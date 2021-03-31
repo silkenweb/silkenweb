@@ -1,0 +1,12 @@
+# This file should exist even if empty, to stop a spurious config file from being picked up in the parent.
+newline_style = "Unix"
+
+# All unstable features should be below this
+unstable_features = true
+group_imports = "StdExternalCrate"
+imports_layout = "HorizontalVertical"
+imports_granularity = "Crate"
+format_macro_matchers = true
+reorder_impl_items = true
+use_field_init_shorthand = true
+wrap_comments = true

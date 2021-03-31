@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+image_id_file="$(mktemp)"
+trap 'rm -f "$image_id_file"' EXIT
+docker build --iidfile "$image_id_file" .
+
+image_id="$(<"$image_id_file")"
+
+# --init is required to forward sigterm to child processes.
+docker run \
+    --init \
+    --rm \
+    "$image_id" \
+    "$@"

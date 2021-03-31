@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+nightly="nightly-2021-02-25"
+
+cargo +$nightly fmt --all -- --check
+cargo +$nightly udeps --all-targets
+cargo clippy --all-targets -- -D warnings -D clippy::pedantic -D clippy::all
+cargo build --all-targets
+cargo test
+cargo test --benches --tests --release
+cargo +$nightly miri test
+cargo audit
