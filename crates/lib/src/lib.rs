@@ -19,18 +19,15 @@ impl Element {
     }
 }
 
-pub struct ElementBuilder {
-    dom_element: DomElement,
-    states: Vec<Box<dyn AnyState>>,
-}
+pub struct ElementBuilder(Element);
 
 impl ElementBuilder {
     pub fn new(tag: impl ToString) -> Self {
         println!("Tag {}", tag.to_string());
-        ElementBuilder {
+        ElementBuilder(Element {
             dom_element: DomElement {},
             states: Vec::new(),
-        }
+        })
     }
 
     pub fn attribute(self, name: impl ToString, value: impl ToString) -> Self {
@@ -40,15 +37,12 @@ impl ElementBuilder {
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         println!("Adding child");
-        self.states.extend(child.into().states);
+        self.0.states.extend(child.into().states);
         self
     }
 
     pub fn build(self) -> Element {
-        Element {
-            dom_element: self.dom_element,
-            states: self.states,
-        }
+        self.0
     }
 }
 
@@ -75,12 +69,6 @@ where
             setter,
         })],
     }
-}
-
-struct State<T, F> {
-    _dom_element: DomElement,
-    generate: F,
-    setter: StateSetter<T>,
 }
 
 pub struct StateSetter<T>(Rc<Cell<Option<T>>>);
@@ -111,14 +99,18 @@ trait AnyState {
     fn update(&self);
 }
 
+struct State<T, F> {
+    _dom_element: DomElement,
+    generate: F,
+    setter: StateSetter<T>,
+}
+
 impl<T, F> AnyState for State<T, F>
 where
     F: Fn(T, StateSetter<T>) -> Element,
 {
     fn update(&self) {
-        let change = self.setter.take();
-
-        if let Some(new_value) = change {
+        if let Some(new_value) = self.setter.take() {
             (self.generate)(new_value, self.setter.clone());
             println!("Replacing node");
         }
@@ -156,11 +148,19 @@ mod tests {
     fn state_changed() {
         let element = parent()
             .child(state(0, |i, set_i| {
-                set_i.set(1);
+                if i < 3 {
+                    set_i.set(i + 1);
+                }
                 child(i)
             }))
             .build();
         println!("Updating");
+        element.update();
+        println!("Updating again");
+        element.update();
+        println!("Update 3");
+        element.update();
+        println!("Update 4");
         element.update();
     }
 }
