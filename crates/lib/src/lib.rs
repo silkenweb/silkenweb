@@ -76,7 +76,7 @@ where
     E: Into<Element>,
     T: 'static,
 {
-    let mut setter = StateSetter::default();
+    let setter = StateSetter::default();
     // TODO: Can we pass setter by mut ref?
     let element = generate(init, setter.clone()).into();
     let dom_element = element.dom_element;
@@ -86,7 +86,7 @@ where
         child_states: RefCell::new(element.states),
     });
 
-    setter.updater.replace(root_state.clone());
+    setter.updater.borrow_mut().replace(root_state.clone());
 
     Element {
         dom_element,
@@ -106,13 +106,18 @@ where
     F: 'static + Fn(T, StateSetter<T>) -> Element,
 {
     fn update(&self, new_value: T, setter: StateSetter<T>) {
+        web_log::println!("here 1");
         let element = (self.generate)(new_value, setter);
+        web_log::println!("here 2");
         self.dom_element
             .borrow()
             .replace_with_with_node_1(&element.dom_element)
             .unwrap();
+        web_log::println!("here 3");
         self.dom_element.replace(element.dom_element);
+        web_log::println!("here 4");
         self.child_states.replace(element.states);
+        web_log::println!("here 5");
     }
 }
 
@@ -123,13 +128,15 @@ trait AnyStateUpdater {
 impl<T> AnyStateUpdater for StateSetter<T> {
     /// # Panics
     ///
-    /// If there is no new state with which to update,
-    /// or if no updater has been set.
+    /// If there is no new state with which to update.
     fn update(&self) {
+        web_log::println!("update");
         let new_value = self.new_state.take().unwrap();
+        web_log::println!("update2");
 
         self.updater
-            .as_ref()
+            .borrow_mut()
+            .as_mut()
             .unwrap()
             .update(new_value, self.clone());
     }
@@ -137,7 +144,7 @@ impl<T> AnyStateUpdater for StateSetter<T> {
 
 pub struct StateSetter<T> {
     new_state: Rc<Cell<Option<T>>>,
-    updater: Option<Rc<dyn StateUpdater<T>>>,
+    updater: Rc<RefCell<Option<Rc<dyn StateUpdater<T>>>>>,
 }
 
 impl<T> Clone for StateSetter<T> {
@@ -153,7 +160,7 @@ impl<T> Default for StateSetter<T> {
     fn default() -> Self {
         Self {
             new_state: Rc::new(Cell::new(None)),
-            updater: None,
+            updater: Rc::new(RefCell::new(None)),
         }
     }
 }
@@ -162,12 +169,20 @@ impl<T: 'static> StateSetter<T> {
     pub fn set(&self, new_value: T) {
         if self.new_state.replace(Some(new_value)).is_none() {
             UPDATE_QUEUE.with(|update_queue| {
-                let mut update_queue = update_queue.borrow_mut();
+                let len = {
+                    web_log::println!("queue 1");
+                    let mut update_queue = update_queue.borrow_mut();
+                    web_log::println!("queue 2");
 
-                update_queue.push(Box::new(self.clone()));
+                    update_queue.push(Box::new(self.clone()));
+                    web_log::println!("queue 3");
+                    update_queue.len()
+                };
 
-                if update_queue.len() == 1 {
+                if len == 1 {
+                    web_log::println!("queue 4");
                     request_process_updates();
+                    web_log::println!("queue 5");
                 }
             });
         }
@@ -189,23 +204,22 @@ fn window() -> dom::Window {
 }
 
 fn request_process_updates() {
-    window()
-        .request_animation_frame(
-            Closure::once(Box::new(move |_time_stamp: JsValue| {
-                process_updates();
-            }))
-            .as_ref()
-            .unchecked_ref(),
-        )
-        .unwrap();
+    web_log::println!("request_process_updates");
+    PROCESS_UPDATES.with(|process_updates| {
+        window()
+            .request_animation_frame(process_updates.as_ref().unchecked_ref())
+            .unwrap()
+    });
 }
 
 fn process_updates() {
+    web_log::println!("process_updates");
     UPDATE_QUEUE.with(|update_queue| {
         let mut update_queue = update_queue.borrow_mut();
 
         for update in update_queue.drain(..) {
             // TODO: Rename update() to apply?
+            web_log::println!("pre update");
             update.update();
         }
     })
@@ -214,4 +228,8 @@ fn process_updates() {
 thread_local!(
     static DOCUMENT: dom::Document = window().document().expect("Window must contain a document");
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
+    static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
+        Closure::once(Box::new(move |_time_stamp: JsValue| {
+            process_updates();
+        }));
 );

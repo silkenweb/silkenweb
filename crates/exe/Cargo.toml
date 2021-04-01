@@ -6,6 +6,8 @@ edition = "2018"
 
 [dependencies]
 lib = { path = "../lib" }
+web-log="1.0"
+console_error_panic_hook = "0.1"
 
 [dependencies.web-sys]
 version = "0.3"
