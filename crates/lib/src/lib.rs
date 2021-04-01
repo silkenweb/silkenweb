@@ -119,7 +119,7 @@ impl<F> ChildState for State<F> {
 
 impl<T, F> StateUpdater<T> for State<F>
 where
-    F: 'static + Fn(T, StateSetter<T>) -> Element,
+    F: Fn(T, StateSetter<T>) -> Element,
 {
     fn cancel_children(&self) {
         self.cancel_children();
