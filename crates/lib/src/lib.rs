@@ -84,6 +84,7 @@ where
         dom_element: RefCell::new(dom_element.clone()),
         generate: move |value, setter| generate(value, setter).into(),
         child_states: RefCell::new(element.states),
+        cancelled: Cell::new(false),
     });
 
     setter.updater.borrow_mut().replace(root_state.clone());
@@ -94,10 +95,19 @@ where
     }
 }
 
-impl<F> ChildState for State<F> {}
+impl<F> ChildState for State<F> {
+    fn cancel(&self) {
+        self.cancelled.replace(true);
+
+        for child in self.child_states.borrow_mut().iter() {
+            child.cancel();
+        }
+    }
+}
 
 trait StateUpdater<T> {
-    // TODO: Cancel children
+    fn cancel_children(&self);
+
     fn update(&self, new_value: T, setter: StateSetter<T>);
 }
 
@@ -105,7 +115,19 @@ impl<T, F> StateUpdater<T> for State<F>
 where
     F: 'static + Fn(T, StateSetter<T>) -> Element,
 {
+    fn cancel_children(&self) {
+        let children = self.child_states.borrow();
+
+        for child in children.iter() {
+            child.cancel();
+        }
+    }
+
     fn update(&self, new_value: T, setter: StateSetter<T>) {
+        if self.cancelled.get() {
+            return;
+        }
+
         let element = (self.generate)(new_value, setter);
         self.dom_element
             .borrow()
@@ -118,6 +140,8 @@ where
 
 trait AnyStateUpdater {
     fn update(&self);
+
+    fn cancel_children(&self);
 }
 
 impl<T> AnyStateUpdater for StateSetter<T> {
@@ -132,6 +156,10 @@ impl<T> AnyStateUpdater for StateSetter<T> {
             .as_mut()
             .unwrap()
             .update(new_value, self.clone());
+    }
+
+    fn cancel_children(&self) {
+        self.updater.borrow().as_ref().unwrap().cancel_children();
     }
 }
 
@@ -178,11 +206,12 @@ impl<T: 'static> StateSetter<T> {
 }
 
 trait ChildState {
-    // TODO: Cancel method
+    fn cancel(&self);
 }
 
 struct State<F> {
     dom_element: RefCell<dom::Element>,
+    cancelled: Cell<bool>,
     generate: F,
     child_states: RefCell<Vec<Rc<dyn ChildState>>>,
 }
@@ -202,6 +231,10 @@ fn request_process_updates() {
 fn process_updates() {
     UPDATE_QUEUE.with(|update_queue| {
         let update_queue = update_queue.take();
+
+        for update in &update_queue {
+            update.cancel_children();
+        }
 
         for update in update_queue {
             // TODO: Rename update() to apply?
