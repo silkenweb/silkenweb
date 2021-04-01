@@ -108,7 +108,7 @@ impl<F> ChildState for State<F> {
 trait StateUpdater<T> {
     fn cancel_children(&self);
 
-    fn update(&self, new_value: T, setter: StateSetter<T>);
+    fn apply(&self, new_value: T, setter: StateSetter<T>);
 }
 
 impl<T, F> StateUpdater<T> for State<F>
@@ -123,7 +123,7 @@ where
         }
     }
 
-    fn update(&self, new_value: T, setter: StateSetter<T>) {
+    fn apply(&self, new_value: T, setter: StateSetter<T>) {
         if self.cancelled.get() {
             return;
         }
@@ -155,7 +155,7 @@ impl<T> AnyStateUpdater for StateSetter<T> {
             .borrow_mut()
             .as_mut()
             .unwrap()
-            .update(new_value, self.clone());
+            .apply(new_value, self.clone());
     }
 
     fn cancel_children(&self) {
