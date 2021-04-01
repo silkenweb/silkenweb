@@ -1,5 +1,9 @@
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+};
 
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
@@ -66,8 +70,6 @@ impl Element {
         self.dom_element.append_child(node).unwrap();
     }
 
-    // TODO: Don't allow
-    #[allow(dead_code)]
     fn update(&self) {
         for state in &self.states {
             state.update()
@@ -81,16 +83,21 @@ where
     T: 'static,
 {
     let setter = StateSetter::default();
+    // TODO: Can we pass setter by mut ref?
     let element = generate(init, setter.clone()).into();
+    // TODO: Handle if setter updated
     let dom_element = element.dom_element;
+    let root_state = State {
+        _dom_element: dom_element.clone(),
+        // TODO: Handle if setter updated
+        generate: move |value, setter| generate(value, setter).into(),
+        setter,
+        child_states: element.states,
+    };
 
     Element {
-        dom_element: dom_element.clone(),
-        states: vec![Box::new(State {
-            _dom_element: dom_element,
-            generate: move |value, setter| generate(value, setter).into(),
-            setter,
-        })],
+        dom_element,
+        states: vec![Box::new(root_state)],
     }
 }
 
@@ -126,6 +133,7 @@ struct State<T, F> {
     _dom_element: dom::Element,
     generate: F,
     setter: StateSetter<T>,
+    child_states: Vec<Box<dyn AnyState>>,
 }
 
 impl<T, F> AnyState for State<T, F>
@@ -135,16 +143,44 @@ where
     fn update(&self) {
         if let Some(new_value) = self.setter.take() {
             (self.generate)(new_value, self.setter.clone());
-            println!("Replacing node");
+        }
+    }
+}
+
+fn window() -> dom::Window {
+    dom::window().expect("Window must be available")
+}
+
+struct RootElement {
+    queued_update: Option<Closure<dyn FnMut(JsValue)>>,
+    element: Rc<RefCell<Element>>,
+}
+
+impl RootElement {
+    fn request_repaint(&mut self) {
+        if self.queued_update.is_none() {
+            let element = self.element.clone();
+            // FEATURE(option_insert): Use `insert`, rather than `replace` and `unwrap`.
+            self.queued_update
+                .replace(Closure::once(Box::new(move |_time_stamp| {
+                    element.borrow_mut().update()
+                })));
+
+            window()
+                .request_animation_frame(
+                    self.queued_update
+                        .as_ref()
+                        .unwrap()
+                        .as_ref()
+                        .unchecked_ref(),
+                )
+                .unwrap();
         }
     }
 }
 
 thread_local!(
-    static DOCUMENT: dom::Document = dom::window()
-        .expect("Window must be available")
-        .document()
-        .expect("Window must contain a document");
+    static DOCUMENT: dom::Document = window().document().expect("Window must contain a document");
 );
 
 #[cfg(test)]
