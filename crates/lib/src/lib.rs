@@ -11,7 +11,7 @@ pub struct ElementBuilder(Element);
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
         ElementBuilder(Element {
-            dom_element: DomElement(DOCUMENT.with(|doc| doc.create_element(tag.as_ref()).unwrap())),
+            dom_element: DOCUMENT.with(|doc| doc.create_element(tag.as_ref()).unwrap()),
             states: Vec::new(),
         })
     }
@@ -19,7 +19,6 @@ impl ElementBuilder {
     pub fn attribute(self, name: impl AsRef<str>, value: impl AsRef<str>) -> Self {
         self.0
             .dom_element
-            .0
             .set_attribute(name.as_ref(), value.as_ref())
             .unwrap();
         self
@@ -27,23 +26,13 @@ impl ElementBuilder {
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
-        self.0
-            .dom_element
-            .0
-            .append_child(&child.dom_element.0)
-            .unwrap();
+        self.0.append_child(&child.dom_element);
         self.0.states.extend(child.states);
         self
     }
 
     pub fn text(self, child: impl AsRef<str>) -> Self {
-        DOCUMENT.with(|doc| {
-            self.0
-                .dom_element
-                .0
-                .append_child(&doc.create_text_node(child.as_ref()))
-                .unwrap()
-        });
+        DOCUMENT.with(|doc| self.0.append_child(&doc.create_text_node(child.as_ref())));
         self
     }
 
@@ -59,7 +48,7 @@ impl From<ElementBuilder> for Element {
 }
 
 pub struct Element {
-    dom_element: DomElement,
+    dom_element: dom::Element,
     states: Vec<Box<dyn AnyState>>,
 }
 
@@ -68,9 +57,13 @@ impl Element {
         DOCUMENT.with(|doc| {
             doc.body()
                 .expect("Document must contain a `body`")
-                .append_child(&self.dom_element.0)
+                .append_child(&self.dom_element)
                 .unwrap()
         });
+    }
+
+    fn append_child(&self, node: &dom::Node) {
+        self.dom_element.append_child(node).unwrap();
     }
 
     // TODO: Don't allow
@@ -130,7 +123,7 @@ trait AnyState {
 }
 
 struct State<T, F> {
-    _dom_element: DomElement,
+    _dom_element: dom::Element,
     generate: F,
     setter: StateSetter<T>,
 }
@@ -146,9 +139,6 @@ where
         }
     }
 }
-
-#[derive(Clone)]
-struct DomElement(dom::Element);
 
 thread_local!(
     static DOCUMENT: dom::Document = dom::window()
