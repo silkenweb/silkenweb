@@ -7,11 +7,10 @@ fn main() {
     tag("div")
         .attribute("id", "hello-world!")
         .child(state(0, |i, set_i| {
-            if i < 100 {
+            if i < 10 {
                 set_i.set(i + 1)
             };
 
-            // TODO: Make text a free function as well.
             let mut counters = tag("p").text(format!("Count = {}", i));
 
             for j in 0..i {
