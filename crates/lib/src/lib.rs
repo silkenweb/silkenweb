@@ -10,6 +10,29 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> Element
+where
+    E: Into<Element>,
+    T: 'static,
+{
+    let setter = StateSetter::default();
+    let element = generate(init, setter.clone()).into();
+    let dom_element = element.dom_element;
+    let root_state = Rc::new(State {
+        dom_element: RefCell::new(dom_element.clone()),
+        generate: move |value, setter| generate(value, setter).into(),
+        child_states: Cell::new(element.states),
+        cancelled: Cell::new(false),
+    });
+
+    setter.updater.borrow_mut().replace(root_state.clone());
+
+    Element {
+        dom_element,
+        states: vec![root_state],
+    }
+}
+
 pub struct ElementBuilder(Element);
 
 impl ElementBuilder {
@@ -72,42 +95,26 @@ impl Element {
     }
 }
 
-pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> Element
-where
-    E: Into<Element>,
-    T: 'static,
-{
-    let setter = StateSetter::default();
-    // TODO: Can we pass setter by mut ref?
-    let element = generate(init, setter.clone()).into();
-    let dom_element = element.dom_element;
-    let root_state = Rc::new(State {
-        dom_element: RefCell::new(dom_element.clone()),
-        generate: move |value, setter| generate(value, setter).into(),
-        child_states: Cell::new(element.states),
-        cancelled: Cell::new(false),
-    });
+struct State<F> {
+    dom_element: RefCell<dom::Element>,
+    cancelled: Cell<bool>,
+    generate: F,
+    child_states: Cell<Vec<Rc<dyn ChildState>>>,
+}
 
-    setter.updater.borrow_mut().replace(root_state.clone());
-
-    Element {
-        dom_element,
-        states: vec![root_state],
+impl<F> State<F> {
+    fn cancel_children(&self) {
+        for child in self.child_states.take() {
+            child.cancel();
+        }
     }
 }
 
 impl<F> ChildState for State<F> {
     fn cancel(&self) {
-        web_log::println!("Cancelling child");
         self.cancelled.replace(true);
         self.cancel_children();
     }
-}
-
-trait StateUpdater<T> {
-    fn cancel_children(&self);
-
-    fn apply(&self, new_value: T, setter: StateSetter<T>);
 }
 
 impl<T, F> StateUpdater<T> for State<F>
@@ -130,31 +137,6 @@ where
             .unwrap();
         self.dom_element.replace(element.dom_element);
         self.child_states.replace(element.states);
-    }
-}
-
-trait AnyStateUpdater {
-    fn update(&self);
-
-    fn cancel_children(&self);
-}
-
-impl<T> AnyStateUpdater for StateSetter<T> {
-    /// # Panics
-    ///
-    /// If there is no new state with which to update.
-    fn update(&self) {
-        let new_value = self.new_state.take().unwrap();
-
-        self.updater
-            .borrow_mut()
-            .as_mut()
-            .unwrap()
-            .apply(new_value, self.clone());
-    }
-
-    fn cancel_children(&self) {
-        self.updater.borrow().as_ref().unwrap().cancel_children();
     }
 }
 
@@ -200,34 +182,48 @@ impl<T: 'static> StateSetter<T> {
     }
 }
 
+impl<T> AnyStateUpdater for StateSetter<T> {
+    /// # Panics
+    ///
+    /// If there is no new state with which to update.
+    fn apply(&self) {
+        let new_value = self.new_state.take().unwrap();
+
+        self.updater
+            .borrow_mut()
+            .as_mut()
+            .unwrap()
+            .apply(new_value, self.clone());
+    }
+
+    fn cancel_children(&self) {
+        self.updater.borrow().as_ref().unwrap().cancel_children();
+    }
+}
+
+trait AnyStateUpdater {
+    fn apply(&self);
+
+    fn cancel_children(&self);
+}
+
+trait StateUpdater<T> {
+    fn cancel_children(&self);
+
+    fn apply(&self, new_value: T, setter: StateSetter<T>);
+}
+
 trait ChildState {
     fn cancel(&self);
 }
 
-struct State<F> {
-    dom_element: RefCell<dom::Element>,
-    cancelled: Cell<bool>,
-    generate: F,
-    child_states: Cell<Vec<Rc<dyn ChildState>>>,
-}
-
-impl<F> State<F> {
-    fn cancel_children(&self) {
-        for child in self.child_states.take() {
-            child.cancel();
-        }
-    }
-}
-
-fn window() -> dom::Window {
-    dom::window().expect("Window must be available")
-}
-
 fn request_process_updates() {
     PROCESS_UPDATES.with(|process_updates| {
-        window()
-            .request_animation_frame(process_updates.as_ref().unchecked_ref())
-            .unwrap()
+        WINDOW.with(|window| {
+            window
+                .request_animation_frame(process_updates.as_ref().unchecked_ref())
+                .unwrap()
+        })
     });
 }
 
@@ -240,14 +236,15 @@ fn process_updates() {
         }
 
         for update in update_queue {
-            // TODO: Rename update() to apply?
-            update.update();
+            update.apply();
         }
     })
 }
 
 thread_local!(
-    static DOCUMENT: dom::Document = window().document().expect("Window must contain a document");
+    static WINDOW: dom::Window = dom::window().expect("Window must be available");
+    static DOCUMENT: dom::Document =
+        WINDOW.with(|window| window.document().expect("Window must contain a document"));
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
     static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
