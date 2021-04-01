@@ -53,7 +53,7 @@ impl From<ElementBuilder> for Element {
 
 pub struct Element {
     dom_element: dom::Element,
-    states: Vec<Box<dyn AnyState>>,
+    states: Vec<Rc<dyn ChildState>>,
 }
 
 impl Element {
@@ -69,12 +69,6 @@ impl Element {
     fn append_child(&self, node: &dom::Node) {
         self.dom_element.append_child(node).unwrap();
     }
-
-    fn update(&self) {
-        for state in &self.states {
-            state.update()
-        }
-    }
 }
 
 pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> Element
@@ -82,148 +76,142 @@ where
     E: Into<Element>,
     T: 'static,
 {
-    let setter = StateSetter::default();
+    let mut setter = StateSetter::default();
     // TODO: Can we pass setter by mut ref?
     let element = generate(init, setter.clone()).into();
-    // TODO: Handle if setter updated
     let dom_element = element.dom_element;
-    let root_state = State {
-        _dom_element: dom_element.clone(),
-        // TODO: Handle if setter updated
+    let root_state = Rc::new(State {
+        dom_element: RefCell::new(dom_element.clone()),
         generate: move |value, setter| generate(value, setter).into(),
-        setter,
-        child_states: element.states,
-    };
+        child_states: RefCell::new(element.states),
+    });
+
+    setter.updater.replace(root_state.clone());
 
     Element {
         dom_element,
-        states: vec![Box::new(root_state)],
+        states: vec![root_state],
     }
 }
 
-pub struct StateSetter<T>(Rc<Cell<Option<T>>>);
+impl<F> ChildState for State<F> {}
+
+trait StateUpdater<T> {
+    // TODO: Cancel children
+    fn update(&self, new_value: T, setter: StateSetter<T>);
+}
+
+impl<T, F> StateUpdater<T> for State<F>
+where
+    F: 'static + Fn(T, StateSetter<T>) -> Element,
+{
+    fn update(&self, new_value: T, setter: StateSetter<T>) {
+        let element = (self.generate)(new_value, setter);
+        self.dom_element
+            .borrow()
+            .replace_with_with_node_1(&element.dom_element)
+            .unwrap();
+        self.dom_element.replace(element.dom_element);
+        self.child_states.replace(element.states);
+    }
+}
+
+trait AnyStateUpdater {
+    fn update(&self);
+}
+
+impl<T> AnyStateUpdater for StateSetter<T> {
+    /// # Panics
+    ///
+    /// If there is no new state with which to update,
+    /// or if no updater has been set.
+    fn update(&self) {
+        let new_value = self.new_state.take().unwrap();
+
+        self.updater
+            .as_ref()
+            .unwrap()
+            .update(new_value, self.clone());
+    }
+}
+
+pub struct StateSetter<T> {
+    new_state: Rc<Cell<Option<T>>>,
+    updater: Option<Rc<dyn StateUpdater<T>>>,
+}
 
 impl<T> Clone for StateSetter<T> {
     fn clone(&self) -> Self {
-        Self(self.0.clone())
+        Self {
+            new_state: self.new_state.clone(),
+            updater: self.updater.clone(),
+        }
     }
 }
 
 impl<T> Default for StateSetter<T> {
     fn default() -> Self {
-        Self(Rc::new(Cell::new(None)))
-    }
-}
-
-impl<T> StateSetter<T> {
-    pub fn set(&self, new_value: T) {
-        self.0.replace(Some(new_value));
-    }
-
-    fn take(&self) -> Option<T> {
-        self.0.replace(None)
-    }
-}
-
-trait AnyState {
-    fn update(&self);
-}
-
-struct State<T, F> {
-    _dom_element: dom::Element,
-    generate: F,
-    setter: StateSetter<T>,
-    child_states: Vec<Box<dyn AnyState>>,
-}
-
-impl<T, F> AnyState for State<T, F>
-where
-    F: Fn(T, StateSetter<T>) -> Element,
-{
-    fn update(&self) {
-        if let Some(new_value) = self.setter.take() {
-            (self.generate)(new_value, self.setter.clone());
+        Self {
+            new_state: Rc::new(Cell::new(None)),
+            updater: None,
         }
     }
+}
+
+impl<T: 'static> StateSetter<T> {
+    pub fn set(&self, new_value: T) {
+        if self.new_state.replace(Some(new_value)).is_none() {
+            UPDATE_QUEUE.with(|update_queue| {
+                let mut update_queue = update_queue.borrow_mut();
+
+                update_queue.push(Box::new(self.clone()));
+
+                if update_queue.len() == 1 {
+                    request_process_updates();
+                }
+            });
+        }
+    }
+}
+
+trait ChildState {
+    // TODO: Cancel method
+}
+
+struct State<F> {
+    dom_element: RefCell<dom::Element>,
+    generate: F,
+    child_states: RefCell<Vec<Rc<dyn ChildState>>>,
 }
 
 fn window() -> dom::Window {
     dom::window().expect("Window must be available")
 }
 
-struct RootElement {
-    queued_update: Option<Closure<dyn FnMut(JsValue)>>,
-    element: Rc<RefCell<Element>>,
+fn request_process_updates() {
+    window()
+        .request_animation_frame(
+            Closure::once(Box::new(move |_time_stamp: JsValue| {
+                process_updates();
+            }))
+            .as_ref()
+            .unchecked_ref(),
+        )
+        .unwrap();
 }
 
-impl RootElement {
-    fn request_repaint(&mut self) {
-        if self.queued_update.is_none() {
-            let element = self.element.clone();
-            // FEATURE(option_insert): Use `insert`, rather than `replace` and `unwrap`.
-            self.queued_update
-                .replace(Closure::once(Box::new(move |_time_stamp| {
-                    element.borrow_mut().update()
-                })));
+fn process_updates() {
+    UPDATE_QUEUE.with(|update_queue| {
+        let mut update_queue = update_queue.borrow_mut();
 
-            window()
-                .request_animation_frame(
-                    self.queued_update
-                        .as_ref()
-                        .unwrap()
-                        .as_ref()
-                        .unchecked_ref(),
-                )
-                .unwrap();
+        for update in update_queue.drain(..) {
+            // TODO: Rename update() to apply?
+            update.update();
         }
-    }
+    })
 }
 
 thread_local!(
     static DOCUMENT: dom::Document = window().document().expect("Window must contain a document");
+    static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
 );
-
-#[cfg(test)]
-mod tests {
-    use crate::{state, tag, ElementBuilder};
-
-    fn parent() -> ElementBuilder {
-        tag("tag_name").attribute("attr_name", "attr_value")
-    }
-
-    fn child(i: i32) -> ElementBuilder {
-        tag("child_tag_name").attribute("child_attr_name", format!("{}", i))
-    }
-
-    #[test]
-    fn simple() {
-        parent().child(child(0)).build();
-    }
-
-    #[test]
-    fn state_unchanged() {
-        let element = parent().child(state(0, |i, _set_i| child(i))).build();
-        println!("Updating");
-        element.update();
-    }
-
-    #[test]
-    fn state_changed() {
-        let element = parent()
-            .child(state(0, |i, set_i| {
-                if i < 3 {
-                    set_i.set(i + 1);
-                }
-                child(i)
-            }))
-            .build();
-        println!("Updating");
-        element.update();
-        println!("Updating again");
-        element.update();
-        println!("Update 3");
-        element.update();
-        println!("Update 4");
-        element.update();
-    }
-}
