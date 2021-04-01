@@ -84,7 +84,7 @@ where
     let root_state = Rc::new(State {
         dom_element: RefCell::new(dom_element.clone()),
         generate: move |value, setter| generate(value, setter).into(),
-        child_states: RefCell::new(element.states),
+        child_states: Cell::new(element.states),
         cancelled: Cell::new(false),
     });
 
@@ -98,11 +98,9 @@ where
 
 impl<F> ChildState for State<F> {
     fn cancel(&self) {
+        web_log::println!("Cancelling child");
         self.cancelled.replace(true);
-
-        for child in self.child_states.borrow_mut().iter() {
-            child.cancel();
-        }
+        self.cancel_children();
     }
 }
 
@@ -117,11 +115,7 @@ where
     F: 'static + Fn(T, StateSetter<T>) -> Element,
 {
     fn cancel_children(&self) {
-        let children = self.child_states.borrow();
-
-        for child in children.iter() {
-            child.cancel();
-        }
+        self.cancel_children();
     }
 
     fn apply(&self, new_value: T, setter: StateSetter<T>) {
@@ -214,7 +208,15 @@ struct State<F> {
     dom_element: RefCell<dom::Element>,
     cancelled: Cell<bool>,
     generate: F,
-    child_states: RefCell<Vec<Rc<dyn ChildState>>>,
+    child_states: Cell<Vec<Rc<dyn ChildState>>>,
+}
+
+impl<F> State<F> {
+    fn cancel_children(&self) {
+        for child in self.child_states.take() {
+            child.cancel();
+        }
+    }
 }
 
 fn window() -> dom::Window {
