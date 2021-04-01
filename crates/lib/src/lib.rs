@@ -58,6 +58,7 @@ pub struct Element {
 
 impl Element {
     pub fn append_to_body(self) {
+        web_log::println!("Setting document body");
         DOCUMENT.with(|doc| {
             doc.body()
                 .expect("Document must contain a `body`")
