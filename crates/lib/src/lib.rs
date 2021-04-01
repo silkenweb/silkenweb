@@ -1,43 +1,49 @@
 use std::{cell::Cell, rc::Rc};
 
-pub fn tag(name: impl ToString) -> ElementBuilder {
+use web_sys as dom;
+
+pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
-}
-
-pub struct Element {
-    dom_element: DomElement,
-    states: Vec<Box<dyn AnyState>>,
-}
-
-impl Element {
-    // TODO: Don't allow
-    #[allow(dead_code)]
-    fn update(&self) {
-        for state in &self.states {
-            state.update()
-        }
-    }
 }
 
 pub struct ElementBuilder(Element);
 
 impl ElementBuilder {
-    pub fn new(tag: impl ToString) -> Self {
-        println!("Tag {}", tag.to_string());
+    pub fn new(tag: impl AsRef<str>) -> Self {
         ElementBuilder(Element {
-            dom_element: DomElement {},
+            dom_element: DomElement(DOCUMENT.with(|doc| doc.create_element(tag.as_ref()).unwrap())),
             states: Vec::new(),
         })
     }
 
-    pub fn attribute(self, name: impl ToString, value: impl ToString) -> Self {
-        println!("Attribute {} = '{}'", name.to_string(), value.to_string());
+    pub fn attribute(self, name: impl AsRef<str>, value: impl AsRef<str>) -> Self {
+        self.0
+            .dom_element
+            .0
+            .set_attribute(name.as_ref(), value.as_ref())
+            .unwrap();
         self
     }
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
-        println!("Adding child");
-        self.0.states.extend(child.into().states);
+        let child = child.into();
+        self.0
+            .dom_element
+            .0
+            .append_child(&child.dom_element.0)
+            .unwrap();
+        self.0.states.extend(child.states);
+        self
+    }
+
+    pub fn text(self, child: impl AsRef<str>) -> Self {
+        DOCUMENT.with(|doc| {
+            self.0
+                .dom_element
+                .0
+                .append_child(&doc.create_text_node(child.as_ref()))
+                .unwrap()
+        });
         self
     }
 
@@ -49,6 +55,30 @@ impl ElementBuilder {
 impl From<ElementBuilder> for Element {
     fn from(builder: ElementBuilder) -> Self {
         builder.build()
+    }
+}
+
+pub struct Element {
+    dom_element: DomElement,
+    states: Vec<Box<dyn AnyState>>,
+}
+
+impl Element {
+    pub fn append_to_body(&self) {
+        DOCUMENT.with(|doc| {
+            doc.body()
+                .expect("Document must contain a `body`")
+                .append_child(&self.dom_element.0)
+                .unwrap()
+        });
+    }
+
+    // TODO: Don't allow
+    #[allow(dead_code)]
+    fn update(&self) {
+        for state in &self.states {
+            state.update()
+        }
     }
 }
 
@@ -118,7 +148,14 @@ where
 }
 
 #[derive(Clone)]
-struct DomElement;
+struct DomElement(dom::Element);
+
+thread_local!(
+    static DOCUMENT: dom::Document = dom::window()
+        .expect("Window must be available")
+        .document()
+        .expect("Window must contain a document");
+);
 
 #[cfg(test)]
 mod tests {
