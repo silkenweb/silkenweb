@@ -165,7 +165,7 @@ impl<T> AnyStateUpdater for StateSetter<T> {
 
 pub struct StateSetter<T> {
     new_state: Rc<Cell<Option<T>>>,
-    updater: RefCell<Option<Rc<dyn StateUpdater<T>>>>,
+    updater: Rc<RefCell<Option<Rc<dyn StateUpdater<T>>>>>,
 }
 
 impl<T> Clone for StateSetter<T> {
@@ -181,7 +181,7 @@ impl<T> Default for StateSetter<T> {
     fn default() -> Self {
         Self {
             new_state: Rc::new(Cell::new(None)),
-            updater: RefCell::new(None),
+            updater: Rc::new(RefCell::new(None)),
         }
     }
 }
