@@ -120,8 +120,6 @@ impl<F> State<F> {
         for child in self.child_states.take() {
             child.cancel();
         }
-
-        self.event_callbacks.take();
     }
 }
 
@@ -129,6 +127,7 @@ impl<F> ChildState for State<F> {
     fn cancel(&self) {
         self.cancelled.replace(true);
         self.cancel_children();
+        self.event_callbacks.take();
     }
 }
 
