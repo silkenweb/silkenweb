@@ -22,6 +22,7 @@ where
         dom_element: RefCell::new(dom_element.clone()),
         generate: move |value, setter| generate(value, setter).into(),
         child_states: Cell::new(element.states),
+        event_callbacks: Cell::new(element.event_callbacks),
         cancelled: Cell::new(false),
     });
 
@@ -30,6 +31,7 @@ where
     Element {
         dom_element,
         states: vec![root_state],
+        event_callbacks: Vec::new(),
     }
 }
 
@@ -40,6 +42,7 @@ impl ElementBuilder {
         ElementBuilder(Element {
             dom_element: DOCUMENT.with(|doc| doc.create_element(tag.as_ref()).unwrap()),
             states: Vec::new(),
+            event_callbacks: Vec::new(),
         })
     }
 
@@ -55,11 +58,19 @@ impl ElementBuilder {
         let child = child.into();
         self.0.append_child(&child.dom_element);
         self.0.states.extend(child.states);
+        self.0.event_callbacks.extend(child.event_callbacks);
         self
     }
 
     pub fn text(self, child: impl AsRef<str>) -> Self {
         DOCUMENT.with(|doc| self.0.append_child(&doc.create_text_node(child.as_ref())));
+        self
+    }
+
+    pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+        self.0
+            .event_callbacks
+            .push(EventCallback::new(self.0.dom_element.clone(), name, f));
         self
     }
 
@@ -77,6 +88,7 @@ impl From<ElementBuilder> for Element {
 pub struct Element {
     dom_element: dom::Element,
     states: Vec<Rc<dyn ChildState>>,
+    event_callbacks: Vec<EventCallback>,
 }
 
 impl Element {
@@ -100,6 +112,7 @@ struct State<F> {
     cancelled: Cell<bool>,
     generate: F,
     child_states: Cell<Vec<Rc<dyn ChildState>>>,
+    event_callbacks: Cell<Vec<EventCallback>>,
 }
 
 impl<F> State<F> {
@@ -107,6 +120,8 @@ impl<F> State<F> {
         for child in self.child_states.take() {
             child.cancel();
         }
+
+        self.event_callbacks.take();
     }
 }
 
@@ -137,6 +152,7 @@ where
             .unwrap();
         self.dom_element.replace(element.dom_element);
         self.child_states.replace(element.states);
+        self.event_callbacks.replace(element.event_callbacks);
     }
 }
 
@@ -215,6 +231,35 @@ trait StateUpdater<T> {
 
 trait ChildState {
     fn cancel(&self);
+}
+
+struct EventCallback {
+    target: dom::Element,
+    name: &'static str,
+    callback: Closure<dyn FnMut(JsValue)>,
+}
+
+impl EventCallback {
+    fn new(target: dom::Element, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+        let callback = Closure::wrap(Box::new(f) as Box<dyn FnMut(JsValue)>);
+        target
+            .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
+            .unwrap();
+
+        Self {
+            target,
+            name,
+            callback,
+        }
+    }
+}
+
+impl Drop for EventCallback {
+    fn drop(&mut self) {
+        self.target
+            .remove_event_listener_with_callback(self.name, self.callback.as_ref().unchecked_ref())
+            .unwrap();
+    }
 }
 
 fn request_process_updates() {
