@@ -44,7 +44,7 @@ impl From<Element> for Div {
     }
 }
 
-impl<Child: content_category::Flow> Parent<Div> for Child {}
+impl<Child: content_category::Flow> ParentCategory<Div> for Child {}
 
 impl content_category::Flow for Div {}
 impl content_category::Palpable for Div {}
@@ -102,7 +102,8 @@ impl From<Element> for Button {
     }
 }
 
-impl<Child: content_category::Flow> Parent<Button> for Child {}
+impl<Child: content_category::Flow> ParentCategory<Button> for Child {}
+
 impl content_category::Flow for Button {}
 impl content_category::Palpable for Button {}
 impl content_category::Flow for ButtonBuilder {}
@@ -138,12 +139,13 @@ impl HtmlElementBuilder {
 
 pub trait Parent<T>: Into<Element> {}
 
-pub mod content_category {
-    // TODO: Remove requirement for Into<Element> from content categories
-    use surfinia_core::Element;
+impl<Child, T: ParentCategory<Child> + Into<Element>> Parent<Child> for T {}
 
+pub trait ParentCategory<T> {}
+
+pub mod content_category {
     macro_rules! content_categories {
-        ($($name:ident),* $(,)?) => { $(pub trait $name: Into<Element> {})* }
+        ($($name:ident),* $(,)?) => { $(pub trait $name {})* }
     }
 
     content_categories!(
