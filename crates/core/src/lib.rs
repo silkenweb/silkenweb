@@ -183,7 +183,7 @@ impl<T> StateSetter<T> {
 }
 
 impl<T: 'static + Clone> StateSetter<T> {
-    pub fn state<ElemBuilder, Elem>(&self, generate: impl 'static + Fn(T) -> ElemBuilder) -> Elem
+    pub fn with<ElemBuilder, Elem>(&self, generate: impl 'static + Fn(T) -> ElemBuilder) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
         Elem: Into<Element>,

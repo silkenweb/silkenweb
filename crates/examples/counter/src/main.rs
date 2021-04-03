@@ -9,6 +9,6 @@ fn main() {
         div()
             .child(button().on_click(move || inc_i.map(|i| i + 1)).text("+"))
             .child(button().on_click(move || dec_i.map(|i| i - 1)).text("-"))
-            .child(set_i.state(move |i| div().text(format!("Count = {}", i)))),
+            .child(set_i.with(move |i| div().text(format!("Count = {}", i)))),
     );
 }
