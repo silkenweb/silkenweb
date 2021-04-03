@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "crates/examples/counter",
     "crates/examples/nested-counters",
     "crates/surfinia",
     "crates/html",

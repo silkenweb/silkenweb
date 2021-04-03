@@ -74,6 +74,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "surfinia-examples-counter"
+version = "0.1.0"
+dependencies = [
+ "surfinia",
+]
+
+[[package]]
 name = "surfinia-examples-nested-counters"
 version = "0.1.0"
 dependencies = [
