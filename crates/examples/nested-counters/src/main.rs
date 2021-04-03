@@ -14,7 +14,7 @@ fn main() {
     let count_state = State::new(0);
 
     append_to_body(
-        counter(count_state.clone()).child(count_state.with(move |i| {
+        counter(count_state.clone()).child(count_state.with(move |&i| {
             let mut counters = div();
 
             for _j in 0..i {

@@ -1,5 +1,6 @@
 use std::{
     cell::{Cell, RefCell},
+    marker::PhantomData,
     mem,
     rc::Rc,
 };
@@ -108,15 +109,22 @@ pub trait Builder {
     fn build(self) -> Self::Target;
 }
 
-struct DomState<F> {
+struct DomState<T, F>
+where
+    F: for<'a> Fn(&'a T) -> Element,
+{
     dom_element: RefCell<dom::Element>,
     cancelled: Cell<bool>,
     generate: F,
     child_states: Cell<Vec<Rc<dyn ChildState>>>,
     event_callbacks: Cell<Vec<EventCallback>>,
+    phantom: PhantomData<T>,
 }
 
-impl<F> DomState<F> {
+impl<T, F> DomState<T, F>
+where
+    F: for<'a> Fn(&'a T) -> Element,
+{
     fn cancel_children(&self) {
         for child in self.child_states.take() {
             child.cancel();
@@ -124,7 +132,10 @@ impl<F> DomState<F> {
     }
 }
 
-impl<F> ChildState for DomState<F> {
+impl<T, F> ChildState for DomState<T, F>
+where
+    F: for<'a> Fn(&'a T) -> Element,
+{
     fn cancel(&self) {
         self.cancelled.replace(true);
         self.cancel_children();
@@ -132,15 +143,15 @@ impl<F> ChildState for DomState<F> {
     }
 }
 
-impl<T, F> StateUpdater<T> for DomState<F>
+impl<T, F> StateUpdater<T> for DomState<T, F>
 where
-    F: Fn(T) -> Element,
+    F: for<'a> Fn(&'a T) -> Element,
 {
     fn cancel_children(&self) {
         self.cancel_children();
     }
 
-    fn apply(&self, new_value: T) {
+    fn apply(&self, new_value: &T) {
         if self.cancelled.get() {
             return;
         }
@@ -182,14 +193,15 @@ impl<T> State<T> {
     }
 }
 
-impl<T: 'static + Clone> State<T> {
-    pub fn with<ElemBuilder, Elem>(&self, generate: impl 'static + Fn(T) -> ElemBuilder) -> Elem
+impl<T: 'static> State<T> {
+    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
         Elem: Into<Element>,
         Element: Into<Elem>,
+        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
     {
-        let element = generate(self.current()).build().into();
+        let element = generate(&self.current.borrow()).build().into();
         let dom_element = element.dom_element;
         let root_state = Rc::new(DomState {
             dom_element: RefCell::new(dom_element.clone()),
@@ -197,6 +209,7 @@ impl<T: 'static + Clone> State<T> {
             child_states: Cell::new(element.states),
             event_callbacks: Cell::new(element.event_callbacks),
             cancelled: Cell::new(false),
+            phantom: PhantomData,
         });
 
         self.updaters.borrow_mut().push(root_state.clone());
@@ -209,8 +222,8 @@ impl<T: 'static + Clone> State<T> {
         .into()
     }
 
-    pub fn map(&self, f: impl FnOnce(T) -> T) {
-        self.set(f(self.current()))
+    pub fn map(&self, f: impl FnOnce(&T) -> T) {
+        self.set(f(&self.current.borrow()))
     }
 
     pub fn set(&self, new_value: T) {
@@ -229,22 +242,19 @@ impl<T: 'static + Clone> State<T> {
             });
         }
     }
-
-    fn current(&self) -> T {
-        self.current.as_ref().clone().into_inner()
-    }
 }
 
-impl<T: Clone> AnyStateUpdater for State<T> {
+impl<T> AnyStateUpdater for State<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.
     fn apply(&self) {
         let new_value = self.new_state.take().unwrap();
-        self.current.replace(new_value.clone());
+        self.current.replace(new_value);
+        let new_value = self.current.borrow();
 
         for updater in self.updaters.borrow_mut().iter_mut() {
-            updater.apply(new_value.clone());
+            updater.apply(&new_value);
         }
     }
 
@@ -264,7 +274,7 @@ trait AnyStateUpdater {
 trait StateUpdater<T> {
     fn cancel_children(&self);
 
-    fn apply(&self, new_value: T);
+    fn apply(&self, new_value: &T);
 }
 
 trait ChildState {
