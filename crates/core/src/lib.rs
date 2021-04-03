@@ -8,7 +8,7 @@ use std::{
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
-pub fn append_to_body(elem: impl Into<Element>) {
+pub fn mount(id: &str, elem: impl Into<Element>) {
     web_log::println!("Setting document body");
     let elem = elem.into();
 
@@ -18,8 +18,8 @@ pub fn append_to_body(elem: impl Into<Element>) {
     let dom_element = elem.dom_element;
 
     DOCUMENT.with(|doc| {
-        doc.body()
-            .expect("Document must contain a `body`")
+        doc.get_element_by_id(id)
+            .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
             .append_child(&dom_element)
             .unwrap()
     });

@@ -1,4 +1,4 @@
-use surfinia::{append_to_body, button, div, DivBuilder, State};
+use surfinia::{button, div, mount, DivBuilder, State};
 
 fn counter(count_state: &State<u32>) -> DivBuilder {
     let inc = count_state.setter();
@@ -13,13 +13,16 @@ fn counter(count_state: &State<u32>) -> DivBuilder {
 fn main() {
     let count_state = State::new(0);
 
-    append_to_body(counter(&count_state).child(count_state.with(|&i| {
-        let mut counters = div();
+    mount(
+        "app",
+        counter(&count_state).child(count_state.with(|&i| {
+            let mut counters = div();
 
-        for _j in 0..i {
-            counters = counters.child(counter(&State::new(0)));
-        }
+            for _j in 0..i {
+                counters = counters.child(counter(&State::new(0)));
+            }
 
-        counters
-    })));
+            counters
+        })),
+    );
 }
