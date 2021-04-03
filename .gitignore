@@ -1,3 +1,3 @@
 /target/
 /.vscode/settings.json
-/crates/exe/dist/
+/crates/examples/*/dist/
