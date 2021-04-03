@@ -1,5 +1,6 @@
 use std::{
     cell::{Cell, RefCell},
+    mem,
     rc::Rc,
 };
 
@@ -8,47 +9,23 @@ use web_sys as dom;
 
 pub fn append_to_body(elem: impl Into<Element>) {
     web_log::println!("Setting document body");
+    let elem = elem.into();
+
+    // TODO: Remember this!
+    mem::forget(elem.event_callbacks);
+    mem::forget(elem.states);
+    let dom_element = elem.dom_element;
+
     DOCUMENT.with(|doc| {
         doc.body()
             .expect("Document must contain a `body`")
-            .append_child(&elem.into().dom_element)
+            .append_child(&dom_element)
             .unwrap()
     });
 }
 
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
-}
-
-pub fn state<T, ElemBuilder, Elem>(
-    init: T,
-    generate: impl 'static + Fn(T, StateSetter<T>) -> ElemBuilder,
-) -> Elem
-where
-    ElemBuilder: Builder<Target = Elem>,
-    Elem: Into<Element>,
-    Element: Into<Elem>,
-    T: 'static,
-{
-    let setter = StateSetter::default();
-    let element = generate(init, setter.clone()).build().into();
-    let dom_element = element.dom_element;
-    let root_state = Rc::new(State {
-        dom_element: RefCell::new(dom_element.clone()),
-        generate: move |value, setter| generate(value, setter).build().into(),
-        child_states: Cell::new(element.states),
-        event_callbacks: Cell::new(element.event_callbacks),
-        cancelled: Cell::new(false),
-    });
-
-    setter.updater.borrow_mut().replace(root_state.clone());
-
-    Element {
-        dom_element,
-        states: vec![root_state],
-        event_callbacks: Vec::new(),
-    }
-    .into()
 }
 
 pub struct ElementBuilder(Element);
@@ -157,18 +134,18 @@ impl<F> ChildState for State<F> {
 
 impl<T, F> StateUpdater<T> for State<F>
 where
-    F: Fn(T, StateSetter<T>) -> Element,
+    F: Fn(T) -> Element,
 {
     fn cancel_children(&self) {
         self.cancel_children();
     }
 
-    fn apply(&self, new_value: T, setter: StateSetter<T>) {
+    fn apply(&self, new_value: T) {
         if self.cancelled.get() {
             return;
         }
 
-        let element = (self.generate)(new_value, setter);
+        let element = (self.generate)(new_value);
         self.dom_element
             .borrow()
             .replace_with_with_node_1(&element.dom_element)
@@ -180,29 +157,62 @@ where
 }
 
 pub struct StateSetter<T> {
+    current: Rc<RefCell<T>>,
     new_state: Rc<Cell<Option<T>>>,
-    updater: Rc<RefCell<Option<Rc<dyn StateUpdater<T>>>>>,
+    updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
 
 impl<T> Clone for StateSetter<T> {
     fn clone(&self) -> Self {
         Self {
+            current: self.current.clone(),
             new_state: self.new_state.clone(),
-            updater: self.updater.clone(),
+            updaters: self.updaters.clone(),
         }
     }
 }
 
-impl<T> Default for StateSetter<T> {
-    fn default() -> Self {
+impl<T> StateSetter<T> {
+    pub fn new(init: T) -> Self {
         Self {
+            current: Rc::new(RefCell::new(init)),
             new_state: Rc::new(Cell::new(None)),
-            updater: Rc::new(RefCell::new(None)),
+            updaters: Rc::new(RefCell::new(Vec::new())),
         }
     }
 }
 
-impl<T: 'static> StateSetter<T> {
+impl<T: 'static + Clone> StateSetter<T> {
+    pub fn state<ElemBuilder, Elem>(&self, generate: impl 'static + Fn(T) -> ElemBuilder) -> Elem
+    where
+        ElemBuilder: Builder<Target = Elem>,
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+    {
+        let element = generate(self.current()).build().into();
+        let dom_element = element.dom_element;
+        let root_state = Rc::new(State {
+            dom_element: RefCell::new(dom_element.clone()),
+            generate: move |value| generate(value).build().into(),
+            child_states: Cell::new(element.states),
+            event_callbacks: Cell::new(element.event_callbacks),
+            cancelled: Cell::new(false),
+        });
+
+        self.updaters.borrow_mut().push(root_state.clone());
+
+        Element {
+            dom_element,
+            states: vec![root_state],
+            event_callbacks: Vec::new(),
+        }
+        .into()
+    }
+
+    pub fn map(&self, f: impl FnOnce(T) -> T) {
+        self.set(f(self.current()))
+    }
+
     pub fn set(&self, new_value: T) {
         if self.new_state.replace(Some(new_value)).is_none() {
             UPDATE_QUEUE.with(|update_queue| {
@@ -219,24 +229,29 @@ impl<T: 'static> StateSetter<T> {
             });
         }
     }
+
+    fn current(&self) -> T {
+        self.current.as_ref().clone().into_inner()
+    }
 }
 
-impl<T> AnyStateUpdater for StateSetter<T> {
+impl<T: Clone> AnyStateUpdater for StateSetter<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.
     fn apply(&self) {
         let new_value = self.new_state.take().unwrap();
+        self.current.replace(new_value.clone());
 
-        self.updater
-            .borrow_mut()
-            .as_mut()
-            .unwrap()
-            .apply(new_value, self.clone());
+        for updater in self.updaters.borrow_mut().iter_mut() {
+            updater.apply(new_value.clone());
+        }
     }
 
     fn cancel_children(&self) {
-        self.updater.borrow().as_ref().unwrap().cancel_children();
+        for updater in self.updaters.borrow_mut().iter_mut() {
+            updater.cancel_children();
+        }
     }
 }
 
@@ -249,7 +264,7 @@ trait AnyStateUpdater {
 trait StateUpdater<T> {
     fn cancel_children(&self);
 
-    fn apply(&self, new_value: T, setter: StateSetter<T>);
+    fn apply(&self, new_value: T);
 }
 
 trait ChildState {
@@ -288,6 +303,7 @@ impl Drop for EventCallback {
 fn request_process_updates() {
     PROCESS_UPDATES.with(|process_updates| {
         WINDOW.with(|window| {
+            // TODO: We need to call cancel_animation_frame if we want to exit
             window
                 .request_animation_frame(process_updates.as_ref().unchecked_ref())
                 .unwrap()

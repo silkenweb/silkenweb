@@ -1,6 +1,5 @@
 pub use surfinia_core::{
     append_to_body,
-    state,
     tag,
     Builder,
     Element,
