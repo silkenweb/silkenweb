@@ -167,13 +167,37 @@ where
     }
 }
 
-pub struct State<T> {
+pub struct State<T>(Setter<T>);
+
+impl<T: 'static> State<T> {
+    pub fn new(init: T) -> Self {
+        Self(Setter::new(init))
+    }
+}
+
+impl<T: 'static> State<T> {
+    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
+    where
+        ElemBuilder: Builder<Target = Elem>,
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
+    {
+        self.0.with(generate)
+    }
+
+    pub fn setter(&self) -> Setter<T> {
+        self.0.clone()
+    }
+}
+
+pub struct Setter<T> {
     current: Rc<RefCell<T>>,
     new_state: Rc<Cell<Option<T>>>,
     updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
 
-impl<T> Clone for State<T> {
+impl<T> Clone for Setter<T> {
     fn clone(&self) -> Self {
         Self {
             current: self.current.clone(),
@@ -183,18 +207,16 @@ impl<T> Clone for State<T> {
     }
 }
 
-impl<T> State<T> {
-    pub fn new(init: T) -> Self {
+impl<T: 'static> Setter<T> {
+    fn new(init: T) -> Self {
         Self {
             current: Rc::new(RefCell::new(init)),
             new_state: Rc::new(Cell::new(None)),
             updaters: Rc::new(RefCell::new(Vec::new())),
         }
     }
-}
 
-impl<T: 'static> State<T> {
-    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
+    fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
         Elem: Into<Element>,
@@ -244,7 +266,7 @@ impl<T: 'static> State<T> {
     }
 }
 
-impl<T> AnyStateUpdater for State<T> {
+impl<T> AnyStateUpdater for Setter<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.

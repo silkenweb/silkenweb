@@ -2,8 +2,8 @@ use surfinia::{append_to_body, button, div, State};
 
 fn main() {
     let count_state = State::new(0);
-    let inc = count_state.clone();
-    let dec = count_state.clone();
+    let inc = count_state.setter();
+    let dec = count_state.setter();
 
     append_to_body(
         div()

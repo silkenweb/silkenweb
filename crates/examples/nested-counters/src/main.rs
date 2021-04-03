@@ -1,8 +1,8 @@
 use surfinia::{append_to_body, button, div, DivBuilder, State};
 
-fn counter(count_state: State<u32>) -> DivBuilder {
-    let inc = count_state.clone();
-    let dec = count_state.clone();
+fn counter(count_state: &State<u32>) -> DivBuilder {
+    let inc = count_state.setter();
+    let dec = count_state.setter();
 
     div()
         .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
@@ -13,11 +13,11 @@ fn counter(count_state: State<u32>) -> DivBuilder {
 fn main() {
     let count_state = State::new(0);
 
-    append_to_body(counter(count_state.clone()).child(count_state.with(|&i| {
+    append_to_body(counter(&count_state).child(count_state.with(|&i| {
         let mut counters = div();
 
         for _j in 0..i {
-            counters = counters.child(counter(State::new(0)));
+            counters = counters.child(counter(&State::new(0)));
         }
 
         counters
