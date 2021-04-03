@@ -61,6 +61,7 @@ name = "surfinia"
 version = "0.1.0"
 dependencies = [
  "surfinia-core",
+ "surfinia-html",
 ]
 
 [[package]]
@@ -77,6 +78,13 @@ name = "surfinia-examples-nested-counters"
 version = "0.1.0"
 dependencies = [
  "surfinia",
+]
+
+[[package]]
+name = "surfinia-html"
+version = "0.1.0"
+dependencies = [
+ "surfinia-core",
 ]
 
 [[package]]

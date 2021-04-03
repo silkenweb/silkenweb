@@ -6,13 +6,25 @@ use std::{
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
+pub fn append_to_body(elem: impl Into<Element>) {
+    web_log::println!("Setting document body");
+    DOCUMENT.with(|doc| {
+        doc.body()
+            .expect("Document must contain a `body`")
+            .append_child(&elem.into().dom_element)
+            .unwrap()
+    });
+}
+
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> Element
+pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> E
 where
     E: Into<Element>,
+    // TODO: Can we find a way to remove this requirement?
+    Element: Into<E>,
     T: 'static,
 {
     let setter = StateSetter::default();
@@ -33,6 +45,7 @@ where
         states: vec![root_state],
         event_callbacks: Vec::new(),
     }
+    .into()
 }
 
 pub struct ElementBuilder(Element);
@@ -92,16 +105,6 @@ pub struct Element {
 }
 
 impl Element {
-    pub fn append_to_body(self) {
-        web_log::println!("Setting document body");
-        DOCUMENT.with(|doc| {
-            doc.body()
-                .expect("Document must contain a `body`")
-                .append_child(&self.dom_element)
-                .unwrap()
-        });
-    }
-
     fn append_child(&self, node: &dom::Node) {
         self.dom_element.append_child(node).unwrap();
     }

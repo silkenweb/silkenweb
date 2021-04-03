@@ -1,9 +1,8 @@
 [package]
-name = "surfinia"
+name = "surfinia-html"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 surfinia-core = { path = "../core" }
-surfinia-html = { path = "../html" }
