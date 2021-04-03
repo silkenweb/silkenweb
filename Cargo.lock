@@ -69,7 +69,6 @@ name = "surfinia-core"
 version = "0.1.0"
 dependencies = [
  "wasm-bindgen",
- "web-log",
  "web-sys",
 ]
 
@@ -164,15 +163,6 @@ name = "wasm-bindgen-shared"
 version = "0.2.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9a543ae66aa233d14bb765ed9af4a33e81b8b58d1584cf1b47ff8cd0b9e4489"
-
-[[package]]
-name = "web-log"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e8dc38fd8e9913a9919b6099d70368d45aaab10732ea1b21094f138e41e13e1"
-dependencies = [
- "wasm-bindgen",
-]
 
 [[package]]
 name = "web-sys"

@@ -9,7 +9,6 @@ use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
 pub fn mount(id: &str, elem: impl Into<Element>) {
-    web_log::println!("Setting document body");
     let elem = elem.into();
 
     // TODO: Remember this!
