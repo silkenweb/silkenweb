@@ -1,25 +1,27 @@
-use surfinia::{append_to_body, button, div, DivBuilder, StateSetter};
+use surfinia::{append_to_body, button, div, DivBuilder, State};
 
-fn counter(set_i: StateSetter<u32>) -> DivBuilder {
-    let inc_i = set_i.clone();
-    let dec_i = set_i.clone();
+fn counter(count_state: State<u32>) -> DivBuilder {
+    let inc = count_state.clone();
+    let dec = count_state.clone();
 
     div()
-        .child(button().on_click(move || inc_i.map(|i| i + 1)).text("+"))
-        .child(button().on_click(move || dec_i.map(|i| i - 1)).text("-"))
-        .child(set_i.with(|i| div().text(format!("Count = {}", i))))
+        .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
+        .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
+        .child(count_state.with(|i| div().text(format!("Count = {}", i))))
 }
 
 fn main() {
-    let set_i = StateSetter::new(0);
+    let count_state = State::new(0);
 
-    append_to_body(counter(set_i.clone()).child(set_i.with(move |i| {
-        let mut counters = div();
+    append_to_body(
+        counter(count_state.clone()).child(count_state.with(move |i| {
+            let mut counters = div();
 
-        for _j in 0..i {
-            counters = counters.child(counter(StateSetter::new(0)));
-        }
+            for _j in 0..i {
+                counters = counters.child(counter(State::new(0)));
+            }
 
-        counters
-    })));
+            counters
+        })),
+    );
 }

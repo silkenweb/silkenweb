@@ -108,7 +108,7 @@ pub trait Builder {
     fn build(self) -> Self::Target;
 }
 
-struct State<F> {
+struct DomState<F> {
     dom_element: RefCell<dom::Element>,
     cancelled: Cell<bool>,
     generate: F,
@@ -116,7 +116,7 @@ struct State<F> {
     event_callbacks: Cell<Vec<EventCallback>>,
 }
 
-impl<F> State<F> {
+impl<F> DomState<F> {
     fn cancel_children(&self) {
         for child in self.child_states.take() {
             child.cancel();
@@ -124,7 +124,7 @@ impl<F> State<F> {
     }
 }
 
-impl<F> ChildState for State<F> {
+impl<F> ChildState for DomState<F> {
     fn cancel(&self) {
         self.cancelled.replace(true);
         self.cancel_children();
@@ -132,7 +132,7 @@ impl<F> ChildState for State<F> {
     }
 }
 
-impl<T, F> StateUpdater<T> for State<F>
+impl<T, F> StateUpdater<T> for DomState<F>
 where
     F: Fn(T) -> Element,
 {
@@ -156,13 +156,13 @@ where
     }
 }
 
-pub struct StateSetter<T> {
+pub struct State<T> {
     current: Rc<RefCell<T>>,
     new_state: Rc<Cell<Option<T>>>,
     updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
 
-impl<T> Clone for StateSetter<T> {
+impl<T> Clone for State<T> {
     fn clone(&self) -> Self {
         Self {
             current: self.current.clone(),
@@ -172,7 +172,7 @@ impl<T> Clone for StateSetter<T> {
     }
 }
 
-impl<T> StateSetter<T> {
+impl<T> State<T> {
     pub fn new(init: T) -> Self {
         Self {
             current: Rc::new(RefCell::new(init)),
@@ -182,7 +182,7 @@ impl<T> StateSetter<T> {
     }
 }
 
-impl<T: 'static + Clone> StateSetter<T> {
+impl<T: 'static + Clone> State<T> {
     pub fn with<ElemBuilder, Elem>(&self, generate: impl 'static + Fn(T) -> ElemBuilder) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
@@ -191,7 +191,7 @@ impl<T: 'static + Clone> StateSetter<T> {
     {
         let element = generate(self.current()).build().into();
         let dom_element = element.dom_element;
-        let root_state = Rc::new(State {
+        let root_state = Rc::new(DomState {
             dom_element: RefCell::new(dom_element.clone()),
             generate: move |value| generate(value).build().into(),
             child_states: Cell::new(element.states),
@@ -235,7 +235,7 @@ impl<T: 'static + Clone> StateSetter<T> {
     }
 }
 
-impl<T: Clone> AnyStateUpdater for StateSetter<T> {
+impl<T: Clone> AnyStateUpdater for State<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.

@@ -1,14 +1,14 @@
-use surfinia::{append_to_body, button, div, StateSetter};
+use surfinia::{append_to_body, button, div, State};
 
 fn main() {
-    let set_i = StateSetter::new(0);
-    let inc_i = set_i.clone();
-    let dec_i = set_i.clone();
+    let count_state = State::new(0);
+    let inc = count_state.clone();
+    let dec = count_state.clone();
 
     append_to_body(
         div()
-            .child(button().on_click(move || inc_i.map(|i| i + 1)).text("+"))
-            .child(button().on_click(move || dec_i.map(|i| i - 1)).text("-"))
-            .child(set_i.with(move |i| div().text(format!("Count = {}", i)))),
+            .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
+            .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
+            .child(count_state.with(move |i| div().text(format!("Count = {}", i)))),
     );
 }
