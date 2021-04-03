@@ -13,15 +13,13 @@ fn counter(count_state: State<u32>) -> DivBuilder {
 fn main() {
     let count_state = State::new(0);
 
-    append_to_body(
-        counter(count_state.clone()).child(count_state.with(move |&i| {
-            let mut counters = div();
+    append_to_body(counter(count_state.clone()).child(count_state.with(|&i| {
+        let mut counters = div();
 
-            for _j in 0..i {
-                counters = counters.child(counter(State::new(0)));
-            }
+        for _j in 0..i {
+            counters = counters.child(counter(State::new(0)));
+        }
 
-            counters
-        })),
-    );
+        counters
+    })));
 }
