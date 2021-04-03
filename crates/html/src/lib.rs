@@ -61,7 +61,8 @@ impl<Child: content_category::Flow> ParentCategory<Div> for Child {}
 impl content_category::Flow for Div {}
 impl content_category::Palpable for Div {}
 
-// TODO: Add a comment in macro as to why we don't use a blanket implementation.
+// TODO: Add a comment in macro as to why we don't use a blanket implementation
+// (see comment below).
 
 // We get better error messages if we implement these traits directly for
 // builder as well as target, rather than via a blanket trait.
