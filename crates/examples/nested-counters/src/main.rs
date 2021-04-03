@@ -15,11 +15,9 @@ fn main() {
         let mut c = counter(i, set_i);
 
         for _j in 0..i {
-            // TODO: Can we find a way to pass `counter` directly rather than wrapping it in
-            // a closure?
-            c = c.child(state(0, |i, set_i| counter(i, set_i).build()));
+            c = c.child(state(0, counter));
         }
 
-        c.build()
+        c
     }));
 }

@@ -9,7 +9,5 @@ fn main() {
             .child(button().on_click(move || inc_i.set(i + 1)).text("+"))
             .child(button().on_click(move || dec_i.set(i - 1)).text("-"))
             .text(format!("Count = {}", i))
-            // TODO: Can we find a way to remove this .build call?
-            .build()
     }));
 }

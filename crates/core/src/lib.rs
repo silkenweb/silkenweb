@@ -20,19 +20,22 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-pub fn state<T, E>(init: T, generate: impl 'static + Fn(T, StateSetter<T>) -> E) -> E
+pub fn state<T, ElemBuilder, Elem>(
+    init: T,
+    generate: impl 'static + Fn(T, StateSetter<T>) -> ElemBuilder,
+) -> Elem
 where
-    E: Into<Element>,
-    // TODO: Can we find a way to remove this requirement?
-    Element: Into<E>,
+    ElemBuilder: Builder<Target = Elem>,
+    Elem: Into<Element>,
+    Element: Into<Elem>,
     T: 'static,
 {
     let setter = StateSetter::default();
-    let element = generate(init, setter.clone()).into();
+    let element = generate(init, setter.clone()).build().into();
     let dom_element = element.dom_element;
     let root_state = Rc::new(State {
         dom_element: RefCell::new(dom_element.clone()),
-        generate: move |value, setter| generate(value, setter).into(),
+        generate: move |value, setter| generate(value, setter).build().into(),
         child_states: Cell::new(element.states),
         event_callbacks: Cell::new(element.event_callbacks),
         cancelled: Cell::new(false),
@@ -86,8 +89,12 @@ impl ElementBuilder {
             .push(EventCallback::new(self.0.dom_element.clone(), name, f));
         self
     }
+}
 
-    pub fn build(self) -> Element {
+impl Builder for ElementBuilder {
+    type Target = Element;
+
+    fn build(self) -> Self::Target {
         self.0
     }
 }
@@ -108,6 +115,20 @@ impl Element {
     fn append_child(&self, node: &dom::Node) {
         self.dom_element.append_child(node).unwrap();
     }
+}
+
+impl Builder for Element {
+    type Target = Self;
+
+    fn build(self) -> Self::Target {
+        self
+    }
+}
+
+pub trait Builder {
+    type Target;
+
+    fn build(self) -> Self::Target;
 }
 
 struct State<F> {

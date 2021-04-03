@@ -1,4 +1,4 @@
-use surfinia_core::{tag, Element, ElementBuilder};
+use surfinia_core::{tag, Builder, Element, ElementBuilder};
 
 pub fn div() -> DivBuilder {
     DivBuilder(HtmlElementBuilder::new("div"))
@@ -18,8 +18,12 @@ impl DivBuilder {
     pub fn child<Child: Parent<Div>>(self, c: Child) -> Self {
         Self(self.0.child(c.into()))
     }
+}
 
-    pub fn build(self) -> Div {
+impl Builder for DivBuilder {
+    type Target = Div;
+
+    fn build(self) -> Self::Target {
         Div(self.0.build())
     }
 }
@@ -31,6 +35,14 @@ impl From<DivBuilder> for Element {
 }
 
 pub struct Div(Element);
+
+impl Builder for Div {
+    type Target = Self;
+
+    fn build(self) -> Self::Target {
+        self
+    }
+}
 
 impl From<Div> for Element {
     fn from(div: Div) -> Self {
@@ -78,8 +90,12 @@ impl ButtonBuilder {
     pub fn on_click(self, f: impl 'static + FnMut()) -> Self {
         Self(self.0.on_click(f))
     }
+}
 
-    pub fn build(self) -> Button {
+impl Builder for ButtonBuilder {
+    type Target = Button;
+
+    fn build(self) -> Self::Target {
         Button(self.0.build())
     }
 }
@@ -91,6 +107,14 @@ impl From<ButtonBuilder> for Element {
 }
 
 pub struct Button(Element);
+
+impl Builder for Button {
+    type Target = Self;
+
+    fn build(self) -> Self::Target {
+        self
+    }
+}
 
 impl From<Button> for Element {
     fn from(button: Button) -> Self {
@@ -133,8 +157,12 @@ impl HtmlElementBuilder {
     pub fn child(self, c: impl Into<Element>) -> Self {
         Self(self.0.child(c.into()))
     }
+}
 
-    pub fn build(self) -> Element {
+impl Builder for HtmlElementBuilder {
+    type Target = Element;
+
+    fn build(self) -> Self::Target {
         self.0.build()
     }
 }
