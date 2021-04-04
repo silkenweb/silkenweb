@@ -190,9 +190,11 @@ impl<T: 'static> State<T> {
     }
 }
 
+type Mutator<T> = Box<dyn FnOnce(&mut T)>;
+
 pub struct Setter<T> {
     current: Rc<RefCell<T>>,
-    new_state: Rc<Cell<Option<T>>>,
+    new_state: Rc<Cell<Option<Mutator<T>>>>,
     updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
 
@@ -243,12 +245,16 @@ impl<T: 'static> Setter<T> {
         .into()
     }
 
-    pub fn map(&self, f: impl FnOnce(&T) -> T) {
-        self.set(f(&self.current.borrow()))
+    pub fn set(&self, new_value: T) {
+        self.map(|_| new_value);
     }
 
-    pub fn set(&self, new_value: T) {
-        if self.new_state.replace(Some(new_value)).is_none() {
+    pub fn map(&self, f: impl 'static + FnOnce(&T) -> T) {
+        self.edit(|x| *x = f(x));
+    }
+
+    pub fn edit(&self, f: impl 'static + FnOnce(&mut T)) {
+        if self.new_state.replace(Some(Box::new(f))).is_none() {
             UPDATE_QUEUE.with(|update_queue| {
                 let len = {
                     let mut update_queue = update_queue.borrow_mut();
@@ -270,8 +276,8 @@ impl<T> AnyStateUpdater for Setter<T> {
     ///
     /// If there is no new state with which to update.
     fn apply(&self) {
-        let new_value = self.new_state.take().unwrap();
-        self.current.replace(new_value);
+        let f = self.new_state.take().unwrap();
+        f(&mut self.current.borrow_mut());
         let new_value = self.current.borrow();
 
         for updater in self.updaters.borrow_mut().iter_mut() {
