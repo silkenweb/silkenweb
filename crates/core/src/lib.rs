@@ -136,7 +136,7 @@ where
     F: for<'a> Fn(&'a T) -> Element,
 {
     fn cancel(&self) {
-        self.cancelled.replace(true);
+        self.cancelled.set(true);
         self.cancel_children();
         self.event_callbacks.take();
     }
@@ -161,8 +161,8 @@ where
             .replace_with_with_node_1(&element.dom_element)
             .unwrap();
         self.dom_element.replace(element.dom_element);
-        self.child_states.replace(element.states);
-        self.event_callbacks.replace(element.event_callbacks);
+        self.child_states.set(element.states);
+        self.event_callbacks.set(element.event_callbacks);
     }
 }
 
