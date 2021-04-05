@@ -254,6 +254,7 @@ impl<T: 'static> Setter<T> {
     }
 
     pub fn edit(&self, f: impl 'static + FnOnce(&mut T)) {
+        // TODO: This should chain updates.
         if self.new_state.replace(Some(Box::new(f))).is_none() {
             UPDATE_QUEUE.with(|update_queue| {
                 let len = {
