@@ -11,7 +11,7 @@ fn counter(count_state: &State<u32>) -> DivBuilder {
 }
 
 fn main() {
-    let count_state = State::new(0);
+    let count_state = State::new(|| 0);
 
     mount(
         "app",
@@ -19,7 +19,7 @@ fn main() {
             let mut counters = div();
 
             for _j in 0..i {
-                counters = counters.child(counter(&State::new(0)));
+                counters = counters.child(counter(&State::new(|| 0)));
             }
 
             counters

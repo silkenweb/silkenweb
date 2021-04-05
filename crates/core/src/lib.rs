@@ -169,7 +169,7 @@ where
 pub struct State<T>(Setter<T>);
 
 impl<T: 'static> State<T> {
-    pub fn new(init: T) -> Self {
+    pub fn new(init: impl 'static + Fn() -> T) -> Self {
         Self(Setter::new(init))
     }
 }
@@ -193,7 +193,9 @@ impl<T: 'static> State<T> {
 type Mutator<T> = Box<dyn FnOnce(&mut T)>;
 
 pub struct Setter<T> {
+    initial: Rc<dyn Fn() -> T>,
     current: Rc<RefCell<T>>,
+    modified: Rc<Cell<bool>>,
     new_state: Rc<Cell<Option<Mutator<T>>>>,
     updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
@@ -201,7 +203,9 @@ pub struct Setter<T> {
 impl<T> Clone for Setter<T> {
     fn clone(&self) -> Self {
         Self {
+            initial: self.initial.clone(),
             current: self.current.clone(),
+            modified: self.modified.clone(),
             new_state: self.new_state.clone(),
             updaters: self.updaters.clone(),
         }
@@ -209,11 +213,25 @@ impl<T> Clone for Setter<T> {
 }
 
 impl<T: 'static> Setter<T> {
-    fn new(init: T) -> Self {
+    fn new(init: impl 'static + Fn() -> T) -> Self {
+        let current = Rc::new(RefCell::new(init()));
+
         Self {
-            current: Rc::new(RefCell::new(init)),
+            initial: Rc::new(init),
+            current,
+            modified: Rc::new(Cell::new(false)),
             new_state: Rc::new(Cell::new(None)),
             updaters: Rc::new(RefCell::new(Vec::new())),
+        }
+    }
+
+    fn reset_to_initial(&self) {
+        if self.modified.get() {
+            let initial = (self.initial)();
+            self.new_state
+                .set(Some(Box::new(move |current| *current = initial)));
+            self.apply();
+            self.modified.set(false);
         }
     }
 
@@ -280,6 +298,7 @@ impl<T> AnyStateUpdater for Setter<T> {
         let f = self.new_state.take().unwrap();
         f(&mut self.current.borrow_mut());
         let new_value = self.current.borrow();
+        self.modified.set(true);
 
         for updater in self.updaters.borrow_mut().iter_mut() {
             updater.apply(&new_value);
