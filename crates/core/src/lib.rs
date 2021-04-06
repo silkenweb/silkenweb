@@ -1,10 +1,15 @@
+pub mod memo;
+
 use std::{
     cell::{Cell, RefCell},
+    fmt::Display,
+    hash::Hash,
     marker::PhantomData,
     mem,
     rc::Rc,
 };
 
+use memo::GetMemoKey;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -28,6 +33,7 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+#[derive(Clone)]
 pub struct ElementBuilder(Element);
 
 impl ElementBuilder {
@@ -49,6 +55,11 @@ impl ElementBuilder {
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
+        
+        for state in &child.states {
+            state.reinstate();
+        }
+
         self.0.append_child(&child.dom_element);
         self.0.states.extend(child.states);
         self.0.event_callbacks.extend(child.event_callbacks);
@@ -63,7 +74,7 @@ impl ElementBuilder {
     pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
         self.0
             .event_callbacks
-            .push(EventCallback::new(self.0.dom_element.clone(), name, f));
+            .push(Rc::new(EventCallback::new(self.0.dom_element.clone(), name, f)));
         self
     }
 }
@@ -82,10 +93,11 @@ impl From<ElementBuilder> for Element {
     }
 }
 
+#[derive(Clone)]
 pub struct Element {
     dom_element: dom::Element,
     states: Vec<Rc<dyn ChildState>>,
-    event_callbacks: Vec<EventCallback>,
+    event_callbacks: Vec<Rc<EventCallback>>,
 }
 
 impl Element {
@@ -116,7 +128,7 @@ where
     cancelled: Cell<bool>,
     generate: F,
     child_states: Cell<Vec<Rc<dyn ChildState>>>,
-    event_callbacks: Cell<Vec<EventCallback>>,
+    event_callbacks: Cell<Vec<Rc<EventCallback>>>,
     phantom: PhantomData<T>,
 }
 
@@ -129,6 +141,12 @@ where
             child.cancel();
         }
     }
+
+    fn reinstate_children(&self) {
+        for child in self.child_states.take() {
+            child.reinstate();
+        }
+    }
 }
 
 impl<T, F> ChildState for DomState<T, F>
@@ -138,7 +156,11 @@ where
     fn cancel(&self) {
         self.cancelled.set(true);
         self.cancel_children();
-        self.event_callbacks.take();
+    }
+
+    fn reinstate(&self) {
+        self.cancelled.set(false);
+        self.reinstate_children();
     }
 }
 
@@ -172,9 +194,7 @@ impl<T: 'static> State<T> {
     pub fn new(init: impl 'static + Fn() -> T) -> Self {
         Self(Setter::new(init))
     }
-}
 
-impl<T: 'static> State<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
@@ -187,6 +207,24 @@ impl<T: 'static> State<T> {
 
     pub fn setter(&self) -> Setter<T> {
         self.0.clone()
+    }
+}
+
+impl<T> GetMemoKey<T> for State<T>
+where
+    T: Hash + Eq + Clone + Display,
+{
+    fn memo_key(&self) -> T {
+        self.0.current.as_ref().borrow().clone()
+    }
+}
+
+impl<T> GetMemoKey<T> for &State<T>
+where
+    T: Hash + Eq + Clone + Display,
+{
+    fn memo_key(&self) -> T {
+        self.0.current.as_ref().borrow().clone()
     }
 }
 
@@ -329,6 +367,8 @@ trait StateUpdater<T> {
 
 trait ChildState {
     fn cancel(&self);
+
+    fn reinstate(&self);
 }
 
 struct EventCallback {
@@ -355,7 +395,10 @@ impl EventCallback {
 impl Drop for EventCallback {
     fn drop(&mut self) {
         self.target
-            .remove_event_listener_with_callback(self.name, self.callback.as_ref().unchecked_ref())
+            .remove_event_listener_with_callback(
+                self.name,
+                self.callback.as_ref().as_ref().unchecked_ref(),
+            )
             .unwrap();
     }
 }
@@ -372,6 +415,8 @@ fn request_process_updates() {
 }
 
 fn process_updates() {
+    memo::next_frame();
+
     UPDATE_QUEUE.with(|update_queue| {
         let update_queue = update_queue.take();
 
@@ -382,7 +427,7 @@ fn process_updates() {
         for update in update_queue {
             update.apply();
         }
-    })
+    });
 }
 
 thread_local!(

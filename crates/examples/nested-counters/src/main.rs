@@ -1,4 +1,12 @@
-use surfinia::{button, div, mount, DivBuilder, State};
+use surfinia::{button, div, mount, DivBuilder, Memo, State};
+
+thread_local!(
+    static COUNTER_MEMO: Memo<u32, DivBuilder> = Memo::initialize();
+);
+
+fn counter_memo(state: &State<u32>) -> DivBuilder {
+    COUNTER_MEMO.with(|counter_memo| counter_memo.memo(|state| counter(state), state))
+}
 
 fn counter(count_state: &State<u32>) -> DivBuilder {
     let inc = count_state.setter();
@@ -11,15 +19,15 @@ fn counter(count_state: &State<u32>) -> DivBuilder {
 }
 
 fn main() {
-    let count_state = State::new(|| 0);
+    let count_state = State::new(|| 10);
 
     mount(
         "app",
-        counter(&count_state).child(count_state.with(|&i| {
+        counter_memo(&count_state).child(count_state.with(|&i| {
             let mut counters = div();
 
             for _j in 0..i {
-                counters = counters.child(counter(&State::new(|| 0)));
+                counters = counters.child(counter_memo(&State::new(|| 0)));
             }
 
             counters
