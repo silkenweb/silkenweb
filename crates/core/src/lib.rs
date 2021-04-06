@@ -225,12 +225,19 @@ impl<T: 'static> Setter<T> {
         }
     }
 
+    fn update(&self) {
+        let new_value = self.current.borrow();
+
+        for updater in self.updaters.borrow_mut().iter_mut() {
+            updater.apply(&new_value);
+        }
+    }
+
     fn reset_to_initial(&self) {
         if self.modified.get() {
             let initial = (self.initial)();
-            self.new_state
-                .set(Some(Box::new(move |current| *current = initial)));
-            self.apply();
+            self.current.replace(initial);
+            self.update();
             self.modified.set(false);
         }
     }
@@ -290,19 +297,15 @@ impl<T: 'static> Setter<T> {
     }
 }
 
-impl<T> AnyStateUpdater for Setter<T> {
+impl<T: 'static> AnyStateUpdater for Setter<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.
     fn apply(&self) {
         let f = self.new_state.take().unwrap();
         f(&mut self.current.borrow_mut());
-        let new_value = self.current.borrow();
         self.modified.set(true);
-
-        for updater in self.updaters.borrow_mut().iter_mut() {
-            updater.apply(&new_value);
-        }
+        self.update();
     }
 
     fn cancel_children(&self) {
