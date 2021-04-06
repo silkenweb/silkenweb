@@ -156,6 +156,7 @@ where
     fn cancel(&self) {
         self.cancelled.set(true);
         self.cancel_children();
+        self.event_callbacks.take();
     }
 
     fn reinstate(&self) {
