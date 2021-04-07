@@ -274,6 +274,8 @@ impl<T: 'static> Setter<T> {
         let element = generate(&self.current.borrow()).build().into();
         let dom_element = element.dom_element.clone();
         let root_state = Rc::new(UpdateableElement {
+            // TODO: Somethings not right here.  We own the element and then create another Element
+            // for the same dom node below.
             element: RefCell::new(element),
             generate: move |value| generate(value).build().into(),
             updates_enabled: Cell::new(true),
