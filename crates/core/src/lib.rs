@@ -254,7 +254,8 @@ impl<T: 'static> Setter<T> {
         }
     }
 
-    fn reset_to_initial(&self) {
+    // TODO:
+    fn _reset_to_initial(&self) {
         if self.modified.get() {
             let initial = (self.initial)();
             self.current.replace(initial);
