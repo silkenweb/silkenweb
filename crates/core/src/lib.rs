@@ -54,7 +54,7 @@ impl ElementBuilder {
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
-        
+
         for state in &child.states {
             state.reinstate();
         }
@@ -71,9 +71,11 @@ impl ElementBuilder {
     }
 
     pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
-        self.0
-            .event_callbacks
-            .push(Rc::new(EventCallback::new(self.0.dom_element.clone(), name, f)));
+        self.0.event_callbacks.push(Rc::new(EventCallback::new(
+            self.0.dom_element.clone(),
+            name,
+            f,
+        )));
         self
     }
 }
