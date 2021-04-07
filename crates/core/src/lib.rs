@@ -267,6 +267,8 @@ impl<T: 'static> Setter<T> {
     fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
+        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
+        // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
         Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
