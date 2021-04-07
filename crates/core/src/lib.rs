@@ -33,7 +33,6 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-#[derive(Clone)]
 pub struct ElementBuilder(Element);
 
 impl ElementBuilder {

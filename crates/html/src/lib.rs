@@ -4,7 +4,6 @@ pub fn div() -> DivBuilder {
     DivBuilder(HtmlElementBuilder::new("div"))
 }
 
-#[derive(Clone)]
 pub struct DivBuilder(HtmlElementBuilder);
 
 impl DivBuilder {
@@ -35,6 +34,7 @@ impl From<DivBuilder> for Element {
     }
 }
 
+#[derive(Clone)]
 pub struct Div(Element);
 
 impl Builder for Div {
@@ -137,7 +137,6 @@ impl content_category::Palpable for Button {}
 impl content_category::Flow for ButtonBuilder {}
 impl content_category::Palpable for ButtonBuilder {}
 
-#[derive(Clone)]
 struct HtmlElementBuilder(ElementBuilder);
 
 impl HtmlElementBuilder {
