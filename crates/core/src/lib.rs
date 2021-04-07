@@ -119,7 +119,7 @@ pub trait Builder {
     fn build(self) -> Self::Target;
 }
 
-struct DomState<T, F>
+struct UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
@@ -131,7 +131,7 @@ where
     phantom: PhantomData<T>,
 }
 
-impl<T, F> DomState<T, F>
+impl<T, F> UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
@@ -148,7 +148,7 @@ where
     }
 }
 
-impl<T, F> ChildState for DomState<T, F>
+impl<T, F> ChildState for UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
@@ -164,7 +164,7 @@ where
     }
 }
 
-impl<T, F> StateUpdater<T> for DomState<T, F>
+impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
@@ -289,7 +289,7 @@ impl<T: 'static> Setter<T> {
     {
         let element = generate(&self.current.borrow()).build().into();
         let dom_element = element.dom_element;
-        let root_state = Rc::new(DomState {
+        let root_state = Rc::new(UpdateableElement {
             dom_element: RefCell::new(dom_element.clone()),
             generate: move |value| generate(value).build().into(),
             child_states: Cell::new(element.states),
