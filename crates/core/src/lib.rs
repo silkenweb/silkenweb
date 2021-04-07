@@ -55,10 +55,6 @@ impl ElementBuilder {
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
 
-        for state in &child.states {
-            state.reinstate();
-        }
-
         self.0.append_child(&child.dom_element);
         self.0.states.extend(child.states);
         self.0.event_callbacks.extend(child.event_callbacks);
@@ -125,11 +121,9 @@ struct UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
-    dom_element: RefCell<dom::Element>,
-    cancelled: Cell<bool>,
+    element: RefCell<Element>,
+    updates_enabled: Cell<bool>,
     generate: F,
-    child_states: Cell<Vec<Rc<dyn ChildState>>>,
-    event_callbacks: Cell<Vec<Rc<EventCallback>>>,
     phantom: PhantomData<T>,
 }
 
@@ -137,15 +131,9 @@ impl<T, F> UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
-    fn cancel_children(&self) {
-        for child in self.child_states.take() {
-            child.cancel();
-        }
-    }
-
-    fn reinstate_children(&self) {
-        for child in self.child_states.take() {
-            child.reinstate();
+    fn enable_child_updates(&self, enabled: bool) {
+        for child in &self.element.borrow().states {
+            child.enable_updates(enabled);
         }
     }
 }
@@ -154,15 +142,9 @@ impl<T, F> ChildState for UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
-    fn cancel(&self) {
-        self.cancelled.set(true);
-        self.cancel_children();
-        self.event_callbacks.take();
-    }
-
-    fn reinstate(&self) {
-        self.cancelled.set(false);
-        self.reinstate_children();
+    fn enable_updates(&self, enabled: bool) {
+        self.updates_enabled.set(enabled);
+        self.enable_child_updates(enabled);
     }
 }
 
@@ -170,23 +152,22 @@ impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
-    fn cancel_children(&self) {
-        self.cancel_children();
+    fn enable_child_updates(&self, enabled: bool) {
+        self.enable_child_updates(enabled);
     }
 
     fn apply(&self, new_value: &T) {
-        if self.cancelled.get() {
+        if !self.updates_enabled.get() {
             return;
         }
 
         let element = (self.generate)(new_value);
-        self.dom_element
+        self.element
             .borrow()
+            .dom_element
             .replace_with_with_node_1(&element.dom_element)
             .unwrap();
-        self.dom_element.replace(element.dom_element);
-        self.child_states.set(element.states);
-        self.event_callbacks.set(element.event_callbacks);
+        self.element.replace(element);
     }
 }
 
@@ -290,13 +271,11 @@ impl<T: 'static> Setter<T> {
         Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
     {
         let element = generate(&self.current.borrow()).build().into();
-        let dom_element = element.dom_element;
+        let dom_element = element.dom_element.clone();
         let root_state = Rc::new(UpdateableElement {
-            dom_element: RefCell::new(dom_element.clone()),
+            element: RefCell::new(element),
             generate: move |value| generate(value).build().into(),
-            child_states: Cell::new(element.states),
-            event_callbacks: Cell::new(element.event_callbacks),
-            cancelled: Cell::new(false),
+            updates_enabled: Cell::new(true),
             phantom: PhantomData,
         });
 
@@ -348,9 +327,9 @@ impl<T: 'static> AnyStateUpdater for Setter<T> {
         self.update();
     }
 
-    fn cancel_children(&self) {
+    fn enable_child_updates(&self, enabled: bool) {
         for updater in self.updaters.borrow_mut().iter_mut() {
-            updater.cancel_children();
+            updater.enable_child_updates(enabled);
         }
     }
 }
@@ -358,19 +337,17 @@ impl<T: 'static> AnyStateUpdater for Setter<T> {
 trait AnyStateUpdater {
     fn apply(&self);
 
-    fn cancel_children(&self);
+    fn enable_child_updates(&self, enabled: bool);
 }
 
 trait StateUpdater<T> {
-    fn cancel_children(&self);
-
     fn apply(&self, new_value: &T);
+
+    fn enable_child_updates(&self, enabled: bool);
 }
 
 trait ChildState {
-    fn cancel(&self);
-
-    fn reinstate(&self);
+    fn enable_updates(&self, enabled: bool);
 }
 
 struct EventCallback {
@@ -423,11 +400,15 @@ fn process_updates() {
         let update_queue = update_queue.take();
 
         for update in &update_queue {
-            update.cancel_children();
+            update.enable_child_updates(false);
+        }
+
+        for update in &update_queue {
+            update.apply();
         }
 
         for update in update_queue {
-            update.apply();
+            update.enable_child_updates(true);
         }
     });
 }
