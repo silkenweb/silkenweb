@@ -171,6 +171,8 @@ where
     }
 }
 
+// TODO: Split into getter and setter. Setter has memo key of (). Getter has
+// memo key of current value, and still has `with` method.
 pub struct State<T>(Setter<T>);
 
 impl<T: 'static> State<T> {
@@ -404,6 +406,7 @@ fn process_updates() {
     UPDATE_QUEUE.with(|update_queue| {
         let update_queue = update_queue.take();
 
+        // TODO: If updates len == 1, no need to disable child updates.
         for update in &update_queue {
             update.enable_child_updates(false);
         }
@@ -412,6 +415,8 @@ fn process_updates() {
             update.apply();
         }
 
+        // TODO: Disable child updates by frame number, then we don't need to re enable
+        // them. This doesn't work properly anyway, as child structure may have changed.
         for update in update_queue {
             update.enable_child_updates(true);
         }
