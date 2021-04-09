@@ -2,10 +2,10 @@ pub mod memo;
 
 use std::{
     cell::{Cell, RefCell},
+    collections::HashMap,
     fmt::Display,
     hash::Hash,
     marker::PhantomData,
-    mem,
     rc::Rc,
 };
 
@@ -15,11 +15,8 @@ use web_sys as dom;
 
 pub fn mount(id: &str, elem: impl Into<Element>) {
     let elem = elem.into();
-
-    // TODO: Remember this!
-    mem::forget(elem.event_callbacks);
-    mem::forget(elem.states);
-    let dom_element = elem.dom_element;
+    let dom_element = elem.dom_element.clone();
+    APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 
     DOCUMENT.with(|doc| {
         doc.get_element_by_id(id)
@@ -27,6 +24,10 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
             .append_child(&dom_element)
             .unwrap()
     });
+}
+
+pub fn unmount(id: &str) {
+    APPS.with(|apps| apps.borrow_mut().remove(id));
 }
 
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
@@ -427,6 +428,7 @@ thread_local!(
     static WINDOW: dom::Window = dom::window().expect("Window must be available");
     static DOCUMENT: dom::Document =
         WINDOW.with(|window| window.document().expect("Window must contain a document"));
+    static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
     static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
