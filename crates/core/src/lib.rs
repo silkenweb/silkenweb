@@ -166,9 +166,7 @@ impl<T: 'static> State<T> {
 type Mutator<T> = Box<dyn FnOnce(&mut T)>;
 
 pub struct Setter<T> {
-    initial: Rc<dyn Fn() -> T>,
     current: Rc<RefCell<T>>,
-    modified: Rc<Cell<bool>>,
     new_state: Rc<Cell<Option<Mutator<T>>>>,
     updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
@@ -176,9 +174,7 @@ pub struct Setter<T> {
 impl<T> Clone for Setter<T> {
     fn clone(&self) -> Self {
         Self {
-            initial: self.initial.clone(),
             current: self.current.clone(),
-            modified: self.modified.clone(),
             new_state: self.new_state.clone(),
             updaters: self.updaters.clone(),
         }
@@ -190,9 +186,7 @@ impl<T: 'static> Setter<T> {
         let current = Rc::new(RefCell::new(init()));
 
         Self {
-            initial: Rc::new(init),
             current,
-            modified: Rc::new(Cell::new(false)),
             new_state: Rc::new(Cell::new(None)),
             updaters: Rc::new(RefCell::new(Vec::new())),
         }
@@ -203,16 +197,6 @@ impl<T: 'static> Setter<T> {
 
         for updater in self.updaters.borrow_mut().iter_mut() {
             updater.apply(&new_value);
-        }
-    }
-
-    // TODO:
-    fn _reset_to_initial(&self) {
-        if self.modified.get() {
-            let initial = (self.initial)();
-            self.current.replace(initial);
-            self.update();
-            self.modified.set(false);
         }
     }
 
@@ -279,7 +263,6 @@ impl<T: 'static> AnyStateUpdater for Setter<T> {
     fn apply(&self) {
         let f = self.new_state.take().unwrap();
         f(&mut self.current.borrow_mut());
-        self.modified.set(true);
         self.update();
     }
 }
