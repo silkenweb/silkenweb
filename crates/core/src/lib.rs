@@ -139,15 +139,11 @@ where
     }
 }
 
-// TODO: Split into getter and setter. Setter has memo key of (). Getter has
-// memo key of current value, and still has `with` method.
-pub struct State<T>(Setter<T>);
+type SharedState<T> = Rc<RefCell<State<T>>>;
 
-impl<T: 'static> State<T> {
-    pub fn new(init: T) -> Self {
-        Self(Setter::new(init))
-    }
+pub struct StateGetter<T>(SharedState<T>);
 
+impl<T: 'static> StateGetter<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
@@ -155,78 +151,41 @@ impl<T: 'static> State<T> {
         Element: Into<Elem>,
         Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
     {
-        self.0.with(generate)
-    }
-
-    pub fn setter(&self) -> Setter<T> {
-        self.0.clone()
+        self.0.borrow_mut().with(generate)
     }
 }
 
 type Mutator<T> = Box<dyn FnOnce(&mut T)>;
 
-pub struct Setter<T> {
-    current: Rc<RefCell<T>>,
+pub struct StateSetter<T> {
+    state: SharedState<T>,
     new_state: Rc<Cell<Option<Mutator<T>>>>,
-    updaters: Rc<RefCell<Vec<Rc<dyn StateUpdater<T>>>>>,
 }
 
-impl<T> Clone for Setter<T> {
+impl<T> Clone for StateSetter<T> {
     fn clone(&self) -> Self {
         Self {
-            current: self.current.clone(),
+            state: self.state.clone(),
             new_state: self.new_state.clone(),
-            updaters: self.updaters.clone(),
         }
     }
 }
 
-impl<T: 'static> Setter<T> {
-    fn new(init: T) -> Self {
-        let current = Rc::new(RefCell::new(init));
+pub fn use_state<T: 'static>(init: T) -> (StateGetter<T>, StateSetter<T>) {
+    let state = Rc::new(RefCell::new(State::new(init)));
 
-        Self {
-            current,
+    (
+        StateGetter(state.clone()),
+        StateSetter {
+            state,
             new_state: Rc::new(Cell::new(None)),
-            updaters: Rc::new(RefCell::new(Vec::new())),
-        }
-    }
+        },
+    )
+}
 
+impl<T: 'static> StateSetter<T> {
     fn update(&self) {
-        let new_value = self.current.borrow();
-
-        for updater in self.updaters.borrow_mut().iter_mut() {
-            updater.apply(&new_value);
-        }
-    }
-
-    fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
-    where
-        ElemBuilder: Builder<Target = Elem>,
-        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
-        // empty type on to/from methods.
-        Elem: Into<Element>,
-        Element: Into<Elem>,
-        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
-    {
-        let element = generate(&self.current.borrow()).build().into();
-        let dom_element = element.dom_element.clone();
-        let root_state = Rc::new(UpdateableElement {
-            // TODO: Somethings not right here.  We own the element and then create another Element
-            // for the same dom node below.
-            element: RefCell::new(element),
-            generate: move |value| generate(value).build().into(),
-            phantom: PhantomData,
-        });
-
-        self.updaters.borrow_mut().push(root_state.clone());
-
-        Element {
-            dom_element,
-            states: vec![root_state],
-            event_callbacks: Vec::new(),
-        }
-        .into()
+        self.state.borrow_mut().update();
     }
 
     pub fn set(&self, new_value: T) {
@@ -256,13 +215,62 @@ impl<T: 'static> Setter<T> {
     }
 }
 
-impl<T: 'static> AnyStateUpdater for Setter<T> {
+struct State<T> {
+    current: T,
+    updaters: Vec<Rc<dyn StateUpdater<T>>>,
+}
+
+impl<T: 'static> State<T> {
+    fn new(init: T) -> Self {
+        Self {
+            current: init,
+            updaters: Vec::new(),
+        }
+    }
+
+    fn update(&mut self) {
+        for updater in self.updaters.iter_mut() {
+            updater.apply(&self.current);
+        }
+    }
+
+    fn with<ElemBuilder, Elem, Gen>(&mut self, generate: Gen) -> Elem
+    where
+        ElemBuilder: Builder<Target = Elem>,
+        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
+        // empty type on to/from methods.
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
+    {
+        let element = generate(&self.current).build().into();
+        let dom_element = element.dom_element.clone();
+        let root_state = Rc::new(UpdateableElement {
+            // TODO: Somethings not right here.  We own the element and then create another Element
+            // for the same dom node below.
+            element: RefCell::new(element),
+            generate: move |value| generate(value).build().into(),
+            phantom: PhantomData,
+        });
+
+        self.updaters.push(root_state.clone());
+
+        Element {
+            dom_element,
+            states: vec![root_state],
+            event_callbacks: Vec::new(),
+        }
+        .into()
+    }
+}
+
+impl<T: 'static> AnyStateUpdater for StateSetter<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.
     fn apply(&self) {
         let f = self.new_state.take().unwrap();
-        f(&mut self.current.borrow_mut());
+        f(&mut self.state.borrow_mut().current);
         self.update();
     }
 }
