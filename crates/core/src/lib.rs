@@ -144,7 +144,7 @@ where
 pub struct State<T>(Setter<T>);
 
 impl<T: 'static> State<T> {
-    pub fn new(init: impl 'static + Fn() -> T) -> Self {
+    pub fn new(init: T) -> Self {
         Self(Setter::new(init))
     }
 
@@ -182,8 +182,8 @@ impl<T> Clone for Setter<T> {
 }
 
 impl<T: 'static> Setter<T> {
-    fn new(init: impl 'static + Fn() -> T) -> Self {
-        let current = Rc::new(RefCell::new(init()));
+    fn new(init: T) -> Self {
+        let current = Rc::new(RefCell::new(init));
 
         Self {
             current,

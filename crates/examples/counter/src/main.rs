@@ -1,7 +1,7 @@
 use surfinia::{button, div, mount, State};
 
 fn main() {
-    let count_state = State::new(|| 0);
+    let count_state = State::new(0);
     let inc = count_state.setter();
     let dec = count_state.setter();
 
