@@ -6,7 +6,7 @@ pub use surfinia_core::{
     Element,
     ElementBuilder,
     GetState,
-    SetState,
     Reference,
+    SetState,
 };
 pub use surfinia_html::{button, div, Button, ButtonBuilder, Div, DivBuilder};
