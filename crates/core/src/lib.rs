@@ -1,15 +1,10 @@
-pub mod memo;
-
 use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
-    fmt::Display,
-    hash::Hash,
     marker::PhantomData,
     rc::Rc,
 };
 
-use memo::GetMemoKey;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -193,24 +188,6 @@ impl<T: 'static> State<T> {
 
     pub fn setter(&self) -> Setter<T> {
         self.0.clone()
-    }
-}
-
-impl<T> GetMemoKey<T> for State<T>
-where
-    T: Hash + Eq + Clone + Display,
-{
-    fn memo_key(&self) -> T {
-        self.0.current.as_ref().borrow().clone()
-    }
-}
-
-impl<T> GetMemoKey<T> for &State<T>
-where
-    T: Hash + Eq + Clone + Display,
-{
-    fn memo_key(&self) -> T {
-        self.0.current.as_ref().borrow().clone()
     }
 }
 
@@ -402,8 +379,6 @@ fn request_process_updates() {
 }
 
 fn process_updates() {
-    memo::next_frame();
-
     UPDATE_QUEUE.with(|update_queue| {
         let update_queue = update_queue.take();
 
