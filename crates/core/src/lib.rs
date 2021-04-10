@@ -122,7 +122,19 @@ where
     phantom: PhantomData<T>,
 }
 
-impl<T> OwnedChild for State<T> {}
+impl<T> OwnedChild for State<T> {
+    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
+        self.parent = Some(parent);
+    }
+
+    fn dom_depth(&self) -> usize {
+        self.parent
+            .as_ref()
+            .map(|p| p.upgrade())
+            .flatten()
+            .map_or(0, |p| p.borrow().dom_depth() + 1)
+    }
+}
 
 impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
@@ -155,6 +167,12 @@ impl<T: 'static> GetState<T> {
     {
         let element = generate(&self.0.borrow().current).build().into();
         let dom_element = element.dom_element.clone();
+
+        for child in &element.states {
+            let parent = Rc::downgrade(&self.0);
+            child.borrow_mut().set_parent(parent);
+        }
+
         let root_state = Rc::new(UpdateableElement {
             // TODO: Somethings not right here.  We own the element and then create another Element
             // for the same dom node below.
@@ -233,6 +251,7 @@ impl<T: 'static> SetState<T> {
 struct State<T> {
     current: T,
     updaters: Vec<Rc<dyn StateUpdater<T>>>,
+    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
 }
 
 impl<T: 'static> State<T> {
@@ -240,6 +259,7 @@ impl<T: 'static> State<T> {
         Self {
             current: init,
             updaters: Vec::new(),
+            parent: None,
         }
     }
 
@@ -251,6 +271,10 @@ impl<T: 'static> State<T> {
 }
 
 impl<T: 'static> AnyStateUpdater for SetState<T> {
+    fn dom_depth(&self) -> usize {
+        self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
+    }
+
     /// # Panics
     ///
     /// If there is no new state with which to update.
@@ -266,6 +290,8 @@ impl<T: 'static> AnyStateUpdater for SetState<T> {
 }
 
 trait AnyStateUpdater {
+    fn dom_depth(&self) -> usize;
+
     fn apply(&self);
 }
 
@@ -273,7 +299,11 @@ trait StateUpdater<T> {
     fn apply(&self, new_value: &T);
 }
 
-trait OwnedChild {}
+trait OwnedChild {
+    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>);
+
+    fn dom_depth(&self) -> usize;
+}
 
 struct EventCallback {
     target: dom::Element,
@@ -320,11 +350,23 @@ fn request_process_updates() {
 
 fn process_updates() {
     UPDATE_QUEUE.with(|update_queue| {
-        let update_queue = update_queue.take();
+        let mut update_queue = update_queue.take();
 
-        // TODO: If updates len == 1, no need to disable child updates.
+        if update_queue.len() != 1 {
+            let mut updates_by_depth: Vec<_> = update_queue
+                .into_iter()
+                .map(|u| (u.dom_depth(), u))
+                .collect();
 
-        for update in &update_queue {
+            updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
+
+            update_queue = updates_by_depth
+                .into_iter()
+                .map(|(_, value)| value)
+                .collect();
+        }
+
+        for update in update_queue {
             update.apply();
         }
     });
