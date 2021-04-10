@@ -97,6 +97,13 @@ impl Element {
     fn append_child(&self, node: &dom::Node) {
         self.dom_element.append_child(node).unwrap();
     }
+
+    fn set_parents<Parent: 'static + OwnedChild>(&self, parent: &Rc<RefCell<Parent>>) {
+        for child in &self.states {
+            let parent = Rc::downgrade(parent);
+            child.borrow_mut().set_parent(parent);
+        }
+    }
 }
 
 impl Builder for Element {
@@ -164,10 +171,7 @@ impl<T: 'static> GetState<T> {
         let element = generate(&self.0.borrow().current).build().into();
         let dom_element = element.dom_element.clone();
 
-        for child in &element.states {
-            let parent = Rc::downgrade(&self.0);
-            child.borrow_mut().set_parent(parent);
-        }
+        element.set_parents(&self.0);
 
         let root_state = Rc::new(UpdateableElement {
             // TODO: Somethings not right here.  We own the element and then create another Element
@@ -292,11 +296,7 @@ impl<T: 'static> Reference<T> {
         let element = generate(&mut self.0.borrow_mut().value).build().into();
         let dom_element = element.dom_element.clone();
 
-        for child in &element.states {
-            let parent = Rc::downgrade(&self.0);
-            child.borrow_mut().set_parent(parent);
-        }
-
+        element.set_parents(&self.0);
         self.0.borrow_mut().elements.push(element);
 
         Element {
