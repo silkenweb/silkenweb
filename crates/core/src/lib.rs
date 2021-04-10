@@ -2,7 +2,7 @@ use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
     marker::PhantomData,
-    rc::Rc,
+    rc::{self, Rc},
 };
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -89,7 +89,7 @@ impl From<ElementBuilder> for Element {
 #[derive(Clone)]
 pub struct Element {
     dom_element: dom::Element,
-    states: Vec<Rc<dyn ChildState>>,
+    states: Vec<Rc<RefCell<dyn ChildState>>>,
     event_callbacks: Vec<Rc<EventCallback>>,
 }
 
@@ -122,7 +122,7 @@ where
     phantom: PhantomData<T>,
 }
 
-impl<T, F> ChildState for UpdateableElement<T, F> where F: for<'a> Fn(&'a T) -> Element {}
+impl<T> ChildState for State<T> {}
 
 impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
@@ -147,18 +147,37 @@ impl<T: 'static> GetState<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
+        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
+        // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
         Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
     {
-        self.0.borrow_mut().with(generate)
+        let element = generate(&self.0.borrow().current).build().into();
+        let dom_element = element.dom_element.clone();
+        let root_state = Rc::new(UpdateableElement {
+            // TODO: Somethings not right here.  We own the element and then create another Element
+            // for the same dom node below.
+            element: RefCell::new(element),
+            generate: move |value| generate(value).build().into(),
+            phantom: PhantomData,
+        });
+
+        self.0.borrow_mut().updaters.push(root_state.clone());
+
+        Element {
+            dom_element,
+            states: vec![self.0.clone()],
+            event_callbacks: Vec::new(),
+        }
+        .into()
     }
 }
 
 type Mutator<T> = Box<dyn FnOnce(&mut T)>;
 
 pub struct SetState<T> {
-    state: SharedState<T>,
+    state: rc::Weak<RefCell<State<T>>>,
     new_state: Rc<Cell<Option<Mutator<T>>>>,
 }
 
@@ -177,17 +196,13 @@ pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
     (
         GetState(state.clone()),
         SetState {
-            state,
+            state: Rc::downgrade(&state),
             new_state: Rc::new(Cell::new(None)),
         },
     )
 }
 
 impl<T: 'static> SetState<T> {
-    fn update(&self) {
-        self.state.borrow_mut().update();
-    }
-
     pub fn set(&self, new_value: T) {
         self.map(|_| new_value);
     }
@@ -233,35 +248,6 @@ impl<T: 'static> State<T> {
             updater.apply(&self.current);
         }
     }
-
-    fn with<ElemBuilder, Elem, Gen>(&mut self, generate: Gen) -> Elem
-    where
-        ElemBuilder: Builder<Target = Elem>,
-        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
-        // empty type on to/from methods.
-        Elem: Into<Element>,
-        Element: Into<Elem>,
-        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
-    {
-        let element = generate(&self.current).build().into();
-        let dom_element = element.dom_element.clone();
-        let root_state = Rc::new(UpdateableElement {
-            // TODO: Somethings not right here.  We own the element and then create another Element
-            // for the same dom node below.
-            element: RefCell::new(element),
-            generate: move |value| generate(value).build().into(),
-            phantom: PhantomData,
-        });
-
-        self.updaters.push(root_state.clone());
-
-        Element {
-            dom_element,
-            states: vec![root_state],
-            event_callbacks: Vec::new(),
-        }
-        .into()
-    }
 }
 
 impl<T: 'static> AnyStateUpdater for SetState<T> {
@@ -270,8 +256,12 @@ impl<T: 'static> AnyStateUpdater for SetState<T> {
     /// If there is no new state with which to update.
     fn apply(&self) {
         let f = self.new_state.take().unwrap();
-        f(&mut self.state.borrow_mut().current);
-        self.update();
+
+        if let Some(state) = self.state.upgrade() {
+            let mut state = state.borrow_mut();
+            f(&mut state.current);
+            state.update();
+        }
     }
 }
 
