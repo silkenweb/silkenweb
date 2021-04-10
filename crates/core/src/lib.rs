@@ -141,9 +141,9 @@ where
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
 
-pub struct StateGetter<T>(SharedState<T>);
+pub struct GetState<T>(SharedState<T>);
 
-impl<T: 'static> StateGetter<T> {
+impl<T: 'static> GetState<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
@@ -157,12 +157,12 @@ impl<T: 'static> StateGetter<T> {
 
 type Mutator<T> = Box<dyn FnOnce(&mut T)>;
 
-pub struct StateSetter<T> {
+pub struct SetState<T> {
     state: SharedState<T>,
     new_state: Rc<Cell<Option<Mutator<T>>>>,
 }
 
-impl<T> Clone for StateSetter<T> {
+impl<T> Clone for SetState<T> {
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
@@ -171,19 +171,19 @@ impl<T> Clone for StateSetter<T> {
     }
 }
 
-pub fn use_state<T: 'static>(init: T) -> (StateGetter<T>, StateSetter<T>) {
+pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
     let state = Rc::new(RefCell::new(State::new(init)));
 
     (
-        StateGetter(state.clone()),
-        StateSetter {
+        GetState(state.clone()),
+        SetState {
             state,
             new_state: Rc::new(Cell::new(None)),
         },
     )
 }
 
-impl<T: 'static> StateSetter<T> {
+impl<T: 'static> SetState<T> {
     fn update(&self) {
         self.state.borrow_mut().update();
     }
@@ -264,7 +264,7 @@ impl<T: 'static> State<T> {
     }
 }
 
-impl<T: 'static> AnyStateUpdater for StateSetter<T> {
+impl<T: 'static> AnyStateUpdater for SetState<T> {
     /// # Panics
     ///
     /// If there is no new state with which to update.

@@ -1,6 +1,6 @@
-use surfinia::{button, div, mount, use_state, DivBuilder, StateGetter, StateSetter};
+use surfinia::{button, div, mount, use_state, DivBuilder, GetState, SetState};
 
-fn counter(count: &StateGetter<u32>, set_count: &StateSetter<u32>) -> DivBuilder {
+fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();
     let dec = set_count.clone();
 
