@@ -122,7 +122,7 @@ pub trait Builder {
 
 struct UpdateableElement<T, F>
 where
-    F: for<'a> Fn(&'a T) -> Element,
+    F: Fn(&T) -> Element,
 {
     element: RefCell<Element>,
     generate: F,
@@ -141,7 +141,7 @@ impl<T> OwnedChild for State<T> {
 
 impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
-    F: for<'a> Fn(&'a T) -> Element,
+    F: Fn(&T) -> Element,
 {
     fn apply(&self, new_value: &T) {
         let element = (self.generate)(new_value);
@@ -166,7 +166,7 @@ impl<T: 'static> GetState<T> {
         // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
-        Gen: 'static + for<'a> Fn(&'a T) -> ElemBuilder,
+        Gen: 'static + Fn(&T) -> ElemBuilder,
     {
         let element = generate(&self.0.borrow().current).build().into();
         let dom_element = element.dom_element.clone();
