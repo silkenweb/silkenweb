@@ -89,7 +89,7 @@ impl From<ElementBuilder> for Element {
 #[derive(Clone)]
 pub struct Element {
     dom_element: dom::Element,
-    states: Vec<Rc<RefCell<dyn ChildState>>>,
+    states: Vec<Rc<RefCell<dyn OwnedChild>>>,
     event_callbacks: Vec<Rc<EventCallback>>,
 }
 
@@ -122,7 +122,7 @@ where
     phantom: PhantomData<T>,
 }
 
-impl<T> ChildState for State<T> {}
+impl<T> OwnedChild for State<T> {}
 
 impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
@@ -273,7 +273,7 @@ trait StateUpdater<T> {
     fn apply(&self, new_value: &T);
 }
 
-trait ChildState {}
+trait OwnedChild {}
 
 struct EventCallback {
     target: dom::Element,
