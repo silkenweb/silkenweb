@@ -222,7 +222,13 @@ pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
 
 impl<T: 'static> SetState<T> {
     pub fn set(&self, new_value: T) {
-        self.map(|_| new_value);
+        if self
+            .new_state
+            .replace(Some(Box::new(|x| *x = new_value)))
+            .is_none()
+        {
+            self.queue_update();
+        }
     }
 
     pub fn map(&self, f: impl 'static + FnOnce(&T) -> T) {
@@ -230,21 +236,32 @@ impl<T: 'static> SetState<T> {
     }
 
     pub fn edit(&self, f: impl 'static + FnOnce(&mut T)) {
-        // TODO: This should chain updates.
-        if self.new_state.replace(Some(Box::new(f))).is_none() {
-            UPDATE_QUEUE.with(|update_queue| {
-                let len = {
-                    let mut update_queue = update_queue.borrow_mut();
+        let existing = self.new_state.replace(None);
 
-                    update_queue.push(Box::new(self.clone()));
-                    update_queue.len()
-                };
-
-                if len == 1 {
-                    request_process_updates();
-                }
-            });
+        if let Some(existing) = existing {
+            self.new_state.replace(Some(Box::new(move |x| {
+                existing(x);
+                f(x);
+            })));
+        } else {
+            self.new_state.replace(Some(Box::new(f)));
+            self.queue_update();
         }
+    }
+
+    fn queue_update(&self) {
+        UPDATE_QUEUE.with(|update_queue| {
+            let len = {
+                let mut update_queue = update_queue.borrow_mut();
+
+                update_queue.push(Box::new(self.clone()));
+                update_queue.len()
+            };
+
+            if len == 1 {
+                request_process_updates();
+            }
+        });
     }
 }
 
