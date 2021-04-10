@@ -128,11 +128,7 @@ impl<T> OwnedChild for State<T> {
     }
 
     fn dom_depth(&self) -> usize {
-        self.parent
-            .as_ref()
-            .map(|p| p.upgrade())
-            .flatten()
-            .map_or(0, |p| p.borrow().dom_depth() + 1)
+        dom_depth(&self.parent)
     }
 }
 
@@ -263,6 +259,71 @@ impl<T: 'static> SetState<T> {
             }
         });
     }
+}
+
+type SharedRef<T> = Rc<RefCell<RefData<T>>>;
+
+pub struct RefData<T> {
+    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
+    elements: Vec<Element>,
+    value: T,
+}
+
+pub struct Reference<T>(SharedRef<T>);
+
+impl<T: 'static> Reference<T> {
+    pub fn new(value: T) -> Self {
+        Self(Rc::new(RefCell::new(RefData {
+            parent: None,
+            elements: Vec::new(),
+            value,
+        })))
+    }
+
+    pub fn with<ElemBuilder, Elem, Gen>(&mut self, generate: Gen) -> Elem
+    where
+        ElemBuilder: Builder<Target = Elem>,
+        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
+        // empty type on to/from methods.
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+        Gen: for<'a> Fn(&mut T) -> ElemBuilder,
+    {
+        let element = generate(&mut self.0.borrow_mut().value).build().into();
+        let dom_element = element.dom_element.clone();
+
+        for child in &element.states {
+            let parent = Rc::downgrade(&self.0);
+            child.borrow_mut().set_parent(parent);
+        }
+
+        self.0.borrow_mut().elements.push(element);
+
+        Element {
+            dom_element,
+            states: vec![self.0.clone()],
+            event_callbacks: Vec::new(),
+        }
+        .into()
+    }
+}
+
+impl<T> OwnedChild for RefData<T> {
+    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
+        self.parent = Some(parent);
+    }
+
+    fn dom_depth(&self) -> usize {
+        dom_depth(&self.parent)
+    }
+}
+
+fn dom_depth(parent: &Option<rc::Weak<RefCell<dyn OwnedChild>>>) -> usize {
+    parent
+        .as_ref()
+        .map(|p| p.upgrade())
+        .flatten()
+        .map_or(0, |p| p.borrow().dom_depth() + 1)
 }
 
 struct State<T> {
