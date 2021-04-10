@@ -284,14 +284,14 @@ impl<T: 'static> Reference<T> {
         })))
     }
 
-    pub fn with<ElemBuilder, Elem, Gen>(&mut self, generate: Gen) -> Elem
+    pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
         // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
         // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
-        Gen: for<'a> Fn(&mut T) -> ElemBuilder,
+        Gen: FnMut(&mut T) -> ElemBuilder,
     {
         let element = generate(&mut self.0.borrow_mut().value).build().into();
         let dom_element = element.dom_element.clone();
