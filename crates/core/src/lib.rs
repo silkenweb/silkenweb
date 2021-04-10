@@ -13,12 +13,11 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     let dom_element = elem.dom_element.clone();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 
-    DOCUMENT.with(|doc| {
-        doc.get_element_by_id(id)
-            .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-            .append_child(&dom_element)
-            .unwrap()
-    });
+    document()
+        .get_element_by_id(id)
+        .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
+        .append_child(&dom_element)
+        .unwrap();
 }
 
 pub fn unmount(id: &str) {
@@ -34,7 +33,7 @@ pub struct ElementBuilder(Element);
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
         ElementBuilder(Element {
-            dom_element: DOCUMENT.with(|doc| doc.create_element(tag.as_ref()).unwrap()),
+            dom_element: document().create_element(tag.as_ref()).unwrap(),
             states: Vec::new(),
             event_callbacks: Vec::new(),
         })
@@ -58,7 +57,8 @@ impl ElementBuilder {
     }
 
     pub fn text(self, child: impl AsRef<str>) -> Self {
-        DOCUMENT.with(|doc| self.0.append_child(&doc.create_text_node(child.as_ref())));
+        self.0
+            .append_child(&document().create_text_node(child.as_ref()));
         self
     }
 
@@ -337,14 +337,20 @@ impl Drop for EventCallback {
     }
 }
 
+fn window() -> dom::Window {
+    dom::window().expect("Window must be available")
+}
+
+fn document() -> dom::Document {
+    window().document().expect("Window must contain a document")
+}
+
 fn request_process_updates() {
     PROCESS_UPDATES.with(|process_updates| {
-        WINDOW.with(|window| {
-            // TODO: We need to call cancel_animation_frame if we want to exit
-            window
-                .request_animation_frame(process_updates.as_ref().unchecked_ref())
-                .unwrap()
-        })
+        // TODO: We need to call cancel_animation_frame if we want to exit
+        window()
+            .request_animation_frame(process_updates.as_ref().unchecked_ref())
+            .unwrap()
     });
 }
 
@@ -373,9 +379,6 @@ fn process_updates() {
 }
 
 thread_local!(
-    static WINDOW: dom::Window = dom::window().expect("Window must be available");
-    static DOCUMENT: dom::Document =
-        WINDOW.with(|window| window.document().expect("Window must contain a document"));
     static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
     static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
