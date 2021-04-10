@@ -118,45 +118,17 @@ where
     F: for<'a> Fn(&'a T) -> Element,
 {
     element: RefCell<Element>,
-    updates_enabled: Cell<bool>,
     generate: F,
     phantom: PhantomData<T>,
 }
 
-impl<T, F> UpdateableElement<T, F>
-where
-    F: for<'a> Fn(&'a T) -> Element,
-{
-    fn enable_child_updates(&self, enabled: bool) {
-        for child in &self.element.borrow().states {
-            child.enable_updates(enabled);
-        }
-    }
-}
-
-impl<T, F> ChildState for UpdateableElement<T, F>
-where
-    F: for<'a> Fn(&'a T) -> Element,
-{
-    fn enable_updates(&self, enabled: bool) {
-        self.updates_enabled.set(enabled);
-        self.enable_child_updates(enabled);
-    }
-}
+impl<T, F> ChildState for UpdateableElement<T, F> where F: for<'a> Fn(&'a T) -> Element {}
 
 impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
 where
     F: for<'a> Fn(&'a T) -> Element,
 {
-    fn enable_child_updates(&self, enabled: bool) {
-        self.enable_child_updates(enabled);
-    }
-
     fn apply(&self, new_value: &T) {
-        if !self.updates_enabled.get() {
-            return;
-        }
-
         let element = (self.generate)(new_value);
         self.element
             .borrow()
@@ -260,7 +232,6 @@ impl<T: 'static> Setter<T> {
             // for the same dom node below.
             element: RefCell::new(element),
             generate: move |value| generate(value).build().into(),
-            updates_enabled: Cell::new(true),
             phantom: PhantomData,
         });
 
@@ -311,29 +282,17 @@ impl<T: 'static> AnyStateUpdater for Setter<T> {
         self.modified.set(true);
         self.update();
     }
-
-    fn enable_child_updates(&self, enabled: bool) {
-        for updater in self.updaters.borrow_mut().iter_mut() {
-            updater.enable_child_updates(enabled);
-        }
-    }
 }
 
 trait AnyStateUpdater {
     fn apply(&self);
-
-    fn enable_child_updates(&self, enabled: bool);
 }
 
 trait StateUpdater<T> {
     fn apply(&self, new_value: &T);
-
-    fn enable_child_updates(&self, enabled: bool);
 }
 
-trait ChildState {
-    fn enable_updates(&self, enabled: bool);
-}
+trait ChildState {}
 
 struct EventCallback {
     target: dom::Element,
@@ -383,18 +342,9 @@ fn process_updates() {
         let update_queue = update_queue.take();
 
         // TODO: If updates len == 1, no need to disable child updates.
-        for update in &update_queue {
-            update.enable_child_updates(false);
-        }
 
         for update in &update_queue {
             update.apply();
-        }
-
-        // TODO: Disable child updates by frame number, then we don't need to re enable
-        // them. This doesn't work properly anyway, as child structure may have changed.
-        for update in update_queue {
-            update.enable_child_updates(true);
         }
     });
 }
