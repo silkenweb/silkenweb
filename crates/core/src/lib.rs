@@ -1,3 +1,4 @@
+#![allow(clippy::missing_panics_doc, clippy::must_use_candidate)]
 use std::{
     any::{Any, TypeId},
     cell::{Cell, Ref, RefCell, RefMut},
@@ -106,6 +107,8 @@ impl Element {
             let parent = Rc::downgrade(&parent);
             child.borrow_mut().set_parent(parent);
         }
+
+        mem::drop(parent)
     }
 }
 
@@ -440,8 +443,7 @@ impl Effect for rc::Weak<RefCell<MemoData>> {
 fn dom_depth(parent: &Option<rc::Weak<RefCell<dyn OwnedChild>>>) -> usize {
     parent
         .as_ref()
-        .map(|p| p.upgrade())
-        .flatten()
+        .and_then(rc::Weak::upgrade)
         .map_or(0, |p| p.borrow().dom_depth() + 1)
 }
 
@@ -461,7 +463,7 @@ impl<T: 'static> State<T> {
     }
 
     fn update(&mut self) {
-        for updater in self.updaters.iter_mut() {
+        for updater in &mut self.updaters {
             updater.apply(&self.current);
         }
     }

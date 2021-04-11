@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 use surfinia_core::{tag, Builder, Element, ElementBuilder};
 
 pub fn div() -> DivBuilder {
