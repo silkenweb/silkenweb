@@ -267,7 +267,7 @@ impl<T: 'static> SetState<T> {
 
 type SharedRef<T> = Rc<RefCell<RefData<T>>>;
 
-pub struct RefData<T> {
+struct RefData<T> {
     parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
     elements: Vec<Element>,
     value: T,
@@ -315,6 +315,72 @@ impl<T> OwnedChild for RefData<T> {
 
     fn dom_depth(&self) -> usize {
         dom_depth(&self.parent)
+    }
+}
+
+#[derive(Clone, Default)]
+pub struct Memo(Rc<RefCell<MemoData>>);
+
+#[derive(Default)]
+struct MemoData {
+    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
+    elements: Vec<Element>,
+}
+
+#[derive(Default)]
+pub struct MemoScope(Memo);
+
+impl MemoScope {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
+    where
+        ElemBuilder: Builder<Target = Elem>,
+        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
+        // empty type on to/from methods.
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+        Gen: FnMut(Memo) -> ElemBuilder,
+    {
+        // TODO: Is there more of this we can factor out between `Reference` and
+        // `GetState`?
+        let element = generate(self.0.clone()).build().into();
+        let dom_element = element.dom_element.clone();
+
+        element.set_parents(self.data());
+        self.0.0.borrow_mut().elements.push(element);
+        EFFECT_QUEUE.with(|effect_queue| {
+            effect_queue
+                .borrow_mut()
+                .push(Box::new(Rc::downgrade(self.data())))
+        });
+
+        Element {
+            dom_element,
+            states: vec![self.data().clone()],
+            event_callbacks: Vec::new(),
+        }
+        .into()
+    }
+
+    fn data(&self) -> &Rc<RefCell<MemoData>> { &self.0.0 }
+}
+
+impl OwnedChild for MemoData {
+    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
+        self.parent = Some(parent);
+    }
+
+    fn dom_depth(&self) -> usize {
+        dom_depth(&self.parent)
+    }
+}
+
+impl Effect for rc::Weak<RefCell<MemoData>> {
+    fn apply(&self) {
+        todo!()
     }
 }
 
@@ -375,6 +441,10 @@ trait AnyStateUpdater {
 
 trait StateUpdater<T> {
     fn apply(&self, new_value: &T);
+}
+
+trait Effect {
+    fn apply(&self);
 }
 
 trait OwnedChild {
@@ -454,11 +524,18 @@ fn process_updates() {
             update.apply();
         }
     });
+
+    EFFECT_QUEUE.with(|effect_queue| {
+        for effect in effect_queue.take() {
+            effect.apply();
+        }
+    });
 }
 
 thread_local!(
     static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
+    static EFFECT_QUEUE: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
     static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
             process_updates();
