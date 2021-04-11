@@ -172,8 +172,6 @@ impl<T: 'static> GetState<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
-        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
-        // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
         Gen: 'static + Fn(&T) -> ElemBuilder,
@@ -184,8 +182,6 @@ impl<T: 'static> GetState<T> {
         element.set_parents(self.0.clone());
 
         let root_state = Rc::new(UpdateableElement {
-            // TODO: Somethings not right here.  We own the element and then create another Element
-            // for the same dom node below.
             element: RefCell::new(element),
             generate: move |value| generate(value).build().into(),
             phantom: PhantomData,
@@ -193,6 +189,8 @@ impl<T: 'static> GetState<T> {
 
         self.0.borrow_mut().updaters.push(root_state.clone());
 
+        // This is kind of the parent element, except we don't know about parents yet.
+        // When we add it as a child, its members will be added to the new parent.
         Element {
             dom_element,
             states: vec![self.0.clone()],
@@ -430,15 +428,10 @@ impl<T: Scopeable> Scope<T> {
     pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
-        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
-        // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
         Gen: FnMut(T) -> ElemBuilder,
     {
-        // TODO: Is there more of this we can factor out between `Reference` and
-        // `GetState`? We'd need to pass `generate` into `Scopeable::add_child` and have
-        // an associate type + accessor for `generate`s argument.
         let element = generate(self.0.clone()).build().into();
 
         let dom_element = element.dom_element.clone();
@@ -590,7 +583,6 @@ fn document() -> dom::Document {
 
 fn request_process_updates() {
     PROCESS_UPDATES.with(|process_updates| {
-        // TODO: We need to call cancel_animation_frame if we want to exit
         window()
             .request_animation_frame(process_updates.as_ref().unchecked_ref())
             .unwrap()
