@@ -6,6 +6,8 @@ pub use surfinia_core::{
     Element,
     ElementBuilder,
     GetState,
+    Memo,
+    MemoScope,
     Reference,
     SetState,
 };

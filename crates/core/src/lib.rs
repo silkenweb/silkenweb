@@ -343,6 +343,15 @@ impl Memo {
         ValueFn: FnOnce() -> Value,
     {
         let mut memo = self.0.borrow_mut();
+
+        if memo.next_memoized.is_empty() {
+            EFFECT_STACK.with(|effect_stack| {
+                effect_stack
+                    .borrow_mut()
+                    .push(Box::new(Rc::downgrade(&self.0)))
+            });
+        }
+
         let current_memos = Self::memo_map::<Key, Value>(&mut memo.current_memoized);
         let value = current_memos.remove(&key).unwrap_or_else(value_fn);
 
@@ -382,15 +391,11 @@ impl MemoScope {
         // TODO: Is there more of this we can factor out between `Reference` and
         // `GetState`?
         let element = generate(self.0.clone()).build().into();
+
         let dom_element = element.dom_element.clone();
 
         element.set_parents(self.data());
         self.0 .0.borrow_mut().elements.push(element);
-        EFFECT_QUEUE.with(|effect_queue| {
-            effect_queue
-                .borrow_mut()
-                .push(Box::new(Rc::downgrade(self.data())))
-        });
 
         Element {
             dom_element,
@@ -565,7 +570,7 @@ fn process_updates() {
         }
     });
 
-    EFFECT_QUEUE.with(|effect_queue| {
+    EFFECT_STACK.with(|effect_queue| {
         for effect in effect_queue.take() {
             effect.apply();
         }
@@ -575,7 +580,7 @@ fn process_updates() {
 thread_local!(
     static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
     static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
-    static EFFECT_QUEUE: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
+    static EFFECT_STACK: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
     static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
             process_updates();

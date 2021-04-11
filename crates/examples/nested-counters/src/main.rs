@@ -1,17 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
-
-use surfinia::{
-    button,
-    div,
-    mount,
-    use_state,
-    Builder,
-    Div,
-    DivBuilder,
-    GetState,
-    Reference,
-    SetState,
-};
+use surfinia::{button, div, mount, use_state, Builder, DivBuilder, GetState, MemoScope, SetState};
 
 fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();
@@ -24,33 +11,26 @@ fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
 }
 
 fn main() {
-    let mut child_counts = Reference::new(Rc::new(RefCell::new(HashMap::<u32, Div>::new())));
+    console_error_panic_hook::set_once();
+    let mut child_counts = MemoScope::new();
 
     mount(
         "app",
         child_counts.with(|child_counts| {
             let (count, set_count) = use_state(0);
 
-            counter(&count, &set_count).child(count.with({
-                let child_counts = child_counts.clone();
-                move |&count| {
-                    let mut counters = div();
+            counter(&count, &set_count).child(count.with(move |&count| {
+                let mut counters = div();
 
-                    for i in 0..count {
-                        let (count, set_count) = use_state(0);
+                for i in 0..count {
+                    let (count, set_count) = use_state(0);
 
-                        let child = child_counts
-                            .as_ref()
-                            .borrow_mut()
-                            .entry(i)
-                            .or_insert_with(|| counter(&count, &set_count).build())
-                            .clone();
+                    let child = child_counts.cache(i, || counter(&count, &set_count).build());
 
-                        counters = counters.child(child);
-                    }
-
-                    counters
+                    counters = counters.child(child);
                 }
+
+                counters
             }))
         }),
     );
