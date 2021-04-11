@@ -30,25 +30,27 @@ fn main() {
         "app",
         child_counts.with(|child_counts| {
             let (count, set_count) = use_state(0);
-            let child_counts = child_counts.clone();
 
-            counter(&count, &set_count).child(count.with(move |&count| {
-                let mut counters = div();
+            counter(&count, &set_count).child(count.with({
+                let child_counts = child_counts.clone();
+                move |&count| {
+                    let mut counters = div();
 
-                for i in 0..count {
-                    let (count, set_count) = use_state(0);
+                    for i in 0..count {
+                        let (count, set_count) = use_state(0);
 
-                    let child = child_counts
-                        .as_ref()
-                        .borrow_mut()
-                        .entry(i)
-                        .or_insert_with(|| counter(&count, &set_count).build())
-                        .clone();
+                        let child = child_counts
+                            .as_ref()
+                            .borrow_mut()
+                            .entry(i)
+                            .or_insert_with(|| counter(&count, &set_count).build())
+                            .clone();
 
-                    counters = counters.child(child);
+                        counters = counters.child(child);
+                    }
+
+                    counters
                 }
-
-                counters
             }))
         }),
     );
