@@ -400,7 +400,8 @@ impl<T: Scopeable> Scope<T> {
         Gen: FnMut(T) -> ElemBuilder,
     {
         // TODO: Is there more of this we can factor out between `Reference` and
-        // `GetState`?
+        // `GetState`? We'd need to pass `generate` into `Scopeable::add_child` and have
+        // an associate type + accessor for `generate`s argument.
         let element = generate(self.0.clone()).build().into();
 
         let dom_element = element.dom_element.clone();
