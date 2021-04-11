@@ -7,8 +7,8 @@ pub use surfinia_core::{
     ElementBuilder,
     GetState,
     Memo,
-    MemoScope,
     Reference,
+    Scope,
     SetState,
 };
 pub use surfinia_html::{button, div, Button, ButtonBuilder, Div, DivBuilder};

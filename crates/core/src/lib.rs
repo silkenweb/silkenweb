@@ -1,6 +1,6 @@
 use std::{
     any::{Any, TypeId},
-    cell::{Cell, RefCell},
+    cell::{Cell, Ref, RefCell, RefMut},
     collections::HashMap,
     hash::Hash,
     marker::PhantomData,
@@ -101,9 +101,9 @@ impl Element {
         self.dom_element.append_child(node).unwrap();
     }
 
-    fn set_parents<Parent: 'static + OwnedChild>(&self, parent: &Rc<RefCell<Parent>>) {
+    fn set_parents(&self, parent: Rc<RefCell<dyn OwnedChild>>) {
         for child in &self.states {
-            let parent = Rc::downgrade(parent);
+            let parent = Rc::downgrade(&parent);
             child.borrow_mut().set_parent(parent);
         }
     }
@@ -174,7 +174,7 @@ impl<T: 'static> GetState<T> {
         let element = generate(&self.0.borrow().current).build().into();
         let dom_element = element.dom_element.clone();
 
-        element.set_parents(&self.0);
+        element.set_parents(self.0.clone());
 
         let root_state = Rc::new(UpdateableElement {
             // TODO: Somethings not right here.  We own the element and then create another Element
@@ -268,7 +268,13 @@ impl<T: 'static> SetState<T> {
     }
 }
 
-type SharedRef<T> = Rc<RefCell<RefData<T>>>;
+pub struct Reference<T>(Rc<RefCell<RefData<T>>>);
+
+impl<T> Clone for Reference<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
 
 struct RefData<T> {
     parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
@@ -276,9 +282,7 @@ struct RefData<T> {
     value: T,
 }
 
-pub struct Reference<T>(SharedRef<T>);
-
-impl<T: 'static> Reference<T> {
+impl<T> Reference<T> {
     pub fn new(value: T) -> Self {
         Self(Rc::new(RefCell::new(RefData {
             parent: None,
@@ -287,27 +291,24 @@ impl<T: 'static> Reference<T> {
         })))
     }
 
-    pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
-    where
-        ElemBuilder: Builder<Target = Elem>,
-        // TODO: Get rid of Into<Element>. Use another trait that takes a privately constructable
-        // empty type on to/from methods.
-        Elem: Into<Element>,
-        Element: Into<Elem>,
-        Gen: FnMut(&mut T) -> ElemBuilder,
-    {
-        let element = generate(&mut self.0.borrow_mut().value).build().into();
-        let dom_element = element.dom_element.clone();
+    pub fn borrow(&self) -> Ref<T> {
+        Ref::map(self.0.borrow(), |x| &x.value)
+    }
 
-        element.set_parents(&self.0);
+    pub fn borrow_mut(&self) -> RefMut<T> {
+        RefMut::map(self.0.borrow_mut(), |x| &mut x.value)
+    }
+
+    // TODO: Other method proxies from RefCell
+}
+
+impl<T: 'static> Scopeable for Reference<T> {
+    fn add_child(&mut self, element: Element) {
         self.0.borrow_mut().elements.push(element);
+    }
 
-        Element {
-            dom_element,
-            states: vec![self.0.clone()],
-            event_callbacks: Vec::new(),
-        }
-        .into()
+    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>> {
+        self.0.clone()
     }
 }
 
@@ -361,6 +362,16 @@ impl Memo {
     }
 }
 
+impl Scopeable for Memo {
+    fn add_child(&mut self, element: Element) {
+        self.0.borrow_mut().elements.push(element);
+    }
+
+    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>> {
+        self.0.clone()
+    }
+}
+
 type AnyMap = HashMap<(TypeId, TypeId), Box<dyn Any>>;
 
 #[derive(Default)]
@@ -372,11 +383,11 @@ struct MemoData {
 }
 
 #[derive(Default)]
-pub struct MemoScope(Memo);
+pub struct Scope<T>(T);
 
-impl MemoScope {
-    pub fn new() -> Self {
-        Self::default()
+impl<T: Scopeable> Scope<T> {
+    pub fn new(value: T) -> Self {
+        Self(value)
     }
 
     pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
@@ -386,7 +397,7 @@ impl MemoScope {
         // empty type on to/from methods.
         Elem: Into<Element>,
         Element: Into<Elem>,
-        Gen: FnMut(Memo) -> ElemBuilder,
+        Gen: FnMut(T) -> ElemBuilder,
     {
         // TODO: Is there more of this we can factor out between `Reference` and
         // `GetState`?
@@ -394,19 +405,15 @@ impl MemoScope {
 
         let dom_element = element.dom_element.clone();
 
-        element.set_parents(self.data());
-        self.0 .0.borrow_mut().elements.push(element);
+        element.set_parents(self.0.as_child().clone());
+        self.0.add_child(element);
 
         Element {
             dom_element,
-            states: vec![self.data().clone()],
+            states: vec![self.0.as_child().clone()],
             event_callbacks: Vec::new(),
         }
         .into()
-    }
-
-    fn data(&self) -> &Rc<RefCell<MemoData>> {
-        &self.0 .0
     }
 }
 
@@ -478,6 +485,12 @@ impl<T: 'static> AnyStateUpdater for SetState<T> {
     }
 }
 
+pub trait Scopeable: Clone {
+    fn add_child(&mut self, element: Element);
+
+    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>>;
+}
+
 trait AnyStateUpdater {
     fn dom_depth(&self) -> usize;
 
@@ -492,7 +505,7 @@ trait Effect {
     fn apply(&self);
 }
 
-trait OwnedChild {
+pub trait OwnedChild {
     fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>);
 
     fn dom_depth(&self) -> usize;

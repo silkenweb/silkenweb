@@ -1,4 +1,16 @@
-use surfinia::{button, div, mount, use_state, Builder, DivBuilder, GetState, MemoScope, SetState};
+use surfinia::{
+    button,
+    div,
+    mount,
+    use_state,
+    Builder,
+    DivBuilder,
+    GetState,
+    Memo,
+    Reference,
+    Scope,
+    SetState,
+};
 
 fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();
@@ -12,26 +24,32 @@ fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let mut child_counts = MemoScope::new();
+    let mut child_counts = Scope::new(Memo::default());
+    let mut call_count = Scope::new(Reference::new(0));
 
     mount(
         "app",
-        child_counts.with(|child_counts| {
-            let (count, set_count) = use_state(0);
+        call_count.with(|call_count| {
+            child_counts.with(|child_counts| {
+                let (count, set_count) = use_state(0);
+                let call_count = call_count.clone();
 
-            counter(&count, &set_count).child(count.with(move |&count| {
-                let mut counters = div();
+                counter(&count, &set_count).child(count.with(move |&count| {
+                    *call_count.borrow_mut() += 1;
+                    web_log::println!("Call count = {}", call_count.borrow());
 
-                for i in 0..count {
-                    let (count, set_count) = use_state(0);
+                    let mut counters = div();
 
-                    let child = child_counts.cache(i, || counter(&count, &set_count).build());
+                    for i in 0..count {
+                        let (count, set_count) = use_state(0);
+                        let child = child_counts.cache(i, || counter(&count, &set_count).build());
 
-                    counters = counters.child(child);
-                }
+                        counters = counters.child(child);
+                    }
 
-                counters
-            }))
+                    counters
+                }))
+            })
         }),
     );
 }
