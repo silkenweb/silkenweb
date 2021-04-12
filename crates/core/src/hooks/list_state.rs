@@ -131,7 +131,8 @@ impl<T: 'static> ListState<T> {
         if let Some(gen_elem) = self.gen_elem.as_ref() {
             for elem in new_elems {
                 // TODO: How do we remove a child? Need to remove `states` and
-                // `event_callbacks`.
+                // `event_callbacks`. We should keep the structure of children in `Element`, for
+                // removing/swapping etc.
                 let child = gen_elem(&elem);
                 // TODO: This is just a copy of the `child()` method - find a better way.
                 self.root.0.append_child(&child.dom_element);
