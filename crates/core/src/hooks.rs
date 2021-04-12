@@ -60,18 +60,18 @@ trait Effect {
 }
 
 fn queue_update(x: impl 'static + AnyStateUpdater) {
-    UPDATE_QUEUE.with(|update_queue| {
-        let len = {
+    let len = {
+        UPDATE_QUEUE.with(|update_queue| {
             let mut update_queue = update_queue.borrow_mut();
 
             update_queue.push(Box::new(x));
             update_queue.len()
-        };
+        })
+    };
 
-        if len == 1 {
-            request_process_updates();
-        }
-    });
+    if len == 1 {
+        request_process_updates();
+    }
 }
 
 fn request_process_updates() {
