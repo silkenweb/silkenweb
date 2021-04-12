@@ -33,7 +33,6 @@ impl<T: 'static> GetListState<T> {
 
         element.set_parents(self.0.clone());
 
-        // TODO: There should be only one of these (as `with` can only be called once).
         self.0.borrow_mut().gen_elem = Some(Box::new(move |value| generate(value).build().into()));
 
         // This is kind of the parent element, except we don't know about parents yet.
