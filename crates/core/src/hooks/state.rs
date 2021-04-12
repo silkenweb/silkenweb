@@ -5,13 +5,7 @@ use std::{
 };
 
 use super::queue_update;
-use crate::{
-    dom_depth,
-    hooks::{AnyStateUpdater, StateUpdater},
-    Builder,
-    Element,
-    OwnedChild,
-};
+use crate::{dom_depth, hooks::AnyStateUpdater, Builder, Element, OwnedChild};
 
 struct UpdateableElement<T, F>
 where
@@ -45,6 +39,10 @@ where
             .unwrap();
         self.element.replace(element);
     }
+}
+
+trait StateUpdater<T> {
+    fn apply(&self, new_value: &T);
 }
 
 type SharedState<T> = Rc<RefCell<State<T>>>;

@@ -51,10 +51,6 @@ trait AnyStateUpdater {
     fn apply(&self);
 }
 
-trait StateUpdater<T> {
-    fn apply(&self, new_value: &T);
-}
-
 trait Effect {
     fn apply(&self);
 }
