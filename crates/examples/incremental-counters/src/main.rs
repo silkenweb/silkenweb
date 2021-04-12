@@ -15,12 +15,15 @@ fn counter() -> DivBuilder {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (count, set_count) = use_list_state(ElementBuilder::new("div"), iter::repeat(()).take(0));
+    let (list, list_mut) = use_list_state(ElementBuilder::new("div"), iter::repeat(()).take(0));
+    let push_elem = list_mut.clone();
+    let pop_elem = list_mut;
 
     mount(
         "app",
         div()
-            .child(button().on_click(move || set_count.append(())).text("+"))
-            .child(count.with(move |()| counter())),
+        .child(button().on_click(move || push_elem.push(())).text("+"))
+        .child(button().on_click(move || pop_elem.pop()).text("-"))
+        .child(list.with(move |()| counter())),
     );
 }

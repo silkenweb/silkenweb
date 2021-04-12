@@ -28,7 +28,7 @@ impl<T: 'static> GetListState<T> {
         Element: Into<Elem>,
         Gen: 'static + Fn(&T) -> ElemBuilder,
     {
-        let element = self.0.borrow().root.clone_build();
+        let element = self.0.borrow().root.clone();
         let dom_element = element.dom_element.clone();
 
         element.set_parents(self.0.clone());
@@ -46,17 +46,21 @@ impl<T: 'static> GetListState<T> {
     }
 }
 
+enum ListUpdate<T> {
+    Push(T),
+    Pop,
+}
+
 pub struct SetListState<T> {
     state: rc::Weak<RefCell<ListState<T>>>,
-    // TODO: This should be a vec of modifications.
-    new_elems: Rc<RefCell<Vec<T>>>,
+    updates: Rc<RefCell<Vec<ListUpdate<T>>>>,
 }
 
 impl<T> Clone for SetListState<T> {
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
-            new_elems: self.new_elems.clone(),
+            updates: self.updates.clone(),
         }
     }
 }
@@ -68,15 +72,15 @@ pub fn use_list_state<T: 'static>(
     initial: impl Iterator<Item = T>,
 ) -> (GetListState<T>, SetListState<T>) {
     let state = Rc::new(RefCell::new(ListState::new(root)));
-    let new_elems: Vec<_> = initial.collect();
-    let new_elems_empty = new_elems.is_empty();
+    let updates: Vec<_> = initial.map(ListUpdate::Push).collect();
+    let updates_empty = updates.is_empty();
 
     let set_list_state = SetListState {
         state: Rc::downgrade(&state),
-        new_elems: Rc::new(RefCell::new(new_elems)),
+        updates: Rc::new(RefCell::new(updates)),
     };
 
-    if !new_elems_empty {
+    if !updates_empty {
         queue_update(set_list_state.clone());
     }
 
@@ -84,12 +88,20 @@ pub fn use_list_state<T: 'static>(
 }
 
 impl<T: 'static> SetListState<T> {
-    pub fn append(&self, new_value: T) {
-        let mut new_elems = self.new_elems.borrow_mut();
+    pub fn push(&self, new_value: T) {
+        self.push_update(ListUpdate::Push(new_value));
+    }
 
-        new_elems.push(new_value);
+    pub fn pop(&self) {
+        self.push_update(ListUpdate::Pop);
+    }
 
-        if new_elems.len() == 1 {
+    fn push_update(&self, update: ListUpdate<T>) {
+        let mut updates = self.updates.borrow_mut();
+
+        updates.push(update);
+
+        if updates.len() == 1 {
             queue_update(self.clone());
         }
     }
@@ -101,18 +113,19 @@ impl<T: 'static> AnyStateUpdater for SetListState<T> {
     }
 
     fn apply(&self) {
-        let new_elems = self.new_elems.take();
+        let updates = self.updates.take();
 
         if let Some(state) = self.state.upgrade() {
             let mut state = state.borrow_mut();
 
-            state.extend(new_elems);
+            state.apply(updates);
         }
     }
 }
 
 struct ListState<T> {
-    root: ElementBuilder,
+    root: Element,
+    children: Vec<Element>,
     gen_elem: Option<Box<dyn Fn(&T) -> Element>>,
     parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
 }
@@ -120,23 +133,38 @@ struct ListState<T> {
 impl<T: 'static> ListState<T> {
     fn new(root: ElementBuilder) -> Self {
         Self {
-            root,
+            root: root.build(),
+            children: Vec::new(),
             gen_elem: None,
             parent: None,
         }
     }
 
-    fn extend(&mut self, new_elems: Vec<T>) {
-        if let Some(gen_elem) = self.gen_elem.as_ref() {
-            for elem in new_elems {
-                // TODO: How do we remove a child? Need to remove `states` and
-                // `event_callbacks`. We should keep the structure of children in `Element`, for
-                // removing/swapping etc.
-                let child = gen_elem(&elem);
-                // TODO: This is just a copy of the `child()` method - find a better way.
-                self.root.0.append_child(&child.dom_element);
-                self.root.0.states.extend(child.states);
-                self.root.0.event_callbacks.extend(child.event_callbacks);
+    fn apply(&mut self, updates: Vec<ListUpdate<T>>) {
+        let gen_elem = match self.gen_elem.as_ref() {
+            Some(gen_elem) => gen_elem,
+            None => return,
+        };
+
+        for update in updates {
+            match update {
+                ListUpdate::Push(elem) => {
+                    let child = gen_elem(&elem);
+
+                    if let Some(parent) = self.parent.as_ref().and_then(rc::Weak::upgrade) {
+                        child.set_parents(parent);
+                    }
+
+                    self.root.append_child(&child.dom_element);
+                    self.children.push(child);
+                }
+                ListUpdate::Pop => {
+                    let child = self.children.pop().expect("List must be non-empty");
+                    self.root
+                        .dom_element
+                        .remove_child(&child.dom_element)
+                        .unwrap();
+                }
             }
         }
     }

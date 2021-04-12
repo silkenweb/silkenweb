@@ -78,10 +78,6 @@ impl ElementBuilder {
         )));
         self
     }
-
-    fn clone_build(&self) -> Element {
-        self.0.clone()
-    }
 }
 
 impl Builder for ElementBuilder {
