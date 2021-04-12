@@ -96,6 +96,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "surfinia-examples-incremental-counters"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "surfinia",
+ "web-log",
+]
+
+[[package]]
 name = "surfinia-examples-nested-counters"
 version = "0.1.0"
 dependencies = [

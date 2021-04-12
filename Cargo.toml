@@ -3,6 +3,7 @@
 members = [
     "crates/examples/counter",
     "crates/examples/nested-counters",
+    "crates/examples/incremental-counters",
     "crates/surfinia",
     "crates/html",
     "crates/core",

@@ -1,0 +1,10 @@
+[package]
+name = "surfinia-examples-incremental-counters"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+surfinia = { path = "../../surfinia" }
+console_error_panic_hook = "*"
+web-log = "*"
