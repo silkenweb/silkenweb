@@ -16,9 +16,9 @@ impl<T> OwnedChild for ListState<T> {
     }
 }
 
-type SharedState<T> = Rc<RefCell<ListState<T>>>;
+type SharedListState<T> = Rc<RefCell<ListState<T>>>;
 
-pub struct GetListState<T>(SharedState<T>);
+pub struct GetListState<T>(SharedListState<T>);
 
 impl<T: 'static> GetListState<T> {
     pub fn with<ElemBuilder, Elem, Gen>(self, generate: Gen) -> Elem
