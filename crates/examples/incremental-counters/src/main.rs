@@ -15,7 +15,7 @@ fn counter() -> DivBuilder {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, list_mut) = use_list_state(ElementBuilder::new("div"), iter::repeat(()).take(0));
+    let (list, list_mut) = use_list_state(ElementBuilder::new("div"), iter::repeat(()).take(10));
     let push_elem = list_mut.clone();
     let pop_elem = list_mut;
 
