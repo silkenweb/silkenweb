@@ -22,8 +22,8 @@ fn main() {
     mount(
         "app",
         div()
-        .child(button().on_click(move || push_elem.push(())).text("+"))
-        .child(button().on_click(move || pop_elem.pop()).text("-"))
-        .child(list.with(move |()| counter())),
+            .child(button().on_click(move || push_elem.push(())).text("+"))
+            .child(button().on_click(move || pop_elem.pop()).text("-"))
+            .child(list.with(move |()| counter())),
     );
 }
