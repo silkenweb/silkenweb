@@ -59,6 +59,21 @@ trait Effect {
     fn apply(&self);
 }
 
+fn queue_update(x: impl 'static + AnyStateUpdater) {
+    UPDATE_QUEUE.with(|update_queue| {
+        let len = {
+            let mut update_queue = update_queue.borrow_mut();
+
+            update_queue.push(Box::new(x));
+            update_queue.len()
+        };
+
+        if len == 1 {
+            request_process_updates();
+        }
+    });
+}
+
 fn request_process_updates() {
     PROCESS_UPDATES.with(|process_updates| {
         window()

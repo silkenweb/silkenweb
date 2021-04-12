@@ -4,9 +4,10 @@ use std::{
     rc::{self, Rc},
 };
 
+use super::queue_update;
 use crate::{
     dom_depth,
-    hooks::{request_process_updates, AnyStateUpdater, StateUpdater, UPDATE_QUEUE},
+    hooks::{AnyStateUpdater, StateUpdater},
     Builder,
     Element,
     OwnedChild,
@@ -117,7 +118,7 @@ impl<T: 'static> SetState<T> {
             .replace(Some(Box::new(|x| *x = new_value)))
             .is_none()
         {
-            self.queue_update();
+            queue_update(self.clone());
         }
     }
 
@@ -135,23 +136,27 @@ impl<T: 'static> SetState<T> {
             })));
         } else {
             self.new_state.replace(Some(Box::new(f)));
-            self.queue_update();
+            queue_update(self.clone());
         }
     }
+}
 
-    fn queue_update(&self) {
-        UPDATE_QUEUE.with(|update_queue| {
-            let len = {
-                let mut update_queue = update_queue.borrow_mut();
+impl<T: 'static> AnyStateUpdater for SetState<T> {
+    fn dom_depth(&self) -> usize {
+        self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
+    }
 
-                update_queue.push(Box::new(self.clone()));
-                update_queue.len()
-            };
+    /// # Panics
+    ///
+    /// If there is no new state with which to update.
+    fn apply(&self) {
+        let f = self.new_state.take().unwrap();
 
-            if len == 1 {
-                request_process_updates();
-            }
-        });
+        if let Some(state) = self.state.upgrade() {
+            let mut state = state.borrow_mut();
+            f(&mut state.current);
+            state.update();
+        }
     }
 }
 
@@ -173,25 +178,6 @@ impl<T: 'static> State<T> {
     fn update(&mut self) {
         for updater in &mut self.updaters {
             updater.apply(&self.current);
-        }
-    }
-}
-
-impl<T: 'static> AnyStateUpdater for SetState<T> {
-    fn dom_depth(&self) -> usize {
-        self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
-    }
-
-    /// # Panics
-    ///
-    /// If there is no new state with which to update.
-    fn apply(&self) {
-        let f = self.new_state.take().unwrap();
-
-        if let Some(state) = self.state.upgrade() {
-            let mut state = state.borrow_mut();
-            f(&mut state.current);
-            state.update();
         }
     }
 }
