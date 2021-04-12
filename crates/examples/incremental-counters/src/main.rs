@@ -1,14 +1,6 @@
 use std::iter;
 
-use surfinia::{
-    button,
-    div,
-    mount,
-    use_list_state,
-    use_state,
-    DivBuilder,
-    ElementBuilder,
-};
+use surfinia::{button, div, mount, use_list_state, use_state, DivBuilder, ElementBuilder};
 
 fn counter() -> DivBuilder {
     let (count, set_count) = use_state(0);
@@ -28,7 +20,7 @@ fn main() {
     mount(
         "app",
         div()
-        .child(button().on_click(move || set_count.append(())).text("+"))
-        .child(count.with(move |()| counter())),
+            .child(button().on_click(move || set_count.append(())).text("+"))
+            .child(count.with(move |()| counter())),
     );
 }
