@@ -68,7 +68,7 @@ impl<T: 'static> GetState<T> {
             phantom: PhantomData,
         });
 
-        self.0.borrow_mut().updaters.push(root_state.clone());
+        self.0.borrow_mut().updaters.push(root_state);
 
         // This is kind of the parent element, except we don't know about parents yet.
         // When we add it as a child, its members will be added to the new parent.
