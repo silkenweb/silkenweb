@@ -58,7 +58,7 @@ trait Effect {
 
 fn queue_update(x: impl 'static + AnyStateUpdater) {
     let len = {
-        UPDATE_QUEUE.with(|update_queue| {
+        PENDING_EFFECTS.with(|update_queue| {
             let mut update_queue = update_queue.borrow_mut();
 
             update_queue.push(Box::new(x));
@@ -72,7 +72,7 @@ fn queue_update(x: impl 'static + AnyStateUpdater) {
 }
 
 fn request_process_updates() {
-    PROCESS_UPDATES.with(|process_updates| {
+    ON_ANIMATION_FRAME.with(|process_updates| {
         window()
             .request_animation_frame(process_updates.as_ref().unchecked_ref())
             .unwrap()
@@ -80,7 +80,7 @@ fn request_process_updates() {
 }
 
 fn process_updates() {
-    UPDATE_QUEUE.with(|update_queue| {
+    PENDING_EFFECTS.with(|update_queue| {
         let mut update_queue = update_queue.take();
 
         if update_queue.len() != 1 {
@@ -102,7 +102,7 @@ fn process_updates() {
         }
     });
 
-    EFFECT_STACK.with(|effect_queue| {
+    PENDING_UPDATES.with(|effect_queue| {
         for effect in effect_queue.take() {
             effect.apply();
         }
@@ -110,9 +110,9 @@ fn process_updates() {
 }
 
 thread_local!(
-    static UPDATE_QUEUE: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
-    static EFFECT_STACK: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
-    static PROCESS_UPDATES: Closure<dyn FnMut(JsValue)> =
+    static PENDING_EFFECTS: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
+    static PENDING_UPDATES: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
+    static ON_ANIMATION_FRAME: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
             process_updates();
         }));

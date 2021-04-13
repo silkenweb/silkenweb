@@ -9,7 +9,7 @@ use std::{
 
 use crate::{
     dom_depth,
-    hooks::{Effect, Scopeable, EFFECT_STACK},
+    hooks::{Effect, Scopeable, PENDING_UPDATES},
     Element,
     OwnedChild,
 };
@@ -38,7 +38,7 @@ impl Memo {
         let mut memo = self.0.borrow_mut();
 
         if memo.next_memoized.is_empty() {
-            EFFECT_STACK.with(|effect_stack| {
+            PENDING_UPDATES.with(|effect_stack| {
                 effect_stack
                     .borrow_mut()
                     .push(Box::new(Rc::downgrade(&self.0)))
