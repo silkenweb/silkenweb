@@ -1,9 +1,12 @@
 // pub mod list_state;
-// pub mod memo;
+pub mod memo;
 // pub mod reference;
 pub mod state;
 
-use std::{cell::{Ref, RefCell}, rc::{self, Rc}};
+use std::{
+    cell::RefCell,
+    rc::{self, Rc},
+};
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
@@ -24,7 +27,7 @@ impl<T: Scopeable> Scope<T> {
         Element: Into<Elem>,
         Gen: 'static + Fn(&T::Item) -> ElemBuilder,
     {
-        let element = generate(&self.0.item()).build().into();
+        let element = self.0.generate(|scoped| generate(scoped).build().into());
 
         // TODO: What happens when we nest `with` calls on the same element. e.g.
         // parent.with(|x| child.with(|x| ...))? Replacing the generator should work Ok.
@@ -40,7 +43,7 @@ impl<T: Scopeable> Scope<T> {
 pub trait Scopeable {
     type Item;
 
-    fn item(&self) -> Ref<Self::Item>;
+    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element;
 
     fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<ElementData>>, mk_elem: F)
     where

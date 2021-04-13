@@ -7,10 +7,7 @@ use std::{
     rc::{self, Rc},
 };
 
-use crate::{
-    hooks::{Effect, Scopeable, PENDING_EFFECTS},
-    Element,
-};
+use crate::{Element, ElementData, hooks::{Effect, Scopeable, PENDING_EFFECTS}};
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -53,19 +50,10 @@ impl Memo {
 }
 
 impl Scopeable for Memo {
-    
-    fn add_child(&mut self, element: Element) {
-        self.0.borrow_mut().elements.push(element);
-    }
-
-    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>> {
-        self.0.clone()
-    }
-
     type Item = Self;
 
-    fn item(&self) -> std::cell::Ref<Self::Item> {
-        todo!()
+    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
+        f(&self)
     }
 
     fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, mk_elem: F)
@@ -79,20 +67,10 @@ type AnyMap = HashMap<(TypeId, TypeId), Box<dyn Any>>;
 
 #[derive(Default)]
 struct MemoData {
-    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
+    parent: Option<rc::Weak<RefCell<ElementData>>>,
     elements: Vec<Element>,
     current_memoized: AnyMap,
     next_memoized: AnyMap,
-}
-
-impl OwnedChild for MemoData {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
-        self.parent = Some(parent);
-    }
-
-    fn dom_depth(&self) -> usize {
-        dom_depth(&self.parent)
-    }
 }
 
 impl Effect for rc::Weak<RefCell<MemoData>> {

@@ -14,8 +14,9 @@ pub struct GetState<T>(SharedState<T>);
 impl<T: 'static> Scopeable for GetState<T> {
     type Item = T;
 
-    fn item(&self) -> Ref<Self::Item> {
-        Ref::map(self.0.borrow(), |s| &s.current)
+
+    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
+        f(&self.0.borrow().current)
     }
 
     fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, generate: F)
