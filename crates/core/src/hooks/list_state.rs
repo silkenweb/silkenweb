@@ -4,7 +4,7 @@ use std::{
 };
 
 use super::queue_update;
-use crate::{dom_depth, hooks::AnyStateUpdater, Builder, Element, ElementBuilder, OwnedChild};
+use crate::{dom_depth, hooks::Update, Builder, Element, ElementBuilder, OwnedChild};
 
 impl<T> OwnedChild for ListState<T> {
     fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
@@ -107,7 +107,7 @@ impl<T: 'static> SetListState<T> {
     }
 }
 
-impl<T: 'static> AnyStateUpdater for SetListState<T> {
+impl<T: 'static> Update for SetListState<T> {
     fn dom_depth(&self) -> usize {
         self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
     }

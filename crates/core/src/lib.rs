@@ -7,9 +7,8 @@
 pub mod hooks;
 
 use std::{
-    cell::RefCell,
+    cell::{Ref, RefCell, RefMut},
     collections::HashMap,
-    mem,
     rc::{self, Rc},
 };
 
@@ -18,14 +17,13 @@ use web_sys as dom;
 
 pub fn mount(id: &str, elem: impl Into<Element>) {
     let elem = elem.into();
-    let dom_element = elem.dom_element.clone();
-    APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 
     document()
         .get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .append_child(&dom_element)
+        .append_child(&elem.0.borrow().dom_element)
         .unwrap();
+    APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
 pub fn unmount(id: &str) {
@@ -40,27 +38,30 @@ pub struct ElementBuilder(Element);
 
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
-        ElementBuilder(Element {
+        ElementBuilder(Element(Rc::new(RefCell::new(ElementData {
             dom_element: document().create_element(tag.as_ref()).unwrap(),
-            states: Vec::new(),
+            parent: None,
+            children: Vec::new(),
             event_callbacks: Vec::new(),
-        })
+            generate: None,
+        }))))
     }
 
     pub fn attribute(self, name: impl AsRef<str>, value: impl AsRef<str>) -> Self {
         self.0
-            .dom_element
+            .dom_element()
             .set_attribute(name.as_ref(), value.as_ref())
             .unwrap();
         self
     }
 
-    pub fn child(mut self, child: impl Into<Element>) -> Self {
+    pub fn child(self, child: impl Into<Element>) -> Self {
+        // TODO: Optimize out unneccessary children?
         let child = child.into();
 
-        self.0.append_child(&child.dom_element);
-        self.0.states.extend(child.states);
-        self.0.event_callbacks.extend(child.event_callbacks);
+        self.0.append_child(&child.dom_element());
+        child.data_mut().parent = Some(Rc::downgrade(&self.0 .0));
+        self.0.data_mut().children.push(child);
         self
     }
 
@@ -70,12 +71,14 @@ impl ElementBuilder {
         self
     }
 
-    pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
-        self.0.event_callbacks.push(Rc::new(EventCallback::new(
-            self.0.dom_element.clone(),
-            name,
-            f,
-        )));
+    pub fn on(self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+        {
+            let mut data = self.0.data_mut();
+            let dom_element = data.dom_element.clone();
+            data.event_callbacks
+                .push(Rc::new(EventCallback::new(dom_element, name, f)));
+        }
+
         self
     }
 }
@@ -95,24 +98,43 @@ impl From<ElementBuilder> for Element {
 }
 
 #[derive(Clone)]
-pub struct Element {
+pub struct Element(Rc<RefCell<ElementData>>);
+
+pub struct ElementData {
     dom_element: dom::Element,
-    states: Vec<Rc<RefCell<dyn OwnedChild>>>,
+    parent: Option<rc::Weak<RefCell<ElementData>>>,
+    children: Vec<Element>,
     event_callbacks: Vec<Rc<EventCallback>>,
+    generate: Option<Box<dyn MkElem>>,
+}
+
+impl ElementData {
+    fn dom_depth(&self) -> usize {
+        self.parent
+            .as_ref()
+            .map_or(0, |p| 1 + p.upgrade().unwrap().borrow().dom_depth())
+    }
+}
+
+trait MkElem {
+    fn mk_elem(&self) -> Element;
 }
 
 impl Element {
     fn append_child(&self, node: &dom::Node) {
-        self.dom_element.append_child(node).unwrap();
+        self.dom_element().append_child(node).unwrap();
     }
 
-    fn set_parents(&self, parent: Rc<RefCell<dyn OwnedChild>>) {
-        for child in &self.states {
-            let parent = Rc::downgrade(&parent);
-            child.borrow_mut().set_parent(parent);
-        }
+    fn dom_element(&self) -> Ref<dom::Element> {
+        Ref::map(self.data(), |e| &e.dom_element)
+    }
 
-        mem::drop(parent)
+    fn data(&self) -> Ref<ElementData> {
+        self.0.borrow()
+    }
+
+    fn data_mut(&self) -> RefMut<ElementData> {
+        self.0.as_ref().borrow_mut()
     }
 }
 
@@ -162,17 +184,8 @@ impl Drop for EventCallback {
     }
 }
 
-fn dom_depth(parent: &Option<rc::Weak<RefCell<dyn OwnedChild>>>) -> usize {
-    parent
-        .as_ref()
-        .and_then(rc::Weak::upgrade)
-        .map_or(0, |p| p.borrow().dom_depth() + 1)
-}
-
-pub trait OwnedChild {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>);
-
-    fn dom_depth(&self) -> usize;
+pub trait Dependent {
+    fn set_parent(&mut self, parent: rc::Weak<RefCell<ElementData>>);
 }
 
 fn window() -> dom::Window {

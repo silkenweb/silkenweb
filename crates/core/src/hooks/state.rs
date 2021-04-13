@@ -1,83 +1,87 @@
 use std::{
-    cell::{Cell, RefCell},
-    marker::PhantomData,
+    cell::{Cell, Ref, RefCell},
+    mem,
     rc::{self, Rc},
 };
 
-use super::queue_update;
-use crate::{dom_depth, hooks::AnyStateUpdater, Builder, Element, OwnedChild};
-
-struct UpdateableElement<T, F>
-where
-    F: Fn(&T) -> Element,
-{
-    element: RefCell<Element>,
-    generate: F,
-    phantom: PhantomData<T>,
-}
-
-impl<T> OwnedChild for State<T> {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
-        self.parent = Some(parent);
-    }
-
-    fn dom_depth(&self) -> usize {
-        dom_depth(&self.parent)
-    }
-}
-
-impl<T, F> StateUpdater<T> for UpdateableElement<T, F>
-where
-    F: Fn(&T) -> Element,
-{
-    fn apply(&self, new_value: &T) {
-        let element = (self.generate)(new_value);
-        self.element
-            .borrow()
-            .dom_element
-            .replace_with_with_node_1(&element.dom_element)
-            .unwrap();
-        self.element.replace(element);
-    }
-}
-
-trait StateUpdater<T> {
-    fn apply(&self, new_value: &T);
-}
+use super::{queue_update, Scope, Scopeable};
+use crate::{hooks::Update, Element, ElementData, MkElem};
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
 
 pub struct GetState<T>(SharedState<T>);
 
-impl<T: 'static> GetState<T> {
-    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
+impl<T: 'static> Scopeable for GetState<T> {
+    type Item = T;
+
+    fn item(&self) -> Ref<Self::Item> {
+        Ref::map(self.0.borrow(), |s| &s.current)
+    }
+
+    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, generate: F)
     where
-        ElemBuilder: Builder<Target = Elem>,
-        Elem: Into<Element>,
-        Element: Into<Elem>,
-        Gen: 'static + Fn(&T) -> ElemBuilder,
+        F: 'static + Fn(&Self::Item) -> Element,
     {
-        let element = generate(&self.0.borrow().current).build().into();
-        let dom_element = element.dom_element.clone();
-
-        element.set_parents(self.0.clone());
-
-        let root_state = Rc::new(UpdateableElement {
-            element: RefCell::new(element),
-            generate: move |value| generate(value).build().into(),
-            phantom: PhantomData,
-        });
-
-        self.0.borrow_mut().updaters.push(root_state);
-
-        // This is kind of the parent element, except we don't know about parents yet.
-        // When we add it as a child, its members will be added to the new parent.
-        Element {
-            dom_element,
-            states: vec![self.0.clone()],
-            event_callbacks: Vec::new(),
+        if let Some(p) = parent.upgrade() {
+            p.borrow_mut().generate = Some(Box::new(UpdateElement {
+                state: self.0.clone(),
+                generate,
+            }))
         }
-        .into()
+
+        self.0.borrow_mut().parents.push(parent);
+    }
+}
+
+struct UpdateElement<T, F>
+where
+    F: Fn(&T) -> Element,
+{
+    state: SharedState<T>,
+    generate: F,
+}
+
+impl<T, F> MkElem for UpdateElement<T, F>
+where
+    F: Fn(&T) -> Element,
+{
+    fn mk_elem(&self) -> Element {
+        (self.generate)(&self.state.borrow().current)
+    }
+}
+
+struct StateUpdate<T> {
+    state: SetState<T>,
+    parent: rc::Weak<RefCell<ElementData>>,
+}
+
+impl<T> Update for StateUpdate<T> {
+    fn parent(&self) -> &rc::Weak<RefCell<ElementData>> {
+        &self.parent
+    }
+
+    fn apply(&self) {
+        if let Some(f) = self.state.new_state.take() {
+            if let Some(state) = self.state.state.upgrade() {
+                f(&mut state.borrow_mut().current);
+            }
+        }
+
+        if let Some(parent) = self.parent.upgrade() {
+            let mut parent = parent.borrow_mut();
+            let element = parent.generate.as_ref().unwrap().mk_elem();
+            parent
+                .dom_element
+                .replace_with_with_node_1(&element.dom_element())
+                .unwrap();
+
+            let element = element.data();
+            // TODO: There must be a tidier way to write this (and the entire `apply`
+            // function).
+            parent.dom_element = element.dom_element.clone();
+            parent.children = element.children.clone();
+            parent.event_callbacks = element.event_callbacks.clone();
+        }
     }
 }
 
@@ -97,11 +101,11 @@ impl<T> Clone for SetState<T> {
     }
 }
 
-pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
+pub fn use_state<T: 'static>(init: T) -> (Scope<GetState<T>>, SetState<T>) {
     let state = Rc::new(RefCell::new(State::new(init)));
 
     (
-        GetState(state.clone()),
+        Scope(GetState(state.clone())),
         SetState {
             state: Rc::downgrade(&state),
             new_state: Rc::new(Cell::new(None)),
@@ -116,7 +120,7 @@ impl<T: 'static> SetState<T> {
             .replace(Some(Box::new(|x| *x = new_value)))
             .is_none()
         {
-            queue_update(self.clone());
+            self.queue_updates();
         }
     }
 
@@ -134,48 +138,32 @@ impl<T: 'static> SetState<T> {
             })));
         } else {
             self.new_state.replace(Some(Box::new(f)));
-            queue_update(self.clone());
+            self.queue_updates();
         }
     }
-}
 
-impl<T: 'static> AnyStateUpdater for SetState<T> {
-    fn dom_depth(&self) -> usize {
-        self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
-    }
-
-    /// # Panics
-    ///
-    /// If there is no new state with which to update.
-    fn apply(&self) {
-        let f = self.new_state.take().unwrap();
-
+    fn queue_updates(&self) {
         if let Some(state) = self.state.upgrade() {
-            let mut state = state.borrow_mut();
-            f(&mut state.current);
-            state.update();
+            for parent in state.borrow().parents.iter().cloned() {
+                queue_update(StateUpdate {
+                    state: self.clone(),
+                    parent,
+                });
+            }
         }
     }
 }
 
 struct State<T> {
     current: T,
-    updaters: Vec<Rc<dyn StateUpdater<T>>>,
-    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
+    parents: Vec<rc::Weak<RefCell<ElementData>>>,
 }
 
 impl<T: 'static> State<T> {
     fn new(init: T) -> Self {
         Self {
             current: init,
-            updaters: Vec::new(),
-            parent: None,
-        }
-    }
-
-    fn update(&mut self) {
-        for updater in &mut self.updaters {
-            updater.apply(&self.current);
+            parents: Vec::new(),
         }
     }
 }

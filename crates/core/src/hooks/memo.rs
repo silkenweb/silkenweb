@@ -8,10 +8,8 @@ use std::{
 };
 
 use crate::{
-    dom_depth,
-    hooks::{Effect, Scopeable, PENDING_UPDATES},
+    hooks::{Effect, Scopeable, PENDING_EFFECTS},
     Element,
-    OwnedChild,
 };
 
 #[derive(Clone, Default)]
@@ -38,7 +36,7 @@ impl Memo {
         let mut memo = self.0.borrow_mut();
 
         if memo.next_memoized.is_empty() {
-            PENDING_UPDATES.with(|effect_stack| {
+            PENDING_EFFECTS.with(|effect_stack| {
                 effect_stack
                     .borrow_mut()
                     .push(Box::new(Rc::downgrade(&self.0)))
@@ -55,12 +53,25 @@ impl Memo {
 }
 
 impl Scopeable for Memo {
+    
     fn add_child(&mut self, element: Element) {
         self.0.borrow_mut().elements.push(element);
     }
 
     fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>> {
         self.0.clone()
+    }
+
+    type Item = Self;
+
+    fn item(&self) -> std::cell::Ref<Self::Item> {
+        todo!()
+    }
+
+    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, mk_elem: F)
+    where
+        F: 'static + Fn(&Self::Item) -> Element {
+        todo!()
     }
 }
 

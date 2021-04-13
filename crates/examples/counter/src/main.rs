@@ -1,6 +1,8 @@
 use surfinia::{button, div, mount, use_state};
 
 fn main() {
+    console_error_panic_hook::set_once();
+
     let (count, set_count) = use_state(0);
     let inc = set_count.clone();
     let dec = set_count;

@@ -1,13 +1,13 @@
-pub mod list_state;
-pub mod memo;
-pub mod reference;
+// pub mod list_state;
+// pub mod memo;
+// pub mod reference;
 pub mod state;
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::{Ref, RefCell}, rc::{self, Rc}};
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
-use crate::{window, Builder, Element, OwnedChild};
+use crate::{window, Builder, Element, ElementData};
 
 #[derive(Default)]
 pub struct Scope<T>(T);
@@ -17,37 +17,38 @@ impl<T: Scopeable> Scope<T> {
         Self(value)
     }
 
-    pub fn with<ElemBuilder, Elem, Gen>(&mut self, mut generate: Gen) -> Elem
+    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
         ElemBuilder: Builder<Target = Elem>,
         Elem: Into<Element>,
         Element: Into<Elem>,
-        Gen: FnMut(T) -> ElemBuilder,
+        Gen: 'static + Fn(&T::Item) -> ElemBuilder,
     {
-        let element = generate(self.0.clone()).build().into();
+        let element = generate(&self.0.item()).build().into();
 
-        let dom_element = element.dom_element.clone();
+        // TODO: What happens when we nest `with` calls on the same element. e.g.
+        // parent.with(|x| child.with(|x| ...))? Replacing the generator should work Ok.
+        self.0
+            .link_to_parent(Rc::downgrade(&element.0), move |scoped| {
+                generate(scoped).build().into()
+            });
 
-        element.set_parents(self.0.as_child().clone());
-        self.0.add_child(element);
-
-        Element {
-            dom_element,
-            states: vec![self.0.as_child().clone()],
-            event_callbacks: Vec::new(),
-        }
-        .into()
+        element.into()
     }
 }
 
-pub trait Scopeable: Clone {
-    fn add_child(&mut self, element: Element);
+pub trait Scopeable {
+    type Item;
 
-    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>>;
+    fn item(&self) -> Ref<Self::Item>;
+
+    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<ElementData>>, mk_elem: F)
+    where
+        F: 'static + Fn(&Self::Item) -> Element;
 }
 
-trait AnyStateUpdater {
-    fn dom_depth(&self) -> usize;
+trait Update {
+    fn parent(&self) -> &rc::Weak<RefCell<ElementData>>;
 
     fn apply(&self);
 }
@@ -56,9 +57,9 @@ trait Effect {
     fn apply(&self);
 }
 
-fn queue_update(x: impl 'static + AnyStateUpdater) {
+fn queue_update(x: impl 'static + Update) {
     let len = {
-        PENDING_EFFECTS.with(|update_queue| {
+        PENDING_UPDATES.with(|update_queue| {
             let mut update_queue = update_queue.borrow_mut();
 
             update_queue.push(Box::new(x));
@@ -80,13 +81,13 @@ fn request_process_updates() {
 }
 
 fn process_updates() {
-    PENDING_EFFECTS.with(|update_queue| {
+    PENDING_UPDATES.with(|update_queue| {
         let mut update_queue = update_queue.take();
 
         if update_queue.len() != 1 {
             let mut updates_by_depth: Vec<_> = update_queue
                 .into_iter()
-                .map(|u| (u.dom_depth(), u))
+                .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(), u)))
                 .collect();
 
             updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
@@ -102,7 +103,7 @@ fn process_updates() {
         }
     });
 
-    PENDING_UPDATES.with(|effect_queue| {
+    PENDING_EFFECTS.with(|effect_queue| {
         for effect in effect_queue.take() {
             effect.apply();
         }
@@ -110,8 +111,8 @@ fn process_updates() {
 }
 
 thread_local!(
-    static PENDING_EFFECTS: RefCell<Vec<Box<dyn AnyStateUpdater>>> = RefCell::new(Vec::new());
-    static PENDING_UPDATES: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
+    static PENDING_UPDATES: RefCell<Vec<Box<dyn Update>>> = RefCell::new(Vec::new());
+    static PENDING_EFFECTS: RefCell<Vec<Box<dyn Effect>>> = RefCell::new(Vec::new());
     static ON_ANIMATION_FRAME: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
             process_updates();
