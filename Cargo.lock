@@ -120,6 +120,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "surfinia-examples-todomvc"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "surfinia",
+]
+
+[[package]]
 name = "surfinia-html"
 version = "0.1.0"
 dependencies = [

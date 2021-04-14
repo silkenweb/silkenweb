@@ -4,6 +4,7 @@ members = [
     "crates/examples/counter",
     "crates/examples/nested-counters",
     "crates/examples/incremental-counters",
+    "crates/examples/todomvc",
     "crates/surfinia",
     "crates/html",
     "crates/core",
