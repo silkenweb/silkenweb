@@ -85,7 +85,6 @@ name = "surfinia-core"
 version = "0.1.0"
 dependencies = [
  "wasm-bindgen",
- "web-log",
  "web-sys",
 ]
 
@@ -103,7 +102,6 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "surfinia",
- "web-log",
 ]
 
 [[package]]
