@@ -11,4 +11,4 @@ pub use surfinia_core::{
     Element,
     ElementBuilder,
 };
-pub use surfinia_html::{button, div, Button, ButtonBuilder, Div, DivBuilder};
+pub use surfinia_html::{button, div, section, header, h1, input, Button, ButtonBuilder, Div, DivBuilder};
