@@ -1,26 +1,46 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{tag, Builder, Element, ElementBuilder};
 
+macro_rules! attribute {
+    ($attr:ident : bool) => {
+        pub fn $attr(self) -> Self {
+            Self(self.0.attribute(stringify!($attr), true))
+        }
+    };
+    ($attr:ident : String) => {
+        attribute!($attr: impl AsRef<str>)
+    };
+    ($attr:ident : $typ:ty) => {
+        pub fn $attr(self, value: $typ) -> Self {
+            Self(self.0.attribute(stringify!($attr), value))
+        }
+    };
+}
+
+macro_rules! attribute_list {
+    ($($attr:ident : $typ:ty),*) => {
+        $(attribute!($attr: $typ);)*
+    };
+}
+
 macro_rules! html_element {
     ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
         paste::item! {
             pub fn $name() -> [<$name:camel Builder>] {
-                [<$name: camel Builder>](HtmlElementBuilder::new(stringify!($name)))
+                [<$name: camel Builder>](tag(stringify!($name)))
             }
 
-            pub struct [<$name:camel Builder>](HtmlElementBuilder);
+            pub struct [<$name:camel Builder>](ElementBuilder);
 
             impl [<$name:camel Builder>] {
-                pub fn id(self, value: impl AsRef<str>) -> Self {
-                    Self(self.0.id(value))
-                }
+                attribute_list![id: String, class: String];
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))
                 }
 
-                pub fn on_click(self, f: impl 'static + FnMut()) -> Self {
-                    Self(self.0.on_click(f))
+                pub fn on_click(self, mut f: impl 'static + FnMut()) -> Self {
+                    Self(self.0.on("click", move |_| f()))
                 }
             }
 
@@ -110,38 +130,6 @@ html_element!(button {});
 text_parent!(button);
 categories!(button[Flow, Palpable]);
 child_categories!(button[Flow]);
-
-struct HtmlElementBuilder(ElementBuilder);
-
-impl HtmlElementBuilder {
-    pub fn new(name: impl AsRef<str>) -> Self {
-        Self(tag(name))
-    }
-
-    pub fn id(self, value: impl AsRef<str>) -> Self {
-        Self(self.0.attribute("id", value))
-    }
-
-    pub fn on_click(self, mut f: impl 'static + FnMut()) -> Self {
-        Self(self.0.on("click", move |_| f()))
-    }
-
-    pub fn text(self, child: impl AsRef<str>) -> Self {
-        Self(self.0.text(child))
-    }
-
-    pub fn child(self, c: impl Into<Element>) -> Self {
-        Self(self.0.child(c.into()))
-    }
-}
-
-impl Builder for HtmlElementBuilder {
-    type Target = Element;
-
-    fn build(self) -> Self::Target {
-        self.0.build()
-    }
-}
 
 pub trait Parent<T>: Into<Element> {}
 
