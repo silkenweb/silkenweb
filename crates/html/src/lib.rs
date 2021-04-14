@@ -4,11 +4,11 @@ use surfinia_core::{tag, Builder, Element, ElementBuilder};
 macro_rules! attribute {
     ($attr:ident : bool) => {
         pub fn $attr(self) -> Self {
-            Self(self.0.attribute(stringify!($attr), true))
+            Self(self.0.attribute(stringify!($attr), "true"))
         }
     };
     ($attr:ident : String) => {
-        attribute!($attr: impl AsRef<str>)
+        attribute!($attr: impl AsRef<str>);
     };
     ($attr:ident : $typ:ty) => {
         pub fn $attr(self, value: $typ) -> Self {
@@ -18,13 +18,13 @@ macro_rules! attribute {
 }
 
 macro_rules! attribute_list {
-    ($($attr:ident : $typ:ty),*) => {
-        $(attribute!($attr: $typ);)*
+    ($($attr:ident : $typ:tt),* $(,)?) => {
+        $(attribute!($attr : $typ);)*
     };
 }
 
 macro_rules! events {
-    ($($name:ident),*) => {
+    ($($name:ident),* $(,)?) => {
         paste::item!{
             $(
                 pub fn [<on_ $name >] (self, mut f: impl 'static + FnMut()) -> Self {
@@ -45,7 +45,7 @@ macro_rules! html_element {
             pub struct [<$name:camel Builder>](ElementBuilder);
 
             impl [<$name:camel Builder>] {
-                attribute_list![id: String, class: String];
+                attribute_list![id: String, class: String, $($attr: $typ, )*];
                 events![click];
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
@@ -154,7 +154,7 @@ categories!(h1[Flow, Heading, Palpable]);
 child_categories!(h1[Phrasing]);
 
 html_element!(input {
-    type: String,
+    r#type: String,
     placeholder: String,
     value: String,
     autofocus: bool,
@@ -162,7 +162,7 @@ html_element!(input {
 });
 categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
-html_element!(label { for: String });
+html_element!(label { r#for: String });
 text_parent!(label);
 categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
 child_categories!(label[Phrasing]);
