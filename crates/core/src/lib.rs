@@ -21,12 +21,13 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     document()
         .get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .append_child(&elem.0.borrow().dom_element)
+        .replace_with_with_node_1(&elem.0.borrow().dom_element)
         .unwrap();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
 pub fn unmount(id: &str) {
+    // TODO: Restore dom to before app was mounted
     APPS.with(|apps| apps.borrow_mut().remove(id));
 }
 
