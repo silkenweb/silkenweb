@@ -7,7 +7,10 @@ use std::{
     rc::{self, Rc},
 };
 
-use crate::{Element, ElementData, hooks::{Effect, Scopeable, PENDING_EFFECTS}};
+use crate::{
+    hooks::{Effect, Scopeable, PENDING_EFFECTS},
+    Element,
+};
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -56,10 +59,10 @@ impl Scopeable for Memo {
         f(&self)
     }
 
-    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, mk_elem: F)
+    fn link_to_parent<F>(&self, _parent: rc::Weak<RefCell<crate::ElementData>>, _mk_elem: F)
     where
-        F: 'static + Fn(&Self::Item) -> Element {
-        todo!()
+        F: 'static + Fn(&Self::Item) -> Element,
+    {
     }
 }
 
@@ -67,8 +70,6 @@ type AnyMap = HashMap<(TypeId, TypeId), Box<dyn Any>>;
 
 #[derive(Default)]
 struct MemoData {
-    parent: Option<rc::Weak<RefCell<ElementData>>>,
-    elements: Vec<Element>,
     current_memoized: AnyMap,
     next_memoized: AnyMap,
 }

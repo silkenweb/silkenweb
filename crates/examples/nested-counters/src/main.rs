@@ -7,12 +7,13 @@ use surfinia::{
     DivBuilder,
     GetState,
     Memo,
-    Reference,
+    // Reference,
     Scope,
     SetState,
 };
 
-fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
+// TODO: Find a way t say `GetState` instead of `Scope<GetState>`
+fn counter(count: &Scope<GetState<u32>>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();
     let dec = set_count.clone();
 
@@ -24,19 +25,20 @@ fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let mut child_counts = Scope::new(Memo::default());
-    let mut call_count = Scope::new(Reference::new(0));
+    let child_counts = Scope::new(Memo::default());
+    // let mut call_count = Scope::new(Reference::new(0));
 
     mount(
         "app",
-        call_count.with(|call_count| {
-            child_counts.with(|child_counts| {
+        // call_count.with(|call_count| {
+            child_counts.with(move |child_counts| {
                 let (count, set_count) = use_state(0);
-                let call_count = call_count.clone();
+                // let call_count = call_count.clone();
+                let child_counts = child_counts.clone();
 
                 counter(&count, &set_count).child(count.with(move |&count| {
-                    *call_count.borrow_mut() += 1;
-                    web_log::println!("Call count = {}", call_count.borrow());
+                    // *call_count.borrow_mut() += 1;
+                    // web_log::println!("Call count = {}", call_count.borrow());
 
                     let mut counters = div();
 
@@ -50,6 +52,6 @@ fn main() {
                     counters
                 }))
             })
-        }),
+        // }),
     );
 }
