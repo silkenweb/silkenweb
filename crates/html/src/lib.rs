@@ -1,10 +1,22 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{tag, Builder, Element, ElementBuilder};
 
+macro_rules! attr_name {
+    (for_) => {
+        "for"
+    };
+    (type_) => {
+        "type"
+    };
+    ($name:ident) => {
+        stringify!($name)
+    };
+}
+
 macro_rules! attribute {
     ($attr:ident : bool) => {
         pub fn $attr(self) -> Self {
-            Self(self.0.attribute(stringify!($attr), "true"))
+            Self(self.0.attribute(attr_name!($attr), "true"))
         }
     };
     ($attr:ident : String) => {
@@ -12,7 +24,7 @@ macro_rules! attribute {
     };
     ($attr:ident : $typ:ty) => {
         pub fn $attr(self, value: $typ) -> Self {
-            Self(self.0.attribute(stringify!($attr), value))
+            Self(self.0.attribute(attr_name!($attr), value))
         }
     };
 }
@@ -154,7 +166,7 @@ categories!(h1[Flow, Heading, Palpable]);
 child_categories!(h1[Phrasing]);
 
 html_element!(input {
-    r#type: String,
+    type_: String,
     placeholder: String,
     value: String,
     autofocus: bool,
@@ -162,7 +174,7 @@ html_element!(input {
 });
 categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
-html_element!(label { r#for: String });
+html_element!(label { for_: String });
 text_parent!(label);
 categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
 child_categories!(label[Phrasing]);
