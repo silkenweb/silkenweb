@@ -1,6 +1,5 @@
 use std::{
-    cell::{Cell, Ref, RefCell},
-    mem,
+    cell::{Cell, RefCell},
     rc::{self, Rc},
 };
 
@@ -13,7 +12,6 @@ pub struct GetState<T>(SharedState<T>);
 
 impl<T: 'static> Scopeable for GetState<T> {
     type Item = T;
-
 
     fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
         f(&self.0.borrow().current)
