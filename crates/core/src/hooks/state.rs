@@ -57,8 +57,8 @@ struct StateUpdate<T> {
 }
 
 impl<T> Update for StateUpdate<T> {
-    fn parent(&self) -> &rc::Weak<RefCell<ElementData>> {
-        &self.parent
+    fn parent(&self) -> rc::Weak<RefCell<ElementData>> {
+        self.parent.clone()
     }
 
     fn apply(&self) {

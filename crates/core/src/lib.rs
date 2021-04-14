@@ -125,6 +125,10 @@ impl Element {
         self.dom_element().append_child(node).unwrap();
     }
 
+    fn remove_child(&self, node: &dom::Node) {
+        self.dom_element().remove_child(node).unwrap();
+    }
+
     fn dom_element(&self) -> Ref<dom::Element> {
         Ref::map(self.data(), |e| &e.dom_element)
     }

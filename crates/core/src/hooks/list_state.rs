@@ -4,9 +4,21 @@ use std::{
 };
 
 use super::queue_update;
-use crate::{Builder, Element, ElementBuilder, ElementData, hooks::Update};
+use crate::{hooks::Update, Builder, Element, ElementBuilder, ElementData, MkElem};
 
-type SharedListState<T> = Rc<RefCell<ListState<T>>>;
+struct SharedListState<T>(Rc<RefCell<ListState<T>>>);
+
+impl<T> Clone for SharedListState<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<T> MkElem for SharedListState<T> {
+    fn mk_elem(&self) -> Element {
+        self.0.borrow().root.clone()
+    }
+}
 
 pub struct GetListState<T>(SharedListState<T>);
 
@@ -18,21 +30,19 @@ impl<T: 'static> GetListState<T> {
         Element: Into<Elem>,
         Gen: 'static + Fn(&T) -> ElemBuilder,
     {
-        let element = self.0.borrow().root.clone();
-        let dom_element = element.dom_element.clone();
+        let element = {
+            let mut state = self.0 .0.as_ref().borrow_mut();
+            let element = state.root.clone();
+            state.generate_child = Some(Box::new(move |scoped| generate(scoped).build().into()));
 
-        element.set_parents(self.0.clone());
+            let parent = Rc::downgrade(&element.0);
+            state.parent = Some(parent);
+            element
+        };
 
-        self.0.borrow_mut().gen_elem = Some(Box::new(move |value| generate(value).build().into()));
+        element.0.as_ref().borrow_mut().generate = Some(Box::new(self.0));
 
-        // This is kind of the parent element, except we don't know about parents yet.
-        // When we add it as a child, its members will be added to the new parent.
-        Element {
-            dom_element,
-            states: vec![self.0],
-            event_callbacks: Vec::new(),
-        }
-        .into()
+        element.into()
     }
 }
 
@@ -42,7 +52,7 @@ enum ListUpdate<T> {
 }
 
 pub struct SetListState<T> {
-    state: rc::Weak<RefCell<ListState<T>>>,
+    state: SharedListState<T>,
     updates: Rc<RefCell<Vec<ListUpdate<T>>>>,
 }
 
@@ -61,12 +71,12 @@ pub fn use_list_state<T: 'static>(
     root: ElementBuilder,
     initial: impl Iterator<Item = T>,
 ) -> (GetListState<T>, SetListState<T>) {
-    let state = Rc::new(RefCell::new(ListState::new(root)));
+    let state = SharedListState(Rc::new(RefCell::new(ListState::new(root))));
     let updates: Vec<_> = initial.map(ListUpdate::Push).collect();
     let updates_empty = updates.is_empty();
 
     let set_list_state = SetListState {
-        state: Rc::downgrade(&state),
+        state: state.clone(),
         updates: Rc::new(RefCell::new(updates)),
     };
 
@@ -87,7 +97,7 @@ impl<T: 'static> SetListState<T> {
     }
 
     fn push_update(&self, update: ListUpdate<T>) {
-        let mut updates = self.updates.borrow_mut();
+        let mut updates = self.updates.as_ref().borrow_mut();
 
         updates.push(update);
 
@@ -100,20 +110,19 @@ impl<T: 'static> SetListState<T> {
 impl<T: 'static> Update for SetListState<T> {
     fn apply(&self) {
         let updates = self.updates.take();
+        self.state.0.borrow_mut().apply(updates);
+    }
 
-        if let Some(state) = self.state.upgrade() {
-            let mut state = state.borrow_mut();
-
-            state.apply(updates);
-        }
+    fn parent(&self) -> rc::Weak<RefCell<ElementData>> {
+        self.state.0.borrow().parent.as_ref().unwrap().clone()
     }
 }
 
 struct ListState<T> {
     root: Element,
     children: Vec<Element>,
-    gen_elem: Option<Box<dyn Fn(&T) -> Element>>,
-    parents: Vec<rc::Weak<RefCell<ElementData>>>,
+    generate_child: Option<Box<dyn Fn(&T) -> Element>>,
+    parent: Option<rc::Weak<RefCell<ElementData>>>,
 }
 
 impl<T: 'static> ListState<T> {
@@ -121,13 +130,13 @@ impl<T: 'static> ListState<T> {
         Self {
             root: root.build(),
             children: Vec::new(),
-            gen_elem: None,
+            generate_child: None,
             parent: None,
         }
     }
 
     fn apply(&mut self, updates: Vec<ListUpdate<T>>) {
-        let gen_elem = match self.gen_elem.as_ref() {
+        let generate_child = match self.generate_child.as_ref() {
             Some(gen_elem) => gen_elem,
             None => return,
         };
@@ -135,21 +144,16 @@ impl<T: 'static> ListState<T> {
         for update in updates {
             match update {
                 ListUpdate::Push(elem) => {
-                    let child = gen_elem(&elem);
+                    let child = generate_child(&elem);
 
-                    if let Some(parent) = self.parent.as_ref().and_then(rc::Weak::upgrade) {
-                        child.set_parents(parent);
-                    }
+                    child.0.borrow_mut().parent = Some(Rc::downgrade(&self.root.0));
 
-                    self.root.append_child(&child.dom_element);
+                    self.root.append_child(&child.dom_element());
                     self.children.push(child);
                 }
                 ListUpdate::Pop => {
                     let child = self.children.pop().expect("List must be non-empty");
-                    self.root
-                        .dom_element
-                        .remove_child(&child.dom_element)
-                        .unwrap();
+                    self.root.remove_child(&child.dom_element());
                 }
             }
         }

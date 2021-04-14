@@ -1,4 +1,4 @@
-// pub mod list_state;
+pub mod list_state;
 pub mod memo;
 pub mod reference;
 pub mod state;
@@ -10,7 +10,7 @@ use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use crate::{window, ElementData};
 
 trait Update {
-    fn parent(&self) -> &rc::Weak<RefCell<ElementData>>;
+    fn parent(&self) -> rc::Weak<RefCell<ElementData>>;
 
     fn apply(&self);
 }
