@@ -30,6 +30,8 @@ impl<T: 'static> GetState<T> {
         let parent = Rc::downgrade(&element.0);
         self.0.borrow_mut().parents.push(parent);
 
+        // TODO: If there are any pending updates, queue them for this parent.
+
         element.into()
     }
 }
