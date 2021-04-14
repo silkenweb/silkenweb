@@ -1,17 +1,17 @@
-use surfinia::{button, div, mount, use_state};
+use surfinia::{h1, header, input, mount, section};
 
 fn main() {
     console_error_panic_hook::set_once();
 
-    let (count, set_count) = use_state(0);
-    let inc = set_count.clone();
-    let dec = set_count;
-
     mount(
         "app",
-        div()
-            .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
-            .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-            .child(count.with(|i| div().text(format!("Count = {}", i)))),
+        section().class("todoapp").child(
+            header().child(h1().text("todos")).child(
+                input()
+                    .class("new-todo")
+                    .placeholder("What needs to be done?")
+                    .autofocus(),
+            ),
+        ),
     );
 }
