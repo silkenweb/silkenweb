@@ -1,15 +1,13 @@
-use surfinia::{
-    button,
-    div,
+use surfinia_core::{
+    hooks::{
+        memo::Memo,
+        reference::Reference,
+        state::{use_state, GetState, SetState},
+    },
     mount,
-    use_state,
     Builder,
-    DivBuilder,
-    GetState,
-    Memo,
-    Reference,
-    SetState,
 };
+use surfinia_html::{button, div, DivBuilder};
 
 fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();

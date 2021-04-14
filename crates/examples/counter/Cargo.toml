@@ -5,5 +5,6 @@ authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-surfinia = { path = "../../surfinia" }
+surfinia-core = { path = "../../core" }
+surfinia-html = { path = "../../html" }
 console_error_panic_hook = "0.1"

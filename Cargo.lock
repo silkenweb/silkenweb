@@ -79,14 +79,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "surfinia"
-version = "0.1.0"
-dependencies = [
- "surfinia-core",
- "surfinia-html",
-]
-
-[[package]]
 name = "surfinia-core"
 version = "0.1.0"
 dependencies = [
@@ -99,7 +91,8 @@ name = "surfinia-examples-counter"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia",
+ "surfinia-core",
+ "surfinia-html",
 ]
 
 [[package]]
@@ -107,7 +100,8 @@ name = "surfinia-examples-incremental-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia",
+ "surfinia-core",
+ "surfinia-html",
 ]
 
 [[package]]
@@ -115,7 +109,8 @@ name = "surfinia-examples-nested-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia",
+ "surfinia-core",
+ "surfinia-html",
  "web-log",
 ]
 
@@ -124,7 +119,8 @@ name = "surfinia-examples-todomvc"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia",
+ "surfinia-core",
+ "surfinia-html",
 ]
 
 [[package]]
