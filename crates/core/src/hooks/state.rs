@@ -31,6 +31,7 @@ impl<T: 'static> GetState<T> {
         self.0.borrow_mut().parents.push(parent);
 
         // TODO: If there are any pending updates, queue them for this parent.
+        // TODO: Remove null weak refs when we update parents.
 
         element.into()
     }
