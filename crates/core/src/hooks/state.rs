@@ -22,15 +22,12 @@ impl<T: 'static> GetState<T> {
 
         // TODO: What happens when we nest `with` calls on the same element. e.g.
         // parent.with(|x| child.with(|x| ...))? Replacing the generator should work Ok.
+        element.0.borrow_mut().generate = Some(Box::new(UpdateElement {
+            state: self.0.clone(),
+            generate: move |scoped| generate(scoped).build().into(),
+        }));
+
         let parent = Rc::downgrade(&element.0);
-
-        if let Some(p) = parent.upgrade() {
-            p.borrow_mut().generate = Some(Box::new(UpdateElement {
-                state: self.0.clone(),
-                generate: move |scoped| generate(scoped).build().into(),
-            }))
-        }
-
         self.0.borrow_mut().parents.push(parent);
 
         element.into()
