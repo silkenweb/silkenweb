@@ -4,7 +4,7 @@ use std::{
     rc::{self, Rc},
 };
 
-use crate::{dom_depth, hooks::Scopeable, Element, OwnedChild};
+use crate::{hooks::Scopeable, Element};
 
 pub struct Reference<T>(Rc<RefCell<RefData<T>>>);
 
@@ -17,8 +17,6 @@ impl<T> Clone for Reference<T> {
 impl<T> Reference<T> {
     pub fn new(value: T) -> Self {
         Self(Rc::new(RefCell::new(RefData {
-            parent: None,
-            elements: Vec::new(),
             value,
         })))
     }
@@ -65,26 +63,19 @@ impl<T> Reference<T> {
 }
 
 impl<T: 'static> Scopeable for Reference<T> {
-    fn add_child(&mut self, element: Element) {
-        self.0.borrow_mut().elements.push(element);
+    type Item = Self;
+
+    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
+        f(self)
     }
 
-    fn as_child(&self) -> Rc<RefCell<dyn OwnedChild>> {
-        self.0.clone()
+    fn link_to_parent<F>(&self, _parent: rc::Weak<RefCell<crate::ElementData>>, _mk_elem: F)
+    where
+        F: 'static + Fn(&Self::Item) -> Element,
+    {
     }
 }
+
 struct RefData<T> {
-    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
-    elements: Vec<Element>,
     value: T,
-}
-
-impl<T> OwnedChild for RefData<T> {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
-        self.parent = Some(parent);
-    }
-
-    fn dom_depth(&self) -> usize {
-        dom_depth(&self.parent)
-    }
 }
