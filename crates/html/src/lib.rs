@@ -23,6 +23,18 @@ macro_rules! attribute_list {
     };
 }
 
+macro_rules! events {
+    ($($name:ident),*) => {
+        paste::item!{
+            $(
+                pub fn [<on_ $name >] (self, mut f: impl 'static + FnMut()) -> Self {
+                    Self(self.0.on(stringify!($name), move |_| f()))
+                }
+            )*
+        }
+    };
+}
+
 macro_rules! html_element {
     ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
         paste::item! {
@@ -34,13 +46,10 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attribute_list![id: String, class: String];
+                events![click];
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))
-                }
-
-                pub fn on_click(self, mut f: impl 'static + FnMut()) -> Self {
-                    Self(self.0.on("click", move |_| f()))
                 }
             }
 
