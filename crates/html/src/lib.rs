@@ -106,7 +106,7 @@ macro_rules! text_parent {
 }
 
 macro_rules! categories {
-    ($name:ident [$($category:ident),* $(,)?] ) => {
+    ($name:ident [$($category:path),* $(,)?] ) => {
         paste::item! {
             // We get better error messages if we implement these traits directly for
             // builder as well as target, rather than via a blanket trait.
@@ -140,6 +140,43 @@ text_parent!(button);
 categories!(button[Flow, Palpable]);
 child_categories!(button[Flow]);
 
+html_element!(section {});
+categories!(section[Flow, Sectioning, Palpable]);
+child_categories!(section[Flow]);
+
+html_element!(header {});
+categories!(header[Flow, Palpable]);
+child_categories!(header[Flow]);
+
+html_element!(h1 {});
+text_parent!(h1);
+categories!(h1[Flow, Heading, Palpable]);
+child_categories!(h1[Phrasing]);
+
+html_element!(input {
+    type: String,
+    placeholder: String,
+    value: String,
+    autofocus: bool,
+    checked: bool,
+});
+categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
+
+html_element!(label { for: String });
+text_parent!(label);
+categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
+child_categories!(label[Phrasing]);
+
+html_element!(ul {});
+text_parent!(ul);
+categories!(ul[Flow, Palpable]);
+child_categories!(ul[Flow]); // TODO: Allowed child tags.
+
+html_element!(li {});
+text_parent!(li);
+categories!(li[Flow]);
+child_categories!(li[Flow]);
+
 pub trait Parent<T>: Into<Element> {}
 
 impl<Child, T: ParentCategory<Child> + Into<Element>> Parent<Child> for T {}
@@ -153,11 +190,18 @@ pub mod content_category {
 
     content_categories![
         Flow,
+        Heading,
         Phrasing,
         Interactive,
         Listed,
         Labelable,
         Submittable,
         Palpable,
+        Sectioning,
+        FormAssociated,
     ];
+
+    pub mod form_associated {
+        content_categories![Resettable];
+    }
 }
