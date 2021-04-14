@@ -1,142 +1,115 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{tag, Builder, Element, ElementBuilder};
 
-pub fn div() -> DivBuilder {
-    DivBuilder(HtmlElementBuilder::new("div"))
+macro_rules! html_element {
+    ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
+        paste::item! {
+            pub fn $name() -> [<$name:camel Builder>] {
+                [<$name: camel Builder>](HtmlElementBuilder::new(stringify!($name)))
+            }
+
+            pub struct [<$name:camel Builder>](HtmlElementBuilder);
+
+            impl [<$name:camel Builder>] {
+                pub fn id(self, value: impl AsRef<str>) -> Self {
+                    Self(self.0.id(value))
+                }
+
+                pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
+                    Self(self.0.child(c.into()))
+                }
+
+                pub fn on_click(self, f: impl 'static + FnMut()) -> Self {
+                    Self(self.0.on_click(f))
+                }
+            }
+
+            impl Builder for [<$name:camel Builder>] {
+                type Target = [<$name:camel>];
+
+                fn build(self) -> Self::Target {
+                    [<$name:camel>](self.0.build())
+                }
+            }
+
+            impl From<[<$name:camel Builder>]> for Element {
+                fn from(div: [<$name:camel Builder>]) -> Self {
+                    div.build().into()
+                }
+            }
+
+            #[derive(Clone)]
+            pub struct [<$name:camel>](Element);
+
+            impl Builder for [<$name:camel>] {
+                type Target = Self;
+
+                fn build(self) -> Self::Target {
+                    self
+                }
+            }
+
+            impl From<[<$name:camel>]> for Element {
+                fn from(div: [<$name:camel>]) -> Self {
+                    div.0
+                }
+            }
+
+            impl From<Element> for [<$name:camel>] {
+                fn from(elem: Element) -> Self {
+                    [<$name:camel>](elem)
+                }
+            }
+        }
+    };
 }
 
-pub struct DivBuilder(HtmlElementBuilder);
-
-impl DivBuilder {
-    pub fn id(self, value: impl AsRef<str>) -> Self {
-        Self(self.0.id(value))
-    }
-
-    pub fn text(self, child: impl AsRef<str>) -> Self {
-        Self(self.0.text(child))
-    }
-
-    pub fn child<Child: Parent<Div>>(self, c: Child) -> Self {
-        Self(self.0.child(c.into()))
-    }
+macro_rules! text_parent {
+    ($name:ident) => {
+        paste::item! {
+            impl [<$name:camel Builder>] {
+                pub fn text(self, child: impl AsRef<str>) -> Self {
+                    Self(self.0.text(child))
+                }
+            }
+        }
+    };
 }
 
-impl Builder for DivBuilder {
-    type Target = Div;
-
-    fn build(self) -> Self::Target {
-        Div(self.0.build())
-    }
-}
-
-impl From<DivBuilder> for Element {
-    fn from(div: DivBuilder) -> Self {
-        div.build().into()
-    }
-}
-
-#[derive(Clone)]
-pub struct Div(Element);
-
-impl Builder for Div {
-    type Target = Self;
-
-    fn build(self) -> Self::Target {
-        self
-    }
-}
-
-impl From<Div> for Element {
-    fn from(div: Div) -> Self {
-        div.0
-    }
-}
-
-impl From<Element> for Div {
-    fn from(elem: Element) -> Self {
-        Div(elem)
-    }
-}
-
-impl<Child: content_category::Flow> ParentCategory<Div> for Child {}
-
-impl content_category::Flow for Div {}
-impl content_category::Palpable for Div {}
-
-// TODO: Add a comment in macro as to why we don't use a blanket implementation
-// (see comment below).
-
-// We get better error messages if we implement these traits directly for
-// builder as well as target, rather than via a blanket trait.
-impl content_category::Flow for DivBuilder {}
-impl content_category::Palpable for DivBuilder {}
-
-pub fn button() -> ButtonBuilder {
-    ButtonBuilder(HtmlElementBuilder::new("button"))
-}
-
-pub struct ButtonBuilder(HtmlElementBuilder);
-
-impl ButtonBuilder {
-    pub fn id(self, value: impl AsRef<str>) -> Self {
-        Self(self.0.id(value))
-    }
-
-    pub fn text(self, child: impl AsRef<str>) -> Self {
-        Self(self.0.text(child))
-    }
-
-    pub fn child<Child: Parent<Button>>(self, c: Child) -> Self {
-        Self(self.0.child(c.into()))
-    }
-
-    pub fn on_click(self, f: impl 'static + FnMut()) -> Self {
-        Self(self.0.on_click(f))
+macro_rules! categories {
+    ($name:ident [$($category:ident),* $(,)?] ) => {
+        paste::item! {
+            // We get better error messages if we implement these traits directly for
+            // builder as well as target, rather than via a blanket trait.
+            $(
+                impl content_category::$category for [<$name:camel>] {}
+                impl content_category::$category for [<$name:camel Builder>] {}
+            )*
+        }
     }
 }
 
-impl Builder for ButtonBuilder {
-    type Target = Button;
-
-    fn build(self) -> Self::Target {
-        Button(self.0.build())
+macro_rules! child_categories {
+    ($name:ident [$($category:ident),* $(,)?] ) => {
+        paste::item! {
+            // We get better error messages if we implement these traits directly for
+            // builder as well as target, rather than via a blanket trait.
+            $(
+                impl<Child: content_category::$category> ParentCategory<[<$name:camel>]> for Child {}
+            )*
+        }
     }
 }
 
-impl From<ButtonBuilder> for Element {
-    fn from(div: ButtonBuilder) -> Self {
-        div.build().into()
-    }
-}
+html_element!(div {});
+text_parent!(div);
+categories!(div[Flow, Palpable]);
+child_categories!(div[Flow]);
 
-pub struct Button(Element);
-
-impl Builder for Button {
-    type Target = Self;
-
-    fn build(self) -> Self::Target {
-        self
-    }
-}
-
-impl From<Button> for Element {
-    fn from(button: Button) -> Self {
-        button.0
-    }
-}
-
-impl From<Element> for Button {
-    fn from(elem: Element) -> Self {
-        Button(elem)
-    }
-}
-
-impl<Child: content_category::Flow> ParentCategory<Button> for Child {}
-
-impl content_category::Flow for Button {}
-impl content_category::Palpable for Button {}
-impl content_category::Flow for ButtonBuilder {}
-impl content_category::Palpable for ButtonBuilder {}
+html_element!(button {});
+text_parent!(button);
+categories!(button[Flow, Palpable]);
+child_categories!(button[Flow]);
 
 struct HtmlElementBuilder(ElementBuilder);
 
@@ -181,7 +154,7 @@ pub mod content_category {
         ($($name:ident),* $(,)?) => { $(pub trait $name {})* }
     }
 
-    content_categories!(
+    content_categories![
         Flow,
         Phrasing,
         Interactive,
@@ -189,5 +162,5 @@ pub mod content_category {
         Labelable,
         Submittable,
         Palpable,
-    );
+    ];
 }
