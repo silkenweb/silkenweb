@@ -74,12 +74,12 @@ impl<T> Update for StateUpdate<T> {
                 .replace_with_with_node_1(&element.dom_element())
                 .unwrap();
 
-            let element = element.data();
+            let element = Rc::try_unwrap(element.0).ok().unwrap().into_inner();
             // TODO: There must be a tidier way to write this (and the entire `apply`
             // function).
-            parent.dom_element = element.dom_element.clone();
-            parent.children = element.children.clone();
-            parent.event_callbacks = element.event_callbacks.clone();
+            parent.dom_element = element.dom_element;
+            parent.children = element.children;
+            parent.event_callbacks = element.event_callbacks;
         }
     }
 }

@@ -76,7 +76,7 @@ impl ElementBuilder {
             let mut data = self.0.data_mut();
             let dom_element = data.dom_element.clone();
             data.event_callbacks
-                .push(Rc::new(EventCallback::new(dom_element, name, f)));
+                .push(EventCallback::new(dom_element, name, f));
         }
 
         self
@@ -104,7 +104,7 @@ pub struct ElementData {
     dom_element: dom::Element,
     parent: Option<rc::Weak<RefCell<ElementData>>>,
     children: Vec<Element>,
-    event_callbacks: Vec<Rc<EventCallback>>,
+    event_callbacks: Vec<EventCallback>,
     generate: Option<Box<dyn MkElem>>,
 }
 
