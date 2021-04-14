@@ -4,17 +4,7 @@ use std::{
 };
 
 use super::queue_update;
-use crate::{dom_depth, hooks::Update, Builder, Element, ElementBuilder, OwnedChild};
-
-impl<T> OwnedChild for ListState<T> {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<dyn OwnedChild>>) {
-        self.parent = Some(parent);
-    }
-
-    fn dom_depth(&self) -> usize {
-        dom_depth(&self.parent)
-    }
-}
+use crate::{Builder, Element, ElementBuilder, ElementData, hooks::Update};
 
 type SharedListState<T> = Rc<RefCell<ListState<T>>>;
 
@@ -108,10 +98,6 @@ impl<T: 'static> SetListState<T> {
 }
 
 impl<T: 'static> Update for SetListState<T> {
-    fn dom_depth(&self) -> usize {
-        self.state.upgrade().map_or(0, |s| s.borrow().dom_depth())
-    }
-
     fn apply(&self) {
         let updates = self.updates.take();
 
@@ -127,7 +113,7 @@ struct ListState<T> {
     root: Element,
     children: Vec<Element>,
     gen_elem: Option<Box<dyn Fn(&T) -> Element>>,
-    parent: Option<rc::Weak<RefCell<dyn OwnedChild>>>,
+    parents: Vec<rc::Weak<RefCell<ElementData>>>,
 }
 
 impl<T: 'static> ListState<T> {

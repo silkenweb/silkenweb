@@ -4,7 +4,6 @@ pub use surfinia_core::{
         memo::Memo,
         reference::Reference,
         state::{use_state, GetState, SetState},
-        Scope,
     },
     mount,
     tag,

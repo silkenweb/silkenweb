@@ -3,52 +3,11 @@ pub mod memo;
 pub mod reference;
 pub mod state;
 
-use std::{
-    cell::RefCell,
-    rc::{self, Rc},
-};
+use std::{cell::RefCell, rc};
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
-use crate::{window, Builder, Element, ElementData};
-
-#[derive(Default)]
-pub struct Scope<T>(T);
-
-impl<T: Scopeable> Scope<T> {
-    pub fn new(value: T) -> Self {
-        Self(value)
-    }
-
-    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
-    where
-        ElemBuilder: Builder<Target = Elem>,
-        Elem: Into<Element>,
-        Element: Into<Elem>,
-        Gen: 'static + Fn(&T::Item) -> ElemBuilder,
-    {
-        let element = self.0.generate(|scoped| generate(scoped).build().into());
-
-        // TODO: What happens when we nest `with` calls on the same element. e.g.
-        // parent.with(|x| child.with(|x| ...))? Replacing the generator should work Ok.
-        self.0
-            .link_to_parent(Rc::downgrade(&element.0), move |scoped| {
-                generate(scoped).build().into()
-            });
-
-        element.into()
-    }
-}
-
-pub trait Scopeable {
-    type Item;
-
-    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element;
-
-    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<ElementData>>, mk_elem: F)
-    where
-        F: 'static + Fn(&Self::Item) -> Element;
-}
+use crate::{window, ElementData};
 
 trait Update {
     fn parent(&self) -> &rc::Weak<RefCell<ElementData>>;

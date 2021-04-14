@@ -3,32 +3,37 @@ use std::{
     rc::{self, Rc},
 };
 
-use super::{queue_update, Scope, Scopeable};
-use crate::{hooks::Update, Element, ElementData, MkElem};
+use super::queue_update;
+use crate::{hooks::Update, Builder, Element, ElementData, MkElem};
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
 
 pub struct GetState<T>(SharedState<T>);
 
-impl<T: 'static> Scopeable for GetState<T> {
-    type Item = T;
-
-    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
-        f(&self.0.borrow().current)
-    }
-
-    fn link_to_parent<F>(&self, parent: rc::Weak<RefCell<crate::ElementData>>, generate: F)
+impl<T: 'static> GetState<T> {
+    pub fn with<ElemBuilder, Elem, Gen>(&self, generate: Gen) -> Elem
     where
-        F: 'static + Fn(&Self::Item) -> Element,
+        ElemBuilder: Builder<Target = Elem>,
+        Elem: Into<Element>,
+        Element: Into<Elem>,
+        Gen: 'static + Fn(&T) -> ElemBuilder,
     {
+        let element = generate(&self.0.borrow().current).build().into();
+
+        // TODO: What happens when we nest `with` calls on the same element. e.g.
+        // parent.with(|x| child.with(|x| ...))? Replacing the generator should work Ok.
+        let parent = Rc::downgrade(&element.0);
+
         if let Some(p) = parent.upgrade() {
             p.borrow_mut().generate = Some(Box::new(UpdateElement {
                 state: self.0.clone(),
-                generate,
+                generate: move |scoped| generate(scoped).build().into(),
             }))
         }
 
         self.0.borrow_mut().parents.push(parent);
+
+        element.into()
     }
 }
 
@@ -100,11 +105,11 @@ impl<T> Clone for SetState<T> {
     }
 }
 
-pub fn use_state<T: 'static>(init: T) -> (Scope<GetState<T>>, SetState<T>) {
+pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
     let state = Rc::new(RefCell::new(State::new(init)));
 
     (
-        Scope(GetState(state.clone())),
+        GetState(state.clone()),
         SetState {
             state: Rc::downgrade(&state),
             new_state: Rc::new(Cell::new(None)),

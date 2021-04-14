@@ -8,12 +8,10 @@ use surfinia::{
     GetState,
     Memo,
     Reference,
-    Scope,
     SetState,
 };
 
-// TODO: Find a way t say `GetState` instead of `Scope<GetState>`
-fn counter(count: &Scope<GetState<u32>>, set_count: &SetState<u32>) -> DivBuilder {
+fn counter(count: &GetState<u32>, set_count: &SetState<u32>) -> DivBuilder {
     let inc = set_count.clone();
     let dec = set_count.clone();
 
