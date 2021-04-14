@@ -62,8 +62,8 @@ macro_rules! html_element {
             }
 
             impl From<[<$name:camel Builder>]> for Element {
-                fn from(div: [<$name:camel Builder>]) -> Self {
-                    div.build().into()
+                fn from(builder: [<$name:camel Builder>]) -> Self {
+                    builder.build().into()
                 }
             }
 
@@ -79,8 +79,8 @@ macro_rules! html_element {
             }
 
             impl From<[<$name:camel>]> for Element {
-                fn from(div: [<$name:camel>]) -> Self {
-                    div.0
+                fn from(html_elem: [<$name:camel>]) -> Self {
+                    html_elem.0
                 }
             }
 
