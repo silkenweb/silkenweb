@@ -7,10 +7,7 @@ use std::{
     rc::{self, Rc},
 };
 
-use crate::{
-    hooks::{Effect, Scopeable, PENDING_EFFECTS},
-    Element,
-};
+use crate::hooks::{Effect, PENDING_EFFECTS};
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -49,20 +46,6 @@ impl Memo {
         let next_memos = Self::memo_map::<Key, Value>(&mut memo.next_memoized);
         next_memos.insert(key, value.clone());
         value
-    }
-}
-
-impl Scopeable for Memo {
-    type Item = Self;
-
-    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
-        f(&self)
-    }
-
-    fn link_to_parent<F>(&self, _parent: rc::Weak<RefCell<crate::ElementData>>, _mk_elem: F)
-    where
-        F: 'static + Fn(&Self::Item) -> Element,
-    {
     }
 }
 

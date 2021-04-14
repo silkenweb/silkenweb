@@ -25,35 +25,26 @@ fn counter(count: &Scope<GetState<u32>>, set_count: &SetState<u32>) -> DivBuilde
 
 fn main() {
     console_error_panic_hook::set_once();
-    let child_counts = Scope::new(Memo::default());
-    let call_count = Scope::new(Reference::new(0));
+    let child_counts = Memo::default();
+    let call_count = Reference::new(0);
+    let (count, set_count) = use_state(0);
 
     mount(
         "app",
-        call_count.with(move |call_count| {
-            let call_count = call_count.clone();
+        counter(&count, &set_count).child(count.with(move |&count| {
+            *call_count.borrow_mut() += 1;
+            web_log::println!("Call count = {}", call_count.borrow());
 
-            child_counts.with(move |child_counts| {
+            let mut counters = div();
+
+            for i in 0..count {
                 let (count, set_count) = use_state(0);
-                let call_count = call_count.clone();
-                let child_counts = child_counts.clone();
+                let child = child_counts.cache(i, || counter(&count, &set_count).build());
 
-                counter(&count, &set_count).child(count.with(move |&count| {
-                    *call_count.borrow_mut() += 1;
-                    web_log::println!("Call count = {}", call_count.borrow());
+                counters = counters.child(child);
+            }
 
-                    let mut counters = div();
-
-                    for i in 0..count {
-                        let (count, set_count) = use_state(0);
-                        let child = child_counts.cache(i, || counter(&count, &set_count).build());
-
-                        counters = counters.child(child);
-                    }
-
-                    counters
-                }))
-            })
-        }),
+            counters
+        })),
     );
 }

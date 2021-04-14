@@ -1,10 +1,8 @@
 use std::{
     cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut},
     mem,
-    rc::{self, Rc},
+    rc::Rc,
 };
-
-use crate::{hooks::Scopeable, Element};
 
 pub struct Reference<T>(Rc<RefCell<T>>);
 
@@ -48,26 +46,10 @@ impl<T> Reference<T> {
     }
 
     pub fn try_borrow(&self) -> Result<Ref<'_, T>, BorrowError> {
-        self.0
-            .try_borrow()
+        self.0.try_borrow()
     }
 
     pub fn try_borrow_mut(&self) -> Result<RefMut<'_, T>, BorrowMutError> {
-        self.0
-            .try_borrow_mut()
-    }
-}
-
-impl<T: 'static> Scopeable for Reference<T> {
-    type Item = Self;
-
-    fn generate<Gen: Fn(&Self::Item) -> Element>(&self, f: Gen) -> Element {
-        f(self)
-    }
-
-    fn link_to_parent<F>(&self, _parent: rc::Weak<RefCell<crate::ElementData>>, _mk_elem: F)
-    where
-        F: 'static + Fn(&Self::Item) -> Element,
-    {
+        self.0.try_borrow_mut()
     }
 }
