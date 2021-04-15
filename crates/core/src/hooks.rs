@@ -46,19 +46,19 @@ fn process_updates() {
     PENDING_UPDATES.with(|update_queue| {
         let mut update_queue = update_queue.take();
 
-        if update_queue.len() != 1 {
-            let mut updates_by_depth: Vec<_> = update_queue
-                .into_iter()
-                .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(), u)))
-                .collect();
+        // if update_queue.len() != 1 {
+        //     let mut updates_by_depth: Vec<_> = update_queue
+        //         .into_iter()
+        //         .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(), u)))
+        //         .collect();
 
-            updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
+        //     updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
 
-            update_queue = updates_by_depth
-                .into_iter()
-                .map(|(_, value)| value)
-                .collect();
-        }
+        //     update_queue = updates_by_depth
+        //         .into_iter()
+        //         .map(|(_, value)| value)
+        //         .collect();
+        // }
 
         for update in update_queue {
             update.apply();

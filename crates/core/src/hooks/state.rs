@@ -1,5 +1,5 @@
 use std::{
-    cell::{Cell, RefCell},
+    cell::{Cell, Ref, RefCell},
     rc::{self, Rc},
 };
 
@@ -36,8 +36,12 @@ impl<T: 'static> GetState<T> {
         element.into()
     }
 
+    pub fn current(&self) -> Ref<T> {
+        Ref::map(self.0.borrow(), |state| &state.current)
+    }
+
     // TODO: Remove existing `with` and rename this to `with`
-    pub fn with_derived<U, Generate>(self, generate: Generate) -> GetState<U>
+    pub fn with_derived<U, Generate>(&self, generate: Generate) -> GetState<U>
     where
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
@@ -47,7 +51,11 @@ impl<T: 'static> GetState<T> {
         self.0
             .borrow_mut()
             .dependents
-            .push(Rc::new(move |new_value| set_value.set(generate(new_value))));
+            .push(Rc::new({let value = self.0.clone(); move |new_value| {
+                let existing = value.clone();
+                web_log::println!("heher");
+                set_value.set(generate(new_value))
+            }}));
 
         // TODO: Store state updates in SharedState. If there are any pending, queue
         // updates for the new dependent.
@@ -192,8 +200,12 @@ impl<T: 'static> SetState<T> {
     }
 
     fn queue_updates(&self) {
+        web_log::println!("Here4");
+
         if let Some(state) = self.state.upgrade() {
+            web_log::println!("Here3");
             for parent in state.borrow().parents.iter().cloned() {
+                web_log::println!("Here2");
                 queue_update(StateUpdate {
                     state: self.clone(),
                     parent,
@@ -201,6 +213,7 @@ impl<T: 'static> SetState<T> {
             }
 
             for dependent in &state.borrow().dependents {
+                web_log::println!("Here1");
                 queue_update(UpdateDependent {
                     state: self.clone(),
                     dependent: Rc::downgrade(dependent),

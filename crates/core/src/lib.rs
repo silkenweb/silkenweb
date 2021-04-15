@@ -6,11 +6,7 @@
 )]
 pub mod hooks;
 
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    collections::HashMap,
-    rc::{self, Rc},
-};
+use std::{cell::{Ref, RefCell, RefMut}, collections::HashMap, rc::{self, Rc}, thread::current};
 
 use hooks::state::GetState;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -46,6 +42,7 @@ impl ElementBuilder {
             children: Vec::new(),
             event_callbacks: Vec::new(),
             generate: None,
+            updater: None,
         }))))
     }
 
@@ -78,7 +75,7 @@ impl ElementBuilder {
             let mut data = self.0.data_mut();
             let dom_element = data.dom_element.clone();
             data.event_callbacks
-                .push(EventCallback::new(dom_element, name, f));
+                .push(Rc::new(EventCallback::new(dom_element, name, f)));
         }
 
         self
@@ -103,8 +100,39 @@ impl From<ElementBuilder> for Element {
 pub struct Element(Rc<RefCell<ElementData>>);
 
 impl From<GetState<Element>> for Element {
-    fn from(_elem: GetState<Element>) -> Self {
-        todo!()
+    fn from(elem: GetState<Element>) -> Self {
+        let current_elem = elem.current().clone();
+        let current_elem = current_elem.data();
+        let updating_elem = Element(Rc::new(RefCell::new(ElementData {
+            dom_element: current_elem.dom_element.clone(),
+            parent: None,
+            // TODO: Can we avoid cloning children and event_callbacks?
+            children: current_elem.children.clone(),
+            event_callbacks: current_elem.event_callbacks.clone(),
+            generate: None,
+            updater: None,
+        })));
+        let updater = elem.with_derived({
+            let updating_elem = updating_elem.clone();
+            move |element| {
+                web_log::println!("Updating");
+                let src_elem_data = element.data();
+                let mut dest_elem_data = updating_elem.data_mut();
+                dest_elem_data
+                    .dom_element
+                    .replace_with_with_node_1(&element.dom_element())
+                    .unwrap();
+
+                dest_elem_data.dom_element = src_elem_data.dom_element.clone();
+                dest_elem_data.children = src_elem_data.children.clone();
+                dest_elem_data.event_callbacks = src_elem_data.event_callbacks.clone();
+            }
+        });
+
+        // TODO: This looks like a circular reference
+        updating_elem.data_mut().updater = Some(updater);
+
+        updating_elem
     }
 }
 
@@ -118,8 +146,9 @@ pub struct ElementData {
     dom_element: dom::Element,
     parent: Option<rc::Weak<RefCell<ElementData>>>,
     children: Vec<Element>,
-    event_callbacks: Vec<EventCallback>,
+    event_callbacks: Vec<Rc<EventCallback>>,
     generate: Option<Box<dyn MkElem>>,
+    updater: Option<GetState<()>>,
 }
 
 impl ElementData {

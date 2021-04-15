@@ -1,5 +1,5 @@
 #![allow(clippy::must_use_candidate)]
-use surfinia_core::{tag, Builder, Element, ElementBuilder};
+use surfinia_core::{tag, Builder, Element, ElementBuilder, hooks::state::GetState};
 
 macro_rules! attr_name {
     (for_) => {
@@ -61,6 +61,11 @@ macro_rules! html_element {
                 events![click];
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
+                    Self(self.0.child(c.into()))
+                }
+
+                pub fn childx<Child>(self, c: GetState<Child>) -> Self where
+                GetState<Child>: Into<Element> {
                     Self(self.0.child(c.into()))
                 }
             }
@@ -125,6 +130,8 @@ macro_rules! categories {
             $(
                 impl content_category::$category for [<$name:camel>] {}
                 impl content_category::$category for [<$name:camel Builder>] {}
+                impl content_category::$category for GetState<[<$name:camel>]> {}
+                impl content_category::$category for GetState<[<$name:camel Builder>]> {}
             )*
         }
     }
@@ -189,7 +196,7 @@ child_categories!(li[Flow]);
 
 pub trait Parent<T>: Into<Element> {}
 
-impl<Child, T: ParentCategory<Child> + Into<Element>> Parent<Child> for T {}
+impl<Child, T> Parent<Child> for T where T: ParentCategory<Child> + Into<Element> {}
 
 pub trait ParentCategory<T> {}
 
