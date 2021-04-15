@@ -52,7 +52,7 @@ enum ListUpdate<T> {
 }
 
 pub struct SetListState<T> {
-    state: SharedListState<T>,
+    state: rc::Weak<RefCell<ListState<T>>>,
     updates: Rc<RefCell<Vec<ListUpdate<T>>>>,
 }
 
@@ -76,7 +76,7 @@ pub fn use_list_state<T: 'static>(
     let updates_empty = updates.is_empty();
 
     let set_list_state = SetListState {
-        state: state.clone(),
+        state: Rc::downgrade(&state.0),
         updates: Rc::new(RefCell::new(updates)),
     };
 
@@ -110,11 +110,15 @@ impl<T: 'static> SetListState<T> {
 impl<T: 'static> Update for SetListState<T> {
     fn apply(&self) {
         let updates = self.updates.take();
-        self.state.0.borrow_mut().apply(updates);
+        if let Some(s) = self.state.upgrade() {
+            s.borrow_mut().apply(updates)
+        }
     }
 
     fn parent(&self) -> rc::Weak<RefCell<ElementData>> {
-        self.state.0.borrow().parent.as_ref().unwrap().clone()
+        self.state.upgrade().map_or_else(rc::Weak::default, |s| {
+            s.borrow().parent.as_ref().unwrap().clone()
+        })
     }
 }
 
