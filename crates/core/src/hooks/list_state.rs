@@ -9,20 +9,26 @@ pub struct ElementList<T> {
 impl<T: 'static> ElementList<T> {
     // TODO: Accept other element builder types (maybe take a function like `div`)
     // How would we set attributes? Could take a Builder type and build it.
-    pub fn new<GenerateChild, Elem>(
+    pub fn new<'a, GenerateChild, Elem>(
         root: ElementBuilder,
         generate_child: GenerateChild,
-        // TODO: Take initial iter
+        initial: impl Iterator<Item = &'a T>,
     ) -> Self
     where
         Elem: Into<Element>,
         GenerateChild: 'static + Fn(&T) -> Elem,
     {
-        Self {
+        let mut new = Self {
             root,
             children: Vec::new(),
             generate_child: Box::new(move |e| generate_child(e).into()),
+        };
+
+        for elem in initial {
+            new.push(elem);
         }
+
+        new
     }
 
     pub fn push(&mut self, new_elem: &T) {

@@ -1,3 +1,5 @@
+use std::iter;
+
 use surfinia_core::{
     hooks::{
         list_state::ElementList,
@@ -26,15 +28,27 @@ fn counter() -> GetState<Div> {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, list_mut) = use_state(ElementList::new(ElementBuilder::new("div"), move |()| counter()));
+    let (list, list_mut) = use_state(ElementList::new(
+        ElementBuilder::new("div"),
+        move |()| counter(),
+        iter::empty(),
+    ));
     let push_elem = list_mut.clone();
     let pop_elem = list_mut;
 
     mount(
         "app",
         div()
-            .child(button().on_click(move || pop_elem.edit(ElementList::pop)).text("-"))
-            .child(button().on_click(move || push_elem.edit(|l| l.push(&()))).text("+"))
+            .child(
+                button()
+                    .on_click(move || pop_elem.edit(ElementList::pop))
+                    .text("-"),
+            )
+            .child(
+                button()
+                    .on_click(move || push_elem.edit(|l| l.push(&())))
+                    .text("+"),
+            )
             .child(list),
     );
 }

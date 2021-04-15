@@ -1,9 +1,10 @@
 use surfinia_core::{
     hooks::{
-        list_state::use_list_state,
+        list_state::ElementList,
         state::{use_state, GetState, SetState},
     },
     mount,
+    Builder,
     ElementBuilder,
 };
 use surfinia_html::{button, div, h1, header, input, label, li, section, Li};
@@ -25,7 +26,7 @@ impl TodoItem {
         }
     }
 
-    fn render(&self) -> Li {
+    fn render(&self) -> GetState<Li> {
         self.completed.with({
             let text = self.text.clone();
             let set_completed = self.set_completed.clone();
@@ -50,6 +51,7 @@ impl TodoItem {
                         .child(button().class("destroy")),
                 )
                 .child(input().class("edit").value(&text))
+                .build()
             }
         })
     }
@@ -57,15 +59,16 @@ impl TodoItem {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, _list_mut) = use_list_state(
+    let (list, _list_mut) = use_state(ElementList::new(
         ElementBuilder::new("ul").attribute("class", "todo-list"),
-        vec![
+        TodoItem::render,
+        [
             TodoItem::new("Test 1", false),
             TodoItem::new("Test 2", false),
             TodoItem::new("Test 3", true),
         ]
-        .into_iter(),
-    );
+        .iter(),
+    ));
 
     mount(
         "app",
@@ -79,6 +82,6 @@ fn main() {
                         .autofocus(),
                 ),
             )
-            .child(section().class("main").child(list.with(TodoItem::render))),
+            .child(section().class("main").child(list)),
     );
 }
