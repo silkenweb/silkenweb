@@ -35,6 +35,24 @@ impl<T: 'static> GetState<T> {
 
         element.into()
     }
+
+    // TODO: Remove existing `with` and rename this to `with`
+    pub fn with_derived<U, Generate>(self, generate: Generate) -> GetState<U>
+    where
+        U: 'static,
+        Generate: 'static + Fn(&T) -> U,
+    {
+        let (value, set_value) = use_state(generate(&self.0.borrow().current));
+
+        self.0
+            .borrow_mut()
+            .dependents
+            .push(Box::new(move |new_value| {
+                set_value.set(generate(new_value))
+            }));
+
+        value
+    }
 }
 
 struct UpdateElement<T, F>
@@ -160,6 +178,7 @@ impl<T: 'static> SetState<T> {
 
 struct State<T> {
     current: T,
+    dependents: Vec<Box<dyn FnMut(&T)>>,
     parents: Vec<rc::Weak<RefCell<ElementData>>>,
 }
 
@@ -167,6 +186,7 @@ impl<T: 'static> State<T> {
     fn new(init: T) -> Self {
         Self {
             current: init,
+            dependents: Vec::new(),
             parents: Vec::new(),
         }
     }
