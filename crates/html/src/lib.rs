@@ -133,8 +133,6 @@ macro_rules! categories {
 macro_rules! child_categories {
     ($name:ident [$($category:ident),* $(,)?] ) => {
         paste::item! {
-            // We get better error messages if we implement these traits directly for
-            // builder as well as target, rather than via a blanket trait.
             $(
                 impl<Child: content_category::$category> ParentCategory<[<$name:camel>]> for Child {}
             )*
