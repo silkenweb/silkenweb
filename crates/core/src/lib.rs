@@ -83,6 +83,10 @@ impl ElementBuilder {
     fn append_child(&mut self, element: &dom::Node) {
         self.0.dom_element.append_child(element).unwrap();
     }
+
+    fn remove_child(&mut self, element: &dom::Node) {
+        self.0.dom_element.remove_child(element).unwrap();
+    }
 }
 
 impl Builder for ElementBuilder {
