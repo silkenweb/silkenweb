@@ -12,6 +12,7 @@ use std::{
     rc::{self, Rc},
 };
 
+use hooks::state::GetState;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -100,6 +101,18 @@ impl From<ElementBuilder> for Element {
 
 #[derive(Clone)]
 pub struct Element(Rc<RefCell<ElementData>>);
+
+impl From<GetState<Element>> for Element {
+    fn from(_elem: GetState<Element>) -> Self {
+        todo!()
+    }
+}
+
+impl From<GetState<Element>> for ElementBuilder {
+    fn from(elem: GetState<Element>) -> Self {
+        elem.into()
+    }
+}
 
 pub struct ElementData {
     dom_element: dom::Element,

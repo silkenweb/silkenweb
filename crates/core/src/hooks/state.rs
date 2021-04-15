@@ -47,9 +47,10 @@ impl<T: 'static> GetState<T> {
         self.0
             .borrow_mut()
             .dependents
-            .push(Box::new(move |new_value| {
-                set_value.set(generate(new_value))
-            }));
+            .push(Rc::new(move |new_value| set_value.set(generate(new_value))));
+
+        // TODO: Store state updates in SharedState. If there are any pending, queue
+        // updates for the new dependent.
 
         value
     }
@@ -104,6 +105,32 @@ impl<T> Update for StateUpdate<T> {
             parent.children = element.children;
             parent.event_callbacks = element.event_callbacks;
         }
+    }
+}
+
+struct UpdateDependent<T> {
+    state: SetState<T>,
+    dependent: rc::Weak<dyn Fn(&T)>,
+}
+
+impl<T> Update for UpdateDependent<T> {
+    fn apply(&self) {
+        if let Some(f) = self.state.new_state.take() {
+            if let Some(state) = self.state.state.upgrade() {
+                f(&mut state.borrow_mut().current);
+            }
+        }
+
+        if let Some(dependent) = self.dependent.upgrade() {
+            if let Some(state) = self.state.state.upgrade() {
+                dependent(&mut state.borrow_mut().current);
+            }
+        }
+    }
+
+    // TODO: Remove this from trait
+    fn parent(&self) -> rc::Weak<RefCell<ElementData>> {
+        todo!("Remove this from trait")
     }
 }
 
@@ -172,13 +199,21 @@ impl<T: 'static> SetState<T> {
                     parent,
                 });
             }
+
+            for dependent in &state.borrow().dependents {
+                queue_update(UpdateDependent {
+                    state: self.clone(),
+                    dependent: Rc::downgrade(dependent),
+                });
+            }
         }
     }
 }
 
 struct State<T> {
     current: T,
-    dependents: Vec<Box<dyn FnMut(&T)>>,
+    dependents: Vec<Rc<dyn Fn(&T)>>,
+    // TODO: Remove parents and use dependents.
     parents: Vec<rc::Weak<RefCell<ElementData>>>,
 }
 
