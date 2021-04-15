@@ -130,6 +130,7 @@ version = "0.1.0"
 dependencies = [
  "paste",
  "surfinia-core",
+ "web-sys",
 ]
 
 [[package]]

@@ -1,17 +1,15 @@
-pub mod list_state;
+// pub mod list_state;
 pub mod memo;
 pub mod reference;
 pub mod state;
 
-use std::{cell::RefCell, rc};
+use std::cell::RefCell;
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
-use crate::{window, ElementData};
+use crate::window;
 
 trait Update {
-    fn parent(&self) -> rc::Weak<RefCell<ElementData>>;
-
     fn apply(&self);
 }
 
@@ -44,24 +42,35 @@ fn request_process_updates() {
 
 fn process_updates() {
     PENDING_UPDATES.with(|update_queue| {
-        let mut update_queue = update_queue.take();
+        // TODO: Is looping here the right thing? It means we can't queue things for next update.
+        // We should probably do everything synchronously, then replace dom nodes in event loop.
+        // Check this thread for info on why react does things asynchronously:
+        // https://github.com/facebook/react/issues/11527#issuecomment-360199710
+        loop {
+            let update_queue = update_queue.take();
 
-        // if update_queue.len() != 1 {
-        //     let mut updates_by_depth: Vec<_> = update_queue
-        //         .into_iter()
-        //         .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(), u)))
-        //         .collect();
+            if update_queue.is_empty() {
+                break;
+            }
 
-        //     updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
+            // TODO: Can we reinstate this? Queue updates from element updater?
+            // if update_queue.len() != 1 {
+            //     let mut updates_by_depth: Vec<_> = update_queue
+            //         .into_iter()
+            //         .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(),
+            // u)))         .collect();
 
-        //     update_queue = updates_by_depth
-        //         .into_iter()
-        //         .map(|(_, value)| value)
-        //         .collect();
-        // }
+            //     updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
 
-        for update in update_queue {
-            update.apply();
+            //     update_queue = updates_by_depth
+            //         .into_iter()
+            //         .map(|(_, value)| value)
+            //         .collect();
+            // }
+
+            for update in update_queue {
+                update.apply();
+            }
         }
     });
 

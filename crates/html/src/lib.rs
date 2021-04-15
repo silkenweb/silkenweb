@@ -1,5 +1,7 @@
 #![allow(clippy::must_use_candidate)]
-use surfinia_core::{tag, Builder, Element, ElementBuilder, hooks::state::GetState};
+use surfinia_core::{tag, DomElement, Builder, Element, ElementBuilder, hooks::state::GetState};
+
+use web_sys as dom;
 
 macro_rules! attr_name {
     (for_) => {
@@ -63,11 +65,6 @@ macro_rules! html_element {
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))
                 }
-
-                pub fn childx<Child>(self, c: GetState<Child>) -> Self where
-                GetState<Child>: Into<Element> {
-                    Self(self.0.child(c.into()))
-                }
             }
 
             impl Builder for [<$name:camel Builder>] {
@@ -75,6 +72,12 @@ macro_rules! html_element {
 
                 fn build(self) -> Self::Target {
                     [<$name:camel>](self.0.build())
+                }
+            }
+
+            impl DomElement for [<$name:camel Builder>] {
+                fn dom_element(&self) -> dom::Element {
+                    self.0.dom_element()
                 }
             }
 
@@ -101,9 +104,9 @@ macro_rules! html_element {
                 }
             }
 
-            impl From<Element> for [<$name:camel>] {
-                fn from(elem: Element) -> Self {
-                    [<$name:camel>](elem)
+            impl DomElement for [<$name:camel>] {
+                fn dom_element(&self) -> dom::Element {
+                    self.0.dom_element()
                 }
             }
         }
@@ -130,6 +133,8 @@ macro_rules! categories {
             $(
                 impl content_category::$category for [<$name:camel>] {}
                 impl content_category::$category for [<$name:camel Builder>] {}
+
+                // TODO: Fix this
                 impl content_category::$category for GetState<[<$name:camel>]> {}
                 impl content_category::$category for GetState<[<$name:camel Builder>]> {}
             )*

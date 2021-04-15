@@ -6,7 +6,11 @@
 )]
 pub mod hooks;
 
-use std::{cell::{Ref, RefCell, RefMut}, collections::HashMap, rc::{self, Rc}, thread::current};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    rc::{self, Rc},
+};
 
 use hooks::state::GetState;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -18,7 +22,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     document()
         .get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .replace_with_with_node_1(&elem.0.borrow().dom_element)
+        .replace_with_with_node_1(&elem.dom_element())
         .unwrap();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
@@ -32,53 +36,52 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-pub struct ElementBuilder(Element);
+pub struct ElementBuilder(ElementData);
 
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
-        ElementBuilder(Element(Rc::new(RefCell::new(ElementData {
+        ElementBuilder(ElementData {
             dom_element: document().create_element(tag.as_ref()).unwrap(),
-            parent: None,
             children: Vec::new(),
             event_callbacks: Vec::new(),
-            generate: None,
-            updater: None,
-        }))))
+        })
     }
 
     pub fn attribute(self, name: impl AsRef<str>, value: impl AsRef<str>) -> Self {
         self.0
-            .dom_element()
+            .dom_element
             .set_attribute(name.as_ref(), value.as_ref())
             .unwrap();
         self
     }
 
-    pub fn child(self, child: impl Into<Element>) -> Self {
+    pub fn child(mut self, child: impl Into<Element>) -> Self {
         // TODO: Optimize out unneccessary children?
         let child = child.into();
 
-        self.0.append_child(&child.dom_element());
-        child.data_mut().parent = Some(Rc::downgrade(&self.0 .0));
-        self.0.data_mut().children.push(child);
+        self.append_child(&child.dom_element());
+        self.0.children.push(child);
         self
     }
 
-    pub fn text(self, child: impl AsRef<str>) -> Self {
-        self.0
-            .append_child(&document().create_text_node(child.as_ref()));
+    pub fn text(mut self, child: impl AsRef<str>) -> Self {
+        self.append_child(&document().create_text_node(child.as_ref()));
         self
     }
 
-    pub fn on(self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+    pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
         {
-            let mut data = self.0.data_mut();
-            let dom_element = data.dom_element.clone();
-            data.event_callbacks
+            let dom_element = self.0.dom_element.clone();
+            self.0
+                .event_callbacks
                 .push(Rc::new(EventCallback::new(dom_element, name, f)));
         }
 
         self
+    }
+
+    fn append_child(&mut self, element: &dom::Node) {
+        self.0.dom_element.append_child(element).unwrap();
     }
 }
 
@@ -86,7 +89,7 @@ impl Builder for ElementBuilder {
     type Target = Element;
 
     fn build(self) -> Self::Target {
-        self.0
+        Element(Rc::new(ElementKind::Static(self.0)))
     }
 }
 
@@ -96,92 +99,61 @@ impl From<ElementBuilder> for Element {
     }
 }
 
+enum ElementKind {
+    Static(ElementData),
+    Reactive(GetState<dom::Element>),
+}
+
 #[derive(Clone)]
-pub struct Element(Rc<RefCell<ElementData>>);
+pub struct Element(Rc<ElementKind>);
 
-impl From<GetState<Element>> for Element {
-    fn from(elem: GetState<Element>) -> Self {
-        let current_elem = elem.current().clone();
-        let current_elem = current_elem.data();
-        let updating_elem = Element(Rc::new(RefCell::new(ElementData {
-            dom_element: current_elem.dom_element.clone(),
-            parent: None,
-            // TODO: Can we avoid cloning children and event_callbacks?
-            children: current_elem.children.clone(),
-            event_callbacks: current_elem.event_callbacks.clone(),
-            generate: None,
-            updater: None,
-        })));
-        let updater = elem.with_derived({
-            let updating_elem = updating_elem.clone();
+// TODO: Find a better way to add all child types to dom
+pub trait DomElement {
+    fn dom_element(&self) -> dom::Element;
+}
+
+impl<E> From<GetState<E>> for Element
+where
+    E: 'static + DomElement,
+{
+    fn from(elem: GetState<E>) -> Self {
+        let dom_element = Rc::new(RefCell::new(elem.current().dom_element()));
+
+        let updater = elem.with({
             move |element| {
-                web_log::println!("Updating");
-                let src_elem_data = element.data();
-                let mut dest_elem_data = updating_elem.data_mut();
-                dest_elem_data
-                    .dom_element
-                    .replace_with_with_node_1(&element.dom_element())
-                    .unwrap();
+                let new_dom_element = element.dom_element();
 
-                dest_elem_data.dom_element = src_elem_data.dom_element.clone();
-                dest_elem_data.children = src_elem_data.children.clone();
-                dest_elem_data.event_callbacks = src_elem_data.event_callbacks.clone();
+                dom_element
+                    .borrow()
+                    .replace_with_with_node_1(&new_dom_element)
+                    .unwrap();
+                dom_element.replace(new_dom_element.clone());
+                new_dom_element
             }
         });
 
-        // TODO: This looks like a circular reference
-        updating_elem.data_mut().updater = Some(updater);
-
-        updating_elem
-    }
-}
-
-impl From<GetState<Element>> for ElementBuilder {
-    fn from(elem: GetState<Element>) -> Self {
-        elem.into()
+        Self(Rc::new(ElementKind::Reactive(updater)))
     }
 }
 
 pub struct ElementData {
     dom_element: dom::Element,
-    parent: Option<rc::Weak<RefCell<ElementData>>>,
     children: Vec<Element>,
     event_callbacks: Vec<Rc<EventCallback>>,
-    generate: Option<Box<dyn MkElem>>,
-    updater: Option<GetState<()>>,
 }
 
-impl ElementData {
-    fn dom_depth(&self) -> usize {
-        self.parent
-            .as_ref()
-            .map_or(0, |p| 1 + p.upgrade().unwrap().borrow().dom_depth())
+impl DomElement for Element {
+    fn dom_element(&self) -> dom::Element {
+        match self.0.as_ref() {
+            ElementKind::Static(elem) => elem.dom_element.clone(),
+            ElementKind::Reactive(elem) => elem.current().clone(),
+        }
     }
 }
 
-trait MkElem {
-    fn mk_elem(&self) -> Element;
-}
-
-impl Element {
-    fn append_child(&self, node: &dom::Node) {
-        self.dom_element().append_child(node).unwrap();
-    }
-
-    fn remove_child(&self, node: &dom::Node) {
-        self.dom_element().remove_child(node).unwrap();
-    }
-
-    fn dom_element(&self) -> Ref<dom::Element> {
-        Ref::map(self.data(), |e| &e.dom_element)
-    }
-
-    fn data(&self) -> Ref<ElementData> {
-        self.0.borrow()
-    }
-
-    fn data_mut(&self) -> RefMut<ElementData> {
-        self.0.as_ref().borrow_mut()
+impl DomElement for ElementBuilder {
+    fn dom_element(&self) -> dom::Element {
+        self.0.dom_element.clone()
     }
 }
 

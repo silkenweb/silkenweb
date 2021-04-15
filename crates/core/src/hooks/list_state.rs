@@ -14,12 +14,6 @@ impl<T> Clone for SharedListState<T> {
     }
 }
 
-impl<T> MkElem for SharedListState<T> {
-    fn mk_elem(&self) -> Element {
-        self.0.borrow().root.clone()
-    }
-}
-
 pub struct GetListState<T>(SharedListState<T>);
 
 impl<T: 'static> GetListState<T> {

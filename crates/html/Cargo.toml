@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 surfinia-core = { path = "../core" }
 paste = "1.0"
+web-sys = "0.3"

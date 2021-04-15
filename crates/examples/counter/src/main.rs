@@ -1,9 +1,4 @@
-use surfinia_core::{
-    hooks::state::{use_state, GetState},
-    mount,
-    Builder,
-    Element,
-};
+use surfinia_core::{hooks::state::use_state, mount};
 use surfinia_html::{button, div};
 
 fn main() {
@@ -18,6 +13,6 @@ fn main() {
         div()
             .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
             .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-            .childx(count.with_derived(|i| div().text(format!("Count = {}", i)).build().into())),
+            .child(count.with(|i| div().text(format!("Count = {}", i)))),
     );
 }
