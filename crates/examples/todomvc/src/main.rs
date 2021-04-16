@@ -22,34 +22,31 @@ impl TodoItem {
         }
     }
 
-    fn render(&self) -> GetState<Li> {
-        self.completed.with({
-            let text = self.text.clone();
+    fn render(&self) -> Li {
+        let text = self.text.clone();
+
+        let mut li = li();
+        let completed_checkbox = input().class("toggle").type_("checkbox").on_click({
             let set_completed = self.set_completed.clone();
+            move || set_completed.map(|completed| !completed)
+        });
 
-            move |&completed| {
-                let mut li = li();
-                let mut completed_checkbox = input().class("toggle").type_("checkbox").on_click({
-                    let set_completed = set_completed.clone();
-                    move || set_completed.set(!completed)
-                });
+        li = li.class(
+            self.completed
+                .with(|&completed| if completed { "completed" } else { "" }.to_owned()),
+        );
 
-                if completed {
-                    li = li.class("completed");
-                    completed_checkbox = completed_checkbox.checked();
-                }
+        // TODO: Set the checked status of the checkbox.
 
-                li.child(
-                    div()
-                        .class("view")
-                        .child(completed_checkbox)
-                        .child(label().text(&text))
-                        .child(button().class("destroy")),
-                )
-                .child(input().class("edit").value(&text))
-                .build()
-            }
-        })
+        li.child(
+            div()
+                .class("view")
+                .child(completed_checkbox)
+                .child(label().text(&text))
+                .child(button().class("destroy")),
+        )
+        .child(input().class("edit").value(&text))
+        .build()
     }
 }
 

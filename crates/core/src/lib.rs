@@ -9,6 +9,7 @@ pub mod hooks;
 use std::{
     cell::RefCell,
     collections::HashMap,
+    mem,
     rc::{self, Rc},
 };
 
@@ -36,6 +37,43 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+pub trait AttributeValue {
+    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
+}
+
+impl<T> AttributeValue for T
+where
+    T: AsRef<str>,
+{
+    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        builder
+            .0
+            .dom_element
+            .set_attribute(name.as_ref(), self.as_ref())
+            .unwrap();
+    }
+}
+
+impl<T> AttributeValue for GetState<T>
+where
+    T: 'static + AsRef<str>,
+{
+    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        let owned_name = name.as_ref().to_string();
+        let name_key = owned_name.clone();
+        self.current().add(name, builder);
+        let dom_element = builder.0.dom_element.clone();
+
+        let updater = self.with(move |new_value| {
+            dom_element
+                .set_attribute(&owned_name, new_value.as_ref())
+                .unwrap();
+        });
+
+        builder.0.reactive_attrs.insert(name_key, updater);
+    }
+}
+
 pub struct ElementBuilder(ElementData);
 
 impl ElementBuilder {
@@ -44,14 +82,13 @@ impl ElementBuilder {
             dom_element: document().create_element(tag.as_ref()).unwrap(),
             children: Vec::new(),
             event_callbacks: Vec::new(),
+            reactive_attrs: HashMap::new(),
         })
     }
 
-    pub fn attribute(self, name: impl AsRef<str>, value: impl AsRef<str>) -> Self {
-        self.0
-            .dom_element
-            .set_attribute(name.as_ref(), value.as_ref())
-            .unwrap();
+    pub fn attribute(mut self, name: impl AsRef<str>, value: impl AttributeValue) -> Self {
+        value.add(name, &mut self);
+        mem::drop(value);
         self
     }
 
@@ -144,6 +181,7 @@ pub struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
+    reactive_attrs: HashMap<String, GetState<()>>,
 }
 
 impl DomElement for Element {

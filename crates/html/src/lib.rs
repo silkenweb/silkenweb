@@ -1,5 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{
+    AttributeValue,
     hooks::{list_state::ElementList, state::GetState},
     tag,
     Builder,
@@ -28,7 +29,7 @@ macro_rules! attribute {
         }
     };
     ($attr:ident : String) => {
-        attribute!($attr: impl AsRef<str>);
+        attribute!($attr: impl AttributeValue); // TODO: Make this work for all attr types
     };
     ($attr:ident : $typ:ty) => {
         pub fn $attr(self, value: $typ) -> Self {
