@@ -42,10 +42,10 @@ fn request_process_updates() {
 
 fn process_updates() {
     PENDING_UPDATES.with(|update_queue| {
-        // TODO: Is looping here the right thing? It means we can't queue things for next update.
-        // We should probably do everything synchronously, then replace dom nodes in event loop.
-        // Check this thread for info on why react does things asynchronously:
-        // https://github.com/facebook/react/issues/11527#issuecomment-360199710
+        // TODO: Is looping here the right thing? It means we can't queue things for
+        // next update. We should probably do everything synchronously, then
+        // replace dom nodes in event loop. Check this thread for info on why
+        // react does things asynchronously: https://github.com/facebook/react/issues/11527#issuecomment-360199710
         loop {
             let update_queue = update_queue.take();
 
