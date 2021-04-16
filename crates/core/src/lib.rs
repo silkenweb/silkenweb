@@ -116,18 +116,8 @@ where
 
 impl AttributeValue<String> for Signal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        let name = name.as_ref().to_string();
-        let dom_element = builder.0.dom_element.clone();
-        self.current().set_attribute(&name, &dom_element);
-
-        let updater = self.with({
-            let name = name.clone();
-            move |&new_value| {
-                new_value.set_attribute(&name, &dom_element);
-            }
-        });
-
-        builder.0.reactive_attrs.insert(name, updater);
+        self.with(|&value| value.to_string())
+            .set_attribute(name, builder);
     }
 }
 
