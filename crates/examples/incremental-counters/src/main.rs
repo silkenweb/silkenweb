@@ -3,14 +3,14 @@ use std::iter;
 use surfinia_core::{
     hooks::{
         list_state::ElementList,
-        state::{use_state, GetState},
+        state::{use_state, Signal},
     },
     mount,
     Builder,
 };
 use surfinia_html::{button, div, element_list, Div};
 
-fn counter() -> GetState<Div> {
+fn counter() -> Signal<Div> {
     let (count, set_count) = use_state(0);
 
     count.with(move |i| {

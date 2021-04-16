@@ -1,5 +1,5 @@
 use surfinia_core::{
-    hooks::state::{use_state, GetState, SetState},
+    hooks::state::{use_state, SetSignal, Signal},
     mount,
     Builder,
 };
@@ -7,8 +7,8 @@ use surfinia_html::{button, div, element_list, h1, header, input, label, li, sec
 
 struct TodoItem {
     text: String,
-    completed: GetState<bool>,
-    set_completed: SetState<bool>,
+    completed: Signal<bool>,
+    set_completed: SetSignal<bool>,
 }
 
 impl TodoItem {

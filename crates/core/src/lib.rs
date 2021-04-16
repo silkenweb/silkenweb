@@ -13,7 +13,7 @@ use std::{
     rc::{self, Rc},
 };
 
-use hooks::{queue_update, state::GetState};
+use hooks::{queue_update, state::Signal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -99,7 +99,7 @@ impl<'a> AttributeValue<String> for &'a String {
     }
 }
 
-impl<T> AttributeValue<T> for GetState<T>
+impl<T> AttributeValue<T> for Signal<T>
 where
     T: 'static + StaticAttribute,
 {
@@ -119,7 +119,7 @@ where
     }
 }
 
-impl AttributeValue<String> for GetState<&'static str> {
+impl AttributeValue<String> for Signal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         let name = name.as_ref().to_string();
         let dom_element = builder.0.dom_element.clone();
@@ -215,7 +215,7 @@ impl From<ElementBuilder> for Element {
 
 enum ElementKind {
     Static(ElementData),
-    Reactive(GetState<dom::Element>),
+    Reactive(Signal<dom::Element>),
 }
 
 #[derive(Clone)]
@@ -226,11 +226,11 @@ pub trait DomElement {
     fn dom_element(&self) -> dom::Element;
 }
 
-impl<E> From<GetState<E>> for Element
+impl<E> From<Signal<E>> for Element
 where
     E: 'static + DomElement,
 {
-    fn from(elem: GetState<E>) -> Self {
+    fn from(elem: Signal<E>) -> Self {
         let dom_element = Rc::new(RefCell::new(elem.current().dom_element()));
 
         let updater = elem.with({
@@ -261,7 +261,7 @@ pub struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
-    reactive_attrs: HashMap<String, GetState<()>>,
+    reactive_attrs: HashMap<String, Signal<()>>,
 }
 
 impl DomElement for Element {

@@ -5,14 +5,14 @@ use std::{
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
 
-pub struct GetState<T>(SharedState<T>);
+pub struct Signal<T>(SharedState<T>);
 
-impl<T: 'static> GetState<T> {
+impl<T: 'static> Signal<T> {
     pub fn current(&self) -> Ref<T> {
         Ref::map(self.0.borrow(), |state| &state.current)
     }
 
-    pub fn with<U, Generate>(&self, generate: Generate) -> GetState<U>
+    pub fn with<U, Generate>(&self, generate: Generate) -> Signal<U>
     where
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
@@ -36,21 +36,21 @@ impl<T: 'static> GetState<T> {
     }
 }
 
-pub struct SetState<T>(rc::Weak<RefCell<State<T>>>);
+pub struct SetSignal<T>(rc::Weak<RefCell<State<T>>>);
 
-impl<T> Clone for SetState<T> {
+impl<T> Clone for SetSignal<T> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
+pub fn use_state<T: 'static>(init: T) -> (Signal<T>, SetSignal<T>) {
     let state = Rc::new(RefCell::new(State::new(init)));
 
-    (GetState(state.clone()), SetState(Rc::downgrade(&state)))
+    (Signal(state.clone()), SetSignal(Rc::downgrade(&state)))
 }
 
-impl<T: 'static> SetState<T> {
+impl<T: 'static> SetSignal<T> {
     pub fn set(&self, new_value: T) {
         if let Some(state) = self.0.upgrade() {
             state.borrow_mut().current = new_value;
