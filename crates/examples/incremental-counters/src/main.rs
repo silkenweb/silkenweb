@@ -1,35 +1,35 @@
 use std::iter;
 
 use surfinia_core::{
-    hooks::{
-        list_state::ElementList,
-        state::{use_state, Signal},
-    },
+    hooks::{list_state::ElementList, state::Signal},
     mount,
     Builder,
 };
 use surfinia_html::{button, div, element_list, Div};
 
 fn counter() -> Signal<Div> {
-    let (count, set_count) = use_state(0);
+    let count = Signal::new(0);
+    let set_count = count.setter();
 
-    count.with(move |i| {
-        let inc = set_count.clone();
-        let dec = set_count.clone();
+    count.with({
+        move |i| {
+            let inc = set_count.clone();
+            let dec = set_count.clone();
 
-        div()
-            .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-            .text(format!("{}", i))
-            .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
-            .build()
+            div()
+                .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
+                .text(format!("{}", i))
+                .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
+                .build()
+        }
     })
 }
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, list_mut) = use_state(element_list(div(), move |()| counter(), iter::empty()));
-    let push_elem = list_mut.clone();
-    let pop_elem = list_mut;
+    let list = Signal::new(element_list(div(), move |()| counter(), iter::empty()));
+    let push_elem = list.setter();
+    let pop_elem = list.setter();
 
     mount(
         "app",

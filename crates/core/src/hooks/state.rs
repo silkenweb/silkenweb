@@ -8,8 +8,16 @@ type SharedState<T> = Rc<RefCell<State<T>>>;
 pub struct Signal<T>(SharedState<T>);
 
 impl<T: 'static> Signal<T> {
+    pub fn new(initial: T) -> Self {
+        Self(Rc::new(RefCell::new(State::new(initial))))
+    }
+
     pub fn current(&self) -> Ref<T> {
         Ref::map(self.0.borrow(), |state| &state.current)
+    }
+
+    pub fn setter(&self) -> SetSignal<T> {
+        SetSignal(Rc::downgrade(&self.0))
     }
 
     pub fn with<U, Generate>(&self, generate: Generate) -> Signal<U>
@@ -17,20 +25,17 @@ impl<T: 'static> Signal<T> {
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
     {
-        let (value, set_value) = use_state(generate(&self.0.borrow().current));
+        let value = Signal::new(generate(&self.0.borrow().current));
 
         self.0.borrow_mut().dependents.push(Rc::new({
-            let value = self.0.clone();
+            let existing = self.0.clone();
+            let set_value = value.setter();
+
             move |new_value| {
-                // TODO: Keep a reference to the source in a Dependent struct
-                let _existing = value.clone();
+                let _existing = existing.clone();
                 set_value.set(generate(new_value))
             }
         }));
-
-        // TODO: Store state updates in SharedState. If there are any pending, queue
-        // updates for the new dependent.
-        // TODO: New value needs to keep a ref to this.
 
         value
     }
@@ -42,12 +47,6 @@ impl<T> Clone for SetSignal<T> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
-}
-
-pub fn use_state<T: 'static>(init: T) -> (Signal<T>, SetSignal<T>) {
-    let state = Rc::new(RefCell::new(State::new(init)));
-
-    (Signal(state.clone()), SetSignal(Rc::downgrade(&state)))
 }
 
 impl<T: 'static> SetSignal<T> {

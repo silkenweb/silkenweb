@@ -1,12 +1,12 @@
-use surfinia_core::{hooks::state::use_state, mount};
+use surfinia_core::{hooks::state::Signal, mount};
 use surfinia_html::{button, div};
 
 fn main() {
     console_error_panic_hook::set_once();
 
-    let (count, set_count) = use_state(0);
-    let inc = set_count.clone();
-    let dec = set_count;
+    let count = Signal::new(0);
+    let inc = count.setter();
+    let dec = count.setter();
 
     mount(
         "app",

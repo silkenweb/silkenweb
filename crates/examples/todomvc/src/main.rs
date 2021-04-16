@@ -1,24 +1,16 @@
-use surfinia_core::{
-    hooks::state::{use_state, SetSignal, Signal},
-    mount,
-    Builder,
-};
+use surfinia_core::{hooks::state::Signal, mount, Builder};
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
 
 struct TodoItem {
     text: String,
     completed: Signal<bool>,
-    set_completed: SetSignal<bool>,
 }
 
 impl TodoItem {
     fn new(text: impl Into<String>, completed: bool) -> Self {
-        let (completed, set_completed) = use_state(completed);
-
         Self {
             text: text.into(),
-            completed,
-            set_completed,
+            completed: Signal::new(completed),
         }
     }
 
@@ -29,7 +21,7 @@ impl TodoItem {
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                let set_completed = self.set_completed.clone();
+                let set_completed = self.completed.setter();
                 move || set_completed.map(|completed| !completed)
             })
             .checked(self.completed.with(|&completed| completed));
@@ -52,7 +44,7 @@ impl TodoItem {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, _list_mut) = use_state(element_list(
+    let list = Signal::new(element_list(
         ul().class("todo-list"),
         TodoItem::render,
         [
