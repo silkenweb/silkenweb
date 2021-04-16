@@ -37,37 +37,72 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-pub trait AttributeValue {
-    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
+pub trait StaticAttribute {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
 }
 
-impl<T> AttributeValue for T
+impl StaticAttribute for bool {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        if *self {
+            dom_element.set_attribute(name.as_ref(), "true").unwrap();
+        }
+        else {
+            dom_element.remove_attribute(name.as_ref()).unwrap()
+        }
+    }
+}
+
+impl StaticAttribute for String {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        dom_element.set_attribute(name.as_ref(), &self).unwrap();
+    }
+}
+
+pub trait AttributeValue<T> {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
+}
+
+impl<T> AttributeValue<T> for T
 where
-    T: AsRef<str>,
+    T: StaticAttribute,
 {
-    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        self.set_attribute(name, &builder.0.dom_element);
+    }
+}
+
+impl<'a> AttributeValue<String> for &'a str {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         builder
             .0
             .dom_element
-            .set_attribute(name.as_ref(), self.as_ref())
+            .set_attribute(name.as_ref(), self)
             .unwrap();
     }
 }
 
-impl<T> AttributeValue for GetState<T>
+impl<'a> AttributeValue<String> for &'a String {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        builder
+            .0
+            .dom_element
+            .set_attribute(name.as_ref(), self)
+            .unwrap();
+    }
+}
+
+impl<T> AttributeValue<T> for GetState<T>
 where
-    T: 'static + AsRef<str>,
+    T: 'static + StaticAttribute,
 {
-    fn add(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         let owned_name = name.as_ref().to_string();
         let name_key = owned_name.clone();
-        self.current().add(name, builder);
         let dom_element = builder.0.dom_element.clone();
+        self.current().set_attribute(name, &dom_element);
 
         let updater = self.with(move |new_value| {
-            dom_element
-                .set_attribute(&owned_name, new_value.as_ref())
-                .unwrap();
+            new_value.set_attribute(&owned_name, &dom_element);
         });
 
         builder.0.reactive_attrs.insert(name_key, updater);
@@ -86,8 +121,8 @@ impl ElementBuilder {
         })
     }
 
-    pub fn attribute(mut self, name: impl AsRef<str>, value: impl AttributeValue) -> Self {
-        value.add(name, &mut self);
+    pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl AttributeValue<T>) -> Self {
+        value.set_attribute(name, &mut self);
         mem::drop(value);
         self
     }

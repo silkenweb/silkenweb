@@ -1,8 +1,8 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{
-    AttributeValue,
     hooks::{list_state::ElementList, state::GetState},
     tag,
+    AttributeValue,
     Builder,
     DomElement,
     Element,
@@ -23,16 +23,8 @@ macro_rules! attr_name {
 }
 
 macro_rules! attribute {
-    ($attr:ident : bool) => {
-        pub fn $attr(self) -> Self {
-            Self(self.0.attribute(attr_name!($attr), "true"))
-        }
-    };
-    ($attr:ident : String) => {
-        attribute!($attr: impl AttributeValue); // TODO: Make this work for all attr types
-    };
     ($attr:ident : $typ:ty) => {
-        pub fn $attr(self, value: $typ) -> Self {
+        pub fn $attr(self, value: impl AttributeValue<$typ>) -> Self {
             Self(self.0.attribute(attr_name!($attr), value))
         }
     };

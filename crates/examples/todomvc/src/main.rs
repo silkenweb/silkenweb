@@ -29,7 +29,7 @@ impl TodoItem {
         let completed_checkbox = input().class("toggle").type_("checkbox").on_click({
             let set_completed = self.set_completed.clone();
             move || set_completed.map(|completed| !completed)
-        });
+        }).checked(self.completed.with(|&completed| completed));
 
         li = li.class(
             self.completed
@@ -72,7 +72,7 @@ fn main() {
                     input()
                         .class("new-todo")
                         .placeholder("What needs to be done?")
-                        .autofocus(),
+                        .autofocus(true),
                 ),
             )
             .child(section().class("main").child(list)),
