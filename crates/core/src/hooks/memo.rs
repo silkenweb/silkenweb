@@ -7,7 +7,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::hooks::PENDING_EFFECTS;
+use super::queue_effect;
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -33,18 +33,13 @@ impl Memo {
         let mut memo = self.0.borrow_mut();
 
         if memo.next_memoized.is_empty() {
-            PENDING_EFFECTS.with(|effect_stack| {
-                // TODO: Split some functions out from this. queue_effect and memo_effect?
-                effect_stack.borrow_mut().push(Box::new({
-                    let memo_data = Rc::downgrade(&self.0);
+            let memo_data = Rc::downgrade(&self.0);
 
-                    move || {
-                        if let Some(memo) = memo_data.upgrade() {
-                            let mut memo = memo.borrow_mut();
-                            memo.current_memoized = mem::take(&mut memo.next_memoized);
-                        }
-                    }
-                }))
+            queue_effect(move || {
+                if let Some(memo) = memo_data.upgrade() {
+                    let mut memo = memo.borrow_mut();
+                    memo.current_memoized = mem::take(&mut memo.next_memoized);
+                }
             });
         }
 

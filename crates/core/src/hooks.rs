@@ -25,6 +25,10 @@ pub fn queue_update(x: impl 'static + FnOnce()) {
     }
 }
 
+fn queue_effect(x: impl 'static + FnOnce()) {
+    PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
+}
+
 fn request_process_updates() {
     ON_ANIMATION_FRAME.with(|process_updates| {
         window()
