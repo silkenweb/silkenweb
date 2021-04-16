@@ -28,6 +28,7 @@ fn main() {
             web_log::println!("Call count = {}", call_count.borrow());
 
             let mut counters = div();
+            child_counts.gc();
 
             for i in 0..count {
                 let child = child_counts.cache(i, || counter(&Signal::new(0)).build());
