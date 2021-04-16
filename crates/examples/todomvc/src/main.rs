@@ -40,8 +40,6 @@ impl TodoItem {
                 .with(|&completed| if completed { "completed" } else { "" }.to_owned()),
         );
 
-        // TODO: Set the checked status of the checkbox.
-
         li.child(
             div()
                 .class("view")
