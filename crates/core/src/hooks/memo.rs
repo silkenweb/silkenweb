@@ -4,10 +4,10 @@ use std::{
     collections::HashMap,
     hash::Hash,
     mem,
-    rc::{self, Rc},
+    rc::Rc,
 };
 
-use crate::hooks::{Effect, PENDING_EFFECTS};
+use crate::hooks::PENDING_EFFECTS;
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -34,9 +34,17 @@ impl Memo {
 
         if memo.next_memoized.is_empty() {
             PENDING_EFFECTS.with(|effect_stack| {
-                effect_stack
-                    .borrow_mut()
-                    .push(Box::new(Rc::downgrade(&self.0)))
+                // TODO: Split some functions out from this. queue_effect and memo_effect?
+                effect_stack.borrow_mut().push(Box::new({
+                    let memo_data = Rc::downgrade(&self.0);
+
+                    move || {
+                        if let Some(memo) = memo_data.upgrade() {
+                            let mut memo = memo.borrow_mut();
+                            memo.current_memoized = mem::take(&mut memo.next_memoized);
+                        }
+                    }
+                }))
             });
         }
 
@@ -55,13 +63,4 @@ type AnyMap = HashMap<(TypeId, TypeId), Box<dyn Any>>;
 struct MemoData {
     current_memoized: AnyMap,
     next_memoized: AnyMap,
-}
-
-impl Effect for rc::Weak<RefCell<MemoData>> {
-    fn apply(&self) {
-        if let Some(memo) = self.upgrade() {
-            let mut memo = memo.borrow_mut();
-            memo.current_memoized = mem::take(&mut memo.next_memoized);
-        }
-    }
 }

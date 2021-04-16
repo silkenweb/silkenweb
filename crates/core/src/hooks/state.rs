@@ -1,10 +1,7 @@
 use std::{
-    cell::{Cell, Ref, RefCell},
+    cell::{Ref, RefCell},
     rc::{self, Rc},
 };
-
-use super::queue_update;
-use crate::hooks::Update;
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
 
@@ -39,63 +36,25 @@ impl<T: 'static> GetState<T> {
     }
 }
 
-struct UpdateDependent<T> {
-    state: SetState<T>,
-    dependent: rc::Weak<dyn Fn(&T)>,
-}
-
-impl<T> Update for UpdateDependent<T> {
-    fn apply(&self) {
-        if let Some(f) = self.state.new_state.take() {
-            if let Some(state) = self.state.state.upgrade() {
-                f(&mut state.borrow_mut().current);
-            }
-        }
-
-        if let Some(dependent) = self.dependent.upgrade() {
-            if let Some(state) = self.state.state.upgrade() {
-                dependent(&mut state.borrow_mut().current);
-            }
-        }
-    }
-}
-
-type Mutator<T> = Box<dyn FnOnce(&mut T)>;
-
-pub struct SetState<T> {
-    state: rc::Weak<RefCell<State<T>>>,
-    new_state: Rc<Cell<Option<Mutator<T>>>>,
-}
+pub struct SetState<T>(rc::Weak<RefCell<State<T>>>);
 
 impl<T> Clone for SetState<T> {
     fn clone(&self) -> Self {
-        Self {
-            state: self.state.clone(),
-            new_state: self.new_state.clone(),
-        }
+        Self(self.0.clone())
     }
 }
 
 pub fn use_state<T: 'static>(init: T) -> (GetState<T>, SetState<T>) {
     let state = Rc::new(RefCell::new(State::new(init)));
 
-    (
-        GetState(state.clone()),
-        SetState {
-            state: Rc::downgrade(&state),
-            new_state: Rc::new(Cell::new(None)),
-        },
-    )
+    (GetState(state.clone()), SetState(Rc::downgrade(&state)))
 }
 
 impl<T: 'static> SetState<T> {
     pub fn set(&self, new_value: T) {
-        if self
-            .new_state
-            .replace(Some(Box::new(|x| *x = new_value)))
-            .is_none()
-        {
-            self.queue_updates();
+        if let Some(state) = self.0.upgrade() {
+            state.borrow_mut().current = new_value;
+            state.borrow().update_dependents();
         }
     }
 
@@ -104,27 +63,9 @@ impl<T: 'static> SetState<T> {
     }
 
     pub fn edit(&self, f: impl 'static + FnOnce(&mut T)) {
-        let existing = self.new_state.replace(None);
-
-        if let Some(existing) = existing {
-            self.new_state.replace(Some(Box::new(move |x| {
-                existing(x);
-                f(x);
-            })));
-        } else {
-            self.new_state.replace(Some(Box::new(f)));
-            self.queue_updates();
-        }
-    }
-
-    fn queue_updates(&self) {
-        if let Some(state) = self.state.upgrade() {
-            for dependent in &state.borrow().dependents {
-                queue_update(UpdateDependent {
-                    state: self.clone(),
-                    dependent: Rc::downgrade(dependent),
-                });
-            }
+        if let Some(state) = self.0.upgrade() {
+            f(&mut state.borrow_mut().current);
+            state.borrow().update_dependents();
         }
     }
 }
@@ -139,6 +80,12 @@ impl<T: 'static> State<T> {
         Self {
             current: init,
             dependents: Vec::new(),
+        }
+    }
+
+    fn update_dependents(&self) {
+        for dep in &self.dependents {
+            dep(&self.current);
         }
     }
 }

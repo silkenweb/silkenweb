@@ -13,7 +13,7 @@ use std::{
     rc::{self, Rc},
 };
 
-use hooks::state::GetState;
+use hooks::{queue_update, state::GetState};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -37,29 +37,40 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl AsRef<str>) {
+    let dom_element = dom_element.clone();
+    let name = name.as_ref().to_string();
+    let value = value.as_ref().to_string();
+
+    queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
+}
+
 pub trait StaticAttribute {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
 }
 
 impl StaticAttribute for bool {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        let dom_element = dom_element.clone();
+        let name = name.as_ref().to_string();
+
         if *self {
-            dom_element.set_attribute(name.as_ref(), "true").unwrap();
+            queue_update(move || dom_element.set_attribute(&name, "true").unwrap());
         } else {
-            dom_element.remove_attribute(name.as_ref()).unwrap()
+            queue_update(move || dom_element.remove_attribute(&name).unwrap());
         }
     }
 }
 
 impl StaticAttribute for String {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        dom_element.set_attribute(name.as_ref(), &self).unwrap();
+        set_attribute(dom_element, name, self);
     }
 }
 
 impl StaticAttribute for str {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        dom_element.set_attribute(name.as_ref(), &self).unwrap();
+        set_attribute(dom_element, name, self);
     }
 }
 
@@ -78,21 +89,13 @@ where
 
 impl<'a> AttributeValue<String> for &'a str {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        builder
-            .0
-            .dom_element
-            .set_attribute(name.as_ref(), self)
-            .unwrap();
+        set_attribute(&builder.0.dom_element, name, self);
     }
 }
 
 impl<'a> AttributeValue<String> for &'a String {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        builder
-            .0
-            .dom_element
-            .set_attribute(name.as_ref(), self)
-            .unwrap();
+        set_attribute(&builder.0.dom_element, name, self);
     }
 }
 
@@ -177,11 +180,21 @@ impl ElementBuilder {
     }
 
     fn append_child(&mut self, element: &dom::Node) {
-        self.0.dom_element.append_child(element).unwrap();
+        let dom_element = self.0.dom_element.clone();
+        let element = element.clone();
+
+        queue_update(move || {
+            dom_element.append_child(&element).unwrap();
+        });
     }
 
     fn remove_child(&mut self, element: &dom::Node) {
-        self.0.dom_element.remove_child(element).unwrap();
+        let dom_element = self.0.dom_element.clone();
+        let element = element.clone();
+
+        queue_update(move || {
+            dom_element.remove_child(&element).unwrap();
+        });
     }
 }
 
@@ -223,10 +236,17 @@ where
             move |element| {
                 let new_dom_element = element.dom_element();
 
-                dom_element
-                    .borrow()
-                    .replace_with_with_node_1(&new_dom_element)
-                    .unwrap();
+                queue_update({
+                    let dom_element = dom_element.borrow().clone();
+                    let new_dom_element = new_dom_element.clone();
+
+                    move || {
+                        dom_element
+                            .replace_with_with_node_1(&new_dom_element)
+                            .unwrap();
+                    }
+                });
+
                 dom_element.replace(new_dom_element.clone());
                 new_dom_element
             }
