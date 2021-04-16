@@ -45,8 +45,7 @@ impl StaticAttribute for bool {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
         if *self {
             dom_element.set_attribute(name.as_ref(), "true").unwrap();
-        }
-        else {
+        } else {
             dom_element.remove_attribute(name.as_ref()).unwrap()
         }
     }

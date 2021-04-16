@@ -26,10 +26,14 @@ impl TodoItem {
         let text = self.text.clone();
 
         let mut li = li();
-        let completed_checkbox = input().class("toggle").type_("checkbox").on_click({
-            let set_completed = self.set_completed.clone();
-            move || set_completed.map(|completed| !completed)
-        }).checked(self.completed.with(|&completed| completed));
+        let completed_checkbox = input()
+            .class("toggle")
+            .type_("checkbox")
+            .on_click({
+                let set_completed = self.set_completed.clone();
+                move || set_completed.map(|completed| !completed)
+            })
+            .checked(self.completed.with(|&completed| completed));
 
         li = li.class(
             self.completed
