@@ -74,7 +74,7 @@ impl ElementBuilder {
             let dom_element = self.0.dom_element.clone();
             self.0
                 .event_callbacks
-                .push(Rc::new(EventCallback::new(dom_element, name, f)));
+                .push(EventCallback::new(dom_element, name, f));
         }
 
         self
@@ -143,7 +143,7 @@ where
 pub struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
-    event_callbacks: Vec<Rc<EventCallback>>,
+    event_callbacks: Vec<EventCallback>,
 }
 
 impl DomElement for Element {
