@@ -27,6 +27,7 @@ impl<T: 'static> Signal<T> {
     {
         let value = Signal::new(generate(&self.0.borrow().current));
 
+        // TODO: Handle removing the new value from dependents.
         self.0.borrow_mut().dependents.push(Rc::new({
             let existing = self.0.clone();
             let set_value = value.setter();
