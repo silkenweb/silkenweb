@@ -1,5 +1,7 @@
+use std::{cell::RefCell, rc::Rc};
+
 use surfinia_core::{
-    hooks::{memo::Memo, reference::Reference, state::Signal},
+    hooks::{memo::Memo, state::Signal},
     mount,
     Builder,
 };
@@ -18,7 +20,7 @@ fn counter(count: &Signal<u32>) -> DivBuilder {
 fn main() {
     console_error_panic_hook::set_once();
     let child_counts = Memo::default();
-    let call_count = Reference::new(0);
+    let call_count = Rc::new(RefCell::new(0));
     let count = Signal::new(0);
 
     mount(
