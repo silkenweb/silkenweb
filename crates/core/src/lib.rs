@@ -6,12 +6,7 @@
 )]
 pub mod hooks;
 
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    mem,
-    rc::{self, Rc},
-};
+use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 use hooks::{queue_update, state::Signal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -323,10 +318,6 @@ impl Drop for EventCallback {
             )
             .unwrap();
     }
-}
-
-pub trait Dependent {
-    fn set_parent(&mut self, parent: rc::Weak<RefCell<ElementData>>);
 }
 
 fn window() -> dom::Window {
