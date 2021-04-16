@@ -36,12 +36,12 @@ fn main() {
         div()
             .child(
                 button()
-                    .on_click(move || pop_elem.edit(ElementList::pop))
+                    .on_click(move || pop_elem.mutate(ElementList::pop))
                     .text("-"),
             )
             .child(
                 button()
-                    .on_click(move || push_elem.edit(|l| l.push(&())))
+                    .on_click(move || push_elem.mutate(|l| l.push(&())))
                     .text("+"),
             )
             .child(list),

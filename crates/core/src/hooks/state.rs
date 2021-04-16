@@ -59,10 +59,10 @@ impl<T: 'static> SetState<T> {
     }
 
     pub fn map(&self, f: impl 'static + FnOnce(&T) -> T) {
-        self.edit(|x| *x = f(x));
+        self.mutate(|x| *x = f(x));
     }
 
-    pub fn edit(&self, f: impl 'static + FnOnce(&mut T)) {
+    pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
         if let Some(state) = self.0.upgrade() {
             f(&mut state.borrow_mut().current);
             state.borrow().update_dependents();
