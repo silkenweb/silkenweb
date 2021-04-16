@@ -163,6 +163,7 @@ impl ElementBuilder {
         self
     }
 
+    // TODO: Make text reactive
     pub fn text(mut self, child: impl AsRef<str>) -> Self {
         self.append_child(&document().create_text_node(child.as_ref()));
         self
