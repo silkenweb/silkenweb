@@ -1,13 +1,9 @@
 use surfinia_core::{
-    hooks::{
-        list_state::ElementList,
-        state::{use_state, GetState, SetState},
-    },
+    hooks::state::{use_state, GetState, SetState},
     mount,
     Builder,
-    ElementBuilder,
 };
-use surfinia_html::{button, div, h1, header, input, label, li, section, Li};
+use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
 
 struct TodoItem {
     text: String,
@@ -59,8 +55,8 @@ impl TodoItem {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, _list_mut) = use_state(ElementList::new(
-        ElementBuilder::new("ul").attribute("class", "todo-list"),
+    let (list, _list_mut) = use_state(element_list(
+        ul().class("todo-list"),
         TodoItem::render,
         [
             TodoItem::new("Test 1", false),

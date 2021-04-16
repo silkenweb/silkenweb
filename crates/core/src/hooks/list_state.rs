@@ -7,21 +7,20 @@ pub struct ElementList<T> {
 }
 
 impl<T: 'static> ElementList<T> {
-    // TODO: Accept other element builder types (maybe take a function like `div`)
+    // TODO: Assert builders children empty.
     // How would we set attributes? Could take a Builder type and build it.
-    pub fn new<'a, GenerateChild, Elem>(
+    pub fn new<'a, GenerateChild>(
         root: ElementBuilder,
         generate_child: GenerateChild,
         initial: impl Iterator<Item = &'a T>,
     ) -> Self
     where
-        Elem: Into<Element>,
-        GenerateChild: 'static + Fn(&T) -> Elem,
+        GenerateChild: 'static + Fn(&T) -> Element,
     {
         let mut new = Self {
             root,
             children: Vec::new(),
-            generate_child: Box::new(move |e| generate_child(e).into()),
+            generate_child: Box::new(generate_child),
         };
 
         for elem in initial {

@@ -7,9 +7,8 @@ use surfinia_core::{
     },
     mount,
     Builder,
-    ElementBuilder,
 };
-use surfinia_html::{button, div, Div};
+use surfinia_html::{button, div, element_list, Div};
 
 fn counter() -> GetState<Div> {
     let (count, set_count) = use_state(0);
@@ -28,11 +27,7 @@ fn counter() -> GetState<Div> {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let (list, list_mut) = use_state(ElementList::new(
-        ElementBuilder::new("div"),
-        move |()| counter(),
-        iter::empty(),
-    ));
+    let (list, list_mut) = use_state(element_list(div(), move |()| counter(), iter::empty()));
     let push_elem = list_mut.clone();
     let pop_elem = list_mut;
 

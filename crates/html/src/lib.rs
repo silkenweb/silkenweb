@@ -1,6 +1,12 @@
 #![allow(clippy::must_use_candidate)]
-use surfinia_core::{Builder, DomElement, Element, ElementBuilder, hooks::{list_state::ElementList, state::GetState}, tag};
-
+use surfinia_core::{
+    hooks::{list_state::ElementList, state::GetState},
+    tag,
+    Builder,
+    DomElement,
+    Element,
+    ElementBuilder,
+};
 use web_sys as dom;
 
 macro_rules! attr_name {
@@ -87,6 +93,12 @@ macro_rules! html_element {
                 }
             }
 
+            impl From<[<$name:camel Builder>]> for ElementBuilder {
+                fn from(builder: [<$name:camel Builder>]) -> Self {
+                    builder.0
+                }
+            }
+
             #[derive(Clone)]
             pub struct [<$name:camel>](Element);
 
@@ -150,6 +162,20 @@ macro_rules! child_categories {
             )*
         }
     }
+}
+
+pub fn element_list<'a, T, GenerateChild, ChildElem, ParentElem>(
+    root: ParentElem,
+    generate_child: GenerateChild,
+    initial: impl Iterator<Item = &'a T>,
+) -> ElementList<T>
+where
+    T: 'static,
+    ChildElem: Into<Element> + Parent<ParentElem::Target>,
+    ParentElem: Into<ElementBuilder> + Builder,
+    GenerateChild: 'static + Fn(&T) -> ChildElem,
+{
+    ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
 
 html_element!(div {});
