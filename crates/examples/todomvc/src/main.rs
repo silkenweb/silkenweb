@@ -25,7 +25,6 @@ impl TodoItem {
     fn render(&self) -> Li {
         let text = self.text.clone();
 
-        let mut li = li();
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -35,12 +34,11 @@ impl TodoItem {
             })
             .checked(self.completed.with(|&completed| completed));
 
-        li = li.class(
+        li().class(
             self.completed
-                .with(|&completed| if completed { "completed" } else { "" }.to_owned()),
-        );
-
-        li.child(
+                .with(|&completed| if completed { "completed" } else { "" }),
+        )
+        .child(
             div()
                 .class("view")
                 .child(completed_checkbox)
