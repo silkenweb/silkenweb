@@ -22,17 +22,13 @@ macro_rules! attr_name {
     };
 }
 
-macro_rules! attribute {
-    ($attr:ident : $typ:ty) => {
-        pub fn $attr(self, value: impl AttributeValue<$typ>) -> Self {
-            Self(self.0.attribute(attr_name!($attr), value))
-        }
-    };
-}
-
-macro_rules! attribute_list {
-    ($($attr:ident : $typ:tt),* $(,)?) => {
-        $(attribute!($attr : $typ);)*
+macro_rules! attributes {
+    ($($attr:ident : $typ:ty),* $(,)?) => {
+        $(
+            pub fn $attr(self, value: impl AttributeValue<$typ>) -> Self {
+                Self(self.0.attribute(attr_name!($attr), value))
+            }
+        )*
     };
 }
 
@@ -58,7 +54,7 @@ macro_rules! html_element {
             pub struct [<$name:camel Builder>](ElementBuilder);
 
             impl [<$name:camel Builder>] {
-                attribute_list![id: String, class: String, $($attr: $typ, )*];
+                attributes![id: String, class: String, $($attr: $typ, )*];
                 events![click];
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
