@@ -9,8 +9,4 @@ docker build --iidfile "$image_id_file" .
 image_id="$(<"$image_id_file")"
 
 # --init is required to forward sigterm to child processes.
-docker run \
-    --init \
-    --rm \
-    "$image_id" \
-    "$@"
+docker run --init --rm "$image_id" "$@"
