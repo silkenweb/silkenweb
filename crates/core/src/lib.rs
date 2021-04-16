@@ -57,6 +57,12 @@ impl StaticAttribute for String {
     }
 }
 
+impl StaticAttribute for str {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        dom_element.set_attribute(name.as_ref(), &self).unwrap();
+    }
+}
+
 pub trait AttributeValue<T> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
@@ -95,16 +101,35 @@ where
     T: 'static + StaticAttribute,
 {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        let owned_name = name.as_ref().to_string();
-        let name_key = owned_name.clone();
+        let name = name.as_ref().to_string();
         let dom_element = builder.0.dom_element.clone();
-        self.current().set_attribute(name, &dom_element);
+        self.current().set_attribute(&name, &dom_element);
 
-        let updater = self.with(move |new_value| {
-            new_value.set_attribute(&owned_name, &dom_element);
+        let updater = self.with({
+            let name = name.clone();
+            move |new_value| {
+                new_value.set_attribute(&name, &dom_element);
+            }
         });
 
-        builder.0.reactive_attrs.insert(name_key, updater);
+        builder.0.reactive_attrs.insert(name, updater);
+    }
+}
+
+impl AttributeValue<String> for GetState<&'static str> {
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        let name = name.as_ref().to_string();
+        let dom_element = builder.0.dom_element.clone();
+        self.current().set_attribute(&name, &dom_element);
+
+        let updater = self.with({
+            let name = name.clone();
+            move |&new_value| {
+                new_value.set_attribute(&name, &dom_element);
+            }
+        });
+
+        builder.0.reactive_attrs.insert(name, updater);
     }
 }
 
