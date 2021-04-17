@@ -77,10 +77,8 @@ fn main() {
 
                                     if !text.is_empty() {
                                         ts.push(&TodoItem::new(text, false));
+                                        input.set_value("");
                                     }
-
-                                    // TODO: Clear value here or inside `if`?
-                                    input.set_value("");
                                 })
                             }
                         }),
