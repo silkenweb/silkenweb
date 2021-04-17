@@ -46,6 +46,18 @@ macro_rules! events {
     };
 }
 
+macro_rules! html_events {
+    () => {
+        events! {
+            click: dom::MouseEvent,
+            focusout: dom::FocusEvent,
+            input: dom::InputEvent,
+            keydown: dom::KeyboardEvent,
+            keyup: dom::KeyboardEvent,
+        }
+    };
+}
+
 macro_rules! html_element {
     ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
         paste::item! {
@@ -57,7 +69,7 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![id: String, class: String, $($attr: $typ, )*];
-                events!{click: dom::MouseEvent}
+                html_events!();
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))

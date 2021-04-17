@@ -52,6 +52,8 @@ features = [
     "HashChangeEventInit",
     "IdbVersionChangeEvent",
     "IdbVersionChangeEventInit",
+    "InputEvent",
+    "InputEventInit",
     "KeyboardEvent",
     "KeyboardEventInit",
     "MessageEvent",
