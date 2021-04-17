@@ -9,6 +9,7 @@ use surfinia_core::{
     ElementBuilder,
     Text,
 };
+use wasm_bindgen::JsCast;
 use web_sys as dom;
 
 macro_rules! attr_name {
@@ -34,11 +35,11 @@ macro_rules! attributes {
 }
 
 macro_rules! events {
-    ($($name:ident),* $(,)?) => {
+    ($($name:ident: $typ:ty),* $(,)?) => {
         paste::item!{
             $(
-                pub fn [<on_ $name >] (self, mut f: impl 'static + FnMut()) -> Self {
-                    Self(self.0.on(stringify!($name), move |_| f()))
+                pub fn [<on_ $name >] (self, mut f: impl 'static + FnMut($typ)) -> Self {
+                    Self(self.0.on(stringify!($name), move |js_ev| f(js_ev.unchecked_into())))
                 }
             )*
         }
@@ -56,7 +57,7 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![id: String, class: String, $($attr: $typ, )*];
-                events![click];
+                events!{click: dom::MouseEvent}
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))
