@@ -8,12 +8,12 @@ use surfinia_core::{
 use surfinia_html::{button, div, DivBuilder};
 
 fn counter(count: &Signal<u32>) -> DivBuilder {
-    let inc = count.writer();
-    let dec = count.writer();
+    let inc = count.write();
+    let dec = count.write();
 
     div()
         .child(button().on_click(move || dec.replace(|i| i - 1)).text("-"))
-        .text(count.map(|i| format!("{}", i)))
+        .text(count.read().map(|i| format!("{}", i)))
         .child(button().on_click(move || inc.replace(|i| i + 1)).text("+"))
 }
 
@@ -25,7 +25,7 @@ fn main() {
 
     mount(
         "app",
-        counter(&count).child(count.map(move |&count| {
+        counter(&count).child(count.read().map(move |&count| {
             *call_count.borrow_mut() += 1;
             web_log::println!("Call count = {}", call_count.borrow());
 

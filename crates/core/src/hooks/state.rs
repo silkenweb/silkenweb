@@ -18,15 +18,23 @@ impl<T: 'static> Signal<T> {
         Self(Rc::new(RefCell::new(State::new(initial))))
     }
 
+    pub fn read(&self) -> ReadSignal<T> {
+        ReadSignal(self.0.clone())
+    }
+
+    pub fn write(&self) -> WriteSignal<T> {
+        WriteSignal(Rc::downgrade(&self.0))
+    }
+}
+
+pub struct ReadSignal<T>(SharedState<T>);
+
+impl<T: 'static> ReadSignal<T> {
     pub fn current(&self) -> Ref<T> {
         Ref::map(self.0.borrow(), |state| &state.current)
     }
 
-    pub fn writer(&self) -> WriteSignal<T> {
-        WriteSignal(Rc::downgrade(&self.0))
-    }
-
-    pub fn map<U, Generate>(&self, generate: Generate) -> Signal<U>
+    pub fn map<U, Generate>(&self, generate: Generate) -> ReadSignal<U>
     where
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
@@ -36,7 +44,7 @@ impl<T: 'static> Signal<T> {
         // TODO: Handle removing the new value from dependents.
         self.0.borrow_mut().dependents.push(Rc::new({
             let existing = self.0.clone();
-            let set_value = value.writer();
+            let set_value = value.write();
 
             move |new_value| {
                 let _existing = existing.clone();
@@ -44,7 +52,7 @@ impl<T: 'static> Signal<T> {
             }
         }));
 
-        value
+        value.read()
     }
 }
 

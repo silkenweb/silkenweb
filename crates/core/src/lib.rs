@@ -8,7 +8,7 @@ pub mod hooks;
 
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
-use hooks::{queue_update, state::Signal};
+use hooks::{queue_update, state::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -94,7 +94,7 @@ impl<'a> AttributeValue<String> for &'a String {
     }
 }
 
-impl<T> AttributeValue<T> for Signal<T>
+impl<T> AttributeValue<T> for ReadSignal<T>
 where
     T: 'static + StaticAttribute,
 {
@@ -133,7 +133,7 @@ where
     }
 }
 
-impl<T> Text for Signal<T>
+impl<T> Text for ReadSignal<T>
 where
     T: 'static + AsRef<str>,
 {
@@ -152,7 +152,7 @@ where
     }
 }
 
-impl AttributeValue<String> for Signal<&'static str> {
+impl AttributeValue<String> for ReadSignal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         self.map(|&value| value.to_string())
             .set_attribute(name, builder);
@@ -245,7 +245,7 @@ impl From<ElementBuilder> for Element {
 
 enum ElementKind {
     Static(ElementData),
-    Reactive(Signal<dom::Element>),
+    Reactive(ReadSignal<dom::Element>),
 }
 
 #[derive(Clone)]
@@ -256,11 +256,11 @@ pub trait DomElement {
     fn dom_element(&self) -> dom::Element;
 }
 
-impl<E> From<Signal<E>> for Element
+impl<E> From<ReadSignal<E>> for Element
 where
     E: 'static + DomElement,
 {
-    fn from(elem: Signal<E>) -> Self {
+    fn from(elem: ReadSignal<E>) -> Self {
         let dom_element = Rc::new(RefCell::new(elem.current().dom_element()));
 
         let updater = elem.map({
@@ -292,8 +292,8 @@ pub struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     // TODO: What happens if you set 2 reactive attrs with same name or 2 text attrs?
-    reactive_attrs: HashMap<String, Signal<()>>,
-    reactive_text: Option<Signal<()>>,
+    reactive_attrs: HashMap<String, ReadSignal<()>>,
+    reactive_text: Option<ReadSignal<()>>,
 }
 
 impl DomElement for Element {

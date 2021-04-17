@@ -1,6 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{
-    hooks::{list_state::ElementList, state::Signal},
+    hooks::{list_state::ElementList, state::ReadSignal},
     tag,
     AttributeValue,
     Builder,
@@ -137,8 +137,8 @@ macro_rules! categories {
                 impl content_category::$category for [<$name:camel Builder>] {}
 
                 // TODO: Fix this
-                impl content_category::$category for Signal<[<$name:camel>]> {}
-                impl content_category::$category for Signal<[<$name:camel Builder>]> {}
+                impl content_category::$category for ReadSignal<[<$name:camel>]> {}
+                impl content_category::$category for ReadSignal<[<$name:camel Builder>]> {}
             )*
         }
     }
@@ -222,7 +222,7 @@ impl<Child, T> Parent<Child> for T where T: ParentCategory<Child> + Into<Element
 pub trait ParentCategory<T> {}
 
 // TODO: Fix this
-impl<T> content_category::Flow for Signal<ElementList<T>> {}
+impl<T> content_category::Flow for ReadSignal<ElementList<T>> {}
 
 pub mod content_category {
     macro_rules! content_categories {

@@ -5,14 +5,14 @@ fn main() {
     console_error_panic_hook::set_once();
 
     let count = Signal::new(0);
-    let inc = count.writer();
-    let dec = count.writer();
+    let inc = count.write();
+    let dec = count.write();
 
     mount(
         "app",
         div()
             .child(button().on_click(move || dec.replace(|i| i - 1)).text("-"))
-            .text(count.map(|i| format!("{}", i)))
+            .text(count.read().map(|i| format!("{}", i)))
             .child(button().on_click(move || inc.replace(|i| i + 1)).text("+")),
     );
 }

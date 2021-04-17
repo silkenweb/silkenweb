@@ -21,13 +21,14 @@ impl TodoItem {
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                let set_completed = self.completed.writer();
+                let set_completed = self.completed.write();
                 move || set_completed.replace(|completed| !completed)
             })
-            .checked(self.completed.map(|&completed| completed));
+            .checked(self.completed.read().map(|&completed| completed));
 
         li().class(
             self.completed
+                .read()
                 .map(|&completed| if completed { "completed" } else { "" }),
         )
         .child(
@@ -67,6 +68,6 @@ fn main() {
                         .autofocus(true),
                 ),
             )
-            .child(section().class("main").child(list)),
+            .child(section().class("main").child(list.read())),
     );
 }
