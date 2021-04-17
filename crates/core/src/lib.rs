@@ -103,7 +103,7 @@ where
         let dom_element = builder.element.dom_element.clone();
         self.current().set_attribute(&name, &dom_element);
 
-        let updater = self.with({
+        let updater = self.map({
             let name = name.clone();
             move |new_value| {
                 new_value.set_attribute(&name, &dom_element);
@@ -142,7 +142,7 @@ where
         // TODO: Is there a better way, avoiding the unwrap?
         let text_node = builder.text_node.as_ref().unwrap().clone();
 
-        let updater = self.with({
+        let updater = self.map({
             move |new_value| {
                 text_node.set_node_value(Some(new_value.as_ref()));
             }
@@ -154,7 +154,7 @@ where
 
 impl AttributeValue<String> for Signal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        self.with(|&value| value.to_string())
+        self.map(|&value| value.to_string())
             .set_attribute(name, builder);
     }
 }
@@ -263,7 +263,7 @@ where
     fn from(elem: Signal<E>) -> Self {
         let dom_element = Rc::new(RefCell::new(elem.current().dom_element()));
 
-        let updater = elem.with({
+        let updater = elem.map({
             move |element| {
                 let new_dom_element = element.dom_element();
 

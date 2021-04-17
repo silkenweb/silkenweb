@@ -14,7 +14,7 @@ fn counter() -> Div {
 
     div()
         .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-        .text(count.with(|i| format!("{}", i)))
+        .text(count.map(|i| format!("{}", i)))
         .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
         .build()
 }

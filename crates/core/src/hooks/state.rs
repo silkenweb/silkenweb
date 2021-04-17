@@ -20,7 +20,7 @@ impl<T: 'static> Signal<T> {
         SetSignal(Rc::downgrade(&self.0))
     }
 
-    pub fn with<U, Generate>(&self, generate: Generate) -> Signal<U>
+    pub fn map<U, Generate>(&self, generate: Generate) -> Signal<U>
     where
         U: 'static,
         Generate: 'static + Fn(&T) -> U,

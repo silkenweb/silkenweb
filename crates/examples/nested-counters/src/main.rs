@@ -13,7 +13,7 @@ fn counter(count: &Signal<u32>) -> DivBuilder {
 
     div()
         .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-        .text(count.with(|i| format!("{}", i)))
+        .text(count.map(|i| format!("{}", i)))
         .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
 }
 
@@ -25,7 +25,7 @@ fn main() {
 
     mount(
         "app",
-        counter(&count).child(count.with(move |&count| {
+        counter(&count).child(count.map(move |&count| {
             *call_count.borrow_mut() += 1;
             web_log::println!("Call count = {}", call_count.borrow());
 

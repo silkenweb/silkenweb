@@ -24,11 +24,11 @@ impl TodoItem {
                 let set_completed = self.completed.setter();
                 move || set_completed.map(|completed| !completed)
             })
-            .checked(self.completed.with(|&completed| completed));
+            .checked(self.completed.map(|&completed| completed));
 
         li().class(
             self.completed
-                .with(|&completed| if completed { "completed" } else { "" }),
+                .map(|&completed| if completed { "completed" } else { "" }),
         )
         .child(
             div()
