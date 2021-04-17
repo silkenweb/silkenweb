@@ -78,19 +78,19 @@ where
     T: StaticAttribute,
 {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        self.set_attribute(name, &builder.0.dom_element);
+        self.set_attribute(name, &builder.element.dom_element);
     }
 }
 
 impl<'a> AttributeValue<String> for &'a str {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        set_attribute(&builder.0.dom_element, name, self);
+        set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
 impl<'a> AttributeValue<String> for &'a String {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        set_attribute(&builder.0.dom_element, name, self);
+        set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
@@ -100,7 +100,7 @@ where
 {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         let name = name.as_ref().to_string();
-        let dom_element = builder.0.dom_element.clone();
+        let dom_element = builder.element.dom_element.clone();
         self.current().set_attribute(&name, &dom_element);
 
         let updater = self.with({
@@ -110,7 +110,7 @@ where
             }
         });
 
-        builder.0.reactive_attrs.insert(name, updater);
+        builder.element.reactive_attrs.insert(name, updater);
     }
 }
 
@@ -123,12 +123,12 @@ where
     T: AsRef<str>,
 {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        if let Some(text_node) = builder.0.text_node.as_ref() {
+        if let Some(text_node) = builder.text_node.as_ref() {
             text_node.set_node_value(Some(self.as_ref()));
         } else {
             let text_node = document().create_text_node(self.as_ref());
             builder.append_child(&text_node);
-            builder.0.text_node = Some(text_node);
+            builder.text_node = Some(text_node);
         }
     }
 }
@@ -140,7 +140,7 @@ where
     fn set_text(&self, builder: &mut ElementBuilder) {
         self.current().set_text(builder);
         // TODO: Is there a better way, avoiding the unwrap?
-        let text_node = builder.0.text_node.as_ref().unwrap().clone();
+        let text_node = builder.text_node.as_ref().unwrap().clone();
 
         let updater = self.with({
             move |new_value| {
@@ -148,7 +148,7 @@ where
             }
         });
 
-        builder.0.reactive_text = Some(updater);
+        builder.element.reactive_text = Some(updater);
     }
 }
 
@@ -159,20 +159,23 @@ impl AttributeValue<String> for Signal<&'static str> {
     }
 }
 
-pub struct ElementBuilder(ElementData);
+pub struct ElementBuilder {
+    element: ElementData,
+    text_node: Option<dom::Text>,
+}
 
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
-        ElementBuilder(ElementData {
-            // TODO: Do dom_element and text_element need to be on ElementData, or just
-            // ElementBuilder?
-            dom_element: document().create_element(tag.as_ref()).unwrap(),
+        ElementBuilder {
+            element: ElementData {
+                dom_element: document().create_element(tag.as_ref()).unwrap(),
+                children: Vec::new(),
+                event_callbacks: Vec::new(),
+                reactive_attrs: HashMap::new(),
+                reactive_text: None,
+            },
             text_node: None,
-            children: Vec::new(),
-            event_callbacks: Vec::new(),
-            reactive_attrs: HashMap::new(),
-            reactive_text: None,
-        })
+        }
     }
 
     pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl AttributeValue<T>) -> Self {
@@ -186,7 +189,7 @@ impl ElementBuilder {
         let child = child.into();
 
         self.append_child(&child.dom_element());
-        self.0.children.push(child);
+        self.element.children.push(child);
         self
     }
 
@@ -198,8 +201,8 @@ impl ElementBuilder {
 
     pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
         {
-            let dom_element = self.0.dom_element.clone();
-            self.0
+            let dom_element = self.element.dom_element.clone();
+            self.element
                 .event_callbacks
                 .push(EventCallback::new(dom_element, name, f));
         }
@@ -208,7 +211,7 @@ impl ElementBuilder {
     }
 
     fn append_child(&mut self, element: &dom::Node) {
-        let dom_element = self.0.dom_element.clone();
+        let dom_element = self.element.dom_element.clone();
         let element = element.clone();
 
         queue_update(move || {
@@ -217,7 +220,7 @@ impl ElementBuilder {
     }
 
     fn remove_child(&mut self, element: &dom::Node) {
-        let dom_element = self.0.dom_element.clone();
+        let dom_element = self.element.dom_element.clone();
         let element = element.clone();
 
         queue_update(move || {
@@ -230,7 +233,7 @@ impl Builder for ElementBuilder {
     type Target = Element;
 
     fn build(self) -> Self::Target {
-        Element(Rc::new(ElementKind::Static(self.0)))
+        Element(Rc::new(ElementKind::Static(self.element)))
     }
 }
 
@@ -286,7 +289,6 @@ where
 
 pub struct ElementData {
     dom_element: dom::Element,
-    text_node: Option<dom::Text>,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     // TODO: What happens if you set 2 reactive attrs with same name or 2 text attrs?
@@ -305,7 +307,7 @@ impl DomElement for Element {
 
 impl DomElement for ElementBuilder {
     fn dom_element(&self) -> dom::Element {
-        self.0.dom_element.clone()
+        self.element.dom_element.clone()
     }
 }
 
