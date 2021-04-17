@@ -58,7 +58,7 @@ impl<T: 'static> SetSignal<T> {
         }
     }
 
-    pub fn map(&self, f: impl 'static + FnOnce(&T) -> T) {
+    pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
         self.mutate(|x| *x = f(x));
     }
 

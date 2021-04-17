@@ -22,7 +22,7 @@ impl TodoItem {
             .type_("checkbox")
             .on_click({
                 let set_completed = self.completed.setter();
-                move || set_completed.map(|completed| !completed)
+                move || set_completed.replace(|completed| !completed)
             })
             .checked(self.completed.map(|&completed| completed));
 
