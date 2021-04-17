@@ -7,6 +7,12 @@ type SharedState<T> = Rc<RefCell<State<T>>>;
 
 pub struct Signal<T>(SharedState<T>);
 
+impl<T> Clone for Signal<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 impl<T: 'static> Signal<T> {
     pub fn new(initial: T) -> Self {
         Self(Rc::new(RefCell::new(State::new(initial))))
