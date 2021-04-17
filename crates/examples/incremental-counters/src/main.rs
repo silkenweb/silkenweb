@@ -13,9 +13,17 @@ fn counter() -> Div {
     let dec = count.write();
 
     div()
-        .child(button().on_click(move |_| dec.replace(|i| i - 1)).text("-"))
+        .child(
+            button()
+                .on_click(move |_, _| dec.replace(|i| i - 1))
+                .text("-"),
+        )
         .text(count.read().map(|i| format!("{}", i)))
-        .child(button().on_click(move |_| inc.replace(|i| i + 1)).text("+"))
+        .child(
+            button()
+                .on_click(move |_, _| inc.replace(|i| i + 1))
+                .text("+"),
+        )
         .build()
 }
 
@@ -30,12 +38,12 @@ fn main() {
         div()
             .child(
                 button()
-                    .on_click(move |_| pop_elem.mutate(ElementList::pop))
+                    .on_click(move |_, _| pop_elem.mutate(ElementList::pop))
                     .text("-"),
             )
             .child(
                 button()
-                    .on_click(move |_| push_elem.mutate(|l| l.push(&())))
+                    .on_click(move |_, _| push_elem.mutate(|l| l.push(&())))
                     .text("+"),
             )
             .child(list.read()),

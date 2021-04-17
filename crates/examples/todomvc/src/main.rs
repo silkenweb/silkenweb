@@ -2,8 +2,6 @@ use std::iter;
 
 use surfinia_core::{hooks::state::Signal, mount, Builder};
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
-use wasm_bindgen::JsCast;
-use web_sys as dom;
 
 struct TodoItem {
     text: String,
@@ -26,7 +24,7 @@ impl TodoItem {
             .type_("checkbox")
             .on_click({
                 let set_completed = self.completed.write();
-                move |_| set_completed.replace(|completed| !completed)
+                move |_, _| set_completed.replace(|completed| !completed)
             })
             .checked(self.completed.read().map(|&completed| completed));
 
@@ -66,12 +64,9 @@ fn main() {
                         .class("new-todo")
                         .placeholder("What needs to be done?")
                         .autofocus(true)
-                        .on_keyup(move |keyup| {
+                        .on_keyup(move |keyup, input| {
                             if keyup.key() == "Enter" {
                                 list_mut.mutate(move |ts| {
-                                    let target = keyup.target().unwrap();
-                                    // TODO: Wrap event type and provide pre-cast target()
-                                    let input: dom::HtmlInputElement = target.dyn_into().unwrap();
                                     let text = input.value();
                                     let text = text.trim();
 

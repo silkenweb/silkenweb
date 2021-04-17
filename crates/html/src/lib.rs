@@ -35,11 +35,21 @@ macro_rules! attributes {
 }
 
 macro_rules! events {
-    ($($name:ident: $typ:ty),* $(,)?) => {
+    ($elem_type:ty {
+        $($name:ident: $event_type:ty),* $(,)?
+    }) => {
         paste::item!{
             $(
-                pub fn [<on_ $name >] (self, mut f: impl 'static + FnMut($typ)) -> Self {
-                    Self(self.0.on(stringify!($name), move |js_ev| f(js_ev.unchecked_into())))
+                pub fn [<on_ $name >] (
+                    self,
+                    mut f: impl 'static + FnMut($event_type, $elem_type)
+                ) -> Self {
+                    Self(self.0.on(stringify!($name), move |js_ev| {
+                        let event: $event_type = js_ev.unchecked_into();
+                        // TODO: Is it safe to unwrap here?
+                        let target: $elem_type = event.target().unwrap().unchecked_into();
+                        f(event, target);
+                    }))
                 }
             )*
         }
@@ -47,19 +57,19 @@ macro_rules! events {
 }
 
 macro_rules! html_events {
-    () => {
-        events! {
+    ($elem_type:ty) => {
+        events!($elem_type {
             click: dom::MouseEvent,
             focusout: dom::FocusEvent,
             input: dom::InputEvent,
             keydown: dom::KeyboardEvent,
             keyup: dom::KeyboardEvent,
-        }
+        });
     };
 }
 
 macro_rules! html_element {
-    ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
+    ($name:ident <$elem_type:ty> { $($attr:ident : $typ:ty),* $(,)? }) => {
         paste::item! {
             pub fn $name() -> [<$name:camel Builder>] {
                 [<$name: camel Builder>](tag(stringify!($name)))
@@ -69,7 +79,7 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![id: String, class: String, $($attr: $typ, )*];
-                html_events!();
+                html_events!($elem_type);
 
                 pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
                     Self(self.0.child(c.into()))
@@ -181,30 +191,31 @@ where
     ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
 
-html_element!(div {});
+// TODO: Set correct dom elements
+html_element!(div <dom::Element> {});
 text_parent!(div);
 categories!(div[Flow, Palpable]);
 child_categories!(div[Flow]);
 
-html_element!(button {});
+html_element!(button <dom::Element> {});
 text_parent!(button);
 categories!(button[Flow, Palpable]);
 child_categories!(button[Flow]);
 
-html_element!(section {});
+html_element!(section <dom::Element> {});
 categories!(section[Flow, Sectioning, Palpable]);
 child_categories!(section[Flow]);
 
-html_element!(header {});
+html_element!(header <dom::Element> {});
 categories!(header[Flow, Palpable]);
 child_categories!(header[Flow]);
 
-html_element!(h1 {});
+html_element!(h1 <dom::Element> {});
 text_parent!(h1);
 categories!(h1[Flow, Heading, Palpable]);
 child_categories!(h1[Phrasing]);
 
-html_element!(input {
+html_element!(input <dom::HtmlInputElement> {
     type_: String,
     placeholder: String,
     value: String,
@@ -213,17 +224,17 @@ html_element!(input {
 });
 categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
-html_element!(label { for_: String });
+html_element!(label <dom::Element> { for_: String });
 text_parent!(label);
 categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
 child_categories!(label[Phrasing]);
 
-html_element!(ul {});
+html_element!(ul <dom::Element> {});
 text_parent!(ul);
 categories!(ul[Flow, Palpable]);
 child_categories!(ul[Flow]); // TODO: Allowed child tags.
 
-html_element!(li {});
+html_element!(li <dom::Element> {});
 text_parent!(li);
 categories!(li[Flow]);
 child_categories!(li[Flow]);

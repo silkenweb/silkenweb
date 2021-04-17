@@ -8,5 +8,3 @@ edition = "2018"
 surfinia-core = { path = "../../core" }
 surfinia-html = { path = "../../html" }
 console_error_panic_hook = "0.1"
-web-sys = "0.3"
-wasm-bindgen = "0.2"
