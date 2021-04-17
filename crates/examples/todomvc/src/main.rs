@@ -1,5 +1,9 @@
+use std::iter;
+
 use surfinia_core::{hooks::state::Signal, mount, Builder};
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
+use wasm_bindgen::JsCast;
+use web_sys as dom;
 
 struct TodoItem {
     text: String,
@@ -48,13 +52,9 @@ fn main() {
     let list = Signal::new(element_list(
         ul().class("todo-list"),
         TodoItem::render,
-        [
-            TodoItem::new("Test 1", false),
-            TodoItem::new("Test 2", false),
-            TodoItem::new("Test 3", true),
-        ]
-        .iter(),
+        iter::empty(),
     ));
+    let list_mut = list.write();
 
     mount(
         "app",
@@ -65,7 +65,25 @@ fn main() {
                     input()
                         .class("new-todo")
                         .placeholder("What needs to be done?")
-                        .autofocus(true),
+                        .autofocus(true)
+                        .on_keyup(move |keyup| {
+                            if keyup.key() == "Enter" {
+                                list_mut.mutate(move |ts| {
+                                    let target = keyup.target().unwrap();
+                                    // TODO: Wrap event type and provide pre-cast target()
+                                    let input: dom::HtmlInputElement = target.dyn_into().unwrap();
+                                    let text = input.value();
+                                    let text = text.trim();
+
+                                    if !text.is_empty() {
+                                        ts.push(&TodoItem::new(text, false));
+                                    }
+
+                                    // TODO: Clear value here or inside `if`?
+                                    input.set_value("");
+                                })
+                            }
+                        }),
                 ),
             )
             .child(section().class("main").child(list.read())),
