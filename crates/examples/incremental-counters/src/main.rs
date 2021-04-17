@@ -9,8 +9,8 @@ use surfinia_html::{button, div, element_list, Div};
 
 fn counter() -> Div {
     let count = Signal::new(0);
-    let inc = count.setter();
-    let dec = count.setter();
+    let inc = count.writer();
+    let dec = count.writer();
 
     div()
         .child(button().on_click(move || dec.replace(|i| i - 1)).text("-"))
@@ -22,8 +22,8 @@ fn counter() -> Div {
 fn main() {
     console_error_panic_hook::set_once();
     let list = Signal::new(element_list(div(), move |()| counter(), iter::empty()));
-    let push_elem = list.setter();
-    let pop_elem = list.setter();
+    let push_elem = list.writer();
+    let pop_elem = list.writer();
 
     mount(
         "app",

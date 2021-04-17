@@ -8,8 +8,8 @@ use surfinia_core::{
 use surfinia_html::{button, div, DivBuilder};
 
 fn counter(count: &Signal<u32>) -> DivBuilder {
-    let inc = count.setter();
-    let dec = count.setter();
+    let inc = count.writer();
+    let dec = count.writer();
 
     div()
         .child(button().on_click(move || dec.replace(|i| i - 1)).text("-"))

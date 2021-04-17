@@ -5,8 +5,8 @@ fn main() {
     console_error_panic_hook::set_once();
 
     let count = Signal::new(0);
-    let inc = count.setter();
-    let dec = count.setter();
+    let inc = count.writer();
+    let dec = count.writer();
 
     mount(
         "app",

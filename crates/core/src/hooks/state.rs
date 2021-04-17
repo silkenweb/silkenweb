@@ -22,8 +22,8 @@ impl<T: 'static> Signal<T> {
         Ref::map(self.0.borrow(), |state| &state.current)
     }
 
-    pub fn setter(&self) -> SetSignal<T> {
-        SetSignal(Rc::downgrade(&self.0))
+    pub fn writer(&self) -> WriteSignal<T> {
+        WriteSignal(Rc::downgrade(&self.0))
     }
 
     pub fn map<U, Generate>(&self, generate: Generate) -> Signal<U>
@@ -36,7 +36,7 @@ impl<T: 'static> Signal<T> {
         // TODO: Handle removing the new value from dependents.
         self.0.borrow_mut().dependents.push(Rc::new({
             let existing = self.0.clone();
-            let set_value = value.setter();
+            let set_value = value.writer();
 
             move |new_value| {
                 let _existing = existing.clone();
@@ -48,15 +48,15 @@ impl<T: 'static> Signal<T> {
     }
 }
 
-pub struct SetSignal<T>(rc::Weak<RefCell<State<T>>>);
+pub struct WriteSignal<T>(rc::Weak<RefCell<State<T>>>);
 
-impl<T> Clone for SetSignal<T> {
+impl<T> Clone for WriteSignal<T> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-impl<T: 'static> SetSignal<T> {
+impl<T: 'static> WriteSignal<T> {
     pub fn set(&self, new_value: T) {
         if let Some(state) = self.0.upgrade() {
             state.borrow_mut().current = new_value;
