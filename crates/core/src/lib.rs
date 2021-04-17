@@ -114,6 +114,44 @@ where
     }
 }
 
+pub trait Text {
+    fn set_text(&self, builder: &mut ElementBuilder);
+}
+
+impl<T> Text for T
+where
+    T: AsRef<str>,
+{
+    fn set_text(&self, builder: &mut ElementBuilder) {
+        if let Some(text_node) = builder.0.text_node.as_ref() {
+            text_node.set_node_value(Some(self.as_ref()));
+        } else {
+            let text_node = document().create_text_node(self.as_ref());
+            builder.append_child(&text_node);
+            builder.0.text_node = Some(text_node);
+        }
+    }
+}
+
+impl<T> Text for Signal<T>
+where
+    T: 'static + AsRef<str>,
+{
+    fn set_text(&self, builder: &mut ElementBuilder) {
+        self.current().set_text(builder);
+        // TODO: Is there a better way, avoiding the unwrap?
+        let text_node = builder.0.text_node.as_ref().unwrap().clone();
+
+        let updater = self.with({
+            move |new_value| {
+                text_node.set_node_value(Some(new_value.as_ref()));
+            }
+        });
+
+        builder.0.reactive_text = Some(updater);
+    }
+}
+
 impl AttributeValue<String> for Signal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         self.with(|&value| value.to_string())
@@ -126,10 +164,14 @@ pub struct ElementBuilder(ElementData);
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
         ElementBuilder(ElementData {
+            // TODO: Do dom_element and text_element need to be on ElementData, or just
+            // ElementBuilder?
             dom_element: document().create_element(tag.as_ref()).unwrap(),
+            text_node: None,
             children: Vec::new(),
             event_callbacks: Vec::new(),
             reactive_attrs: HashMap::new(),
+            reactive_text: None,
         })
     }
 
@@ -148,9 +190,9 @@ impl ElementBuilder {
         self
     }
 
-    // TODO: Make text reactive
-    pub fn text(mut self, child: impl AsRef<str>) -> Self {
-        self.append_child(&document().create_text_node(child.as_ref()));
+    pub fn text(mut self, child: impl Text) -> Self {
+        child.set_text(&mut self);
+        mem::drop(child);
         self
     }
 
@@ -244,9 +286,12 @@ where
 
 pub struct ElementData {
     dom_element: dom::Element,
+    text_node: Option<dom::Text>,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
+    // TODO: What happens if you set 2 reactive attrs with same name or 2 text attrs?
     reactive_attrs: HashMap<String, Signal<()>>,
+    reactive_text: Option<Signal<()>>,
 }
 
 impl DomElement for Element {

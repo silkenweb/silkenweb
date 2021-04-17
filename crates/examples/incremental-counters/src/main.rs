@@ -7,22 +7,16 @@ use surfinia_core::{
 };
 use surfinia_html::{button, div, element_list, Div};
 
-fn counter() -> Signal<Div> {
+fn counter() -> Div {
     let count = Signal::new(0);
-    let set_count = count.setter();
+    let inc = count.setter();
+    let dec = count.setter();
 
-    count.with({
-        move |i| {
-            let inc = set_count.clone();
-            let dec = set_count.clone();
-
-            div()
-                .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-                .text(format!("{}", i))
-                .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
-                .build()
-        }
-    })
+    div()
+        .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
+        .text(count.with(|i| format!("{}", i)))
+        .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
+        .build()
 }
 
 fn main() {

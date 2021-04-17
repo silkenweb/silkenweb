@@ -7,6 +7,7 @@ use surfinia_core::{
     DomElement,
     Element,
     ElementBuilder,
+    Text,
 };
 use web_sys as dom;
 
@@ -118,7 +119,7 @@ macro_rules! text_parent {
     ($name:ident) => {
         paste::item! {
             impl [<$name:camel Builder>] {
-                pub fn text(self, child: impl AsRef<str>) -> Self {
+                pub fn text(self, child: impl Text) -> Self {
                     Self(self.0.text(child))
                 }
             }

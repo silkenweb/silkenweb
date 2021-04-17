@@ -12,9 +12,9 @@ fn counter(count: &Signal<u32>) -> DivBuilder {
     let dec = count.setter();
 
     div()
-        .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
         .child(button().on_click(move || dec.map(|i| i - 1)).text("-"))
-        .child(count.with(|i| div().text(format!("Count = {}", i))))
+        .text(count.with(|i| format!("{}", i)))
+        .child(button().on_click(move || inc.map(|i| i + 1)).text("+"))
 }
 
 fn main() {
