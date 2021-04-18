@@ -45,8 +45,11 @@ impl TodoItem {
     ) {
         let text = input.value();
         let text = text.trim();
-        set_text.set(text.to_string());
-        set_editing.set(false);
+
+        if !text.is_empty() {
+            set_text.set(text.to_string());
+            set_editing.set(false);
+        }
     }
 
     fn class(completed: bool, editing: bool) -> String {
