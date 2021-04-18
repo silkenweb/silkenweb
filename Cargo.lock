@@ -121,6 +121,7 @@ dependencies = [
  "console_error_panic_hook",
  "surfinia-core",
  "surfinia-html",
+ "web-sys",
 ]
 
 [[package]]

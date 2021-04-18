@@ -1,11 +1,12 @@
 use std::iter;
 
 use surfinia_core::{
-    hooks::state::{ReadSignal, Signal},
+    hooks::state::{ReadSignal, Signal, WriteSignal},
     mount,
     Builder,
 };
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
+use web_sys::HtmlInputElement;
 
 struct TodoItem {
     text: Signal<String>,
@@ -50,26 +51,32 @@ impl TodoItem {
                         // TODO: on_blur and on_keyup(Enter) to finish editing
 
                         // TODO: Set focus once this is rendered.
-                        item.child(input().class("edit").type_("text").value(&get_text)
-                            .on_keyup({
-                                let set_editing = set_editing.clone();
-                                let set_text = set_text.clone();
-                                
-                                move |keyup, input| {
-                                    let key = keyup.key();
-                                    
-                                    if key == "Escape" {
-                                        set_editing.set(false);
+                        item.child(
+                            input()
+                                .class("edit")
+                                .type_("text")
+                                .value(&get_text)
+                                .on_blur({
+                                    // TODO: This doesn't seem to work
+                                    let set_editing = set_editing.clone();
+                                    let set_text = set_text.clone();
+                                    move |_, input| save_edits(&input, &set_text, &set_editing)
+                                })
+                                .on_keyup({
+                                    let set_editing = set_editing.clone();
+                                    let set_text = set_text.clone();
+
+                                    move |keyup, input| {
+                                        let key = keyup.key();
+
+                                        if key == "Escape" {
+                                            set_editing.set(false);
+                                        } else if key == "Enter" {
+                                            save_edits(&input, &set_text, &set_editing);
+                                        }
                                     }
-                                    else if key == "Enter" {
-                                        let text = input.value();
-                                        let text = text.trim();
-                              
-                                        set_text.set(text.to_string());
-                                        set_editing.set(false);
-                                    }
-                                }
-                            }))
+                                }),
+                        )
                     } else {
                         let completed_checkbox = input()
                             .class("toggle")
@@ -96,6 +103,17 @@ impl TodoItem {
             }
         })
     }
+}
+
+fn save_edits(
+    input: &HtmlInputElement,
+    set_text: &WriteSignal<String>,
+    set_editing: &WriteSignal<bool>,
+) {
+    let text = input.value();
+    let text = text.trim();
+    set_text.set(text.to_string());
+    set_editing.set(false);
 }
 
 fn main() {
