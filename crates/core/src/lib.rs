@@ -114,6 +114,16 @@ where
     }
 }
 
+impl<'a, T> AttributeValue<T> for &'a ReadSignal<T>
+where
+    ReadSignal<T>: AttributeValue<T>,
+    T: 'static,
+{
+    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        (*self).set_attribute(name, builder);
+    }
+}
+
 pub trait Text {
     fn set_text(&self, builder: &mut ElementBuilder);
 }
@@ -149,6 +159,17 @@ where
         });
 
         builder.element.reactive_text = Some(updater);
+    }
+}
+
+// TODO: Code to test this
+impl<'a, T> Text for &'a ReadSignal<T>
+where
+    T: 'static,
+    ReadSignal<T>: Text
+{
+    fn set_text(&self, builder: &mut ElementBuilder) {
+        (*self).set_text(builder);
     }
 }
 

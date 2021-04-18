@@ -8,7 +8,7 @@ use surfinia_core::{
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
 
 struct TodoItem {
-    text: String,
+    text: Signal<String>,
     completed: Signal<bool>,
     editing: Signal<bool>,
 }
@@ -16,7 +16,7 @@ struct TodoItem {
 impl TodoItem {
     fn new(text: impl Into<String>, completed: bool) -> Self {
         Self {
-            text: text.into(),
+            text: Signal::new(text.into()),
             completed: Signal::new(completed),
             editing: Signal::new(false),
         }
@@ -24,10 +24,11 @@ impl TodoItem {
 
     fn render(&self) -> ReadSignal<Li> {
         self.editing.read().map({
-            let text = self.text.clone();
             let set_editing = self.editing.write();
             let set_completed = self.completed.write();
             let get_completed = self.completed.read();
+            let get_text = self.text.read();
+            let set_text = self.text.write();
 
             move |&editing| {
                 {
@@ -49,15 +50,26 @@ impl TodoItem {
                         // TODO: on_blur and on_keyup(Enter) to finish editing
 
                         // TODO: Set focus once this is rendered.
-                        item.child(input().class("edit").type_("text").value(&text))
+                        item.child(input().class("edit").type_("text").value(&get_text)
                             .on_keyup({
                                 let set_editing = set_editing.clone();
+                                let set_text = set_text.clone();
+                                
                                 move |keyup, input| {
-                                    if keyup.key() == "Escape" {
+                                    let key = keyup.key();
+                                    
+                                    if key == "Escape" {
+                                        set_editing.set(false);
+                                    }
+                                    else if key == "Enter" {
+                                        let text = input.value();
+                                        let text = text.trim();
+                              
+                                        set_text.set(text.to_string());
                                         set_editing.set(false);
                                     }
                                 }
-                            })
+                            }))
                     } else {
                         let completed_checkbox = input()
                             .class("toggle")
@@ -72,7 +84,7 @@ impl TodoItem {
                             div()
                                 .class("view")
                                 .child(completed_checkbox)
-                                .child(label().text(&text).on_dblclick({
+                                .child(label().text(&get_text).on_dblclick({
                                     let set_editing = set_editing.clone();
                                     move |_, _| set_editing.set(true)
                                 }))
