@@ -17,6 +17,7 @@ use surfinia_html::{
     li,
     section,
     ul,
+    Div,
     Input,
     Li,
 };
@@ -91,6 +92,32 @@ impl TodoItem {
             .build()
     }
 
+    fn render_view(
+        set_completed: &WriteSignal<bool>,
+        get_completed: &ReadSignal<bool>,
+        get_text: &ReadSignal<String>,
+        set_editing: &WriteSignal<bool>,
+    ) -> Div {
+        let completed_checkbox = input()
+            .class("toggle")
+            .type_("checkbox")
+            .on_click({
+                clone!(set_completed);
+                move |_, _| set_completed.replace(|completed| !completed)
+            })
+            .checked(get_completed.map(|&completed| completed));
+
+        div()
+            .class("view")
+            .child(completed_checkbox)
+            .child(label().text(get_text).on_dblclick({
+                clone!(set_editing);
+                move |_, _| set_editing.set(true)
+            }))
+            .child(button().class("destroy"))
+            .build()
+    }
+
     fn render(&self) -> ReadSignal<Li> {
         self.editing.read().map({
             let set_editing = self.editing.write();
@@ -100,37 +127,19 @@ impl TodoItem {
             let set_text = self.text.write();
 
             move |&editing| {
-                {
-                    let item = li().class(
-                        get_completed.map(move |&completed| Self::class(completed, editing)),
-                    );
+                let item = li()
+                    .class(get_completed.map(move |&completed| Self::class(completed, editing)));
 
-                    if editing {
-                        // TODO: on_blur and on_keyup(Enter) to finish editing
-
-                        // TODO: Set focus once this is rendered.
-                        item.child(Self::render_edit(&get_text, &set_text, &set_editing))
-                    } else {
-                        let completed_checkbox = input()
-                            .class("toggle")
-                            .type_("checkbox")
-                            .on_click({
-                                clone!(set_completed);
-                                move |_, _| set_completed.replace(|completed| !completed)
-                            })
-                            .checked(get_completed.map(|&completed| completed));
-
-                        item.child(
-                            div()
-                                .class("view")
-                                .child(completed_checkbox)
-                                .child(label().text(&get_text).on_dblclick({
-                                    clone!(set_editing);
-                                    move |_, _| set_editing.set(true)
-                                }))
-                                .child(button().class("destroy")),
-                        )
-                    }
+                if editing {
+                    // TODO: Set focus once this is rendered.
+                    item.child(Self::render_edit(&get_text, &set_text, &set_editing))
+                } else {
+                    item.child(Self::render_view(
+                        &set_completed,
+                        &get_completed,
+                        &get_text,
+                        &set_editing,
+                    ))
                 }
                 .build()
             }
