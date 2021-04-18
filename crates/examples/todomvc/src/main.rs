@@ -2,9 +2,13 @@ use std::iter;
 
 use surfinia_core::{
     clone,
-    hooks::state::{ReadSignal, Signal, WriteSignal},
+    hooks::{
+        effect,
+        state::{ReadSignal, Signal, WriteSignal},
+    },
     mount,
     Builder,
+    DomElement,
 };
 use surfinia_html::{
     button,
@@ -134,8 +138,11 @@ impl TodoItem {
                     .class(get_completed.map(move |&completed| Self::class(completed, editing)));
 
                 if editing {
-                    // TODO: Set focus once this is rendered.
-                    item.child(Self::render_edit(&get_text, &set_text, &set_editing))
+                    let input = Self::render_edit(&get_text, &set_text, &set_editing);
+                    let dom_elem = input.dom_element();
+
+                    effect(move || dom_elem.focus().unwrap());
+                    item.child(input)
                 } else {
                     item.child(Self::render_view(
                         &set_completed,

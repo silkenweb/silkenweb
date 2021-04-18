@@ -173,7 +173,7 @@ where
 impl<'a, T> Text for &'a ReadSignal<T>
 where
     T: 'static,
-    ReadSignal<T>: Text
+    ReadSignal<T>: Text,
 {
     fn set_text(&self, builder: &mut ElementBuilder) {
         (*self).set_text(builder);
@@ -281,7 +281,9 @@ pub struct Element(Rc<ElementKind>);
 
 // TODO: Find a better way to add all child types to dom
 pub trait DomElement {
-    fn dom_element(&self) -> dom::Element;
+    type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
+
+    fn dom_element(&self) -> Self::Target;
 }
 
 impl<E> From<ReadSignal<E>> for Element
@@ -289,11 +291,11 @@ where
     E: 'static + DomElement,
 {
     fn from(elem: ReadSignal<E>) -> Self {
-        let dom_element = Rc::new(RefCell::new(elem.current().dom_element()));
+        let dom_element = Rc::new(RefCell::new(elem.current().dom_element().into()));
 
         let updater = elem.map({
             move |element| {
-                let new_dom_element = element.dom_element();
+                let new_dom_element: dom::Element = element.dom_element().into();
 
                 queue_update({
                     let dom_element = dom_element.borrow().clone();
@@ -325,7 +327,9 @@ pub struct ElementData {
 }
 
 impl DomElement for Element {
-    fn dom_element(&self) -> dom::Element {
+    type Target = dom::Element;
+
+    fn dom_element(&self) -> Self::Target {
         match self.0.as_ref() {
             ElementKind::Static(elem) => elem.dom_element.clone(),
             ElementKind::Reactive(elem) => elem.current().clone(),
@@ -334,7 +338,9 @@ impl DomElement for Element {
 }
 
 impl DomElement for ElementBuilder {
-    fn dom_element(&self) -> dom::Element {
+    type Target = dom::Element;
+
+    fn dom_element(&self) -> Self::Target {
         self.element.dom_element.clone()
     }
 }

@@ -7,7 +7,7 @@ use std::{
     rc::Rc,
 };
 
-use super::queue_effect;
+use super::effect;
 
 #[derive(Clone, Default)]
 pub struct Memo(Rc<RefCell<MemoData>>);
@@ -29,7 +29,7 @@ impl Memo {
             memo.effect_queued = true;
             let memo_data = Rc::downgrade(&self.0);
 
-            queue_effect(move || {
+            effect(move || {
                 if let Some(memo) = memo_data.upgrade() {
                     let mut memo = memo.borrow_mut();
                     memo.current_memoized = mem::take(&mut memo.next_memoized);

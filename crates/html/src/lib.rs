@@ -97,8 +97,10 @@ macro_rules! html_element {
             }
 
             impl DomElement for [<$name:camel Builder>] {
-                fn dom_element(&self) -> dom::Element {
-                    self.0.dom_element()
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    self.0.dom_element().unchecked_into()
                 }
             }
 
@@ -132,8 +134,10 @@ macro_rules! html_element {
             }
 
             impl DomElement for [<$name:camel>] {
-                fn dom_element(&self) -> dom::Element {
-                    self.0.dom_element()
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    self.0.dom_element().unchecked_into()
                 }
             }
         }

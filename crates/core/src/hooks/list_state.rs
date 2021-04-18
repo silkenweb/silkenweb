@@ -1,3 +1,5 @@
+use web_sys as dom;
+
 use crate::{DomElement, Element, ElementBuilder};
 
 pub struct ElementList<T> {
@@ -44,7 +46,9 @@ impl<T: 'static> ElementList<T> {
 }
 
 impl<T> DomElement for ElementList<T> {
-    fn dom_element(&self) -> web_sys::Element {
+    type Target = dom::Element;
+
+    fn dom_element(&self) -> Self::Target {
         self.root.dom_element()
     }
 }
