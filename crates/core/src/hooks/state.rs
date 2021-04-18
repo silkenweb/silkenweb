@@ -29,6 +29,12 @@ impl<T: 'static> Signal<T> {
 
 pub struct ReadSignal<T>(SharedState<T>);
 
+impl<T> Clone for ReadSignal<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 impl<T: 'static> ReadSignal<T> {
     pub fn current(&self) -> Ref<T> {
         Ref::map(self.0.borrow(), |state| &state.current)
@@ -39,7 +45,7 @@ impl<T: 'static> ReadSignal<T> {
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
     {
-        let value = Signal::new(generate(&self.0.borrow().current));
+        let value = Signal::new(generate(&self.current()));
 
         // TODO: Handle removing the new value from dependents.
         self.0.borrow_mut().dependents.push(Rc::new({
@@ -49,6 +55,54 @@ impl<T: 'static> ReadSignal<T> {
             move |new_value| {
                 let _existing = existing.clone();
                 set_value.set(generate(new_value))
+            }
+        }));
+
+        value.read()
+    }
+}
+
+pub trait ZipSignal<Generate> {
+    type Target;
+
+    fn map(&self, generate: Generate) -> ReadSignal<Self::Target>;
+}
+
+impl<T0, T1, U, Generate> ZipSignal<Generate> for (ReadSignal<T0>, ReadSignal<T1>)
+where
+    T0: 'static,
+    T1: 'static,
+    U: 'static,
+    Generate: 'static + Fn(&T0, &T1) -> U,
+{
+    type Target = U;
+
+    fn map(&self, generate: Generate) -> ReadSignal<Self::Target> {
+        let v0 = self.0.clone();
+        let v1 = self.1.clone();
+        let value = Signal::new(generate(&v0.current(), &v1.current()));
+        let generate0 = Rc::new(generate);
+        let generate1 = generate0.clone();
+
+        // TODO: Handle removing the new value from dependents.
+        v0.0.borrow_mut().dependents.push(Rc::new({
+            let v0 = v0.0.clone();
+            let set_value = value.write();
+            let v1 = v1.clone();
+
+            move |new_value| {
+                let _existing = v0.clone();
+                set_value.set(generate0(new_value, &v1.current()))
+            }
+        }));
+
+        v1.0.borrow_mut().dependents.push(Rc::new({
+            let v1 = v1.0.clone();
+            let set_value = value.write();
+
+            move |new_value| {
+                let _existing = v1.clone();
+                set_value.set(generate1(&v0.current(), new_value))
             }
         }));
 

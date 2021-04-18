@@ -1,10 +1,9 @@
 use std::iter;
 
 use surfinia_core::{
-    clone,
     hooks::{
         effect,
-        state::{ReadSignal, Signal, WriteSignal},
+        state::{ReadSignal, Signal, ZipSignal},
     },
     mount,
     Builder,
@@ -27,6 +26,7 @@ use surfinia_html::{
 };
 use web_sys::HtmlInputElement;
 
+#[derive(Clone)]
 struct TodoItem {
     text: Signal<String>,
     completed: Signal<bool>,
@@ -42,82 +42,65 @@ impl TodoItem {
         }
     }
 
-    fn save_edits(
-        input: &HtmlInputElement,
-        set_text: &WriteSignal<String>,
-        set_editing: &WriteSignal<bool>,
-    ) {
+    fn save_edits(&self, input: &HtmlInputElement) {
         let text = input.value();
         let text = text.trim();
 
         if !text.is_empty() {
-            set_text.set(text.to_string());
-            set_editing.set(false);
+            self.text.write().set(text.to_string());
+            self.editing.write().set(false);
         }
     }
 
-    fn class(completed: bool, editing: bool) -> String {
-        let mut classes = Vec::new();
-
-        if completed {
-            classes.push("completed");
-        }
-
-        if editing {
-            classes.push("editing");
-        }
-
-        classes.join(" ")
+    fn class(&self) -> ReadSignal<String> {
+        (self.completed.read(), self.editing.read()).map(move |&completed, &editing| {
+            vec![(completed, "completed"), (editing, "editing")]
+                .into_iter()
+                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
     }
 
-    fn render_edit(
-        get_text: &ReadSignal<String>,
-        set_text: &WriteSignal<String>,
-        set_editing: &WriteSignal<bool>,
-    ) -> Input {
+    fn render_edit(&self) -> Input {
         input()
             .class("edit")
             .type_("text")
-            .value(get_text)
+            .value(&self.text.read())
             .on_focusout({
-                clone!(set_editing, set_text);
-                move |_, input| Self::save_edits(&input, &set_text, &set_editing)
+                let this = self.clone();
+                move |_, input| this.save_edits(&input)
             })
             .on_keyup({
-                clone!(set_editing, set_text);
+                let this = self.clone();
                 move |keyup, input| {
                     let key = keyup.key();
 
                     if key == "Escape" {
-                        set_editing.set(false);
+                        this.editing.write().set(false);
                     } else if key == "Enter" {
-                        Self::save_edits(&input, &set_text, &set_editing);
+                        this.save_edits(&input);
                     }
                 }
             })
             .build()
     }
 
-    fn render_view(
-        set_completed: &WriteSignal<bool>,
-        get_completed: &ReadSignal<bool>,
-        get_text: &ReadSignal<String>,
-        set_editing: &WriteSignal<bool>,
-    ) -> Div {
+    fn render_view(&self) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                clone!(set_completed);
+                let set_completed = self.completed.write();
                 move |_, _| set_completed.replace(|completed| !completed)
             })
-            .checked(get_completed.map(|&completed| completed));
+            .checked(self.completed.read().map(|&completed| completed));
 
         div()
             .class("view")
             .child(completed_checkbox)
-            .child(label().text(get_text).on_dblclick({
-                clone!(set_editing);
+            .child(label().text(self.text.read()).on_dblclick({
+                let set_editing = self.editing.write();
                 move |_, _| set_editing.set(true)
             }))
             .child(button().class("destroy"))
@@ -125,33 +108,22 @@ impl TodoItem {
     }
 
     fn render(&self) -> ReadSignal<Li> {
-        self.editing.read().map({
-            let set_editing = self.editing.write();
-            let set_completed = self.completed.write();
-            let get_completed = self.completed.read();
-            let get_text = self.text.read();
-            let set_text = self.text.write();
+        let this = self.clone();
+        let class = this.class();
 
-            move |&editing| {
-                let item = li()
-                    .class(get_completed.map(move |&completed| Self::class(completed, editing)));
+        self.editing.read().map(move |&editing| {
+            let item = li().class(class.clone());
 
-                if editing {
-                    let input = Self::render_edit(&get_text, &set_text, &set_editing);
-                    let dom_elem = input.dom_element();
+            if editing {
+                let input = this.render_edit();
+                let dom_elem = input.dom_element();
 
-                    effect(move || dom_elem.focus().unwrap());
-                    item.child(input)
-                } else {
-                    item.child(Self::render_view(
-                        &set_completed,
-                        &get_completed,
-                        &get_text,
-                        &set_editing,
-                    ))
-                }
-                .build()
+                effect(move || dom_elem.focus().unwrap());
+                item.child(input)
+            } else {
+                item.child(this.render_view())
             }
+            .build()
         })
     }
 }
