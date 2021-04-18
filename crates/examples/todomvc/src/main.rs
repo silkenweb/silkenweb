@@ -1,6 +1,7 @@
 use std::iter;
 
 use surfinia_core::{
+    clone,
     hooks::state::{ReadSignal, Signal, WriteSignal},
     mount,
     Builder,
@@ -58,14 +59,11 @@ impl TodoItem {
                                 .value(&get_text)
                                 .on_blur({
                                     // TODO: This doesn't seem to work
-                                    let set_editing = set_editing.clone();
-                                    let set_text = set_text.clone();
+                                    clone!(set_editing, set_text);
                                     move |_, input| save_edits(&input, &set_text, &set_editing)
                                 })
                                 .on_keyup({
-                                    let set_editing = set_editing.clone();
-                                    let set_text = set_text.clone();
-
+                                    clone!(set_editing, set_text);
                                     move |keyup, input| {
                                         let key = keyup.key();
 
@@ -82,7 +80,7 @@ impl TodoItem {
                             .class("toggle")
                             .type_("checkbox")
                             .on_click({
-                                let set_completed = set_completed.clone();
+                                clone!(set_completed);
                                 move |_, _| set_completed.replace(|completed| !completed)
                             })
                             .checked(get_completed.map(|&completed| completed));
@@ -92,7 +90,7 @@ impl TodoItem {
                                 .class("view")
                                 .child(completed_checkbox)
                                 .child(label().text(&get_text).on_dblclick({
-                                    let set_editing = set_editing.clone();
+                                    clone!(set_editing);
                                     move |_, _| set_editing.set(true)
                                 }))
                                 .child(button().class("destroy")),

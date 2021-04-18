@@ -12,6 +12,13 @@ use hooks::{queue_update, state::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
+#[macro_export]
+macro_rules! clone{
+    ($($x:ident),* $(,)?) => {
+        $(let $x = $x.clone();)*
+    }
+}
+
 pub fn mount(id: &str, elem: impl Into<Element>) {
     let elem = elem.into();
 
