@@ -24,6 +24,31 @@ impl TodoItem {
         }
     }
 
+    fn save_edits(
+        input: &HtmlInputElement,
+        set_text: &WriteSignal<String>,
+        set_editing: &WriteSignal<bool>,
+    ) {
+        let text = input.value();
+        let text = text.trim();
+        set_text.set(text.to_string());
+        set_editing.set(false);
+    }
+
+    fn class(completed: bool, editing: bool) -> String {
+        let mut classes = Vec::new();
+
+        if completed {
+            classes.push("completed");
+        }
+
+        if editing {
+            classes.push("editing");
+        }
+
+        classes.join(" ")
+    }
+
     fn render(&self) -> ReadSignal<Li> {
         self.editing.read().map({
             let set_editing = self.editing.write();
@@ -34,19 +59,9 @@ impl TodoItem {
 
             move |&editing| {
                 {
-                    let item = li().class(get_completed.map(move |&completed| {
-                        let mut classes = Vec::new();
-
-                        if completed {
-                            classes.push("completed");
-                        }
-
-                        if editing {
-                            classes.push("editing");
-                        }
-
-                        classes.join(" ")
-                    }));
+                    let item = li().class(
+                        get_completed.map(move |&completed| Self::class(completed, editing)),
+                    );
 
                     if editing {
                         // TODO: on_blur and on_keyup(Enter) to finish editing
@@ -60,7 +75,9 @@ impl TodoItem {
                                 .on_blur({
                                     // TODO: This doesn't seem to work
                                     clone!(set_editing, set_text);
-                                    move |_, input| save_edits(&input, &set_text, &set_editing)
+                                    move |_, input| {
+                                        Self::save_edits(&input, &set_text, &set_editing)
+                                    }
                                 })
                                 .on_keyup({
                                     clone!(set_editing, set_text);
@@ -70,7 +87,7 @@ impl TodoItem {
                                         if key == "Escape" {
                                             set_editing.set(false);
                                         } else if key == "Enter" {
-                                            save_edits(&input, &set_text, &set_editing);
+                                            Self::save_edits(&input, &set_text, &set_editing);
                                         }
                                     }
                                 }),
@@ -101,17 +118,6 @@ impl TodoItem {
             }
         })
     }
-}
-
-fn save_edits(
-    input: &HtmlInputElement,
-    set_text: &WriteSignal<String>,
-    set_editing: &WriteSignal<bool>,
-) {
-    let text = input.value();
-    let text = text.trim();
-    set_text.set(text.to_string());
-    set_editing.set(false);
 }
 
 fn main() {
