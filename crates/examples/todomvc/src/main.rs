@@ -1,11 +1,16 @@
 use std::iter;
 
-use surfinia_core::{hooks::state::Signal, mount, Builder};
+use surfinia_core::{
+    hooks::state::{ReadSignal, Signal},
+    mount,
+    Builder,
+};
 use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
 
 struct TodoItem {
     text: String,
     completed: Signal<bool>,
+    editing: Signal<bool>,
 }
 
 impl TodoItem {
@@ -13,33 +18,71 @@ impl TodoItem {
         Self {
             text: text.into(),
             completed: Signal::new(completed),
+            editing: Signal::new(false),
         }
     }
 
-    fn render(&self) -> Li {
-        let completed_checkbox = input()
-            .class("toggle")
-            .type_("checkbox")
-            .on_click({
-                let set_completed = self.completed.write();
-                move |_, _| set_completed.replace(|completed| !completed)
-            })
-            .checked(self.completed.read().map(|&completed| completed));
+    fn render(&self) -> ReadSignal<Li> {
+        self.editing.read().map({
+            let text = self.text.clone();
+            let set_editing = self.editing.write();
+            let set_completed = self.completed.write();
+            let get_completed = self.completed.read();
 
-        li().class(
-            self.completed
-                .read()
-                .map(|&completed| if completed { "completed" } else { "" }),
-        )
-        .child(
-            div()
-                .class("view")
-                .child(completed_checkbox)
-                .child(label().text(&self.text))
-                .child(button().class("destroy")),
-        )
-        .child(input().class("edit").value(&self.text))
-        .build()
+            move |&editing| {
+                {
+                    let item = li().class(get_completed.map(move |&completed| {
+                        let mut classes = Vec::new();
+
+                        if completed {
+                            classes.push("completed");
+                        }
+
+                        if editing {
+                            classes.push("editing");
+                        }
+
+                        classes.join(" ")
+                    }));
+
+                    if editing {
+                        // TODO: on_blur and on_keyup(Enter) to finish editing
+
+                        // TODO: Set focus once this is rendered.
+                        item.child(input().class("edit").type_("text").value(&text))
+                            .on_keyup({
+                                let set_editing = set_editing.clone();
+                                move |keyup, input| {
+                                    if keyup.key() == "Escape" {
+                                        set_editing.set(false);
+                                    }
+                                }
+                            })
+                    } else {
+                        let completed_checkbox = input()
+                            .class("toggle")
+                            .type_("checkbox")
+                            .on_click({
+                                let set_completed = set_completed.clone();
+                                move |_, _| set_completed.replace(|completed| !completed)
+                            })
+                            .checked(get_completed.map(|&completed| completed));
+
+                        item.child(
+                            div()
+                                .class("view")
+                                .child(completed_checkbox)
+                                .child(label().text(&text).on_dblclick({
+                                    let set_editing = set_editing.clone();
+                                    move |_, _| set_editing.set(true)
+                                }))
+                                .child(button().class("destroy")),
+                        )
+                    }
+                }
+                .build()
+            }
+        })
     }
 }
 

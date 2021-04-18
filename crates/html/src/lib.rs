@@ -59,7 +59,9 @@ macro_rules! events {
 macro_rules! html_events {
     ($elem_type:ty) => {
         events!($elem_type {
+            blur: dom::FocusEvent,
             click: dom::MouseEvent,
+            dblclick: dom::MouseEvent,
             focusout: dom::FocusEvent,
             input: dom::InputEvent,
             keydown: dom::KeyboardEvent,
