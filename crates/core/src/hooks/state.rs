@@ -152,6 +152,13 @@ impl<T: 'static> State<T> {
     }
 
     fn update_dependents(&self) {
+        // TODO: Experiment with finer grained borrowing.
+        //
+        // `current` and `dependents` should be RefCells, instead of the whole of
+        // `State`.
+        // Seperate exisiting dependents from new dependents, so we can borrow
+        // dependents and add to new dependents from within a dep. Then we need to take
+        // and process new dependencies, until we're done. Would this recurse forever?
         for dep in &self.dependents {
             dep(&self.current);
         }
