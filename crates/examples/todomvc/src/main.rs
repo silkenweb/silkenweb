@@ -17,8 +17,6 @@ impl TodoItem {
     }
 
     fn render(&self) -> Li {
-        let text = self.text.clone();
-
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -37,10 +35,10 @@ impl TodoItem {
             div()
                 .class("view")
                 .child(completed_checkbox)
-                .child(label().text(&text))
+                .child(label().text(&self.text))
                 .child(button().class("destroy")),
         )
-        .child(input().class("edit").value(&text))
+        .child(input().class("edit").value(&self.text))
         .build()
     }
 }
