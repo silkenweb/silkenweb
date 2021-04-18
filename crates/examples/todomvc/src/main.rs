@@ -6,7 +6,20 @@ use surfinia_core::{
     mount,
     Builder,
 };
-use surfinia_html::{button, div, element_list, h1, header, input, label, li, section, ul, Li};
+use surfinia_html::{
+    button,
+    div,
+    element_list,
+    h1,
+    header,
+    input,
+    label,
+    li,
+    section,
+    ul,
+    Input,
+    Li,
+};
 use web_sys::HtmlInputElement;
 
 struct TodoItem {
@@ -49,6 +62,35 @@ impl TodoItem {
         classes.join(" ")
     }
 
+    fn render_edit(
+        get_text: &ReadSignal<String>,
+        set_text: &WriteSignal<String>,
+        set_editing: &WriteSignal<bool>,
+    ) -> Input {
+        input()
+            .class("edit")
+            .type_("text")
+            .value(get_text)
+            .on_blur({
+                // TODO: This doesn't seem to work
+                clone!(set_editing, set_text);
+                move |_, input| Self::save_edits(&input, &set_text, &set_editing)
+            })
+            .on_keyup({
+                clone!(set_editing, set_text);
+                move |keyup, input| {
+                    let key = keyup.key();
+
+                    if key == "Escape" {
+                        set_editing.set(false);
+                    } else if key == "Enter" {
+                        Self::save_edits(&input, &set_text, &set_editing);
+                    }
+                }
+            })
+            .build()
+    }
+
     fn render(&self) -> ReadSignal<Li> {
         self.editing.read().map({
             let set_editing = self.editing.write();
@@ -67,31 +109,7 @@ impl TodoItem {
                         // TODO: on_blur and on_keyup(Enter) to finish editing
 
                         // TODO: Set focus once this is rendered.
-                        item.child(
-                            input()
-                                .class("edit")
-                                .type_("text")
-                                .value(&get_text)
-                                .on_blur({
-                                    // TODO: This doesn't seem to work
-                                    clone!(set_editing, set_text);
-                                    move |_, input| {
-                                        Self::save_edits(&input, &set_text, &set_editing)
-                                    }
-                                })
-                                .on_keyup({
-                                    clone!(set_editing, set_text);
-                                    move |keyup, input| {
-                                        let key = keyup.key();
-
-                                        if key == "Escape" {
-                                            set_editing.set(false);
-                                        } else if key == "Enter" {
-                                            Self::save_edits(&input, &set_text, &set_editing);
-                                        }
-                                    }
-                                }),
-                        )
+                        item.child(Self::render_edit(&get_text, &set_text, &set_editing))
                     } else {
                         let completed_checkbox = input()
                             .class("toggle")
