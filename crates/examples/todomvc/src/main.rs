@@ -80,7 +80,6 @@ impl TodoItem {
             .type_("text")
             .value(get_text)
             .on_focusout({
-                // TODO: This doesn't seem to work
                 clone!(set_editing, set_text);
                 move |_, input| Self::save_edits(&input, &set_text, &set_editing)
             })
