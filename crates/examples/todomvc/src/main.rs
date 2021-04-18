@@ -74,12 +74,10 @@ impl TodoItem {
             .on_keyup({
                 let this = self.clone();
                 move |keyup, input| {
-                    let key = keyup.key();
-
-                    if key == "Escape" {
-                        this.editing.write().set(false);
-                    } else if key == "Enter" {
-                        this.save_edits(&input);
+                    match keyup.key().as_str() {
+                        "Escape" => this.editing.write().set(false),
+                        "Enter" => this.save_edits(&input),
+                        _ => (),
                     }
                 }
             })
