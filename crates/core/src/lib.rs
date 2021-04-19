@@ -248,6 +248,16 @@ impl ElementBuilder {
             dom_element.remove_child(&element).unwrap();
         });
     }
+
+    fn remove_last(&mut self) {
+        let dom_element = self.element.dom_element.clone();
+
+        queue_update(move || {
+            dom_element
+                .remove_child(&dom_element.last_element_child().unwrap())
+                .unwrap();
+        });
+    }
 }
 
 impl Builder for ElementBuilder {

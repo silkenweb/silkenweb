@@ -43,7 +43,11 @@ fn main() {
             )
             .child(
                 button()
-                    .on_click(move |_, _| push_elem.mutate(|l| l.push(&())))
+                    .on_click(move |_, _| {
+                        push_elem.mutate(|l| {
+                            l.push(&());
+                        })
+                    })
                     .text("+"),
             )
             .child(list.read()),

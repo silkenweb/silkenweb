@@ -4,7 +4,6 @@ use crate::{DomElement, Element, ElementBuilder};
 
 pub struct ElementList<T> {
     root: ElementBuilder,
-    children: Vec<Element>,
     generate_child: Box<dyn Fn(&T) -> Element>,
 }
 
@@ -21,7 +20,6 @@ impl<T: 'static> ElementList<T> {
     {
         let mut new = Self {
             root,
-            children: Vec::new(),
             generate_child: Box::new(generate_child),
         };
 
@@ -34,14 +32,15 @@ impl<T: 'static> ElementList<T> {
 
     pub fn push(&mut self, new_elem: &T) {
         let child = (self.generate_child)(&new_elem);
-
         self.root.append_child(&child.dom_element());
-        self.children.push(child);
+    }
+
+    pub fn remove(&mut self, elem: &dom::Element) {
+        self.root.remove_child(elem);
     }
 
     pub fn pop(&mut self) {
-        let child = self.children.pop().expect("List must be non-empty");
-        self.root.remove_child(&child.dom_element());
+        self.root.remove_last();
     }
 }
 

@@ -3,7 +3,8 @@ use std::iter;
 use surfinia_core::{
     hooks::{
         effect,
-        state::{ReadSignal, Signal, ZipSignal},
+        list_state::ElementList,
+        state::{ReadSignal, Signal, WriteSignal, ZipSignal},
     },
     mount,
     Builder,
@@ -24,6 +25,7 @@ use surfinia_html::{
     Input,
     Li,
 };
+use web_sys as dom;
 use web_sys::HtmlInputElement;
 
 #[derive(Clone)]
@@ -31,14 +33,20 @@ struct TodoItem {
     text: Signal<String>,
     completed: Signal<bool>,
     editing: Signal<bool>,
+    parent: WriteSignal<ElementList<Self>>,
 }
 
 impl TodoItem {
-    fn new(text: impl Into<String>, completed: bool) -> Self {
+    fn new(
+        text: impl Into<String>,
+        completed: bool,
+        parent: WriteSignal<ElementList<Self>>,
+    ) -> Self {
         Self {
             text: Signal::new(text.into()),
             completed: Signal::new(completed),
             editing: Signal::new(false),
+            parent,
         }
     }
 
@@ -82,7 +90,7 @@ impl TodoItem {
             .build()
     }
 
-    fn render_view(&self) -> Div {
+    fn render_view(&self, dom_elem: dom::Element) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -91,6 +99,7 @@ impl TodoItem {
                 move |_, _| set_completed.replace(|completed| !completed)
             })
             .checked(self.completed.read().map(|&completed| completed));
+        let parent = self.parent.clone();
 
         div()
             .class("view")
@@ -99,7 +108,12 @@ impl TodoItem {
                 let set_editing = self.editing.write();
                 move |_, _| set_editing.set(true)
             }))
-            .child(button().class("destroy"))
+            .child(button().class("destroy").on_click(move |_, _| {
+                parent.mutate({
+                    let dom_elem = dom_elem.clone();
+                    move |p| p.remove(&dom_elem)
+                })
+            }))
             .build()
     }
 
@@ -109,6 +123,7 @@ impl TodoItem {
 
         self.editing.read().map(move |&editing| {
             let item = li().class(class.clone());
+            let dom_elem = item.dom_element();
 
             if editing {
                 let input = this.render_edit();
@@ -117,7 +132,7 @@ impl TodoItem {
                 effect(move || dom_elem.focus().unwrap());
                 item.child(input)
             } else {
-                item.child(this.render_view())
+                item.child(this.render_view(dom_elem))
             }
             .build()
         })
@@ -145,12 +160,13 @@ fn main() {
                         .autofocus(true)
                         .on_keyup(move |keyup, input| {
                             if keyup.key() == "Enter" {
+                                let parent = list_mut.clone();
                                 list_mut.mutate(move |ts| {
                                     let text = input.value();
                                     let text = text.trim();
 
                                     if !text.is_empty() {
-                                        ts.push(&TodoItem::new(text, false));
+                                        ts.push(&TodoItem::new(text, false, parent));
                                         input.set_value("");
                                     }
                                 })
