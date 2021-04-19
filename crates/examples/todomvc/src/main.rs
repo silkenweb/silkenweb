@@ -90,7 +90,7 @@ impl TodoItem {
             .build()
     }
 
-    fn render_view(&self, dom_elem: dom::Element) -> Div {
+    fn render_view(&self, dom_elem: dom::HtmlLiElement) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")

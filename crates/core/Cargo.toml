@@ -16,7 +16,12 @@ features = [
     "Element",
     "EventTarget",
     "HtmlElement",
+    "HtmlHeadingElement",
+    "HtmlLabelElement",
+    "HtmlUListElement",
+    "HtmlLiElement",
     "HtmlHeadElement",
+    "HtmlButtonElement",
     "NamedNodeMap",
     "Node",
     "NodeList",
@@ -96,5 +101,5 @@ features = [
     "MutationObserverInit",
     "MutationRecord",
     "HtmlInputElement",
-    "console"
+    "console",
 ]

@@ -203,20 +203,20 @@ text_parent!(div);
 categories!(div[Flow, Palpable]);
 child_categories!(div[Flow]);
 
-html_element!(button <dom::Element> {});
+html_element!(button <dom::HtmlButtonElement> {});
 text_parent!(button);
 categories!(button[Flow, Palpable]);
 child_categories!(button[Flow]);
 
-html_element!(section <dom::Element> {});
+html_element!(section <dom::HtmlElement> {});
 categories!(section[Flow, Sectioning, Palpable]);
 child_categories!(section[Flow]);
 
-html_element!(header <dom::Element> {});
+html_element!(header <dom::HtmlElement> {});
 categories!(header[Flow, Palpable]);
 child_categories!(header[Flow]);
 
-html_element!(h1 <dom::Element> {});
+html_element!(h1 <dom::HtmlHeadingElement> {});
 text_parent!(h1);
 categories!(h1[Flow, Heading, Palpable]);
 child_categories!(h1[Phrasing]);
@@ -230,17 +230,17 @@ html_element!(input <dom::HtmlInputElement> {
 });
 categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
-html_element!(label <dom::Element> { for_: String });
+html_element!(label <dom::HtmlLabelElement> { for_: String });
 text_parent!(label);
 categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
 child_categories!(label[Phrasing]);
 
-html_element!(ul <dom::Element> {});
+html_element!(ul <dom::HtmlUListElement> {});
 text_parent!(ul);
 categories!(ul[Flow, Palpable]);
 child_categories!(ul[Flow]); // TODO: Allowed child tags.
 
-html_element!(li <dom::Element> {});
+html_element!(li <dom::HtmlLiElement> {});
 text_parent!(li);
 categories!(li[Flow]);
 child_categories!(li[Flow]);
