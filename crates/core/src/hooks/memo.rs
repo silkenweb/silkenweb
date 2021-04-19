@@ -47,6 +47,8 @@ impl Memo {
         self.gc_borrowed(&mut self.0.borrow_mut());
     }
 
+    // TODO: This seems to loose the cache sometimes. Maybe when an event comes
+    // though while processing RAF?
     pub fn cache<Key, Value, ValueFn>(&self, key: Key, value_fn: ValueFn) -> Value
     where
         Key: 'static + Eq + Hash,
