@@ -1,6 +1,6 @@
 use std::{
     cell::{Ref, RefCell},
-    rc::{self, Rc},
+    rc::Rc,
 };
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
@@ -23,7 +23,7 @@ impl<T: 'static> Signal<T> {
     }
 
     pub fn write(&self) -> WriteSignal<T> {
-        WriteSignal(Rc::downgrade(&self.0))
+        WriteSignal(self.0.clone())
     }
 }
 
@@ -49,13 +49,9 @@ impl<T: 'static> ReadSignal<T> {
 
         // TODO: Handle removing the new value from dependents.
         self.0.borrow_mut().dependents.push(Rc::new({
-            let existing = self.0.clone();
             let set_value = value.write();
 
-            move |new_value| {
-                let _existing = existing.clone();
-                set_value.set(generate(new_value))
-            }
+            move |new_value| set_value.set(generate(new_value))
         }));
 
         value.read()
@@ -86,31 +82,23 @@ where
 
         // TODO: Handle removing the new value from dependents.
         v0.0.borrow_mut().dependents.push(Rc::new({
-            let v0 = v0.0.clone();
             let set_value = value.write();
             let v1 = v1.clone();
 
-            move |new_value| {
-                let _existing = v0.clone();
-                set_value.set(generate0(new_value, &v1.current()))
-            }
+            move |new_value| set_value.set(generate0(new_value, &v1.current()))
         }));
 
         v1.0.borrow_mut().dependents.push(Rc::new({
-            let v1 = v1.0.clone();
             let set_value = value.write();
 
-            move |new_value| {
-                let _existing = v1.clone();
-                set_value.set(generate1(&v0.current(), new_value))
-            }
+            move |new_value| set_value.set(generate1(&v0.current(), new_value))
         }));
 
         value.read()
     }
 }
 
-pub struct WriteSignal<T>(rc::Weak<RefCell<State<T>>>);
+pub struct WriteSignal<T>(SharedState<T>);
 
 impl<T> Clone for WriteSignal<T> {
     fn clone(&self) -> Self {
@@ -120,10 +108,8 @@ impl<T> Clone for WriteSignal<T> {
 
 impl<T: 'static> WriteSignal<T> {
     pub fn set(&self, new_value: T) {
-        if let Some(state) = self.0.upgrade() {
-            state.borrow_mut().current = new_value;
-            state.borrow().update_dependents();
-        }
+        self.0.borrow_mut().current = new_value;
+        self.0.borrow().update_dependents();
     }
 
     pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
@@ -131,10 +117,8 @@ impl<T: 'static> WriteSignal<T> {
     }
 
     pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
-        if let Some(state) = self.0.upgrade() {
-            f(&mut state.borrow_mut().current);
-            state.borrow().update_dependents();
-        }
+        f(&mut self.0.borrow_mut().current);
+        self.0.borrow().update_dependents();
     }
 }
 
