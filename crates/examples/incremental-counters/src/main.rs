@@ -1,4 +1,4 @@
-use std::iter;
+use std::{cell::RefCell, iter, rc::Rc};
 
 use surfinia_core::{
     hooks::{list_state::ElementList, state::Signal},
@@ -32,6 +32,7 @@ fn main() {
     let list = Signal::new(element_list(div(), move |()| counter(), iter::empty()));
     let push_elem = list.write();
     let pop_elem = list.write();
+    let id = Rc::new(RefCell::new(0));
 
     mount(
         "app",
@@ -44,8 +45,12 @@ fn main() {
             .child(
                 button()
                     .on_click(move |_, _| {
-                        push_elem.mutate(|l| {
-                            l.push(&());
+                        push_elem.mutate({
+                            let id = id.clone();
+                            move |l| {
+                                let current_id = id.replace_with(|current| *current + 1);
+                                l.insert(current_id, ());
+                            }
                         })
                     })
                     .text("+"),

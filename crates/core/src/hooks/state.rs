@@ -59,6 +59,8 @@ impl<T: 'static> ReadSignal<T> {
     }
 
     fn add_dependent(&self, dependent_callback: DependentCallback<T>) {
+        // TODO: Failure to borrow shared state indicate a circular dependency. We
+        // should report a nicer error. Is the borrow failure always a circular dependency?
         let mut state = self.0.borrow_mut();
         state
             .parents

@@ -183,10 +183,10 @@ macro_rules! child_categories {
     }
 }
 
-pub fn element_list<'a, T, GenerateChild, ChildElem, ParentElem>(
+pub fn element_list<T, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,
     generate_child: GenerateChild,
-    initial: impl Iterator<Item = &'a T>,
+    initial: impl Iterator<Item = (usize, T)>,
 ) -> ElementList<T>
 where
     T: 'static,
@@ -216,10 +216,25 @@ html_element!(header <dom::HtmlElement> {});
 categories!(header[Flow, Palpable]);
 child_categories!(header[Flow]);
 
+// TODO: Check this agrees with html5 spec
+html_element!(footer <dom::HtmlElement> {});
+categories!(footer[Flow, Palpable]);
+child_categories!(footer[Flow]);
+
+html_element!(span <dom::HtmlSpanElement> {});
+text_parent!(span);
+categories!(span[Flow, Phrasing]);
+child_categories!(span[Phrasing]);
+
 html_element!(h1 <dom::HtmlHeadingElement> {});
 text_parent!(h1);
 categories!(h1[Flow, Heading, Palpable]);
 child_categories!(h1[Phrasing]);
+
+html_element!(strong <dom::HtmlElement> {});
+text_parent!(strong);
+categories!(strong[Flow, Phrasing]);
+child_categories!(strong[Phrasing]);
 
 html_element!(input <dom::HtmlInputElement> {
     type_: String,
@@ -244,6 +259,11 @@ html_element!(li <dom::HtmlLiElement> {});
 text_parent!(li);
 categories!(li[Flow]);
 child_categories!(li[Flow]);
+
+html_element!(a <dom::HtmlAnchorElement> {});
+text_parent!(a);
+categories!(a[Flow, Phrasing, Interactive, Palpable]);
+child_categories!(a[Flow]); // TODO: Interactive, Phrasing
 
 pub trait Parent<T>: Into<Element> {}
 

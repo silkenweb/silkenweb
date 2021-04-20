@@ -1,4 +1,7 @@
-use std::iter;
+#[macro_use]
+extern crate derive_more;
+
+use std::{cell::RefCell, iter, rc::Rc};
 
 use surfinia_core::{
     hooks::{
@@ -11,25 +14,31 @@ use surfinia_core::{
     DomElement,
 };
 use surfinia_html::{
+    a,
     button,
     div,
     element_list,
+    footer,
     h1,
     header,
     input,
     label,
     li,
     section,
+    span,
+    strong,
     ul,
     Div,
     Input,
     Li,
+    LiBuilder,
+    Section,
 };
-use web_sys as dom;
 use web_sys::HtmlInputElement;
 
 #[derive(Clone)]
 struct TodoItem {
+    id: usize,
     text: Signal<String>,
     completed: Signal<bool>,
     editing: Signal<bool>,
@@ -38,11 +47,13 @@ struct TodoItem {
 
 impl TodoItem {
     fn new(
+        id: usize,
         text: impl Into<String>,
         completed: bool,
         parent: WriteSignal<ElementList<Self>>,
     ) -> Self {
         Self {
+            id,
             text: Signal::new(text.into()),
             completed: Signal::new(completed),
             editing: Signal::new(false),
@@ -90,7 +101,7 @@ impl TodoItem {
             .build()
     }
 
-    fn render_view(&self, dom_elem: dom::HtmlLiElement) -> Div {
+    fn render_view(&self) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -100,6 +111,7 @@ impl TodoItem {
             })
             .checked(self.completed.read().map(|&completed| completed));
         let parent = self.parent.clone();
+        let id = self.id;
 
         div()
             .class("view")
@@ -108,12 +120,11 @@ impl TodoItem {
                 let set_editing = self.editing.write();
                 move |_, _| set_editing.set(true)
             }))
-            .child(button().class("destroy").on_click(move |_, _| {
-                parent.mutate({
-                    let dom_elem = dom_elem.clone();
-                    move |p| p.remove(&dom_elem)
-                })
-            }))
+            .child(
+                button()
+                    .class("destroy")
+                    .on_click(move |_, _| parent.mutate(move |p| p.remove(id))),
+            )
             .build()
     }
 
@@ -123,7 +134,6 @@ impl TodoItem {
 
         self.editing.read().map(move |&editing| {
             let item = li().class(class.clone());
-            let dom_elem = item.dom_element();
 
             if editing {
                 let input = this.render_edit();
@@ -132,24 +142,117 @@ impl TodoItem {
                 effect(move || dom_elem.focus().unwrap());
                 item.child(input)
             } else {
-                item.child(this.render_view(dom_elem))
+                item.child(this.render_view())
             }
             .build()
         })
     }
 }
 
-fn main() {
-    console_error_panic_hook::set_once();
-    let list = Signal::new(element_list(
-        ul().class("todo-list"),
-        TodoItem::render,
-        iter::empty(),
-    ));
-    let list_mut = list.write();
+#[derive(Display, Copy, Clone, Eq, PartialEq)]
+enum Filter {
+    All,
+    Active,
+    Completed,
+}
 
-    mount(
-        "app",
+#[derive(Clone)]
+struct TodoApp {
+    items: Signal<ElementList<TodoItem>>,
+    id: Rc<RefCell<usize>>, // TODO: Cell
+    filter: Signal<Filter>,
+}
+
+impl TodoApp {
+    fn new() -> Self {
+        Self {
+            items: Signal::new(element_list(
+                ul().class("todo-list"),
+                TodoItem::render,
+                iter::empty(),
+            )),
+            id: Rc::new(RefCell::new(0)),
+            filter: Signal::new(Filter::All),
+        }
+    }
+
+    fn push(&self, text: String) {
+        let this = self.clone();
+
+        self.items.write().mutate(move |ts| {
+            let current_id = this.id.replace_with(|current| *current + 1);
+            let parent = this.items.write();
+            ts.insert(current_id, TodoItem::new(current_id, text, false, parent));
+        })
+    }
+
+    fn render_filter_link(
+        current_filter: &Signal<Filter>,
+        filter: Filter,
+        seperator: &str,
+        f: impl Fn(&TodoItem) -> ReadSignal<bool>,
+    ) -> LiBuilder {
+        let set_filter = current_filter.write();
+        li().child(
+            a().class(
+                current_filter
+                    .read()
+                    .map(move |f| if filter == *f { "selected" } else { "" }),
+            )
+            .text(format!("{}", filter))
+            .on_click(move |_, _| set_filter.set(filter)),
+        )
+        .text(seperator)
+    }
+
+    fn render_footer(&self) -> ReadSignal<Div> {
+        self.items.read().map({
+            let current_filter = self.filter.clone();
+            move |l| {
+                // TODO: We could do with the concept of an empty element, rather than using div
+                // here.
+                let mut footer_div = div();
+
+                if !l.is_empty() {
+                    let len = l.len(); // TODO: Exclude completed
+                    footer_div = footer_div.child(
+                        footer()
+                            .class("footer")
+                            .child(span().class("todo-count").child(strong().text(format!(
+                                "{} item{} left",
+                                len,
+                                if len == 1 { "" } else { "s" }
+                            ))))
+                            .child(
+                                ul().class("filters")
+                                    .child(Self::render_filter_link(
+                                        &current_filter,
+                                        Filter::All,
+                                        " ",
+                                        |_| Signal::new(true).read(),
+                                    ))
+                                    .child(Self::render_filter_link(
+                                        &current_filter,
+                                        Filter::Active,
+                                        " ",
+                                        |item| item.completed.read().map(|completed| !completed),
+                                    ))
+                                    .child(Self::render_filter_link(
+                                        &current_filter,
+                                        Filter::Completed,
+                                        "",
+                                        |item| item.completed.read(),
+                                    )),
+                            ),
+                    )
+                }
+
+                footer_div.build()
+            }
+        })
+    }
+
+    fn render(&self) -> Section {
         section()
             .class("todoapp")
             .child(
@@ -158,22 +261,31 @@ fn main() {
                         .class("new-todo")
                         .placeholder("What needs to be done?")
                         .autofocus(true)
-                        .on_keyup(move |keyup, input| {
-                            if keyup.key() == "Enter" {
-                                let parent = list_mut.clone();
-                                list_mut.mutate(move |ts| {
+                        .on_keyup({
+                            let this = self.clone();
+
+                            move |keyup, input| {
+                                if keyup.key() == "Enter" {
+                                    let this = this.clone();
                                     let text = input.value();
-                                    let text = text.trim();
+                                    let text = text.trim().to_string();
 
                                     if !text.is_empty() {
-                                        ts.push(&TodoItem::new(text, false, parent));
+                                        this.push(text);
                                         input.set_value("");
                                     }
-                                })
+                                }
                             }
                         }),
                 ),
             )
-            .child(section().class("main").child(list.read())),
-    );
+            .child(section().class("main").child(self.items.read()))
+            .child(self.render_footer())
+            .build()
+    }
+}
+
+fn main() {
+    console_error_panic_hook::set_once();
+    mount("app", TodoApp::new().render());
 }
