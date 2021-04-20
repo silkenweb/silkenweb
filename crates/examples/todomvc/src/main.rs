@@ -33,6 +33,7 @@ use surfinia_html::{
     Li,
     LiBuilder,
     Section,
+    Ul,
 };
 use web_sys::HtmlInputElement;
 
@@ -188,9 +189,10 @@ impl TodoApp {
 
     fn render_filter_link(
         current_filter: &Signal<Filter>,
+        write_items: WriteSignal<ElementList<TodoItem>>,
         filter: Filter,
         seperator: &str,
-        f: impl Fn(&TodoItem) -> ReadSignal<bool>,
+        f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
     ) -> LiBuilder {
         let set_filter = current_filter.write();
         li().child(
@@ -200,14 +202,51 @@ impl TodoApp {
                     .map(move |f| if filter == *f { "selected" } else { "" }),
             )
             .text(format!("{}", filter))
-            .on_click(move |_, _| set_filter.set(filter)),
+            .on_click(move |_, _| {
+                let write_items = write_items.clone();
+                let f = f.clone();
+                set_filter.set(filter);
+                write_items.mutate(move |items| items.filter(f))
+            }),
         )
         .text(seperator)
     }
 
+    fn render_filters(
+        current: &Signal<Filter>,
+        write_items: WriteSignal<ElementList<TodoItem>>,
+    ) -> Ul {
+        ul().class("filters")
+            .child(Self::render_filter_link(
+                &current,
+                write_items.clone(),
+                Filter::All,
+                " ",
+                |_| Signal::new(true).read(),
+            ))
+            .child(Self::render_filter_link(
+                &current,
+                write_items.clone(),
+                Filter::Active,
+                " ",
+                |item| item.completed.read().map(|completed| !completed),
+            ))
+            .child(Self::render_filter_link(
+                &current,
+                write_items,
+                Filter::Completed,
+                "",
+                |item| item.completed.read(),
+            ))
+            .build()
+    }
+
     fn render_footer(&self) -> ReadSignal<Div> {
+        let write_items = self.items.write();
+
         self.items.read().map({
             let current_filter = self.filter.clone();
+
             move |l| {
                 // TODO: We could do with the concept of an empty element, rather than using div
                 // here.
@@ -215,6 +254,8 @@ impl TodoApp {
 
                 if !l.is_empty() {
                     let len = l.len(); // TODO: Exclude completed
+                    let write_items = write_items.clone();
+
                     footer_div = footer_div.child(
                         footer()
                             .class("footer")
@@ -223,27 +264,7 @@ impl TodoApp {
                                 len,
                                 if len == 1 { "" } else { "s" }
                             ))))
-                            .child(
-                                ul().class("filters")
-                                    .child(Self::render_filter_link(
-                                        &current_filter,
-                                        Filter::All,
-                                        " ",
-                                        |_| Signal::new(true).read(),
-                                    ))
-                                    .child(Self::render_filter_link(
-                                        &current_filter,
-                                        Filter::Active,
-                                        " ",
-                                        |item| item.completed.read().map(|completed| !completed),
-                                    ))
-                                    .child(Self::render_filter_link(
-                                        &current_filter,
-                                        Filter::Completed,
-                                        "",
-                                        |item| item.completed.read(),
-                                    )),
-                            ),
+                            .child(Self::render_filters(&current_filter, write_items)),
                     )
                 }
 
