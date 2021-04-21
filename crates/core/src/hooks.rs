@@ -36,24 +36,10 @@ fn request_process_updates() {
     });
 }
 
+// TODO: Figure out how to handle animation
 fn process_updates() {
     PENDING_UPDATES.with(|update_queue| {
         let update_queue = update_queue.take();
-
-        // TODO: Can we reinstate this? Queue updates from element updater?
-        // if update_queue.len() != 1 {
-        //     let mut updates_by_depth: Vec<_> = update_queue
-        //         .into_iter()
-        //         .filter_map(|u| u.parent().upgrade().map(|p| (p.borrow().dom_depth(),
-        // u)))         .collect();
-
-        //     updates_by_depth.sort_unstable_by_key(|(key, _)| *key);
-
-        //     update_queue = updates_by_depth
-        //         .into_iter()
-        //         .map(|(_, value)| value)
-        //         .collect();
-        // }
 
         for update in update_queue {
             update();
