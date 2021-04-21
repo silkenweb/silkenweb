@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
+use std::{cell::RefCell, collections::BTreeMap, mem, rc::Rc};
 
 use web_sys as dom;
 
@@ -116,11 +116,19 @@ impl<T: 'static> ElementList<T> {
         self.storage.remove(key)
     }
 
-    pub fn filter(&mut self, f: impl Fn(&T) -> ReadSignal<bool>) {
-        // TODO
+    pub fn filter(&mut self, f: impl 'static + Fn(&T) -> ReadSignal<bool>) {
+        let old_items = self.storage.items.take();
+        self.filter = Box::new(f);
+        let mut items = self.storage.items.borrow_mut();
+
+        for (key, StoredItem { item, updater }) in old_items {
+            mem::drop(updater);
+            let updater = self.updater(key, &item);
+            items.insert(key, StoredItem { item, updater });
+        }
     }
 
-    fn updater(&mut self, key: usize, item: &Rc<T>) -> ReadSignal<()> {
+    fn updater(&self, key: usize, item: &Rc<T>) -> ReadSignal<()> {
         (self.filter)(&item).map({
             let storage = self.storage.clone();
             let item = item.clone();
