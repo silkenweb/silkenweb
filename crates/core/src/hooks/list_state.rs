@@ -150,7 +150,9 @@ where
 
             move |&visible| {
                 if visible {
-                    storage.borrow_mut().insert(key.clone(), generate_child(&item));
+                    storage
+                        .borrow_mut()
+                        .insert(key.clone(), generate_child(&item));
                 } else {
                     storage.borrow_mut().remove(&key);
                 }

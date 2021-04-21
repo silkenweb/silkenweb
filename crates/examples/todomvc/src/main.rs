@@ -131,7 +131,7 @@ impl TodoItem {
 
     fn render(&self) -> ReadSignal<Li> {
         let this = self.clone();
-        
+
         self.editing.read().map(move |&editing| {
             let item = li().class(this.class());
 

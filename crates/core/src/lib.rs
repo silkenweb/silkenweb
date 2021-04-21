@@ -237,7 +237,9 @@ impl ElementBuilder {
         let reference_node = reference_node.clone();
 
         queue_update(move || {
-            dom_element.insert_before(&new_node, Some(&reference_node)).unwrap();
+            dom_element
+                .insert_before(&new_node, Some(&reference_node))
+                .unwrap();
         });
     }
 
