@@ -231,6 +231,16 @@ impl ElementBuilder {
         self
     }
 
+    fn insert_child_before(&mut self, new_node: &dom::Node, reference_node: &dom::Node) {
+        let dom_element = self.element.dom_element.clone();
+        let new_node = new_node.clone();
+        let reference_node = reference_node.clone();
+
+        queue_update(move || {
+            dom_element.insert_before(&new_node, Some(&reference_node)).unwrap();
+        });
+    }
+
     fn append_child(&mut self, element: &dom::Node) {
         let dom_element = self.element.dom_element.clone();
         let element = element.clone();

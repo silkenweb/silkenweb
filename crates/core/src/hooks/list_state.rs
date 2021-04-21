@@ -1,7 +1,13 @@
 // TODO: Need to think carefully about a minimal list container that
 // filter/sort/etc can be built on top of.
 
-use std::{cell::RefCell, collections::BTreeMap, mem, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::BTreeMap,
+    mem,
+    ops::Bound::{Excluded, Unbounded},
+    rc::Rc,
+};
 
 use web_sys as dom;
 
@@ -31,8 +37,12 @@ impl OrderedElementList {
             self.root.remove_child(&existing_elem.dom_element());
         }
 
-        // TODO: Put in the correct position in the list
-        self.root.append_child(&dom_element);
+        if let Some((_key, next_elem)) = self.items.range((Excluded(key), Unbounded)).next() {
+            self.root
+                .insert_child_before(&dom_element, &next_elem.dom_element());
+        } else {
+            self.root.append_child(&dom_element);
+        }
     }
 
     pub fn remove(&mut self, key: usize) {
