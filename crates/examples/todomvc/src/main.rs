@@ -159,7 +159,7 @@ enum Filter {
 #[derive(Clone)]
 struct TodoApp {
     items: Signal<ElementList<usize, TodoItem>>,
-    id: Rc<RefCell<usize>>, // TODO: Cell
+    id: Rc<RefCell<usize>>, // FEATURE(cell_update): Replace with `Cell`
     filter: Signal<Filter>,
 }
 
