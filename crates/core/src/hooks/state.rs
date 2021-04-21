@@ -211,6 +211,12 @@ impl<T> Drop for Parent<T> {
 
 struct DependentCallback<T>(rc::Weak<dyn Fn(&T)>);
 
+impl<T> Clone for DependentCallback<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 impl<T> DependentCallback<T> {
     fn new(f: &Rc<dyn 'static + Fn(&T)>) -> Self {
         Self(Rc::downgrade(f))
