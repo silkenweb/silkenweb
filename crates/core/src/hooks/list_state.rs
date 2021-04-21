@@ -27,6 +27,13 @@ struct OrderedElementList {
 }
 
 impl OrderedElementList {
+    pub fn new(root: ElementBuilder) -> Self {
+        Self {
+            root,
+            items: BTreeMap::new(),
+        }
+    }
+
     // TODO: Add an `entry()` method
     pub fn insert(&mut self, key: usize, element: Element) {
         // TODO: Add a test to make sure a reactive element gives us the correct
@@ -73,10 +80,7 @@ impl<T: 'static> ElementList<T> {
         GenerateChild: 'static + Fn(&T) -> Element,
     {
         let mut new = Self {
-            visible_items: Rc::new(RefCell::new(OrderedElementList {
-                root,
-                items: BTreeMap::new(),
-            })),
+            visible_items: Rc::new(RefCell::new(OrderedElementList::new(root))),
             generate_child: Rc::new(generate_child),
             items: BTreeMap::new(),
             filter: Box::new(|_| Signal::new(true).read()),
