@@ -183,16 +183,17 @@ macro_rules! child_categories {
     }
 }
 
-pub fn element_list<T, GenerateChild, ChildElem, ParentElem>(
+pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,
     generate_child: GenerateChild,
-    initial: impl Iterator<Item = (usize, T)>,
-) -> ElementList<T>
+    initial: impl Iterator<Item = (Key, Value)>,
+) -> ElementList<Key, Value>
 where
-    T: 'static,
+    Value: 'static,
     ChildElem: Into<Element> + Parent<ParentElem::Target>,
     ParentElem: Into<ElementBuilder> + Builder,
-    GenerateChild: 'static + Fn(&T) -> ChildElem,
+    GenerateChild: 'static + Fn(&Value) -> ChildElem,
+    Key: 'static + Ord + Eq + Clone,
 {
     ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
@@ -272,7 +273,7 @@ impl<Child, T> Parent<Child> for T where T: ParentCategory<Child> + Into<Element
 pub trait ParentCategory<T> {}
 
 // TODO: Fix this
-impl<T> content_category::Flow for ReadSignal<ElementList<T>> {}
+impl<Key, Value> content_category::Flow for ReadSignal<ElementList<Key, Value>> {}
 
 pub mod content_category {
     macro_rules! content_categories {

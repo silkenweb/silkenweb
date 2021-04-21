@@ -43,7 +43,7 @@ struct TodoItem {
     text: Signal<String>,
     completed: Signal<bool>,
     editing: Signal<bool>,
-    parent: WriteSignal<ElementList<Self>>,
+    parent: WriteSignal<ElementList<usize, Self>>,
 }
 
 impl TodoItem {
@@ -51,7 +51,7 @@ impl TodoItem {
         id: usize,
         text: impl Into<String>,
         completed: bool,
-        parent: WriteSignal<ElementList<Self>>,
+        parent: WriteSignal<ElementList<usize, Self>>,
     ) -> Self {
         Self {
             id,
@@ -124,7 +124,7 @@ impl TodoItem {
             .child(
                 button()
                     .class("destroy")
-                    .on_click(move |_, _| parent.mutate(move |p| p.remove(id))),
+                    .on_click(move |_, _| parent.mutate(move |p| p.remove(&id))),
             )
             .build()
     }
@@ -158,7 +158,7 @@ enum Filter {
 
 #[derive(Clone)]
 struct TodoApp {
-    items: Signal<ElementList<TodoItem>>,
+    items: Signal<ElementList<usize, TodoItem>>,
     id: Rc<RefCell<usize>>, // TODO: Cell
     filter: Signal<Filter>,
 }
@@ -188,7 +188,7 @@ impl TodoApp {
 
     fn render_filter_link(
         current_filter: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<TodoItem>>,
+        write_items: WriteSignal<ElementList<usize, TodoItem>>,
         filter: Filter,
         seperator: &str,
         f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
@@ -213,7 +213,7 @@ impl TodoApp {
 
     fn render_filters(
         current: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<TodoItem>>,
+        write_items: WriteSignal<ElementList<usize, TodoItem>>,
     ) -> Ul {
         ul().class("filters")
             .child(Self::render_filter_link(
