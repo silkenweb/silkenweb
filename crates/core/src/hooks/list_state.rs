@@ -12,16 +12,11 @@ struct StoredItem<T> {
     updater: ReadSignal<()>,
 }
 
-struct VisibleItem<T> {
-    item: SharedItem<T>,
-    element: Element,
-}
-
 struct Storage<T> {
     generate_child: Box<dyn Fn(&T) -> Element>,
     root: RefCell<ElementBuilder>,
     items: RefCell<BTreeMap<usize, StoredItem<T>>>,
-    visible_items: RefCell<BTreeMap<usize, VisibleItem<T>>>,
+    visible_items: RefCell<BTreeMap<usize, Element>>,
 }
 
 impl<T> Storage<T> {
@@ -47,7 +42,7 @@ impl<T> Storage<T> {
 
     pub fn remove(&self, key: usize) {
         if self.items.borrow_mut().remove(&key).is_some() {
-            if let Some(VisibleItem { element, .. }) = self.visible_items.borrow_mut().remove(&key)
+            if let Some(element) = self.visible_items.borrow_mut().remove(&key)
             {
                 self.root.borrow_mut().remove_child(&element.dom_element());
             }
@@ -150,9 +145,9 @@ impl<T: 'static> ElementList<T> {
                                 .borrow_mut()
                                 .append_child(&element.dom_element());
 
-                            VisibleItem { item, element }
+                            element
                         });
-                } else if let Some(VisibleItem { element, .. }) =
+                } else if let Some(element) =
                     storage.visible_items.borrow_mut().remove(&key)
                 {
                     storage
