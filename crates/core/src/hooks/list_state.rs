@@ -147,9 +147,7 @@ impl<T: 'static> ElementList<T> {
 
                             element
                         });
-                } else if let Some(element) =
-                    storage.visible_items.borrow_mut().remove(&key)
-                {
+                } else if let Some(element) = storage.visible_items.borrow_mut().remove(&key) {
                     storage
                         .root
                         .borrow_mut()
