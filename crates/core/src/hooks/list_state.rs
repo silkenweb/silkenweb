@@ -8,6 +8,7 @@ use web_sys as dom;
 use super::state::{ReadSignal, Signal};
 use crate::{DomElement, Element, ElementBuilder};
 
+// TODO: Is this neccessary
 type SharedItem<T> = Rc<T>;
 
 struct StoredItem<T> {
@@ -17,32 +18,28 @@ struct StoredItem<T> {
 
 // TODO: Rename
 struct Storage {
-    // TODO: Lift refcell to owner
-    root: RefCell<ElementBuilder>,
-    // TODO: Rename to items.
-    items: RefCell<BTreeMap<usize, Element>>,
+    root: ElementBuilder,
+    items: BTreeMap<usize, Element>,
 }
 
 impl Storage {
     // TODO: Add an `entry()` method
-    pub fn insert(&self, key: usize, element: Element) {
+    pub fn insert(&mut self, key: usize, element: Element) {
         // TODO: Add a test to make sure a reactive element gives us the correct
         // dom_element.
         let dom_element = element.dom_element();
 
-        if let Some(existing_elem) = self.items.borrow_mut().insert(key, element) {
-            self.root
-                .borrow_mut()
-                .remove_child(&existing_elem.dom_element());
+        if let Some(existing_elem) = self.items.insert(key, element) {
+            self.root.remove_child(&existing_elem.dom_element());
         }
 
         // TODO: Put in the correct position in the list
-        self.root.borrow_mut().append_child(&dom_element);
+        self.root.append_child(&dom_element);
     }
 
-    pub fn remove(&self, key: usize) {
-        if let Some(element) = self.items.borrow_mut().remove(&key) {
-            self.root.borrow_mut().remove_child(&element.dom_element());
+    pub fn remove(&mut self, key: usize) {
+        if let Some(element) = self.items.remove(&key) {
+            self.root.remove_child(&element.dom_element());
         }
     }
 }
@@ -50,7 +47,7 @@ impl Storage {
 // TODO: Parameterize on key type
 // TODO: Parameterize on storage type
 pub struct ElementList<T> {
-    storage: Rc<Storage>,
+    storage: Rc<RefCell<Storage>>,
     generate_child: Rc<dyn Fn(&T) -> Element>,
     items: BTreeMap<usize, StoredItem<T>>,
     filter: Box<dyn Fn(&T) -> ReadSignal<bool>>,
@@ -68,10 +65,10 @@ impl<T: 'static> ElementList<T> {
         GenerateChild: 'static + Fn(&T) -> Element,
     {
         let mut new = Self {
-            storage: Rc::new(Storage {
-                root: RefCell::new(root),
-                items: RefCell::new(BTreeMap::new()),
-            }),
+            storage: Rc::new(RefCell::new(Storage {
+                root,
+                items: BTreeMap::new(),
+            })),
             generate_child: Rc::new(generate_child),
             items: BTreeMap::new(),
             filter: Box::new(|_| Signal::new(true).read()),
@@ -102,13 +99,13 @@ impl<T: 'static> ElementList<T> {
     pub fn pop(&mut self) {
         if let Some((&key, _)) = self.items.iter().next_back() {
             self.items.remove(&key);
-            self.storage.remove(key);
+            self.storage.borrow_mut().remove(key);
         }
     }
 
     pub fn remove(&mut self, key: usize) {
         if self.items.remove(&key).is_some() {
-            self.storage.remove(key)
+            self.storage.borrow_mut().remove(key)
         }
     }
 
@@ -131,9 +128,9 @@ impl<T: 'static> ElementList<T> {
 
             move |&visible| {
                 if visible {
-                    storage.insert(key, generate_child(&item));
+                    storage.borrow_mut().insert(key, generate_child(&item));
                 } else {
-                    storage.remove(key);
+                    storage.borrow_mut().remove(key);
                 }
             }
         })
@@ -144,6 +141,6 @@ impl<T> DomElement for ElementList<T> {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
-        self.storage.root.borrow().dom_element()
+        self.storage.borrow_mut().root.dom_element()
     }
 }
