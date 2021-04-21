@@ -5,8 +5,8 @@ use std::{
     rc::{self, Rc},
 };
 
-type SharedState<T> = Rc<RefCell<State<T>>>;
-type WeakSharedState<T> = rc::Weak<RefCell<State<T>>>;
+type SharedState<T> = Rc<State<T>>;
+type WeakSharedState<T> = rc::Weak<State<T>>;
 
 pub struct Signal<T>(SharedState<T>);
 
@@ -18,7 +18,7 @@ impl<T> Clone for Signal<T> {
 
 impl<T: 'static> Signal<T> {
     pub fn new(initial: T) -> Self {
-        Self(Rc::new(RefCell::new(State::new(initial))))
+        Self(Rc::new(State::new(initial)))
     }
 
     pub fn read(&self) -> ReadSignal<T> {
@@ -40,7 +40,7 @@ impl<T> Clone for ReadSignal<T> {
 
 impl<T: 'static> ReadSignal<T> {
     pub fn current(&self) -> Ref<T> {
-        Ref::map(self.0.borrow(), |state| &state.current)
+        self.0.current.borrow()
     }
 
     pub fn map<U, Generate>(&self, generate: Generate) -> ReadSignal<U>
@@ -67,13 +67,13 @@ impl<T: 'static> ReadSignal<T> {
         // should report a nicer error. Is the borrow failure always a circular
         // dependency?
         self.0
-            .borrow_mut()
             .dependents
+            .borrow_mut()
             .insert(DependentCallback::new(&dependent_callback));
         child
             .0
-            .borrow_mut()
             .parents
+            .borrow_mut()
             .push(Box::new(Parent::new(dependent_callback, &self)));
     }
 }
@@ -135,8 +135,8 @@ impl<T> Clone for WriteSignal<T> {
 impl<T: 'static> WriteSignal<T> {
     pub fn set(&self, new_value: T) {
         if let Some(state) = self.0.upgrade() {
-            state.borrow_mut().current = new_value;
-            state.borrow().update_dependents();
+            *state.current.borrow_mut() = new_value;
+            state.update_dependents();
         }
     }
 
@@ -146,31 +146,31 @@ impl<T: 'static> WriteSignal<T> {
 
     pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
         if let Some(state) = self.0.upgrade() {
-            f(&mut state.borrow_mut().current);
-            state.borrow().update_dependents();
+            f(&mut state.current.borrow_mut());
+            state.update_dependents();
         }
     }
 }
 
 struct State<T> {
-    current: T,
-    parents: Vec<Box<dyn AnyParent>>,
-    dependents: HashSet<DependentCallback<T>>,
+    current: RefCell<T>,
+    parents: RefCell<Vec<Box<dyn AnyParent>>>,
+    dependents: RefCell<HashSet<DependentCallback<T>>>,
 }
 
 impl<T: 'static> State<T> {
     fn new(init: T) -> Self {
         Self {
-            current: init,
-            parents: Vec::new(),
-            dependents: HashSet::new(),
+            current: RefCell::new(init),
+            parents: RefCell::new(Vec::new()),
+            dependents: RefCell::new(HashSet::new()),
         }
     }
 
     fn update_dependents(&self) {
-        for dep in &self.dependents {
+        for dep in self.dependents.borrow().iter() {
             if let Some(f) = dep.0.upgrade() {
-                f(&self.current);
+                f(&self.current.borrow());
             }
         }
     }
@@ -180,7 +180,7 @@ trait AnyParent {}
 
 struct Parent<T> {
     dependent_callback: Rc<dyn Fn(&T)>,
-    parent: Rc<RefCell<State<T>>>,
+    parent: Rc<State<T>>,
 }
 
 impl<T> Parent<T> {
@@ -198,8 +198,8 @@ impl<T> Drop for Parent<T> {
     fn drop(&mut self) {
         let removed = self
             .parent
-            .borrow_mut()
             .dependents
+            .borrow_mut()
             .remove(&DependentCallback(Rc::downgrade(&self.dependent_callback)));
         assert!(removed);
     }
