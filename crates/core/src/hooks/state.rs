@@ -168,7 +168,11 @@ impl<T: 'static> State<T> {
     }
 
     fn update_dependents(&self) {
-        for dep in self.dependents.borrow().iter() {
+        // TODO: Figure out why this is neccessary and if it's safe. The problems occur
+        // when a child dependency is removed. What if a new dependency is added?
+        let dependents = self.dependents.borrow().clone();
+
+        for dep in &dependents {
             if let Some(f) = dep.0.upgrade() {
                 f(&self.current.borrow());
             }
