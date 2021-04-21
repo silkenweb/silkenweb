@@ -1,3 +1,5 @@
+// TODO: Need to think carefully about a minimal list container that filter/sort/etc can be built on top of.
+
 use std::{cell::RefCell, collections::BTreeMap, mem, rc::Rc};
 
 use web_sys as dom;
