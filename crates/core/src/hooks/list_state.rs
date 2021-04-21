@@ -42,10 +42,22 @@ impl<T> Storage<T> {
 
     pub fn remove(&self, key: usize) {
         if self.items.borrow_mut().remove(&key).is_some() {
-            if let Some(element) = self.visible_items.borrow_mut().remove(&key)
-            {
+            if let Some(element) = self.visible_items.borrow_mut().remove(&key) {
                 self.root.borrow_mut().remove_child(&element.dom_element());
             }
+        }
+    }
+
+    pub fn retain(&self, f: impl 'static + Fn(&T) -> bool) {
+        // FEATURE(btree_retain): Implement in terms of retain or drain_filter
+        let items = self.items.borrow();
+        let removal_keys: Vec<_> = items
+            .iter()
+            .filter_map(|(key, item)| if f(&item.item) { None } else { Some(key) })
+            .collect();
+
+        for key in removal_keys {
+            self.remove(*key)
         }
     }
 }
@@ -121,6 +133,10 @@ impl<T: 'static> ElementList<T> {
             let updater = self.updater(key, &item);
             items.insert(key, StoredItem { item, updater });
         }
+    }
+
+    pub fn retain(&mut self, f: impl 'static + Fn(&T) -> bool) {
+        self.storage.retain(f);
     }
 
     fn updater(&self, key: usize, item: &Rc<T>) -> ReadSignal<()> {
