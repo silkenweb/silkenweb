@@ -6,6 +6,7 @@ use std::{
 };
 
 type SharedState<T> = Rc<RefCell<State<T>>>;
+type WeakSharedState<T> = rc::Weak<RefCell<State<T>>>;
 
 pub struct Signal<T>(SharedState<T>);
 
@@ -25,7 +26,7 @@ impl<T: 'static> Signal<T> {
     }
 
     pub fn write(&self) -> WriteSignal<T> {
-        WriteSignal(self.0.clone())
+        WriteSignal(Rc::downgrade(&self.0))
     }
 }
 
@@ -51,7 +52,7 @@ impl<T: 'static> ReadSignal<T> {
 
         self.add_dependent(
             &child,
-            DependentCallback::new({
+            Rc::new({
                 let set_value = child.write();
 
                 move |new_value| set_value.set(generate(new_value))
@@ -61,16 +62,19 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
-    fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: DependentCallback<T>) {
+    fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: Rc<dyn Fn(&T)>) {
         // TODO: Failure to borrow shared state indicate a circular dependency. We
         // should report a nicer error. Is the borrow failure always a circular
         // dependency?
+        self.0
+            .borrow_mut()
+            .dependents
+            .insert(DependentCallback::new(&dependent_callback));
         child
             .0
             .borrow_mut()
             .parents
-            .push(Box::new(Parent::new(&dependent_callback, &self)));
-        self.0.borrow_mut().dependents.insert(dependent_callback);
+            .push(Box::new(Parent::new(dependent_callback, &self)));
     }
 }
 
@@ -98,7 +102,7 @@ where
 
         x0.add_dependent(
             &child,
-            DependentCallback::new({
+            Rc::new({
                 let set_value = child.write();
                 let x1 = x1.clone();
 
@@ -108,7 +112,7 @@ where
 
         x1.add_dependent(
             &child,
-            DependentCallback::new({
+            Rc::new({
                 let set_value = child.write();
                 let x0 = x0.clone();
 
@@ -120,7 +124,7 @@ where
     }
 }
 
-pub struct WriteSignal<T>(SharedState<T>);
+pub struct WriteSignal<T>(WeakSharedState<T>);
 
 impl<T> Clone for WriteSignal<T> {
     fn clone(&self) -> Self {
@@ -130,8 +134,10 @@ impl<T> Clone for WriteSignal<T> {
 
 impl<T: 'static> WriteSignal<T> {
     pub fn set(&self, new_value: T) {
-        self.0.borrow_mut().current = new_value;
-        self.0.borrow().update_dependents();
+        if let Some(state) = self.0.upgrade() {
+            state.borrow_mut().current = new_value;
+            state.borrow().update_dependents();
+        }
     }
 
     pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
@@ -139,8 +145,10 @@ impl<T: 'static> WriteSignal<T> {
     }
 
     pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
-        f(&mut self.0.borrow_mut().current);
-        self.0.borrow().update_dependents();
+        if let Some(state) = self.0.upgrade() {
+            f(&mut state.borrow_mut().current);
+            state.borrow().update_dependents();
+        }
     }
 }
 
@@ -161,7 +169,9 @@ impl<T: 'static> State<T> {
 
     fn update_dependents(&self) {
         for dep in &self.dependents {
-            (dep.0)(&self.current);
+            if let Some(f) = dep.0.upgrade() {
+                f(&self.current);
+            }
         }
     }
 }
@@ -169,15 +179,15 @@ impl<T: 'static> State<T> {
 trait AnyParent {}
 
 struct Parent<T> {
-    dependent_callback: rc::Weak<dyn Fn(&T)>,
-    parent: rc::Weak<RefCell<State<T>>>,
+    dependent_callback: Rc<dyn Fn(&T)>,
+    parent: Rc<RefCell<State<T>>>,
 }
 
 impl<T> Parent<T> {
-    fn new(dependent_callback: &DependentCallback<T>, parent: &ReadSignal<T>) -> Self {
+    fn new(dependent_callback: Rc<dyn Fn(&T)>, parent: &ReadSignal<T>) -> Self {
         Self {
-            dependent_callback: Rc::downgrade(&dependent_callback.0),
-            parent: Rc::downgrade(&parent.0),
+            dependent_callback,
+            parent: parent.0.clone(),
         }
     }
 }
@@ -186,23 +196,24 @@ impl<T> AnyParent for Parent<T> {}
 
 impl<T> Drop for Parent<T> {
     fn drop(&mut self) {
-        if let (Some(dependent_callback), Some(parent)) =
-            (self.dependent_callback.upgrade(), self.parent.upgrade())
-        {
-            let removed = parent
-                .borrow_mut()
-                .dependents
-                .remove(&DependentCallback(dependent_callback));
-            assert!(removed);
-        }
+        let removed = self
+            .parent
+            .borrow_mut()
+            .dependents
+            .remove(&DependentCallback(Rc::downgrade(&self.dependent_callback)));
+        assert!(removed);
     }
 }
 
-struct DependentCallback<T>(Rc<dyn Fn(&T)>);
+struct DependentCallback<T>(rc::Weak<dyn Fn(&T)>);
 
 impl<T> DependentCallback<T> {
-    fn new(f: impl 'static + Fn(&T)) -> Self {
-        Self(Rc::new(f))
+    fn new(f: &Rc<dyn 'static + Fn(&T)>) -> Self {
+        Self(Rc::downgrade(f))
+    }
+
+    fn upgrade(&self) -> Rc<dyn 'static + Fn(&T)> {
+        self.0.upgrade().unwrap()
     }
 }
 
@@ -210,7 +221,7 @@ impl<T> PartialEq for DependentCallback<T> {
     fn eq(&self, other: &Self) -> bool {
         // TODO: Investigate this further
         #[allow(clippy::vtable_address_comparisons)]
-        Rc::ptr_eq(&self.0, &other.0)
+        Rc::ptr_eq(&self.upgrade(), &other.upgrade())
     }
 }
 
@@ -218,6 +229,28 @@ impl<T> Eq for DependentCallback<T> {}
 
 impl<T> Hash for DependentCallback<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        Rc::as_ptr(&self.0).hash(state);
+        Rc::as_ptr(&self.upgrade()).hash(state);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{cell::Cell, mem};
+
+    use super::*;
+
+    #[test]
+    fn callback_cleanup() {
+        let state = Rc::new(Cell::new(0));
+        let x = Signal::new(0);
+        let y = x.read().map({
+            let state = state.clone();
+            move |x| state.replace(*x)
+        });
+
+        x.write().set(1);
+        mem::drop(y);
+        x.write().set(2);
+        assert_eq!(state.get(), 1);
     }
 }
