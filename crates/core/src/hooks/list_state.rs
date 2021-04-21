@@ -8,7 +8,6 @@ use web_sys as dom;
 use super::state::{ReadSignal, Signal};
 use crate::{DomElement, Element, ElementBuilder};
 
-// TODO: Is this neccessary
 type SharedItem<T> = Rc<T>;
 
 struct StoredItem<T> {
@@ -16,13 +15,12 @@ struct StoredItem<T> {
     updater: ReadSignal<()>,
 }
 
-// TODO: Rename
-struct Storage {
+struct OrderedElementList {
     root: ElementBuilder,
     items: BTreeMap<usize, Element>,
 }
 
-impl Storage {
+impl OrderedElementList {
     // TODO: Add an `entry()` method
     pub fn insert(&mut self, key: usize, element: Element) {
         // TODO: Add a test to make sure a reactive element gives us the correct
@@ -47,7 +45,7 @@ impl Storage {
 // TODO: Parameterize on key type
 // TODO: Parameterize on storage type
 pub struct ElementList<T> {
-    storage: Rc<RefCell<Storage>>,
+    visible_items: Rc<RefCell<OrderedElementList>>,
     generate_child: Rc<dyn Fn(&T) -> Element>,
     items: BTreeMap<usize, StoredItem<T>>,
     filter: Box<dyn Fn(&T) -> ReadSignal<bool>>,
@@ -65,7 +63,7 @@ impl<T: 'static> ElementList<T> {
         GenerateChild: 'static + Fn(&T) -> Element,
     {
         let mut new = Self {
-            storage: Rc::new(RefCell::new(Storage {
+            visible_items: Rc::new(RefCell::new(OrderedElementList {
                 root,
                 items: BTreeMap::new(),
             })),
@@ -99,13 +97,13 @@ impl<T: 'static> ElementList<T> {
     pub fn pop(&mut self) {
         if let Some((&key, _)) = self.items.iter().next_back() {
             self.items.remove(&key);
-            self.storage.borrow_mut().remove(key);
+            self.visible_items.borrow_mut().remove(key);
         }
     }
 
     pub fn remove(&mut self, key: usize) {
         if self.items.remove(&key).is_some() {
-            self.storage.borrow_mut().remove(key)
+            self.visible_items.borrow_mut().remove(key)
         }
     }
 
@@ -122,7 +120,7 @@ impl<T: 'static> ElementList<T> {
 
     fn updater(&self, key: usize, item: &Rc<T>) -> ReadSignal<()> {
         (self.filter)(&item).map({
-            let storage = self.storage.clone();
+            let storage = self.visible_items.clone();
             let item = item.clone();
             let generate_child = self.generate_child.clone();
 
@@ -141,6 +139,6 @@ impl<T> DomElement for ElementList<T> {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
-        self.storage.borrow_mut().root.dom_element()
+        self.visible_items.borrow_mut().root.dom_element()
     }
 }
