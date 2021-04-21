@@ -1,4 +1,5 @@
-// TODO: Need to think carefully about a minimal list container that filter/sort/etc can be built on top of.
+// TODO: Need to think carefully about a minimal list container that
+// filter/sort/etc can be built on top of.
 
 use std::{cell::RefCell, collections::BTreeMap, mem, rc::Rc};
 
@@ -14,52 +15,34 @@ struct StoredItem<T> {
     updater: ReadSignal<()>,
 }
 
-struct Storage<T> {
-    generate_child: Box<dyn Fn(&T) -> Element>,
+// TODO: Rename
+struct Storage {
+    // TODO: Lift refcell to owner
     root: RefCell<ElementBuilder>,
-    items: RefCell<BTreeMap<usize, StoredItem<T>>>,
+    // TODO: Rename to items.
     visible_items: RefCell<BTreeMap<usize, Element>>,
 }
 
-impl<T> Storage<T> {
-    pub fn is_empty(&self) -> bool {
-        self.items.borrow().is_empty()
-    }
+impl Storage {
+    // TODO: Add an `entry()` method
+    pub fn insert(&self, key: usize, element: Element) {
+        // TODO: Add a test to make sure a reactive element gives us the correct
+        // dom_element.
+        let dom_element = element.dom_element();
 
-    pub fn len(&self) -> usize {
-        self.items.borrow().len()
-    }
-
-    pub fn pop(&self) {
-        let mut items = self.items.borrow_mut();
-
-        if let Some((&key, _)) = items.iter().next_back() {
-            items.remove(&key);
-
-            if self.visible_items.borrow_mut().remove(&key).is_some() {
-                self.root.borrow_mut().remove_last();
-            }
+        if let Some(existing_elem) = self.visible_items.borrow_mut().insert(key, element) {
+            self.root
+                .borrow_mut()
+                .remove_child(&existing_elem.dom_element());
         }
+
+        // TODO: Put in the correct position in the list
+        self.root.borrow_mut().append_child(&dom_element);
     }
 
     pub fn remove(&self, key: usize) {
-        if self.items.borrow_mut().remove(&key).is_some() {
-            if let Some(element) = self.visible_items.borrow_mut().remove(&key) {
-                self.root.borrow_mut().remove_child(&element.dom_element());
-            }
-        }
-    }
-
-    pub fn retain(&self, f: impl 'static + Fn(&T) -> bool) {
-        // FEATURE(btree_retain): Implement in terms of retain or drain_filter
-        let items = self.items.borrow();
-        let removal_keys: Vec<_> = items
-            .iter()
-            .filter_map(|(key, item)| if f(&item.item) { None } else { Some(key) })
-            .collect();
-
-        for key in removal_keys {
-            self.remove(*key)
+        if let Some(element) = self.visible_items.borrow_mut().remove(&key) {
+            self.root.borrow_mut().remove_child(&element.dom_element());
         }
     }
 }
@@ -67,7 +50,9 @@ impl<T> Storage<T> {
 // TODO: Parameterize on key type
 // TODO: Parameterize on storage type
 pub struct ElementList<T> {
-    storage: Rc<Storage<T>>,
+    storage: Rc<Storage>,
+    generate_child: Rc<dyn Fn(&T) -> Element>,
+    items: BTreeMap<usize, StoredItem<T>>,
     filter: Box<dyn Fn(&T) -> ReadSignal<bool>>,
 }
 
@@ -84,11 +69,11 @@ impl<T: 'static> ElementList<T> {
     {
         let mut new = Self {
             storage: Rc::new(Storage {
-                generate_child: Box::new(generate_child),
                 root: RefCell::new(root),
-                items: RefCell::new(BTreeMap::new()),
                 visible_items: RefCell::new(BTreeMap::new()),
             }),
+            generate_child: Rc::new(generate_child),
+            items: BTreeMap::new(),
             filter: Box::new(|_| Signal::new(true).read()),
         };
 
@@ -100,76 +85,55 @@ impl<T: 'static> ElementList<T> {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.storage.is_empty()
+        self.items.is_empty()
     }
 
     pub fn len(&self) -> usize {
-        self.storage.len()
+        self.items.len()
     }
 
     pub fn insert(&mut self, key: usize, item: T) {
         let item = Rc::new(item);
         let updater = self.updater(key, &item);
 
-        self.storage
-            .items
-            .borrow_mut()
-            .insert(key, StoredItem { item, updater });
+        self.items.insert(key, StoredItem { item, updater });
     }
 
     pub fn pop(&mut self) {
-        self.storage.pop()
+        if let Some((&key, _)) = self.items.iter().next_back() {
+            self.items.remove(&key);
+            self.storage.remove(key);
+        }
     }
 
     pub fn remove(&mut self, key: usize) {
-        self.storage.remove(key)
+        if self.items.remove(&key).is_some() {
+            self.storage.remove(key)
+        }
     }
 
     pub fn filter(&mut self, f: impl 'static + Fn(&T) -> ReadSignal<bool>) {
-        let old_items = self.storage.items.take();
+        let old_items = mem::take(&mut self.items);
         self.filter = Box::new(f);
-        let mut items = self.storage.items.borrow_mut();
 
         for (key, StoredItem { item, updater }) in old_items {
             mem::drop(updater);
             let updater = self.updater(key, &item);
-            items.insert(key, StoredItem { item, updater });
+            self.items.insert(key, StoredItem { item, updater });
         }
-    }
-
-    pub fn retain(&mut self, f: impl 'static + Fn(&T) -> bool) {
-        self.storage.retain(f);
     }
 
     fn updater(&self, key: usize, item: &Rc<T>) -> ReadSignal<()> {
         (self.filter)(&item).map({
             let storage = self.storage.clone();
             let item = item.clone();
+            let generate_child = self.generate_child.clone();
 
             move |&visible| {
                 if visible {
-                    let item = item.clone();
-
-                    storage
-                        .visible_items
-                        .borrow_mut()
-                        .entry(key)
-                        .or_insert_with(|| {
-                            let element = (storage.generate_child)(&item);
-
-                            // TODO: Insert child in correct place.
-                            storage
-                                .root
-                                .borrow_mut()
-                                .append_child(&element.dom_element());
-
-                            element
-                        });
-                } else if let Some(element) = storage.visible_items.borrow_mut().remove(&key) {
-                    storage
-                        .root
-                        .borrow_mut()
-                        .remove_child(&element.dom_element())
+                    storage.insert(key, generate_child(&item));
+                } else {
+                    storage.remove(key);
                 }
             }
         })
