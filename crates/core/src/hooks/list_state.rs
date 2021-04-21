@@ -20,7 +20,7 @@ struct Storage {
     // TODO: Lift refcell to owner
     root: RefCell<ElementBuilder>,
     // TODO: Rename to items.
-    visible_items: RefCell<BTreeMap<usize, Element>>,
+    items: RefCell<BTreeMap<usize, Element>>,
 }
 
 impl Storage {
@@ -30,7 +30,7 @@ impl Storage {
         // dom_element.
         let dom_element = element.dom_element();
 
-        if let Some(existing_elem) = self.visible_items.borrow_mut().insert(key, element) {
+        if let Some(existing_elem) = self.items.borrow_mut().insert(key, element) {
             self.root
                 .borrow_mut()
                 .remove_child(&existing_elem.dom_element());
@@ -41,7 +41,7 @@ impl Storage {
     }
 
     pub fn remove(&self, key: usize) {
-        if let Some(element) = self.visible_items.borrow_mut().remove(&key) {
+        if let Some(element) = self.items.borrow_mut().remove(&key) {
             self.root.borrow_mut().remove_child(&element.dom_element());
         }
     }
@@ -70,7 +70,7 @@ impl<T: 'static> ElementList<T> {
         let mut new = Self {
             storage: Rc::new(Storage {
                 root: RefCell::new(root),
-                visible_items: RefCell::new(BTreeMap::new()),
+                items: RefCell::new(BTreeMap::new()),
             }),
             generate_child: Rc::new(generate_child),
             items: BTreeMap::new(),
