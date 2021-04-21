@@ -47,25 +47,30 @@ impl<T: 'static> ReadSignal<T> {
         U: 'static,
         Generate: 'static + Fn(&T) -> U,
     {
-        let value = Signal::new(generate(&self.current()));
+        let child = Signal::new(generate(&self.current()));
 
-        self.add_dependent(DependentCallback::new({
-            let set_value = value.write();
+        self.add_dependent(
+            &child,
+            DependentCallback::new({
+                let set_value = child.write();
 
-            move |new_value| set_value.set(generate(new_value))
-        }));
+                move |new_value| set_value.set(generate(new_value))
+            }),
+        );
 
-        value.read()
+        child.read()
     }
 
-    fn add_dependent(&self, dependent_callback: DependentCallback<T>) {
+    fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: DependentCallback<T>) {
         // TODO: Failure to borrow shared state indicate a circular dependency. We
-        // should report a nicer error. Is the borrow failure always a circular dependency?
-        let mut state = self.0.borrow_mut();
-        state
+        // should report a nicer error. Is the borrow failure always a circular
+        // dependency?
+        child
+            .0
+            .borrow_mut()
             .parents
             .push(Box::new(Parent::new(&dependent_callback, &self)));
-        state.dependents.insert(dependent_callback);
+        self.0.borrow_mut().dependents.insert(dependent_callback);
     }
 }
 
@@ -87,25 +92,31 @@ where
     fn map(&self, generate: Generate) -> ReadSignal<Self::Target> {
         let x0 = &self.0;
         let x1 = &self.1;
-        let value = Signal::new(generate(&x0.current(), &x1.current()));
+        let child = Signal::new(generate(&x0.current(), &x1.current()));
         let generate0 = Rc::new(generate);
         let generate1 = generate0.clone();
 
-        x0.add_dependent(DependentCallback::new({
-            let set_value = value.write();
-            let x1 = x1.clone();
+        x0.add_dependent(
+            &child,
+            DependentCallback::new({
+                let set_value = child.write();
+                let x1 = x1.clone();
 
-            move |new_value| set_value.set(generate0(new_value, &x1.current()))
-        }));
+                move |new_value| set_value.set(generate0(new_value, &x1.current()))
+            }),
+        );
 
-        x1.add_dependent(DependentCallback::new({
-            let set_value = value.write();
-            let x0 = x0.clone();
+        x1.add_dependent(
+            &child,
+            DependentCallback::new({
+                let set_value = child.write();
+                let x0 = x0.clone();
 
-            move |new_value| set_value.set(generate1(&x0.current(), new_value))
-        }));
+                move |new_value| set_value.set(generate1(&x0.current(), new_value))
+            }),
+        );
 
-        value.read()
+        child.read()
     }
 }
 
