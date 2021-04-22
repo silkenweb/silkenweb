@@ -306,8 +306,11 @@ impl TodoApp {
                                                 .class("clear-completed")
                                                 .text("Clear completed")
                                                 .on_click(move |_, _| {
-                                                    // TODO: filter out non completed items.
-                                                    write_items.mutate(ElementList::clear)
+                                                    write_items.mutate(|items| {
+                                                        items.retain(|item| {
+                                                            !*item.completed.read().current()
+                                                        })
+                                                    })
                                                 }),
                                         )
                                     } else {

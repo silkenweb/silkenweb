@@ -3,7 +3,7 @@
 
 use std::{
     cell::RefCell,
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     mem,
     ops::Bound::{Excluded, Unbounded},
     rc::Rc,
@@ -146,6 +146,21 @@ where
             mem::drop(updater);
             let updater = self.updater(&key, &item);
             self.items.insert(key, StoredItem { item, updater });
+        }
+    }
+
+    pub fn retain(&mut self, f: impl Fn(&Value) -> bool) {
+        // FEATURE(btree_map_retain): Use retain
+        let mut to_remove = BTreeSet::new();
+
+        for (key, value) in &self.items {
+            if !f(&value.item) {
+                to_remove.insert(key.clone());
+            }
+        }
+
+        for key in to_remove {
+            self.remove(&key);
         }
     }
 
