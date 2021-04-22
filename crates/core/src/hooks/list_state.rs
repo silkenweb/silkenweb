@@ -60,6 +60,14 @@ where
             self.root.remove_child(&element.dom_element());
         }
     }
+
+    pub fn clear(&mut self) {
+        for element in self.items.values() {
+            self.root.remove_child(&element.dom_element());
+        }
+
+        self.items.clear();
+    }
 }
 
 // TODO: Parameterize on key type
@@ -139,6 +147,11 @@ where
             let updater = self.updater(&key, &item);
             self.items.insert(key, StoredItem { item, updater });
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.visible_items.borrow_mut().clear();
+        self.items.clear();
     }
 
     fn updater(&self, key: &Key, item: &Rc<Value>) -> ReadSignal<()> {
