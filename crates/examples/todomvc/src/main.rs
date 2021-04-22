@@ -331,6 +331,7 @@ impl TodoApp {
             .read()
             .map(|&active_count| active_count == 0)
             .only_changes();
+        let write_items = self.items.write();
 
         section()
             .class("todoapp")
@@ -365,16 +366,29 @@ impl TodoApp {
                         if is_empty {
                             div()
                         } else {
+                            let write_items = write_items.clone();
+                            let all_complete = all_complete.clone();
+
                             div()
                                 .child(
                                     input()
                                         .id("toggle-all")
                                         .class("toggle-all")
                                         .type_("checkbox")
-                                        // TODO: Take by reference?
                                         .checked(all_complete.clone()),
                                 )
-                                .child(label().for_("toggle-all"))
+                                .child(label().for_("toggle-all").on_click(move |_, _| {
+                                    let new_completed = !*all_complete.current();
+
+                                    write_items.mutate(move |items| {
+                                        for item in items.values_mut() {
+                                            // TODO: This doesn't quite work. In the dom, we should
+                                            // be setting the checked prop rather than the attr or
+                                            // something.
+                                            item.completed.write().set(new_completed);
+                                        }
+                                    })
+                                }))
                         }
                     }))
                     .child(self.items.read()),

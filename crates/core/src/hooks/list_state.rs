@@ -1,20 +1,14 @@
 // TODO: Need to think carefully about a minimal list container that
 // filter/sort/etc can be built on top of.
 
-use std::{
-    cell::RefCell,
-    collections::{BTreeMap, BTreeSet},
-    mem,
-    ops::Bound::{Excluded, Unbounded},
-    rc::Rc,
-};
+use std::{cell::{RefCell, RefMut}, collections::{BTreeMap, BTreeSet}, mem, ops::Bound::{Excluded, Unbounded}, rc::Rc};
 
 use web_sys as dom;
 
 use super::state::{ReadSignal, Signal};
 use crate::{DomElement, Element, ElementBuilder};
 
-type SharedItem<T> = Rc<T>;
+type SharedItem<T> = Rc<RefCell<T>>;
 
 struct StoredItem<T> {
     item: SharedItem<T>,
@@ -117,7 +111,7 @@ where
     }
 
     pub fn insert(&mut self, key: Key, item: Value) {
-        let item = Rc::new(item);
+        let item = Rc::new(RefCell::new(item));
         let updater = self.updater(&key, &item);
 
         self.items.insert(key, StoredItem { item, updater });
@@ -154,7 +148,7 @@ where
         let mut to_remove = BTreeSet::new();
 
         for (key, value) in &self.items {
-            if !f(&value.item) {
+            if !f(&value.item.borrow()) {
                 to_remove.insert(key.clone());
             }
         }
@@ -164,13 +158,17 @@ where
         }
     }
 
+    pub fn values_mut(&mut self) -> impl Iterator<Item = RefMut<Value>> {
+        self.items.values_mut().map(|stored| stored.item.borrow_mut())
+    }
+
     pub fn clear(&mut self) {
         self.visible_items.borrow_mut().clear();
         self.items.clear();
     }
 
-    fn updater(&self, key: &Key, item: &Rc<Value>) -> ReadSignal<()> {
-        (self.filter)(&item).map({
+    fn updater(&self, key: &Key, item: &Rc<RefCell<Value>>) -> ReadSignal<()> {
+        (self.filter)(&item.borrow()).map({
             let storage = self.visible_items.clone();
             let item = item.clone();
             let generate_child = self.generate_child.clone();
@@ -180,7 +178,7 @@ where
                 if visible {
                     storage
                         .borrow_mut()
-                        .insert(key.clone(), generate_child(&item));
+                        .insert(key.clone(), generate_child(&item.borrow()));
                 } else {
                     storage.borrow_mut().remove(&key);
                 }
