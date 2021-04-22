@@ -272,18 +272,20 @@ impl TodoApp {
                     let write_items = write_items.clone();
                     let current_filter = current_filter.clone();
 
-                    div().child(active_count.map(move |&active_count| {
-                        let write_items = write_items.clone();
-
+                    div().child(
                         footer()
                             .class("footer")
-                            .child(span().class("todo-count").child(strong().text(format!(
-                                "{} item{} left",
-                                active_count,
-                                if active_count == 1 { "" } else { "s" }
-                            ))))
-                            .child(Self::render_filters(&current_filter, write_items))
-                    }))
+                            .child(span().class("todo-count").child(strong().text(
+                                active_count.map(move |&active_count| {
+                                    format!(
+                                        "{} item{} left",
+                                        active_count,
+                                        if active_count == 1 { "" } else { "s" }
+                                    )
+                                }),
+                            )))
+                            .child(Self::render_filters(&current_filter, write_items)),
+                    )
                 }
                 .build()
             }
