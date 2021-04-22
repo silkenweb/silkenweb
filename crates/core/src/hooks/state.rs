@@ -5,6 +5,13 @@ use std::{
     rc::{self, Rc},
 };
 
+// TODO: We should provide a way avoid propagating null changes.
+//
+// Ideas:
+// trait for comparing old and new (used in set + mutate). We could provide a
+// blanket impl for Copy + Eq. We'd need to be careful not to break
+// accumulators. Maybe provide a force_set method and use that for deltas?
+
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
