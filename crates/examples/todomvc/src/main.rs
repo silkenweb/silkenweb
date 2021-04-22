@@ -196,13 +196,7 @@ impl TodoApp {
             let parent = this.items.write();
             ts.insert(
                 current_id,
-                TodoItem::new(
-                    current_id,
-                    text,
-                    false,
-                    parent,
-                    &this.active_count,
-                ),
+                TodoItem::new(current_id, text, false, parent, &this.active_count),
             );
         })
     }
@@ -330,6 +324,13 @@ impl TodoApp {
     }
 
     fn render(&self) -> Section {
+        let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
+        let all_complete = self
+            .active_count
+            .read()
+            .map(|&active_count| active_count == 0)
+            .only_changes();
+
         section()
             .class("todoapp")
             .child(
@@ -359,14 +360,22 @@ impl TodoApp {
             .child(
                 section()
                     .class("main")
-                    .child(
-                        input()
-                            .id("toggle-all")
-                            .class("toggle-all")
-                            .type_("checkbox")
-                            .readonly(true),
-                    )
-                    .child(label().for_("toggle-all"))
+                    .child(is_empty.map(move |&is_empty| {
+                        if is_empty {
+                            div()
+                        } else {
+                            div()
+                                .child(
+                                    input()
+                                        .id("toggle-all")
+                                        .class("toggle-all")
+                                        .type_("checkbox")
+                                        // TODO: Take by reference?
+                                        .checked(all_complete.clone()),
+                                )
+                                .child(label().for_("toggle-all"))
+                        }
+                    }))
                     .child(self.items.read()),
             )
             .child(self.render_footer())
