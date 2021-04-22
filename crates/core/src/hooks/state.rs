@@ -53,6 +53,28 @@ impl<T: 'static> ReadSignal<T> {
         self.0.current.borrow()
     }
 
+    pub fn only_changes(&self) -> ReadSignal<T>
+    where
+        T: Clone + Eq,
+    {
+        let child = Signal::new(self.current().clone());
+
+        self.add_dependent(
+            &child,
+            Rc::new({
+                let child = child.clone();
+
+                move |new_value| {
+                    if *child.read().current() != *new_value {
+                        child.write().set(new_value.clone())
+                    }
+                }
+            }),
+        );
+
+        child.read()
+    }
+
     pub fn send_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
     where
         Output: 'static,
