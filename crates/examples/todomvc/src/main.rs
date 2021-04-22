@@ -120,7 +120,7 @@ impl TodoItem {
                 let set_completed = self.completed.write();
                 move |_, _| set_completed.replace(|completed| !completed)
             })
-            .checked(self.completed.read().map(|&completed| completed));
+            .checked(self.completed.read());
         let parent = self.parent.clone();
         let id = self.id;
 
@@ -257,7 +257,11 @@ impl TodoApp {
 
     fn render_footer(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
+        // TODO: Factor some of these into methods
         let items_len = self.items.read().map(ElementList::len);
+        let any_completed = (self.active_count.read(), items_len)
+            .map(|&active_count, &items_len| active_count != items_len)
+            .only_changes();
 
         self.items
             .read()
@@ -276,7 +280,6 @@ impl TodoApp {
                     } else {
                         let write_items = write_items.clone();
                         let current_filter = current_filter.clone();
-                        let items_len = items_len.clone();
                         let active_count = active_count.clone();
 
                         div().child(
@@ -292,30 +295,25 @@ impl TodoApp {
                                         ))
                                 }))
                                 .child(Self::render_filters(&current_filter, write_items.clone()))
-                                .child(
-                                    (active_count, items_len)
-                                        .map(|&active_count, &items_len| active_count != items_len)
-                                        .only_changes()
-                                        .map(move |&any_completed| {
-                                            let write_items = write_items.clone();
+                                .child(any_completed.map(move |&any_completed| {
+                                    let write_items = write_items.clone();
 
-                                            // TODO: Need empty element concept again! Or
-                                            // .child(Option<blah>)
-                                            if any_completed {
-                                                div().child(
-                                                    button()
-                                                        .class("clear-completed")
-                                                        .text("Clear completed")
-                                                        .on_click(move |_, _| {
-                                                            // TODO: filter out non completed items.
-                                                            write_items.mutate(ElementList::clear)
-                                                        }),
-                                                )
-                                            } else {
-                                                div()
-                                            }
-                                        }),
-                                ),
+                                    // TODO: Need empty element concept again! Or
+                                    // .child(Option<blah>)
+                                    if any_completed {
+                                        div().child(
+                                            button()
+                                                .class("clear-completed")
+                                                .text("Clear completed")
+                                                .on_click(move |_, _| {
+                                                    // TODO: filter out non completed items.
+                                                    write_items.mutate(ElementList::clear)
+                                                }),
+                                        )
+                                    } else {
+                                        div()
+                                    }
+                                })),
                         )
                     }
                     .build()
