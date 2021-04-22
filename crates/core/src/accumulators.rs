@@ -24,7 +24,9 @@ pub struct SumTotal<T> {
 impl<T: 'static + Zero + Clone + WrappingAdd> Default for SumTotal<T> {
     fn default() -> Self {
         let deltas = Signal::new(T::zero());
-        let total = deltas.read().send_to(AccumulateSum(RefCell::new(T::zero())));
+        let total = deltas
+            .read()
+            .send_to(AccumulateSum(RefCell::new(T::zero())));
         Self {
             deltas: deltas.write(),
             total,

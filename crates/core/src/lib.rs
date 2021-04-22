@@ -4,8 +4,8 @@
     clippy::must_use_candidate,
     clippy::module_name_repetitions
 )]
-pub mod hooks;
 pub mod accumulators;
+pub mod hooks;
 
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
