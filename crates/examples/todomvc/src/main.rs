@@ -258,38 +258,42 @@ impl TodoApp {
     fn render_footer(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
 
-        self.items.read().map(ElementList::is_empty).map({
-            let current_filter = self.filter.clone();
-            let active_count = self.active_count.read();
+        self.items
+            .read()
+            .map(ElementList::is_empty)
+            .only_changes()
+            .map({
+                let current_filter = self.filter.clone();
+                let active_count = self.active_count.read();
 
-            move |&is_empty| {
-                // TODO: We could do with the concept of an empty element, rather than using div
-                // here.
+                move |&is_empty| {
+                    // TODO: We could do with the concept of an empty element, rather than using div
+                    // here.
 
-                if is_empty {
-                    div()
-                } else {
-                    let write_items = write_items.clone();
-                    let current_filter = current_filter.clone();
+                    if is_empty {
+                        div()
+                    } else {
+                        let write_items = write_items.clone();
+                        let current_filter = current_filter.clone();
 
-                    div().child(
-                        footer()
-                            .class("footer")
-                            .child(span().class("todo-count").child(strong().text(
-                                active_count.map(move |&active_count| {
-                                    format!(
-                                        "{} item{} left",
-                                        active_count,
-                                        if active_count == 1 { "" } else { "s" }
-                                    )
-                                }),
-                            )))
-                            .child(Self::render_filters(&current_filter, write_items)),
-                    )
+                        div().child(
+                            footer()
+                                .class("footer")
+                                .child(active_count.map(move |&active_count| {
+                                    span()
+                                        .class("todo-count")
+                                        .child(strong().text(format!("{}", active_count)))
+                                        .text(format!(
+                                            " item{} left",
+                                            if active_count == 1 { "" } else { "s" }
+                                        ))
+                                }))
+                                .child(Self::render_filters(&current_filter, write_items)),
+                        )
+                    }
+                    .build()
                 }
-                .build()
-            }
-        })
+            })
     }
 
     fn render(&self) -> Section {
