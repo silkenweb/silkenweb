@@ -1,3 +1,4 @@
+// TODO: Generalize all this in terms of actions and inverses.
 use std::cell::RefCell;
 
 use num_traits::{WrappingAdd, WrappingSub, Zero};
@@ -6,7 +7,6 @@ use crate::hooks::state::{ReadSignal, Signal, SignalReceiver, WriteSignal};
 
 struct Accumulate<T>(RefCell<T>);
 
-// TODO: Require Copy rather than Clone
 impl<T: 'static + Clone + WrappingAdd> SignalReceiver<T, T> for Accumulate<T> {
     fn receive(&self, x: &T) -> T {
         let mut total = self.0.borrow_mut();
