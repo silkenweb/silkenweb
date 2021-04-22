@@ -4,7 +4,7 @@ extern crate derive_more;
 use std::{cell::RefCell, iter, rc::Rc};
 
 use surfinia_core::{
-    accumulators::{Sum, SumTotal},
+    accumulators::{IncludeSum, Sum, SumTotal},
     hooks::{
         effect,
         list_state::ElementList,
@@ -45,7 +45,7 @@ struct TodoItem {
     completed: Signal<bool>,
     editing: Signal<bool>,
     parent: WriteSignal<ElementList<usize, Self>>,
-    active_count: ReadSignal<()>,
+    active_count: ReadSignal<IncludeSum>,
 }
 
 impl TodoItem {
