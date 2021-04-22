@@ -243,6 +243,7 @@ html_element!(input <dom::HtmlInputElement> {
     value: String,
     autofocus: bool,
     checked: bool,
+    readonly: bool,
 });
 categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
