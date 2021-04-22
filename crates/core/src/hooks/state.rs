@@ -43,23 +43,30 @@ impl<T: 'static> ReadSignal<T> {
         self.0.current.borrow()
     }
 
-    pub fn map<U, Generate>(&self, generate: Generate) -> ReadSignal<U>
+    pub fn send_to<Output>(&self, receiver: impl Receiver<T, Output>) -> ReadSignal<Output>
     where
-        U: 'static,
-        Generate: 'static + Fn(&T) -> U,
+        Output: 'static,
     {
-        let child = Signal::new(generate(&self.current()));
+        let child = Signal::new(receiver.receive(&self.current()));
 
         self.add_dependent(
             &child,
             Rc::new({
                 let set_value = child.write();
 
-                move |new_value| set_value.set(generate(new_value))
+                move |new_value| set_value.set(receiver.receive(new_value))
             }),
         );
 
         child.read()
+    }
+
+    pub fn map<Output, Generate>(&self, generate: Generate) -> ReadSignal<Output>
+    where
+        Output: 'static,
+        Generate: 'static + Fn(&T) -> Output,
+    {
+        self.send_to(generate)
     }
 
     fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: Rc<dyn Fn(&T)>) {
@@ -75,6 +82,25 @@ impl<T: 'static> ReadSignal<T> {
             .parents
             .borrow_mut()
             .push(Box::new(Parent::new(dependent_callback, &self)));
+    }
+}
+
+pub trait Receiver<Input, Output>: 'static
+where
+    Input: 'static,
+    Output: 'static,
+{
+    fn receive(&self, x: &Input) -> Output;
+}
+
+impl<Input, Output, F> Receiver<Input, Output> for F
+where
+    Input: 'static,
+    Output: 'static,
+    F: 'static + Fn(&Input) -> Output,
+{
+    fn receive(&self, x: &Input) -> Output {
+        self(x)
     }
 }
 
