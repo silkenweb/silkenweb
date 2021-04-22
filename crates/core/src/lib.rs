@@ -51,9 +51,15 @@ impl StaticAttribute for bool {
         let name = name.as_ref().to_string();
 
         if *self {
-            queue_update(move || {dom_element.set_attribute(&name, "").unwrap(); set_input_checked(dom_element, &name, true)});
+            queue_update(move || {
+                dom_element.set_attribute(&name, "").unwrap();
+                set_input_checked(dom_element, &name, true)
+            });
         } else {
-            queue_update(move || {dom_element.remove_attribute(&name).unwrap(); set_input_checked(dom_element, &name, false)});
+            queue_update(move || {
+                dom_element.remove_attribute(&name).unwrap();
+                set_input_checked(dom_element, &name, false)
+            });
         }
     }
 }
