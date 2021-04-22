@@ -381,7 +381,7 @@ impl TodoApp {
                                     let new_completed = !*all_complete.current();
 
                                     write_items.mutate(move |items| {
-                                        for item in items.values_mut() {
+                                        for item in items.values() {
                                             item.completed.write().set(new_completed);
                                         }
                                     })

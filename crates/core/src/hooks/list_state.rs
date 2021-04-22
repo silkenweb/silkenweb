@@ -1,7 +1,7 @@
 // TODO: Need to think carefully about a minimal list container that
 // filter/sort/etc can be built on top of.
 
-use std::{cell::{RefCell, RefMut}, collections::{BTreeMap, BTreeSet}, mem, ops::Bound::{Excluded, Unbounded}, rc::Rc};
+use std::{cell::{Ref, RefCell}, collections::{BTreeMap, BTreeSet}, mem, ops::Bound::{Excluded, Unbounded}, rc::Rc};
 
 use web_sys as dom;
 
@@ -158,8 +158,8 @@ where
         }
     }
 
-    pub fn values_mut(&mut self) -> impl Iterator<Item = RefMut<Value>> {
-        self.items.values_mut().map(|stored| stored.item.borrow_mut())
+    pub fn values(&mut self) -> impl Iterator<Item = Ref<Value>> {
+        self.items.values_mut().map(|stored| stored.item.borrow())
     }
 
     pub fn clear(&mut self) {
