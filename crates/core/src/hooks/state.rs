@@ -5,7 +5,10 @@ use std::{
     rc::{self, Rc},
 };
 
-// TODO: We should provide a way avoid propagating null changes.
+// TODO: Can we provide a way to collapse ReadSignal<ReadSignal<T>> into
+// ReadSignal<T>?
+
+// TODO: We should provide a way to avoid propagating null changes.
 //
 // Ideas:
 // trait for comparing old and new (used in set + mutate). We could provide a
