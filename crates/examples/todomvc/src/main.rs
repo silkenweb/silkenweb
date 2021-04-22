@@ -196,7 +196,13 @@ impl TodoApp {
             let parent = this.items.write();
             ts.insert(
                 current_id,
-                TodoItem::new(current_id, text, false, parent, &this.active_count),
+                TodoItem::new(
+                    current_id,
+                    text,
+                    false,
+                    parent,
+                    &this.active_count,
+                ),
             );
         })
     }
@@ -257,6 +263,7 @@ impl TodoApp {
 
     fn render_footer(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
+        let items_len = self.items.read().map(ElementList::len);
 
         self.items
             .read()
@@ -275,6 +282,8 @@ impl TodoApp {
                     } else {
                         let write_items = write_items.clone();
                         let current_filter = current_filter.clone();
+                        let items_len = items_len.clone();
+                        let active_count = active_count.clone();
 
                         div().child(
                             footer()
@@ -288,7 +297,31 @@ impl TodoApp {
                                             if active_count == 1 { "" } else { "s" }
                                         ))
                                 }))
-                                .child(Self::render_filters(&current_filter, write_items)),
+                                .child(Self::render_filters(&current_filter, write_items.clone()))
+                                .child(
+                                    (active_count, items_len)
+                                        .map(|&active_count, &items_len| active_count != items_len)
+                                        .only_changes()
+                                        .map(move |&any_completed| {
+                                            let write_items = write_items.clone();
+
+                                            // TODO: Need empty element concept again! Or
+                                            // .child(Option<blah>)
+                                            if any_completed {
+                                                div().child(
+                                                    button()
+                                                        .class("clear-completed")
+                                                        .text("Clear completed")
+                                                        .on_click(move |_, _| {
+                                                            // TODO: filter out non completed items.
+                                                            write_items.mutate(ElementList::clear)
+                                                        }),
+                                                )
+                                            } else {
+                                                div()
+                                            }
+                                        }),
+                                ),
                         )
                     }
                     .build()
@@ -323,7 +356,19 @@ impl TodoApp {
                         }),
                 ),
             )
-            .child(section().class("main").child(self.items.read()))
+            .child(
+                section()
+                    .class("main")
+                    .child(
+                        input()
+                            .id("toggle-all")
+                            .class("toggle-all")
+                            .type_("checkbox")
+                            .readonly(true),
+                    )
+                    .child(label().for_("toggle-all"))
+                    .child(self.items.read()),
+            )
             .child(self.render_footer())
             .build()
     }
