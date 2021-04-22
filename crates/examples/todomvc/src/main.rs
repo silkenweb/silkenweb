@@ -258,15 +258,15 @@ impl TodoApp {
     fn render_footer(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
 
-        self.items.read().map({
+        self.items.read().map(ElementList::is_empty).map({
             let current_filter = self.filter.clone();
             let active_count = self.active_count.read();
 
-            move |l| {
+            move |&is_empty| {
                 // TODO: We could do with the concept of an empty element, rather than using div
                 // here.
 
-                if l.is_empty() {
+                if is_empty {
                     div()
                 } else {
                     let write_items = write_items.clone();
