@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 wasm-bindgen = "0.2.73"
+num-traits = "0.2"
 
 # TODO: Most of these depednencies are for surfinia-html
 [dependencies.web-sys]

@@ -4,6 +4,7 @@ extern crate derive_more;
 use std::{cell::RefCell, iter, rc::Rc};
 
 use surfinia_core::{
+    accumulators::{Sum, SumTotal},
     hooks::{
         effect,
         list_state::ElementList,
@@ -44,6 +45,7 @@ struct TodoItem {
     completed: Signal<bool>,
     editing: Signal<bool>,
     parent: WriteSignal<ElementList<usize, Self>>,
+    active_count: ReadSignal<()>,
 }
 
 impl TodoItem {
@@ -52,13 +54,21 @@ impl TodoItem {
         text: impl Into<String>,
         completed: bool,
         parent: WriteSignal<ElementList<usize, Self>>,
+        active_count: &SumTotal<usize>,
     ) -> Self {
+        let completed = Signal::new(completed);
+        let active_count = completed
+            .read()
+            .map(|completed| (!completed) as usize)
+            .send_to(Sum::new(active_count));
+
         Self {
             id,
             text: Signal::new(text.into()),
-            completed: Signal::new(completed),
+            completed,
             editing: Signal::new(false),
             parent,
+            active_count,
         }
     }
 
@@ -161,6 +171,7 @@ struct TodoApp {
     items: Signal<ElementList<usize, TodoItem>>,
     id: Rc<RefCell<usize>>, // FEATURE(cell_update): Replace with `Cell`
     filter: Signal<Filter>,
+    active_count: SumTotal<usize>,
 }
 
 impl TodoApp {
@@ -173,6 +184,7 @@ impl TodoApp {
             )),
             id: Rc::new(RefCell::new(0)),
             filter: Signal::new(Filter::All),
+            active_count: SumTotal::default(),
         }
     }
 
@@ -182,7 +194,10 @@ impl TodoApp {
         self.items.write().mutate(move |ts| {
             let current_id = this.id.replace_with(|current| *current + 1);
             let parent = this.items.write();
-            ts.insert(current_id, TodoItem::new(current_id, text, false, parent));
+            ts.insert(
+                current_id,
+                TodoItem::new(current_id, text, false, parent, &this.active_count),
+            );
         })
     }
 
@@ -245,29 +260,32 @@ impl TodoApp {
 
         self.items.read().map({
             let current_filter = self.filter.clone();
+            let active_count = self.active_count.read();
 
             move |l| {
                 // TODO: We could do with the concept of an empty element, rather than using div
                 // here.
-                let mut footer_div = div();
 
-                if !l.is_empty() {
-                    let len = l.len(); // TODO: Exclude completed
+                if l.is_empty() {
+                    div()
+                } else {
                     let write_items = write_items.clone();
+                    let current_filter = current_filter.clone();
 
-                    footer_div = footer_div.child(
+                    div().child(active_count.map(move |&active_count| {
+                        let write_items = write_items.clone();
+
                         footer()
                             .class("footer")
                             .child(span().class("todo-count").child(strong().text(format!(
                                 "{} item{} left",
-                                len,
-                                if len == 1 { "" } else { "s" }
+                                active_count,
+                                if active_count == 1 { "" } else { "s" }
                             ))))
-                            .child(Self::render_filters(&current_filter, write_items)),
-                    )
+                            .child(Self::render_filters(&current_filter, write_items))
+                    }))
                 }
-
-                footer_div.build()
+                .build()
             }
         })
     }

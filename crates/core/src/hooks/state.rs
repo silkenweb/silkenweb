@@ -43,7 +43,7 @@ impl<T: 'static> ReadSignal<T> {
         self.0.current.borrow()
     }
 
-    pub fn send_to<Output>(&self, receiver: impl Receiver<T, Output>) -> ReadSignal<Output>
+    pub fn send_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
     where
         Output: 'static,
     {
@@ -85,7 +85,7 @@ impl<T: 'static> ReadSignal<T> {
     }
 }
 
-pub trait Receiver<Input, Output>: 'static
+pub trait SignalReceiver<Input, Output>: 'static
 where
     Input: 'static,
     Output: 'static,
@@ -93,7 +93,7 @@ where
     fn receive(&self, x: &Input) -> Output;
 }
 
-impl<Input, Output, F> Receiver<Input, Output> for F
+impl<Input, Output, F> SignalReceiver<Input, Output> for F
 where
     Input: 'static,
     Output: 'static,
