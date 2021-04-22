@@ -382,9 +382,6 @@ impl TodoApp {
 
                                     write_items.mutate(move |items| {
                                         for item in items.values_mut() {
-                                            // TODO: This doesn't quite work. In the dom, we should
-                                            // be setting the checked prop rather than the attr or
-                                            // something.
                                             item.completed.write().set(new_completed);
                                         }
                                     })

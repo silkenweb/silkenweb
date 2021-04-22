@@ -51,9 +51,18 @@ impl StaticAttribute for bool {
         let name = name.as_ref().to_string();
 
         if *self {
-            queue_update(move || dom_element.set_attribute(&name, "").unwrap());
+            queue_update(move || {dom_element.set_attribute(&name, "").unwrap(); set_input_checked(dom_element, &name, true)});
         } else {
-            queue_update(move || dom_element.remove_attribute(&name).unwrap());
+            queue_update(move || {dom_element.remove_attribute(&name).unwrap(); set_input_checked(dom_element, &name, false)});
+        }
+    }
+}
+
+// TODO: Is this a special case in the DOM?
+fn set_input_checked(dom_element: dom::Element, name: &str, value: bool) {
+    if name == "checked" {
+        if let Ok(input) = dom_element.dyn_into::<dom::HtmlInputElement>() {
+            input.set_checked(value);
         }
     }
 }
