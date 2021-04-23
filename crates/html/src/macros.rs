@@ -32,8 +32,12 @@ macro_rules! attr_name {
 }
 
 macro_rules! attributes {
-    ($($attr:ident : $typ:ty),* $(,)?) => {
+    ($(
+        $(#[$attr_meta:meta])*
+        $attr:ident : $typ:ty
+    ),* $(,)? ) => {
         $(
+            $(#[$attr_meta])*
             pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
                 Self(self.0.attribute(attr_name!($attr), value))
             }
@@ -116,8 +120,8 @@ macro_rules! html_element {
             ),* $(,)?
         }
     ) => {
-        // TODO: Use meta stuff
         paste::item! {
+            $(#[$elem_meta])*
             pub fn $name() -> [<$name:camel Builder>] {
                 [<$name: camel Builder>]($crate::macros::tag(stringify!($name)))
             }
@@ -125,7 +129,7 @@ macro_rules! html_element {
             pub struct [<$name:camel Builder>]($crate::macros::ElementBuilder);
 
             impl [<$name:camel Builder>] {
-                attributes![id: String, class: String, $($attr: $typ, )*];
+                attributes![id: String, class: String, $($(#[$attr_meta])* $attr: $typ, )*];
 
                 pub fn child<Child>(self, c: Child) -> Self
                 where
