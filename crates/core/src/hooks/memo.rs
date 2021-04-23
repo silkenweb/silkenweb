@@ -9,11 +9,10 @@ use std::{
 
 type SharedMemoData = Rc<RefCell<MemoData>>;
 
-// TODO: Naming of MemoScope and Memo
 #[derive(Clone, Default)]
-pub struct MemoScope(SharedMemoData);
+pub struct MemoCache(SharedMemoData);
 
-impl MemoScope {
+impl MemoCache {
     pub fn scope(&self) -> Memo {
         Memo(self.0.clone())
     }
