@@ -35,7 +35,6 @@ macro_rules! events {
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
                     Self(self.0.on(stringify!($name), move |js_ev| {
-                        // TODO: Export from crate
                         use $crate::macros::JsCast;
                         let event: $event_type = js_ev.unchecked_into();
                         // TODO: Is it safe to unwrap here?
@@ -73,7 +72,6 @@ macro_rules! dom_type {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
-                    // TODO: Export from crate
                     use $crate::macros::JsCast;
                     self.0.dom_element().unchecked_into()
                 }
@@ -83,7 +81,6 @@ macro_rules! dom_type {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
-                    // TODO: Export from crate
                     use $crate::macros::JsCast;
                     self.0.dom_element().unchecked_into()
                 }

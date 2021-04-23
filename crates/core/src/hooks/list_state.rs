@@ -37,7 +37,6 @@ where
         }
     }
 
-    // TODO: Add an `entry()` method
     pub fn insert(&mut self, key: Key, element: Element) {
         // TODO: Add a test to make sure a reactive element gives us the correct
         // dom_element.
@@ -70,8 +69,6 @@ where
     }
 }
 
-// TODO: Parameterize on key type
-// TODO: Parameterize on storage type
 pub struct ElementList<Key, Value> {
     visible_items: Rc<RefCell<OrderedElementList<Key>>>,
     generate_child: Rc<dyn Fn(&Value) -> Element>,
