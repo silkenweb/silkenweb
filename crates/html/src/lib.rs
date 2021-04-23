@@ -2,7 +2,7 @@
 
 #[macro_use]
 pub mod macros;
-pub mod html;
+pub mod elements;
 
 use surfinia_core::{hooks::list_state::ElementList, Builder, Element, ElementBuilder, Text};
 use web_sys as dom;
