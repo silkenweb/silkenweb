@@ -180,7 +180,7 @@ macro_rules! html_element {
     };
 }
 
-macro_rules! text_parent {
+macro_rules! children_allowed {
     ($name:ident) => {
         paste::item! {
             impl [<$name:camel Builder>] {
