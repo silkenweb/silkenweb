@@ -11,7 +11,6 @@ pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     generate_child: GenerateChild,
     initial: impl Iterator<Item = (Key, Value)>,
 ) -> ElementList<Key, Value>
-// TODO: Change order of type params
 where
     Value: 'static,
     ChildElem: Into<Element>,
