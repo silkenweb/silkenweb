@@ -1,10 +1,27 @@
 pub use surfinia_core::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
 pub use wasm_bindgen::JsCast;
 
-// TODO: Mangle other attributes
 macro_rules! attr_name {
+    (accept_charset) => {
+        "accept-charset"
+    };
+    (as_) => {
+        "as"
+    };
+    (async_) => {
+        "async"
+    };
     (for_) => {
         "for"
+    };
+    (http_equiv) => {
+        "http-equiv"
+    };
+    (current_time) => {
+        "currentTime"
+    };
+    (loop_) => {
+        "loop"
     };
     (type_) => {
         "type"
