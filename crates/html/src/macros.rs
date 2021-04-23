@@ -1,6 +1,7 @@
 pub use surfinia_core::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder};
 pub use wasm_bindgen::JsCast;
 
+// TODO: Mangle other attributes
 macro_rules! attr_name {
     (for_) => {
         "for"
