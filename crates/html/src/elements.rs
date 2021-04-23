@@ -2656,7 +2656,7 @@ html_element!(
         /// is checked, the form data submitted will include fruit=cherry. If the checkbox isn't
         /// active, it isn't listed in the form data at all. The default value for checkboxes and
         /// radio buttons is on.
-        checked: String,
+        checked: bool,
 
         /// Valid for text and search input types only, the dirname attribute enables the submission
         /// of the directionality of the element. When included, the form control will submit with
