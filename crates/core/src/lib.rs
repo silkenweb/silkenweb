@@ -344,7 +344,6 @@ pub struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
-    // TODO: What happens if you set 2 reactive attrs with same name or 2 text attrs?
     reactive_attrs: HashMap<String, ReadSignal<()>>,
     reactive_text: Option<ReadSignal<()>>,
 }
