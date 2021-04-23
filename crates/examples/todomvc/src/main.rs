@@ -44,7 +44,7 @@ struct TodoItem {
     text: Signal<String>,
     completed: Signal<bool>,
     editing: Signal<bool>,
-    parent: WriteSignal<ElementList<usize, Self>>,
+    parent: WriteSignal<ElementList<usize, Ul, Self>>,
     active_count: ReadSignal<IncludeSum>,
 }
 
@@ -53,7 +53,7 @@ impl TodoItem {
         id: usize,
         text: impl Into<String>,
         completed: bool,
-        parent: WriteSignal<ElementList<usize, Self>>,
+        parent: WriteSignal<ElementList<usize, Ul, Self>>,
         active_count: &SumTotal<usize>,
     ) -> Self {
         let completed = Signal::new(completed);
@@ -168,7 +168,7 @@ enum Filter {
 
 #[derive(Clone)]
 struct TodoApp {
-    items: Signal<ElementList<usize, TodoItem>>,
+    items: Signal<ElementList<usize, Ul, TodoItem>>,
     id: Rc<RefCell<usize>>, // FEATURE(cell_update): Replace with `Cell`
     filter: Signal<Filter>,
     active_count: SumTotal<usize>,
@@ -203,7 +203,7 @@ impl TodoApp {
 
     fn render_filter_link(
         current_filter: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<usize, TodoItem>>,
+        write_items: WriteSignal<ElementList<usize, Ul, TodoItem>>,
         filter: Filter,
         seperator: &str,
         f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
@@ -228,7 +228,7 @@ impl TodoApp {
 
     fn render_filters(
         current: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<usize, TodoItem>>,
+        write_items: WriteSignal<ElementList<usize, Ul, TodoItem>>,
     ) -> Ul {
         ul().class("filters")
             .child(Self::render_filter_link(

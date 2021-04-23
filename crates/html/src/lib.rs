@@ -83,7 +83,9 @@ macro_rules! html_element {
                 attributes![id: String, class: String, $($attr: $typ, )*];
                 html_events!($elem_type);
 
-                pub fn child<Child: Parent<[<$name:camel>]>>(self, c: Child) -> Self {
+                pub fn child<Child>(self, c: Child) -> Self where
+                [<$name:camel>]: ParentOf<Child>,
+                Child: Into<Element> {
                     Self(self.0.child(c.into()))
                 }
             }
@@ -159,15 +161,9 @@ macro_rules! text_parent {
 macro_rules! categories {
     ($name:ident [$($category:path),* $(,)?] ) => {
         paste::item! {
-            // We get better error messages if we implement these traits directly for
-            // builder as well as target, rather than via a blanket trait.
             $(
                 impl content_category::$category for [<$name:camel>] {}
                 impl content_category::$category for [<$name:camel Builder>] {}
-
-                // TODO: Fix this
-                impl content_category::$category for ReadSignal<[<$name:camel>]> {}
-                impl content_category::$category for ReadSignal<[<$name:camel Builder>]> {}
             )*
         }
     }
@@ -177,20 +173,32 @@ macro_rules! child_categories {
     ($name:ident [$($category:ident),* $(,)?] ) => {
         paste::item! {
             $(
-                impl<Child: content_category::$category> ParentCategory<[<$name:camel>]> for Child {}
+                impl<Child> ParentOf<Child> for [<$name:camel>]
+                where
+                    Child: content_category::$category
+                {}
             )*
         }
     }
+}
+
+impl<Parent, Child> ParentOf<ReadSignal<Child>> for Parent where Parent: ParentOf<Child> {}
+
+impl<Parent, Key, Child, ListElem> ParentOf<ElementList<Key, Child, ListElem>> for Parent where
+    Parent: ParentOf<Child>
+{
 }
 
 pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,
     generate_child: GenerateChild,
     initial: impl Iterator<Item = (Key, Value)>,
-) -> ElementList<Key, Value>
+) -> ElementList<Key, ParentElem::Target, Value>
+// TODO: Change order of type params
 where
     Value: 'static,
-    ChildElem: Into<Element> + Parent<ParentElem::Target>,
+    ParentElem::Target: ParentOf<ChildElem>,
+    ChildElem: Into<Element>,
     ParentElem: Into<ElementBuilder> + Builder,
     GenerateChild: 'static + Fn(&Value) -> ChildElem,
     Key: 'static + Ord + Eq + Clone,
@@ -267,14 +275,7 @@ text_parent!(a);
 categories!(a[Flow, Phrasing, Interactive, Palpable]);
 child_categories!(a[Flow]); // TODO: Interactive, Phrasing
 
-pub trait Parent<T>: Into<Element> {}
-
-impl<Child, T> Parent<Child> for T where T: ParentCategory<Child> + Into<Element> {}
-
-pub trait ParentCategory<T> {}
-
-// TODO: Fix this
-impl<Key, Value> content_category::Flow for ReadSignal<ElementList<Key, Value>> {}
+pub trait ParentOf<T> {}
 
 pub mod content_category {
     macro_rules! content_categories {
