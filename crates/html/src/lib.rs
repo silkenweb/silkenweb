@@ -70,8 +70,34 @@ macro_rules! html_events {
     };
 }
 
+macro_rules! dom_type {
+    ($name:ident < $elem_type:ty >) => {
+        paste::item! {
+            impl [<$name:camel Builder>] {
+                html_events!($elem_type);
+            }
+
+            impl DomElement for [<$name:camel Builder>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    self.0.dom_element().unchecked_into()
+                }
+            }
+
+            impl DomElement for [<$name:camel>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    self.0.dom_element().unchecked_into()
+                }
+            }
+        }
+    };
+}
+
 macro_rules! html_element {
-    ($name:ident <$elem_type:ty> { $($attr:ident : $typ:ty),* $(,)? }) => {
+    ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
         paste::item! {
             pub fn $name() -> [<$name:camel Builder>] {
                 [<$name: camel Builder>](tag(stringify!($name)))
@@ -81,7 +107,6 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![id: String, class: String, $($attr: $typ, )*];
-                html_events!($elem_type);
 
                 pub fn child<Child>(self, c: Child) -> Self
                 where
@@ -96,14 +121,6 @@ macro_rules! html_element {
 
                 fn build(self) -> Self::Target {
                     [<$name:camel>](self.0.build())
-                }
-            }
-
-            impl DomElement for [<$name:camel Builder>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    self.0.dom_element().unchecked_into()
                 }
             }
 
@@ -133,14 +150,6 @@ macro_rules! html_element {
             impl From<[<$name:camel>]> for Element {
                 fn from(html_elem: [<$name:camel>]) -> Self {
                     html_elem.0
-                }
-            }
-
-            impl DomElement for [<$name:camel>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    self.0.dom_element().unchecked_into()
                 }
             }
         }
@@ -175,28 +184,36 @@ where
     ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
 
-html_element!(div <dom::HtmlDivElement> {});
+html_element!(div {});
+dom_type!(div<dom::HtmlDivElement>);
 text_parent!(div);
 
-html_element!(button <dom::HtmlButtonElement> {});
+html_element!(button {});
+dom_type!(button<dom::HtmlButtonElement>);
 text_parent!(button);
 
-html_element!(section <dom::HtmlElement> {});
+html_element!(section {});
+dom_type!(section<dom::HtmlElement>);
 
-html_element!(header <dom::HtmlElement> {});
+html_element!(header {});
+dom_type!(header<dom::HtmlElement>);
 
-html_element!(footer <dom::HtmlElement> {});
+html_element!(footer {});
+dom_type!(footer<dom::HtmlElement>);
 
-html_element!(span <dom::HtmlSpanElement> {});
+html_element!(span {});
+dom_type!(span<dom::HtmlSpanElement>);
 text_parent!(span);
 
-html_element!(h1 <dom::HtmlHeadingElement> {});
+html_element!(h1 {});
+dom_type!(h1<dom::HtmlHeadingElement>);
 text_parent!(h1);
 
-html_element!(strong <dom::HtmlElement> {});
+html_element!(strong {});
+dom_type!(strong<dom::HtmlElement>);
 text_parent!(strong);
 
-html_element!(input <dom::HtmlInputElement> {
+html_element!(input {
     type_: String,
     placeholder: String,
     value: String,
@@ -204,15 +221,20 @@ html_element!(input <dom::HtmlInputElement> {
     checked: bool,
     readonly: bool,
 });
+dom_type!(input<dom::HtmlInputElement>);
 
-html_element!(label <dom::HtmlLabelElement> { for_: String });
+html_element!(label { for_: String });
+dom_type!(label<dom::HtmlLabelElement>);
 text_parent!(label);
 
-html_element!(ul <dom::HtmlUListElement> {});
+html_element!(ul {});
+dom_type!(ul<dom::HtmlUListElement>);
 text_parent!(ul);
 
-html_element!(li <dom::HtmlLiElement> {});
+html_element!(li {});
+dom_type!(li<dom::HtmlLiElement>);
 text_parent!(li);
 
-html_element!(a <dom::HtmlAnchorElement> {});
+html_element!(a {});
+dom_type!(a<dom::HtmlAnchorElement>);
 text_parent!(a);
