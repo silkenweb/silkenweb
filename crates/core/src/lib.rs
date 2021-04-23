@@ -165,16 +165,18 @@ where
 {
     fn set_text(&self, builder: &mut ElementBuilder) {
         self.current().set_text(builder);
-        // TODO: Is there a better way, avoiding the unwrap?
-        let text_node = builder.text_node.as_ref().unwrap().clone();
 
-        let updater = self.map({
-            move |new_value| {
-                text_node.set_node_value(Some(new_value.as_ref()));
-            }
-        });
+        if let Some(text_node) = builder.text_node.as_ref() {
+            let updater = self.map({
+                let text_node = text_node.clone();
 
-        builder.element.reactive_text = Some(updater);
+                move |new_value| {
+                    text_node.set_node_value(Some(new_value.as_ref()));
+                }
+            });
+
+            builder.element.reactive_text = Some(updater);
+        }
     }
 }
 
