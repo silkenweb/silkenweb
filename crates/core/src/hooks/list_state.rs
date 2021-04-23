@@ -30,7 +30,12 @@ impl<Key> OrderedElementList<Key>
 where
     Key: Ord + Eq,
 {
+    /// # Panic
+    ///
+    /// Panics if `root` has already had children added to it.
     pub fn new(root: ElementBuilder) -> Self {
+        assert!(root.element.children.is_empty());
+
         Self {
             root,
             items: BTreeMap::new(),
@@ -81,8 +86,9 @@ where
     Key: 'static + Clone + Ord + Eq,
     Value: 'static,
 {
-    // TODO: Assert builders children empty.
-    // How would we set attributes? Could take a Builder type and build it.
+    /// # Panic
+    ///
+    /// Panics if `root` has already had children added to it.
     pub fn new<GenerateChild>(
         root: ElementBuilder,
         generate_child: GenerateChild,
