@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use surfinia_core::{
-    hooks::{memo::Memo, state::Signal},
+    hooks::{memo::MemoScope, state::Signal},
     mount,
     Builder,
 };
@@ -27,13 +27,14 @@ fn counter(count: &Signal<u32>) -> DivBuilder {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let child_counts = Memo::default();
+    let child_counts = MemoScope::default();
     let call_count = Rc::new(RefCell::new(0));
     let count = Signal::new(0);
 
     mount(
         "app",
         counter(&count).child(count.read().map(move |&count| {
+            let child_counts = child_counts.scope();
             *call_count.borrow_mut() += 1;
             web_log::println!("Call count = {}", call_count.borrow());
 
@@ -44,8 +45,6 @@ fn main() {
 
                 counters = counters.child(child);
             }
-
-            child_counts.finish_render();
 
             counters
         })),

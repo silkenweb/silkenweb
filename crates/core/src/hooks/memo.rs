@@ -7,8 +7,19 @@ use std::{
     rc::Rc,
 };
 
+type SharedMemoData = Rc<RefCell<MemoData>>;
+
+// TODO: Naming of MemoScope and Memo
 #[derive(Clone, Default)]
-pub struct Memo(Rc<RefCell<MemoData>>);
+pub struct MemoScope(SharedMemoData);
+
+impl MemoScope {
+    pub fn scope(&self) -> Memo {
+        Memo(self.0.clone())
+    }
+}
+
+pub struct Memo(SharedMemoData);
 
 impl Memo {
     fn memo_map<'a, Key: 'static, Value: 'static>(
@@ -20,14 +31,6 @@ impl Memo {
             .or_insert_with(|| Box::new(HashMap::<Key, Value>::new()))
             .downcast_mut()
             .unwrap()
-    }
-
-    // TODO: Safer interface for this. Need something like `memo.use(&self) ->
-    // UseMemo` which calls `finish_render` on drop.
-    /// Clients must call `self.finish_render()` after each render has finished.
-    pub fn finish_render(&self) {
-        let mut memo = self.0.borrow_mut();
-        memo.current_memoized = mem::take(&mut memo.next_memoized);
     }
 
     pub fn cache<Key, Value, ValueFn>(&self, key: Key, value_fn: ValueFn) -> Value
@@ -44,6 +47,13 @@ impl Memo {
         let next_memos = Self::memo_map::<Key, Value>(&mut memo.next_memoized);
         next_memos.insert(key, value.clone());
         value
+    }
+}
+
+impl Drop for Memo {
+    fn drop(&mut self) {
+        let mut memo = self.0.borrow_mut();
+        memo.current_memoized = mem::take(&mut memo.next_memoized);
     }
 }
 
