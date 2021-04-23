@@ -5,7 +5,7 @@ use surfinia_core::{
     mount,
     Builder,
 };
-use surfinia_html::{button, div, DivBuilder};
+use surfinia_html::elements::{button, div, DivBuilder};
 
 fn counter(count: &Signal<u32>) -> DivBuilder {
     let inc = count.write();

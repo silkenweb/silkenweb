@@ -1,4 +1,4 @@
-pub use surfinia_core::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder};
+pub use surfinia_core::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
 pub use wasm_bindgen::JsCast;
 
 // TODO: Mangle other attributes
@@ -166,7 +166,7 @@ macro_rules! text_parent {
     ($name:ident) => {
         paste::item! {
             impl [<$name:camel Builder>] {
-                pub fn text(self, child: impl Text) -> Self {
+                pub fn text(self, child: impl $crate::macros::Text) -> Self {
                     Self(self.0.text(child))
                 }
             }

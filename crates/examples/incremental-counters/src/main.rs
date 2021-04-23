@@ -5,7 +5,10 @@ use surfinia_core::{
     mount,
     Builder,
 };
-use surfinia_html::{button, div, element_list, Div};
+use surfinia_html::{
+    element_list,
+    elements::{button, div, Div},
+};
 
 fn counter() -> Div {
     let count = Signal::new(0);

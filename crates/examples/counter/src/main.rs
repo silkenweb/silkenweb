@@ -1,5 +1,5 @@
 use surfinia_core::{hooks::state::Signal, mount};
-use surfinia_html::{button, div};
+use surfinia_html::elements::{button, div};
 
 fn main() {
     console_error_panic_hook::set_once();
