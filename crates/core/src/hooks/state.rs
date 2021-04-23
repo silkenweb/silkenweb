@@ -282,9 +282,9 @@ impl<T> DependentCallback<T> {
 
 impl<T> PartialEq for DependentCallback<T> {
     fn eq(&self, other: &Self) -> bool {
-        // TODO: Investigate this further
-        #[allow(clippy::vtable_address_comparisons)]
-        Rc::ptr_eq(&self.upgrade(), &other.upgrade())
+        // We need to discard the vtable by casting as we only care if the data pointers
+        // are equal. See https://github.com/rust-lang/rust/issues/46139
+        Rc::as_ptr(&self.upgrade()).cast::<()>() == Rc::as_ptr(&other.upgrade()).cast::<()>()
     }
 }
 
