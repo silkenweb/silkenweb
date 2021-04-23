@@ -77,6 +77,7 @@ html_element!(
 );
 
 dom_type!(a <dom::HtmlAnchorElement>);
+text_parent!(a);
 
 html_element!(
     /// The [HTML Abbreviation element (`<abbr>`)][mdn] represents an abbreviation or acronym; the
@@ -95,6 +96,7 @@ html_element!(
 );
 
 dom_type!(abbr <dom::HtmlElement>);
+text_parent!(abbr);
 
 html_element!(
     /// The [HTML Bring Attention To element (`<b>`)][mdn] is used to draw the reader's attention to
@@ -106,6 +108,7 @@ html_element!(
 );
 
 dom_type!(b <dom::HtmlElement>);
+text_parent!(b);
 
 html_element!(
     /// The [HTML Bidirectional Isolate element (`<bdi>`)][mdn] tells the browser's bidirectional
@@ -117,6 +120,7 @@ html_element!(
 );
 
 dom_type!(bdi <dom::HtmlElement>);
+text_parent!(bdi);
 
 html_element!(
     /// The [HTML Bidirectional Text Override element (`<bdo>`)][mdn] overrides the current
@@ -135,6 +139,7 @@ html_element!(
 );
 
 dom_type!(bdo <dom::HtmlElement>);
+text_parent!(bdo);
 
 html_element!(
     /// The [HTML `<br>` element][mdn] produces a line break in text (carriage-return). It is useful
@@ -146,6 +151,7 @@ html_element!(
 );
 
 dom_type!(br <dom::HtmlBrElement>);
+text_parent!(br);
 
 html_element!(
     /// The [HTML Citation element (`<cite>`)][mdn] is used to describe a reference to a cited
@@ -157,6 +163,7 @@ html_element!(
 );
 
 dom_type!(cite <dom::HtmlElement>);
+text_parent!(cite);
 
 html_element!(
     /// The [HTML `<code>` element][mdn] displays its contents styled in a fashion intended to
@@ -168,6 +175,7 @@ html_element!(
 );
 
 dom_type!(code <dom::HtmlElement>);
+text_parent!(code);
 
 html_element!(
     /// The [HTML `<data>` element][mdn] links a given content with a machine-readable translation.
@@ -183,6 +191,7 @@ html_element!(
 );
 
 dom_type!(data <dom::HtmlDataElement>);
+text_parent!(data);
 
 html_element!(
     /// The [HTML Definition element (`<dfn>`)][mdn] is used to indicate the term being defined
@@ -194,6 +203,7 @@ html_element!(
 );
 
 dom_type!(dfn <dom::HtmlElement>);
+text_parent!(dfn);
 
 html_element!(
     /// The [HTML `<em>` element][mdn] marks text that has stress emphasis. The `<em>` element can
@@ -205,6 +215,7 @@ html_element!(
 );
 
 dom_type!(em <dom::HtmlElement>);
+text_parent!(em);
 
 html_element!(
     /// The [HTML `<i>` element][mdn] represents a range of text that is set off from the normal
@@ -217,6 +228,7 @@ html_element!(
 );
 
 dom_type!(i <dom::HtmlElement>);
+text_parent!(i);
 
 html_element!(
     /// The [HTML Keyboard Input element (`<kbd>`)][mdn] represents a span of inline text denoting
@@ -228,6 +240,7 @@ html_element!(
 );
 
 dom_type!(kbd <dom::HtmlElement>);
+text_parent!(kbd);
 
 html_element!(
     /// The [HTML Mark Text element (`<mark>`)][mdn] represents text which is marked or highlighted
@@ -240,6 +253,7 @@ html_element!(
 );
 
 dom_type!(mark <dom::HtmlElement>);
+text_parent!(mark);
 
 html_element!(
     /// The [HTML `<q>` element][mdn]  indicates that the enclosed text is a short inline quotation.
@@ -256,6 +270,7 @@ html_element!(
 );
 
 dom_type!(q <dom::HtmlQuoteElement>);
+text_parent!(q);
 
 html_element!(
     /// The [HTML Ruby Base (`<rb>`) element][mdn] is used to delimit the base text component of
@@ -268,6 +283,7 @@ html_element!(
 );
 
 dom_type!(rb <dom::HtmlElement>);
+text_parent!(rb);
 
 html_element!(
     /// The [HTML Ruby Fallback Parenthesis (`<rp>`) element][mdn] is used to provide fall-back
@@ -281,6 +297,7 @@ html_element!(
 );
 
 dom_type!(rp <dom::HtmlElement>);
+text_parent!(rp);
 
 html_element!(
     /// The [HTML Ruby Text (`<rt>`) element][mdn] specifies the ruby text component of a ruby
@@ -295,6 +312,7 @@ html_element!(
 );
 
 dom_type!(rt <dom::HtmlElement>);
+text_parent!(rt);
 
 html_element!(
     /// The [HTML Ruby Text Container (`<rtc>`) element][mdn] embraces semantic annotations of
@@ -312,6 +330,7 @@ html_element!(
 );
 
 dom_type!(rtc <dom::HtmlElement>);
+text_parent!(rtc);
 
 html_element!(
     /// The [HTML `<ruby>` element][mdn] represents a ruby annotation. Ruby annotations are for
@@ -323,6 +342,7 @@ html_element!(
 );
 
 dom_type!(ruby <dom::HtmlElement>);
+text_parent!(ruby);
 
 html_element!(
     /// The [HTML `<s>` element][mdn] renders text with a strikethrough, or a line through it. Use
@@ -338,6 +358,7 @@ html_element!(
 );
 
 dom_type!(s <dom::HtmlElement>);
+text_parent!(s);
 
 html_element!(
     /// The [HTML Sample Element (`<samp>`)][mdn] is used to enclose inline text which represents
@@ -349,6 +370,7 @@ html_element!(
 );
 
 dom_type!(samp <dom::HtmlElement>);
+text_parent!(samp);
 
 html_element!(
     /// The [HTML `<small>` element][mdn] represents side-comments and small print, like copyright
@@ -361,6 +383,7 @@ html_element!(
 );
 
 dom_type!(small <dom::HtmlElement>);
+text_parent!(small);
 
 html_element!(
     /// The [HTML `<span>` element][mdn] is a generic inline container for phrasing content, which
@@ -377,6 +400,7 @@ html_element!(
 );
 
 dom_type!(span <dom::HtmlSpanElement>);
+text_parent!(span);
 
 html_element!(
     /// The [HTML Strong Importance Element (`<strong>`)][mdn] indicates that its contents have
@@ -389,6 +413,7 @@ html_element!(
 );
 
 dom_type!(strong <dom::HtmlElement>);
+text_parent!(strong);
 
 html_element!(
     /// The [HTML Subscript element (`<sub>`)][mdn] specifies inline text which should be displayed
@@ -400,6 +425,7 @@ html_element!(
 );
 
 dom_type!(sub <dom::HtmlElement>);
+text_parent!(sub);
 
 html_element!(
     /// The [HTML Superscript element (`<sup>`)][mdn] specifies inline text which is to be displayed
@@ -411,6 +437,7 @@ html_element!(
 );
 
 dom_type!(sup <dom::HtmlElement>);
+text_parent!(sup);
 
 html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
@@ -425,6 +452,7 @@ html_element!(
 );
 
 dom_type!(time <dom::HtmlTimeElement>);
+text_parent!(time);
 
 html_element!(
     /// The [HTML Unarticulated Annotation Element (`<u>`)][mdn] represents a span of inline text
@@ -436,6 +464,7 @@ html_element!(
 );
 
 dom_type!(u <dom::HtmlElement>);
+text_parent!(u);
 
 html_element!(
     /// The [HTML Variable element (`<var>`)][mdn] represents the name of a variable in a
@@ -447,6 +476,7 @@ html_element!(
 );
 
 dom_type!(var <dom::HtmlElement>);
+text_parent!(var);
 
 html_element!(
     /// The [HTML `<wbr>` element][mdn] represents a word break opportunity—a position within text
@@ -459,6 +489,7 @@ html_element!(
 );
 
 dom_type!(wbr <dom::HtmlElement>);
+text_parent!(wbr);
 
 html_element!(
     /// The [HTML `<del>` element][mdn] represents a range of text that has been deleted from a
@@ -480,6 +511,7 @@ html_element!(
 );
 
 dom_type!(del <dom::HtmlModElement>);
+text_parent!(del);
 
 html_element!(
     /// The [HTML `<ins>` element][mdn] represents a range of text that has been added to a
@@ -501,6 +533,7 @@ html_element!(
 );
 
 dom_type!(ins <dom::HtmlModElement>);
+text_parent!(ins);
 
 html_element!(
     /// The [HTML `<address>` element][mdn] indicates that the enclosed HTML provides contact
@@ -512,6 +545,7 @@ html_element!(
 );
 
 dom_type!(address <dom::HtmlElement>);
+text_parent!(address);
 
 html_element!(
     /// The [HTML `<article>` element][mdn] represents a self-contained composition in a document,
@@ -524,6 +558,7 @@ html_element!(
 );
 
 dom_type!(article <dom::HtmlElement>);
+text_parent!(article);
 
 html_element!(
     /// The [HTML `<aside>` element][mdn] represents a portion of a document whose content is only
@@ -535,6 +570,7 @@ html_element!(
 );
 
 dom_type!(aside <dom::HtmlElement>);
+text_parent!(aside);
 
 html_element!(
     /// The [HTML `<footer>` element][mdn] represents a footer for its nearest [sectioning content]
@@ -549,6 +585,7 @@ html_element!(
 );
 
 dom_type!(footer <dom::HtmlElement>);
+text_parent!(footer);
 
 html_element!(
     /// The [HTML `<header>` element][mdn] represents introductory content, typically a group of
@@ -561,6 +598,7 @@ html_element!(
 );
 
 dom_type!(header <dom::HtmlElement>);
+text_parent!(header);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -572,6 +610,7 @@ html_element!(
 );
 
 dom_type!(h1 <dom::HtmlHeadingElement>);
+text_parent!(h1);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -583,6 +622,7 @@ html_element!(
 );
 
 dom_type!(h2 <dom::HtmlHeadingElement>);
+text_parent!(h2);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -594,6 +634,7 @@ html_element!(
 );
 
 dom_type!(h3 <dom::HtmlHeadingElement>);
+text_parent!(h3);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -605,6 +646,7 @@ html_element!(
 );
 
 dom_type!(h4 <dom::HtmlHeadingElement>);
+text_parent!(h4);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -616,6 +658,7 @@ html_element!(
 );
 
 dom_type!(h5 <dom::HtmlHeadingElement>);
+text_parent!(h5);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -627,6 +670,7 @@ html_element!(
 );
 
 dom_type!(h6 <dom::HtmlHeadingElement>);
+text_parent!(h6);
 
 html_element!(
     /// The [HTML `<hgroup>` element][mdn] represents a multi-level heading for a section of a
@@ -639,6 +683,7 @@ html_element!(
 );
 
 dom_type!(hgroup <dom::HtmlElement>);
+text_parent!(hgroup);
 
 html_element!(
     /// The [HTML `<main>` element][mdn] represents the dominant content of the [`<body>`][body] of
@@ -652,6 +697,7 @@ html_element!(
 );
 
 dom_type!(main <dom::HtmlElement>);
+text_parent!(main);
 
 html_element!(
     /// The [HTML `<nav>` element][mdn] represents a section of a page whose purpose is to provide
@@ -664,6 +710,7 @@ html_element!(
 );
 
 dom_type!(nav <dom::HtmlElement>);
+text_parent!(nav);
 
 html_element!(
     /// The [HTML `<section>` element][mdn] represents a standalone section — which doesn't have a
@@ -675,6 +722,7 @@ html_element!(
 );
 
 dom_type!(section <dom::HtmlElement>);
+text_parent!(section);
 
 html_element!(
     /// The [HTML `<embed>` element][mdn] embeds external content at the specified point in the
@@ -707,6 +755,7 @@ html_element!(
 );
 
 dom_type!(embed <dom::HtmlEmbedElement>);
+text_parent!(embed);
 
 html_element!(
     /// The [HTML Inline Frame element (`<iframe>`)][mdn] represents a nested [browsing context],
@@ -786,6 +835,7 @@ html_element!(
 );
 
 dom_type!(iframe <dom::HtmlIFrameElement>);
+text_parent!(iframe);
 
 html_element!(
     /// The [HTML `<object>` element][mdn] represents an external resource, which can be treated as
@@ -825,6 +875,7 @@ html_element!(
 );
 
 dom_type!(object <dom::HtmlObjectElement>);
+text_parent!(object);
 
 html_element!(
     /// The [HTML `<param>` element][param] defines parameters for an [`<object>`][object] element.
@@ -842,6 +893,7 @@ html_element!(
 );
 
 dom_type!(param <dom::HtmlParamElement>);
+text_parent!(param);
 
 html_element!(
     /// The [HTML `<picture>` element][mdn] contains zero or more [`<source>`][source] elements and
@@ -856,6 +908,7 @@ html_element!(
 );
 
 dom_type!(picture <dom::HtmlPictureElement>);
+text_parent!(picture);
 
 html_element!(
     /// The [HTML `<source>` element][source] specifies multiple media resources for the
@@ -910,6 +963,7 @@ html_element!(
 );
 
 dom_type!(source <dom::HtmlSourceElement>);
+text_parent!(source);
 
 html_element!(
     /// Use the [HTML `<canvas>` element][mdn] with either the [canvas scripting API][api] or the
@@ -929,6 +983,7 @@ html_element!(
 );
 
 dom_type!(canvas <dom::HtmlCanvasElement>);
+text_parent!(canvas);
 
 html_element!(
     /// The [HTML `<noscript>` element][mdn] defines a section of HTML to be inserted if a script
@@ -940,6 +995,7 @@ html_element!(
 );
 
 dom_type!(noscript <dom::HtmlElement>);
+text_parent!(noscript);
 
 html_element!(
     /// The [HTML `<script>` element][mdn] is used to embed or reference executable code; this is
@@ -1025,6 +1081,7 @@ html_element!(
 );
 
 dom_type!(script <dom::HtmlScriptElement>);
+text_parent!(script);
 
 html_element!(
     /// The [HTML `<area>` element][mdn] defines a hot-spot region on an image, and optionally
@@ -1097,6 +1154,7 @@ html_element!(
 );
 
 dom_type!(area <dom::HtmlAreaElement>);
+text_parent!(area);
 
 html_element!(
     /// The [HTML `<audio>` element][mdn] is used to embed sound content in documents. It may
@@ -1204,6 +1262,7 @@ html_element!(
 );
 
 dom_type!(audio <dom::HtmlAudioElement>);
+text_parent!(audio);
 
 html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
@@ -1355,6 +1414,7 @@ html_element!(
 );
 
 dom_type!(img <dom::HtmlImageElement>);
+text_parent!(img);
 
 html_element!(
     /// The [HTML `<map>` element][mdn] is used with [`<area>`][area] elements to define an image
@@ -1374,6 +1434,7 @@ html_element!(
 );
 
 dom_type!(map <dom::HtmlMapElement>);
+text_parent!(map);
 
 html_element!(
     /// The [HTML `<track>` element][mdn] is used as a child of the media elements
@@ -1435,6 +1496,7 @@ html_element!(
 );
 
 dom_type!(track <dom::HtmlTrackElement>);
+text_parent!(track);
 
 html_element!(
     /// The [HTML Video element (`<video>`)][mdn] embeds a media player which supports video
@@ -1555,6 +1617,7 @@ html_element!(
 );
 
 dom_type!(video <dom::HtmlVideoElement>);
+text_parent!(video);
 
 html_element!(
     /// The [HTML Details Element (`<details>`)][mdn] creates a disclosure widget in which
@@ -1569,6 +1632,7 @@ html_element!(
 );
 
 dom_type!(details <dom::HtmlDetailsElement>);
+text_parent!(details);
 
 html_element!(
     /// The [HTML `<dialog>` element][mdn] represents a dialog box or other interactive component,
@@ -1584,6 +1648,7 @@ html_element!(
 );
 
 dom_type!(dialog <dom::HtmlDialogElement>);
+text_parent!(dialog);
 
 html_element!(
     /// The [HTML `<menu>` element][mdn] represents a group of commands that a user can perform or
@@ -1597,6 +1662,7 @@ html_element!(
 );
 
 dom_type!(menu <dom::HtmlMenuElement>);
+text_parent!(menu);
 
 html_element!(
     /// The [HTML Disclosure Summary element (`<summary>`)][mdn] element specifies a summary,
@@ -1609,6 +1675,7 @@ html_element!(
 );
 
 dom_type!(summary <dom::HtmlElement>);
+text_parent!(summary);
 
 html_element!(
     /// The [HTML `<blockquote>` element][mdn] (or *HTML Block Quotation Element*) indicates that
@@ -1628,6 +1695,7 @@ html_element!(
 );
 
 dom_type!(blockquote <dom::HtmlQuoteElement>);
+text_parent!(blockquote);
 
 html_element!(
     /// The [HTML `<dd>` element][mdn] provides the description, definition, or value for the
@@ -1641,6 +1709,7 @@ html_element!(
 );
 
 dom_type!(dd <dom::HtmlElement>);
+text_parent!(dd);
 
 html_element!(
     /// The [HTML Content Division element (`<div>`)][mdn] is the generic container for flow
@@ -1653,6 +1722,7 @@ html_element!(
 );
 
 dom_type!(div <dom::HtmlDivElement>);
+text_parent!(div);
 
 html_element!(
     /// The [HTML `<dl>` element][mdn] represents a description list. The element encloses a list of
@@ -1668,6 +1738,7 @@ html_element!(
 );
 
 dom_type!(dl <dom::HtmlDListElement>);
+text_parent!(dl);
 
 html_element!(
     /// The [HTML `<dt>` element][mdn] specifies a term in a description or definition list, and as
@@ -1680,6 +1751,7 @@ html_element!(
 );
 
 dom_type!(dt <dom::HtmlElement>);
+text_parent!(dt);
 
 html_element!(
     /// The [HTML `<figcaption>` or Figure Caption element][mdn] represents a caption or legend
@@ -1692,6 +1764,7 @@ html_element!(
 );
 
 dom_type!(figcaption <dom::HtmlElement>);
+text_parent!(figcaption);
 
 html_element!(
     /// The [HTML `<figure>` (Figure With Optional Caption) element][mdn] represents self-contained
@@ -1705,6 +1778,7 @@ html_element!(
 );
 
 dom_type!(figure <dom::HtmlElement>);
+text_parent!(figure);
 
 html_element!(
     /// The [HTML `<hr>` element][mdn] represents a thematic break between paragraph-level elements:
@@ -1716,6 +1790,7 @@ html_element!(
 );
 
 dom_type!(hr <dom::HtmlHrElement>);
+text_parent!(hr);
 
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
@@ -1726,6 +1801,7 @@ html_element!(
 );
 
 dom_type!(li <dom::HtmlLiElement>);
+text_parent!(li);
 
 html_element!(
     /// The [HTML `<ol>` element][mdn] represents an ordered list of items, typically rendered as a
@@ -1762,6 +1838,7 @@ html_element!(
 );
 
 dom_type!(ol <dom::HtmlOListElement>);
+text_parent!(ol);
 
 html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
@@ -1772,6 +1849,7 @@ html_element!(
 );
 
 dom_type!(p <dom::HtmlParagraphElement>);
+text_parent!(p);
 
 html_element!(
     /// The [HTML `<pre>` element][mdn] represents preformatted text which is to be presented
@@ -1783,6 +1861,7 @@ html_element!(
 );
 
 dom_type!(pre <dom::HtmlPreElement>);
+text_parent!(pre);
 
 html_element!(
     /// The [HTML `<ul>` element][mdn] represents an unordered list of items, typically rendered as
@@ -1794,6 +1873,7 @@ html_element!(
 );
 
 dom_type!(ul <dom::HtmlUListElement>);
+text_parent!(ul);
 
 html_element!(
     /// The [HTML Table Caption element (`<caption>`)][mdn] specifies the caption (or title) of a
@@ -1806,6 +1886,7 @@ html_element!(
 );
 
 dom_type!(caption <dom::HtmlTableCaptionElement>);
+text_parent!(caption);
 
 html_element!(
     /// The [HTML `<col>` element][mdn] defines a column within a table and is used for defining
@@ -1823,6 +1904,7 @@ html_element!(
 );
 
 dom_type!(col <dom::HtmlTableColElement>);
+text_parent!(col);
 
 html_element!(
     /// The [HTML `<colgroup>` element][mdn] defines a group of columns within a table.
@@ -1844,6 +1926,7 @@ html_element!(
 );
 
 dom_type!(colgroup <dom::HtmlTableColElement>);
+text_parent!(colgroup);
 
 html_element!(
     /// The [HTML `<table>` element][mdn] represents tabular data — that is, information presented
@@ -1855,6 +1938,7 @@ html_element!(
 );
 
 dom_type!(table <dom::HtmlTableElement>);
+text_parent!(table);
 
 html_element!(
     /// The [HTML Table Body element (`<tbody>`)][mdn] encapsulates a set of table rows
@@ -1869,6 +1953,7 @@ html_element!(
 );
 
 dom_type!(tbody <dom::HtmlTableSectionElement>);
+text_parent!(tbody);
 
 html_element!(
     /// The [HTML `<td>` element][mdn] defines a cell of a table that contains data. It participates
@@ -1895,6 +1980,7 @@ html_element!(
 );
 
 dom_type!(td <dom::HtmlTableCellElement>);
+text_parent!(td);
 
 html_element!(
     /// The [HTML `<tfoot>` element][mdn] defines a set of rows summarizing the columns of the
@@ -1906,6 +1992,7 @@ html_element!(
 );
 
 dom_type!(tfoot <dom::HtmlTableSectionElement>);
+text_parent!(tfoot);
 
 html_element!(
     /// The [HTML `<th>` element][mdn] defines a cell as header of a group of table cells. The exact
@@ -1953,6 +2040,7 @@ html_element!(
 );
 
 dom_type!(th <dom::HtmlTableCellElement>);
+text_parent!(th);
 
 html_element!(
     /// The [HTML `<thead>` element][mdn] defines a set of rows defining the head of the columns of
@@ -1964,6 +2052,7 @@ html_element!(
 );
 
 dom_type!(thead <dom::HtmlTableSectionElement>);
+text_parent!(thead);
 
 html_element!(
     /// The [HTML `<tr>` element][mdn] defines a row of cells in a table. The row's cells can then
@@ -1978,6 +2067,7 @@ html_element!(
 );
 
 dom_type!(tr <dom::HtmlTableRowElement>);
+text_parent!(tr);
 
 html_element!(
     /// The [HTML `<base> element`][mdn] specifies the base URL to use for all relative URLs
@@ -2014,6 +2104,7 @@ html_element!(
 );
 
 dom_type!(base <dom::HtmlBaseElement>);
+text_parent!(base);
 
 html_element!(
     /// The [HTML `<head>` element][mdn] contains machine-readable information ([metadata]) about
@@ -2029,6 +2120,7 @@ html_element!(
 );
 
 dom_type!(head <dom::HtmlHeadElement>);
+text_parent!(head);
 
 html_element!(
     /// The [HTML External Resource Link element (`<link>`)][mdn] specifies relationships between
@@ -2152,6 +2244,7 @@ html_element!(
 );
 
 dom_type!(link <dom::HtmlLinkElement>);
+text_parent!(link);
 
 html_element!(
     /// The [HTML `<meta>` element][mdn] represents [metadata] that cannot be represented by other
@@ -2218,6 +2311,7 @@ html_element!(
 );
 
 dom_type!(meta <dom::HtmlMetaElement>);
+text_parent!(meta);
 
 html_element!(
     /// The [HTML `<style>` element][mdn] contains style information for a document, or part of a
@@ -2242,6 +2336,7 @@ html_element!(
 );
 
 dom_type!(style <dom::HtmlStyleElement>);
+text_parent!(style);
 
 html_element!(
     /// The [HTML Title element (`<title>`)][mdn] defines the document's title that is shown in a
@@ -2254,6 +2349,7 @@ html_element!(
 );
 
 dom_type!(title <dom::HtmlTitleElement>);
+text_parent!(title);
 
 html_element!(
     /// The [HTML `<button>` element][mdn] represents a clickable button, which can be used in
@@ -2357,6 +2453,7 @@ html_element!(
 );
 
 dom_type!(button <dom::HtmlButtonElement>);
+text_parent!(button);
 
 html_element!(
     /// The [HTML `<datalist>` element][mdn] contains a set of [`<option>`][option] elements that
@@ -2369,6 +2466,7 @@ html_element!(
 );
 
 dom_type!(datalist <dom::HtmlDataListElement>);
+text_parent!(datalist);
 
 html_element!(
     /// The [HTML `<fieldset>` element][mdn] is used to group several controls as well as labels
@@ -2397,6 +2495,7 @@ html_element!(
 );
 
 dom_type!(fieldset <dom::HtmlFieldSetElement>);
+text_parent!(fieldset);
 
 html_element!(
     /// The [HTML `<form>` element][mdn] represents a document section that contains interactive
@@ -2474,6 +2573,7 @@ html_element!(
 );
 
 dom_type!(form <dom::HtmlFormElement>);
+text_parent!(form);
 
 html_element!(
     /// The [HTML `<input>` element][mdn] is used to create interactive controls for web-based forms
@@ -2843,6 +2943,7 @@ html_element!(
 );
 
 dom_type!(input <dom::HtmlInputElement>);
+text_parent!(input);
 
 html_element!(
     /// The [HTML `<label>` element][mdn] represents a caption for an item in a user interface.
@@ -2869,6 +2970,7 @@ html_element!(
 );
 
 dom_type!(label <dom::HtmlLabelElement>);
+text_parent!(label);
 
 html_element!(
     /// The [HTML `<legend>` element][mdn] represents a caption for the content of its parent
@@ -2881,6 +2983,7 @@ html_element!(
 );
 
 dom_type!(legend <dom::HtmlLegendElement>);
+text_parent!(legend);
 
 html_element!(
     /// The [HTML `<meter>` element][mdn] represents either a scalar value within a known range or a
@@ -2937,6 +3040,7 @@ html_element!(
 );
 
 dom_type!(meter <dom::HtmlMeterElement>);
+text_parent!(meter);
 
 html_element!(
     /// The [HTML `<optgroup>` element][mdn] creates a grouping of options within a
@@ -2958,6 +3062,7 @@ html_element!(
 );
 
 dom_type!(optgroup <dom::HtmlOptGroupElement>);
+text_parent!(optgroup);
 
 html_element!(
     /// The [HTML `<option>` element][mdn] is used to define an item contained in a
@@ -2994,6 +3099,7 @@ html_element!(
 );
 
 dom_type!(option <dom::HtmlOptionElement>);
+text_parent!(option);
 
 html_element!(
     /// The [HTML Output element (`<output>`)][mdn] is a container element into which a site or app
@@ -3020,6 +3126,7 @@ html_element!(
 );
 
 dom_type!(output <dom::HtmlOutputElement>);
+text_parent!(output);
 
 html_element!(
     /// The [HTML `<progress>` element][progress] displays an indicator showing the completion
@@ -3042,6 +3149,7 @@ html_element!(
 );
 
 dom_type!(progress <dom::HtmlProgressElement>);
+text_parent!(progress);
 
 html_element!(
     /// The [HTML `<select>` element][mdn] represents a control that provides a menu of options.
@@ -3090,6 +3198,7 @@ html_element!(
 );
 
 dom_type!(select <dom::HtmlSelectElement>);
+text_parent!(select);
 
 html_element!(
     /// The [HTML `<textarea>` element][mdn] represents a multi-line plain-text editing control,
@@ -3189,4 +3298,5 @@ html_element!(
 );
 
 dom_type!(textarea <dom::HtmlTextAreaElement>);
+text_parent!(textarea);
 

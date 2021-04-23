@@ -23,6 +23,9 @@ where
     ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
 
+// TODO: Everything is currently a text_parent. Figure out which elements can
+// have text children.
+
 html_element!(div {});
 dom_type!(div<dom::HtmlDivElement>);
 text_parent!(div);
