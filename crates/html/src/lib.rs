@@ -1,6 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 use surfinia_core::{
-    hooks::{list_state::ElementList, state::ReadSignal},
+    hooks::list_state::ElementList,
     tag,
     AttributeValue,
     Builder,
@@ -83,9 +83,10 @@ macro_rules! html_element {
                 attributes![id: String, class: String, $($attr: $typ, )*];
                 html_events!($elem_type);
 
-                pub fn child<Child>(self, c: Child) -> Self where
-                [<$name:camel>]: ParentOf<Child>,
-                Child: Into<Element> {
+                pub fn child<Child>(self, c: Child) -> Self
+                where
+                    Child: Into<Element>
+                {
                     Self(self.0.child(c.into()))
                 }
             }
@@ -158,37 +159,6 @@ macro_rules! text_parent {
     };
 }
 
-macro_rules! categories {
-    ($name:ident [$($category:path),* $(,)?] ) => {
-        paste::item! {
-            $(
-                impl content_category::$category for [<$name:camel>] {}
-                impl content_category::$category for [<$name:camel Builder>] {}
-            )*
-        }
-    }
-}
-
-macro_rules! child_categories {
-    ($name:ident [$($category:ident),* $(,)?] ) => {
-        paste::item! {
-            $(
-                impl<Child> ParentOf<Child> for [<$name:camel>]
-                where
-                    Child: content_category::$category
-                {}
-            )*
-        }
-    }
-}
-
-impl<Parent, Child> ParentOf<ReadSignal<Child>> for Parent where Parent: ParentOf<Child> {}
-
-impl<Parent, Key, Child, ListElem> ParentOf<ElementList<Key, Child, ListElem>> for Parent where
-    Parent: ParentOf<Child>
-{
-}
-
 pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,
     generate_child: GenerateChild,
@@ -197,7 +167,6 @@ pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
 // TODO: Change order of type params
 where
     Value: 'static,
-    ParentElem::Target: ParentOf<ChildElem>,
     ChildElem: Into<Element>,
     ParentElem: Into<ElementBuilder> + Builder,
     GenerateChild: 'static + Fn(&Value) -> ChildElem,
@@ -209,41 +178,25 @@ where
 // TODO: Set correct dom elements
 html_element!(div <dom::Element> {});
 text_parent!(div);
-categories!(div[Flow, Palpable]);
-child_categories!(div[Flow]);
 
 html_element!(button <dom::HtmlButtonElement> {});
 text_parent!(button);
-categories!(button[Flow, Palpable]);
-child_categories!(button[Flow]);
 
 html_element!(section <dom::HtmlElement> {});
-categories!(section[Flow, Sectioning, Palpable]);
-child_categories!(section[Flow]);
 
 html_element!(header <dom::HtmlElement> {});
-categories!(header[Flow, Palpable]);
-child_categories!(header[Flow]);
 
 // TODO: Check this agrees with html5 spec
 html_element!(footer <dom::HtmlElement> {});
-categories!(footer[Flow, Palpable]);
-child_categories!(footer[Flow]);
 
 html_element!(span <dom::HtmlSpanElement> {});
 text_parent!(span);
-categories!(span[Flow, Phrasing]);
-child_categories!(span[Phrasing]);
 
 html_element!(h1 <dom::HtmlHeadingElement> {});
 text_parent!(h1);
-categories!(h1[Flow, Heading, Palpable]);
-child_categories!(h1[Phrasing]);
 
 html_element!(strong <dom::HtmlElement> {});
 text_parent!(strong);
-categories!(strong[Flow, Phrasing]);
-child_categories!(strong[Phrasing]);
 
 html_element!(input <dom::HtmlInputElement> {
     type_: String,
@@ -253,52 +206,15 @@ html_element!(input <dom::HtmlInputElement> {
     checked: bool,
     readonly: bool,
 });
-categories!(input[Flow, Listed, Submittable, form_associated::Resettable, Phrasing]);
 
 html_element!(label <dom::HtmlLabelElement> { for_: String });
 text_parent!(label);
-categories!(label[Flow, Phrasing, Interactive, FormAssociated]);
-child_categories!(label[Phrasing]);
 
 html_element!(ul <dom::HtmlUListElement> {});
 text_parent!(ul);
-categories!(ul[Flow, Palpable]);
-child_categories!(ul[Flow]); // TODO: Allowed child tags.
 
 html_element!(li <dom::HtmlLiElement> {});
 text_parent!(li);
-categories!(li[Flow]);
-child_categories!(li[Flow]);
 
 html_element!(a <dom::HtmlAnchorElement> {});
 text_parent!(a);
-categories!(a[Flow, Phrasing, Interactive, Palpable]);
-child_categories!(a[Flow,
-    // TODO:
-    // Interactive, Phrasing
-]);
-
-pub trait ParentOf<Child> {}
-
-pub mod content_category {
-    macro_rules! content_categories {
-        ($($name:ident),* $(,)?) => { $(pub trait $name {})* }
-    }
-
-    content_categories![
-        Flow,
-        Heading,
-        Phrasing,
-        Interactive,
-        Listed,
-        Labelable,
-        Submittable,
-        Palpable,
-        Sectioning,
-        FormAssociated,
-    ];
-
-    pub mod form_associated {
-        content_categories![Resettable];
-    }
-}
