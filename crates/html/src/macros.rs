@@ -130,13 +130,6 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![id: String, class: String, $($(#[$attr_meta])* $attr: $typ, )*];
-
-                pub fn child<Child>(self, c: Child) -> Self
-                where
-                    Child: Into<$crate::macros::Element>
-                {
-                    Self(self.0.child(c.into()))
-                }
             }
 
             impl $crate::macros::Builder for [<$name:camel Builder>] {
@@ -186,6 +179,13 @@ macro_rules! children_allowed {
             impl [<$name:camel Builder>] {
                 pub fn text(self, child: impl $crate::macros::Text) -> Self {
                     Self(self.0.text(child))
+                }
+
+                pub fn child<Child>(self, c: Child) -> Self
+                where
+                    Child: Into<$crate::macros::Element>
+                {
+                    Self(self.0.child(c.into()))
                 }
             }
         }
