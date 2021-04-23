@@ -175,8 +175,7 @@ where
     ElementList::new(root.into(), move |c| generate_child(c).into(), initial)
 }
 
-// TODO: Set correct dom elements
-html_element!(div <dom::Element> {});
+html_element!(div <dom::HtmlDivElement> {});
 text_parent!(div);
 
 html_element!(button <dom::HtmlButtonElement> {});
@@ -186,7 +185,6 @@ html_element!(section <dom::HtmlElement> {});
 
 html_element!(header <dom::HtmlElement> {});
 
-// TODO: Check this agrees with html5 spec
 html_element!(footer <dom::HtmlElement> {});
 
 html_element!(span <dom::HtmlSpanElement> {});

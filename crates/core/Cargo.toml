@@ -19,6 +19,7 @@ features = [
     "EventTarget",
     "HtmlElement",
     "HtmlHeadingElement",
+    "HtmlDivElement",
     "HtmlLabelElement",
     "HtmlUListElement",
     "HtmlLiElement",
