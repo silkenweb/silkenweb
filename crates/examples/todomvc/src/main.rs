@@ -259,7 +259,7 @@ impl TodoApp {
 
     fn render_footer(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
-        // TODO: Factor some of these into methods
+        // TODO(tidy todomvc): Factor some of these into methods
         let items_len = self.items.read().map(ElementList::len);
         let any_completed = (self.active_count.read(), items_len)
             .map(|&active_count, &items_len| active_count != items_len)

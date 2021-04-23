@@ -180,7 +180,7 @@ where
     }
 }
 
-// TODO: Code to test this
+// TODO(testing): Code to test this
 impl<'a, T> Text for &'a ReadSignal<T>
 where
     T: 'static,
@@ -302,7 +302,7 @@ enum ElementKind {
 #[derive(Clone)]
 pub struct Element(Rc<ElementKind>);
 
-// TODO: Find a better way to add all child types to dom
+// TODO(review): Find a better way to add all child types to dom
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
 

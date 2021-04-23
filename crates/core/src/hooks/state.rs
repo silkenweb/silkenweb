@@ -95,7 +95,7 @@ impl<T: 'static> ReadSignal<T> {
     }
 
     fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: Rc<dyn Fn(&T)>) {
-        // TODO: Failure to borrow shared state indicate a circular dependency. We
+        // TODO(testing): Failure to borrow shared state indicate a circular dependency. We
         // should report a nicer error. Is the borrow failure always a circular
         // dependency?
         self.0
