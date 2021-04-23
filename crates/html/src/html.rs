@@ -1,3 +1,5 @@
+#![allow(unused_attributes)]
+#![rustfmt::skip]
 use web_sys as dom;
 
 html_element!(
@@ -3297,4 +3299,3 @@ html_element!(
 
 // TODO: Use correct dom type
 dom_type!(textarea <dom::Element>);
-
