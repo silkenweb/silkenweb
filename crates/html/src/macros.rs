@@ -57,8 +57,8 @@ macro_rules! events {
                 ) -> Self {
                     Self(self.0.on(stringify!($name), move |js_ev| {
                         use $crate::macros::JsCast;
+                        // I *think* it's safe to assume event and event.target aren't null
                         let event: $event_type = js_ev.unchecked_into();
-                        // TODO: Is it safe to unwrap here?
                         let target: $elem_type = event.target().unwrap().unchecked_into();
                         f(event, target);
                     }))
