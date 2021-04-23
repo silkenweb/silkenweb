@@ -10,7 +10,7 @@ pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,
     generate_child: GenerateChild,
     initial: impl Iterator<Item = (Key, Value)>,
-) -> ElementList<Key, ParentElem::Target, Value>
+) -> ElementList<Key, Value>
 // TODO: Change order of type params
 where
     Value: 'static,

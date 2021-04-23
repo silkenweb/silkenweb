@@ -1,7 +1,13 @@
 // TODO: Need to think carefully about a minimal list container that
 // filter/sort/etc can be built on top of.
 
-use std::{cell::{Ref, RefCell}, collections::{BTreeMap, BTreeSet}, marker::PhantomData, mem, ops::Bound::{Excluded, Unbounded}, rc::Rc};
+use std::{
+    cell::{Ref, RefCell},
+    collections::{BTreeMap, BTreeSet},
+    mem,
+    ops::Bound::{Excluded, Unbounded},
+    rc::Rc,
+};
 
 use web_sys as dom;
 
@@ -66,16 +72,14 @@ where
 
 // TODO: Parameterize on key type
 // TODO: Parameterize on storage type
-pub struct ElementList<Key, Parent, Value> {
+pub struct ElementList<Key, Value> {
     visible_items: Rc<RefCell<OrderedElementList<Key>>>,
     generate_child: Rc<dyn Fn(&Value) -> Element>,
     items: BTreeMap<Key, StoredItem<Value>>,
     filter: Box<dyn Fn(&Value) -> ReadSignal<bool>>,
-    // TODO: Can we actually use this type for the root?
-    phantom: PhantomData<Parent>
 }
 
-impl<Key, Parent, Value> ElementList<Key, Parent, Value>
+impl<Key, Value> ElementList<Key, Value>
 where
     Key: 'static + Clone + Ord + Eq,
     Value: 'static,
@@ -95,7 +99,6 @@ where
             generate_child: Rc::new(generate_child),
             items: BTreeMap::new(),
             filter: Box::new(|_| Signal::new(true).read()),
-            phantom: PhantomData
         };
 
         for (key, elem) in initial {
@@ -190,7 +193,7 @@ where
     }
 }
 
-impl<Key, Parent, T> DomElement for ElementList<Key, Parent, T> {
+impl<Key, T> DomElement for ElementList<Key, T> {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
