@@ -151,7 +151,6 @@ html_element!(
 );
 
 dom_type!(br <dom::HtmlBrElement>);
-text_parent!(br);
 
 html_element!(
     /// The [HTML Citation element (`<cite>`)][mdn] is used to describe a reference to a cited
@@ -489,7 +488,6 @@ html_element!(
 );
 
 dom_type!(wbr <dom::HtmlElement>);
-text_parent!(wbr);
 
 html_element!(
     /// The [HTML `<del>` element][mdn] represents a range of text that has been deleted from a
@@ -755,7 +753,6 @@ html_element!(
 );
 
 dom_type!(embed <dom::HtmlEmbedElement>);
-text_parent!(embed);
 
 html_element!(
     /// The [HTML Inline Frame element (`<iframe>`)][mdn] represents a nested [browsing context],
@@ -893,7 +890,6 @@ html_element!(
 );
 
 dom_type!(param <dom::HtmlParamElement>);
-text_parent!(param);
 
 html_element!(
     /// The [HTML `<picture>` element][mdn] contains zero or more [`<source>`][source] elements and
@@ -963,7 +959,6 @@ html_element!(
 );
 
 dom_type!(source <dom::HtmlSourceElement>);
-text_parent!(source);
 
 html_element!(
     /// Use the [HTML `<canvas>` element][mdn] with either the [canvas scripting API][api] or the
@@ -1154,7 +1149,6 @@ html_element!(
 );
 
 dom_type!(area <dom::HtmlAreaElement>);
-text_parent!(area);
 
 html_element!(
     /// The [HTML `<audio>` element][mdn] is used to embed sound content in documents. It may
@@ -1414,7 +1408,6 @@ html_element!(
 );
 
 dom_type!(img <dom::HtmlImageElement>);
-text_parent!(img);
 
 html_element!(
     /// The [HTML `<map>` element][mdn] is used with [`<area>`][area] elements to define an image
@@ -1496,7 +1489,6 @@ html_element!(
 );
 
 dom_type!(track <dom::HtmlTrackElement>);
-text_parent!(track);
 
 html_element!(
     /// The [HTML Video element (`<video>`)][mdn] embeds a media player which supports video
@@ -1790,7 +1782,6 @@ html_element!(
 );
 
 dom_type!(hr <dom::HtmlHrElement>);
-text_parent!(hr);
 
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
@@ -1904,7 +1895,6 @@ html_element!(
 );
 
 dom_type!(col <dom::HtmlTableColElement>);
-text_parent!(col);
 
 html_element!(
     /// The [HTML `<colgroup>` element][mdn] defines a group of columns within a table.
@@ -2104,7 +2094,6 @@ html_element!(
 );
 
 dom_type!(base <dom::HtmlBaseElement>);
-text_parent!(base);
 
 html_element!(
     /// The [HTML `<head>` element][mdn] contains machine-readable information ([metadata]) about
@@ -2244,7 +2233,6 @@ html_element!(
 );
 
 dom_type!(link <dom::HtmlLinkElement>);
-text_parent!(link);
 
 html_element!(
     /// The [HTML `<meta>` element][mdn] represents [metadata] that cannot be represented by other
@@ -2311,7 +2299,6 @@ html_element!(
 );
 
 dom_type!(meta <dom::HtmlMetaElement>);
-text_parent!(meta);
 
 html_element!(
     /// The [HTML `<style>` element][mdn] contains style information for a document, or part of a
@@ -2943,7 +2930,6 @@ html_element!(
 );
 
 dom_type!(input <dom::HtmlInputElement>);
-text_parent!(input);
 
 html_element!(
     /// The [HTML `<label>` element][mdn] represents a caption for an item in a user interface.
