@@ -221,10 +221,18 @@ impl<T: 'static> State<T> {
     }
 
     fn update_dependents(&self) {
-        // TODO: Figure out why this is neccessary and if it's safe. The problems occur
-        // when a child dependency is removed. What if a new dependency is added?
+        // Take a copy here, as updating dependencies could add or remove dependencies
+        // here, causing a multiple borrows.
         let dependents = self.dependents.borrow().clone();
 
+        // If a dependency is added while updating, it won't need updating because it
+        // will be initialized with the current value.
+        //
+        // If a dependency is removed before we get to it in the loop, we'll have a null
+        // weak reference and ignore it.
+        //
+        // If a dependency is removed after we get to it in the loop, we'll still update
+        // it.
         for dep in &dependents {
             if let Some(f) = dep.0.upgrade() {
                 f(&self.current.borrow());
