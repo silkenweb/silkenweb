@@ -97,7 +97,14 @@ macro_rules! dom_type {
 }
 
 macro_rules! html_element {
-    ($name:ident { $($attr:ident : $typ:ty),* $(,)? }) => {
+    (
+        $(#[elem_meta:meta])*
+        $name:ident {
+            $(#[attr_meta:meta])*
+            $($attr:ident : $typ:ty),* $(,)?
+        }
+    ) => {
+        // TODO: Use meta stuff
         paste::item! {
             pub fn $name() -> [<$name:camel Builder>] {
                 [<$name: camel Builder>](tag(stringify!($name)))
