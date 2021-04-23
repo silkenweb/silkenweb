@@ -43,8 +43,8 @@ where
     }
 
     pub fn insert(&mut self, key: Key, element: Element) {
-        // TODO(testing): Add a test to make sure a reactive element gives us the correct
-        // dom_element.
+        // TODO(testing): Add a test to make sure a reactive element gives us the
+        // correct dom_element.
         let dom_element = element.dom_element();
 
         if let Some((_key, next_elem)) = self.items.range((Excluded(&key), Unbounded)).next() {
