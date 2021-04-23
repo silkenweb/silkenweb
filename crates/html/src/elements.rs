@@ -77,7 +77,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(a <dom::Element>);
+dom_type!(a <dom::HtmlAnchorElement>);
 
 html_element!(
     /// The [HTML Abbreviation element (`<abbr>`)][mdn] represents an abbreviation or acronym; the
@@ -96,7 +96,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(abbr <dom::Element>);
+dom_type!(abbr <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Bring Attention To element (`<b>`)][mdn] is used to draw the reader's attention to
@@ -108,7 +108,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(b <dom::Element>);
+dom_type!(b <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Bidirectional Isolate element (`<bdi>`)][mdn] tells the browser's bidirectional
@@ -120,7 +120,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(bdi <dom::Element>);
+dom_type!(bdi <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Bidirectional Text Override element (`<bdo>`)][mdn] overrides the current
@@ -139,7 +139,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(bdo <dom::Element>);
+dom_type!(bdo <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<br>` element][mdn] produces a line break in text (carriage-return). It is useful
@@ -151,7 +151,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(br <dom::Element>);
+dom_type!(br <dom::HtmlBrElement>);
 
 html_element!(
     /// The [HTML Citation element (`<cite>`)][mdn] is used to describe a reference to a cited
@@ -163,7 +163,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(cite <dom::Element>);
+dom_type!(cite <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<code>` element][mdn] displays its contents styled in a fashion intended to
@@ -175,7 +175,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(code <dom::Element>);
+dom_type!(code <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<data>` element][mdn] links a given content with a machine-readable translation.
@@ -191,7 +191,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(data <dom::Element>);
+dom_type!(data <dom::HtmlDataElement>);
 
 html_element!(
     /// The [HTML Definition element (`<dfn>`)][mdn] is used to indicate the term being defined
@@ -203,7 +203,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(dfn <dom::Element>);
+dom_type!(dfn <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<em>` element][mdn] marks text that has stress emphasis. The `<em>` element can
@@ -215,7 +215,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(em <dom::Element>);
+dom_type!(em <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<i>` element][mdn] represents a range of text that is set off from the normal
@@ -228,7 +228,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(i <dom::Element>);
+dom_type!(i <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Keyboard Input element (`<kbd>`)][mdn] represents a span of inline text denoting
@@ -240,7 +240,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(kbd <dom::Element>);
+dom_type!(kbd <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Mark Text element (`<mark>`)][mdn] represents text which is marked or highlighted
@@ -253,7 +253,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(mark <dom::Element>);
+dom_type!(mark <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<q>` element][mdn]  indicates that the enclosed text is a short inline quotation.
@@ -270,7 +270,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(q <dom::Element>);
+dom_type!(q <dom::HtmlQuoteElement>);
 
 html_element!(
     /// The [HTML Ruby Base (`<rb>`) element][mdn] is used to delimit the base text component of
@@ -283,7 +283,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(rb <dom::Element>);
+dom_type!(rb <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Ruby Fallback Parenthesis (`<rp>`) element][mdn] is used to provide fall-back
@@ -297,7 +297,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(rp <dom::Element>);
+dom_type!(rp <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Ruby Text (`<rt>`) element][mdn] specifies the ruby text component of a ruby
@@ -312,7 +312,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(rt <dom::Element>);
+dom_type!(rt <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Ruby Text Container (`<rtc>`) element][mdn] embraces semantic annotations of
@@ -330,7 +330,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(rtc <dom::Element>);
+dom_type!(rtc <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<ruby>` element][mdn] represents a ruby annotation. Ruby annotations are for
@@ -342,7 +342,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(ruby <dom::Element>);
+dom_type!(ruby <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<s>` element][mdn] renders text with a strikethrough, or a line through it. Use
@@ -358,7 +358,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(s <dom::Element>);
+dom_type!(s <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Sample Element (`<samp>`)][mdn] is used to enclose inline text which represents
@@ -370,7 +370,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(samp <dom::Element>);
+dom_type!(samp <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<small>` element][mdn] represents side-comments and small print, like copyright
@@ -383,7 +383,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(small <dom::Element>);
+dom_type!(small <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<span>` element][mdn] is a generic inline container for phrasing content, which
@@ -400,7 +400,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(span <dom::Element>);
+dom_type!(span <dom::HtmlSpanElement>);
 
 html_element!(
     /// The [HTML Strong Importance Element (`<strong>`)][mdn] indicates that its contents have
@@ -413,7 +413,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(strong <dom::Element>);
+dom_type!(strong <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Subscript element (`<sub>`)][mdn] specifies inline text which should be displayed
@@ -425,7 +425,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(sub <dom::Element>);
+dom_type!(sub <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Superscript element (`<sup>`)][mdn] specifies inline text which is to be displayed
@@ -437,7 +437,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(sup <dom::Element>);
+dom_type!(sup <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
@@ -452,7 +452,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(time <dom::Element>);
+dom_type!(time <dom::HtmlTimeElement>);
 
 html_element!(
     /// The [HTML Unarticulated Annotation Element (`<u>`)][mdn] represents a span of inline text
@@ -464,7 +464,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(u <dom::Element>);
+dom_type!(u <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Variable element (`<var>`)][mdn] represents the name of a variable in a
@@ -476,7 +476,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(var <dom::Element>);
+dom_type!(var <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<wbr>` element][mdn] represents a word break opportunity—a position within text
@@ -489,7 +489,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(wbr <dom::Element>);
+dom_type!(wbr <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<del>` element][mdn] represents a range of text that has been deleted from a
@@ -511,7 +511,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(del <dom::Element>);
+dom_type!(del <dom::HtmlModElement>);
 
 html_element!(
     /// The [HTML `<ins>` element][mdn] represents a range of text that has been added to a
@@ -533,7 +533,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(ins <dom::Element>);
+dom_type!(ins <dom::HtmlModElement>);
 
 html_element!(
     /// The [HTML `<address>` element][mdn] indicates that the enclosed HTML provides contact
@@ -545,7 +545,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(address <dom::Element>);
+dom_type!(address <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<article>` element][mdn] represents a self-contained composition in a document,
@@ -558,7 +558,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(article <dom::Element>);
+dom_type!(article <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<aside>` element][mdn] represents a portion of a document whose content is only
@@ -570,7 +570,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(aside <dom::Element>);
+dom_type!(aside <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<footer>` element][mdn] represents a footer for its nearest [sectioning content]
@@ -585,7 +585,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(footer <dom::Element>);
+dom_type!(footer <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<header>` element][mdn] represents introductory content, typically a group of
@@ -598,7 +598,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(header <dom::Element>);
+dom_type!(header <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -610,7 +610,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h1 <dom::Element>);
+dom_type!(h1 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -622,7 +622,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h2 <dom::Element>);
+dom_type!(h2 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -634,7 +634,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h3 <dom::Element>);
+dom_type!(h3 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -646,7 +646,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h4 <dom::Element>);
+dom_type!(h4 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -658,7 +658,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h5 <dom::Element>);
+dom_type!(h5 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section headings. `<h1>` is
@@ -670,7 +670,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(h6 <dom::Element>);
+dom_type!(h6 <dom::HtmlHeadingElement>);
 
 html_element!(
     /// The [HTML `<hgroup>` element][mdn] represents a multi-level heading for a section of a
@@ -683,7 +683,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(hgroup <dom::Element>);
+dom_type!(hgroup <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<main>` element][mdn] represents the dominant content of the [`<body>`][body] of
@@ -697,7 +697,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(main <dom::Element>);
+dom_type!(main <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<nav>` element][mdn] represents a section of a page whose purpose is to provide
@@ -710,7 +710,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(nav <dom::Element>);
+dom_type!(nav <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<section>` element][mdn] represents a standalone section — which doesn't have a
@@ -722,7 +722,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(section <dom::Element>);
+dom_type!(section <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<embed>` element][mdn] embeds external content at the specified point in the
@@ -755,7 +755,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(embed <dom::Element>);
+dom_type!(embed <dom::HtmlEmbedElement>);
 
 html_element!(
     /// The [HTML Inline Frame element (`<iframe>`)][mdn] represents a nested [browsing context],
@@ -835,7 +835,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(iframe <dom::Element>);
+dom_type!(iframe <dom::HtmlIFrameElement>);
 
 html_element!(
     /// The [HTML `<object>` element][mdn] represents an external resource, which can be treated as
@@ -875,7 +875,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(object <dom::Element>);
+dom_type!(object <dom::HtmlObjectElement>);
 
 html_element!(
     /// The [HTML `<param>` element][param] defines parameters for an [`<object>`][object] element.
@@ -893,7 +893,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(param <dom::Element>);
+dom_type!(param <dom::HtmlParamElement>);
 
 html_element!(
     /// The [HTML `<picture>` element][mdn] contains zero or more [`<source>`][source] elements and
@@ -908,7 +908,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(picture <dom::Element>);
+dom_type!(picture <dom::HtmlPictureElement>);
 
 html_element!(
     /// The [HTML `<source>` element][source] specifies multiple media resources for the
@@ -963,7 +963,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(source <dom::Element>);
+dom_type!(source <dom::HtmlSourceElement>);
 
 html_element!(
     /// Use the [HTML `<canvas>` element][mdn] with either the [canvas scripting API][api] or the
@@ -983,7 +983,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(canvas <dom::Element>);
+dom_type!(canvas <dom::HtmlCanvasElement>);
 
 html_element!(
     /// The [HTML `<noscript>` element][mdn] defines a section of HTML to be inserted if a script
@@ -995,7 +995,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(noscript <dom::Element>);
+dom_type!(noscript <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<script>` element][mdn] is used to embed or reference executable code; this is
@@ -1081,7 +1081,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(script <dom::Element>);
+dom_type!(script <dom::HtmlScriptElement>);
 
 html_element!(
     /// The [HTML `<area>` element][mdn] defines a hot-spot region on an image, and optionally
@@ -1154,7 +1154,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(area <dom::Element>);
+dom_type!(area <dom::HtmlAreaElement>);
 
 html_element!(
     /// The [HTML `<audio>` element][mdn] is used to embed sound content in documents. It may
@@ -1262,7 +1262,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(audio <dom::Element>);
+dom_type!(audio <dom::HtmlAudioElement>);
 
 html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
@@ -1414,7 +1414,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(img <dom::Element>);
+dom_type!(img <dom::HtmlImageElement>);
 
 html_element!(
     /// The [HTML `<map>` element][mdn] is used with [`<area>`][area] elements to define an image
@@ -1434,7 +1434,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(map <dom::Element>);
+dom_type!(map <dom::HtmlMapElement>);
 
 html_element!(
     /// The [HTML `<track>` element][mdn] is used as a child of the media elements
@@ -1496,7 +1496,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(track <dom::Element>);
+dom_type!(track <dom::HtmlTrackElement>);
 
 html_element!(
     /// The [HTML Video element (`<video>`)][mdn] embeds a media player which supports video
@@ -1617,7 +1617,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(video <dom::Element>);
+dom_type!(video <dom::HtmlVideoElement>);
 
 html_element!(
     /// The [HTML Details Element (`<details>`)][mdn] creates a disclosure widget in which
@@ -1632,7 +1632,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(details <dom::Element>);
+dom_type!(details <dom::HtmlDetailsElement>);
 
 html_element!(
     /// The [HTML `<dialog>` element][mdn] represents a dialog box or other interactive component,
@@ -1648,7 +1648,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(dialog <dom::Element>);
+dom_type!(dialog <dom::HtmlDialogElement>);
 
 html_element!(
     /// The [HTML `<menu>` element][mdn] represents a group of commands that a user can perform or
@@ -1662,7 +1662,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(menu <dom::Element>);
+dom_type!(menu <dom::HtmlMenuElement>);
 
 html_element!(
     /// The [HTML Disclosure Summary element (`<summary>`)][mdn] element specifies a summary,
@@ -1675,7 +1675,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(summary <dom::Element>);
+dom_type!(summary <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<blockquote>` element][mdn] (or *HTML Block Quotation Element*) indicates that
@@ -1695,7 +1695,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(blockquote <dom::Element>);
+dom_type!(blockquote <dom::HtmlQuoteElement>);
 
 html_element!(
     /// The [HTML `<dd>` element][mdn] provides the description, definition, or value for the
@@ -1709,7 +1709,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(dd <dom::Element>);
+dom_type!(dd <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML Content Division element (`<div>`)][mdn] is the generic container for flow
@@ -1722,7 +1722,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(div <dom::Element>);
+dom_type!(div <dom::HtmlDivElement>);
 
 html_element!(
     /// The [HTML `<dl>` element][mdn] represents a description list. The element encloses a list of
@@ -1738,7 +1738,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(dl <dom::Element>);
+dom_type!(dl <dom::HtmlDListElement>);
 
 html_element!(
     /// The [HTML `<dt>` element][mdn] specifies a term in a description or definition list, and as
@@ -1751,7 +1751,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(dt <dom::Element>);
+dom_type!(dt <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<figcaption>` or Figure Caption element][mdn] represents a caption or legend
@@ -1764,7 +1764,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(figcaption <dom::Element>);
+dom_type!(figcaption <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<figure>` (Figure With Optional Caption) element][mdn] represents self-contained
@@ -1778,7 +1778,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(figure <dom::Element>);
+dom_type!(figure <dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<hr>` element][mdn] represents a thematic break between paragraph-level elements:
@@ -1790,7 +1790,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(hr <dom::Element>);
+dom_type!(hr <dom::HtmlHrElement>);
 
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
@@ -1801,7 +1801,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(li <dom::Element>);
+dom_type!(li <dom::HtmlLiElement>);
 
 html_element!(
     /// The [HTML `<ol>` element][mdn] represents an ordered list of items, typically rendered as a
@@ -1838,7 +1838,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(ol <dom::Element>);
+dom_type!(ol <dom::HtmlOListElement>);
 
 html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
@@ -1849,7 +1849,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(p <dom::Element>);
+dom_type!(p <dom::HtmlParagraphElement>);
 
 html_element!(
     /// The [HTML `<pre>` element][mdn] represents preformatted text which is to be presented
@@ -1861,7 +1861,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(pre <dom::Element>);
+dom_type!(pre <dom::HtmlPreElement>);
 
 html_element!(
     /// The [HTML `<ul>` element][mdn] represents an unordered list of items, typically rendered as
@@ -1873,7 +1873,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(ul <dom::Element>);
+dom_type!(ul <dom::HtmlUListElement>);
 
 html_element!(
     /// The [HTML Table Caption element (`<caption>`)][mdn] specifies the caption (or title) of a
@@ -1886,7 +1886,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(caption <dom::Element>);
+dom_type!(caption <dom::HtmlTableCaptionElement>);
 
 html_element!(
     /// The [HTML `<col>` element][mdn] defines a column within a table and is used for defining
@@ -1904,7 +1904,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(col <dom::Element>);
+dom_type!(col <dom::HtmlTableColElement>);
 
 html_element!(
     /// The [HTML `<colgroup>` element][mdn] defines a group of columns within a table.
@@ -1926,7 +1926,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(colgroup <dom::Element>);
+dom_type!(colgroup <dom::HtmlTableColElement>);
 
 html_element!(
     /// The [HTML `<table>` element][mdn] represents tabular data — that is, information presented
@@ -1938,7 +1938,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(table <dom::Element>);
+dom_type!(table <dom::HtmlTableElement>);
 
 html_element!(
     /// The [HTML Table Body element (`<tbody>`)][mdn] encapsulates a set of table rows
@@ -1953,7 +1953,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(tbody <dom::Element>);
+dom_type!(tbody <dom::HtmlTableSectionElement>);
 
 html_element!(
     /// The [HTML `<td>` element][mdn] defines a cell of a table that contains data. It participates
@@ -1980,7 +1980,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(td <dom::Element>);
+dom_type!(td <dom::HtmlTableCellElement>);
 
 html_element!(
     /// The [HTML `<tfoot>` element][mdn] defines a set of rows summarizing the columns of the
@@ -1992,7 +1992,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(tfoot <dom::Element>);
+dom_type!(tfoot <dom::HtmlTableSectionElement>);
 
 html_element!(
     /// The [HTML `<th>` element][mdn] defines a cell as header of a group of table cells. The exact
@@ -2040,7 +2040,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(th <dom::Element>);
+dom_type!(th <dom::HtmlTableCellElement>);
 
 html_element!(
     /// The [HTML `<thead>` element][mdn] defines a set of rows defining the head of the columns of
@@ -2052,7 +2052,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(thead <dom::Element>);
+dom_type!(thead <dom::HtmlTableSectionElement>);
 
 html_element!(
     /// The [HTML `<tr>` element][mdn] defines a row of cells in a table. The row's cells can then
@@ -2067,7 +2067,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(tr <dom::Element>);
+dom_type!(tr <dom::HtmlTableRowElement>);
 
 html_element!(
     /// The [HTML `<base> element`][mdn] specifies the base URL to use for all relative URLs
@@ -2104,7 +2104,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(base <dom::Element>);
+dom_type!(base <dom::HtmlBaseElement>);
 
 html_element!(
     /// The [HTML `<head>` element][mdn] contains machine-readable information ([metadata]) about
@@ -2120,7 +2120,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(head <dom::Element>);
+dom_type!(head <dom::HtmlHeadElement>);
 
 html_element!(
     /// The [HTML External Resource Link element (`<link>`)][mdn] specifies relationships between
@@ -2244,7 +2244,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(link <dom::Element>);
+dom_type!(link <dom::HtmlLinkElement>);
 
 html_element!(
     /// The [HTML `<meta>` element][mdn] represents [metadata] that cannot be represented by other
@@ -2311,7 +2311,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(meta <dom::Element>);
+dom_type!(meta <dom::HtmlMetaElement>);
 
 html_element!(
     /// The [HTML `<style>` element][mdn] contains style information for a document, or part of a
@@ -2336,7 +2336,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(style <dom::Element>);
+dom_type!(style <dom::HtmlStyleElement>);
 
 html_element!(
     /// The [HTML Title element (`<title>`)][mdn] defines the document's title that is shown in a
@@ -2349,7 +2349,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(title <dom::Element>);
+dom_type!(title <dom::HtmlTitleElement>);
 
 html_element!(
     /// The [HTML `<button>` element][mdn] represents a clickable button, which can be used in
@@ -2453,7 +2453,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(button <dom::Element>);
+dom_type!(button <dom::HtmlButtonElement>);
 
 html_element!(
     /// The [HTML `<datalist>` element][mdn] contains a set of [`<option>`][option] elements that
@@ -2466,7 +2466,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(datalist <dom::Element>);
+dom_type!(datalist <dom::HtmlDataListElement>);
 
 html_element!(
     /// The [HTML `<fieldset>` element][mdn] is used to group several controls as well as labels
@@ -2495,7 +2495,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(fieldset <dom::Element>);
+dom_type!(fieldset <dom::HtmlFieldSetElement>);
 
 html_element!(
     /// The [HTML `<form>` element][mdn] represents a document section that contains interactive
@@ -2573,7 +2573,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(form <dom::Element>);
+dom_type!(form <dom::HtmlFormElement>);
 
 html_element!(
     /// The [HTML `<input>` element][mdn] is used to create interactive controls for web-based forms
@@ -2943,7 +2943,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(input <dom::Element>);
+dom_type!(input <dom::HtmlInputElement>);
 
 html_element!(
     /// The [HTML `<label>` element][mdn] represents a caption for an item in a user interface.
@@ -2970,7 +2970,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(label <dom::Element>);
+dom_type!(label <dom::HtmlLabelElement>);
 
 html_element!(
     /// The [HTML `<legend>` element][mdn] represents a caption for the content of its parent
@@ -2983,7 +2983,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(legend <dom::Element>);
+dom_type!(legend <dom::HtmlLegendElement>);
 
 html_element!(
     /// The [HTML `<meter>` element][mdn] represents either a scalar value within a known range or a
@@ -3040,7 +3040,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(meter <dom::Element>);
+dom_type!(meter <dom::HtmlMeterElement>);
 
 html_element!(
     /// The [HTML `<optgroup>` element][mdn] creates a grouping of options within a
@@ -3062,7 +3062,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(optgroup <dom::Element>);
+dom_type!(optgroup <dom::HtmlOptGroupElement>);
 
 html_element!(
     /// The [HTML `<option>` element][mdn] is used to define an item contained in a
@@ -3099,7 +3099,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(option <dom::Element>);
+dom_type!(option <dom::HtmlOptionElement>);
 
 html_element!(
     /// The [HTML Output element (`<output>`)][mdn] is a container element into which a site or app
@@ -3126,7 +3126,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(output <dom::Element>);
+dom_type!(output <dom::HtmlOutputElement>);
 
 html_element!(
     /// The [HTML `<progress>` element][progress] displays an indicator showing the completion
@@ -3149,7 +3149,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(progress <dom::Element>);
+dom_type!(progress <dom::HtmlProgressElement>);
 
 html_element!(
     /// The [HTML `<select>` element][mdn] represents a control that provides a menu of options.
@@ -3198,7 +3198,7 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(select <dom::Element>);
+dom_type!(select <dom::HtmlSelectElement>);
 
 html_element!(
     /// The [HTML `<textarea>` element][mdn] represents a multi-line plain-text editing control,
@@ -3298,4 +3298,5 @@ html_element!(
 );
 
 // TODO: Use correct dom type
-dom_type!(textarea <dom::Element>);
+dom_type!(textarea <dom::HtmlTextAreaElement>);
+
