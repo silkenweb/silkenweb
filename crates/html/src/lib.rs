@@ -273,9 +273,12 @@ child_categories!(li[Flow]);
 html_element!(a <dom::HtmlAnchorElement> {});
 text_parent!(a);
 categories!(a[Flow, Phrasing, Interactive, Palpable]);
-child_categories!(a[Flow]); // TODO: Interactive, Phrasing
+child_categories!(a[Flow,
+    // TODO:
+    // Interactive, Phrasing
+]);
 
-pub trait ParentOf<T> {}
+pub trait ParentOf<Child> {}
 
 pub mod content_category {
     macro_rules! content_categories {
