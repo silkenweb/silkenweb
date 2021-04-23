@@ -76,7 +76,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(a <dom::HtmlAnchorElement>);
 
 html_element!(
@@ -95,7 +94,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(abbr <dom::HtmlElement>);
 
 html_element!(
@@ -107,7 +105,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(b <dom::HtmlElement>);
 
 html_element!(
@@ -119,7 +116,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(bdi <dom::HtmlElement>);
 
 html_element!(
@@ -138,7 +134,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(bdo <dom::HtmlElement>);
 
 html_element!(
@@ -150,7 +145,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(br <dom::HtmlBrElement>);
 
 html_element!(
@@ -162,7 +156,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(cite <dom::HtmlElement>);
 
 html_element!(
@@ -174,7 +167,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(code <dom::HtmlElement>);
 
 html_element!(
@@ -190,7 +182,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(data <dom::HtmlDataElement>);
 
 html_element!(
@@ -202,7 +193,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(dfn <dom::HtmlElement>);
 
 html_element!(
@@ -214,7 +204,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(em <dom::HtmlElement>);
 
 html_element!(
@@ -227,7 +216,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(i <dom::HtmlElement>);
 
 html_element!(
@@ -239,7 +227,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(kbd <dom::HtmlElement>);
 
 html_element!(
@@ -252,7 +239,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(mark <dom::HtmlElement>);
 
 html_element!(
@@ -269,7 +255,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(q <dom::HtmlQuoteElement>);
 
 html_element!(
@@ -282,7 +267,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(rb <dom::HtmlElement>);
 
 html_element!(
@@ -296,7 +280,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(rp <dom::HtmlElement>);
 
 html_element!(
@@ -311,7 +294,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(rt <dom::HtmlElement>);
 
 html_element!(
@@ -329,7 +311,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(rtc <dom::HtmlElement>);
 
 html_element!(
@@ -341,7 +322,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(ruby <dom::HtmlElement>);
 
 html_element!(
@@ -357,7 +337,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(s <dom::HtmlElement>);
 
 html_element!(
@@ -369,7 +348,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(samp <dom::HtmlElement>);
 
 html_element!(
@@ -382,7 +360,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(small <dom::HtmlElement>);
 
 html_element!(
@@ -399,7 +376,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(span <dom::HtmlSpanElement>);
 
 html_element!(
@@ -412,7 +388,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(strong <dom::HtmlElement>);
 
 html_element!(
@@ -424,7 +399,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(sub <dom::HtmlElement>);
 
 html_element!(
@@ -436,7 +410,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(sup <dom::HtmlElement>);
 
 html_element!(
@@ -451,7 +424,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(time <dom::HtmlTimeElement>);
 
 html_element!(
@@ -463,7 +435,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(u <dom::HtmlElement>);
 
 html_element!(
@@ -475,7 +446,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(var <dom::HtmlElement>);
 
 html_element!(
@@ -488,7 +458,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(wbr <dom::HtmlElement>);
 
 html_element!(
@@ -510,7 +479,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(del <dom::HtmlModElement>);
 
 html_element!(
@@ -532,7 +500,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(ins <dom::HtmlModElement>);
 
 html_element!(
@@ -544,7 +511,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(address <dom::HtmlElement>);
 
 html_element!(
@@ -557,7 +523,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(article <dom::HtmlElement>);
 
 html_element!(
@@ -569,7 +534,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(aside <dom::HtmlElement>);
 
 html_element!(
@@ -584,7 +548,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(footer <dom::HtmlElement>);
 
 html_element!(
@@ -597,7 +560,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(header <dom::HtmlElement>);
 
 html_element!(
@@ -609,7 +571,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h1 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -621,7 +582,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h2 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -633,7 +593,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h3 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -645,7 +604,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h4 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -657,7 +615,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h5 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -669,7 +626,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(h6 <dom::HtmlHeadingElement>);
 
 html_element!(
@@ -682,7 +638,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(hgroup <dom::HtmlElement>);
 
 html_element!(
@@ -696,7 +651,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(main <dom::HtmlElement>);
 
 html_element!(
@@ -709,7 +663,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(nav <dom::HtmlElement>);
 
 html_element!(
@@ -721,7 +674,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(section <dom::HtmlElement>);
 
 html_element!(
@@ -754,7 +706,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(embed <dom::HtmlEmbedElement>);
 
 html_element!(
@@ -834,7 +785,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(iframe <dom::HtmlIFrameElement>);
 
 html_element!(
@@ -874,7 +824,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(object <dom::HtmlObjectElement>);
 
 html_element!(
@@ -892,7 +841,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(param <dom::HtmlParamElement>);
 
 html_element!(
@@ -907,7 +855,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(picture <dom::HtmlPictureElement>);
 
 html_element!(
@@ -962,7 +909,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(source <dom::HtmlSourceElement>);
 
 html_element!(
@@ -982,7 +928,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(canvas <dom::HtmlCanvasElement>);
 
 html_element!(
@@ -994,7 +939,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(noscript <dom::HtmlElement>);
 
 html_element!(
@@ -1080,7 +1024,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(script <dom::HtmlScriptElement>);
 
 html_element!(
@@ -1153,7 +1096,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(area <dom::HtmlAreaElement>);
 
 html_element!(
@@ -1261,7 +1203,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(audio <dom::HtmlAudioElement>);
 
 html_element!(
@@ -1413,7 +1354,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(img <dom::HtmlImageElement>);
 
 html_element!(
@@ -1433,7 +1373,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(map <dom::HtmlMapElement>);
 
 html_element!(
@@ -1495,7 +1434,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(track <dom::HtmlTrackElement>);
 
 html_element!(
@@ -1616,7 +1554,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(video <dom::HtmlVideoElement>);
 
 html_element!(
@@ -1631,7 +1568,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(details <dom::HtmlDetailsElement>);
 
 html_element!(
@@ -1647,7 +1583,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(dialog <dom::HtmlDialogElement>);
 
 html_element!(
@@ -1661,7 +1596,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(menu <dom::HtmlMenuElement>);
 
 html_element!(
@@ -1674,7 +1608,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(summary <dom::HtmlElement>);
 
 html_element!(
@@ -1694,7 +1627,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(blockquote <dom::HtmlQuoteElement>);
 
 html_element!(
@@ -1708,7 +1640,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(dd <dom::HtmlElement>);
 
 html_element!(
@@ -1721,7 +1652,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(div <dom::HtmlDivElement>);
 
 html_element!(
@@ -1737,7 +1667,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(dl <dom::HtmlDListElement>);
 
 html_element!(
@@ -1750,7 +1679,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(dt <dom::HtmlElement>);
 
 html_element!(
@@ -1763,7 +1691,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(figcaption <dom::HtmlElement>);
 
 html_element!(
@@ -1777,7 +1704,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(figure <dom::HtmlElement>);
 
 html_element!(
@@ -1789,7 +1715,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(hr <dom::HtmlHrElement>);
 
 html_element!(
@@ -1800,7 +1725,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(li <dom::HtmlLiElement>);
 
 html_element!(
@@ -1837,7 +1761,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(ol <dom::HtmlOListElement>);
 
 html_element!(
@@ -1848,7 +1771,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(p <dom::HtmlParagraphElement>);
 
 html_element!(
@@ -1860,7 +1782,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(pre <dom::HtmlPreElement>);
 
 html_element!(
@@ -1872,7 +1793,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(ul <dom::HtmlUListElement>);
 
 html_element!(
@@ -1885,7 +1805,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(caption <dom::HtmlTableCaptionElement>);
 
 html_element!(
@@ -1903,7 +1822,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(col <dom::HtmlTableColElement>);
 
 html_element!(
@@ -1925,7 +1843,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(colgroup <dom::HtmlTableColElement>);
 
 html_element!(
@@ -1937,7 +1854,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(table <dom::HtmlTableElement>);
 
 html_element!(
@@ -1952,7 +1868,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(tbody <dom::HtmlTableSectionElement>);
 
 html_element!(
@@ -1979,7 +1894,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(td <dom::HtmlTableCellElement>);
 
 html_element!(
@@ -1991,7 +1905,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(tfoot <dom::HtmlTableSectionElement>);
 
 html_element!(
@@ -2039,7 +1952,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(th <dom::HtmlTableCellElement>);
 
 html_element!(
@@ -2051,7 +1963,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(thead <dom::HtmlTableSectionElement>);
 
 html_element!(
@@ -2066,7 +1977,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(tr <dom::HtmlTableRowElement>);
 
 html_element!(
@@ -2103,7 +2013,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(base <dom::HtmlBaseElement>);
 
 html_element!(
@@ -2119,7 +2028,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(head <dom::HtmlHeadElement>);
 
 html_element!(
@@ -2243,7 +2151,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(link <dom::HtmlLinkElement>);
 
 html_element!(
@@ -2310,7 +2217,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(meta <dom::HtmlMetaElement>);
 
 html_element!(
@@ -2335,7 +2241,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(style <dom::HtmlStyleElement>);
 
 html_element!(
@@ -2348,7 +2253,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(title <dom::HtmlTitleElement>);
 
 html_element!(
@@ -2452,7 +2356,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(button <dom::HtmlButtonElement>);
 
 html_element!(
@@ -2465,7 +2368,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(datalist <dom::HtmlDataListElement>);
 
 html_element!(
@@ -2494,7 +2396,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(fieldset <dom::HtmlFieldSetElement>);
 
 html_element!(
@@ -2572,7 +2473,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(form <dom::HtmlFormElement>);
 
 html_element!(
@@ -2942,7 +2842,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(input <dom::HtmlInputElement>);
 
 html_element!(
@@ -2969,7 +2868,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(label <dom::HtmlLabelElement>);
 
 html_element!(
@@ -2982,7 +2880,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(legend <dom::HtmlLegendElement>);
 
 html_element!(
@@ -3039,7 +2936,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(meter <dom::HtmlMeterElement>);
 
 html_element!(
@@ -3061,7 +2957,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(optgroup <dom::HtmlOptGroupElement>);
 
 html_element!(
@@ -3098,7 +2993,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(option <dom::HtmlOptionElement>);
 
 html_element!(
@@ -3125,7 +3019,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(output <dom::HtmlOutputElement>);
 
 html_element!(
@@ -3148,7 +3041,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(progress <dom::HtmlProgressElement>);
 
 html_element!(
@@ -3197,7 +3089,6 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(select <dom::HtmlSelectElement>);
 
 html_element!(
@@ -3297,6 +3188,5 @@ html_element!(
     }
 );
 
-// TODO: Use correct dom type
 dom_type!(textarea <dom::HtmlTextAreaElement>);
 
