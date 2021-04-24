@@ -215,10 +215,9 @@ impl TodoApp {
             )
             .text(format!("{}", filter))
             .on_click(move |_, _| {
-                let write_items = write_items.clone();
                 let f = f.clone();
                 set_filter.set(filter);
-                write_items.mutate(move |items| items.filter(f))
+                write_items.mutate(|items| items.filter(f))
             }),
         )
         .text(seperator)
@@ -341,7 +340,6 @@ impl TodoApp {
 
                             move |keyup, input| {
                                 if keyup.key() == "Enter" {
-                                    let self_ = self_.clone();
                                     let text = input.value();
                                     let text = text.trim().to_string();
 
