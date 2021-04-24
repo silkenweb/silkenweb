@@ -166,7 +166,7 @@ enum Filter {
 #[derive(Clone)]
 struct TodoApp {
     items: Signal<ElementList<usize, TodoItem>>,
-    id: Rc<RefCell<usize>>, // FEATURE(cell_update): Replace with `Cell`
+    id: Rc<RefCell<usize>>, // RUSTC(cell_update): Replace with `Cell`
     filter: Signal<Filter>,
     active_count: SumTotal<usize>,
 }

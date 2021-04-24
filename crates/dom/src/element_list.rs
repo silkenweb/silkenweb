@@ -127,7 +127,7 @@ where
 
     pub fn pop(&mut self) {
         if let Some((key, _)) = self.items.iter().next_back() {
-            // FEATURE(btree_pop_last): Don't clone the key and just pop last
+            // RUSTC(btree_pop_last): Don't clone the key and just pop last
             let key = key.clone();
             self.items.remove(&key);
             self.visible_items.borrow_mut().remove(&key);
@@ -152,7 +152,7 @@ where
     }
 
     pub fn retain(&mut self, f: impl Fn(&Value) -> bool) {
-        // FEATURE(btree_map_retain): Use retain
+        // RUSTC(btree_map_retain): Use retain
         let mut to_remove = BTreeSet::new();
 
         for (key, value) in &self.items {
