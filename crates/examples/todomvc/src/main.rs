@@ -252,31 +252,51 @@ impl TodoApp {
             .build()
     }
 
-    fn render_footer(&self) -> ReadSignal<Div> {
+    fn render_clear_completed(&self) -> ReadSignal<Div> {
         let write_items = self.items.write();
-        // TODO(tidy todomvc): Factor some of these into methods
         let items_len = self.items.read().map(ElementList::len);
         let any_completed = (self.active_count.read(), items_len)
             .map(|&active_count, &items_len| active_count != items_len)
             .only_changes();
 
+        any_completed.map(move |&any_completed| {
+            let write_items = write_items.clone();
+
+            // TODO(empty elements): Eliminate the outer `div`.
+            if any_completed {
+                div().child(
+                    button()
+                        .class("clear-completed")
+                        .text("Clear completed")
+                        .on_click(move |_, _| {
+                            write_items.mutate(|items| {
+                                items.retain(|item| !*item.completed.read().current())
+                            })
+                        }),
+                )
+            } else {
+                div()
+            }
+            .build()
+        })
+    }
+
+    fn render_footer(&self) -> ReadSignal<Div> {
         self.items
             .read()
             .map(ElementList::is_empty)
             .only_changes()
             .map({
+                let write_items = self.items.write();
                 let current_filter = self.filter.clone();
                 let active_count = self.active_count.read();
+                let this = self.clone();
 
                 move |&is_empty| {
                     // TODO(empty elements): Eliminate the outer `div`.
                     if is_empty {
                         div()
                     } else {
-                        let write_items = write_items.clone();
-                        let current_filter = current_filter.clone();
-                        let active_count = active_count.clone();
-
                         div().child(
                             footer()
                                 .class("footer")
@@ -290,27 +310,7 @@ impl TodoApp {
                                         ))
                                 }))
                                 .child(Self::render_filters(&current_filter, write_items.clone()))
-                                .child(any_completed.map(move |&any_completed| {
-                                    let write_items = write_items.clone();
-
-                                    // TODO(empty elements): Eliminate the outer `div`.
-                                    if any_completed {
-                                        div().child(
-                                            button()
-                                                .class("clear-completed")
-                                                .text("Clear completed")
-                                                .on_click(move |_, _| {
-                                                    write_items.mutate(|items| {
-                                                        items.retain(|item| {
-                                                            !*item.completed.read().current()
-                                                        })
-                                                    })
-                                                }),
-                                        )
-                                    } else {
-                                        div()
-                                    }
-                                })),
+                                .child(this.render_clear_completed()),
                         )
                     }
                     .build()
