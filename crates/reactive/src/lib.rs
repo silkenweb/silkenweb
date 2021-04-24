@@ -5,5 +5,5 @@
     clippy::module_name_repetitions
 )]
 pub mod accumulators;
-pub mod hooks;
+pub mod signal;
 pub mod memo;

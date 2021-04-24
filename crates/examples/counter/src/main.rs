@@ -1,6 +1,6 @@
 use silkenweb::{
     elements::{button, div},
-    hooks::state::Signal,
+    signal::Signal,
     mount,
 };
 

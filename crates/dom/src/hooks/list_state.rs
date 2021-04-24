@@ -6,7 +6,7 @@ use std::{
     rc::Rc,
 };
 
-use silkenweb_reactive::hooks::state::{ReadSignal, Signal};
+use silkenweb_reactive::signal::{ReadSignal, Signal};
 use web_sys as dom;
 
 use crate::{Builder, DomElement, Element, ElementBuilder};

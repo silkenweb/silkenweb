@@ -9,7 +9,7 @@ pub mod hooks;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 use hooks::queue_update;
-use silkenweb_reactive::hooks::state::ReadSignal;
+use silkenweb_reactive::signal::ReadSignal;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 

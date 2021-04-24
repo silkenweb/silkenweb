@@ -4,7 +4,7 @@ use silkenweb::{
     elements::{button, div, Div},
     list_state::ElementList,
     mount,
-    state::Signal,
+    signal::Signal,
     Builder,
 };
 

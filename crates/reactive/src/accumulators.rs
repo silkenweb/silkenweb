@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use num_traits::{WrappingAdd, WrappingSub, Zero};
 
-use crate::hooks::state::{ReadSignal, Signal, SignalReceiver, WriteSignal};
+use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal};
 
 struct AccumulateSum<T>(RefCell<T>);
 

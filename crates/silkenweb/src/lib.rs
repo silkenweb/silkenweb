@@ -9,8 +9,4 @@ pub use silkenweb_dom::{
     ElementBuilder,
 };
 pub use silkenweb_html::elements;
-pub use silkenweb_reactive::{
-    accumulators,
-    hooks::{self, state},
-    memo,
-};
+pub use silkenweb_reactive::{accumulators, memo, signal};
