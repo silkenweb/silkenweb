@@ -19,14 +19,15 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     document()
         .get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .replace_with_with_node_1(&elem.dom_element())
+        .append_child(&elem.dom_element())
         .unwrap();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
 pub fn unmount(id: &str) {
-    // TODO: Restore dom to before app was mounted
-    APPS.with(|apps| apps.borrow_mut().remove(id));
+    if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
+        elem.dom_element().remove();
+    }
 }
 
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
