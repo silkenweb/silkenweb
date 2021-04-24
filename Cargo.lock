@@ -112,7 +112,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "surfinia-core"
+name = "silkenweb-core"
 version = "0.1.0"
 dependencies = [
  "num-traits",
@@ -121,50 +121,50 @@ dependencies = [
 ]
 
 [[package]]
-name = "surfinia-examples-counter"
+name = "silkenweb-examples-counter"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia-core",
- "surfinia-html",
+ "silkenweb-core",
+ "silkenweb-html",
 ]
 
 [[package]]
-name = "surfinia-examples-incremental-counters"
+name = "silkenweb-examples-incremental-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia-core",
- "surfinia-html",
+ "silkenweb-core",
+ "silkenweb-html",
 ]
 
 [[package]]
-name = "surfinia-examples-nested-counters"
+name = "silkenweb-examples-nested-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "surfinia-core",
- "surfinia-html",
+ "silkenweb-core",
+ "silkenweb-html",
  "web-log",
 ]
 
 [[package]]
-name = "surfinia-examples-todomvc"
+name = "silkenweb-examples-todomvc"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "derive_more",
- "surfinia-core",
- "surfinia-html",
+ "silkenweb-core",
+ "silkenweb-html",
  "web-sys",
 ]
 
 [[package]]
-name = "surfinia-html"
+name = "silkenweb-html"
 version = "0.1.0"
 dependencies = [
  "paste",
- "surfinia-core",
+ "silkenweb-core",
  "wasm-bindgen",
  "web-sys",
 ]

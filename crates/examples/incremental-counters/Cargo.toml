@@ -1,10 +1,10 @@
 [package]
-name = "surfinia-examples-incremental-counters"
+name = "silkenweb-examples-incremental-counters"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-surfinia-core = { path = "../../core" }
-surfinia-html = { path = "../../html" }
+silkenweb-core = { path = "../../core" }
+silkenweb-html = { path = "../../html" }
 console_error_panic_hook = "*"

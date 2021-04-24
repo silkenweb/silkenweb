@@ -1,12 +1,12 @@
 [package]
-name = "surfinia-examples-todomvc"
+name = "silkenweb-examples-todomvc"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-surfinia-core = { path = "../../core" }
-surfinia-html = { path = "../../html" }
+silkenweb-core = { path = "../../core" }
+silkenweb-html = { path = "../../html" }
 console_error_panic_hook = "0.1"
 web-sys = "0.3"
 derive_more = "0.99"

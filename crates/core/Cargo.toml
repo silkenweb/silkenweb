@@ -1,5 +1,5 @@
 [package]
-name = "surfinia-core"
+name = "silkenweb-core"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"

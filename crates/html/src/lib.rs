@@ -4,7 +4,7 @@
 pub mod macros;
 pub mod elements;
 
-use surfinia_core::{hooks::list_state::ElementList, Builder, Element, ElementBuilder};
+use silkenweb_core::{hooks::list_state::ElementList, Builder, Element, ElementBuilder};
 
 pub fn element_list<Key, Value, GenerateChild, ChildElem, ParentElem>(
     root: ParentElem,

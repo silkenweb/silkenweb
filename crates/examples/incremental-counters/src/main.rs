@@ -1,11 +1,11 @@
 use std::{cell::RefCell, iter, rc::Rc};
 
-use surfinia_core::{
+use silkenweb_core::{
     hooks::{list_state::ElementList, state::Signal},
     mount,
     Builder,
 };
-use surfinia_html::{
+use silkenweb_html::{
     element_list,
     elements::{button, div, Div},
 };

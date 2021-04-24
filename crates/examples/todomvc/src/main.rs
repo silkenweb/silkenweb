@@ -3,7 +3,7 @@ extern crate derive_more;
 
 use std::{cell::RefCell, iter, rc::Rc};
 
-use surfinia_core::{
+use silkenweb_core::{
     accumulators::{IncludeSum, Sum, SumTotal},
     hooks::{
         effect,
@@ -14,7 +14,7 @@ use surfinia_core::{
     Builder,
     DomElement,
 };
-use surfinia_html::{
+use silkenweb_html::{
     element_list,
     elements::{
         a,

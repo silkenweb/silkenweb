@@ -1,11 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
-use surfinia_core::{
+use silkenweb_core::{
     hooks::{memo::MemoCache, state::Signal},
     mount,
     Builder,
 };
-use surfinia_html::elements::{button, div, DivBuilder};
+use silkenweb_html::elements::{button, div, DivBuilder};
 
 fn counter(count: &Signal<u32>) -> DivBuilder {
     let inc = count.write();
