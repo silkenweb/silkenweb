@@ -287,6 +287,9 @@ impl TodoApp {
             .map(ElementList::is_empty)
             .only_changes()
             .map({
+                // TODO: We're capturing `self_` in the closure, so `write_items`,
+                // `current_filter` and `active_count` aren't needed. `render_filters` could
+                // just take `&self`.
                 let write_items = self.items.write();
                 let current_filter = self.filter.clone();
                 let active_count = self.active_count.read();
