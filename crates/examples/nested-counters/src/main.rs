@@ -2,9 +2,9 @@ use std::{cell::RefCell, rc::Rc};
 
 use silkenweb::{
     elements::{button, div, DivBuilder},
-    signal::Signal,
     memo::MemoCache,
     mount,
+    signal::Signal,
     Builder,
 };
 

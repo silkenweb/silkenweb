@@ -1,7 +1,7 @@
 use silkenweb::{
     elements::{button, div},
-    signal::Signal,
     mount,
+    signal::Signal,
 };
 
 fn main() {
