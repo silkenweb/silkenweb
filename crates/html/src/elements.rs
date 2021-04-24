@@ -1,3 +1,9 @@
+//! All the HTML elements
+//!
+//! This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on 2021-04-23
+//!
+//! [Moxie DOM]: https://github.com/anp/moxie
+
 #![allow(unused_attributes)]
 #![rustfmt::skip]
 use web_sys as dom;
