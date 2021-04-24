@@ -57,7 +57,7 @@ impl TodoItem {
         let active_count = completed
             .read()
             .map(|completed| (!completed) as usize)
-            .send_to(Sum::new(active_count));
+            .map_to(Sum::new(active_count));
 
         Self {
             id,

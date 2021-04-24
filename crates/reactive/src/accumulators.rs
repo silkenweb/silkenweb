@@ -25,7 +25,7 @@ impl<T: 'static + Zero + Clone + WrappingAdd> Default for SumTotal<T> {
         let deltas = Signal::new(T::zero());
         let total = deltas
             .read()
-            .send_to(AccumulateSum(RefCell::new(T::zero())));
+            .map_to(AccumulateSum(RefCell::new(T::zero())));
         Self {
             deltas: deltas.write(),
             total,

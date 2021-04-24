@@ -65,7 +65,7 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
-    pub fn send_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
+    pub fn map_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
     where
         Output: 'static,
     {
@@ -88,7 +88,7 @@ impl<T: 'static> ReadSignal<T> {
         Output: 'static,
         Generate: 'static + Fn(&T) -> Output,
     {
-        self.send_to(generate)
+        self.map_to(generate)
     }
 
     fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: Rc<dyn Fn(&T)>) {
