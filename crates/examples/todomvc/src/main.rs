@@ -144,9 +144,10 @@ impl TodoItem {
 
             if editing {
                 let input = this.render_edit();
-                let dom_elem = input.dom_element();
-
-                after_render(move || dom_elem.focus().unwrap());
+                after_render({
+                    let input = input.clone();
+                    move || input.dom_element().focus().unwrap()
+                });
                 item.child(input)
             } else {
                 item.child(this.render_view())
