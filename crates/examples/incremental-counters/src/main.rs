@@ -1,8 +1,8 @@
 use std::{cell::RefCell, iter, rc::Rc};
 
 use silkenweb::{
-    elements::{button, div, Div},
     element_list::ElementList,
+    elements::{button, div, Div},
     mount,
     signal::Signal,
     Builder,

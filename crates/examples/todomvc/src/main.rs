@@ -6,6 +6,7 @@ use std::{cell::RefCell, iter, rc::Rc};
 use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
     effect,
+    element_list::ElementList,
     elements::{
         a,
         button,
@@ -27,7 +28,6 @@ use silkenweb::{
         Section,
         Ul,
     },
-    element_list::ElementList,
     mount,
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
