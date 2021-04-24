@@ -1,11 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
-use silkenweb_core::{
+use silkenweb::{
+    elements::{button, div, DivBuilder},
     hooks::{memo::MemoCache, state::Signal},
     mount,
     Builder,
 };
-use silkenweb_html::elements::{button, div, DivBuilder};
 
 fn counter(count: &Signal<u32>) -> DivBuilder {
     let inc = count.write();

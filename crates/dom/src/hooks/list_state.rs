@@ -6,9 +6,9 @@ use std::{
     rc::Rc,
 };
 
+use silkenweb_reactive::hooks::state::{ReadSignal, Signal};
 use web_sys as dom;
 
-use super::state::{ReadSignal, Signal};
 use crate::{Builder, DomElement, Element, ElementBuilder};
 
 type SharedItem<T> = Rc<RefCell<T>>;

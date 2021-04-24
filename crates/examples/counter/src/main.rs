@@ -1,5 +1,8 @@
-use silkenweb_core::{hooks::state::Signal, mount};
-use silkenweb_html::elements::{button, div};
+use silkenweb::{
+    elements::{button, div},
+    hooks::state::Signal,
+    mount,
+};
 
 fn main() {
     console_error_panic_hook::set_once();

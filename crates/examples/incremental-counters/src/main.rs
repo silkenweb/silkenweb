@@ -1,11 +1,12 @@
 use std::{cell::RefCell, iter, rc::Rc};
 
-use silkenweb_core::{
-    hooks::{list_state::ElementList, state::Signal},
+use silkenweb::{
+    elements::{button, div, Div},
+    list_state::ElementList,
     mount,
+    state::Signal,
     Builder,
 };
-use silkenweb_html::elements::{button, div, Div};
 
 fn counter() -> Div {
     let count = Signal::new(0);

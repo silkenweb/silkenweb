@@ -5,9 +5,10 @@ members = [
     "crates/examples/nested-counters",
     "crates/examples/incremental-counters",
     "crates/examples/todomvc",
-    "crates/html",
-    "crates/core",
     "crates/silkenweb",
+    "crates/html",
+    "crates/dom",
+    "crates/reactive",
 ]
 
 [profile.release]

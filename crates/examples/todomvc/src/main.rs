@@ -3,37 +3,35 @@ extern crate derive_more;
 
 use std::{cell::RefCell, iter, rc::Rc};
 
-use silkenweb_core::{
+use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
-    hooks::{
-        effect,
-        list_state::ElementList,
-        state::{ReadSignal, Signal, WriteSignal, ZipSignal},
+    effect,
+    elements::{
+        a,
+        button,
+        div,
+        footer,
+        h1,
+        header,
+        input,
+        label,
+        li,
+        section,
+        span,
+        strong,
+        ul,
+        Div,
+        Input,
+        Li,
+        LiBuilder,
+        Section,
+        Ul,
     },
+    hooks::state::{ReadSignal, Signal, WriteSignal, ZipSignal},
+    list_state::ElementList,
     mount,
     Builder,
     DomElement,
-};
-use silkenweb_html::elements::{
-    a,
-    button,
-    div,
-    footer,
-    h1,
-    header,
-    input,
-    label,
-    li,
-    section,
-    span,
-    strong,
-    ul,
-    Div,
-    Input,
-    Li,
-    LiBuilder,
-    Section,
-    Ul,
 };
 use web_sys::HtmlInputElement;
 

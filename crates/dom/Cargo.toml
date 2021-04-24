@@ -1,10 +1,14 @@
 [package]
-name = "silkenweb"
+name = "silkenweb-dom"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-silkenweb-html = { path = "../html" }
-silkenweb-dom = { path = "../dom" }
+wasm-bindgen = "0.2.73"
+num-traits = "0.2"
 silkenweb-reactive = { path = "../reactive" }
+
+[dependencies.web-sys]
+version = "0.3"
+features = ["Window", "Document", "Text"]

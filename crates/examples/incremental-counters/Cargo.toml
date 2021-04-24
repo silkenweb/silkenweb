@@ -5,6 +5,5 @@ authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-silkenweb-core = { path = "../../core" }
-silkenweb-html = { path = "../../html" }
+silkenweb = { path = "../../silkenweb" }
 console_error_panic_hook = "*"

@@ -1,4 +1,4 @@
-pub use silkenweb_core::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
+pub use silkenweb_dom::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
 pub use wasm_bindgen::JsCast;
 
 macro_rules! attr_name {

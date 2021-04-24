@@ -4,12 +4,12 @@
     clippy::must_use_candidate,
     clippy::module_name_repetitions
 )]
-pub mod accumulators;
 pub mod hooks;
 
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
-use hooks::{queue_update, state::ReadSignal};
+use hooks::queue_update;
+use silkenweb_reactive::hooks::state::ReadSignal;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -145,18 +145,31 @@ pub trait Text {
     fn set_text(&self, builder: &mut ElementBuilder);
 }
 
-impl<T> Text for T
-where
-    T: AsRef<str>,
-{
+fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
+    if let Some(text_node) = builder.text_node.as_ref() {
+        text_node.set_node_value(Some(text.as_ref()));
+    } else {
+        let text_node = document().create_text_node(text.as_ref());
+        builder.append_child(&text_node);
+        builder.text_node = Some(text_node);
+    }
+}
+
+impl<'a> Text for &'a str {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        if let Some(text_node) = builder.text_node.as_ref() {
-            text_node.set_node_value(Some(self.as_ref()));
-        } else {
-            let text_node = document().create_text_node(self.as_ref());
-            builder.append_child(&text_node);
-            builder.text_node = Some(text_node);
-        }
+        set_static_text(self, builder)
+    }
+}
+
+impl<'a> Text for &'a String {
+    fn set_text(&self, builder: &mut ElementBuilder) {
+        set_static_text(self, builder)
+    }
+}
+
+impl Text for String {
+    fn set_text(&self, builder: &mut ElementBuilder) {
+        set_static_text(self, builder)
     }
 }
 
@@ -165,7 +178,7 @@ where
     T: 'static + AsRef<str>,
 {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        self.current().set_text(builder);
+        set_static_text(&self.current().as_ref(), builder);
 
         if let Some(text_node) = builder.text_node.as_ref() {
             let updater = self.map({
@@ -340,7 +353,7 @@ where
     }
 }
 
-pub struct ElementData {
+struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,

@@ -115,14 +115,17 @@ dependencies = [
 name = "silkenweb"
 version = "0.1.0"
 dependencies = [
+ "silkenweb-dom",
  "silkenweb-html",
+ "silkenweb-reactive",
 ]
 
 [[package]]
-name = "silkenweb-core"
+name = "silkenweb-dom"
 version = "0.1.0"
 dependencies = [
  "num-traits",
+ "silkenweb-reactive",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -132,8 +135,7 @@ name = "silkenweb-examples-counter"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "silkenweb-core",
- "silkenweb-html",
+ "silkenweb",
 ]
 
 [[package]]
@@ -141,8 +143,7 @@ name = "silkenweb-examples-incremental-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "silkenweb-core",
- "silkenweb-html",
+ "silkenweb",
 ]
 
 [[package]]
@@ -150,8 +151,7 @@ name = "silkenweb-examples-nested-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "silkenweb-core",
- "silkenweb-html",
+ "silkenweb",
  "web-log",
 ]
 
@@ -161,8 +161,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "derive_more",
- "silkenweb-core",
- "silkenweb-html",
+ "silkenweb",
  "web-sys",
 ]
 
@@ -171,9 +170,16 @@ name = "silkenweb-html"
 version = "0.1.0"
 dependencies = [
  "paste",
- "silkenweb-core",
+ "silkenweb-dom",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "silkenweb-reactive"
+version = "0.1.0"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
