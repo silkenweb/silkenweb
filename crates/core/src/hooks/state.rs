@@ -5,9 +5,6 @@ use std::{
     rc::{self, Rc},
 };
 
-// TODO: Can we provide a way to collapse ReadSignal<ReadSignal<T>> into
-// ReadSignal<T>?
-
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
@@ -135,8 +132,6 @@ pub trait ZipSignal<Generate> {
     fn map(&self, generate: Generate) -> ReadSignal<Self::Target>;
 }
 
-// TODO: We need to do this for larger tuples. Is it easier if we have
-// flattening of `ReadSignal<ReadSignal<T>>`?
 impl<T0, T1, U, Generate> ZipSignal<Generate> for (ReadSignal<T0>, ReadSignal<T1>)
 where
     T0: 'static,

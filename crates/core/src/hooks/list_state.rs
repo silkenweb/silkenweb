@@ -1,6 +1,3 @@
-// TODO: Need to think carefully about a minimal list container that
-// filter/sort/etc can be built on top of.
-
 use std::{
     cell::{Ref, RefCell},
     collections::{BTreeMap, BTreeSet},

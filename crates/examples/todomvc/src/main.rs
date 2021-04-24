@@ -274,9 +274,7 @@ impl TodoApp {
                 let active_count = self.active_count.read();
 
                 move |&is_empty| {
-                    // TODO: We could do with the concept of an empty element, rather than using div
-                    // here.
-
+                    // TODO(empty elements): Eliminate the outer `div`.
                     if is_empty {
                         div()
                     } else {
@@ -300,8 +298,7 @@ impl TodoApp {
                                 .child(any_completed.map(move |&any_completed| {
                                     let write_items = write_items.clone();
 
-                                    // TODO: Need empty element concept again! Or
-                                    // .child(Option<blah>)
+                                    // TODO(empty elements): Eliminate the outer `div`.
                                     if any_completed {
                                         div().child(
                                             button()

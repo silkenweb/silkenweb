@@ -1,4 +1,3 @@
-// TODO: Generalize all this in terms of actions and inverses.
 use std::cell::RefCell;
 
 use num_traits::{WrappingAdd, WrappingSub, Zero};

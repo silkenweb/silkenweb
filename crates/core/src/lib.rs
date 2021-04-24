@@ -225,7 +225,6 @@ impl ElementBuilder {
     }
 
     pub fn child(mut self, child: impl Into<Element>) -> Self {
-        // TODO: Optimize out unneccessary children?
         let child = child.into();
 
         self.append_child(&child.dom_element());

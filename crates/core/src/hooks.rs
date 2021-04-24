@@ -36,7 +36,6 @@ fn request_process_updates() {
     });
 }
 
-// TODO: Figure out how to handle animation
 fn process_updates() {
     PENDING_UPDATES.with(|update_queue| {
         let update_queue = update_queue.take();
