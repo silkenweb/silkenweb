@@ -27,7 +27,7 @@ use silkenweb::{
         Section,
         Ul,
     },
-    list_state::ElementList,
+    element_list::ElementList,
     mount,
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,

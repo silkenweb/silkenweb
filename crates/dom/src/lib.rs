@@ -5,6 +5,7 @@
     clippy::module_name_repetitions
 )]
 pub mod hooks;
+pub mod element_list;
 
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 

@@ -1,5 +1,3 @@
-pub mod list_state;
-
 use std::cell::RefCell;
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
