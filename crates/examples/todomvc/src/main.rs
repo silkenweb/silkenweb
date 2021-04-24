@@ -95,14 +95,14 @@ impl TodoItem {
             .type_("text")
             .value(&self.text.read())
             .on_focusout({
-                let this = self.clone();
-                move |_, input| this.save_edits(&input)
+                let self_ = self.clone();
+                move |_, input| self_.save_edits(&input)
             })
             .on_keyup({
-                let this = self.clone();
+                let self_ = self.clone();
                 move |keyup, input| match keyup.key().as_str() {
-                    "Escape" => this.editing.write().set(false),
-                    "Enter" => this.save_edits(&input),
+                    "Escape" => self_.editing.write().set(false),
+                    "Enter" => self_.save_edits(&input),
                     _ => (),
                 }
             })
@@ -137,20 +137,20 @@ impl TodoItem {
     }
 
     fn render(&self) -> ReadSignal<Li> {
-        let this = self.clone();
+        let self_ = self.clone();
 
         self.editing.read().map(move |&editing| {
-            let item = li().class(this.class());
+            let item = li().class(self_.class());
 
             if editing {
-                let input = this.render_edit();
+                let input = self_.render_edit();
                 after_render({
                     let input = input.clone();
                     move || input.dom_element().focus().unwrap()
                 });
                 item.child(input)
             } else {
-                item.child(this.render_view())
+                item.child(self_.render_view())
             }
             .build()
         })
@@ -187,14 +187,14 @@ impl TodoApp {
     }
 
     fn push(&self, text: String) {
-        let this = self.clone();
+        let self_ = self.clone();
 
         self.items.write().mutate(move |ts| {
-            let current_id = this.id.replace_with(|current| *current + 1);
-            let parent = this.items.write();
+            let current_id = self_.id.replace_with(|current| *current + 1);
+            let parent = self_.items.write();
             ts.insert(
                 current_id,
-                TodoItem::new(current_id, text, false, parent, &this.active_count),
+                TodoItem::new(current_id, text, false, parent, &self_.active_count),
             );
         })
     }
@@ -291,7 +291,7 @@ impl TodoApp {
                 let write_items = self.items.write();
                 let current_filter = self.filter.clone();
                 let active_count = self.active_count.read();
-                let this = self.clone();
+                let self_ = self.clone();
 
                 move |&is_empty| {
                     // TODO(empty elements): Eliminate the outer `div`.
@@ -311,7 +311,7 @@ impl TodoApp {
                                         ))
                                 }))
                                 .child(Self::render_filters(&current_filter, write_items.clone()))
-                                .child(this.render_clear_completed()),
+                                .child(self_.render_clear_completed()),
                         )
                     }
                     .build()
@@ -337,16 +337,16 @@ impl TodoApp {
                         .placeholder("What needs to be done?")
                         .autofocus(true)
                         .on_keyup({
-                            let this = self.clone();
+                            let self_ = self.clone();
 
                             move |keyup, input| {
                                 if keyup.key() == "Enter" {
-                                    let this = this.clone();
+                                    let self_ = self_.clone();
                                     let text = input.value();
                                     let text = text.trim().to_string();
 
                                     if !text.is_empty() {
-                                        this.push(text);
+                                        self_.push(text);
                                         input.set_value("");
                                     }
                                 }
