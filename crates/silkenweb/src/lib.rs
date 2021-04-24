@@ -12,4 +12,5 @@ pub use silkenweb_html::elements;
 pub use silkenweb_reactive::{
     accumulators,
     hooks::{self, state},
+    memo,
 };

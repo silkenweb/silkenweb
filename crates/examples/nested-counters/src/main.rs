@@ -2,7 +2,8 @@ use std::{cell::RefCell, rc::Rc};
 
 use silkenweb::{
     elements::{button, div, DivBuilder},
-    hooks::{memo::MemoCache, state::Signal},
+    hooks::state::Signal,
+    memo::MemoCache,
     mount,
     Builder,
 };

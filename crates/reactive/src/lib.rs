@@ -6,3 +6,4 @@
 )]
 pub mod accumulators;
 pub mod hooks;
+pub mod memo;
