@@ -5,7 +5,7 @@ use std::{cell::RefCell, iter, rc::Rc};
 
 use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
-    effect,
+    after_render,
     element_list::ElementList,
     elements::{
         a,
@@ -146,7 +146,7 @@ impl TodoItem {
                 let input = this.render_edit();
                 let dom_elem = input.dom_element();
 
-                effect(move || dom_elem.focus().unwrap());
+                after_render(move || dom_elem.focus().unwrap());
                 item.child(input)
             } else {
                 item.child(this.render_view())

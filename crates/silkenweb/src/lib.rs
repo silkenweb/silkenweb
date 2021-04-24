@@ -1,5 +1,5 @@
 pub use silkenweb_dom::{
-    effect,
+    after_render,
     element_list,
     mount,
     tag,

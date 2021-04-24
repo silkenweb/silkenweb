@@ -8,7 +8,7 @@ pub mod element_list;
 mod render;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
-pub use render::effect;
+pub use render::after_render;
 use render::queue_update;
 use silkenweb_reactive::signal::ReadSignal;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};

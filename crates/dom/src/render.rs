@@ -19,7 +19,7 @@ pub fn queue_update(x: impl 'static + FnOnce()) {
     }
 }
 
-pub fn effect(x: impl 'static + FnOnce()) {
+pub fn after_render(x: impl 'static + FnOnce()) {
     PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
 }
 
