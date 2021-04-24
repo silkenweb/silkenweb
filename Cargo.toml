@@ -7,6 +7,7 @@ members = [
     "crates/examples/todomvc",
     "crates/html",
     "crates/core",
+    "crates/silkenweb",
 ]
 
 [profile.release]

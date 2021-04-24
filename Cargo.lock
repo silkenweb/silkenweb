@@ -112,6 +112,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb"
+version = "0.1.0"
+dependencies = [
+ "silkenweb-html",
+]
+
+[[package]]
 name = "silkenweb-core"
 version = "0.1.0"
 dependencies = [
