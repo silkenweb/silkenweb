@@ -14,29 +14,26 @@ use silkenweb_core::{
     Builder,
     DomElement,
 };
-use silkenweb_html::{
-    element_list,
-    elements::{
-        a,
-        button,
-        div,
-        footer,
-        h1,
-        header,
-        input,
-        label,
-        li,
-        section,
-        span,
-        strong,
-        ul,
-        Div,
-        Input,
-        Li,
-        LiBuilder,
-        Section,
-        Ul,
-    },
+use silkenweb_html::elements::{
+    a,
+    button,
+    div,
+    footer,
+    h1,
+    header,
+    input,
+    label,
+    li,
+    section,
+    span,
+    strong,
+    ul,
+    Div,
+    Input,
+    Li,
+    LiBuilder,
+    Section,
+    Ul,
 };
 use web_sys::HtmlInputElement;
 
@@ -179,7 +176,7 @@ struct TodoApp {
 impl TodoApp {
     fn new() -> Self {
         Self {
-            items: Signal::new(element_list(
+            items: Signal::new(ElementList::new(
                 ul().class("todo-list"),
                 TodoItem::render,
                 iter::empty(),

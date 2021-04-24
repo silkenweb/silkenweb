@@ -9,7 +9,7 @@ use std::{
 use web_sys as dom;
 
 use super::state::{ReadSignal, Signal};
-use crate::{DomElement, Element, ElementBuilder};
+use crate::{Builder, DomElement, Element, ElementBuilder};
 
 type SharedItem<T> = Rc<RefCell<T>>;
 
@@ -86,17 +86,19 @@ where
     /// # Panic
     ///
     /// Panics if `root` has already had children added to it.
-    pub fn new<GenerateChild>(
-        root: ElementBuilder,
+    pub fn new<GenerateChild, ChildElem, ParentElem>(
+        root: ParentElem,
         generate_child: GenerateChild,
         initial: impl Iterator<Item = (Key, Value)>,
     ) -> Self
     where
-        GenerateChild: 'static + Fn(&Value) -> Element,
+        ChildElem: Into<Element>,
+        ParentElem: Into<ElementBuilder> + Builder,
+        GenerateChild: 'static + Fn(&Value) -> ChildElem,
     {
         let mut new = Self {
-            visible_items: Rc::new(RefCell::new(OrderedElementList::new(root))),
-            generate_child: Rc::new(generate_child),
+            visible_items: Rc::new(RefCell::new(OrderedElementList::new(root.into()))),
+            generate_child: Rc::new(move |c| generate_child(c).into()),
             items: BTreeMap::new(),
             filter: Box::new(|_| Signal::new(true).read()),
         };

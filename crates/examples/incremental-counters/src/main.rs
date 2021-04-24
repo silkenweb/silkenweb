@@ -5,10 +5,7 @@ use silkenweb_core::{
     mount,
     Builder,
 };
-use silkenweb_html::{
-    element_list,
-    elements::{button, div, Div},
-};
+use silkenweb_html::elements::{button, div, Div};
 
 fn counter() -> Div {
     let count = Signal::new(0);
@@ -32,7 +29,7 @@ fn counter() -> Div {
 
 fn main() {
     console_error_panic_hook::set_once();
-    let list = Signal::new(element_list(div(), move |()| counter(), iter::empty()));
+    let list = Signal::new(ElementList::new(div(), move |()| counter(), iter::empty()));
     let push_elem = list.write();
     let pop_elem = list.write();
     let id = Rc::new(RefCell::new(0));
