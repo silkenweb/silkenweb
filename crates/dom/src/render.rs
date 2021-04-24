@@ -4,7 +4,6 @@ use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
 use crate::window;
 
-// TODO(mod reorg): This shouldn't be public
 pub fn queue_update(x: impl 'static + FnOnce()) {
     let len = {
         PENDING_UPDATES.with(|update_queue| {

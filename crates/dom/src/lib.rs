@@ -5,7 +5,8 @@
     clippy::module_name_repetitions
 )]
 pub mod element_list;
-pub mod render;
+mod render;
+pub use render::effect;
 
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 

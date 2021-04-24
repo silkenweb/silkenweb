@@ -1,7 +1,7 @@
 pub use silkenweb_dom::{
     element_list,
     mount,
-    render::effect,
+    effect,
     tag,
     unmount,
     Builder,
