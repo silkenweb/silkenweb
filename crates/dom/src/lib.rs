@@ -66,7 +66,11 @@ impl StaticAttribute for bool {
     }
 }
 
-// TODO: Is this a special case in the DOM?
+// TODO: This is a bit of a hack.
+//
+// Setting the `checked` attribute doesn't send a change event. We have to set
+// the `checked` prop. I think we need to add support for reactive props, then
+// this can be handled client side.
 fn set_input_checked(dom_element: dom::Element, name: &str, value: bool) {
     if name == "checked" {
         if let Ok(input) = dom_element.dyn_into::<dom::HtmlInputElement>() {
