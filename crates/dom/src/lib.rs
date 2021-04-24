@@ -77,7 +77,7 @@ impl StaticAttribute for bool {
 // - We need the current dom element to run that thing
 // - We may want to run the thing conditionally on some signal
 //
-// It's like setting an attribute with a value type of `Fn(&dom::Element)`
+// It's like setting an attribute with a value type of `FnOnce(&dom::Element)`
 // that may be wrapped in a `ReadSignal`. Instead of setting the attribute, we
 // call the function. Set attribute could be implemented in terms of this.
 fn set_input_checked(dom_element: dom::Element, name: &str, value: bool) {
