@@ -80,7 +80,7 @@ impl TodoItem {
     }
 
     fn class(&self) -> ReadSignal<String> {
-        (self.completed.read(), self.editing.read()).map(move |&completed, &editing| {
+        (self.completed.read(), self.editing.read()).map(|&completed, &editing| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| if flag { Some(name) } else { None })
