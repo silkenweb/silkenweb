@@ -6,10 +6,9 @@
 )]
 pub mod element_list;
 mod render;
-pub use render::effect;
-
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
+pub use render::effect;
 use render::queue_update;
 use silkenweb_reactive::signal::ReadSignal;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
