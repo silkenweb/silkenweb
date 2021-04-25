@@ -15,7 +15,7 @@ pub fn queue_update(x: impl 'static + FnOnce()) {
     };
 
     if len == 1 {
-        request_process_updates();
+        request_render_updates();
     }
 }
 
@@ -23,7 +23,7 @@ pub fn after_render(x: impl 'static + FnOnce()) {
     PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
 }
 
-fn request_process_updates() {
+fn request_render_updates() {
     ON_ANIMATION_FRAME.with(|process_updates| {
         window()
             .request_animation_frame(process_updates.as_ref().unchecked_ref())
@@ -31,7 +31,7 @@ fn request_process_updates() {
     });
 }
 
-fn process_updates() {
+pub fn render_updates() {
     PENDING_UPDATES.with(|update_queue| {
         let update_queue = update_queue.take();
 
@@ -52,6 +52,6 @@ thread_local!(
     static PENDING_EFFECTS: RefCell<Vec<Box<dyn FnOnce()>>> = RefCell::new(Vec::new());
     static ON_ANIMATION_FRAME: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_time_stamp: JsValue| {
-            process_updates();
+            render_updates();
         }));
 );

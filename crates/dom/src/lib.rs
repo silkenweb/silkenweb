@@ -8,8 +8,8 @@ pub mod element_list;
 mod render;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
-pub use render::after_render;
 use render::queue_update;
+pub use render::{after_render, render_updates};
 use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
