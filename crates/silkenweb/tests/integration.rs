@@ -57,6 +57,8 @@ fn simple_counter() {
 }
 
 fn create_app_container(app_id: &str) {
+    // Clear the render queue
+    render_updates();
     let app_container = document().create_element("div").unwrap();
     app_container.set_id(app_id);
     let body = document().body().unwrap();
