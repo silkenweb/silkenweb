@@ -13,7 +13,11 @@ type SharedMemoData = Rc<RefCell<MemoData>>;
 pub struct MemoCache(SharedMemoData);
 
 impl MemoCache {
-    pub fn scope(&self) -> Memo {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn frame(&self) -> Memo {
         Memo(self.0.clone())
     }
 }

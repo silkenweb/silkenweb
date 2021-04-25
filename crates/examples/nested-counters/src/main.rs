@@ -35,7 +35,7 @@ fn main() {
     mount(
         "app",
         counter(&count).child(count.read().map(move |&count| {
-            let child_counts = child_counts.scope();
+            let child_counts = child_counts.frame();
             *call_count.borrow_mut() += 1;
             web_log::println!("Call count = {}", call_count.borrow());
 
