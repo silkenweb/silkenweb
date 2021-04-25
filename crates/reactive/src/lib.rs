@@ -7,3 +7,12 @@
 pub mod accumulators;
 pub mod memo;
 pub mod signal;
+
+#[macro_export]
+macro_rules! clone{
+    ($($name:ident),* $(,)?) => {
+        $(
+            let $name = $name.clone();
+        )*
+    }
+}

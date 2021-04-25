@@ -1,6 +1,7 @@
 use std::{cell::RefCell, iter, rc::Rc};
 
 use silkenweb::{
+    clone,
     element_list::ElementList,
     elements::{button, div, Div},
     mount,
@@ -47,7 +48,7 @@ fn main() {
                 button()
                     .on_click(move |_, _| {
                         push_elem.mutate({
-                            let id = id.clone();
+                            clone!(id);
                             move |l| {
                                 let current_id = id.replace_with(|current| *current + 1);
                                 l.insert(current_id, ());

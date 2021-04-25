@@ -5,6 +5,8 @@ use std::{
     rc::{self, Rc},
 };
 
+use crate::clone;
+
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
@@ -52,7 +54,7 @@ impl<T: 'static> ReadSignal<T> {
         self.add_dependent(
             &child,
             Rc::new({
-                let child = child.clone();
+                clone!(child);
 
                 move |new_value| {
                     if *child.read().current() != *new_value {
@@ -152,7 +154,7 @@ where
             &child,
             Rc::new({
                 let set_value = child.write();
-                let x1 = x1.clone();
+                clone!(x1);
 
                 move |new_value| set_value.set(generate0(new_value, &x1.current()))
             }),
@@ -162,7 +164,7 @@ where
             &child,
             Rc::new({
                 let set_value = child.write();
-                let x0 = x0.clone();
+                clone!(x0);
 
                 move |new_value| set_value.set(generate1(&x0.current(), new_value))
             }),

@@ -6,7 +6,10 @@ use std::{
     rc::Rc,
 };
 
-use silkenweb_reactive::signal::{ReadSignal, Signal};
+use silkenweb_reactive::{
+    clone,
+    signal::{ReadSignal, Signal},
+};
 use web_sys as dom;
 
 use crate::{Builder, DomElement, Element, ElementBuilder};
@@ -128,7 +131,7 @@ where
     pub fn pop(&mut self) {
         if let Some((key, _)) = self.items.iter().next_back() {
             // RUSTC(btree_pop_last): Don't clone the key and just pop last
-            let key = key.clone();
+            clone!(key);
             self.items.remove(&key);
             self.visible_items.borrow_mut().remove(&key);
         }
@@ -178,9 +181,8 @@ where
     fn updater(&self, key: &Key, item: &Rc<RefCell<Value>>) -> ReadSignal<()> {
         (self.filter)(&item.borrow()).map({
             let storage = self.visible_items.clone();
-            let item = item.clone();
+            clone!(item, key);
             let generate_child = self.generate_child.clone();
-            let key = key.clone();
 
             move |&visible| {
                 if visible {

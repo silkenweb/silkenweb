@@ -10,7 +10,7 @@ use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 pub use render::after_render;
 use render::queue_update;
-use silkenweb_reactive::signal::ReadSignal;
+use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -36,7 +36,7 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
 }
 
 fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl AsRef<str>) {
-    let dom_element = dom_element.clone();
+    clone!(dom_element);
     let name = name.as_ref().to_string();
     let value = value.as_ref().to_string();
 
@@ -49,7 +49,7 @@ pub trait StaticAttribute {
 
 impl StaticAttribute for bool {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        let dom_element = dom_element.clone();
+        clone!(dom_element);
         let name = name.as_ref().to_string();
 
         if *self {
@@ -135,7 +135,7 @@ where
         self.current().set_attribute(&name, &dom_element);
 
         let updater = self.map({
-            let name = name.clone();
+            clone!(name);
             move |new_value| {
                 new_value.set_attribute(&name, &dom_element);
             }
@@ -196,11 +196,11 @@ where
 
         if let Some(text_node) = builder.text_node.as_ref() {
             let updater = self.map({
-                let text_node = text_node.clone();
+                clone!(text_node);
 
                 move |new_value| {
                     queue_update({
-                        let text_node = text_node.clone();
+                        clone!(text_node);
                         let new_value = new_value.as_ref().to_string();
                         move || text_node.set_node_value(Some(new_value.as_ref()))
                     });
@@ -282,8 +282,7 @@ impl ElementBuilder {
 
     fn insert_child_before(&mut self, new_node: &dom::Node, reference_node: &dom::Node) {
         let dom_element = self.element.dom_element.clone();
-        let new_node = new_node.clone();
-        let reference_node = reference_node.clone();
+        clone!(new_node, reference_node);
 
         queue_update(move || {
             dom_element
@@ -294,7 +293,7 @@ impl ElementBuilder {
 
     fn append_child(&mut self, element: &dom::Node) {
         let dom_element = self.element.dom_element.clone();
-        let element = element.clone();
+        clone!(element);
 
         queue_update(move || {
             dom_element.append_child(&element).unwrap();
@@ -303,7 +302,7 @@ impl ElementBuilder {
 
     fn remove_child(&mut self, element: &dom::Node) {
         let dom_element = self.element.dom_element.clone();
-        let element = element.clone();
+        clone!(element);
 
         queue_update(move || {
             dom_element.remove_child(&element).unwrap();
@@ -353,7 +352,7 @@ where
 
                 queue_update({
                     let dom_element = dom_element.borrow().clone();
-                    let new_dom_element = new_dom_element.clone();
+                    clone!(new_dom_element);
 
                     move || {
                         dom_element

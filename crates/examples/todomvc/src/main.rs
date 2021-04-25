@@ -6,6 +6,7 @@ use std::{cell::RefCell, iter, rc::Rc};
 use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
     after_render,
+    clone,
     element_list::ElementList,
     elements::{
         a,
@@ -145,7 +146,7 @@ impl TodoItem {
             if editing {
                 let input = self_.render_edit();
                 after_render({
-                    let input = input.clone();
+                    clone!(input);
                     move || input.dom_element().focus().unwrap()
                 });
                 item.child(input)
@@ -216,7 +217,7 @@ impl TodoApp {
             )
             .text(format!("{}", filter))
             .on_click(move |_, _| {
-                let f = f.clone();
+                clone!(f);
                 set_filter.set(filter);
                 write_items.mutate(|items| items.filter(f))
             }),
@@ -242,7 +243,7 @@ impl TodoApp {
             .only_changes();
 
         any_completed.map(move |&any_completed| {
-            let write_items = write_items.clone();
+            clone!(write_items);
 
             // TODO(empty elements): Eliminate the outer `div`.
             if any_completed {
@@ -338,8 +339,7 @@ impl TodoApp {
                         if is_empty {
                             div()
                         } else {
-                            let write_items = write_items.clone();
-                            let all_complete = all_complete.clone();
+                            clone!(all_complete, write_items);
 
                             div()
                                 .child(
