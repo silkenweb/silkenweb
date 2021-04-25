@@ -3,6 +3,14 @@ name = "silkenweb-dom"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
+description = "Silkenweb DOM API"
+readme = true
+homepage = "https://github.com/simon-bourne/silkenweb"
+repository = "https://github.com/simon-bourne/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui", "web-programming"]
+keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [dependencies]
 wasm-bindgen = "0.2.73"
