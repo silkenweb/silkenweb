@@ -1,5 +1,5 @@
 use std::{
-    cell::{Ref, RefCell},
+    cell::{Ref, RefCell, RefMut},
     collections::HashSet,
     hash::Hash,
     rc::{self, Rc},
@@ -40,7 +40,7 @@ impl<T> Clone for ReadSignal<T> {
 
 impl<T: 'static> ReadSignal<T> {
     pub fn current(&self) -> Ref<T> {
-        self.0.current.borrow()
+        self.0.current()
     }
 
     pub fn only_changes(&self) -> ReadSignal<T>
@@ -183,7 +183,7 @@ impl<T> Clone for WriteSignal<T> {
 impl<T: 'static> WriteSignal<T> {
     pub fn set(&self, new_value: T) {
         if let Some(state) = self.0.upgrade() {
-            *state.current.borrow_mut() = new_value;
+            *state.current_mut() = new_value;
             state.update_dependents();
         }
     }
@@ -194,7 +194,7 @@ impl<T: 'static> WriteSignal<T> {
 
     pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
         if let Some(state) = self.0.upgrade() {
-            f(&mut state.current.borrow_mut());
+            f(&mut state.current_mut());
             state.update_dependents();
         }
     }
@@ -230,9 +230,21 @@ impl<T: 'static> State<T> {
         // it.
         for dep in &dependents {
             if let Some(f) = dep.0.upgrade() {
-                f(&self.current.borrow());
+                f(&self.current());
             }
         }
+    }
+
+    fn current(&self) -> Ref<T> {
+        self.current
+            .try_borrow()
+            .expect("Possible circular dependency")
+    }
+
+    fn current_mut(&self) -> RefMut<T> {
+        self.current
+            .try_borrow_mut()
+            .expect("Possible circular dependency")
     }
 }
 
@@ -296,27 +308,5 @@ impl<T> Eq for DependentCallback<T> {}
 impl<T> Hash for DependentCallback<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         Rc::as_ptr(&self.upgrade()).hash(state);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::{cell::Cell, mem};
-
-    use super::*;
-
-    #[test]
-    fn callback_cleanup() {
-        let state = Rc::new(Cell::new(0));
-        let x = Signal::new(0);
-        let y = x.read().map({
-            let state = state.clone();
-            move |x| state.replace(*x)
-        });
-
-        x.write().set(1);
-        mem::drop(y);
-        x.write().set(2);
-        assert_eq!(state.get(), 1);
     }
 }
