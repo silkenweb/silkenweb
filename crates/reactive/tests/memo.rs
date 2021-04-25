@@ -30,10 +30,26 @@ fn multi_value_caching() {
 
     let frame = memo.frame();
 
-    assert_eq!(frame.cache(0_u8, || 0), 10, "The old value should be cached");
-    assert_eq!(frame.cache(1_u8, || 0), 20, "The old value should be cached");
-    assert_eq!(frame.cache(0_u64, || 0), 30, "The old value should be cached");
-    assert_eq!(frame.cache(1_u64, || 0), 40, "The old value should be cached");
+    assert_eq!(
+        frame.cache(0_u8, || 0),
+        10,
+        "The old value should be cached"
+    );
+    assert_eq!(
+        frame.cache(1_u8, || 0),
+        20,
+        "The old value should be cached"
+    );
+    assert_eq!(
+        frame.cache(0_u64, || 0),
+        30,
+        "The old value should be cached"
+    );
+    assert_eq!(
+        frame.cache(1_u64, || 0),
+        40,
+        "The old value should be cached"
+    );
 }
 
 #[test]
@@ -52,11 +68,15 @@ fn cache_expiry() {
     }
 
     mem::drop(memo.frame());
-    
+
     {
         let frame = memo.frame();
 
-        assert_eq!(3, frame.cache(0, || 3), "The old value should expire from the cache");
+        assert_eq!(
+            3,
+            frame.cache(0, || 3),
+            "The old value should expire from the cache"
+        );
     }
 }
 
