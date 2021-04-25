@@ -13,7 +13,7 @@ cargo test --benches --tests --release
 cargo audit
 
 (
-    cd crates/dom
+    cd crates/silkenweb
 
     for browser in chrome firefox; do
         wasm-pack test --headless --"$browser"

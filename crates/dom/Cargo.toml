@@ -20,10 +20,3 @@ silkenweb-reactive = { path = "../reactive" }
 [dependencies.web-sys]
 version = "0.3"
 features = ["Window", "Document", "Text", "Element", "HtmlInputElement"]
-
-[dev-dependencies]
-wasm-bindgen-test= "0.3.23"
-
-[dev-dependencies.web-sys]
-version = "0.3"
-features = ["Window", "Document", "Text", "Element", "HtmlInputElement"]
