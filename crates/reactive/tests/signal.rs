@@ -3,7 +3,10 @@ mod common;
 use std::mem;
 
 use common::State;
-use silkenweb_reactive::signal::{Signal, ZipSignal};
+use silkenweb_reactive::{
+    clone,
+    signal::{Signal, ZipSignal},
+};
 
 #[test]
 fn zip_signals() {
@@ -25,7 +28,7 @@ fn callback_cleanup() {
     let state = State::new(0);
     let x = Signal::new(0);
     let y = x.read().map({
-        let state = state.clone();
+        clone!(state);
         move |x| *state.get_mut() = *x
     });
 
@@ -48,13 +51,13 @@ fn change_propagation() {
 
     let all_changes_state = State::new(0);
     let all_changes = x.read().map({
-        let all_changes_state = all_changes_state.clone();
+        clone!(all_changes_state);
         move |_| *all_changes_state.get_mut() += 1
     });
 
     let only_diffs_state = State::new(0);
     let only_diffs = x.read().only_changes().map({
-        let only_diffs_state = only_diffs_state.clone();
+        clone!(only_diffs_state);
         move |_| *only_diffs_state.get_mut() += 1
     });
 
