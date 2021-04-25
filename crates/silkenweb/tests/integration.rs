@@ -53,7 +53,7 @@ fn simple_counter() {
     query_element(BUTTON_ID).click();
     assert_eq!("+0", counter_text(), "Counter unchanged before render");
     render_updates();
-    assert_eq!("+0", counter_text(), "Counter incremented after render");
+    assert_eq!("+1", counter_text(), "Counter incremented after render");
 }
 
 fn create_app_container(app_id: &str) {
