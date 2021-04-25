@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 silkenweb-dom = { path = "../dom" }
 paste = "1.0"
-wasm-bindgen = "0.2"
+wasm-bindgen = "0.2.73"
 
 [dependencies.web-sys]
 version = "0.3"
