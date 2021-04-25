@@ -48,7 +48,10 @@ impl Memo {
         let value = current_memos.remove(&key).unwrap_or_else(value_fn);
 
         let next_memos = Self::memo_map::<Key, Value>(&mut memo.next_memoized);
-        next_memos.insert(key, value.clone());
+        let previous_value = next_memos.insert(key, value.clone());
+
+        assert!(previous_value.is_none(), "Keys can't be reused within a frame");
+
         value
     }
 }
