@@ -75,11 +75,7 @@ fn query_element(id: &str) -> dom::HtmlElement {
 }
 
 fn app_html() -> String {
-    document()
-        .query_selector(&format!("#{}", APP_ID))
-        .unwrap()
-        .unwrap()
-        .inner_html()
+    query_element(APP_ID).inner_html()
 }
 
 fn document() -> dom::Document {
