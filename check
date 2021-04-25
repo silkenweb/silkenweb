@@ -11,3 +11,11 @@ cargo build --all-targets
 cargo test
 cargo test --benches --tests --release
 cargo audit
+
+(
+    cd crates/dom
+
+    for browser in chrome firefox; do
+        wasm-pack test --headless --"$browser"
+    done
+)
