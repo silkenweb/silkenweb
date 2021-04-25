@@ -1,4 +1,7 @@
-use std::{cell::{Ref, RefCell, RefMut}, rc::Rc};
+use std::{
+    cell::{Ref, RefCell, RefMut},
+    rc::Rc,
+};
 
 pub struct State<T>(Rc<RefCell<T>>);
 
@@ -17,8 +20,7 @@ impl<T> State<T> {
         self.0.borrow_mut()
     }
 
-    pub fn get(&self) -> Ref<T>
-    {
+    pub fn get(&self) -> Ref<T> {
         self.0.borrow()
     }
 }
