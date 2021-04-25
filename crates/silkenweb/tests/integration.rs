@@ -53,7 +53,7 @@ fn simple_counter() {
             )
             .text(count.read().map(|i| format!("{}", i))),
     );
-    
+
     render_updates();
     check_counter(0);
     query_element(INC_ID).click();
