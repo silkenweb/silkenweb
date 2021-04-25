@@ -35,7 +35,11 @@ fn callback_cleanup() {
     x.write().set(1);
     mem::drop(y);
     x.write().set(2);
-    assert_eq!(*state.get(), 1, "The state shouldn't be updated once `y` is dropped");
+    assert_eq!(
+        *state.get(),
+        1,
+        "The state shouldn't be updated once `y` is dropped"
+    );
 }
 
 #[test]
@@ -64,8 +68,16 @@ fn change_propagation() {
     x.write().set(1);
     x.write().set(1);
 
-    assert_eq!(*all_changes_state.get(), 3, "Once for initialization, then 2 updates");
-    assert_eq!(*only_diffs_state.get(), 2, "Once for initialization, the 1 update that actually changes");
+    assert_eq!(
+        *all_changes_state.get(),
+        3,
+        "Once for initialization, then 2 updates"
+    );
+    assert_eq!(
+        *only_diffs_state.get(),
+        2,
+        "Once for initialization, the 1 update that actually changes"
+    );
     mem::drop(all_changes);
     mem::drop(only_diffs);
 }
