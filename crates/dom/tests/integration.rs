@@ -28,7 +28,7 @@ fn create_app_container(app_id: &str) {
 
 fn app_html() -> String {
     document()
-        .query_selector("#app")
+        .query_selector(&format!("#{}", APP_ID))
         .unwrap()
         .unwrap()
         .inner_html()
