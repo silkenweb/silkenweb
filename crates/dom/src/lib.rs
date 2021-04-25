@@ -199,7 +199,11 @@ where
                 let text_node = text_node.clone();
 
                 move |new_value| {
-                    text_node.set_node_value(Some(new_value.as_ref()));
+                    queue_update({
+                        let text_node = text_node.clone();
+                        let new_value = new_value.as_ref().to_string();
+                        move || text_node.set_node_value(Some(new_value.as_ref()))
+                    });
                 }
             });
 
