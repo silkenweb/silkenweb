@@ -200,16 +200,17 @@ impl TodoApp {
     }
 
     fn render_filter_link(
-        current_filter: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<usize, TodoItem>>,
+        &self,
         filter: Filter,
         seperator: &str,
         f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
     ) -> LiBuilder {
-        let set_filter = current_filter.write();
+        let set_filter = self.filter.write();
+        let write_items = self.items.write();
+
         li().child(
             a().class(
-                current_filter
+                self.filter
                     .read()
                     .map(move |f| if filter == *f { "selected" } else { "" }),
             )
@@ -223,32 +224,13 @@ impl TodoApp {
         .text(seperator)
     }
 
-    fn render_filters(
-        current: &Signal<Filter>,
-        write_items: WriteSignal<ElementList<usize, TodoItem>>,
-    ) -> Ul {
+    fn render_filters(&self) -> Ul {
         ul().class("filters")
-            .child(Self::render_filter_link(
-                &current,
-                write_items.clone(),
-                Filter::All,
-                " ",
-                |_| Signal::new(true).read(),
-            ))
-            .child(Self::render_filter_link(
-                &current,
-                write_items.clone(),
-                Filter::Active,
-                " ",
-                |item| item.completed.read().map(|completed| !completed),
-            ))
-            .child(Self::render_filter_link(
-                &current,
-                write_items,
-                Filter::Completed,
-                "",
-                |item| item.completed.read(),
-            ))
+            .child(self.render_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
+            .child(self.render_filter_link(Filter::Active, " ", |item| {
+                item.completed.read().map(|completed| !completed)
+            }))
+            .child(self.render_filter_link(Filter::Completed, "", |item| item.completed.read()))
             .build()
     }
 
@@ -287,12 +269,6 @@ impl TodoApp {
             .map(ElementList::is_empty)
             .only_changes()
             .map({
-                // TODO: We're capturing `self_` in the closure, so `write_items`,
-                // `current_filter` and `active_count` aren't needed. `render_filters` could
-                // just take `&self`.
-                let write_items = self.items.write();
-                let current_filter = self.filter.clone();
-                let active_count = self.active_count.read();
                 let self_ = self.clone();
 
                 move |&is_empty| {
@@ -303,7 +279,7 @@ impl TodoApp {
                         div().child(
                             footer()
                                 .class("footer")
-                                .child(active_count.map(move |&active_count| {
+                                .child(self_.active_count.read().map(move |&active_count| {
                                     span()
                                         .class("todo-count")
                                         .child(strong().text(format!("{}", active_count)))
@@ -312,7 +288,7 @@ impl TodoApp {
                                             if active_count == 1 { "" } else { "s" }
                                         ))
                                 }))
-                                .child(Self::render_filters(&current_filter, write_items.clone()))
+                                .child(self_.render_filters())
                                 .child(self_.render_clear_completed()),
                         )
                     }
