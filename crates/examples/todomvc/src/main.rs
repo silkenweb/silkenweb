@@ -306,32 +306,34 @@ impl TodoApp {
             .map(|&active_count| active_count == 0)
             .only_changes();
         let write_items = self.items.write();
+        let input_elem = input()
+            .class("new-todo")
+            .placeholder("What needs to be done?")
+            .autofocus(true)
+            .on_keyup({
+                let self_ = self.clone();
+
+                move |keyup, input| {
+                    if keyup.key() == "Enter" {
+                        let text = input.value();
+                        let text = text.trim().to_string();
+
+                        if !text.is_empty() {
+                            self_.push(text);
+                            input.set_value("");
+                        }
+                    }
+                }
+            })
+            .build();
+        after_render({
+            clone!(input_elem);
+            move || input_elem.dom_element().focus().unwrap()
+        });
 
         section()
             .class("todoapp")
-            .child(
-                header().child(h1().text("todos")).child(
-                    input()
-                        .class("new-todo")
-                        .placeholder("What needs to be done?")
-                        .autofocus(true)
-                        .on_keyup({
-                            let self_ = self.clone();
-
-                            move |keyup, input| {
-                                if keyup.key() == "Enter" {
-                                    let text = input.value();
-                                    let text = text.trim().to_string();
-
-                                    if !text.is_empty() {
-                                        self_.push(text);
-                                        input.set_value("");
-                                    }
-                                }
-                            }
-                        }),
-                ),
-            )
+            .child(header().child(h1().text("todos")).child(input_elem))
             .child(
                 section()
                     .class("main")
