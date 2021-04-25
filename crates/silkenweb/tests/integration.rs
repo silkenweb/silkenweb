@@ -26,15 +26,8 @@ fn mount_unmount() {
 
 #[wasm_bindgen_test]
 fn simple_counter() {
-    const INC_ID: &str = "increment";
+    const BUTTON_ID: &str = "increment";
     const COUNTER_ID: &str = "counter";
-
-    fn check_counter(expected: usize) {
-        assert_eq!(
-            format!("+{}", expected),
-            query_element(COUNTER_ID).inner_text()
-        );
-    }
 
     create_app_container(APP_ID);
 
@@ -47,7 +40,7 @@ fn simple_counter() {
             .id(COUNTER_ID)
             .child(
                 button()
-                    .id(INC_ID)
+                    .id(BUTTON_ID)
                     .on_click(move |_, _| inc.replace(|i| i + 1))
                     .text("+"),
             )
@@ -55,11 +48,12 @@ fn simple_counter() {
     );
 
     render_updates();
-    check_counter(0);
-    query_element(INC_ID).click();
-    check_counter(0);
+    let counter_text = || query_element(COUNTER_ID).inner_text();
+    assert_eq!("+0", counter_text(), "Counter is initially zero");
+    query_element(BUTTON_ID).click();
+    assert_eq!("+0", counter_text(), "Counter unchanged before render");
     render_updates();
-    check_counter(1);
+    assert_eq!("+0", counter_text(), "Counter incremented after render");
 }
 
 fn create_app_container(app_id: &str) {
