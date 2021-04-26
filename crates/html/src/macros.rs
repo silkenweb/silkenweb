@@ -73,6 +73,7 @@ macro_rules! html_events {
         events!($elem_type {
             blur: web_sys::FocusEvent,
             click: web_sys::MouseEvent,
+            change: web_sys::Event,
             dblclick: web_sys::MouseEvent,
             focusout: web_sys::FocusEvent,
             input: web_sys::InputEvent,

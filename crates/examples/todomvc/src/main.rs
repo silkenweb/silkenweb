@@ -349,17 +349,18 @@ impl TodoApp {
                                         .id("toggle-all")
                                         .class("toggle-all")
                                         .type_("checkbox")
-                                        .checked(all_complete.clone()),
-                                )
-                                .child(label().for_("toggle-all").on_click(move |_, _| {
-                                    let new_completed = !*all_complete.current();
+                                        .checked(all_complete.clone())
+                                        .on_change(move |_, _| {
+                                            let new_completed = !*all_complete.current();
 
-                                    write_items.mutate(move |items| {
-                                        for item in items.values() {
-                                            item.completed.write().set(new_completed);
-                                        }
-                                    })
-                                }))
+                                            write_items.mutate(move |items| {
+                                                for item in items.values() {
+                                                    item.completed.write().set(new_completed);
+                                                }
+                                            })
+                                        }),
+                                )
+                                .child(label().for_("toggle-all"))
                         }
                     }))
                     .child(self.items.read()),
