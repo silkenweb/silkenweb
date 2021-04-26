@@ -9,6 +9,9 @@ RUN \
 RUN \
     apt-get update && apt-get install -y npm
 
+# For headless browser tests
+RUN apt-get install -y firefox-esr chromium
+
 # Install NPM
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get update && apt-get install -y nodejs
@@ -17,11 +20,10 @@ RUN apt-get update && apt-get install -y nodejs
 RUN curl -L https://github.com/WebAssembly/binaryen/releases/download/version_101/binaryen-version_101-x86_64-linux.tar.gz | tar -xz
 RUN cp binaryen-version_101/bin/wasm-opt /usr/bin/
 
-RUN cargo install cargo-audit
-RUN cargo install cargo-criterion
 RUN cargo install cargo-udeps
 RUN cargo install trunk
 RUN cargo install wasm-bindgen-cli
+RUN cargo install wasm-pack
 RUN cargo install xargo
 
 RUN rustup component add clippy rustfmt

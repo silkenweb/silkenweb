@@ -10,14 +10,10 @@ cargo clippy --all-targets -- -D warnings -D clippy::pedantic -D clippy::all
 cargo build --all-targets
 cargo test
 cargo test --benches --tests --release
-cargo audit
 
 (
     cd crates/silkenweb
-
-    for browser in chrome firefox; do
-        wasm-pack test --headless --"$browser"
-    done
+    wasm-pack test --headless --firefox
 )
 
 (

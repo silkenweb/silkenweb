@@ -3,6 +3,5 @@
 ## Running Browser Tests
 
 ```bash
-wasm-pack test --headless --firefox
-wasm-pack test --headless --chrome
+wasm-pack test --headless --firefox --chrome
 ```
