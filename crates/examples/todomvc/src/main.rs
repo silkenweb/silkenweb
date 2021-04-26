@@ -33,7 +33,6 @@ use silkenweb::{
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
     DomElement,
-    Element,
 };
 use web_sys::HtmlInputElement;
 
@@ -139,20 +138,39 @@ impl TodoItem {
     }
 
     fn render(&self) -> Li {
-        let self_ = self.clone();
-
-        li().class(self_.class())
-            .child(self.editing.read().map(move |&editing| {
-                if editing {
+        // TODO: We don't need to re-render the view and editing components when
+        // `editing` changes. We just need an effect tied to the elements to set the
+        // hidden status.
+        li().class(self.class())
+            .child(self.editing.read().map({
+                let self_ = self.clone();
+                move |&editing| {
                     let input = self_.render_edit();
                     after_render({
                         clone!(input);
-                        move || input.dom_element().focus().unwrap()
+                        move || {
+                            let dom_elem = input.dom_element();
+                            dom_elem.set_hidden(!editing);
+                            dom_elem.focus().unwrap()
+                        }
                     });
-                    // TODO: Add an into_element() method on builder and typed elements
-                    Into::<Element>::into(input)
-                } else {
-                    Into::<Element>::into(self_.render_view())
+
+                    input
+                }
+            }))
+            .child(self.editing.read().map({
+                let self_ = self.clone();
+                move |&editing| {
+                    let view = self_.render_view();
+
+                    after_render({
+                        clone!(view);
+                        move || {
+                            view.dom_element().set_hidden(editing);
+                        }
+                    });
+
+                    view
                 }
             }))
             .build()
