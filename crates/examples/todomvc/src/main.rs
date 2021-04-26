@@ -33,6 +33,7 @@ use silkenweb::{
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
     DomElement,
+    Element,
 };
 use web_sys::HtmlInputElement;
 
@@ -137,24 +138,24 @@ impl TodoItem {
             .build()
     }
 
-    fn render(&self) -> ReadSignal<Li> {
+    fn render(&self) -> Li {
         let self_ = self.clone();
 
-        self.editing.read().map(move |&editing| {
-            let item = li().class(self_.class());
-
-            if editing {
-                let input = self_.render_edit();
-                after_render({
-                    clone!(input);
-                    move || input.dom_element().focus().unwrap()
-                });
-                item.child(input)
-            } else {
-                item.child(self_.render_view())
-            }
+        li().class(self_.class())
+            .child(self.editing.read().map(move |&editing| {
+                if editing {
+                    let input = self_.render_edit();
+                    after_render({
+                        clone!(input);
+                        move || input.dom_element().focus().unwrap()
+                    });
+                    // TODO: Add an into_element() method on builder and typed elements
+                    Into::<Element>::into(input)
+                } else {
+                    Into::<Element>::into(self_.render_view())
+                }
+            }))
             .build()
-        })
     }
 }
 
