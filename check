@@ -19,3 +19,8 @@ cargo audit
         wasm-pack test --headless --"$browser"
     done
 )
+
+(
+    cd crates/examples/todomvc
+    ./run-cypress-tests.sh
+)
