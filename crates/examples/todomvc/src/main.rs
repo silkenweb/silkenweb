@@ -144,6 +144,30 @@ impl TodoItem {
         // TODO: We don't need to re-render the view and editing components when
         // `editing` changes. We just need an effect tied to the elements to set the
         // hidden status.
+        //
+        // Then we can write the whole function like this:
+        //
+        // li().class(self.class())
+        //     .child(
+        //         self.render_edit()
+        //             .after_render(self.editing.read().map(|&editing| {
+        //                 |elem| {
+        //                     if editing {
+        //                         elem.set_focus().unwrap()
+        //                     }
+        //
+        //                     elem.set_hidden(!editing)
+        //                 }
+        //             })),
+        //     )
+        //     .child(
+        //         self.render_view().after_render(
+        //             self.editing
+        //                 .read()
+        //                 .map(|&editing| |elem| elem.set_hidden(editing)),
+        //         ),
+        //     );
+
         li().class(self.class())
             .child(self.editing.read().map({
                 let self_ = self.clone();
