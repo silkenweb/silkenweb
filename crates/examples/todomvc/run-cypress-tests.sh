@@ -9,5 +9,6 @@ trap 'kill %%' EXIT
 (
     cd cypress-tests
     npm install
+    npm install cypress
     npx cypress run
 )
