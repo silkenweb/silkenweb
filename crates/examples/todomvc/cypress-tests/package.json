@@ -1,0 +1,8 @@
+{
+  "name": "silkenweb-todomvc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Simon Bourne",
+  "license": "MIT"
+}
