@@ -1,8 +1,8 @@
 use silkenweb::{
-    elements::{button, div},
+    elements::{button, div, p, PBuilder},
     mount,
     render_updates,
-    signal::Signal,
+    signal::{Signal, WriteSignal},
     tag,
     unmount,
 };
@@ -54,6 +54,84 @@ fn simple_counter() {
     assert_eq!("+0", counter_text(), "Counter unchanged before render");
     render_updates();
     assert_eq!("+1", counter_text(), "Counter incremented after render");
+}
+
+const TEXT_ID: &str = "text";
+
+fn text_content(text_id: &str) -> String {
+    query_element(text_id).inner_text()
+}
+
+#[wasm_bindgen_test]
+fn reactive_text() {
+    create_app_container(APP_ID);
+
+    let text_signal = Signal::new("0");
+    verify_reactive_text(
+        p().id("text").text(&text_signal.read()),
+        TEXT_ID,
+        &text_signal.write(),
+    );
+}
+
+// Verify reactive text when passing the signal by reference.
+#[wasm_bindgen_test]
+fn reactive_text_reference() {
+    create_app_container(APP_ID);
+
+    let text_signal = Signal::new("0");
+    verify_reactive_text(
+        p().id("text").text(&text_signal.read()),
+        TEXT_ID,
+        &text_signal.write(),
+    );
+}
+
+// Make sure text is overwritten when called twice
+#[wasm_bindgen_test]
+fn reactive_text_reset() {
+    create_app_container(APP_ID);
+
+    let text_overwritten = Signal::new("This should be overwritten");
+    let text_signal = Signal::new("0");
+
+    mount(
+        APP_ID,
+        p().id(TEXT_ID)
+            .text(text_overwritten.read())
+            .text(text_signal.read()),
+    );
+
+    render_updates();
+    assert_eq!("0", text_content(TEXT_ID));
+    text_overwritten.write().set("This should be discarded");
+    render_updates();
+    assert_eq!("0", text_content(TEXT_ID), "The last call to `text()` wins");
+    text_signal.write().set("1");
+    render_updates();
+    assert_eq!(
+        "1",
+        text_content(TEXT_ID),
+        "The text is reactive to the last `text()` call"
+    );
+}
+
+fn verify_reactive_text(paragraph: PBuilder, text_id: &str, text: &WriteSignal<&'static str>) {
+    mount(APP_ID, paragraph);
+    render_updates();
+    assert_eq!("0", text_content(text_id));
+    text.set("1");
+    assert_eq!(
+        "0",
+        text_content(text_id),
+        "Text unaffected by signal before render"
+    );
+    render_updates();
+    assert_eq!(
+        "1",
+        text_content(text_id),
+        "Text updated by signal after render"
+    );
 }
 
 fn create_app_container(app_id: &str) {

@@ -213,7 +213,6 @@ where
     }
 }
 
-// TODO(testing): Code to test this
 impl<'a, T> Text for &'a ReadSignal<T>
 where
     T: 'static,
