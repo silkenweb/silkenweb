@@ -8,5 +8,6 @@ trap 'kill %%' EXIT
 
 (
     cd cypress-tests
+    npm install
     npx cypress run
 )
