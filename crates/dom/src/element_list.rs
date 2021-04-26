@@ -12,7 +12,7 @@ use silkenweb_reactive::{
 };
 use web_sys as dom;
 
-use crate::{Builder, DomElement, Element, ElementBuilder};
+use crate::{DomElement, Element, ElementBuilder};
 
 type SharedItem<T> = Rc<RefCell<T>>;
 
@@ -96,7 +96,7 @@ where
     ) -> Self
     where
         ChildElem: Into<Element>,
-        ParentElem: Into<ElementBuilder> + Builder,
+        ParentElem: Into<ElementBuilder>,
         GenerateChild: 'static + Fn(&Value) -> ChildElem,
     {
         let mut new = Self {
