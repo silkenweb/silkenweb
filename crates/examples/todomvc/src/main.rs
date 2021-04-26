@@ -74,7 +74,10 @@ impl TodoItem {
         let text = input.value();
         let text = text.trim();
 
-        if !text.is_empty() {
+        if text.is_empty() {
+            let id = self.id;
+            self.parent.mutate(move |p| p.remove(&id));
+        } else {
             self.text.write().set(text.to_string());
             self.editing.write().set(false);
         }
