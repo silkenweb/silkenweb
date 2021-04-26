@@ -316,6 +316,10 @@ impl Builder for ElementBuilder {
     fn build(self) -> Self::Target {
         Element(Rc::new(ElementKind::Static(self.element)))
     }
+
+    fn into_element(self) -> Element {
+        self.build()
+    }
 }
 
 impl From<ElementBuilder> for Element {
@@ -403,12 +407,18 @@ impl Builder for Element {
     fn build(self) -> Self::Target {
         self
     }
+
+    fn into_element(self) -> Element {
+        self
+    }
 }
 
 pub trait Builder {
     type Target;
 
     fn build(self) -> Self::Target;
+
+    fn into_element(self) -> Element;
 }
 
 struct EventCallback {

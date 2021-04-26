@@ -1,7 +1,6 @@
 pub use silkenweb_dom::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
 pub use wasm_bindgen::JsCast;
 
-// TODO: Add an into_element() method on builder and typed elements
 macro_rules! attr_name {
     (accept_charset) => {
         "accept-charset"
@@ -140,6 +139,10 @@ macro_rules! html_element {
                 fn build(self) -> Self::Target {
                     [<$name:camel>](self.0.build())
                 }
+
+                fn into_element(self) -> $crate::macros::Element {
+                    self.build().into()
+                }
             }
 
             impl From<[<$name:camel Builder>]> for $crate::macros::Element {
@@ -163,6 +166,10 @@ macro_rules! html_element {
 
                 fn build(self) -> Self::Target {
                     self
+                }
+
+                fn into_element(self) -> $crate::macros::Element {
+                    self.build().into()
                 }
             }
 
