@@ -516,7 +516,7 @@ describe('TodoMVC - React', function () {
     })
   })
 
-  context('Persistence', function () {
+  context.skip('Persistence', function () {
     it('should persist its data', function () {
       // mimicking TodoMVC tests
       // by writing out this function
@@ -542,7 +542,7 @@ describe('TodoMVC - React', function () {
     })
   })
 
-  context('Routing', function () {
+  context.skip('Routing', function () {
     // New commands used here:
     // https://on.cypress.io/window
     // https://on.cypress.io/its
@@ -643,7 +643,7 @@ describe('TodoMVC - React', function () {
     })
   })
 
-  context('Contrast', () => {
+  context.skip('Contrast', () => {
     it('has good contrast when empty', () => {
       cy.addAxeCode()
       cy.checkA11y(null, {
