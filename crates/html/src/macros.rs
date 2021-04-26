@@ -1,6 +1,7 @@
 pub use silkenweb_dom::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
 pub use wasm_bindgen::JsCast;
 
+// TODO: Add an into_element() method on builder and typed elements
 macro_rules! attr_name {
     (accept_charset) => {
         "accept-charset"
