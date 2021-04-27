@@ -4,16 +4,6 @@ use num_traits::{WrappingAdd, WrappingSub, Zero};
 
 use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal};
 
-struct AccumulateSum<T>(RefCell<T>);
-
-impl<T: 'static + Clone + WrappingAdd> SignalReceiver<T, T> for AccumulateSum<T> {
-    fn receive(&self, x: &T) -> T {
-        let mut total = self.0.borrow_mut();
-        *total = total.wrapping_add(x);
-        total.clone()
-    }
-}
-
 #[derive(Clone)]
 pub struct SumTotal<T> {
     deltas: WriteSignal<T>,
@@ -71,3 +61,13 @@ impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for Sum<T> {
 }
 
 pub struct IncludeSum();
+
+struct AccumulateSum<T>(RefCell<T>);
+
+impl<T: 'static + Clone + WrappingAdd> SignalReceiver<T, T> for AccumulateSum<T> {
+    fn receive(&self, x: &T) -> T {
+        let mut total = self.0.borrow_mut();
+        *total = total.wrapping_add(x);
+        total.clone()
+    }
+}

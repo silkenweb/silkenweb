@@ -125,6 +125,34 @@ where
     }
 }
 
+pub struct WriteSignal<T>(WeakSharedState<T>);
+
+impl<T> Clone for WriteSignal<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<T: 'static> WriteSignal<T> {
+    pub fn set(&self, new_value: T) {
+        if let Some(state) = self.0.upgrade() {
+            *state.current_mut() = new_value;
+            state.update_dependents();
+        }
+    }
+
+    pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
+        self.mutate(|x| *x = f(x));
+    }
+
+    pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
+        if let Some(state) = self.0.upgrade() {
+            f(&mut state.current_mut());
+            state.update_dependents();
+        }
+    }
+}
+
 pub trait ZipSignal<Generate> {
     type Target;
 
@@ -168,34 +196,6 @@ where
         );
 
         child.read()
-    }
-}
-
-pub struct WriteSignal<T>(WeakSharedState<T>);
-
-impl<T> Clone for WriteSignal<T> {
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
-
-impl<T: 'static> WriteSignal<T> {
-    pub fn set(&self, new_value: T) {
-        if let Some(state) = self.0.upgrade() {
-            *state.current_mut() = new_value;
-            state.update_dependents();
-        }
-    }
-
-    pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
-        self.mutate(|x| *x = f(x));
-    }
-
-    pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
-        if let Some(state) = self.0.upgrade() {
-            f(&mut state.current_mut());
-            state.update_dependents();
-        }
     }
 }
 
