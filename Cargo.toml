@@ -1,10 +1,10 @@
 [workspace]
 
 members = [
-    "crates/examples/counter",
-    "crates/examples/nested-counters",
-    "crates/examples/incremental-counters",
-    "crates/examples/todomvc",
+    "examples/counter",
+    "examples/nested-counters",
+    "examples/incremental-counters",
+    "examples/todomvc",
     "crates/silkenweb",
     "crates/html",
     "crates/dom",

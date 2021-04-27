@@ -1,11 +1,10 @@
 [package]
-name = "silkenweb-examples-nested-counters"
+name = "silkenweb-examples-incremental-counters"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../silkenweb" }
+silkenweb = { path = "../../crates/silkenweb" }
 console_error_panic_hook = "*"
-web-log = "*"
