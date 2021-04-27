@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-trunk build
 trunk serve --ignore=cypress-tests &
 trap 'kill %%' EXIT
 
