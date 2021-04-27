@@ -305,7 +305,7 @@ impl TodoApp {
             })
     }
 
-    fn render(&self) -> Section {
+    fn render_todo_items(&self) -> ReadSignal<Div> {
         let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
         let all_complete = self
             .active_count
@@ -313,6 +313,45 @@ impl TodoApp {
             .map(|&active_count| active_count == 0)
             .only_changes();
         let write_items = self.items.write();
+
+        is_empty.map(move |&is_empty| {
+            if is_empty {
+                div()
+            } else {
+                clone!(all_complete, write_items);
+                let initial_complete = *all_complete.current();
+
+                div()
+                    .child(
+                        input()
+                            .id("toggle-all")
+                            .class("toggle-all")
+                            .type_("checkbox")
+                            .checked(initial_complete)
+                            .on_change({
+                                clone!(all_complete);
+                                move |_, _| {
+                                    let new_completed = !*all_complete.current();
+
+                                    write_items.mutate(move |items| {
+                                        for item in items.values() {
+                                            item.completed.write().set(new_completed);
+                                        }
+                                    })
+                                }
+                            })
+                            .effect(all_complete.map(|&complete| {
+                                move |elem: &HtmlInputElement| {
+                                    elem.set_checked(complete)
+                                }
+                            })),
+                    )
+                    .child(label().for_("toggle-all"))
+            }.build()
+        })
+    }
+
+    fn render(&self) -> Section {
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
@@ -340,41 +379,7 @@ impl TodoApp {
             .child(
                 section()
                     .class("main")
-                    .child(is_empty.map(move |&is_empty| {
-                        if is_empty {
-                            div()
-                        } else {
-                            clone!(all_complete, write_items);
-                            let initial_complete = *all_complete.current();
-
-                            div()
-                                .child(
-                                    input()
-                                        .id("toggle-all")
-                                        .class("toggle-all")
-                                        .type_("checkbox")
-                                        .checked(initial_complete)
-                                        .on_change({
-                                            clone!(all_complete);
-                                            move |_, _| {
-                                                let new_completed = !*all_complete.current();
-
-                                                write_items.mutate(move |items| {
-                                                    for item in items.values() {
-                                                        item.completed.write().set(new_completed);
-                                                    }
-                                                })
-                                            }
-                                        })
-                                        .effect(all_complete.map(|&complete| {
-                                            move |elem: &HtmlInputElement| {
-                                                elem.set_checked(complete)
-                                            }
-                                        })),
-                                )
-                                .child(label().for_("toggle-all"))
-                        }
-                    }))
+                    .child(self.render_todo_items())
                     .child(self.items.read()),
             )
             .child(self.render_footer())
