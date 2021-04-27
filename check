@@ -18,5 +18,6 @@ cargo test --benches --tests --release
 
 (
     cd crates/examples/todomvc
+    ./install-cypress.sh
     ./run-cypress-tests.sh
 )
