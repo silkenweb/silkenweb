@@ -3,120 +3,6 @@ pub use silkenweb_dom::{
 };
 pub use wasm_bindgen::JsCast;
 
-macro_rules! attr_name {
-    (accept_charset) => {
-        "accept-charset"
-    };
-    (as_) => {
-        "as"
-    };
-    (async_) => {
-        "async"
-    };
-    (for_) => {
-        "for"
-    };
-    (http_equiv) => {
-        "http-equiv"
-    };
-    (current_time) => {
-        "currentTime"
-    };
-    (loop_) => {
-        "loop"
-    };
-    (type_) => {
-        "type"
-    };
-    ($name:ident) => {
-        stringify!($name)
-    };
-}
-
-macro_rules! attributes {
-    ($(
-        $(#[$attr_meta:meta])*
-        $attr:ident : $typ:ty
-    ),* $(,)? ) => {
-        $(
-            $(#[$attr_meta])*
-            pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
-                Self(self.0.attribute(attr_name!($attr), value))
-            }
-        )*
-    };
-}
-
-macro_rules! events {
-    ($elem_type:ty {
-        $($name:ident: $event_type:ty),* $(,)?
-    }) => {
-        paste::item!{
-            $(
-                pub fn [<on_ $name >] (
-                    self,
-                    mut f: impl 'static + FnMut($event_type, $elem_type)
-                ) -> Self {
-                    Self(self.0.on(stringify!($name), move |js_ev| {
-                        use $crate::macros::JsCast;
-                        // I *think* it's safe to assume event and event.target aren't null
-                        let event: $event_type = js_ev.unchecked_into();
-                        let target: $elem_type = event.target().unwrap().unchecked_into();
-                        f(event, target);
-                    }))
-                }
-            )*
-        }
-    };
-}
-
-macro_rules! html_events {
-    ($elem_type:ty) => {
-        events!($elem_type {
-            blur: web_sys::FocusEvent,
-            click: web_sys::MouseEvent,
-            change: web_sys::Event,
-            dblclick: web_sys::MouseEvent,
-            focusout: web_sys::FocusEvent,
-            input: web_sys::InputEvent,
-            keydown: web_sys::KeyboardEvent,
-            keyup: web_sys::KeyboardEvent,
-        });
-    };
-}
-
-macro_rules! dom_type {
-    ($name:ident < $elem_type:ty >) => {
-        paste::item! {
-            impl [<$name:camel Builder>] {
-                html_events!($elem_type);
-
-                pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
-                    Self(self.0.effect(f))
-                }
-            }
-
-            impl $crate::macros::DomElement for [<$name:camel Builder>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
-                    self.0.dom_element().unchecked_into()
-                }
-            }
-
-            impl $crate::macros::DomElement for [<$name:camel>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
-                    self.0.dom_element().unchecked_into()
-                }
-            }
-        }
-    };
-}
-
 macro_rules! html_element {
     (
         $(#[$elem_meta:meta])*
@@ -188,6 +74,38 @@ macro_rules! html_element {
     };
 }
 
+macro_rules! dom_type {
+    ($name:ident < $elem_type:ty >) => {
+        paste::item! {
+            impl [<$name:camel Builder>] {
+                html_events!($elem_type);
+
+                pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
+                    Self(self.0.effect(f))
+                }
+            }
+
+            impl $crate::macros::DomElement for [<$name:camel Builder>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    use $crate::macros::JsCast;
+                    self.0.dom_element().unchecked_into()
+                }
+            }
+
+            impl $crate::macros::DomElement for [<$name:camel>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    use $crate::macros::JsCast;
+                    self.0.dom_element().unchecked_into()
+                }
+            }
+        }
+    };
+}
+
 macro_rules! children_allowed {
     ($name:ident) => {
         paste::item! {
@@ -204,5 +122,87 @@ macro_rules! children_allowed {
                 }
             }
         }
+    };
+}
+
+macro_rules! html_events {
+    ($elem_type:ty) => {
+        events!($elem_type {
+            blur: web_sys::FocusEvent,
+            click: web_sys::MouseEvent,
+            change: web_sys::Event,
+            dblclick: web_sys::MouseEvent,
+            focusout: web_sys::FocusEvent,
+            input: web_sys::InputEvent,
+            keydown: web_sys::KeyboardEvent,
+            keyup: web_sys::KeyboardEvent,
+        });
+    };
+}
+
+macro_rules! events {
+    ($elem_type:ty {
+        $($name:ident: $event_type:ty),* $(,)?
+    }) => {
+        paste::item!{
+            $(
+                pub fn [<on_ $name >] (
+                    self,
+                    mut f: impl 'static + FnMut($event_type, $elem_type)
+                ) -> Self {
+                    Self(self.0.on(stringify!($name), move |js_ev| {
+                        use $crate::macros::JsCast;
+                        // I *think* it's safe to assume event and event.target aren't null
+                        let event: $event_type = js_ev.unchecked_into();
+                        let target: $elem_type = event.target().unwrap().unchecked_into();
+                        f(event, target);
+                    }))
+                }
+            )*
+        }
+    };
+}
+
+macro_rules! attributes {
+    ($(
+        $(#[$attr_meta:meta])*
+        $attr:ident : $typ:ty
+    ),* $(,)? ) => {
+        $(
+            $(#[$attr_meta])*
+            pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
+                Self(self.0.attribute(attr_name!($attr), value))
+            }
+        )*
+    };
+}
+
+macro_rules! attr_name {
+    (accept_charset) => {
+        "accept-charset"
+    };
+    (as_) => {
+        "as"
+    };
+    (async_) => {
+        "async"
+    };
+    (for_) => {
+        "for"
+    };
+    (http_equiv) => {
+        "http-equiv"
+    };
+    (current_time) => {
+        "currentTime"
+    };
+    (loop_) => {
+        "loop"
+    };
+    (type_) => {
+        "type"
+    };
+    ($name:ident) => {
+        stringify!($name)
     };
 }
