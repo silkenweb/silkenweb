@@ -433,7 +433,14 @@ where
     fn dom_element(&self) -> Self::Target {
         match self {
             Some(elem) => elem.dom_element().into(),
-            None => document().create_element("div").unwrap(),
+            None => {
+                // TODO: What's the best element type to use here?
+                // Comments won't work as their interface is `Node` rather than `Element`, so we
+                // can't call `replace`.
+                let none = document().create_element("div").unwrap();
+                none.unchecked_ref::<dom::HtmlElement>().set_hidden(true);
+                none
+            }
         }
     }
 }
