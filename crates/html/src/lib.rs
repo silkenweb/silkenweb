@@ -2,4 +2,6 @@
 
 #[macro_use]
 pub mod macros;
+
+#[rustfmt::skip]
 pub mod elements;

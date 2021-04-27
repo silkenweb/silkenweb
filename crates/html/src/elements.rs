@@ -4,8 +4,6 @@
 //!
 //! [Moxie DOM]: https://github.com/anp/moxie
 
-#![allow(unused_attributes)]
-#![rustfmt::skip]
 use web_sys as dom;
 
 html_element!(
