@@ -157,7 +157,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-examples-nested-counters"
+name = "silkenweb-examples-memoized-counters"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",

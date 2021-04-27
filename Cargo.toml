@@ -2,7 +2,7 @@
 
 members = [
     "examples/counter",
-    "examples/nested-counters",
+    "examples/memoized-counters",
     "examples/incremental-counters",
     "examples/todomvc",
     "crates/silkenweb",

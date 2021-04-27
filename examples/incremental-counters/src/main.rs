@@ -3,9 +3,9 @@ use std::{cell::RefCell, iter, rc::Rc};
 use silkenweb::{
     clone,
     element_list::ElementList,
-    elements::{button, div, Div},
+    elements::{button, div, Button, DivBuilder},
     mount,
-    signal::Signal,
+    signal::{Signal, WriteSignal},
     Builder,
 };
 
@@ -24,6 +24,7 @@ fn main() {
                     .on_click(move |_, _| pop_elem.mutate(ElementList::pop))
                     .text("-"),
             )
+            .text(list.read().map(|list| format!("{}", list.len())))
             .child(
                 button()
                     .on_click(move |_, _| {
@@ -41,22 +42,18 @@ fn main() {
     );
 }
 
-fn counter() -> Div {
+fn counter() -> DivBuilder {
     let count = Signal::new(0);
-    let inc = count.write();
-    let dec = count.write();
 
     div()
-        .child(
-            button()
-                .on_click(move |_, _| dec.replace(|i| i - 1))
-                .text("-"),
-        )
+        .child(update_count("-", -1, count.write()))
         .text(count.read().map(|i| format!("{}", i)))
-        .child(
-            button()
-                .on_click(move |_, _| inc.replace(|i| i + 1))
-                .text("+"),
-        )
+        .child(update_count("+", 1, count.write()))
+}
+
+fn update_count(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
+    button()
+        .on_click(move |_, _| set_count.replace(move |&i| i + delta))
+        .text(label)
         .build()
 }

@@ -1,8 +1,8 @@
 use silkenweb::{
-    elements::{button, div, DivBuilder},
+    elements::{button, div, Button, DivBuilder},
     memo::MemoCache,
     mount,
-    signal::Signal,
+    signal::{Signal, WriteSignal},
     Builder,
 };
 
@@ -29,20 +29,16 @@ fn main() {
     );
 }
 
-fn counter(count: &Signal<u32>) -> DivBuilder {
-    let inc = count.write();
-    let dec = count.write();
-
+fn counter(count: &Signal<i64>) -> DivBuilder {
     div()
-        .child(
-            button()
-                .on_click(move |_, _| dec.replace(|i| i - 1))
-                .text("-"),
-        )
+        .child(update_count("-", -1, count.write()))
         .text(count.read().map(|i| format!("{}", i)))
-        .child(
-            button()
-                .on_click(move |_, _| inc.replace(|i| i + 1))
-                .text("+"),
-        )
+        .child(update_count("+", 1, count.write()))
+}
+
+fn update_count(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
+    button()
+        .on_click(move |_, _| set_count.replace(move |&i| i + delta))
+        .text(label)
+        .build()
 }
