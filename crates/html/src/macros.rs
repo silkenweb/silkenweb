@@ -1,12 +1,5 @@
 pub use silkenweb_dom::{
-    tag,
-    AttributeValue,
-    Builder,
-    DomElement,
-    Effect,
-    Element,
-    ElementBuilder,
-    Text,
+    tag, AttributeValue, Builder, DomElement, Effect, Element, ElementBuilder, Text,
 };
 pub use wasm_bindgen::JsCast;
 

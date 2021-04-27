@@ -1,10 +1,8 @@
 use silkenweb::{
     elements::{button, div, p, PBuilder},
-    mount,
-    render_updates,
+    mount, render_updates,
     signal::{Signal, WriteSignal},
-    tag,
-    unmount,
+    tag, unmount,
 };
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
