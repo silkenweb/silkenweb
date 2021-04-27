@@ -434,9 +434,11 @@ where
         match self {
             Some(elem) => elem.dom_element().into(),
             None => {
-                // TODO: What's the best element type to use here?
-                // Comments won't work as their interface is `Node` rather than `Element`, so we
-                // can't call `replace`.
+                // We use a hidden `div` element as a placeholder. We'll call
+                // `replace_with_with_node_1` if a reactive option changes to `Some`.
+                //
+                // Comments won't work as their interface is `Node` rather than `Element`, which
+                // means we can't call `replace`.
                 let none = document().create_element("div").unwrap();
                 none.unchecked_ref::<dom::HtmlElement>().set_hidden(true);
                 none
