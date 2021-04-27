@@ -1,4 +1,4 @@
-use std::{cell::RefCell, iter, rc::Rc};
+use std::{cell::Cell, iter, rc::Rc};
 
 use silkenweb::{
     clone,
@@ -14,7 +14,7 @@ fn main() {
     let list = Signal::new(ElementList::new(div(), move |()| counter(), iter::empty()));
     let push_elem = list.write();
     let pop_elem = list.write();
-    let id = Rc::new(RefCell::new(0));
+    let id = Rc::new(Cell::new(0));
 
     mount(
         "app",
@@ -31,7 +31,7 @@ fn main() {
                         push_elem.mutate({
                             clone!(id);
                             move |l| {
-                                let current_id = id.replace_with(|current| *current + 1);
+                                let current_id = id.replace(id.get() + 1);
                                 l.insert(current_id, ());
                             }
                         })
