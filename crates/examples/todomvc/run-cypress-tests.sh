@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# TODO: We need a way to serve without building.
+# We build first to try and mitigate cypress timing out waiting for our server.
+trunk build
 trunk serve --ignore=cypress-tests &
 trap 'kill %%' EXIT
 
