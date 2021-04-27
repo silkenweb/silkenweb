@@ -3,7 +3,7 @@
 members = [
     "examples/counter",
     "examples/memoized-counters",
-    "examples/incremental-counters",
+    "examples/reactive-list-counters",
     "examples/todomvc",
     "crates/silkenweb",
     "crates/html",
