@@ -8,24 +8,6 @@ use silkenweb::{
     Builder,
 };
 
-fn counter(count: &Signal<u32>) -> DivBuilder {
-    let inc = count.write();
-    let dec = count.write();
-
-    div()
-        .child(
-            button()
-                .on_click(move |_, _| dec.replace(|i| i - 1))
-                .text("-"),
-        )
-        .text(count.read().map(|i| format!("{}", i)))
-        .child(
-            button()
-                .on_click(move |_, _| inc.replace(|i| i + 1))
-                .text("+"),
-        )
-}
-
 fn main() {
     console_error_panic_hook::set_once();
     let child_counts = MemoCache::default();
@@ -50,4 +32,22 @@ fn main() {
             counters
         })),
     );
+}
+
+fn counter(count: &Signal<u32>) -> DivBuilder {
+    let inc = count.write();
+    let dec = count.write();
+
+    div()
+        .child(
+            button()
+                .on_click(move |_, _| dec.replace(|i| i - 1))
+                .text("-"),
+        )
+        .text(count.read().map(|i| format!("{}", i)))
+        .child(
+            button()
+                .on_click(move |_, _| inc.replace(|i| i + 1))
+                .text("+"),
+        )
 }

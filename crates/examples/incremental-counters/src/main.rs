@@ -9,26 +9,6 @@ use silkenweb::{
     Builder,
 };
 
-fn counter() -> Div {
-    let count = Signal::new(0);
-    let inc = count.write();
-    let dec = count.write();
-
-    div()
-        .child(
-            button()
-                .on_click(move |_, _| dec.replace(|i| i - 1))
-                .text("-"),
-        )
-        .text(count.read().map(|i| format!("{}", i)))
-        .child(
-            button()
-                .on_click(move |_, _| inc.replace(|i| i + 1))
-                .text("+"),
-        )
-        .build()
-}
-
 fn main() {
     console_error_panic_hook::set_once();
     let list = Signal::new(ElementList::new(div(), move |()| counter(), iter::empty()));
@@ -59,4 +39,24 @@ fn main() {
             )
             .child(list.read()),
     );
+}
+
+fn counter() -> Div {
+    let count = Signal::new(0);
+    let inc = count.write();
+    let dec = count.write();
+
+    div()
+        .child(
+            button()
+                .on_click(move |_, _| dec.replace(|i| i - 1))
+                .text("-"),
+        )
+        .text(count.read().map(|i| format!("{}", i)))
+        .child(
+            button()
+                .on_click(move |_, _| inc.replace(|i| i + 1))
+                .text("+"),
+        )
+        .build()
 }

@@ -17,6 +17,223 @@ use silkenweb::{
 };
 use web_sys::{HtmlDivElement, HtmlInputElement};
 
+fn main() {
+    console_error_panic_hook::set_once();
+    mount("app", TodoApp::new().render());
+}
+
+#[derive(Clone)]
+struct TodoApp {
+    items: Signal<ElementList<usize, TodoItem>>,
+    id: Rc<RefCell<usize>>, // RUSTC(cell_update): Replace with `Cell`
+    filter: Signal<Filter>,
+    active_count: SumTotal<usize>,
+}
+
+impl TodoApp {
+    fn new() -> Self {
+        Self {
+            items: Signal::new(ElementList::new(
+                ul().class("todo-list"),
+                TodoItem::render,
+                iter::empty(),
+            )),
+            id: Rc::new(RefCell::new(0)),
+            filter: Signal::new(Filter::All),
+            active_count: SumTotal::default(),
+        }
+    }
+
+    fn render(&self) -> Section {
+        let input_elem = input()
+            .class("new-todo")
+            .placeholder("What needs to be done?")
+            .on_keyup({
+                let self_ = self.clone();
+
+                move |keyup, input| {
+                    if keyup.key() == "Enter" {
+                        let text = input.value();
+                        let text = text.trim().to_string();
+
+                        if !text.is_empty() {
+                            self_.push(text);
+                            input.set_value("");
+                        }
+                    }
+                }
+            })
+            .effect(|elem: &HtmlInputElement| elem.focus().unwrap())
+            .build();
+
+        section()
+            .class("todoapp")
+            .child(header().child(h1().text("todos")).child(input_elem))
+            .child(
+                section()
+                    .class("main")
+                    .child(self.render_todo_items())
+                    .child(self.items.read()),
+            )
+            .child(self.render_footer())
+            .build()
+    }
+
+    fn render_todo_items(&self) -> ReadSignal<Div> {
+        let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
+        let all_complete = self
+            .active_count
+            .read()
+            .map(|&active_count| active_count == 0)
+            .only_changes();
+        let write_items = self.items.write();
+
+        is_empty.map(move |&is_empty| {
+            if is_empty {
+                div()
+            } else {
+                clone!(all_complete, write_items);
+                let initial_complete = *all_complete.current();
+
+                div()
+                    .child(
+                        input()
+                            .id("toggle-all")
+                            .class("toggle-all")
+                            .type_("checkbox")
+                            .checked(initial_complete)
+                            .on_change({
+                                clone!(all_complete);
+                                move |_, _| {
+                                    let new_completed = !*all_complete.current();
+
+                                    write_items.mutate(move |items| {
+                                        for item in items.values() {
+                                            item.completed.write().set(new_completed);
+                                        }
+                                    })
+                                }
+                            })
+                            .effect(all_complete.map(|&complete| {
+                                move |elem: &HtmlInputElement| elem.set_checked(complete)
+                            })),
+                    )
+                    .child(label().for_("toggle-all"))
+            }
+            .build()
+        })
+    }
+
+    fn render_footer(&self) -> ReadSignal<Option<Footer>> {
+        self.items
+            .read()
+            .map(ElementList::is_empty)
+            .only_changes()
+            .map({
+                let self_ = self.clone();
+
+                move |&is_empty| {
+                    if is_empty {
+                        None
+                    } else {
+                        Some(
+                            footer()
+                                .class("footer")
+                                .child(self_.active_count.read().map(move |&active_count| {
+                                    span()
+                                        .class("todo-count")
+                                        .child(strong().text(format!("{}", active_count)))
+                                        .text(format!(
+                                            " item{} left",
+                                            if active_count == 1 { "" } else { "s" }
+                                        ))
+                                }))
+                                .child(self_.render_filters())
+                                .child(self_.render_clear_completed())
+                                .build(),
+                        )
+                    }
+                }
+            })
+    }
+
+    fn render_filter_link(
+        &self,
+        filter: Filter,
+        seperator: &str,
+        f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
+    ) -> LiBuilder {
+        let set_filter = self.filter.write();
+        let write_items = self.items.write();
+
+        li().child(
+            a().class(
+                self.filter
+                    .read()
+                    .map(move |f| if filter == *f { "selected" } else { "" }),
+            )
+            .text(format!("{}", filter))
+            .on_click(move |_, _| {
+                clone!(f);
+                set_filter.set(filter);
+                write_items.mutate(|items| items.filter(f))
+            }),
+        )
+        .text(seperator)
+    }
+
+    fn render_filters(&self) -> Ul {
+        ul().class("filters")
+            .child(self.render_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
+            .child(self.render_filter_link(Filter::Active, " ", |item| {
+                item.completed.read().map(|completed| !completed)
+            }))
+            .child(self.render_filter_link(Filter::Completed, "", |item| item.completed.read()))
+            .build()
+    }
+
+    fn render_clear_completed(&self) -> ReadSignal<Option<Button>> {
+        let write_items = self.items.write();
+        let items_len = self.items.read().map(ElementList::len);
+        let any_completed = (self.active_count.read(), items_len)
+            .map(|&active_count, &items_len| active_count != items_len)
+            .only_changes();
+
+        any_completed.map(move |&any_completed| {
+            clone!(write_items);
+
+            if any_completed {
+                Some(
+                    button()
+                        .class("clear-completed")
+                        .text("Clear completed")
+                        .on_click(move |_, _| {
+                            write_items.mutate(|items| {
+                                items.retain(|item| !*item.completed.read().current())
+                            })
+                        })
+                        .build(),
+                )
+            } else {
+                None
+            }
+        })
+    }
+
+    fn push(&self, text: String) {
+        let self_ = self.clone();
+
+        self.items.write().mutate(move |ts| {
+            let current_id = self_.id.replace_with(|current| *current + 1);
+            let parent = self_.items.write();
+            ts.insert(
+                current_id,
+                TodoItem::new(current_id, text, false, parent, &self_.active_count),
+            );
+        })
+    }
+}
+
 #[derive(Clone)]
 struct TodoItem {
     id: usize,
@@ -51,27 +268,11 @@ impl TodoItem {
         }
     }
 
-    fn save_edits(&self, input: &HtmlInputElement) {
-        let text = input.value();
-        let text = text.trim();
-
-        if text.is_empty() {
-            let id = self.id;
-            self.parent.mutate(move |p| p.remove(&id));
-        } else if *self.editing.read().current() {
-            self.text.write().set(text.to_string());
-            self.editing.write().set(false);
-        }
-    }
-
-    fn class(&self) -> ReadSignal<String> {
-        (self.completed.read(), self.editing.read()).map(|&completed, &editing| {
-            vec![(completed, "completed"), (editing, "editing")]
-                .into_iter()
-                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
-                .collect::<Vec<_>>()
-                .join(" ")
-        })
+    fn render(&self) -> Li {
+        li().class(self.class())
+            .child(self.render_edit())
+            .child(self.render_view())
+            .build()
     }
 
     fn render_edit(&self) -> Input {
@@ -140,11 +341,27 @@ impl TodoItem {
             .build()
     }
 
-    fn render(&self) -> Li {
-        li().class(self.class())
-            .child(self.render_edit())
-            .child(self.render_view())
-            .build()
+    fn save_edits(&self, input: &HtmlInputElement) {
+        let text = input.value();
+        let text = text.trim();
+
+        if text.is_empty() {
+            let id = self.id;
+            self.parent.mutate(move |p| p.remove(&id));
+        } else if *self.editing.read().current() {
+            self.text.write().set(text.to_string());
+            self.editing.write().set(false);
+        }
+    }
+
+    fn class(&self) -> ReadSignal<String> {
+        (self.completed.read(), self.editing.read()).map(|&completed, &editing| {
+            vec![(completed, "completed"), (editing, "editing")]
+                .into_iter()
+                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
     }
 }
 
@@ -153,221 +370,4 @@ enum Filter {
     All,
     Active,
     Completed,
-}
-
-#[derive(Clone)]
-struct TodoApp {
-    items: Signal<ElementList<usize, TodoItem>>,
-    id: Rc<RefCell<usize>>, // RUSTC(cell_update): Replace with `Cell`
-    filter: Signal<Filter>,
-    active_count: SumTotal<usize>,
-}
-
-impl TodoApp {
-    fn new() -> Self {
-        Self {
-            items: Signal::new(ElementList::new(
-                ul().class("todo-list"),
-                TodoItem::render,
-                iter::empty(),
-            )),
-            id: Rc::new(RefCell::new(0)),
-            filter: Signal::new(Filter::All),
-            active_count: SumTotal::default(),
-        }
-    }
-
-    fn push(&self, text: String) {
-        let self_ = self.clone();
-
-        self.items.write().mutate(move |ts| {
-            let current_id = self_.id.replace_with(|current| *current + 1);
-            let parent = self_.items.write();
-            ts.insert(
-                current_id,
-                TodoItem::new(current_id, text, false, parent, &self_.active_count),
-            );
-        })
-    }
-
-    fn render_filter_link(
-        &self,
-        filter: Filter,
-        seperator: &str,
-        f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
-    ) -> LiBuilder {
-        let set_filter = self.filter.write();
-        let write_items = self.items.write();
-
-        li().child(
-            a().class(
-                self.filter
-                    .read()
-                    .map(move |f| if filter == *f { "selected" } else { "" }),
-            )
-            .text(format!("{}", filter))
-            .on_click(move |_, _| {
-                clone!(f);
-                set_filter.set(filter);
-                write_items.mutate(|items| items.filter(f))
-            }),
-        )
-        .text(seperator)
-    }
-
-    fn render_filters(&self) -> Ul {
-        ul().class("filters")
-            .child(self.render_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
-            .child(self.render_filter_link(Filter::Active, " ", |item| {
-                item.completed.read().map(|completed| !completed)
-            }))
-            .child(self.render_filter_link(Filter::Completed, "", |item| item.completed.read()))
-            .build()
-    }
-
-    fn render_clear_completed(&self) -> ReadSignal<Option<Button>> {
-        let write_items = self.items.write();
-        let items_len = self.items.read().map(ElementList::len);
-        let any_completed = (self.active_count.read(), items_len)
-            .map(|&active_count, &items_len| active_count != items_len)
-            .only_changes();
-
-        any_completed.map(move |&any_completed| {
-            clone!(write_items);
-
-            if any_completed {
-                Some(
-                    button()
-                        .class("clear-completed")
-                        .text("Clear completed")
-                        .on_click(move |_, _| {
-                            write_items.mutate(|items| {
-                                items.retain(|item| !*item.completed.read().current())
-                            })
-                        })
-                        .build(),
-                )
-            } else {
-                None
-            }
-        })
-    }
-
-    fn render_footer(&self) -> ReadSignal<Option<Footer>> {
-        self.items
-            .read()
-            .map(ElementList::is_empty)
-            .only_changes()
-            .map({
-                let self_ = self.clone();
-
-                move |&is_empty| {
-                    if is_empty {
-                        None
-                    } else {
-                        Some(
-                            footer()
-                                .class("footer")
-                                .child(self_.active_count.read().map(move |&active_count| {
-                                    span()
-                                        .class("todo-count")
-                                        .child(strong().text(format!("{}", active_count)))
-                                        .text(format!(
-                                            " item{} left",
-                                            if active_count == 1 { "" } else { "s" }
-                                        ))
-                                }))
-                                .child(self_.render_filters())
-                                .child(self_.render_clear_completed())
-                                .build(),
-                        )
-                    }
-                }
-            })
-    }
-
-    fn render_todo_items(&self) -> ReadSignal<Div> {
-        let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
-        let all_complete = self
-            .active_count
-            .read()
-            .map(|&active_count| active_count == 0)
-            .only_changes();
-        let write_items = self.items.write();
-
-        is_empty.map(move |&is_empty| {
-            if is_empty {
-                div()
-            } else {
-                clone!(all_complete, write_items);
-                let initial_complete = *all_complete.current();
-
-                div()
-                    .child(
-                        input()
-                            .id("toggle-all")
-                            .class("toggle-all")
-                            .type_("checkbox")
-                            .checked(initial_complete)
-                            .on_change({
-                                clone!(all_complete);
-                                move |_, _| {
-                                    let new_completed = !*all_complete.current();
-
-                                    write_items.mutate(move |items| {
-                                        for item in items.values() {
-                                            item.completed.write().set(new_completed);
-                                        }
-                                    })
-                                }
-                            })
-                            .effect(all_complete.map(|&complete| {
-                                move |elem: &HtmlInputElement| elem.set_checked(complete)
-                            })),
-                    )
-                    .child(label().for_("toggle-all"))
-            }
-            .build()
-        })
-    }
-
-    fn render(&self) -> Section {
-        let input_elem = input()
-            .class("new-todo")
-            .placeholder("What needs to be done?")
-            .on_keyup({
-                let self_ = self.clone();
-
-                move |keyup, input| {
-                    if keyup.key() == "Enter" {
-                        let text = input.value();
-                        let text = text.trim().to_string();
-
-                        if !text.is_empty() {
-                            self_.push(text);
-                            input.set_value("");
-                        }
-                    }
-                }
-            })
-            .effect(|elem: &HtmlInputElement| elem.focus().unwrap())
-            .build();
-
-        section()
-            .class("todoapp")
-            .child(header().child(h1().text("todos")).child(input_elem))
-            .child(
-                section()
-                    .class("main")
-                    .child(self.render_todo_items())
-                    .child(self.items.read()),
-            )
-            .child(self.render_footer())
-            .build()
-    }
-}
-
-fn main() {
-    console_error_panic_hook::set_once();
-    mount("app", TodoApp::new().render());
 }
