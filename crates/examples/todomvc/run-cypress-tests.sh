@@ -10,5 +10,10 @@ trap 'kill %%' EXIT
     cd cypress-tests
     npm install
     npm install cypress
-    npx cypress run
+
+    if [ "$1" = "gui" ]; then
+        npx cypress open
+    else
+        npx cypress run
+    fi
 )
