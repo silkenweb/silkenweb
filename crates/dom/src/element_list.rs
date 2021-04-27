@@ -141,11 +141,11 @@ impl<Key, T> DomElement for ElementList<Key, T> {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
-        self.visible_items.borrow_mut().root.dom_element()
+        self.visible_items.borrow().dom_element()
     }
 }
 
-struct OrderedElementList<Key> {
+pub struct OrderedElementList<Key> {
     root: ElementBuilder,
     items: BTreeMap<Key, Element>,
 }
@@ -157,13 +157,25 @@ where
     /// # Panic
     ///
     /// Panics if `root` has already had children added to it.
-    pub fn new(root: ElementBuilder) -> Self {
+    pub fn new<ParentElem>(root: ParentElem) -> Self
+    where
+        ParentElem: Into<ElementBuilder>,
+    {
+        let root = root.into();
         assert!(root.element.children.is_empty());
 
         Self {
             root,
             items: BTreeMap::new(),
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.items.len()
     }
 
     pub fn insert(&mut self, key: Key, element: Element) {
@@ -195,6 +207,14 @@ where
         }
 
         self.items.clear();
+    }
+}
+
+impl<Key> DomElement for OrderedElementList<Key> {
+    type Target = dom::Element;
+
+    fn dom_element(&self) -> Self::Target {
+        self.root.dom_element()
     }
 }
 

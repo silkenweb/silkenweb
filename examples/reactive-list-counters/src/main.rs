@@ -1,8 +1,5 @@
-use std::{cell::Cell, iter, rc::Rc};
-
 use silkenweb::{
-    clone,
-    element_list::ElementList,
+    element_list::OrderedElementList,
     elements::{button, div, Button, DivBuilder},
     mount,
     signal::{Signal, WriteSignal},
@@ -11,35 +8,40 @@ use silkenweb::{
 
 fn main() {
     console_error_panic_hook::set_once();
-    let list = Signal::new(ElementList::new(div(), move |()| counter(), iter::empty()));
-    let push_elem = list.write();
-    let pop_elem = list.write();
-    let id = Rc::new(Cell::new(0));
+    let list = Signal::new(OrderedElementList::new(div()));
 
     mount(
         "app",
         div()
-            .child(
-                button()
-                    .on_click(move |_, _| pop_elem.mutate(ElementList::pop))
-                    .text("-"),
-            )
+            .child(pop_button(&list))
             .text(list.read().map(|list| format!("{}", list.len())))
-            .child(
-                button()
-                    .on_click(move |_, _| {
-                        push_elem.mutate({
-                            clone!(id);
-                            move |l| {
-                                let current_id = id.replace(id.get() + 1);
-                                l.insert(current_id, ());
-                            }
-                        })
-                    })
-                    .text("+"),
-            )
+            .child(push_button(&list))
             .child(list.read()),
     );
+}
+
+fn push_button(list: &Signal<OrderedElementList<usize>>) -> Button {
+    let push_elem = list.write();
+    button()
+        .on_click(move |_, _| {
+            push_elem.mutate(move |list| list.insert(list.len(), counter().into()))
+        })
+        .text("+")
+        .build()
+}
+
+fn pop_button(list: &Signal<OrderedElementList<usize>>) -> Button {
+    let pop_elem = list.write();
+    button()
+        .on_click(move |_, _| {
+            pop_elem.mutate(move |list| {
+                if !list.is_empty() {
+                    list.remove(&(list.len() - 1))
+                }
+            })
+        })
+        .text("-")
+        .build()
 }
 
 fn counter() -> DivBuilder {
