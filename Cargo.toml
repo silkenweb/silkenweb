@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "examples/counter",
-    "examples/memoized-counters",
-    "examples/reactive-list-counters",
+    "tutorial/counter",
+    "tutorial/memoized-counters",
+    "tutorial/reactive-list-counters",
     "examples/todomvc",
     "crates/silkenweb",
     "crates/html",

@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-examples-counter"
+name = "silkenweb-tutorial-memoized-counters"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../crates/silkenweb" }
-console_error_panic_hook = "0.1"
+console_error_panic_hook = "*"

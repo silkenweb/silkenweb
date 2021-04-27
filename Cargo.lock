@@ -141,30 +141,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-examples-counter"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "silkenweb",
-]
-
-[[package]]
-name = "silkenweb-examples-memoized-counters"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "silkenweb",
-]
-
-[[package]]
-name = "silkenweb-examples-reactive-list-counters"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "silkenweb",
-]
-
-[[package]]
 name = "silkenweb-examples-todomvc"
 version = "0.1.0"
 dependencies = [
@@ -189,6 +165,30 @@ name = "silkenweb-reactive"
 version = "0.1.0"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "silkenweb-tutorial-counter"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "silkenweb",
+]
+
+[[package]]
+name = "silkenweb-tutorial-memoized-counters"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "silkenweb",
+]
+
+[[package]]
+name = "silkenweb-tutorial-reactive-list-counters"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "silkenweb",
 ]
 
 [[package]]

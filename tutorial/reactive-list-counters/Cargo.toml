@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-examples-reactive-list-counters"
+name = "silkenweb-tutorial-reactive-list-counters"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
