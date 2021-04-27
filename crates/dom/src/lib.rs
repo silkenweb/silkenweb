@@ -156,6 +156,46 @@ where
     }
 }
 
+pub trait Effect<T> {
+    fn set_effect(self, builder: &mut ElementBuilder);
+}
+
+impl<F, T> Effect<T> for F
+where
+    F: 'static + Fn(&T),
+    T: 'static + JsCast,
+{
+    fn set_effect(self, builder: &mut ElementBuilder) {
+        let dom_element = builder.dom_element().dyn_into().unwrap();
+        after_render(move || self(&dom_element))
+    }
+}
+
+impl<F, T> Effect<T> for ReadSignal<F>
+where
+    F: 'static + Clone + Fn(&T),
+    T: 'static + Clone + JsCast,
+{
+    fn set_effect(self, builder: &mut ElementBuilder) {
+        let dom_element: T = builder.dom_element().dyn_into().unwrap();
+        let current = self.current().clone();
+
+        after_render({
+            clone!(dom_element);
+            move || current(&dom_element)
+        });
+
+        let updater = self.map(move |new_value| {
+            after_render({
+                clone!(new_value, dom_element);
+                move || new_value(&dom_element)
+            })
+        });
+
+        builder.element.reactive_with_dom.push(updater);
+    }
+}
+
 pub trait Text {
     fn set_text(&self, builder: &mut ElementBuilder);
 }
@@ -244,6 +284,7 @@ impl ElementBuilder {
                 event_callbacks: Vec::new(),
                 reactive_attrs: HashMap::new(),
                 reactive_text: None,
+                reactive_with_dom: Vec::new(),
             },
             text_node: None,
         }
@@ -266,6 +307,11 @@ impl ElementBuilder {
     pub fn text(mut self, child: impl Text) -> Self {
         child.set_text(&mut self);
         mem::drop(child);
+        self
+    }
+
+    pub fn effect<T>(mut self, child: impl Effect<T>) -> Self {
+        child.set_effect(&mut self);
         self
     }
 
@@ -380,6 +426,7 @@ struct ElementData {
     event_callbacks: Vec<EventCallback>,
     reactive_attrs: HashMap<String, ReadSignal<()>>,
     reactive_text: Option<ReadSignal<()>>,
+    reactive_with_dom: Vec<ReadSignal<()>>,
 }
 
 impl DomElement for Element {

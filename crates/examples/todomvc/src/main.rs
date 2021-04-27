@@ -5,7 +5,6 @@ use std::{cell::RefCell, iter, rc::Rc};
 
 use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
-    after_render,
     clone,
     element_list::ElementList,
     elements::{
@@ -32,9 +31,8 @@ use silkenweb::{
     mount,
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
-    DomElement,
 };
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlDivElement, HtmlInputElement};
 
 #[derive(Clone)]
 struct TodoItem {
@@ -77,7 +75,7 @@ impl TodoItem {
         if text.is_empty() {
             let id = self.id;
             self.parent.mutate(move |p| p.remove(&id));
-        } else {
+        } else if *self.editing.read().current() {
             self.text.write().set(text.to_string());
             self.editing.write().set(false);
         }
@@ -110,6 +108,15 @@ impl TodoItem {
                     _ => (),
                 }
             })
+            .effect(self.editing.read().map(|&editing| {
+                move |elem: &HtmlInputElement| {
+                    elem.set_hidden(!editing);
+
+                    if editing {
+                        elem.focus().unwrap()
+                    }
+                }
+            }))
             .build()
     }
 
@@ -137,69 +144,18 @@ impl TodoItem {
                     .class("destroy")
                     .on_click(move |_, _| parent.mutate(move |p| p.remove(&id))),
             )
+            .effect(
+                self.editing
+                    .read()
+                    .map(|&editing| move |elem: &HtmlDivElement| elem.set_hidden(editing)),
+            )
             .build()
     }
 
     fn render(&self) -> Li {
-        // TODO: We don't need to re-render the view and editing components when
-        // `editing` changes. We just need an effect tied to the elements to set the
-        // hidden status.
-        //
-        // Then we can write the whole function like this:
-        //
-        // li().class(self.class())
-        //     .child(
-        //         self.render_edit()
-        //             .after_render(self.editing.read().map(|&editing| {
-        //                 |elem| {
-        //                     if editing {
-        //                         elem.set_focus().unwrap()
-        //                     }
-        //
-        //                     elem.set_hidden(!editing)
-        //                 }
-        //             })),
-        //     )
-        //     .child(
-        //         self.render_view().after_render(
-        //             self.editing
-        //                 .read()
-        //                 .map(|&editing| |elem| elem.set_hidden(editing)),
-        //         ),
-        //     );
-
         li().class(self.class())
-            .child(self.editing.read().map({
-                let self_ = self.clone();
-                move |&editing| {
-                    let input = self_.render_edit();
-                    after_render({
-                        clone!(input);
-                        move || {
-                            let dom_elem = input.dom_element();
-                            dom_elem.set_hidden(!editing);
-                            dom_elem.focus().unwrap()
-                        }
-                    });
-
-                    input
-                }
-            }))
-            .child(self.editing.read().map({
-                let self_ = self.clone();
-                move |&editing| {
-                    let view = self_.render_view();
-
-                    after_render({
-                        clone!(view);
-                        move || {
-                            view.dom_element().set_hidden(editing);
-                        }
-                    });
-
-                    view
-                }
-            }))
+            .child(self.render_edit())
+            .child(self.render_view())
             .build()
     }
 }
@@ -355,7 +311,6 @@ impl TodoApp {
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
-            .autofocus(true)
             .on_keyup({
                 let self_ = self.clone();
 
@@ -371,11 +326,8 @@ impl TodoApp {
                     }
                 }
             })
+            .effect(|elem: &HtmlInputElement| elem.focus().unwrap())
             .build();
-        after_render({
-            clone!(input_elem);
-            move || input_elem.dom_element().focus().unwrap()
-        });
 
         section()
             .class("todoapp")

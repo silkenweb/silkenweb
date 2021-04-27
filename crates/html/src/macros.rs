@@ -1,4 +1,13 @@
-pub use silkenweb_dom::{tag, AttributeValue, Builder, DomElement, Element, ElementBuilder, Text};
+pub use silkenweb_dom::{
+    tag,
+    AttributeValue,
+    Builder,
+    DomElement,
+    Effect,
+    Element,
+    ElementBuilder,
+    Text,
+};
 pub use wasm_bindgen::JsCast;
 
 macro_rules! attr_name {
@@ -88,6 +97,10 @@ macro_rules! dom_type {
         paste::item! {
             impl [<$name:camel Builder>] {
                 html_events!($elem_type);
+
+                pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
+                    Self(self.0.effect(f))
+                }
             }
 
             impl $crate::macros::DomElement for [<$name:camel Builder>] {
