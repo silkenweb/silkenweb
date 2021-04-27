@@ -28,7 +28,7 @@ RUN cargo install xargo
 
 RUN rustup component add clippy rustfmt
 RUN rustup target add wasm32-unknown-unknown
-RUN rustup toolchain install nightly-2021-02-25 -c clippy -c rustfmt -c rust-src -c miri
+RUN rustup toolchain install nightly-2021-04-25 -c clippy -c rustfmt -c rust-src -c miri
 
 WORKDIR /workdir
 COPY . .

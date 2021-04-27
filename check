@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-nightly="nightly-2021-02-25"
+nightly="nightly-2021-04-25"
 
 cargo +$nightly fmt --all -- --check
 cargo +$nightly udeps --all-targets
