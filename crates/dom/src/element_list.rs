@@ -14,66 +14,6 @@ use web_sys as dom;
 
 use crate::{DomElement, Element, ElementBuilder};
 
-type SharedItem<T> = Rc<RefCell<T>>;
-
-struct StoredItem<T> {
-    item: SharedItem<T>,
-    updater: ReadSignal<()>,
-}
-
-struct OrderedElementList<Key> {
-    root: ElementBuilder,
-    items: BTreeMap<Key, Element>,
-}
-
-impl<Key> OrderedElementList<Key>
-where
-    Key: Ord + Eq,
-{
-    /// # Panic
-    ///
-    /// Panics if `root` has already had children added to it.
-    pub fn new(root: ElementBuilder) -> Self {
-        assert!(root.element.children.is_empty());
-
-        Self {
-            root,
-            items: BTreeMap::new(),
-        }
-    }
-
-    pub fn insert(&mut self, key: Key, element: Element) {
-        // TODO(testing): Add a test to make sure a reactive element gives us the
-        // correct dom_element.
-        let dom_element = element.dom_element();
-
-        if let Some((_key, next_elem)) = self.items.range((Excluded(&key), Unbounded)).next() {
-            self.root
-                .insert_child_before(&dom_element, &next_elem.dom_element());
-        } else {
-            self.root.append_child(&dom_element);
-        }
-
-        if let Some(existing_elem) = self.items.insert(key, element) {
-            self.root.remove_child(&existing_elem.dom_element());
-        }
-    }
-
-    pub fn remove(&mut self, key: &Key) {
-        if let Some(element) = self.items.remove(key) {
-            self.root.remove_child(&element.dom_element());
-        }
-    }
-
-    pub fn clear(&mut self) {
-        for element in self.items.values() {
-            self.root.remove_child(&element.dom_element());
-        }
-
-        self.items.clear();
-    }
-}
-
 pub struct ElementList<Key, Value> {
     visible_items: Rc<RefCell<OrderedElementList<Key>>>,
     generate_child: Rc<dyn Fn(&Value) -> Element>,
@@ -204,3 +144,63 @@ impl<Key, T> DomElement for ElementList<Key, T> {
         self.visible_items.borrow_mut().root.dom_element()
     }
 }
+
+struct OrderedElementList<Key> {
+    root: ElementBuilder,
+    items: BTreeMap<Key, Element>,
+}
+
+impl<Key> OrderedElementList<Key>
+where
+    Key: Ord + Eq,
+{
+    /// # Panic
+    ///
+    /// Panics if `root` has already had children added to it.
+    pub fn new(root: ElementBuilder) -> Self {
+        assert!(root.element.children.is_empty());
+
+        Self {
+            root,
+            items: BTreeMap::new(),
+        }
+    }
+
+    pub fn insert(&mut self, key: Key, element: Element) {
+        // TODO(testing): Add a test to make sure a reactive element gives us the
+        // correct dom_element.
+        let dom_element = element.dom_element();
+
+        if let Some((_key, next_elem)) = self.items.range((Excluded(&key), Unbounded)).next() {
+            self.root
+                .insert_child_before(&dom_element, &next_elem.dom_element());
+        } else {
+            self.root.append_child(&dom_element);
+        }
+
+        if let Some(existing_elem) = self.items.insert(key, element) {
+            self.root.remove_child(&existing_elem.dom_element());
+        }
+    }
+
+    pub fn remove(&mut self, key: &Key) {
+        if let Some(element) = self.items.remove(key) {
+            self.root.remove_child(&element.dom_element());
+        }
+    }
+
+    pub fn clear(&mut self) {
+        for element in self.items.values() {
+            self.root.remove_child(&element.dom_element());
+        }
+
+        self.items.clear();
+    }
+}
+
+struct StoredItem<T> {
+    item: SharedItem<T>,
+    updater: ReadSignal<()>,
+}
+
+type SharedItem<T> = Rc<RefCell<T>>;
