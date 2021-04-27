@@ -23,14 +23,6 @@ pub fn after_render(x: impl 'static + FnOnce()) {
     PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
 }
 
-fn request_render_updates() {
-    ON_ANIMATION_FRAME.with(|process_updates| {
-        window()
-            .request_animation_frame(process_updates.as_ref().unchecked_ref())
-            .unwrap()
-    });
-}
-
 pub fn render_updates() {
     PENDING_UPDATES.with(|update_queue| {
         let update_queue = update_queue.take();
@@ -44,6 +36,14 @@ pub fn render_updates() {
         for effect in effect_queue.take() {
             effect();
         }
+    });
+}
+
+fn request_render_updates() {
+    ON_ANIMATION_FRAME.with(|process_updates| {
+        window()
+            .request_animation_frame(process_updates.as_ref().unchecked_ref())
+            .unwrap()
     });
 }
 
