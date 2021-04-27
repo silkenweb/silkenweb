@@ -121,6 +121,7 @@ impl TodoItem {
     }
 
     fn render_view(&self) -> Div {
+        let completed = self.completed.read();
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -128,7 +129,11 @@ impl TodoItem {
                 let set_completed = self.completed.write();
                 move |_, _| set_completed.replace(|completed| !completed)
             })
-            .checked(self.completed.read());
+            .checked(*completed.current())
+            .effect(
+                completed
+                    .map(|&complete| move |elem: &HtmlInputElement| elem.set_checked(complete)),
+            );
         let parent = self.parent.clone();
         let id = self.id;
 
@@ -340,6 +345,7 @@ impl TodoApp {
                             div()
                         } else {
                             clone!(all_complete, write_items);
+                            let initial_complete = *all_complete.current();
 
                             div()
                                 .child(
@@ -347,16 +353,24 @@ impl TodoApp {
                                         .id("toggle-all")
                                         .class("toggle-all")
                                         .type_("checkbox")
-                                        .checked(all_complete.clone())
-                                        .on_change(move |_, _| {
-                                            let new_completed = !*all_complete.current();
+                                        .checked(initial_complete)
+                                        .on_change({
+                                            clone!(all_complete);
+                                            move |_, _| {
+                                                let new_completed = !*all_complete.current();
 
-                                            write_items.mutate(move |items| {
-                                                for item in items.values() {
-                                                    item.completed.write().set(new_completed);
-                                                }
-                                            })
-                                        }),
+                                                write_items.mutate(move |items| {
+                                                    for item in items.values() {
+                                                        item.completed.write().set(new_completed);
+                                                    }
+                                                })
+                                            }
+                                        })
+                                        .effect(all_complete.map(|&complete| {
+                                            move |elem: &HtmlInputElement| {
+                                                elem.set_checked(complete)
+                                            }
+                                        })),
                                 )
                                 .child(label().for_("toggle-all"))
                         }

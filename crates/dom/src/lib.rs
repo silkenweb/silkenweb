@@ -56,35 +56,11 @@ impl StaticAttribute for bool {
         if *self {
             queue_update(move || {
                 dom_element.set_attribute(&name, "").unwrap();
-                set_input_checked(dom_element, &name, true)
             });
         } else {
             queue_update(move || {
                 dom_element.remove_attribute(&name).unwrap();
-                set_input_checked(dom_element, &name, false)
             });
-        }
-    }
-}
-
-// TODO: This is a hack to set the checked state of a checkbox.
-//
-// Setting the `checked` attribute doesn't send a change event. We have to set
-// the `checked` prop. We need a way to attach an effect to a dom element.
-//
-// There are several problems:
-//
-// - We need to run something in the render queue
-// - We need the current dom element to run that thing
-// - We may want to run the thing conditionally on some signal
-//
-// It's like setting an attribute with a value type of `FnOnce(&dom::Element)`
-// that may be wrapped in a `ReadSignal`. Instead of setting the attribute, we
-// call the function. Set attribute could be implemented in terms of this.
-fn set_input_checked(dom_element: dom::Element, name: &str, value: bool) {
-    if name == "checked" {
-        if let Ok(input) = dom_element.dyn_into::<dom::HtmlInputElement>() {
-            input.set_checked(value);
         }
     }
 }
