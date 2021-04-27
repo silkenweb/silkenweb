@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate derive_more;
 
-use std::{cell::RefCell, iter, rc::Rc};
+use std::{cell::Cell, iter, rc::Rc};
 
 use silkenweb::{
     accumulators::{IncludeSum, Sum, SumTotal},
@@ -25,7 +25,7 @@ fn main() {
 #[derive(Clone)]
 struct TodoApp {
     items: Signal<ElementList<usize, TodoItem>>,
-    id: Rc<RefCell<usize>>, // RUSTC(cell_update): Replace with `Cell`
+    id: Rc<Cell<usize>>,
     filter: Signal<Filter>,
     active_count: SumTotal<usize>,
 }
@@ -38,7 +38,7 @@ impl TodoApp {
                 TodoItem::render,
                 iter::empty(),
             )),
-            id: Rc::new(RefCell::new(0)),
+            id: Rc::new(Cell::new(0)),
             filter: Signal::new(Filter::All),
             active_count: SumTotal::default(),
         }
@@ -224,7 +224,7 @@ impl TodoApp {
         let self_ = self.clone();
 
         self.items.write().mutate(move |ts| {
-            let current_id = self_.id.replace_with(|current| *current + 1);
+            let current_id = self_.id.replace(self_.id.get() + 1);
             let parent = self_.items.write();
             ts.insert(
                 current_id,
