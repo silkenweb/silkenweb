@@ -287,7 +287,10 @@ impl TodoItem {
             .on_keyup({
                 let self_ = self.clone();
                 move |keyup, input| match keyup.key().as_str() {
-                    "Escape" => self_.editing.write().set(false),
+                    "Escape" => {
+                        input.set_value(&self_.text.read().current());
+                        self_.editing.write().set(false)
+                    }
                     "Enter" => self_.save_edits(&input),
                     _ => (),
                 }
