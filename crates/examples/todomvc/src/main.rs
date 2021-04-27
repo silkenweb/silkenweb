@@ -341,13 +341,12 @@ impl TodoApp {
                                 }
                             })
                             .effect(all_complete.map(|&complete| {
-                                move |elem: &HtmlInputElement| {
-                                    elem.set_checked(complete)
-                                }
+                                move |elem: &HtmlInputElement| elem.set_checked(complete)
                             })),
                     )
                     .child(label().for_("toggle-all"))
-            }.build()
+            }
+            .build()
         })
     }
 
