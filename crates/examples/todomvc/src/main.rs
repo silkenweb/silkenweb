@@ -21,7 +21,9 @@ use silkenweb::{
         span,
         strong,
         ul,
+        Button,
         Div,
+        Footer,
         Input,
         Li,
         LiBuilder,
@@ -242,7 +244,7 @@ impl TodoApp {
             .build()
     }
 
-    fn render_clear_completed(&self) -> ReadSignal<Div> {
+    fn render_clear_completed(&self) -> ReadSignal<Option<Button>> {
         let write_items = self.items.write();
         let items_len = self.items.read().map(ElementList::len);
         let any_completed = (self.active_count.read(), items_len)
@@ -252,9 +254,8 @@ impl TodoApp {
         any_completed.map(move |&any_completed| {
             clone!(write_items);
 
-            // TODO(empty elements): Eliminate the outer `div`.
             if any_completed {
-                div().child(
+                Some(
                     button()
                         .class("clear-completed")
                         .text("Clear completed")
@@ -262,16 +263,16 @@ impl TodoApp {
                             write_items.mutate(|items| {
                                 items.retain(|item| !*item.completed.read().current())
                             })
-                        }),
+                        })
+                        .build(),
                 )
             } else {
-                div()
+                None
             }
-            .build()
         })
     }
 
-    fn render_footer(&self) -> ReadSignal<Div> {
+    fn render_footer(&self) -> ReadSignal<Option<Footer>> {
         self.items
             .read()
             .map(ElementList::is_empty)
@@ -280,11 +281,10 @@ impl TodoApp {
                 let self_ = self.clone();
 
                 move |&is_empty| {
-                    // TODO(empty elements): Eliminate the outer `div`.
                     if is_empty {
-                        div()
+                        None
                     } else {
-                        div().child(
+                        Some(
                             footer()
                                 .class("footer")
                                 .child(self_.active_count.read().map(move |&active_count| {
@@ -297,10 +297,10 @@ impl TodoApp {
                                         ))
                                 }))
                                 .child(self_.render_filters())
-                                .child(self_.render_clear_completed()),
+                                .child(self_.render_clear_completed())
+                                .build(),
                         )
                     }
-                    .build()
                 }
             })
     }

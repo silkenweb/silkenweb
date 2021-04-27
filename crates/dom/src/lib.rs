@@ -424,6 +424,20 @@ impl DomElement for ElementBuilder {
     }
 }
 
+impl<T> DomElement for Option<T>
+where
+    T: DomElement,
+{
+    type Target = dom::Element;
+
+    fn dom_element(&self) -> Self::Target {
+        match self {
+            Some(elem) => elem.dom_element().into(),
+            None => document().create_element("div").unwrap(),
+        }
+    }
+}
+
 impl Builder for Element {
     type Target = Self;
 
