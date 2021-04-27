@@ -8,4 +8,3 @@ publish = false
 [dependencies]
 silkenweb = { path = "../../crates/silkenweb" }
 console_error_panic_hook = "*"
-web-log = "*"

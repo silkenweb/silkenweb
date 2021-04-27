@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use silkenweb::{
     elements::{button, div, DivBuilder},
     memo::MemoCache,
@@ -11,15 +9,12 @@ use silkenweb::{
 fn main() {
     console_error_panic_hook::set_once();
     let child_counts = MemoCache::default();
-    let call_count = Rc::new(RefCell::new(0));
     let count = Signal::new(0);
 
     mount(
         "app",
         counter(&count).child(count.read().map(move |&count| {
             let child_counts = child_counts.frame();
-            *call_count.borrow_mut() += 1;
-            web_log::println!("Call count = {}", call_count.borrow());
 
             let mut counters = div();
 

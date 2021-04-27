@@ -162,7 +162,6 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "silkenweb",
- "web-log",
 ]
 
 [[package]]
@@ -297,15 +296,6 @@ checksum = "ea6153a8f9bf24588e9f25c87223414fff124049f68d3a442a0f0eab4768a8b6"
 dependencies = [
  "proc-macro2",
  "quote",
-]
-
-[[package]]
-name = "web-log"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e8dc38fd8e9913a9919b6099d70368d45aaab10732ea1b21094f138e41e13e1"
-dependencies = [
- "wasm-bindgen",
 ]
 
 [[package]]
