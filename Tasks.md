@@ -28,12 +28,6 @@ Can we implement a `flatten` method on nested `ReadSignal`s?
 
 Currently `Element` mirrors the real DOM tree. It only really needs to store a tree of reactive nodes and their reactive children. Is this even worth implementing?
 
-## Empty Elements
-
-Sometimes it's useful to have an expression/return type of `ReadSignal<Option<Element>>` to represent a node that may or may not exist in a reactive way.
-
-- Is it best to implement this for `Option<Element>` as well?
-
 ## Template Elements
 
 Elements should have a `.cache()` method that globally caches the node by call site and uses `clone_node` to generate the elements. Will this work for reactive elements?
