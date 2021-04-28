@@ -10,6 +10,16 @@ use crate::clone;
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
+/// A `Signal` is like a varible, but it can update it's dependencies when it changes.
+///
+/// ```
+/// # use silkenweb_reactive::signal::*;
+/// let x = Signal::new(0);
+/// let next_x = x.read().map(|x| x + 1);
+/// assert_eq!(*next_x.current(), 1);
+/// x.write().set(2);
+/// assert_eq!(*next_x.current(), 3);
+/// ```
 pub struct Signal<T>(SharedState<T>);
 
 impl<T> Clone for Signal<T> {
