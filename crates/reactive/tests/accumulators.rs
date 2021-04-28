@@ -1,7 +1,7 @@
 use std::mem;
 
 use silkenweb_reactive::{
-    accumulators::{Sum, SumTotal},
+    accumulators::{SumElement, SumTotal},
     signal::{ReadSignal, SignalReceiver},
 };
 
@@ -12,9 +12,9 @@ fn check_total(expected: usize, actual: &ReadSignal<usize>) {
 #[test]
 fn sum() {
     let total = SumTotal::<usize>::default();
-    let first_digit = Sum::new(&total);
-    let second_digit = Sum::new(&total);
-    let third_digit = Sum::new(&total);
+    let first_digit = SumElement::new(&total);
+    let second_digit = SumElement::new(&total);
+    let third_digit = SumElement::new(&total);
     let total = total.read();
 
     assert_eq!(*total.current(), 0, "Intial total should be zero");

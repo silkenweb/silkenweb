@@ -4,7 +4,7 @@ extern crate derive_more;
 use std::{cell::Cell, iter, rc::Rc};
 
 use silkenweb::{
-    accumulators::{IncludeSum, Sum, SumTotal},
+    accumulators::{SumElement, SumHandle, SumTotal},
     clone,
     element_list::ElementList,
     elements::{
@@ -241,7 +241,7 @@ struct TodoItem {
     completed: Signal<bool>,
     editing: Signal<bool>,
     parent: WriteSignal<ElementList<usize, Self>>,
-    active_count: ReadSignal<IncludeSum>,
+    active_count: ReadSignal<SumHandle>,
 }
 
 impl TodoItem {
@@ -256,7 +256,7 @@ impl TodoItem {
         let active_count = completed
             .read()
             .map(|completed| (!completed) as usize)
-            .map_to(Sum::new(active_count));
+            .map_to(SumElement::new(active_count));
 
         Self {
             id,

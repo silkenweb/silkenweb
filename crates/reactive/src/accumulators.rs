@@ -51,12 +51,12 @@ impl<T: 'static> SumTotal<T> {
 /// A single element of the sum.
 ///
 /// See module level documentation for an example of usage.
-pub struct Sum<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> {
+pub struct SumElement<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> {
     current: RefCell<T>,
     total: SumTotal<T>,
 }
 
-impl<T: 'static + Zero + Clone + Zero + WrappingAdd + WrappingSub> Sum<T> {
+impl<T: 'static + Zero + Clone + Zero + WrappingAdd + WrappingSub> SumElement<T> {
     pub fn new(total: &SumTotal<T>) -> Self {
         Self {
             current: RefCell::new(T::zero()),
@@ -65,18 +65,18 @@ impl<T: 'static + Zero + Clone + Zero + WrappingAdd + WrappingSub> Sum<T> {
     }
 }
 
-impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> SignalReceiver<T, IncludeSum>
-    for Sum<T>
+impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> SignalReceiver<T, SumHandle>
+    for SumElement<T>
 {
-    fn receive(&self, x: &T) -> IncludeSum {
+    fn receive(&self, x: &T) -> SumHandle {
         let delta = x.wrapping_sub(&self.current.borrow());
         self.current.replace(x.clone());
         self.total.deltas.set(delta);
-        IncludeSum()
+        SumHandle()
     }
 }
 
-impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for Sum<T> {
+impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for SumElement<T> {
     fn drop(&mut self) {
         self.total
             .deltas
@@ -87,7 +87,7 @@ impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for Sum<T> {
 /// A handle to keep a value in the sum.
 ///
 /// See module level documentation for an example of usage.
-pub struct IncludeSum();
+pub struct SumHandle();
 
 struct AccumulateSum<T>(RefCell<T>);
 
