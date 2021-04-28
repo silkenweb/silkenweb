@@ -12,6 +12,11 @@ cargo test
 cargo test --benches --tests --release
 
 (
+    cd tutorial
+    mdbook test
+)
+
+(
     cd crates/silkenweb
     wasm-pack test --headless --firefox
 )
