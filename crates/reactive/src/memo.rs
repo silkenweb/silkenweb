@@ -1,7 +1,7 @@
 //! Memoize functions across frames
 //!
-//! Typically a [`MemoCache`] will last the duration of a UI component, whereas a
-//! [`MemoFrame`] will last the duration of a single render.
+//! Typically a [`MemoCache`] will last the duration of a UI component, whereas
+//! a [`MemoFrame`] will last the duration of a single render.
 use std::{
     any::{Any, TypeId},
     cell::RefCell,
