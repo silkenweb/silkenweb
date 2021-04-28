@@ -6,4 +6,5 @@
 - [A Simple Counter](./simple-counter.md)
 - [A List of Counters](./counter-list.md)
 - [A List of Memoized Counters](./memoized-counter-list.md)
-- [A Reactive List of Counters]()
+- [A Reactive List of Counters](./reactive-counter-list.md)
+- [Further Reading](./further-reading.md)
