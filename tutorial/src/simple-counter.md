@@ -9,7 +9,7 @@ trunk serve --open
 
 This should open a browser with a simple counter app. Let's have a look at the code:
 
-```rust,no_run,noplayground
+```rust,no_run,noplayground,ignore
 {{#rustdoc_include ../counter/src/main.rs:body}}
 ```
 
@@ -17,7 +17,7 @@ This code defines a counter app and `mount`s it on the page.
 
 Next we'll define the actual counter app. We do this in a library crate under `tutorial/common`, as we'll reuse the counter in more complex examples:
 
-```rust,no_run,noplayground
+```rust,no_run,noplayground,ignore
 {{#rustdoc_include ../common/src/lib.rs:define_counter}}
 ```
 
@@ -25,7 +25,7 @@ We use the [builder pattern] to define elements of our app. In the `define_count
 
 Next we define a button with `define_button`. It adds a callback to handle mouse clicks which updates the count signal:
 
-```rust,no_run,noplayground
+```rust,no_run,noplayground,ignore
 {{#rustdoc_include ../common/src/lib.rs:define_button}}
 ```
 

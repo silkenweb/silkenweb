@@ -15,7 +15,7 @@ cd silkenweb/tutorial/counter-signal
 trunk serve --open
 ```
 
-```rust
+```rust,no_run,noplayground,ignore
 {{#rustdoc_include ../counter-signal/src/main.rs:body}}
 ```
 
@@ -39,11 +39,23 @@ Setting `count` to 2
 
 We created a `Signal` called `count`. We map over `count` to produce another `Signal` called `print_count` which simply prints out the current value of `count`:
 
-```rust
-{{#rustdoc_include ../counter-signal/src/main.rs:map_signal}}
+```rust,no_run,noplayground,ignore
+{{#rustdoc_include ../counter-signal/src/main.rs:print_count}}
 ```
 
- `print_count` runs once when it is initialized, and once for every update to `count`, until `print_count` is dropped. Once a `Signal` is dropped, it will no longer respond to changes in upstream `Signal`s.
+`print_count` runs once when it is initialized, and once for every update to `count`, until `print_count` is dropped. Once a `ReadSignal` is dropped, it will no longer respond to changes in upstream `Signal`s.
+
+We define `set_count` so we can update the counter:
+
+```rust,no_run,noplayground,ignore
+{{#rustdoc_include ../counter-signal/src/main.rs:define_set_count}}
+```
+
+We can update the counter with:
+
+```rust,no_run,noplayground,ignore
+{{#rustdoc_include ../counter-signal/src/main.rs:set_count}}
+```
 
 Next we'll look at how we use signals to make a simple interactive app.
 
