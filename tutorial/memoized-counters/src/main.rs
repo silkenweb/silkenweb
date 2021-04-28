@@ -1,42 +1,47 @@
 use silkenweb::{
-    elements::{button, div, Button, DivBuilder},
-    memo::MemoCache,
+    elements::{button, div, Button, Div, DivBuilder},
+    memo::{Memo, MemoCache},
     mount,
     signal::{Signal, WriteSignal},
     Builder,
 };
 
 fn main() {
-    console_error_panic_hook::set_once();
-    let child_counts = MemoCache::default();
     let count = Signal::new(0);
 
     mount(
         "app",
-        counter(&count).child(count.read().map(move |&count| {
-            let child_counts = child_counts.frame();
+        render_counter(&count).child(count.read().map({
+            let counter_elem_cache = MemoCache::default();
 
-            let mut counters = div();
-
-            for i in 0..count {
-                let child = child_counts.cache(i, || counter(&Signal::new(0)).build());
-
-                counters = counters.child(child);
+            move |&count| {
+                let counter_elems = counter_elem_cache.frame();
+                render_counter_list(&counter_elems, count)
             }
-
-            counters
         })),
     );
 }
 
-fn counter(count: &Signal<i64>) -> DivBuilder {
-    div()
-        .child(update_count("-", -1, count.write()))
-        .text(count.read().map(|i| format!("{}", i)))
-        .child(update_count("+", 1, count.write()))
+fn render_counter_list(counter_elems: &Memo, count: i64) -> Div {
+    let mut counters = div();
+
+    for i in 0..count {
+        let child = counter_elems.cache(i, || render_counter(&Signal::new(0)).build());
+
+        counters = counters.child(child);
+    }
+
+    counters.build()
 }
 
-fn update_count(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
+fn render_counter(count: &Signal<i64>) -> DivBuilder {
+    div()
+        .child(render_button("-", -1, count.write()))
+        .text(count.read().map(|i| format!("{}", i)))
+        .child(render_button("+", 1, count.write()))
+}
+
+fn render_button(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
     button()
         .on_click(move |_, _| set_count.replace(move |&i| i + delta))
         .text(label)
