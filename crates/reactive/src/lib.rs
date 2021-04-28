@@ -1,3 +1,4 @@
+//! Various primitives to make your code reactive to upstream updates
 #![allow(
     clippy::missing_panics_doc,
     clippy::missing_errors_doc,

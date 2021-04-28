@@ -1,3 +1,4 @@
+//! Signals are variables that update their dependencies
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,

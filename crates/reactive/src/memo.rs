@@ -1,3 +1,4 @@
+//! Memoize functions across frames.
 use std::{
     any::{Any, TypeId},
     cell::RefCell,
