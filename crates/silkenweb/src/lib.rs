@@ -1,4 +1,4 @@
-//! Silkenweb is a reactive web library
+//! Silkenweb is a reactive web library for writing single page apps
 //!
 //! # Features
 //!
