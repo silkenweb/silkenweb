@@ -2,9 +2,9 @@
 
 members = [
     "tutorial/counter",
-    "tutorial/nested-counters",
-    "tutorial/memoized-counters",
-    "tutorial/reactive-list-counters",
+    "tutorial/counter-list",
+    "tutorial/memoized-counter-list",
+    "tutorial/reactive-counter-list",
     "tutorial/common",
     "examples/todomvc",
     "crates/silkenweb",

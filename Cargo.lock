@@ -183,7 +183,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-tutorial-memoized-counters"
+name = "silkenweb-tutorial-counter-list"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
@@ -191,7 +191,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-tutorial-nested-counters"
+name = "silkenweb-tutorial-memoized-counter-list"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
@@ -199,7 +199,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-tutorial-reactive-list-counters"
+name = "silkenweb-tutorial-reactive-counter-list"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
