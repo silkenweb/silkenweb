@@ -10,7 +10,8 @@ use crate::clone;
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
-/// A `Signal` is like a varible, but it can update it's dependencies when it changes.
+/// A `Signal` is like a varible, but it can update it's dependencies when it
+/// changes.
 ///
 /// ```
 /// # use silkenweb_reactive::signal::*;
@@ -42,6 +43,26 @@ impl<T: 'static> Signal<T> {
     }
 }
 
+/// Receive changes from a signal.
+///
+/// Changes will stop being received when this is destroyed:
+/// ```
+/// # use silkenweb_reactive::{clone, signal::*};
+/// # use std::{mem, cell::Cell, rc::Rc};
+/// let x = Signal::new(1);
+/// let seen_by_y = Rc::new(Cell::new(0));
+/// let y = x.read().map({
+///     clone!(seen_by_y);
+///     move|&x| seen_by_y.set(x)
+/// });
+/// assert_eq!(seen_by_y.get(), 1);
+/// x.write().set(2);
+/// assert_eq!(seen_by_y.get(), 2);
+/// mem::drop(y);
+/// // We won't see this update
+/// x.write().set(3);
+/// assert_eq!(seen_by_y.get(), 2);
+/// ```
 pub struct ReadSignal<T>(SharedState<T>);
 
 impl<T> Clone for ReadSignal<T> {
@@ -51,10 +72,33 @@ impl<T> Clone for ReadSignal<T> {
 }
 
 impl<T: 'static> ReadSignal<T> {
+    /// The current value of the signal
     pub fn current(&self) -> Ref<T> {
         self.0.current()
     }
 
+    /// Only propagate actual changes to the signal value.
+    ///
+    /// ```
+    /// # use silkenweb_reactive::{clone, signal::*};
+    /// # use std::{mem, cell::Cell, rc::Rc};
+    /// let all_updates_count = Rc::new(Cell::new(0));
+    /// let only_changes_count = Rc::new(Cell::new(0));
+    /// let x = Signal::new(0);
+    /// let all_updates = x.read().map({
+    ///     clone!(all_updates_count);
+    ///     move |_| all_updates_count.set(all_updates_count.get() + 1)
+    /// });
+    /// let only_changes = x.read().only_changes().map({
+    ///     clone!(only_changes_count);
+    ///     move |_| only_changes_count.set(only_changes_count.get() + 1)
+    /// });
+    ///
+    /// x.write().set(1);
+    /// x.write().set(1);
+    /// assert_eq!(all_updates_count.get(), 3, "One for init + 2 updates");
+    /// assert_eq!(only_changes_count.get(), 2, "One for init + 1 actual change");
+    /// ```
     pub fn only_changes(&self) -> ReadSignal<T>
     where
         T: Clone + Eq,
@@ -77,6 +121,19 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
+    /// Map a function onto the inner value to produce a new `ReadSignal`
+    ///
+    /// This only exists to make type inference easier, and just forwards its
+    /// arguments to `map_to`.
+    pub fn map<Output, Generate>(&self, generate: Generate) -> ReadSignal<Output>
+    where
+        Output: 'static,
+        Generate: 'static + Fn(&T) -> Output,
+    {
+        self.map_to(generate)
+    }
+
+    /// Receive changes to a signal
     pub fn map_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
     where
         Output: 'static,
@@ -95,14 +152,6 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
-    pub fn map<Output, Generate>(&self, generate: Generate) -> ReadSignal<Output>
-    where
-        Output: 'static,
-        Generate: 'static + Fn(&T) -> Output,
-    {
-        self.map_to(generate)
-    }
-
     fn add_dependent<U>(&self, child: &Signal<U>, dependent_callback: Rc<dyn Fn(&T)>) {
         self.0
             .dependents
@@ -116,11 +165,13 @@ impl<T: 'static> ReadSignal<T> {
     }
 }
 
+/// Receive changes to a signal
 pub trait SignalReceiver<Input, Output>: 'static
 where
     Input: 'static,
     Output: 'static,
 {
+    /// Receive the changes. It's Ok for this to have side effects.
     fn receive(&self, x: &Input) -> Output;
 }
 
@@ -135,6 +186,7 @@ where
     }
 }
 
+/// Write changes to a signal
 pub struct WriteSignal<T>(WeakSharedState<T>);
 
 impl<T> Clone for WriteSignal<T> {
@@ -144,6 +196,7 @@ impl<T> Clone for WriteSignal<T> {
 }
 
 impl<T: 'static> WriteSignal<T> {
+    /// Set the inner value of a signal, and update downstream signals.
     pub fn set(&self, new_value: T) {
         if let Some(state) = self.0.upgrade() {
             *state.current_mut() = new_value;
@@ -151,10 +204,14 @@ impl<T: 'static> WriteSignal<T> {
         }
     }
 
+    /// Replace inner value of a signal using `f`, and update downstream
+    /// signals.
     pub fn replace(&self, f: impl 'static + FnOnce(&T) -> T) {
         self.mutate(|x| *x = f(x));
     }
 
+    /// Mutate the inner value of a signal using `f`, and update downstream
+    /// signals.
     pub fn mutate(&self, f: impl 'static + FnOnce(&mut T)) {
         if let Some(state) = self.0.upgrade() {
             f(&mut state.current_mut());
@@ -163,9 +220,12 @@ impl<T: 'static> WriteSignal<T> {
     }
 }
 
+/// Zip signals together to create a new one.
 pub trait ZipSignal<Generate> {
+    /// The inner type of the target signal.
     type Target;
 
+    /// Map `generate` over the inner signal value.
     fn map(&self, generate: Generate) -> ReadSignal<Self::Target>;
 }
 
