@@ -1,6 +1,6 @@
 use silkenweb::{
     elements::{div, hr, Div},
-    memo::{MemoFrame, MemoCache},
+    memo::{MemoCache, MemoFrame},
     mount,
     signal::Signal,
     Builder,
