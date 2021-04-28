@@ -1,4 +1,4 @@
-//! Components to manage reactive lists of DOM elements
+//! Manage reactive lists of DOM elements
 use std::{
     cell::{Ref, RefCell},
     collections::{BTreeMap, BTreeSet},

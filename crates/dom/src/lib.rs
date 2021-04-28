@@ -1,3 +1,4 @@
+//! A reactive interface to the DOM
 #![allow(
     clippy::missing_panics_doc,
     clippy::missing_errors_doc,
@@ -14,10 +15,12 @@ use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
-/// Mount an app on the document
+/// Mount an element on the document
 ///
-/// `id` is the html element id of the parent element. The app is added as the
-/// last child of this element.
+/// `id` is the html element id of the parent element. The element is added as
+/// the last child of this element.
+///
+/// Mounting an `id` that is already mounted will remove that element.
 ///
 /// An [`Element`] can only appear once in the document. Adding an [`Element`]
 /// to the document a second time will move it. It will still require
@@ -34,7 +37,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
-/// Unmount an app
+/// Unmount an element
 ///
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
@@ -45,7 +48,7 @@ pub fn unmount(id: &str) {
 
 /// An HTML element tag
 ///
-/// For example: `div()`
+/// For example: `tag("div")`
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }

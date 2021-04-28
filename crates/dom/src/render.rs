@@ -24,7 +24,7 @@ pub fn after_render(x: impl 'static + FnOnce()) {
     PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
 }
 
-/// Render and pending updates
+/// Render any pending updates
 ///
 /// This is mostly useful for testing.
 pub fn render_updates() {
