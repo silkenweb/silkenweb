@@ -14,6 +14,14 @@ use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
+/// Mount an app on the document
+///
+/// `id` is the html element id of the parent element. The app is added as the
+/// last child of this element.
+///
+/// Mounting an element that is already in the document will first remove the
+/// element from the document. It will still require unmounting from both places
+/// to free up any resources.
 pub fn mount(id: &str, elem: impl Into<Element>) {
     unmount(id);
     let elem = elem.into();
@@ -26,16 +34,23 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
+/// Unmount an app
+///
+/// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
     if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.dom_element().remove();
     }
 }
 
+/// An HTML element tag
+///
+/// For example: `div()`
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+/// Build an HTML element
 pub struct ElementBuilder {
     element: ElementData,
     text_nodes: Vec<dom::Text>,
@@ -76,6 +91,15 @@ impl ElementBuilder {
         self
     }
 
+    /// Apply an effect after the next render
+    ///
+    /// For example, to set the focus of an element:
+    /// ```no_run
+    /// # use silkenweb_dom::tag;
+    /// # use web_sys::HtmlInputElement;
+    /// # let element = tag("input");
+    /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    /// ```
     pub fn effect<T>(mut self, child: impl Effect<T>) -> Self {
         child.set_effect(&mut self);
         self
@@ -148,6 +172,7 @@ impl From<ElementBuilder> for Element {
     }
 }
 
+/// An HTML element
 #[derive(Clone)]
 pub struct Element(Rc<ElementKind>);
 

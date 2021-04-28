@@ -1,3 +1,4 @@
+//! Manage reactive lists of DOM elements
 use std::{
     cell::{Ref, RefCell},
     collections::{BTreeMap, BTreeSet},
