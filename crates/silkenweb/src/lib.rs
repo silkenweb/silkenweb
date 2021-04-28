@@ -33,7 +33,8 @@
 //!
 //! # Learning
 //!
-//! - Check out the tutorial: [Learning Silkenweb With Entirely Too Many Counters]()
+//! - Check out the tutorial: [Learning Silkenweb With Entirely Too Many
+//!   Counters]()
 //! - Check out the `examples` folder
 //! - Browse this documentation
 
