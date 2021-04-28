@@ -1,4 +1,4 @@
-//! Accumulate reactive variables into a reactive total
+//! Accumulate reactive variables into a reactive total.
 //!
 //! The example below shows how to sum up `first_digit` and `second_digit` into
 //! `total`. When we drop `first_digit`, it is removed from the total.
@@ -25,7 +25,7 @@ use num_traits::{WrappingAdd, WrappingSub, Zero};
 
 use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal};
 
-/// This holds the current total of a sum
+/// This holds the current total of a sum.
 ///
 /// See module level documentation for an example of usage.
 #[derive(Clone)]
@@ -51,7 +51,7 @@ impl<T: 'static> SumTotal<T> {
     }
 }
 
-/// A single element of the sum
+/// A single element of the sum.
 ///
 /// See module level documentation for an example of usage.
 pub struct SumElement<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> {
@@ -87,7 +87,7 @@ impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for SumElement<
     }
 }
 
-/// A handle to keep a value in the sum
+/// A handle to keep a value in the sum.
 ///
 /// See module level documentation for an example of usage.
 pub struct SumHandle();

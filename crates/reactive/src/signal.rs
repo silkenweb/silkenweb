@@ -1,4 +1,4 @@
-//! Signals are like variables that update their dependencies
+//! Signals are like variables that update their dependencies.
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,
@@ -123,7 +123,7 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
-    /// Map a function onto the inner value to produce a new [`ReadSignal`]
+    /// Map a function onto the inner value to produce a new [`ReadSignal`].
     ///
     /// This only exists to make type inference easier, and just forwards its
     /// arguments to [`map_to`](Self::map_to).
@@ -135,7 +135,7 @@ impl<T: 'static> ReadSignal<T> {
         self.map_to(generate)
     }
 
-    /// Receive changes to a signal
+    /// Receive changes to a signal.
     pub fn map_to<Output>(&self, receiver: impl SignalReceiver<T, Output>) -> ReadSignal<Output>
     where
         Output: 'static,
@@ -167,7 +167,7 @@ impl<T: 'static> ReadSignal<T> {
     }
 }
 
-/// Receive changes to a signal
+/// Receive changes to a signal.
 pub trait SignalReceiver<Input, Output>: 'static
 where
     Input: 'static,
@@ -188,7 +188,7 @@ where
     }
 }
 
-/// Write changes to a signal
+/// Write changes to a signal.
 pub struct WriteSignal<T>(WeakSharedState<T>);
 
 impl<T> Clone for WriteSignal<T> {

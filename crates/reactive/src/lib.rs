@@ -1,4 +1,4 @@
-//! Various primitives to make your code reactive to upstream updates
+//! Various primitives to make your code reactive to upstream updates.
 #![allow(
     clippy::missing_panics_doc,
     clippy::missing_errors_doc,
@@ -9,7 +9,7 @@ pub mod accumulators;
 pub mod memo;
 pub mod signal;
 
-/// Clone all the identifiers supplied as arguments
+/// Clone all the identifiers supplied as arguments.
 ///
 /// `clone!(x, y, z);` will generate:
 ///

@@ -1,4 +1,4 @@
-//! Manage reactive lists of DOM elements
+//! Manage reactive lists of DOM elements.
 use std::{
     cell::{Ref, RefCell},
     collections::{BTreeMap, BTreeSet},
@@ -15,7 +15,7 @@ use web_sys as dom;
 
 use crate::{DomElement, Element, ElementBuilder};
 
-/// A filterable, ordered element list
+/// A filterable, ordered element list.
 ///
 /// This owns the data to create child elements, and will manage adding/removing
 /// them from the DOM as the filter requires.
@@ -33,6 +33,8 @@ where
     Key: 'static + Clone + Ord + Eq,
     Value: 'static,
 {
+    /// Create a new [`ElementList`].
+    ///
     /// # Panic
     ///
     /// Panics if `root` has already had children added to it.
@@ -167,7 +169,7 @@ impl<Key, T> DomElement for ElementList<Key, T> {
     }
 }
 
-/// A list ordered by `Key`
+/// A list ordered by `Key`.
 pub struct OrderedElementList<Key> {
     root: ElementBuilder,
     items: BTreeMap<Key, Element>,
@@ -177,6 +179,8 @@ impl<Key> OrderedElementList<Key>
 where
     Key: Ord + Eq,
 {
+    /// Create a new [`OrderedElementList`].
+    ///
     /// # Panic
     ///
     /// Panics if `root` has already had children added to it.

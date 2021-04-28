@@ -1,4 +1,4 @@
-//! A reactive interface to the DOM
+//! A reactive interface to the DOM.
 #![allow(
     clippy::missing_panics_doc,
     clippy::missing_errors_doc,
@@ -15,7 +15,7 @@ use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
-/// Mount an element on the document
+/// Mount an element on the document.
 ///
 /// `id` is the html element id of the parent element. The element is added as
 /// the last child of this element.
@@ -37,7 +37,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
-/// Unmount an element
+/// Unmount an element.
 ///
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
@@ -46,14 +46,14 @@ pub fn unmount(id: &str) {
     }
 }
 
-/// An HTML element tag
+/// An HTML element tag.
 ///
 /// For example: `tag("div")`
 pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
-/// Build an HTML element
+/// Build an HTML element.
 pub struct ElementBuilder {
     element: ElementData,
     text_nodes: Vec<dom::Text>,
@@ -201,7 +201,7 @@ impl From<ElementBuilder> for Element {
     }
 }
 
-/// An HTML element
+/// An HTML element.
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
@@ -262,7 +262,7 @@ impl Builder for Element {
     }
 }
 
-/// A non-reactive attribute
+/// A non-reactive attribute.
 pub trait StaticAttribute {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
 }
@@ -304,7 +304,7 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
     queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
 }
 
-/// A potentially reactive attribute
+/// A potentially reactive attribute.
 pub trait AttributeValue<T> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
@@ -367,7 +367,7 @@ where
     }
 }
 
-/// An [`Effect`] that can be applied to an [`Element`] after rendering
+/// An [`Effect`] that can be applied to an [`Element`] after rendering.
 pub trait Effect<T> {
     fn set_effect(self, builder: &mut ElementBuilder);
 }
@@ -408,7 +408,7 @@ where
     }
 }
 
-/// A Text element
+/// A Text element.
 pub trait Text {
     fn set_text(&self, builder: &mut ElementBuilder);
 }
@@ -473,7 +473,7 @@ where
 }
 
 // TODO(review): Find a better way to add all child types to dom
-/// Get a raw Javascript, non-reactive DOM element
+/// Get a raw Javascript, non-reactive DOM element.
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
 
@@ -503,7 +503,7 @@ where
     }
 }
 
-/// An HTML element builder
+/// An HTML element builder.
 pub trait Builder {
     type Target;
 

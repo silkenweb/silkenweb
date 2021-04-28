@@ -19,12 +19,12 @@ pub fn queue_update(x: impl 'static + FnOnce()) {
     }
 }
 
-/// Run a closure after the next render
+/// Run a closure after the next render.
 pub fn after_render(x: impl 'static + FnOnce()) {
     PENDING_EFFECTS.with(|pending_effects| pending_effects.borrow_mut().push(Box::new(x)));
 }
 
-/// Render any pending updates
+/// Render any pending updates.
 ///
 /// This is mostly useful for testing.
 pub fn render_updates() {
