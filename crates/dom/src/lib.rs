@@ -38,7 +38,7 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
 
 pub struct ElementBuilder {
     element: ElementData,
-    text_node: Option<dom::Text>,
+    text_nodes: Vec<dom::Text>,
 }
 
 impl ElementBuilder {
@@ -49,10 +49,10 @@ impl ElementBuilder {
                 children: Vec::new(),
                 event_callbacks: Vec::new(),
                 reactive_attrs: HashMap::new(),
-                reactive_text: None,
+                reactive_text: Vec::new(),
                 reactive_with_dom: Vec::new(),
             },
-            text_node: None,
+            text_nodes: Vec::new(),
         }
     }
 
@@ -353,13 +353,9 @@ pub trait Text {
 }
 
 fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
-    if let Some(text_node) = builder.text_node.as_ref() {
-        text_node.set_node_value(Some(text.as_ref()));
-    } else {
-        let text_node = document().create_text_node(text.as_ref());
-        builder.append_child(&text_node);
-        builder.text_node = Some(text_node);
-    }
+    let text_node = document().create_text_node(text.as_ref());
+    builder.append_child(&text_node);
+    builder.text_nodes.push(text_node);
 }
 
 impl<'a> Text for &'a str {
@@ -387,7 +383,7 @@ where
     fn set_text(&self, builder: &mut ElementBuilder) {
         set_static_text(&self.current().as_ref(), builder);
 
-        if let Some(text_node) = builder.text_node.as_ref() {
+        if let Some(text_node) = builder.text_nodes.last() {
             let updater = self.map({
                 clone!(text_node);
 
@@ -400,7 +396,7 @@ where
                 }
             });
 
-            builder.element.reactive_text = Some(updater);
+            builder.element.reactive_text.push(updater);
         }
     }
 }
@@ -463,7 +459,7 @@ struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     reactive_attrs: HashMap<String, ReadSignal<()>>,
-    reactive_text: Option<ReadSignal<()>>,
+    reactive_text: Vec<ReadSignal<()>>,
     reactive_with_dom: Vec<ReadSignal<()>>,
 }
 

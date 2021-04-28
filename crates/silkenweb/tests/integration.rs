@@ -85,32 +85,32 @@ fn reactive_text_reference() {
     );
 }
 
-// Make sure text is overwritten when called twice
+// Make we support multiple reactive text children
 #[wasm_bindgen_test]
-fn reactive_text_reset() {
+fn multiple_reactive_text() {
     create_app_container(APP_ID);
 
-    let text_overwritten = Signal::new("This should be overwritten");
-    let text_signal = Signal::new("0");
+    let first_text = Signal::new("{First 0}");
+    let second_text = Signal::new("{Second 0}");
 
     mount(
         APP_ID,
         p().id(TEXT_ID)
-            .text(text_overwritten.read())
-            .text(text_signal.read()),
+            .text(first_text.read())
+            .text(second_text.read()),
     );
 
     render_updates();
-    assert_eq!("0", text_content(TEXT_ID));
-    text_overwritten.write().set("This should be discarded");
+    assert_eq!("{First 0}{Second 0}", text_content(TEXT_ID));
+    first_text.write().set("{First 1}");
     render_updates();
-    assert_eq!("0", text_content(TEXT_ID), "The last call to `text()` wins");
-    text_signal.write().set("1");
+    assert_eq!("{First 1}{Second 0}", text_content(TEXT_ID), "First is updated");
+    second_text.write().set("{Second 1}");
     render_updates();
     assert_eq!(
-        "1",
+        "{First 1}{Second 1}",
         text_content(TEXT_ID),
-        "The text is reactive to the last `text()` call"
+        "Second is updated"
     );
 }
 
