@@ -1,6 +1,6 @@
 use silkenweb::{
     elements::{div, hr, Div},
-    memo::{Memo, MemoCache},
+    memo::{MemoFrame, MemoCache},
     mount,
     signal::Signal,
     Builder,
@@ -34,7 +34,7 @@ fn main() {
 // ANCHOR_END: main
 
 // ANCHOR: define_counter_list
-fn define_counter_list(counter_elems: &Memo, count: i64) -> Div {
+fn define_counter_list(counter_elems: &MemoFrame, count: i64) -> Div {
     let mut counters = div();
 
     for i in 0..count {
