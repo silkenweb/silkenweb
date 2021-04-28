@@ -1,11 +1,11 @@
 //! Accumulate reactive variables
 //!
 //! ```
-//! # use silkenweb_reactive::{signal::SignalReceiver, accumulators::{SumTotal, Sum, IncludeSum}};
+//! # use silkenweb_reactive::{signal::SignalReceiver, accumulators::{SumTotal, SumElement}};
 //! # use std::mem;
 //! let total = SumTotal::<usize>::default();
-//! let first_digit = Sum::new(&total);
-//! let second_digit = Sum::new(&total);
+//! let first_digit = SumElement::new(&total);
+//! let second_digit = SumElement::new(&total);
 //! let total = total.read();
 //!
 //! first_digit.receive(&1);
