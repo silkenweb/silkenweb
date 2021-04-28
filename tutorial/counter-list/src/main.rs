@@ -6,8 +6,12 @@ use silkenweb::{
 };
 use silkenweb_tutorial_common::define_counter;
 
+// ANCHOR: main
 fn main() {
     let count = Signal::new(0);
+    // ANCHOR: counter_list
+    let counter_list = count.read().map(move |&count| define_counter_list(count));
+    // ANCHOR_END: counter_list
 
     mount(
         "app",
@@ -15,10 +19,12 @@ fn main() {
             .text("How many counters would you like?")
             .child(define_counter(&count))
             .child(hr())
-            .child(count.read().map(move |&count| define_counter_list(count))),
+            .child(counter_list),
     );
 }
+// ANCHOR_END: main
 
+// ANCHOR: define_counter_list
 fn define_counter_list(count: i64) -> Div {
     let mut counters = div();
 
@@ -28,3 +34,4 @@ fn define_counter_list(count: i64) -> Div {
 
     counters.build()
 }
+// ANCHOR_END: define_counter_list
