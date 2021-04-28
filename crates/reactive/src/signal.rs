@@ -47,6 +47,7 @@ impl<T: 'static> Signal<T> {
 /// Receive changes from a signal.
 ///
 /// Changes will stop being received when this is destroyed:
+///
 /// ```
 /// # use silkenweb_reactive::{clone, signal::*};
 /// # use std::{mem, cell::Cell, rc::Rc};

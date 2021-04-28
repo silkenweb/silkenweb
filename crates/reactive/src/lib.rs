@@ -12,6 +12,7 @@ pub mod signal;
 /// Clone all the identifiers supplied as arguments
 ///
 /// `clone!(x, y, z);` will generate:
+///
 /// ```
 /// # #[macro_use] extern crate silkenweb_reactive;
 /// # let (x, y, z) = (0, 0, 0);
@@ -19,7 +20,9 @@ pub mod signal;
 /// let y = y.clone();
 /// let z = z.clone();
 /// ```
+///
 /// This is useful for capturing variables by copy in closures. For example:
+///
 /// ```
 /// # #[macro_use] extern crate silkenweb_reactive;
 /// # let (x, y, z) = (0, 0, 0);

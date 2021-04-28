@@ -19,9 +19,9 @@ use web_sys as dom;
 /// `id` is the html element id of the parent element. The app is added as the
 /// last child of this element.
 ///
-/// Mounting an element that is already in the document will first remove the
-/// element from the document. It will still require unmounting from both places
-/// to free up any resources.
+/// An [`Element`] can only appear once in the document. Adding an [`Element`]
+/// to the document a second time will move it. It will still require
+/// unmounting from both places to free up any resources.
 pub fn mount(id: &str, elem: impl Into<Element>) {
     unmount(id);
     let elem = elem.into();
@@ -71,12 +71,15 @@ impl ElementBuilder {
         }
     }
 
+    /// Set an attribute. Attribute values can be reactive.
     pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl AttributeValue<T>) -> Self {
         value.set_attribute(name, &mut self);
         mem::drop(value);
         self
     }
 
+    /// Add a child element after existing children. The child element can be
+    /// reactive.
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
 
@@ -85,26 +88,49 @@ impl ElementBuilder {
         self
     }
 
+    /// Add a text node after existing children. The text node can be reactive.
     pub fn text(mut self, child: impl Text) -> Self {
         child.set_text(&mut self);
         mem::drop(child);
         self
     }
 
-    /// Apply an effect after the next render
+    /// Apply an effect after the next render. For example, to set the focus of
+    /// an element:
     ///
-    /// For example, to set the focus of an element:
     /// ```no_run
     /// # use silkenweb_dom::tag;
     /// # use web_sys::HtmlInputElement;
     /// # let element = tag("input");
     /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap());
     /// ```
+    ///
+    /// Effects can be reactive. For example, to set the visibibilty of an item
+    /// based on a `hidden` boolean signal:
+    ///
+    /// ```no_run
+    /// # use silkenweb_dom::tag;
+    /// # use silkenweb_reactive::signal::Signal;
+    /// # use web_sys::HtmlInputElement;
+    /// # let element = tag("input");
+    /// let hidden = Signal::new(false);
+    /// let is_hidden = hidden.read();
+    ///
+    /// element.effect(is_hidden.map(|&hidden| move |elem: &HtmlInputElement| elem.set_hidden(hidden)));
+    /// ```
     pub fn effect<T>(mut self, child: impl Effect<T>) -> Self {
         child.set_effect(&mut self);
         self
     }
 
+    /// Register an event handler.
+    ///
+    /// `name` is the name of the event. See the [MDN Events] page for a list.
+    ///
+    /// `f` is the callback when the event fires and will be passed the
+    /// javascript `Event` object.
+    ///
+    /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
     pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
         {
             let dom_element = self.element.dom_element.clone();
@@ -173,6 +199,9 @@ impl From<ElementBuilder> for Element {
 }
 
 /// An HTML element
+///
+/// Elements can only appear once in the document. If an element is added again,
+/// it will be moved.
 #[derive(Clone)]
 pub struct Element(Rc<ElementKind>);
 
@@ -230,6 +259,7 @@ impl Builder for Element {
     }
 }
 
+/// A non-reactive attribute
 pub trait StaticAttribute {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
 }
@@ -271,6 +301,7 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
     queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
 }
 
+/// A potentially reactive attribute
 pub trait AttributeValue<T> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
@@ -333,6 +364,7 @@ where
     }
 }
 
+/// An [`Effect`] that can be applied to an [`Element`] after rendering
 pub trait Effect<T> {
     fn set_effect(self, builder: &mut ElementBuilder);
 }
@@ -373,6 +405,7 @@ where
     }
 }
 
+/// A Text element
 pub trait Text {
     fn set_text(&self, builder: &mut ElementBuilder);
 }
@@ -437,6 +470,7 @@ where
 }
 
 // TODO(review): Find a better way to add all child types to dom
+/// Get a raw Javascript, non-reactive DOM element
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
 
@@ -466,6 +500,7 @@ where
     }
 }
 
+/// An HTML element builder
 pub trait Builder {
     type Target;
 

@@ -1,4 +1,4 @@
-//! Manage reactive lists of DOM elements
+//! Components to manage reactive lists of DOM elements
 use std::{
     cell::{Ref, RefCell},
     collections::{BTreeMap, BTreeSet},
@@ -15,6 +15,12 @@ use web_sys as dom;
 
 use crate::{DomElement, Element, ElementBuilder};
 
+/// A filterable, ordered element list
+///
+/// This owns the data to create child elements, and will manage adding/removing
+/// them from the DOM as the filter requires.
+///
+/// The list is ordered by `Key`.
 pub struct ElementList<Key, Value> {
     visible_items: Rc<RefCell<OrderedElementList<Key>>>,
     generate_child: Rc<dyn Fn(&Value) -> Element>,
@@ -54,14 +60,18 @@ where
         new
     }
 
+    /// `true` iff the list, without a filter applied, is empty.
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }
 
+    /// The length of the list without any filter applied.
     pub fn len(&self) -> usize {
         self.items.len()
     }
 
+    /// Insert an item into the list. If an item exists at `key`, it is
+    /// replaced.
     pub fn insert(&mut self, key: Key, item: Value) {
         let item = Rc::new(RefCell::new(item));
         let updater = self.updater(&key, &item);
@@ -69,6 +79,8 @@ where
         self.items.insert(key, StoredItem { item, updater });
     }
 
+    /// Pop the last element from the list. If the list is empty, this has no
+    /// effect.
     pub fn pop(&mut self) {
         if let Some((key, _)) = self.items.iter().next_back() {
             // RUSTC(btree_pop_last): Don't clone the key and just pop last
@@ -78,12 +90,15 @@ where
         }
     }
 
+    /// Remove the item corresponding to `key`. If the item is not in the list,
+    /// this has no effect.
     pub fn remove(&mut self, key: &Key) {
         if self.items.remove(key).is_some() {
             self.visible_items.borrow_mut().remove(key)
         }
     }
 
+    /// Apply a filter to the list, replacing any existing filter.
     pub fn filter(&mut self, f: impl 'static + Fn(&Value) -> ReadSignal<bool>) {
         let old_items = mem::take(&mut self.items);
         self.filter = Box::new(f);
@@ -95,6 +110,8 @@ where
         }
     }
 
+    /// Remove all items for which `f` returns `false`. Matching items that are
+    /// currently filtered out will still be removed.
     pub fn retain(&mut self, f: impl Fn(&Value) -> bool) {
         // RUSTC(btree_map_retain): Use retain
         let mut to_remove = BTreeSet::new();
@@ -110,10 +127,14 @@ where
         }
     }
 
+    /// An iterator over all values in the list, including hidden items. If
+    /// `Value` is interiorly mutable and reactivity with the filter
+    /// is correctly set up, it's safe to mutate the items.
     pub fn values(&mut self) -> impl Iterator<Item = Ref<Value>> {
         self.items.values_mut().map(|stored| stored.item.borrow())
     }
 
+    /// Clear all the items from the list, including filtered items.
     pub fn clear(&mut self) {
         self.visible_items.borrow_mut().clear();
         self.items.clear();
@@ -146,6 +167,7 @@ impl<Key, T> DomElement for ElementList<Key, T> {
     }
 }
 
+/// A list ordered by `Key`
 pub struct OrderedElementList<Key> {
     root: ElementBuilder,
     items: BTreeMap<Key, Element>,
@@ -179,6 +201,7 @@ where
         self.items.len()
     }
 
+    /// Insert an element. If the element exists, it will be replaced.
     pub fn insert(&mut self, key: Key, element: Element) {
         // TODO(testing): Add a test to make sure a reactive element gives us the
         // correct dom_element.
@@ -196,12 +219,15 @@ where
         }
     }
 
+    /// Remove an item from the list. If no item exists for `key`, this has no
+    /// effect.
     pub fn remove(&mut self, key: &Key) {
         if let Some(element) = self.items.remove(key) {
             self.root.remove_child(&element.dom_element());
         }
     }
 
+    /// Clear the list.
     pub fn clear(&mut self) {
         for element in self.items.values() {
             self.root.remove_child(&element.dom_element());
