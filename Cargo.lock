@@ -191,6 +191,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-tutorial-counter-signal"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+ "silkenweb-tutorial-common",
+]
+
+[[package]]
 name = "silkenweb-tutorial-memoized-counter-list"
 version = "0.1.0"
 dependencies = [

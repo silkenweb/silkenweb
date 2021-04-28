@@ -2,6 +2,7 @@
 
 members = [
     "tutorial/counter",
+    "tutorial/counter-signal",
     "tutorial/counter-list",
     "tutorial/memoized-counter-list",
     "tutorial/reactive-counter-list",
