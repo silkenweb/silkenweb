@@ -30,6 +30,14 @@
 //! }
 //! # }
 //! ```
+//!
+//! # Learning
+//!
+//! - Check out the tutorial: [Learning Silkenweb With Entirely Too Many Counters]()
+//! - Check out the `examples` folder
+//! - Browse this documentation
+
+// TODO: Tutorial link
 pub use silkenweb_dom::{
     after_render, element_list, mount, render_updates, tag, unmount, Builder, DomElement, Element,
     ElementBuilder,
