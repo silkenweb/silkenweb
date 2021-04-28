@@ -1,4 +1,4 @@
-//! Signals are variables that update their dependencies
+//! Signals are like variables that update their dependencies
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,
@@ -11,7 +11,7 @@ use crate::clone;
 type SharedState<T> = Rc<State<T>>;
 type WeakSharedState<T> = rc::Weak<State<T>>;
 
-/// A `Signal` is like a varible, but it can update it's dependencies when it
+/// A [`Signal`] is like a varible, but it can update it's dependencies when it
 /// changes.
 ///
 /// ```
@@ -122,10 +122,10 @@ impl<T: 'static> ReadSignal<T> {
         child.read()
     }
 
-    /// Map a function onto the inner value to produce a new `ReadSignal`
+    /// Map a function onto the inner value to produce a new [`ReadSignal`]
     ///
     /// This only exists to make type inference easier, and just forwards its
-    /// arguments to `map_to`.
+    /// arguments to [`map_to`](Self::map_to).
     pub fn map<Output, Generate>(&self, generate: Generate) -> ReadSignal<Output>
     where
         Output: 'static,

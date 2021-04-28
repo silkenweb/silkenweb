@@ -1,4 +1,7 @@
-//! Memoize functions across frames.
+//! Memoize functions across frames
+//!
+//! Typically a [`MemoCache`] will last the duration of a UI component, whereas a
+//! [`MemoFrame`] will last the duration of a single render.
 use std::{
     any::{Any, TypeId},
     cell::RefCell,
@@ -10,10 +13,7 @@ use std::{
 
 type SharedMemoData = Rc<RefCell<MemoData>>;
 
-/// `MemoCache` holds the map of keys to cached values.
-///
-/// Typically a `MemoCache` will last the duration of a UI component, whereas a
-/// `MemoFrame` will last the duration of that components render.
+/// [`MemoCache`] holds the map of keys to cached values.
 #[derive(Clone, Default)]
 pub struct MemoCache(SharedMemoData);
 
@@ -23,14 +23,14 @@ impl MemoCache {
     }
 
     /// Start a new *frame*. Values will only be cached until the next *frame*.
-    /// If a value is used before `MemoFrame` is destroyed, it will be cached
+    /// If a value is used before [`MemoFrame`] is destroyed, it will be cached
     /// for the next frame, otherwise it will be removed from the cache.
     pub fn frame(&self) -> MemoFrame {
         MemoFrame(self.0.clone())
     }
 }
 
-/// A `MemoFrame` represents the scope of a *frame* for the `MemoCache`.
+/// A [`MemoFrame`] represents the scope of a *frame* for the [`MemoCache`].
 pub struct MemoFrame(SharedMemoData);
 
 impl MemoFrame {
