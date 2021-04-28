@@ -11,7 +11,7 @@
 //! let link: ABuilder = a()
 //!     .href("https://example.com/")
 //!     .on_click(|event: dom::MouseEvent, link: dom::HtmlAnchorElement| {});
-//!```
+//! ```
 
 #[macro_use]
 pub mod macros;
