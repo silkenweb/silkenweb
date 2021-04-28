@@ -2,8 +2,10 @@
 
 members = [
     "tutorial/counter",
+    "tutorial/nested-counters",
     "tutorial/memoized-counters",
     "tutorial/reactive-list-counters",
+    "tutorial/common",
     "examples/todomvc",
     "crates/silkenweb",
     "crates/html",

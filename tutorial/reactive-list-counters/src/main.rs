@@ -1,13 +1,13 @@
 use silkenweb::{
     element_list::OrderedElementList,
-    elements::{button, div, Button, DivBuilder},
+    elements::{button, div, Button},
     mount,
-    signal::{Signal, WriteSignal},
+    signal::Signal,
     Builder,
 };
+use silkenweb_tutorial_common::render_counter;
 
 fn main() {
-    console_error_panic_hook::set_once();
     let list = Signal::new(OrderedElementList::new(div()));
 
     mount(
@@ -24,7 +24,8 @@ fn push_button(list: &Signal<OrderedElementList<usize>>) -> Button {
     let push_elem = list.write();
     button()
         .on_click(move |_, _| {
-            push_elem.mutate(move |list| list.insert(list.len(), counter().into()))
+            push_elem
+                .mutate(move |list| list.insert(list.len(), render_counter(&Signal::new(0)).into()))
         })
         .text("+")
         .build()
@@ -41,21 +42,5 @@ fn pop_button(list: &Signal<OrderedElementList<usize>>) -> Button {
             })
         })
         .text("-")
-        .build()
-}
-
-fn counter() -> DivBuilder {
-    let count = Signal::new(0);
-
-    div()
-        .child(update_count("-", -1, count.write()))
-        .text(count.read().map(|i| format!("{}", i)))
-        .child(update_count("+", 1, count.write()))
-}
-
-fn update_count(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
-    button()
-        .on_click(move |_, _| set_count.replace(move |&i| i + delta))
-        .text(label)
         .build()
 }

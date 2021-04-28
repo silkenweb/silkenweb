@@ -168,10 +168,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-tutorial-common"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-tutorial-counter"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
+ "silkenweb-tutorial-common",
 ]
 
 [[package]]
@@ -179,14 +187,23 @@ name = "silkenweb-tutorial-memoized-counters"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
+ "silkenweb-tutorial-common",
+]
+
+[[package]]
+name = "silkenweb-tutorial-nested-counters"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+ "silkenweb-tutorial-common",
 ]
 
 [[package]]
 name = "silkenweb-tutorial-reactive-list-counters"
 version = "0.1.0"
 dependencies = [
- "console_error_panic_hook",
  "silkenweb",
+ "silkenweb-tutorial-common",
 ]
 
 [[package]]
