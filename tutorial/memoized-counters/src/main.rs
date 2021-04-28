@@ -11,22 +11,22 @@ fn main() {
 
     mount(
         "app",
-        render_counter(&count).child(count.read().map({
+        define_counter(&count).child(count.read().map({
             let counter_elem_cache = MemoCache::default();
 
             move |&count| {
                 let counter_elems = counter_elem_cache.frame();
-                render_counter_list(&counter_elems, count)
+                define_counter_list(&counter_elems, count)
             }
         })),
     );
 }
 
-fn render_counter_list(counter_elems: &Memo, count: i64) -> Div {
+fn define_counter_list(counter_elems: &Memo, count: i64) -> Div {
     let mut counters = div();
 
     for i in 0..count {
-        let child = counter_elems.cache(i, || render_counter(&Signal::new(0)).build());
+        let child = counter_elems.cache(i, || define_counter(&Signal::new(0)).build());
 
         counters = counters.child(child);
     }
@@ -34,14 +34,14 @@ fn render_counter_list(counter_elems: &Memo, count: i64) -> Div {
     counters.build()
 }
 
-fn render_counter(count: &Signal<i64>) -> DivBuilder {
+fn define_counter(count: &Signal<i64>) -> DivBuilder {
     div()
-        .child(render_button("-", -1, count.write()))
+        .child(define_button("-", -1, count.write()))
         .text(count.read().map(|i| format!("{}", i)))
-        .child(render_button("+", 1, count.write()))
+        .child(define_button("+", 1, count.write()))
 }
 
-fn render_button(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
+fn define_button(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
     button()
         .on_click(move |_, _| set_count.replace(move |&i| i + delta))
         .text(label)

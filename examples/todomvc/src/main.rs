@@ -72,14 +72,14 @@ impl TodoApp {
             .child(
                 section()
                     .class("main")
-                    .child(self.render_todo_items())
+                    .child(self.define_todo_items())
                     .child(self.items.read()),
             )
-            .child(self.render_footer())
+            .child(self.define_footer())
             .build()
     }
 
-    fn render_todo_items(&self) -> ReadSignal<Div> {
+    fn define_todo_items(&self) -> ReadSignal<Div> {
         let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
         let all_complete = self
             .active_count
@@ -124,7 +124,7 @@ impl TodoApp {
         })
     }
 
-    fn render_footer(&self) -> ReadSignal<Option<Footer>> {
+    fn define_footer(&self) -> ReadSignal<Option<Footer>> {
         self.items
             .read()
             .map(ElementList::is_empty)
@@ -148,8 +148,8 @@ impl TodoApp {
                                             if active_count == 1 { "" } else { "s" }
                                         ))
                                 }))
-                                .child(self_.render_filters())
-                                .child(self_.render_clear_completed())
+                                .child(self_.define_filters())
+                                .child(self_.define_clear_completed())
                                 .build(),
                         )
                     }
@@ -157,7 +157,7 @@ impl TodoApp {
             })
     }
 
-    fn render_filter_link(
+    fn define_filter_link(
         &self,
         filter: Filter,
         seperator: &str,
@@ -182,17 +182,17 @@ impl TodoApp {
         .text(seperator)
     }
 
-    fn render_filters(&self) -> Ul {
+    fn define_filters(&self) -> Ul {
         ul().class("filters")
-            .child(self.render_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
-            .child(self.render_filter_link(Filter::Active, " ", |item| {
+            .child(self.define_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
+            .child(self.define_filter_link(Filter::Active, " ", |item| {
                 item.completed.read().map(|completed| !completed)
             }))
-            .child(self.render_filter_link(Filter::Completed, "", |item| item.completed.read()))
+            .child(self.define_filter_link(Filter::Completed, "", |item| item.completed.read()))
             .build()
     }
 
-    fn render_clear_completed(&self) -> ReadSignal<Option<Button>> {
+    fn define_clear_completed(&self) -> ReadSignal<Option<Button>> {
         let write_items = self.items.write();
         let items_len = self.items.read().map(ElementList::len);
         let any_completed = (self.active_count.read(), items_len)
@@ -270,12 +270,12 @@ impl TodoItem {
 
     fn render(&self) -> Li {
         li().class(self.class())
-            .child(self.render_edit())
-            .child(self.render_view())
+            .child(self.define_edit())
+            .child(self.define_view())
             .build()
     }
 
-    fn render_edit(&self) -> Input {
+    fn define_edit(&self) -> Input {
         input()
             .class("edit")
             .type_("text")
@@ -307,7 +307,7 @@ impl TodoItem {
             .build()
     }
 
-    fn render_view(&self) -> Div {
+    fn define_view(&self) -> Div {
         let completed = self.completed.read();
         let completed_checkbox = input()
             .class("toggle")

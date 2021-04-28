@@ -5,7 +5,7 @@ use silkenweb::{
     signal::Signal,
     Builder,
 };
-use silkenweb_tutorial_common::render_counter;
+use silkenweb_tutorial_common::define_counter;
 
 fn main() {
     let list = Signal::new(OrderedElementList::new(div()));
@@ -25,7 +25,7 @@ fn push_button(list: &Signal<OrderedElementList<usize>>) -> Button {
     button()
         .on_click(move |_, _| {
             push_elem
-                .mutate(move |list| list.insert(list.len(), render_counter(&Signal::new(0)).into()))
+                .mutate(move |list| list.insert(list.len(), define_counter(&Signal::new(0)).into()))
         })
         .text("+")
         .build()
