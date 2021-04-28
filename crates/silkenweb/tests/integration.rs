@@ -104,7 +104,11 @@ fn multiple_reactive_text() {
     assert_eq!("{First 0}{Second 0}", text_content(TEXT_ID));
     first_text.write().set("{First 1}");
     render_updates();
-    assert_eq!("{First 1}{Second 0}", text_content(TEXT_ID), "First is updated");
+    assert_eq!(
+        "{First 1}{Second 0}",
+        text_content(TEXT_ID),
+        "First is updated"
+    );
     second_text.write().set("{Second 1}");
     render_updates();
     assert_eq!(
