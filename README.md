@@ -33,5 +33,5 @@ fn main() {
 
 # Learning
 
-- Check out the tutorial: [Learning Silkenweb With Entirely Too Many Counters]()
+- Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters]()
 - Check out the `examples` folder
