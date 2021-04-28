@@ -5,6 +5,7 @@ use silkenweb::{
     Builder,
 };
 
+// ANCHOR: body
 pub fn define_counter(count: &Signal<i64>) -> DivBuilder {
     let count_text = count.read().map(|i| format!("{}", i));
 
@@ -20,3 +21,4 @@ pub fn define_button(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Bu
         .text(label)
         .build()
 }
+// ANCHOR_END: body
