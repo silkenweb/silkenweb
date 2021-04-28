@@ -195,7 +195,6 @@ name = "silkenweb-tutorial-counter-signal"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
- "silkenweb-tutorial-common",
 ]
 
 [[package]]
