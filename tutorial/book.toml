@@ -1,0 +1,10 @@
+[book]
+authors = ["Simon Bourne"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Learning Silkenweb With Entirely Too Many Counters"
+description = "A Silkenweb tutorial using counters"
+
+[rust]
+edition = "2018"
