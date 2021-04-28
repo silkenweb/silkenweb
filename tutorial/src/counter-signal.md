@@ -43,6 +43,8 @@ We created a `Signal` called `count`. We map over `count` to produce another `Si
 {{#rustdoc_include ../counter-signal/src/main.rs:print_count}}
 ```
 
+`map` is just like `Option::map`, `Iterator::map`. It maps one signal type to another by transforming the inner value.
+
 `print_count` runs once when it is initialized, and once for every update to `count`, until `print_count` is dropped. Once a `ReadSignal` is dropped, it will no longer respond to changes in upstream `Signal`s.
 
 We define `set_count` so we can update the counter:
