@@ -9,6 +9,8 @@ use std::{
 
 type SharedMemoData = Rc<RefCell<MemoData>>;
 
+// TODO: We should probably rename this. It's not really memoization, just
+// caching.
 #[derive(Clone, Default)]
 pub struct MemoCache(SharedMemoData);
 
