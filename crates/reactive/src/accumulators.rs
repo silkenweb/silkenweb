@@ -1,9 +1,30 @@
+//! Accumulate reactive variables
+//!
+//! ```
+//! # use silkenweb_reactive::{signal::SignalReceiver, accumulators::{SumTotal, Sum, IncludeSum}};
+//! # use std::mem;
+//! let total = SumTotal::<usize>::default();
+//! let first_digit = Sum::new(&total);
+//! let second_digit = Sum::new(&total);
+//! let total = total.read();
+//!
+//! first_digit.receive(&1);
+//! assert_eq!(1, *total.current());
+//! second_digit.receive(&10);
+//! assert_eq!(11, *total.current());
+//!
+//! mem::drop(first_digit);
+//! assert_eq!(10, *total.current());
+//! ```
 use std::cell::RefCell;
 
 use num_traits::{WrappingAdd, WrappingSub, Zero};
 
 use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal};
 
+/// This holds the current total of a sum.
+///
+/// See module level documentation for an example of usage.
 #[derive(Clone)]
 pub struct SumTotal<T> {
     deltas: WriteSignal<T>,
@@ -27,6 +48,9 @@ impl<T: 'static> SumTotal<T> {
     }
 }
 
+/// A single element of the sum.
+///
+/// See module level documentation for an example of usage.
 pub struct Sum<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> {
     current: RefCell<T>,
     total: SumTotal<T>,
@@ -60,6 +84,9 @@ impl<T: 'static + Clone + Zero + WrappingAdd + WrappingSub> Drop for Sum<T> {
     }
 }
 
+/// A handle to keep a value in the sum.
+///
+/// See module level documentation for an example of usage.
 pub struct IncludeSum();
 
 struct AccumulateSum<T>(RefCell<T>);
