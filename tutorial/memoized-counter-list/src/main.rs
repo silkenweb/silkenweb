@@ -13,7 +13,7 @@ fn main() {
     mount(
         "app",
         define_counter(&count).child(count.read().map({
-            let counter_elem_cache = MemoCache::default();
+            let counter_elem_cache = MemoCache::new();
 
             move |&count| {
                 let counter_elems = counter_elem_cache.frame();
