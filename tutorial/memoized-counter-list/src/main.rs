@@ -1,5 +1,5 @@
 use silkenweb::{
-    elements::{div, Div},
+    elements::{div, hr, Div},
     memo::{Memo, MemoCache},
     mount,
     signal::Signal,
@@ -12,14 +12,18 @@ fn main() {
 
     mount(
         "app",
-        define_counter(&count).child(count.read().map({
-            let counter_elem_cache = MemoCache::new();
+        div()
+            .text("How many counters would you like?")
+            .child(define_counter(&count))
+            .child(hr())
+            .child(count.read().map({
+                let counter_elem_cache = MemoCache::new();
 
-            move |&count| {
-                let counter_elems = counter_elem_cache.frame();
-                define_counter_list(&counter_elems, count)
-            }
-        })),
+                move |&count| {
+                    let counter_elems = counter_elem_cache.frame();
+                    define_counter_list(&counter_elems, count)
+                }
+            })),
     );
 }
 

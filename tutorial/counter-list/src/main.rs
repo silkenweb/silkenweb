@@ -1,5 +1,5 @@
 use silkenweb::{
-    elements::{div, Div},
+    elements::{div, hr, Div},
     mount,
     signal::Signal,
     Builder,
@@ -11,7 +11,11 @@ fn main() {
 
     mount(
         "app",
-        define_counter(&count).child(count.read().map(move |&count| define_counter_list(count))),
+        div()
+            .text("How many counters would you like?")
+            .child(define_counter(&count))
+            .child(hr())
+            .child(count.read().map(move |&count| define_counter_list(count))),
     );
 }
 

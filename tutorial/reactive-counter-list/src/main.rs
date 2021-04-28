@@ -1,6 +1,6 @@
 use silkenweb::{
     element_list::OrderedElementList,
-    elements::{button, div, Button},
+    elements::{button, div, hr, Button},
     mount,
     signal::Signal,
     Builder,
@@ -13,9 +13,14 @@ fn main() {
     mount(
         "app",
         div()
-            .child(pop_button(&list))
-            .text(list.read().map(|list| format!("{}", list.len())))
-            .child(push_button(&list))
+            .text("How many counters would you like?")
+            .child(
+                div()
+                    .child(pop_button(&list))
+                    .text(list.read().map(|list| format!("{}", list.len())))
+                    .child(push_button(&list)),
+            )
+            .child(hr())
             .child(list.read()),
     );
 }
