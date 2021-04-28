@@ -8,6 +8,7 @@ members = [
     "tutorial/reactive-counter-list",
     "tutorial/common",
     "examples/todomvc",
+    "examples/counter",
     "crates/silkenweb",
     "crates/html",
     "crates/dom",
