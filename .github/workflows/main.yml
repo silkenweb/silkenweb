@@ -29,5 +29,6 @@ jobs:
     - uses: actions/checkout@main
     - run: rustup toolchain install ${{ matrix.rust }} -c clippy -c rustfmt
     - run: cargo install cargo-udeps
+    - run: rustup default ${{ matrix.rust }}
     - run: cargo fmt --all -- --check
     - run: cargo udeps --all-targets
