@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  non-web-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        rust: [1.51]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@main
+    - run: rustup toolchain install ${{ matrix.rust }}
+    - run: cargo clippy --all-targets -- -D warnings -D clippy::pedantic -D clippy::all
+    - run: cargo build --all-targets
+    - run: cargo test
+    - run: cargo test --benches --tests --release
+  nightly:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        rust: [nightly-2021-04-25]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@main
+    - run: rustup toolchain install ${{ matrix.rust }} -c clippy -c rustfmt
+    - run: cargo install cargo-udeps
+    - run: cargo fmt --all -- --check
+    - run: cargo udeps --all-targets
