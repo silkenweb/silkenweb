@@ -15,10 +15,25 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - run: rustup toolchain install ${{ matrix.rust }}
+    - run: rustup default ${{ matrix.rust }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::pedantic -D clippy::all
     - run: cargo build --all-targets
     - run: cargo test
     - run: cargo test --benches --tests --release
+  browser-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        rust: [1.51]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@main
+    - run: rustup toolchain install ${{ matrix.rust }}
+    - run: rustup default ${{ matrix.rust }}
+    - run: cargo install wasm-bindgen-cli --version 0.2.73
+    - run: cargo install wasm-pack
+    - working-directory: crates/silkenweb
+    - run: wasm-pack test --headless --firefox
   nightly:
     strategy:
       matrix:
