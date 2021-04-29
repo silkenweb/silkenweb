@@ -1,4 +1,4 @@
-//! A really simple example counter for the README
+//! A minimal interactive example
 use silkenweb::{
     elements::{button, div, p},
     mount,
