@@ -32,6 +32,8 @@ Looking inside, we can see where it uses the cache:
 {{#rustdoc_include ../memoized-counter-list/src/main.rs:get_cached_counter}}
 ```
 
-This will reuse counters between frames when we update the main counter. The individual counters will not be re-rendered unless they change. Unfortunately, the list of counters gets reconstructed each frame, even though we're not reconstructing individual counters. We'll address that in the next example.
+This will reuse counters between frames when we update the main counter. So now we're keeping the counter state when the number of counters change. The individual counters will not be re-rendered unless they change, which is good from an efficiency point of view.
+
+Unfortunately, the list of counters gets reconstructed each frame, even though we're not reconstructing individual counters. This isn't very efficient, so we'll address that in the next example.
 
 [memoization]:https://en.wikipedia.org/wiki/Memoization
