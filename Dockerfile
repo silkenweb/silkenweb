@@ -1,3 +1,4 @@
+# Dockerfile for `act` (local github actions runner)
 FROM rust:1.51
 
 RUN apt-get update && apt-get install -y curl
@@ -16,6 +17,9 @@ RUN apt-get install -y firefox-esr chromium
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 
+# Everything below is just to speed things up.
+# It'll be installed by the github actions workflow as required.
+
 # Install wasm-opt
 RUN curl -L https://github.com/WebAssembly/binaryen/releases/download/version_101/binaryen-version_101-x86_64-linux.tar.gz | tar -xz
 RUN cp binaryen-version_101/bin/wasm-opt /usr/bin/
@@ -29,9 +33,3 @@ RUN cargo install xargo
 
 RUN rustup component add clippy rustfmt
 RUN rustup target add wasm32-unknown-unknown
-RUN rustup toolchain install nightly-2021-04-25 -c clippy -c rustfmt -c rust-src -c miri
-
-WORKDIR /workdir
-COPY . .
-
-CMD [ "./check" ]
