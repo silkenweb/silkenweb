@@ -1,5 +1,5 @@
 # Further Reading
 
-- Stateful signal receivers: `SignalReceiver`
-- Only propagating changes: `only_changed`
-- Signal products `(signal0, signal1).map(...)` and `ZipSignal`
+- [Signal products](https://docs.rs/silkenweb/latest/silkenweb/signal/trait.ZipSignal.html): `(signal0, signal1).map(...)`
+- [Only propagating changes](https://docs.rs/silkenweb/latest/silkenweb/signal/struct.ReadSignal.html#method.only_changes): `signal.map(...).only_changes()`
+- [The `SignalReceiver` trait](https://docs.rs/silkenweb/latest/silkenweb/signal/trait.SignalReceiver.html)
