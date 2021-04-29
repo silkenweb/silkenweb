@@ -33,7 +33,9 @@ jobs:
     - run: rustup default ${{ matrix.rust }}
     - run: cargo install wasm-bindgen-cli --version 0.2.73
     - run: cargo install wasm-pack
-    - run: wasm-pack test --headless --firefox
+    - run: cargo install trunk
+    - name: Browser Tests
+      run: wasm-pack test --headless --firefox --chrome
       working-directory: crates/silkenweb
     - name: Cypress tests
       working-directory: examples/todomvc
