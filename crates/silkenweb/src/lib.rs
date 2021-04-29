@@ -2,7 +2,7 @@
 //!
 //! # Features
 //!
-//! - Fine grained reactivity using signals
+//! - Fine grained reactivity using signals to minimize DOM API calls
 //! - No VDOM
 //! - Uses plain Rust syntax rather than a macro DSL
 //!
@@ -35,8 +35,6 @@
 //!
 //! - Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
 //! - Check out the `examples` folder
-
-// TODO: Tutorial link
 pub use silkenweb_dom::{
     after_render, element_list, mount, render_updates, tag, unmount, Builder, DomElement, Element,
     ElementBuilder,
