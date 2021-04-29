@@ -168,12 +168,14 @@ impl<T: 'static> ReadSignal<T> {
 }
 
 /// Receive changes to a signal.
+///
+/// Pass a `SignalReceiver` to [`ReadSignal::map_to`], as an alternative to
+/// passing a closure to [`ReadSignal::map`].
 pub trait SignalReceiver<Input, Output>: 'static
 where
     Input: 'static,
     Output: 'static,
 {
-    /// Receive the changes. It's Ok for this to have side effects.
     fn receive(&self, x: &Input) -> Output;
 }
 
@@ -222,7 +224,8 @@ impl<T: 'static> WriteSignal<T> {
     }
 }
 
-/// Zip signals together to create a new one.
+/// Zip signals together to create a new one. The tuple implementation allows
+/// you to write `(signal0, signal1).map(...)`.
 pub trait ZipSignal<Generate> {
     /// The inner type of the target signal.
     type Target;
