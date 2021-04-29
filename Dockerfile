@@ -1,28 +1,28 @@
 # Dockerfile for `act` (local github actions runner)
 FROM rust:1.51
 
-RUN apt-get update && apt-get install -y curl
-
-# For Cypress
 RUN \
     apt-get update && \
-    apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-RUN \
-    apt-get update && apt-get install -y npm
-
-# For headless browser tests
-RUN apt-get install -y firefox-esr chromium
+    apt-get install --no-install-recommends -y \
+        curl \
+        # For headless browser tests
+        firefox-esr chromium \
+        # For Cypress
+        libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb \
+        # Cleanup
+        && rm -rf /var/lib/apt/lists/*
 
 # Install NPM
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get update && apt-get install -y nodejs
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs
 
 # Everything below is just to speed things up.
 # It'll be installed by the github actions workflow as required.
 
 # Install wasm-opt
-RUN curl -L https://github.com/WebAssembly/binaryen/releases/download/version_101/binaryen-version_101-x86_64-linux.tar.gz | tar -xz
-RUN cp binaryen-version_101/bin/wasm-opt /usr/bin/
+RUN curl -L https://github.com/WebAssembly/binaryen/releases/download/version_101/binaryen-version_101-x86_64-linux.tar.gz | tar -xz \
+    && cp binaryen-version_101/bin/wasm-opt /usr/bin/ \
+    && rm -rf binary-version_101
 
 RUN cargo install cargo-udeps
 RUN cargo install mdbook
