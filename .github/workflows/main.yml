@@ -46,7 +46,7 @@ jobs:
   nightly:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
         rust: [nightly-2021-04-25]
     runs-on: ${{ matrix.os }}
     steps:
@@ -60,7 +60,7 @@ jobs:
   book:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
         rust: [1.51]
     runs-on: ${{ matrix.os }}
     steps:
