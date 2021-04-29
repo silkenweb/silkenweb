@@ -4,6 +4,14 @@
 
 First, install Rust by following the [official instructions](https://www.rust-lang.org/tools/install).
 
+## OS Setup
+
+On a fresh Ubuntu install, you'll need to install some basic packages for `trunk` and `wasm-bindgen`:
+
+```bash
+sudo apt install gcc-multilib libssl-dev git g++
+```
+
 ## Wasm Tooling
 
 You'll need to install the wasm32 target and some tools to build your apps:
