@@ -4,11 +4,12 @@ use silkenweb::signal::{ReadSignal, Signal, WriteSignal};
 
 // ANCHOR: body
 fn main() {
+    // ANCHOR: new_count
     let count = Signal::new(0);
+    let get_count: ReadSignal<usize> = count.read();
+    // ANCHOR_END: new_count
     // ANCHOR: print_count
-    let print_count: ReadSignal<()> = count
-        .read()
-        .map(|&count| println!("The count is {}", count));
+    let print_count: ReadSignal<()> = get_count.map(|&count| println!("The count is {}", count));
     // ANCHOR_END: print_count
 
     // ANCHOR: define_set_count
