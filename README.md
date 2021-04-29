@@ -4,7 +4,7 @@
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
 
-Silkenweb is a reactive web library for writing single page apps
+A library for writing reactive single page web apps.
 
 ## Features
 
