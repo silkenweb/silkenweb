@@ -8,12 +8,7 @@ Let's look at an example. First we'll clone the main [Silkenweb] repo, which con
 git clone https://github.com/silkenweb/silkenweb
 ```
 
-The tutorial examples can all be found in the `tutorial` subdirectory. Lets run the first example so we can see how the code translates:
-
-```bash
-cd silkenweb/tutorial/counter-signal
-trunk serve --open
-```
+The tutorial examples can all be found in the `tutorial` subdirectory.
 
 ```rust,no_run,noplayground,ignore
 {{#rustdoc_include ../counter-signal/src/main.rs:body}}
