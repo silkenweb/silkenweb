@@ -37,5 +37,5 @@ fn main() {
 
 ## Learning
 
-- Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
-- Check out the `examples` folder
+- [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
+- Check out the [examples](https://github.com/silkenweb/silkenweb/tree/main/examples) folder
