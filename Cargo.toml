@@ -9,6 +9,7 @@ members = [
     "tutorial/common",
     "examples/todomvc",
     "examples/counter",
+    "examples/hello-world",
     "crates/silkenweb",
     "crates/html",
     "crates/dom",
