@@ -1,40 +1,27 @@
-//! Silkenweb is a library for writing reactive single page web apps
+//! A library for building reactive single page web apps
 //!
-//! # Features
+//! # Quick Start
 //!
-//! - Fine grained reactivity using signals to minimize DOM API calls
-//! - No VDOM
-//! - Uses plain Rust syntax rather than a macro DSL
+//! The best way to get started is to look at the examples. You'll need [trunk]
+//! to run them. For example, to run [hello-world]:
 //!
-//! # Example: A Simple Counter
-//!
-//! ```
-//! use silkenweb::{
-//!     elements::{button, div, p},
-//!     mount,
-//!     signal::Signal,
-//! };
-//!
-//! # fn no_exec() {
-//! fn main() {
-//!     let count = Signal::new(0);
-//!     let set_count = count.write();
-//!     let inc = move |_, _| set_count.replace(|&i| i + 1);
-//!     let count_text = count.read().map(|i| format!("{}", i));
-//!
-//!     let app = div()
-//!         .child(button().on_click(inc).text("+"))
-//!         .child(p().text(count_text));
-//!
-//!     mount("app", app);
-//! }
-//! # }
+//! ```bash
+//! cd examples/hello-world
+//! trunk serve --open
 //! ```
 //!
-//! # Learning
+//! - [hello-world] is a minimal example
+//! - [counter] is a minimal interactive example
+//! - [todomvc] is an example of a simple app
 //!
-//! - Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
-//! - Check out the `examples` folder
+//! For a more complete introduction, see
+//! [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
+//!
+//! [trunk]: https://trunkrs.dev/
+//! [hello-world]: https://github.com/silkenweb/silkenweb/tree/main/examples/hello-world
+//! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
+//! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
+
 pub use silkenweb_dom::{
     after_render, element_list, mount, render_updates, tag, unmount, Builder, DomElement, Element,
     ElementBuilder,

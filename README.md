@@ -4,11 +4,11 @@
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
 
-A library for writing reactive single page web apps.
+A library for building reactive single page web apps.
 
 ## Features
 
-- Fine grained reactivity using signals
+- Fine grained reactivity using signals to minimize DOM API calls
 - No VDOM
 - Uses plain Rust syntax rather than a macro DSL
 
