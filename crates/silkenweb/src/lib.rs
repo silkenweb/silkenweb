@@ -33,7 +33,7 @@
 //!
 //! # Learning
 //!
-//! - Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters]()
+//! - Read the tutorial: [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
 //! - Check out the `examples` folder
 
 // TODO: Tutorial link
