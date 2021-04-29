@@ -13,7 +13,7 @@ This should open a browser with a simple counter app. Let's have a look at the c
 {{#rustdoc_include ../counter/src/main.rs:body}}
 ```
 
-This code defines a counter app and `mount`s it on the page.
+This code defines a counter app and mounts it on the page using the `mount` function.
 
 Next we'll define the actual counter app. We do this in a library crate under `tutorial/common`, as we'll reuse the counter in more complex examples:
 
