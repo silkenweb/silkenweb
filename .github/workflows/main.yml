@@ -9,7 +9,7 @@ jobs:
   non-web-tests:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         rust: [1.51]
     runs-on: ${{ matrix.os }}
     steps:
@@ -24,7 +24,7 @@ jobs:
   browser-tests:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         rust: [1.51]
     runs-on: ${{ matrix.os }}
     steps:
