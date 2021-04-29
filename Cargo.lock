@@ -124,7 +124,7 @@ dependencies = [
  "silkenweb",
  "silkenweb-dom",
  "silkenweb-html",
- "silkenweb-reactive",
+ "silkenweb-reactive 0.1.0",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
@@ -135,7 +135,7 @@ name = "silkenweb-dom"
 version = "0.1.0"
 dependencies = [
  "num-traits",
- "silkenweb-reactive",
+ "silkenweb-reactive 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -170,6 +170,15 @@ dependencies = [
 [[package]]
 name = "silkenweb-reactive"
 version = "0.1.0"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "silkenweb-reactive"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93a9eb559209e452ebf1270286493f9d0f4b19488450c4c90aa623576fec2c6f"
 dependencies = [
  "num-traits",
 ]
