@@ -1,4 +1,2 @@
-/target/
-/.git/
-node_modules
-npm-debug.log
+# Ignore everything
+**
