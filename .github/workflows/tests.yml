@@ -26,9 +26,12 @@ jobs:
     - uses: actions/checkout@main
     - run: rustup toolchain install ${{ matrix.rust }}
     - run: rustup default ${{ matrix.rust }}
-    - run: cargo install wasm-bindgen-cli --version 0.2.73
-    - run: cargo install wasm-pack
-    - run: cargo install trunk
+    - name: Cache Cargo Installs
+      uses: actions/cache@v2
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-${{ hashFiles('scripts/install-wasm-tools.sh') }}
+    - run: bash scripts/install-wasm-tools.sh
     - name: Browser Tests
       run: wasm-pack test --headless --firefox --chrome
       working-directory: crates/silkenweb
