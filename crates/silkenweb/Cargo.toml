@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb"
-version = "0.1.1"
+version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 description = "A library for building single page web apps"
@@ -13,7 +13,7 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [dependencies]
-silkenweb-html = "0.1.1"
+silkenweb-html = "0.1.0"
 silkenweb-dom = "0.1.1"
 silkenweb-reactive = "0.1.1"
 
