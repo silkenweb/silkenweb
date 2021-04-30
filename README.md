@@ -1,5 +1,6 @@
 # Silkenweb
 
+![Checks](https://github.com/silkenweb/silkenweb/actions/workflows/checks.yml/badge.svg)
 [![crates.io](https://img.shields.io/crates/v/silkenweb.svg)](https://crates.io/crates/silkenweb)
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
