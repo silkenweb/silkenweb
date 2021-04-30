@@ -12,7 +12,9 @@ A library for building reactive single page web apps.
 - Fine grained reactivity using signals to minimize DOM API calls
 - No VDOM. Calls to the DOM API and your rendering code are minimized using signals.
 - Uses plain Rust syntax rather than a macro DSL
-- Downcasts Js objects for you where the type is known at compile time. For example `input().dom_element()` returns a `web_sys::HtmlInputElement`, and `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
+- Downcasts Js objects for you where the type is known at compile time. For example:
+  - `input().dom_element()` returns a `web_sys::HtmlInputElement`
+  - `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
 
 ## Example: A Simple Counter
 
