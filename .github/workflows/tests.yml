@@ -1,11 +1,5 @@
-name: Checks
-on:
-  push:
-    branches:
-    - main
-  pull_request:
-    branches:
-    - main
+name: Tests
+on: [push, pull_request]
 jobs:
   non-web-tests:
     strategy:
