@@ -1,12 +1,3 @@
-//! URL based routing.
-//!
-//! Get the URL with [`url()`], and set it however you want to. For example:
-//! - with an anchor element like `<a href="/some/link">Some link</a>`
-//! - with [`set_url_path`].
-//!
-//! See
-//! [here](https://github.com/silkenweb/silkenweb/tree/main/examples/router)
-//! for an example.
 use silkenweb_reactive::signal::{ReadSignal, Signal};
 use url::Url;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
