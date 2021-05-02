@@ -12,6 +12,7 @@ use silkenweb::{
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
     mount,
+    router::url,
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
 };
@@ -26,22 +27,51 @@ fn main() {
 struct TodoApp {
     items: Signal<ElementList<usize, TodoItem>>,
     id: Rc<Cell<usize>>,
-    filter: Signal<Filter>,
+    filter: ReadSignal<Filter>,
     active_count: SumTotal<usize>,
 }
 
 impl TodoApp {
     fn new() -> Self {
+        let items = Signal::new(ElementList::new(
+            ul().class("todo-list"),
+            TodoItem::render,
+            iter::empty(),
+        ));
+
+        let filter = url().map({
+            let write_items = items.write();
+            move |url| match url.fragment() {
+                Some("/active") => {
+                    Self::set_filter(&write_items, |item| {
+                        item.completed.read().map(|completed| !completed)
+                    });
+                    Filter::Active
+                }
+                Some("/completed") => {
+                    Self::set_filter(&write_items, |item| item.completed.read());
+                    Filter::Completed
+                }
+                _ => {
+                    Self::set_filter(&write_items, |_| Signal::new(true).read());
+                    Filter::All
+                }
+            }
+        });
+
         Self {
-            items: Signal::new(ElementList::new(
-                ul().class("todo-list"),
-                TodoItem::render,
-                iter::empty(),
-            )),
+            items,
             id: Rc::new(Cell::new(0)),
-            filter: Signal::new(Filter::All),
+            filter,
             active_count: SumTotal::default(),
         }
+    }
+
+    fn set_filter(
+        write_items: &WriteSignal<ElementList<usize, TodoItem>>,
+        f: impl 'static + Fn(&TodoItem) -> ReadSignal<bool>,
+    ) {
+        write_items.mutate(|items| items.filter(f));
     }
 
     fn render(&self) -> Section {
@@ -157,40 +187,25 @@ impl TodoApp {
             })
     }
 
-    fn define_filter_link(
-        &self,
-        filter: Filter,
-        seperator: &str,
-        f: impl 'static + Clone + Fn(&TodoItem) -> ReadSignal<bool>,
-    ) -> LiBuilder {
-        let set_filter = self.filter.write();
-        let write_items = self.items.write();
+    fn define_filter_link(&self, filter: Filter, seperator: &str) -> LiBuilder {
         let filter_name = format!("{}", filter);
 
         li().child(
             a().class(
                 self.filter
-                    .read()
                     .map(move |f| if filter == *f { "selected" } else { "" }),
             )
             .href(format!("/#/{}", filter_name.to_lowercase()))
-            .text(&filter_name)
-            .on_click(move |_, _| {
-                clone!(f);
-                set_filter.set(filter);
-                write_items.mutate(|items| items.filter(f))
-            }),
+            .text(&filter_name),
         )
         .text(seperator)
     }
 
     fn define_filters(&self) -> Ul {
         ul().class("filters")
-            .child(self.define_filter_link(Filter::All, " ", |_| Signal::new(true).read()))
-            .child(self.define_filter_link(Filter::Active, " ", |item| {
-                item.completed.read().map(|completed| !completed)
-            }))
-            .child(self.define_filter_link(Filter::Completed, "", |item| item.completed.read()))
+            .child(self.define_filter_link(Filter::All, " "))
+            .child(self.define_filter_link(Filter::Active, " "))
+            .child(self.define_filter_link(Filter::Completed, ""))
             .build()
     }
 

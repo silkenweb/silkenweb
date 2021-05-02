@@ -16,7 +16,16 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 wasm-bindgen = "0.2.73"
 num-traits = "0.2"
 silkenweb-reactive = "0.1.1"
+url = "2.2"
 
 [dependencies.web-sys]
 version = "0.3"
-features = ["Window", "Document", "Text", "Element", "HtmlInputElement"]
+features = [
+    "Window",
+    "Document",
+    "Text",
+    "Element",
+    "HtmlInputElement",
+    "Location",
+    "History",
+]

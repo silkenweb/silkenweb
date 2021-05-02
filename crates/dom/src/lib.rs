@@ -7,6 +7,7 @@
 )]
 pub mod element_list;
 mod render;
+pub mod router;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 use render::queue_update;

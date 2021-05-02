@@ -542,7 +542,7 @@ describe('TodoMVC - React', function () {
     })
   })
 
-  context.skip('Routing', function () {
+  context('Routing', function () {
     // New commands used here:
     // https://on.cypress.io/window
     // https://on.cypress.io/its

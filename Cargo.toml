@@ -19,3 +19,8 @@ members = [
 [profile.release]
 codegen-units = 1
 lto = true
+
+[patch.crates-io]
+silkenweb-html = { path = "crates/html" }
+silkenweb-dom = { path = "crates/dom" }
+silkenweb-reactive = { path = "crates/reactive" }
