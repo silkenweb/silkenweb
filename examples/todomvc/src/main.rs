@@ -165,6 +165,7 @@ impl TodoApp {
     ) -> LiBuilder {
         let set_filter = self.filter.write();
         let write_items = self.items.write();
+        let filter_name = format!("{}", filter);
 
         li().child(
             a().class(
@@ -172,7 +173,8 @@ impl TodoApp {
                     .read()
                     .map(move |f| if filter == *f { "selected" } else { "" }),
             )
-            .text(format!("{}", filter))
+            .href(format!("/#/{}", filter_name.to_lowercase()))
+            .text(&filter_name)
             .on_click(move |_, _| {
                 clone!(f);
                 set_filter.set(filter);
