@@ -31,7 +31,7 @@ struct TodoApp {
     filter: ReadSignal<Filter>,
     active_count: SumTotal<usize>,
     // TODO: We want something that just collects signals together
-    store_items: ReadSignal<Vec<ReadSignal<()>>>,
+    store_items: ReadSignal<()>,
 }
 
 impl TodoApp {
@@ -61,26 +61,29 @@ impl TodoApp {
         }
 
         // TODO: map_changes (only map changes, rather than initial value)
-        let store_items = items.read().map(|items| {
-            let mut store_items = Vec::new();
+        let store_items = items
+            .read()
+            .map(|items| {
+                let mut store_items = Vec::new();
 
-            if let Some(storage) = local_storage() {
-                let items = items
-                    .values()
-                    .map(|item| item.data.clone())
-                    .collect::<Vec<_>>();
-                storage
-                    .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-                    .unwrap();
+                if let Some(storage) = local_storage() {
+                    let items = items
+                        .values()
+                        .map(|item| item.data.clone())
+                        .collect::<Vec<_>>();
+                    storage
+                        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
+                        .unwrap();
 
-                for item in &items {
-                    store_items.push(store(&item.completed, &storage, items.clone()));
-                    store_items.push(store(&item.text, &storage, items.clone()));
+                    for item in &items {
+                        store_items.push(store(&item.completed, &storage, items.clone()));
+                        store_items.push(store(&item.text, &storage, items.clone()));
+                    }
                 }
-            }
 
-            store_items
-        });
+                store_items
+            })
+            .map(|_| ());
 
         let filter = url().map({
             let write_items = items.write();
