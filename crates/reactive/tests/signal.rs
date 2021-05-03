@@ -46,7 +46,7 @@ fn callback_cleanup() {
 #[should_panic]
 fn circular_dependency() {
     let x_signal = Signal::new(());
-    x_signal.read().map(move |_| x_signal.write().set(()));
+    let _circular = x_signal.read().map(move |_| x_signal.write().set(()));
 }
 
 #[test]

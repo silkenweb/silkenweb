@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate derive_more;
 
-use std::{cell::Cell, iter, rc::Rc};
+use std::{cell::Cell, cmp::max, iter, rc::Rc};
 
+use serde::{Deserialize, Serialize};
 use silkenweb::{
     accumulators::{SumElement, SumHandle, SumTotal},
     clone,
@@ -11,12 +12,12 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    mount,
+    local_storage, mount,
     router::url,
     signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
     Builder,
 };
-use web_sys::{HtmlDivElement, HtmlInputElement};
+use web_sys::{HtmlDivElement, HtmlInputElement, Storage};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -29,15 +30,57 @@ struct TodoApp {
     id: Rc<Cell<usize>>,
     filter: ReadSignal<Filter>,
     active_count: SumTotal<usize>,
+    // TODO: We want something that just collects signals together
+    store_items: ReadSignal<Vec<ReadSignal<()>>>,
 }
 
 impl TodoApp {
     fn new() -> Self {
+        let mut max_id = 0;
+
         let items = Signal::new(ElementList::new(
             ul().class("todo-list"),
             TodoItem::render,
             iter::empty(),
         ));
+        let write_items = items.write();
+        let active_count = SumTotal::default();
+
+        // TODO: Test if localstorage is disabled
+        if let Some(todos_str) =
+            local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).unwrap())
+        {
+            let todos: Vec<TodoStorage> = serde_json::from_str(&todos_str).unwrap();
+
+            for data in todos {
+                let id = data.id;
+                max_id = max(max_id, data.id);
+                let todo_item = TodoItem::new(data, write_items.clone(), &active_count);
+                write_items.mutate(move |items| items.insert(id, todo_item));
+            }
+        }
+
+        // TODO: map_changes (only map changes, rather than initial value)
+        let store_items = items.read().map(|items| {
+            let mut store_items = Vec::new();
+
+            if let Some(storage) = local_storage() {
+                let items = items
+                    .values()
+                    .map(|item| item.data.clone())
+                    .collect::<Vec<_>>();
+                storage
+                    .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
+                    .unwrap();
+
+                for item in &items {
+                    store_items.push(store(&item.completed, &storage, items.clone()));
+                    store_items.push(store(&item.text, &storage, items.clone()));
+                }
+            }
+
+            store_items
+        });
 
         let filter = url().map({
             let write_items = items.write();
@@ -61,9 +104,10 @@ impl TodoApp {
 
         Self {
             items,
-            id: Rc::new(Cell::new(0)),
+            id: Rc::new(Cell::new(max_id + 1)),
             filter,
-            active_count: SumTotal::default(),
+            active_count,
+            store_items,
         }
     }
 
@@ -244,17 +288,31 @@ impl TodoApp {
             let parent = self_.items.write();
             ts.insert(
                 current_id,
-                TodoItem::new(current_id, text, false, parent, &self_.active_count),
+                TodoItem::new(
+                    TodoStorage::new(current_id, text, false),
+                    parent,
+                    &self_.active_count,
+                ),
             );
         })
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 struct TodoStorage {
     id: usize,
     text: Signal<String>,
     completed: Signal<bool>,
+}
+
+impl TodoStorage {
+    fn new(id: usize, text: impl Into<String>, completed: bool) -> Self {
+        Self {
+            id,
+            text: Signal::new(text.into()),
+            completed: Signal::new(completed),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -267,24 +325,18 @@ struct TodoItem {
 
 impl TodoItem {
     fn new(
-        id: usize,
-        text: impl Into<String>,
-        completed: bool,
+        data: TodoStorage,
         parent: WriteSignal<ElementList<usize, Self>>,
         active_count: &SumTotal<usize>,
     ) -> Self {
-        let completed = Signal::new(completed);
-        let active_count = completed
+        let active_count = data
+            .completed
             .read()
             .map(|completed| (!completed) as usize)
             .map_to(SumElement::new(active_count));
 
         Self {
-            data: TodoStorage {
-                id,
-                text: Signal::new(text.into()),
-                completed,
-            },
+            data,
             editing: Signal::new(false),
             parent,
             active_count,
@@ -370,9 +422,9 @@ impl TodoItem {
     fn save_edits(&self, input: &HtmlInputElement) {
         let text = input.value();
         let text = text.trim();
+        let id = self.data.id;
 
         if text.is_empty() {
-            let id = self.data.id;
             self.parent.mutate(move |p| p.remove(&id));
         } else if *self.editing.read().current() {
             self.data.text.write().set(text.to_string());
@@ -404,4 +456,21 @@ enum Filter {
     All,
     Active,
     Completed,
+}
+
+const STORAGE_KEY: &str = "silkenweb_todo";
+
+fn store<T>(dependency: &Signal<T>, storage: &Storage, items: Vec<TodoStorage>) -> ReadSignal<()>
+where
+    T: 'static,
+{
+    dependency.read().map({
+        clone!(storage);
+
+        move |_| {
+            storage
+                .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
+                .unwrap()
+        }
+    })
 }

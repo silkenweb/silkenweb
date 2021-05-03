@@ -516,7 +516,7 @@ describe('TodoMVC - React', function () {
     })
   })
 
-  context.skip('Persistence', function () {
+  context('Persistence', function () {
     it('should persist its data', function () {
       // mimicking TodoMVC tests
       // by writing out this function

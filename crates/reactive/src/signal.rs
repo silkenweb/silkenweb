@@ -6,6 +6,8 @@ use std::{
     rc::{self, Rc},
 };
 
+use serde::{Deserialize, Serialize};
+
 use crate::clone;
 
 type SharedState<T> = Rc<State<T>>;
@@ -44,6 +46,25 @@ impl<T: 'static> Signal<T> {
     }
 }
 
+// TODO: Feature gate serde
+impl<T: 'static + Serialize> Serialize for Signal<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.current.serialize(serializer)
+    }
+}
+
+impl<'de, T: 'static + Deserialize<'de>> Deserialize<'de> for Signal<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Signal::new(T::deserialize(deserializer)?))
+    }
+}
+
 /// Receive changes from a signal.
 ///
 /// Changes will stop being received when this is destroyed:
@@ -65,6 +86,7 @@ impl<T: 'static> Signal<T> {
 /// x.write().set(3);
 /// assert_eq!(seen_by_y.get(), 2);
 /// ```
+#[must_use]
 pub struct ReadSignal<T>(SharedState<T>);
 
 impl<T> Clone for ReadSignal<T> {

@@ -567,6 +567,19 @@ fn document() -> dom::Document {
     window().document().expect("Window must contain a document")
 }
 
+// TODO: We probably want a better storage API.
+// We want to be able to iterator over it like a map using Object::entries and Object::keys
+/// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+pub fn local_storage() -> Option<dom::Storage> {
+    // TODO: Under what circumstances can these fail?
+    window().local_storage().unwrap()
+}
+
+/// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
+pub fn session_storage() -> Option<dom::Storage> {
+    window().session_storage().unwrap()
+}
+
 thread_local!(
     static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
