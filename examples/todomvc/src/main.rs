@@ -44,12 +44,12 @@ impl TodoApp {
             move |url| match url.fragment() {
                 Some("/active") => {
                     Self::set_filter(&write_items, |item| {
-                        item.completed.read().map(|completed| !completed)
+                        item.completed().map(|completed| !completed)
                     });
                     Filter::Active
                 }
                 Some("/completed") => {
-                    Self::set_filter(&write_items, |item| item.completed.read());
+                    Self::set_filter(&write_items, TodoItem::completed);
                     Filter::Completed
                 }
                 _ => {
@@ -139,7 +139,7 @@ impl TodoApp {
 
                                     write_items.mutate(move |items| {
                                         for item in items.values() {
-                                            item.completed.write().set(new_completed);
+                                            item.data.completed.write().set(new_completed);
                                         }
                                     })
                                 }
@@ -225,9 +225,8 @@ impl TodoApp {
                         .class("clear-completed")
                         .text("Clear completed")
                         .on_click(move |_, _| {
-                            write_items.mutate(|items| {
-                                items.retain(|item| !*item.completed.read().current())
-                            })
+                            write_items
+                                .mutate(|items| items.retain(|item| !*item.completed().current()))
                         })
                         .build(),
                 )
@@ -252,10 +251,15 @@ impl TodoApp {
 }
 
 #[derive(Clone)]
-struct TodoItem {
+struct TodoStorage {
     id: usize,
     text: Signal<String>,
     completed: Signal<bool>,
+}
+
+#[derive(Clone)]
+struct TodoItem {
+    data: TodoStorage,
     editing: Signal<bool>,
     parent: WriteSignal<ElementList<usize, Self>>,
     active_count: ReadSignal<SumHandle>,
@@ -276,9 +280,11 @@ impl TodoItem {
             .map_to(SumElement::new(active_count));
 
         Self {
-            id,
-            text: Signal::new(text.into()),
-            completed,
+            data: TodoStorage {
+                id,
+                text: Signal::new(text.into()),
+                completed,
+            },
             editing: Signal::new(false),
             parent,
             active_count,
@@ -296,7 +302,7 @@ impl TodoItem {
         input()
             .class("edit")
             .type_("text")
-            .value(&self.text.read())
+            .value(&self.text())
             .on_focusout({
                 let self_ = self.clone();
                 move |_, input| self_.save_edits(&input)
@@ -305,7 +311,7 @@ impl TodoItem {
                 let self_ = self.clone();
                 move |keyup, input| match keyup.key().as_str() {
                     "Escape" => {
-                        input.set_value(&self_.text.read().current());
+                        input.set_value(&self_.text().current());
                         self_.editing.write().set(false)
                     }
                     "Enter" => self_.save_edits(&input),
@@ -325,12 +331,12 @@ impl TodoItem {
     }
 
     fn define_view(&self) -> Div {
-        let completed = self.completed.read();
+        let completed = self.completed();
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                let set_completed = self.completed.write();
+                let set_completed = self.data.completed.write();
                 move |_, _| set_completed.replace(|completed| !completed)
             })
             .checked(*completed.current())
@@ -339,12 +345,12 @@ impl TodoItem {
                     .map(|&complete| move |elem: &HtmlInputElement| elem.set_checked(complete)),
             );
         let parent = self.parent.clone();
-        let id = self.id;
+        let id = self.data.id;
 
         div()
             .class("view")
             .child(completed_checkbox)
-            .child(label().text(self.text.read()).on_dblclick({
+            .child(label().text(self.text()).on_dblclick({
                 let set_editing = self.editing.write();
                 move |_, _| set_editing.set(true)
             }))
@@ -366,22 +372,30 @@ impl TodoItem {
         let text = text.trim();
 
         if text.is_empty() {
-            let id = self.id;
+            let id = self.data.id;
             self.parent.mutate(move |p| p.remove(&id));
         } else if *self.editing.read().current() {
-            self.text.write().set(text.to_string());
+            self.data.text.write().set(text.to_string());
             self.editing.write().set(false);
         }
     }
 
     fn class(&self) -> ReadSignal<String> {
-        (self.completed.read(), self.editing.read()).map(|&completed, &editing| {
+        (self.completed(), self.editing.read()).map(|&completed, &editing| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| if flag { Some(name) } else { None })
                 .collect::<Vec<_>>()
                 .join(" ")
         })
+    }
+
+    fn text(&self) -> ReadSignal<String> {
+        self.data.text.read()
+    }
+
+    fn completed(&self) -> ReadSignal<bool> {
+        self.data.completed.read()
     }
 }
 
