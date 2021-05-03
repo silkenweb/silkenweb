@@ -132,8 +132,8 @@ where
     /// An iterator over all values in the list, including hidden items. If
     /// `Value` is interiorly mutable and reactivity with the filter
     /// is correctly set up, it's safe to mutate the items.
-    pub fn values(&mut self) -> impl Iterator<Item = Ref<Value>> {
-        self.items.values_mut().map(|stored| stored.item.borrow())
+    pub fn values(&self) -> impl Iterator<Item = Ref<Value>> {
+        self.items.values().map(|stored| stored.item.borrow())
     }
 
     /// Clear all the items from the list, including filtered items.
