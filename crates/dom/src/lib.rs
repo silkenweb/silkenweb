@@ -568,7 +568,8 @@ fn document() -> dom::Document {
 }
 
 // TODO: We probably want a better storage API.
-// We want to be able to iterator over it like a map using Object::entries and Object::keys
+// We want to be able to iterator over it like a map using Object::entries and
+// Object::keys
 /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 pub fn local_storage() -> Option<dom::Storage> {
     // TODO: Under what circumstances can these fail?
