@@ -152,11 +152,7 @@ impl TodoApp {
                     for item in &items {
                         store_items.push({
                             clone!(storage, items);
-                            item.completed.read().map(move |_| store(&storage, &items))
-                        });
-                        store_items.push({
-                            clone!(storage, items);
-                            item.text.read().map(move |_| store(&storage, &items))
+                            item.on_change().map(move |_| store(&storage, &items))
                         });
                     }
                 }
@@ -327,6 +323,10 @@ impl TodoStorage {
             text: Signal::new(text.into()),
             completed: Signal::new(completed),
         }
+    }
+
+    fn on_change(&self) -> ReadSignal<()> {
+        (self.text.read(), self.completed.read()).map(|_, _| ())
     }
 }
 
