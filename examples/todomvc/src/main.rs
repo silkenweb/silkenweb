@@ -147,13 +147,17 @@ impl TodoApp {
                         .values()
                         .map(|item| item.data.clone())
                         .collect::<Vec<_>>();
-                    storage
-                        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-                        .unwrap();
+                    store(&storage, &items);
 
                     for item in &items {
-                        store_items.push(store(&item.completed, &storage, items.clone()));
-                        store_items.push(store(&item.text, &storage, items.clone()));
+                        store_items.push({
+                            clone!(storage, items);
+                            item.completed.read().map(move |_| store(&storage, &items))
+                        });
+                        store_items.push({
+                            clone!(storage, items);
+                            item.text.read().map(move |_| store(&storage, &items))
+                        });
                     }
                 }
 
@@ -471,17 +475,9 @@ enum Filter {
 
 const STORAGE_KEY: &str = "silkenweb_todo";
 
-fn store<T>(dependency: &Signal<T>, storage: &Storage, items: Vec<TodoStorage>) -> ReadSignal<()>
-where
-    T: 'static,
-{
-    dependency.read().map({
-        clone!(storage);
-
-        move |_| {
-            storage
-                .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-                .unwrap()
-        }
-    })
+#[allow(clippy::ptr_arg)]
+fn store(storage: &Storage, items: &Vec<TodoStorage>) {
+    storage
+        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
+        .unwrap()
 }
