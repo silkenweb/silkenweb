@@ -26,7 +26,7 @@ fn main() {
 
 #[derive(Clone)]
 struct TodoApp {
-    items: Signal<ElementList<usize, TodoItem>>,
+    items: Signal<TodoList>,
     id: Rc<Cell<usize>>,
     filter: ReadSignal<Filter>,
     active_count: SumTotal<usize>,
@@ -36,54 +36,14 @@ struct TodoApp {
 
 impl TodoApp {
     fn new() -> Self {
-        let mut max_id = 0;
-
         let items = Signal::new(ElementList::new(
             ul().class("todo-list"),
             TodoItem::render,
             iter::empty(),
         ));
-        let write_items = items.write();
         let active_count = SumTotal::default();
-
-        // TODO: Test if localstorage is disabled
-        if let Some(todos_str) =
-            local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).unwrap())
-        {
-            let todos: Vec<TodoStorage> = serde_json::from_str(&todos_str).unwrap();
-
-            for data in todos {
-                let id = data.id;
-                max_id = max(max_id, data.id);
-                let todo_item = TodoItem::new(data, write_items.clone(), &active_count);
-                write_items.mutate(move |items| items.insert(id, todo_item));
-            }
-        }
-
-        // TODO: map_changes (only map changes, rather than initial value)
-        let store_items = items
-            .read()
-            .map(|items| {
-                let mut store_items = Vec::new();
-
-                if let Some(storage) = local_storage() {
-                    let items = items
-                        .values()
-                        .map(|item| item.data.clone())
-                        .collect::<Vec<_>>();
-                    storage
-                        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-                        .unwrap();
-
-                    for item in &items {
-                        store_items.push(store(&item.completed, &storage, items.clone()));
-                        store_items.push(store(&item.text, &storage, items.clone()));
-                    }
-                }
-
-                store_items
-            })
-            .map(|_| ());
+        let next_id = Self::read_items(&items.write(), &active_count);
+        let store_items = Self::store_items(&items.read());
 
         let filter = url().map({
             let write_items = items.write();
@@ -107,7 +67,7 @@ impl TodoApp {
 
         Self {
             items,
-            id: Rc::new(Cell::new(max_id + 1)),
+            id: Rc::new(Cell::new(next_id)),
             filter,
             active_count,
             store_items,
@@ -115,7 +75,7 @@ impl TodoApp {
     }
 
     fn set_filter(
-        write_items: &WriteSignal<ElementList<usize, TodoItem>>,
+        write_items: &WriteSignal<TodoList>,
         f: impl 'static + Fn(&TodoItem) -> ReadSignal<bool>,
     ) {
         write_items.mutate(|items| items.filter(f));
@@ -154,6 +114,52 @@ impl TodoApp {
             )
             .child(self.define_footer())
             .build()
+    }
+
+    // Returns the next item id
+    fn read_items(dest_items: &WriteSignal<TodoList>, active_count: &SumTotal<usize>) -> usize {
+        let mut next_id = 0;
+
+        if let Some(todos_str) =
+            local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).ok().flatten())
+        {
+            let todos: Vec<TodoStorage> = serde_json::from_str(&todos_str).unwrap();
+
+            for data in todos {
+                let id = data.id;
+                next_id = max(next_id, data.id + 1);
+                let todo_item = TodoItem::new(data, dest_items.clone(), &active_count);
+                dest_items.mutate(move |items| items.insert(id, todo_item));
+            }
+        }
+
+        next_id
+    }
+
+    fn store_items(items: &ReadSignal<TodoList>) -> ReadSignal<()> {
+        // TODO: map_changes (only map changes, rather than initial value)
+        items
+            .map(|items| {
+                let mut store_items = Vec::new();
+
+                if let Some(storage) = local_storage() {
+                    let items = items
+                        .values()
+                        .map(|item| item.data.clone())
+                        .collect::<Vec<_>>();
+                    storage
+                        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
+                        .unwrap();
+
+                    for item in &items {
+                        store_items.push(store(&item.completed, &storage, items.clone()));
+                        store_items.push(store(&item.text, &storage, items.clone()));
+                    }
+                }
+
+                store_items
+            })
+            .map(|_| ())
     }
 
     fn define_todo_items(&self) -> ReadSignal<Div> {
@@ -300,6 +306,8 @@ impl TodoApp {
         })
     }
 }
+
+type TodoList = ElementList<usize, TodoItem>;
 
 #[derive(Clone, Serialize, Deserialize)]
 struct TodoStorage {
