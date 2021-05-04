@@ -6,6 +6,7 @@ use std::{
     rc::{self, Rc},
 };
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::clone;
@@ -46,7 +47,7 @@ impl<T: 'static> Signal<T> {
     }
 }
 
-// TODO: Feature gate serde
+#[cfg(feature = "serde")]
 impl<T: 'static + Serialize> Serialize for Signal<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -56,6 +57,7 @@ impl<T: 'static + Serialize> Serialize for Signal<T> {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de, T: 'static + Deserialize<'de>> Deserialize<'de> for Signal<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

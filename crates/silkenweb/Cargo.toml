@@ -25,3 +25,6 @@ silkenweb = { path = "../silkenweb" }
 [dev-dependencies.web-sys]
 version = "0.3"
 features = ["Window", "Document", "Text", "Element", "HtmlInputElement"]
+
+[features]
+serde = ["silkenweb-reactive/serde"]
