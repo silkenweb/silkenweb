@@ -30,8 +30,8 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.cargo/bin
-        key: ${{ runner.os }}-cargo-${{ hashFiles('scripts/install-wasm-tools.sh') }}
-    - run: bash scripts/install-wasm-tools.sh
+        key: ${{ runner.os }}-cargo-${{ hashFiles('scripts/install-ci-runtime.sh') }}
+    - run: bash scripts/install-ci-runtime.sh
     - name: Browser Tests
       run: wasm-pack test --headless --firefox --chrome
       working-directory: crates/silkenweb
@@ -52,7 +52,12 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - run: rustup toolchain install ${{ matrix.rust }} -c rustfmt
-    - run: cargo install cargo-udeps
+    - name: Cache Cargo Installs
+      uses: actions/cache@v2
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-${{ hashFiles('scripts/install-ci-runtime.sh') }}
+    - run: bash scripts/install-ci-runtime.sh
     - run: rustup default ${{ matrix.rust }}
     - run: cargo fmt --all -- --check
     - run: cargo udeps --all-targets
@@ -65,6 +70,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@main
-    - run: cargo install mdbook
+    - name: Cache Cargo Installs
+      uses: actions/cache@v2
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-${{ hashFiles('scripts/install-ci-runtime.sh') }}
+    - run: bash scripts/install-ci-runtime.sh
     - run: mdbook test
       working-directory: tutorial
