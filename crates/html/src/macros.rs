@@ -152,9 +152,9 @@ macro_rules! events {
                 ) -> Self {
                     Self(self.0.on(stringify!($name), move |js_ev| {
                         use $crate::macros::JsCast;
-                        // I *think* it's safe to assume event and event.target aren't null
+                        // I *think* it's safe to assume event and event.current_target aren't null
                         let event: $event_type = js_ev.unchecked_into();
-                        let target: $elem_type = event.target().unwrap().unchecked_into();
+                        let target: $elem_type = event.current_target().unwrap().unchecked_into();
                         f(event, target);
                     }))
                 }
