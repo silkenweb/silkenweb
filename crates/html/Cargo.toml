@@ -29,6 +29,7 @@ features = [
     "PointerEvent",
     "TouchEvent",
     "TransitionEvent",
+    "WebGlContextEvent",
     "WheelEvent",
 
     "HtmlAnchorElement",

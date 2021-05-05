@@ -75,11 +75,13 @@ macro_rules! html_element {
 }
 
 macro_rules! dom_type {
-    ($name:ident < $elem_type:ty >) => {
+    ($name:ident < $elem_type:ty > $( { $($events:tt)* } )?) => {
         paste::item! {
             impl [<$name:camel Builder>] {
                 html_element_events!($elem_type);
                 element_events!($elem_type);
+
+                $( events!($elem_type { $($events)* }); )?
 
                 pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
                     Self(self.0.effect(f))
