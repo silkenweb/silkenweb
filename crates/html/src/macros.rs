@@ -78,7 +78,8 @@ macro_rules! dom_type {
     ($name:ident < $elem_type:ty >) => {
         paste::item! {
             impl [<$name:camel Builder>] {
-                html_events!($elem_type);
+                html_element_events!($elem_type);
+                element_events!($elem_type);
 
                 pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
                     Self(self.0.effect(f))
@@ -125,17 +126,68 @@ macro_rules! children_allowed {
     };
 }
 
-macro_rules! html_events {
+macro_rules! html_element_events {
     ($elem_type:ty) => {
         events!($elem_type {
+            animationend: web_sys::AnimationEvent,
+            animationiteration: web_sys::AnimationEvent,
+            animationstart: web_sys::AnimationEvent,
+            beforeinput: web_sys::InputEvent,
+            change: web_sys::Event,
+            gotpointercapture: web_sys::PointerEvent,
+            input: web_sys::InputEvent,
+            lostpointercapture: web_sys::PointerEvent,
+            pointercancel: web_sys::PointerEvent,
+            pointerdown: web_sys::PointerEvent,
+            pointerenter: web_sys::PointerEvent,
+            pointerleave: web_sys::PointerEvent,
+            pointermove: web_sys::PointerEvent,
+            pointerout: web_sys::PointerEvent,
+            pointerover: web_sys::PointerEvent,
+            pointerup: web_sys::PointerEvent,
+            transitionend: web_sys::TransitionEvent,
+        });
+    };
+}
+
+macro_rules! element_events {
+    ($elem_type:ty) => {
+        events!($elem_type {
+            auxclick: web_sys::MouseEvent,
             blur: web_sys::FocusEvent,
             click: web_sys::MouseEvent,
-            change: web_sys::Event,
+            compositionend: web_sys::CompositionEvent,
+            compositionstart: web_sys::CompositionEvent,
+            compositionupdate: web_sys::CompositionEvent,
+            contextmenu: web_sys::MouseEvent,
             dblclick: web_sys::MouseEvent,
+            error: web_sys::Event,
+            focusin: web_sys::FocusEvent,
             focusout: web_sys::FocusEvent,
-            input: web_sys::InputEvent,
+            focus: web_sys::FocusEvent,
+            fullscreenchange: web_sys::Event,
+            fullscreenerror: web_sys::Event,
             keydown: web_sys::KeyboardEvent,
             keyup: web_sys::KeyboardEvent,
+            mousedown: web_sys::MouseEvent,
+            mouseenter: web_sys::MouseEvent,
+            mouseleave: web_sys::MouseEvent,
+            mousemove: web_sys::MouseEvent,
+            mouseout: web_sys::MouseEvent,
+            mouseover: web_sys::MouseEvent,
+            mouseup: web_sys::MouseEvent,
+            scroll: web_sys::Event,
+            select: web_sys::Event,
+            touchcancel: web_sys::TouchEvent,
+            touchend: web_sys::TouchEvent,
+            touchmove: web_sys::TouchEvent,
+            touchstart: web_sys::TouchEvent,
+            wheel: web_sys::WheelEvent,
+            /* The events are currently marked as unstable in web_sys:
+             *
+             * copy: web_sys::ClipboardEvent,
+             * cut: web_sys::ClipboardEvent,
+             * paste: web_sys::ClipboardEvent, */
         });
     };
 }

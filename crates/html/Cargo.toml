@@ -20,10 +20,16 @@ wasm-bindgen = "0.2.73"
 [dependencies.web-sys]
 version = "0.3"
 features = [
+    "AnimationEvent",
+    "CompositionEvent",
     "FocusEvent",
     "InputEvent",
     "KeyboardEvent",
     "MouseEvent",
+    "PointerEvent",
+    "TouchEvent",
+    "TransitionEvent",
+    "WheelEvent",
 
     "HtmlAnchorElement",
     "HtmlAreaElement",
