@@ -249,52 +249,49 @@ impl<T: 'static> WriteSignal<T> {
 }
 
 /// Zip signals together to create a new one. The tuple implementation allows
-/// you to write `(signal0, signal1).map(...)`.
-pub trait ZipSignal<Generate> {
+/// you to write `(signal0, signal1).zip().map(...)`.
+pub trait ZipSignal {
     /// The inner type of the target signal.
     type Target;
 
-    /// Map `generate` over the inner signal value.
-    fn map(&self, generate: Generate) -> ReadSignal<Self::Target>;
+    /// Zip the elements of `self` together.
+    fn zip(&self) -> ReadSignal<Self::Target>;
 }
 
-impl<T0, T1, U, Generate> ZipSignal<Generate> for (ReadSignal<T0>, ReadSignal<T1>)
+impl<Lhs, Rhs> ZipSignal for (ReadSignal<Lhs>, ReadSignal<Rhs>)
 where
-    T0: 'static,
-    T1: 'static,
-    U: 'static,
-    Generate: 'static + Fn(&T0, &T1) -> U,
+    Lhs: 'static + Clone,
+    Rhs: 'static + Clone,
 {
-    type Target = U;
+    type Target = (Lhs, Rhs);
 
-    fn map(&self, generate: Generate) -> ReadSignal<Self::Target> {
-        let x0 = &self.0;
-        let x1 = &self.1;
-        let child = Signal::new(generate(&x0.current(), &x1.current()));
-        let generate0 = Rc::new(generate);
-        let generate1 = generate0.clone();
+    fn zip(&self) -> ReadSignal<Self::Target> {
+        let (lhs, rhs) = self;
 
-        x0.add_dependent(
-            &child,
+        let current = (lhs.current().clone(), rhs.current().clone());
+        let product = Signal::new(current);
+
+        lhs.add_dependent(
+            &product,
             Rc::new({
-                let set_value = child.write();
-                clone!(x1);
+                let set_value = product.write();
+                clone!(rhs);
 
-                move |new_value| set_value.set(generate0(new_value, &x1.current()))
+                move |new_value| set_value.set((new_value.clone(), rhs.current().clone()))
             }),
         );
 
-        x1.add_dependent(
-            &child,
+        rhs.add_dependent(
+            &product,
             Rc::new({
-                let set_value = child.write();
-                clone!(x0);
+                let set_value = product.write();
+                clone!(lhs);
 
-                move |new_value| set_value.set(generate1(&x0.current(), new_value))
+                move |new_value| set_value.set((lhs.current().clone(), new_value.clone()))
             }),
         );
 
-        child.read()
+        product.read()
     }
 }
 

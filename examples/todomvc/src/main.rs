@@ -266,7 +266,8 @@ impl TodoApp {
         let write_items = self.items.write();
         let items_len = self.items.read().map(ElementList::len);
         let any_completed = (self.active_count.read(), items_len)
-            .map(|&active_count, &items_len| active_count != items_len)
+            .zip()
+            .map(|&(active_count, items_len)| active_count != items_len)
             .only_changes();
 
         any_completed.map(move |&any_completed| {
@@ -326,7 +327,7 @@ impl TodoStorage {
     }
 
     fn on_change(&self) -> ReadSignal<()> {
-        (self.text.read(), self.completed.read()).map(|_, _| ())
+        (self.text.read(), self.completed.read()).zip().map(|_| ())
     }
 }
 
@@ -448,13 +449,15 @@ impl TodoItem {
     }
 
     fn class(&self) -> ReadSignal<String> {
-        (self.completed(), self.editing.read()).map(|&completed, &editing| {
-            vec![(completed, "completed"), (editing, "editing")]
-                .into_iter()
-                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
-                .collect::<Vec<_>>()
-                .join(" ")
-        })
+        (self.completed(), self.editing.read())
+            .zip()
+            .map(|&(completed, editing)| {
+                vec![(completed, "completed"), (editing, "editing")]
+                    .into_iter()
+                    .filter_map(|(flag, name)| if flag { Some(name) } else { None })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            })
     }
 
     fn text(&self) -> ReadSignal<String> {

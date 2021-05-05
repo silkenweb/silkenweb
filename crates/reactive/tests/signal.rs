@@ -13,7 +13,7 @@ fn zip_signals() {
     let x = Signal::new(1);
     let y = Signal::new(10);
 
-    let sum = (x.read(), y.read()).map(move |&x, &y| x + y);
+    let sum = (x.read(), y.read()).zip().map(move |&(x, y)| x + y);
     assert_eq!(*sum.current(), 11);
 
     x.write().set(2);
