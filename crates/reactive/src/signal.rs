@@ -255,7 +255,7 @@ pub trait ZipSignal {
     type Target;
 
     /// Zip the elements of `self` together.
-    fn zip(&self) -> ReadSignal<Self::Target>;
+    fn zip(self) -> ReadSignal<Self::Target>;
 }
 
 impl<Lhs, Rhs> ZipSignal for (ReadSignal<Lhs>, ReadSignal<Rhs>)
@@ -265,7 +265,7 @@ where
 {
     type Target = (Lhs, Rhs);
 
-    fn zip(&self) -> ReadSignal<Self::Target> {
+    fn zip(self) -> ReadSignal<Self::Target> {
         let (lhs, rhs) = self;
 
         let current = (lhs.current().clone(), rhs.current().clone());
@@ -294,6 +294,45 @@ where
         product.read()
     }
 }
+
+macro_rules! zip_signal{
+    ( $($x:ident : $typ:ident),* ) => {
+        impl<T0, $($typ),*> ZipSignal for (ReadSignal<T0>, $(ReadSignal<$typ>),*)
+        where
+            T0: 'static + Clone,
+            $($typ: 'static + Clone),*
+        {
+            type Target = (T0, $($typ),*);
+
+            fn zip(self) -> ReadSignal<Self::Target> {
+                let (x0, $($x),*) = self;
+
+                (x0, ( $($x),* ).zip())
+                    .zip()
+                    .map(|(x0, ( $($x),*) )| (x0.clone(), $($x.clone()),*))
+            }
+        }
+    }
+}
+
+macro_rules! zip_all_signals{
+    () => { zip_signal!(x1: T1, x2: T2); };
+    ($head:ident : $head_typ: ident $(, $tail:ident : $tail_typ:ident)*) => {
+        zip_all_signals!( $($tail: $tail_typ),* );
+        zip_signal!(x1: T1, x2: T2, $head: $head_typ $(, $tail: $tail_typ)*);
+    }
+}
+
+zip_all_signals!(
+    x3: T3,
+    x4: T4,
+    x5: T5,
+    x6: T6,
+    x7: T7,
+    x8: T8,
+    x9: T9,
+    x10: T10
+);
 
 struct State<T> {
     current: RefCell<T>,

@@ -24,6 +24,31 @@ fn zip_signals() {
 }
 
 #[test]
+fn zip_many_signals() {
+    let x0 = Signal::new(1);
+    let x1 = Signal::new(10);
+    let x2 = Signal::new(100);
+    let x3 = Signal::new(1000);
+
+    let sum = (x0.read(), x1.read(), x2.read(), x3.read())
+        .zip()
+        .map(move |&(x0, x1, x2, x3)| x0 + x1 + x2 + x3);
+    assert_eq!(*sum.current(), 1111);
+
+    x0.write().set(2);
+    assert_eq!(*sum.current(), 1112);
+
+    x1.write().set(20);
+    assert_eq!(*sum.current(), 1122);
+
+    x2.write().set(200);
+    assert_eq!(*sum.current(), 1222);
+
+    x3.write().set(2000);
+    assert_eq!(*sum.current(), 2222);
+}
+
+#[test]
 fn callback_cleanup() {
     let state = State::new(0);
     let x = Signal::new(0);
