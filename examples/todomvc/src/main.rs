@@ -47,14 +47,14 @@ impl TodoApp {
 
         let filter = url().map({
             let write_items = items.write();
-            move |url| match url.fragment() {
-                Some("/active") => {
+            move |url| match url.hash().as_str() {
+                "#/active" => {
                     Self::set_filter(&write_items, |item| {
                         item.completed().map(|completed| !completed)
                     });
                     Filter::Active
                 }
-                Some("/completed") => {
+                "#/completed" => {
                     Self::set_filter(&write_items, TodoItem::completed);
                     Filter::Completed
                 }

@@ -1,6 +1,6 @@
 use silkenweb_reactive::signal::{ReadSignal, Signal};
-use url::Url;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use web_sys::Url;
 
 use crate::window;
 
@@ -21,11 +21,11 @@ pub fn url() -> ReadSignal<Url> {
 pub fn set_url_path(path: impl 'static + AsRef<str>) {
     URL.with(move |url| {
         url.write().mutate(move |url| {
-            url.set_path(path.as_ref());
+            url.set_pathname(path.as_ref());
             window()
                 .history()
                 .unwrap()
-                .push_state_with_url(&JsValue::null(), "", Some(url.as_str()))
+                .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
                 .unwrap();
         })
     })
@@ -33,7 +33,7 @@ pub fn set_url_path(path: impl 'static + AsRef<str>) {
 
 fn new_url_signal() -> Signal<Url> {
     let window = window();
-    let url = Url::parse(
+    let url = Url::new(
         &window
             .location()
             .href()
@@ -51,7 +51,7 @@ thread_local! {
     static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_event: JsValue| {
             URL.with(|url| url.write().set(
-                Url::parse(&window().location().href().expect("HRef must exist")).expect("URL must be valid")
+                Url::new(&window().location().href().expect("HRef must exist")).expect("URL must be valid")
             ));
         }));
     static URL: Signal<Url> = new_url_signal();

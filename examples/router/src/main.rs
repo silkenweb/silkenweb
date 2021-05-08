@@ -17,6 +17,6 @@ fn main() {
                     .on_click(|_, _| router::set_url_path("/route_2"))
                     .text("Go to route 2"),
             )
-            .child(p().text(router::url().map(|url| format!("URL Path is: {}", url.path()))))
+            .child(p().text(router::url().map(|url| format!("URL Path is: {}", url.pathname()))))
     });
 }
