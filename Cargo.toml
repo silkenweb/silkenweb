@@ -20,6 +20,7 @@ members = [
 [profile.release]
 codegen-units = 1
 lto = true
+opt-level = "z"
 
 [patch.crates-io]
 silkenweb-html = { path = "crates/html" }
