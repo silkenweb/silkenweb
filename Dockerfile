@@ -27,7 +27,7 @@ RUN curl -L https://github.com/WebAssembly/binaryen/releases/download/version_10
 RUN cargo install cargo-udeps
 RUN cargo install mdbook
 RUN cargo install trunk
-RUN cargo install wasm-bindgen-cli
+RUN cargo install wasm-bindgen-cli --version 0.2.73
 RUN cargo install wasm-pack
 RUN cargo install xargo
 
