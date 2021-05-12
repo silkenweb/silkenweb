@@ -23,8 +23,8 @@
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
 
 pub use silkenweb_dom::{
-    after_render, element_list, local_storage, mount, render_updates, session_storage, tag,
-    unmount, Builder, DomElement, Element, ElementBuilder, animation
+    after_render, animation, element_list, local_storage, mount, render_updates, session_storage,
+    tag, tag_in_namespace, unmount, Builder, DomElement, Element, ElementBuilder,
 };
 pub use silkenweb_html::elements;
 pub use silkenweb_reactive::{accumulators, clone, memo, signal};

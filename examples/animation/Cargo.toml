@@ -1,0 +1,10 @@
+[package]
+name = "silkenweb-example-animation"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+silkenweb = { path = "../../crates/silkenweb" }
+num-traits = "0.2"

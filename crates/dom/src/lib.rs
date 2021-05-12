@@ -55,6 +55,13 @@ pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
+/// An HTML element tag in a namespace.
+///
+/// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
+pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> ElementBuilder {
+    ElementBuilder::new_in_namespace(namespace, name)
+}
+
 /// Build an HTML element.
 pub struct ElementBuilder {
     element: ElementData,
@@ -63,9 +70,21 @@ pub struct ElementBuilder {
 
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
+        Self::new_element(document().create_element(tag.as_ref()).unwrap())
+    }
+
+    pub fn new_in_namespace(namespace: impl AsRef<str>, tag: impl AsRef<str>) -> Self {
+        Self::new_element(
+            document()
+                .create_element_ns(Some(namespace.as_ref()), tag.as_ref())
+                .unwrap(),
+        )
+    }
+
+    fn new_element(dom_element: dom::Element) -> Self {
         ElementBuilder {
             element: ElementData {
-                dom_element: document().create_element(tag.as_ref()).unwrap(),
+                dom_element,
                 children: Vec::new(),
                 event_callbacks: Vec::new(),
                 reactive_attrs: HashMap::new(),

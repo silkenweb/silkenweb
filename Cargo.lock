@@ -184,6 +184,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-animation"
+version = "0.1.0"
+dependencies = [
+ "num-traits",
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-example-counter"
 version = "0.1.0"
 dependencies = [

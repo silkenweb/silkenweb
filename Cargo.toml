@@ -10,6 +10,7 @@ members = [
     "examples/todomvc",
     "examples/counter",
     "examples/router",
+    "examples/animation",
     "examples/hello-world",
     "crates/silkenweb",
     "crates/html",
