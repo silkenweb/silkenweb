@@ -27,11 +27,34 @@
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
 
 pub use silkenweb_dom::{
-    after_render, animation, element_list, local_storage, mount, render_updates, session_storage,
-    tag, tag_in_namespace, unmount, Builder, DomElement, Element, ElementBuilder,
+    after_render, element_list, local_storage, mount, render_updates, session_storage, tag,
+    tag_in_namespace, unmount, Builder, DomElement, Element, ElementBuilder,
 };
 pub use silkenweb_html::elements;
 pub use silkenweb_reactive::{accumulators, clone, memo, signal};
+
+pub mod animation {
+    //! Provide animation time signals.
+    //!
+    //! Each time signal is in milliseconds, and starts from 0. Any live
+    //! animation time signals will be updated each frame, and are strictly
+    //! increasing.
+    //!
+    //! For example, this will show a progress bar that takes 10 seconds to
+    //! fill.
+    //!
+    //! ```no_run
+    //! # use silkenweb::{animation::finite_animation, elements::progress, mount};
+    //!
+    //! mount(
+    //!     "app",
+    //!     progress()
+    //!         .value(finite_animation(10000.0).map(|&time| time as f32))
+    //!         .max(10000.0),
+    //! );
+    //! ```
+    pub use silkenweb_dom::animation::{finite_animation, infinite_animation};
+}
 
 pub mod router {
     //! URL based routing.
