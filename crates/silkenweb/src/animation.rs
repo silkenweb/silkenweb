@@ -19,9 +19,8 @@
 //! ```
 use std::cell::Cell;
 
-use silkenweb_reactive::signal::{ReadSignal, SignalReceiver};
-
 use silkenweb_dom::render::{animation_timestamp, request_render_updates};
+use silkenweb_reactive::signal::{ReadSignal, SignalReceiver};
 
 #[derive(Default)]
 struct AnimationTime {
