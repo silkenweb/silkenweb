@@ -22,7 +22,12 @@ macro_rules! html_element {
             pub struct [<$name:camel Builder>]($crate::macros::ElementBuilder);
 
             impl [<$name:camel Builder>] {
-                attributes![id: String, class: String, $($(#[$attr_meta])* $attr: $typ, )*];
+                attributes![
+                    id: String,
+                    class: String,
+                    style: String,
+                    $($(#[$attr_meta])* $attr: $typ,)*
+                ];
             }
 
             impl $crate::macros::Builder for [<$name:camel Builder>] {
