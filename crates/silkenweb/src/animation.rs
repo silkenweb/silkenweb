@@ -5,7 +5,7 @@
 //! increasing.
 //!
 //! For example, this will show a progress bar that takes 10 seconds to
-//! fill.
+//! fill:
 //!
 //! ```no_run
 //! # use silkenweb::{animation::finite_animation, elements::progress, mount};
