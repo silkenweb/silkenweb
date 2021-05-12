@@ -6,14 +6,12 @@
     clippy::module_name_repetitions,
     clippy::option_if_let_else
 )]
-pub mod animation;
 pub mod element_list;
-mod render;
+pub mod render;
 pub mod router;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
-use render::queue_update;
-pub use render::{after_render, render_updates};
+use render::{after_render, queue_update};
 use silkenweb_reactive::{clone, signal::ReadSignal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;

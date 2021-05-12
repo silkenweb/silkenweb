@@ -14,7 +14,7 @@ pub fn after_render(x: impl 'static + FnOnce()) {
     RENDER.with(|r| r.after_render(x));
 }
 
-pub(crate) fn animation_timestamp() -> ReadSignal<f64> {
+pub fn animation_timestamp() -> ReadSignal<f64> {
     RENDER.with(Render::animation_timestamp)
 }
 
@@ -25,7 +25,7 @@ pub fn render_updates() {
     RENDER.with(Render::render_updates);
 }
 
-pub(super) fn request_render_updates() {
+pub fn request_render_updates() {
     RENDER.with(Render::request_render_updates);
 }
 
