@@ -5,6 +5,7 @@
     clippy::must_use_candidate,
     clippy::module_name_repetitions
 )]
+pub mod animation;
 pub mod element_list;
 mod render;
 pub mod router;
@@ -282,6 +283,12 @@ impl StaticAttribute for bool {
                 dom_element.remove_attribute(&name).unwrap();
             });
         }
+    }
+}
+
+impl StaticAttribute for f32 {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        set_attribute(dom_element, name, format!("{}", self));
     }
 }
 

@@ -24,7 +24,7 @@
 
 pub use silkenweb_dom::{
     after_render, element_list, local_storage, mount, render_updates, session_storage, tag,
-    unmount, Builder, DomElement, Element, ElementBuilder,
+    unmount, Builder, DomElement, Element, ElementBuilder, animation
 };
 pub use silkenweb_html::elements;
 pub use silkenweb_reactive::{accumulators, clone, memo, signal};
