@@ -17,13 +17,12 @@ fn path(time: &ReadSignal<f64>, humps: usize, speed: f64) -> ReadSignal<Element>
         let hump_width = WIDTH / humps.to_f32().unwrap();
 
         let initial_path = format!(
-            "M 0,{} Q {},{} {},{} t {},0",
+            "M 0,{} Q {},{} {},{}",
             half_height,
             hump_width / 2.0,
             control_point,
             hump_width,
             half_height,
-            hump_width
         );
 
         assert!(humps >= 1);
