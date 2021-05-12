@@ -127,7 +127,7 @@ impl<T: 'static> ReadSignal<T> {
     /// ```
     pub fn only_changes(&self) -> ReadSignal<T>
     where
-        T: Clone + Eq,
+        T: Clone + PartialEq,
     {
         let child = Signal::new(self.current().clone());
 
