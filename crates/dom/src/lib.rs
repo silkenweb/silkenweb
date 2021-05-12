@@ -8,7 +8,6 @@
 )]
 pub mod element_list;
 pub mod render;
-pub mod router;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 use render::{after_render, queue_update};
@@ -45,6 +44,14 @@ pub fn unmount(id: &str) {
     if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.dom_element().remove();
     }
+}
+
+pub fn window() -> dom::Window {
+    dom::window().expect("Window must be available")
+}
+
+pub fn document() -> dom::Document {
+    window().document().expect("Window must contain a document")
 }
 
 /// An HTML element tag.
@@ -582,14 +589,6 @@ impl Drop for EventCallback {
             )
             .unwrap();
     }
-}
-
-fn window() -> dom::Window {
-    dom::window().expect("Window must be available")
-}
-
-fn document() -> dom::Document {
-    window().document().expect("Window must contain a document")
 }
 
 // TODO: We probably want a better storage API.

@@ -164,7 +164,6 @@ dependencies = [
 name = "silkenweb"
 version = "0.1.1"
 dependencies = [
- "silkenweb",
  "silkenweb-dom",
  "silkenweb-html",
  "silkenweb-reactive",
