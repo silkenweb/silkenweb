@@ -12,6 +12,8 @@
 //!
 //! - [hello-world] is a minimal example
 //! - [counter] is a minimal interactive example
+//! - [router] is a simple routing example
+//! - [animation] is a simple animation example
 //! - [todomvc] is an example of a simple app
 //!
 //! For a more complete introduction, see
@@ -20,6 +22,8 @@
 //! [trunk]: https://trunkrs.dev/
 //! [hello-world]: https://github.com/silkenweb/silkenweb/tree/main/examples/hello-world
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
+//! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
+//! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
 
 pub use silkenweb_dom::{
