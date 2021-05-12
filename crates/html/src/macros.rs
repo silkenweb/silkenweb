@@ -23,6 +23,7 @@ macro_rules! html_element {
 
             impl [<$name:camel Builder>] {
                 attributes![
+                    // TODO: Add all global attrs.
                     id: String,
                     class: String,
                     style: String,
