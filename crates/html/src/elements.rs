@@ -2513,7 +2513,7 @@ html_element!(
         /// being automatically redirected. The abrupt, unannounced
         /// updating of the page content may also be disorienting for people
         /// experiencing low vision conditions.
-        http_equiv: String,
+        http-equiv: String,
 
         /// The name and content attributes can be used together to provide
         /// document metadata in terms of name-value pairs, with the
@@ -2754,7 +2754,7 @@ html_element!(
         /// default value means the same encoding as the page.
         ///
         /// [character encodings]: https://developer.mozilla.org/en-US/docs/Web/Guide/Localizations_and_character_encodings
-        accept_charset: String,
+        accept-charset: String,
 
         /// The URI of a program that processes the information submitted via
         /// the form.

@@ -3,6 +3,13 @@ pub use silkenweb_dom::{
 };
 pub use wasm_bindgen::JsCast;
 
+#[doc(hidden)]
+// Macro dependencies
+pub mod private {
+    pub use paste::item;
+    pub use web_sys as dom;
+}
+
 #[macro_export]
 macro_rules! html_element {
     (
@@ -14,16 +21,16 @@ macro_rules! html_element {
                 $attr:ident $(- $attr_tail:ident)*: $typ:ty
             ),* $(,)?
         }
-    ) => { paste::item!{
+    ) => { $crate::macros::private::item!{
         html_element!(
             $(#[$elem_meta])*
             snake ( [< $name $(_ $name_tail)* >] ),
             camel ( [< $name:camel $($name_tail:camel)* >] ),
-            text ( text_name!($name $(- $name_tail)*) ),
+            text ( $crate::text_name!($name $(- $name_tail)*) ),
             {
                 $(
                     $(#[$attr_meta])*
-                    [< $attr $(_ $attr_tail)*>] ( text_name!($attr $(- $attr_tail)*) ) : $typ
+                    [< $attr $(_ $attr_tail)*>] ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
                 ),*
             }
         );
@@ -40,21 +47,22 @@ macro_rules! html_element {
             ),* $(,)?
         }
     ) => {
-        paste::item! {
+        $crate::macros::private::item! {
             $(#[$elem_meta])*
             pub fn $snake_name() -> [<$camel_name Builder>] {
-                [<$camel_name Builder>]($crate::macros::tag(stringify!($text_name)))
+                [<$camel_name Builder>]($crate::macros::tag($text_name))
             }
 
             pub struct [<$camel_name Builder>]($crate::macros::ElementBuilder);
 
             impl [<$camel_name Builder>] {
-                attributes![
+                $crate::attributes![
                     // TODO: Add all global attrs.
-                    id: String,
-                    class: String,
-                    style: String,
-                    $($(#[$attr_meta])* $attr: $typ,)*
+                    // TODO: Seperate macro for global attrs that doesn't require text attr
+                    id("id"): String,
+                    class("class"): String,
+                    style("style"): String,
+                    $($(#[$attr_meta])* $attr ($text_attr): $typ,)*
                 ];
             }
 
@@ -110,19 +118,19 @@ macro_rules! html_element {
 #[macro_export]
 macro_rules! dom_type {
     ($name:ident $(- $name_tail:ident)* < $elem_type:ty > $( { $($events:tt)* } )? ) => {
-        paste::item! {
+        $crate::macros::private::item! {
             dom_type!(
-                camel([<$name:camel $(- $name_tail:camel)* >])
+                camel([<$name:camel $( $name_tail:camel)* >])
                 < $elem_type >
                 $( { $($events)* } )?
             );
         }
     };
     (camel($name_camel:ident) < $elem_type:ty > $( { $($events:tt)* } )?) => {
-        paste::item! {
+        $crate::macros::private::item! {
             impl [<$name_camel Builder>] {
-                html_element_events!($elem_type);
-                element_events!($elem_type);
+                $crate::html_element_events!($elem_type);
+                $crate::element_events!($elem_type);
 
                 $( events!($elem_type { $($events)* }); )?
 
@@ -155,7 +163,7 @@ macro_rules! dom_type {
 #[macro_export]
 macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
-        paste::item! {
+        $crate::macros::private::item! {
             impl [<$name:camel $($name_tail:camel)* Builder>] {
                 pub fn text(self, child: impl $crate::macros::Text) -> Self {
                     Self(self.0.text(child))
@@ -176,24 +184,24 @@ macro_rules! children_allowed {
 #[macro_export]
 macro_rules! html_element_events {
     ($elem_type:ty) => {
-        events!($elem_type {
-            animationend: web_sys::AnimationEvent,
-            animationiteration: web_sys::AnimationEvent,
-            animationstart: web_sys::AnimationEvent,
-            beforeinput: web_sys::InputEvent,
-            change: web_sys::Event,
-            gotpointercapture: web_sys::PointerEvent,
-            input: web_sys::InputEvent,
-            lostpointercapture: web_sys::PointerEvent,
-            pointercancel: web_sys::PointerEvent,
-            pointerdown: web_sys::PointerEvent,
-            pointerenter: web_sys::PointerEvent,
-            pointerleave: web_sys::PointerEvent,
-            pointermove: web_sys::PointerEvent,
-            pointerout: web_sys::PointerEvent,
-            pointerover: web_sys::PointerEvent,
-            pointerup: web_sys::PointerEvent,
-            transitionend: web_sys::TransitionEvent,
+        $crate::events!($elem_type {
+            animationend: $crate::macros::private::dom::AnimationEvent,
+            animationiteration: $crate::macros::private::dom::AnimationEvent,
+            animationstart: $crate::macros::private::dom::AnimationEvent,
+            beforeinput: $crate::macros::private::dom::InputEvent,
+            change: $crate::macros::private::dom::Event,
+            gotpointercapture: $crate::macros::private::dom::PointerEvent,
+            input: $crate::macros::private::dom::InputEvent,
+            lostpointercapture: $crate::macros::private::dom::PointerEvent,
+            pointercancel: $crate::macros::private::dom::PointerEvent,
+            pointerdown: $crate::macros::private::dom::PointerEvent,
+            pointerenter: $crate::macros::private::dom::PointerEvent,
+            pointerleave: $crate::macros::private::dom::PointerEvent,
+            pointermove: $crate::macros::private::dom::PointerEvent,
+            pointerout: $crate::macros::private::dom::PointerEvent,
+            pointerover: $crate::macros::private::dom::PointerEvent,
+            pointerup: $crate::macros::private::dom::PointerEvent,
+            transitionend: $crate::macros::private::dom::TransitionEvent,
         });
     };
 }
@@ -202,42 +210,42 @@ macro_rules! html_element_events {
 #[macro_export]
 macro_rules! element_events {
     ($elem_type:ty) => {
-        events!($elem_type {
-            auxclick: web_sys::MouseEvent,
-            blur: web_sys::FocusEvent,
-            click: web_sys::MouseEvent,
-            compositionend: web_sys::CompositionEvent,
-            compositionstart: web_sys::CompositionEvent,
-            compositionupdate: web_sys::CompositionEvent,
-            contextmenu: web_sys::MouseEvent,
-            dblclick: web_sys::MouseEvent,
-            error: web_sys::Event,
-            focusin: web_sys::FocusEvent,
-            focusout: web_sys::FocusEvent,
-            focus: web_sys::FocusEvent,
-            fullscreenchange: web_sys::Event,
-            fullscreenerror: web_sys::Event,
-            keydown: web_sys::KeyboardEvent,
-            keyup: web_sys::KeyboardEvent,
-            mousedown: web_sys::MouseEvent,
-            mouseenter: web_sys::MouseEvent,
-            mouseleave: web_sys::MouseEvent,
-            mousemove: web_sys::MouseEvent,
-            mouseout: web_sys::MouseEvent,
-            mouseover: web_sys::MouseEvent,
-            mouseup: web_sys::MouseEvent,
-            scroll: web_sys::Event,
-            select: web_sys::Event,
-            touchcancel: web_sys::TouchEvent,
-            touchend: web_sys::TouchEvent,
-            touchmove: web_sys::TouchEvent,
-            touchstart: web_sys::TouchEvent,
-            wheel: web_sys::WheelEvent,
+        $crate::events!($elem_type {
+            auxclick: $crate::macros::private::dom::MouseEvent,
+            blur: $crate::macros::private::dom::FocusEvent,
+            click: $crate::macros::private::dom::MouseEvent,
+            compositionend: $crate::macros::private::dom::CompositionEvent,
+            compositionstart: $crate::macros::private::dom::CompositionEvent,
+            compositionupdate: $crate::macros::private::dom::CompositionEvent,
+            contextmenu: $crate::macros::private::dom::MouseEvent,
+            dblclick: $crate::macros::private::dom::MouseEvent,
+            error: $crate::macros::private::dom::Event,
+            focusin: $crate::macros::private::dom::FocusEvent,
+            focusout: $crate::macros::private::dom::FocusEvent,
+            focus: $crate::macros::private::dom::FocusEvent,
+            fullscreenchange: $crate::macros::private::dom::Event,
+            fullscreenerror: $crate::macros::private::dom::Event,
+            keydown: $crate::macros::private::dom::KeyboardEvent,
+            keyup: $crate::macros::private::dom::KeyboardEvent,
+            mousedown: $crate::macros::private::dom::MouseEvent,
+            mouseenter: $crate::macros::private::dom::MouseEvent,
+            mouseleave: $crate::macros::private::dom::MouseEvent,
+            mousemove: $crate::macros::private::dom::MouseEvent,
+            mouseout: $crate::macros::private::dom::MouseEvent,
+            mouseover: $crate::macros::private::dom::MouseEvent,
+            mouseup: $crate::macros::private::dom::MouseEvent,
+            scroll: $crate::macros::private::dom::Event,
+            select: $crate::macros::private::dom::Event,
+            touchcancel: $crate::macros::private::dom::TouchEvent,
+            touchend: $crate::macros::private::dom::TouchEvent,
+            touchmove: $crate::macros::private::dom::TouchEvent,
+            touchstart: $crate::macros::private::dom::TouchEvent,
+            wheel: $crate::macros::private::dom::WheelEvent,
             /* The events are currently marked as unstable in web_sys:
              *
-             * copy: web_sys::ClipboardEvent,
-             * cut: web_sys::ClipboardEvent,
-             * paste: web_sys::ClipboardEvent, */
+             * copy: $crate::macros::private::dom::ClipboardEvent,
+             * cut: $crate::macros::private::dom::ClipboardEvent,
+             * paste: $crate::macros::private::dom::ClipboardEvent, */
         });
     };
 }
@@ -248,7 +256,7 @@ macro_rules! events {
     ($elem_type:ty {
         $($name:ident: $event_type:ty),* $(,)?
     }) => {
-        paste::item!{
+        $crate::macros::private::item!{
             $(
                 pub fn [<on_ $name >] (
                     self,
@@ -272,12 +280,12 @@ macro_rules! events {
 macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
-        $attr:ident : $typ:ty
+        $attr:ident ($text_attr:expr): $typ:ty
     ),* $(,)? ) => {
         $(
             $(#[$attr_meta])*
             pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
-                Self(self.0.attribute(attr_name!($attr), value))
+                Self(self.0.attribute($text_attr, value))
             }
         )*
     };
@@ -285,10 +293,7 @@ macro_rules! attributes {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! attr_name {
-    (accept_charset) => {
-        "accept-charset"
-    };
+macro_rules! text_attr {
     (as_) => {
         "as"
     };
@@ -297,9 +302,6 @@ macro_rules! attr_name {
     };
     (for_) => {
         "for"
-    };
-    (http_equiv) => {
-        "http-equiv"
     };
     (current_time) => {
         "currentTime"
@@ -310,8 +312,8 @@ macro_rules! attr_name {
     (type_) => {
         "type"
     };
-    ($name:ident) => {
-        stringify!($name)
+    ($($name:tt)*) => {
+        $crate::text_name!($($name)*)
     };
 }
 
