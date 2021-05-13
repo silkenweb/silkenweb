@@ -1,0 +1,20 @@
+[package]
+name = "silkenweb-ui5"
+version = "0.1.1"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2018"
+description = "UI5 bindings for Silkenweb"
+readme = "README.md"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui", "web-programming"]
+keywords = ["reactive", "web", "html", "browser", "dom"]
+
+[dependencies]
+silkenweb = "0.1.1"
+web-sys = "0.3"
+
+[features]
+serde = ["silkenweb/serde"]

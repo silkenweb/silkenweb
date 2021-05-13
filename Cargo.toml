@@ -7,12 +7,14 @@ members = [
     "tutorial/memoized-counter-list",
     "tutorial/reactive-counter-list",
     "tutorial/common",
+    "examples/ui5-showcase",
     "examples/todomvc",
     "examples/counter",
     "examples/router",
     "examples/animation",
     "examples/hello-world",
     "crates/silkenweb",
+    "crates/ui5",
     "crates/html",
     "crates/dom",
     "crates/reactive",
@@ -27,3 +29,4 @@ opt-level = "z"
 silkenweb-html = { path = "crates/html" }
 silkenweb-dom = { path = "crates/dom" }
 silkenweb-reactive = { path = "crates/reactive" }
+silkenweb = { path = "crates/silkenweb" }
