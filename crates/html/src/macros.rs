@@ -13,8 +13,9 @@ pub mod private {
 /// Define an html element.
 ///
 /// This will define a builder struct for an html element, with a method for
-/// each attribute. It will also define a struct for the built element. For
-/// example:
+/// each attribute. It will also define a struct for the built element. Dashes
+/// are allowed in element, attribute, and event names. They will be converted
+/// to underscores when generating rust identifiers. For example:
 ///
 /// ```no_run
 /// # use silkenweb_html::{html_element, dom_type};
@@ -23,6 +24,8 @@ pub mod private {
 /// html_element!(my-html-element {
 ///     my-attribute: String
 /// });
+///
+/// // The types of the dom element and event carry through to the event handler.
 /// dom_type!(my-html-element<dom::HtmlDivElement> {
 ///     my-event: dom::CustomEvent
 /// });
