@@ -24,7 +24,7 @@ pub mod private {
 ///     my-attribute: String
 /// });
 /// dom_type!(my-html-element<dom::HtmlDivElement> {
-///     my_event: dom::CustomEvent
+///     my-event: dom::CustomEvent
 /// });
 ///
 /// let elem = my_html_element()
@@ -281,15 +281,15 @@ macro_rules! element_events {
 #[macro_export]
 macro_rules! events {
     ($elem_type:ty {
-        $($name:ident: $event_type:ty),* $(,)?
+        $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
     }) => {
         $crate::macros::private::item!{
             $(
-                pub fn [<on_ $name >] (
+                pub fn [<on_ $name $(_ $name_tail)* >] (
                     self,
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
-                    Self(self.0.on(stringify!($name), move |js_ev| {
+                    Self(self.0.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* it's safe to assume event and event.current_target aren't null
                         let event: $event_type = js_ev.unchecked_into();
