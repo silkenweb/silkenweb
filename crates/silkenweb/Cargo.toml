@@ -16,7 +16,7 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 silkenweb-html = "0.1.1"
 silkenweb-dom = "0.1.1"
 silkenweb-reactive = "0.1.1"
-wasm-bindgen = "0.2.73"
+wasm-bindgen = "=0.2.73"
 
 [dependencies.web-sys]
 version = "0.3"
