@@ -22,6 +22,7 @@ version = "0.3"
 features = [
     "AnimationEvent",
     "CompositionEvent",
+    "CustomEvent",
     "FocusEvent",
     "InputEvent",
     "KeyboardEvent",

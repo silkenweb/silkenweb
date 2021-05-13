@@ -10,6 +10,27 @@ pub mod private {
     pub use web_sys as dom;
 }
 
+/// Define an html element.
+///
+/// This will define a builder struct for an html element, with a method for
+/// each attribute. It will also define a struct for the built element. For
+/// example:
+///
+/// ```no_run
+/// # use silkenweb_html::{html_element, dom_type};
+/// use web_sys as dom;
+///
+/// html_element!(my-html-element {
+///     my-attribute: String
+/// });
+/// dom_type!(my-html-element<dom::HtmlDivElement> {
+///     my_event: dom::CustomEvent
+/// });
+///
+/// let elem = my_html_element()
+///     .my_attribute("attribute-value")
+///     .on_my_event(|event: dom::CustomEvent, target: dom::HtmlDivElement| {});
+/// ```
 #[macro_export]
 macro_rules! html_element {
     (
@@ -115,6 +136,9 @@ macro_rules! html_element {
     };
 }
 
+/// Define the DOM type and events for an html element.
+///
+/// See [`html_element`] for a complete example of defining an html element.
 #[macro_export]
 macro_rules! dom_type {
     ($name:ident $(- $name_tail:ident)* < $elem_type:ty > $( { $($events:tt)* } )? ) => {
@@ -132,7 +156,7 @@ macro_rules! dom_type {
                 $crate::html_element_events!($elem_type);
                 $crate::element_events!($elem_type);
 
-                $( events!($elem_type { $($events)* }); )?
+                $( $crate::events!($elem_type { $($events)* }); )?
 
                 pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
                     Self(self.0.effect(f))
@@ -160,6 +184,9 @@ macro_rules! dom_type {
     };
 }
 
+/// Add `child` and `text` methods to an html element builder.
+///
+/// See [`html_element`] for a complete example of defining an html element.
 #[macro_export]
 macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
