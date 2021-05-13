@@ -3,25 +3,52 @@ pub use silkenweb_dom::{
 };
 pub use wasm_bindgen::JsCast;
 
+#[macro_export]
 macro_rules! html_element {
     (
         $(#[$elem_meta:meta])*
-        $name:ident {
+        $name:ident $(- $name_tail:ident)*
+        {
             $(
                 $(#[$attr_meta:meta])*
-                $attr:ident : $typ:ty
+                $attr:ident $(- $attr_tail:ident)*: $typ:ty
+            ),* $(,)?
+        }
+    ) => { paste::item!{
+        html_element!(
+            $(#[$elem_meta])*
+            snake ( [< $name $(_ $name_tail)* >] ),
+            camel ( [< $name:camel $($name_tail:camel)* >] ),
+            text ( text_name!($name $(- $name_tail)*) ),
+            {
+                $(
+                    $(#[$attr_meta])*
+                    [< $attr $(_ $attr_tail)*>] ( text_name!($attr $(- $attr_tail)*) ) : $typ
+                ),*
+            }
+        );
+    }};
+    (
+        $(#[$elem_meta:meta])*
+        snake ( $snake_name:ident ),
+        camel ( $camel_name:ident ),
+        text ( $text_name:expr ) $(,)?
+        {
+            $(
+                $(#[$attr_meta:meta])*
+                $attr:ident ($text_attr:expr) : $typ:ty
             ),* $(,)?
         }
     ) => {
         paste::item! {
             $(#[$elem_meta])*
-            pub fn $name() -> [<$name:camel Builder>] {
-                [<$name: camel Builder>]($crate::macros::tag(stringify!($name)))
+            pub fn $snake_name() -> [<$camel_name Builder>] {
+                [<$camel_name Builder>]($crate::macros::tag(stringify!($text_name)))
             }
 
-            pub struct [<$name:camel Builder>]($crate::macros::ElementBuilder);
+            pub struct [<$camel_name Builder>]($crate::macros::ElementBuilder);
 
-            impl [<$name:camel Builder>] {
+            impl [<$camel_name Builder>] {
                 attributes![
                     // TODO: Add all global attrs.
                     id: String,
@@ -31,11 +58,11 @@ macro_rules! html_element {
                 ];
             }
 
-            impl $crate::macros::Builder for [<$name:camel Builder>] {
-                type Target = [<$name:camel>];
+            impl $crate::macros::Builder for [<$camel_name Builder>] {
+                type Target = $camel_name;
 
                 fn build(self) -> Self::Target {
-                    [<$name:camel>](self.0.build())
+                    $camel_name(self.0.build())
                 }
 
                 fn into_element(self) -> $crate::macros::Element {
@@ -43,23 +70,23 @@ macro_rules! html_element {
                 }
             }
 
-            impl From<[<$name:camel Builder>]> for $crate::macros::Element {
-                fn from(builder: [<$name:camel Builder>]) -> Self {
+            impl From<[<$camel_name Builder>]> for $crate::macros::Element {
+                fn from(builder: [<$camel_name Builder>]) -> Self {
                     use $crate::macros::Builder;
                     builder.build().into()
                 }
             }
 
-            impl From<[<$name:camel Builder>]> for $crate::macros::ElementBuilder {
-                fn from(builder: [<$name:camel Builder>]) -> Self {
+            impl From<[<$camel_name Builder>]> for $crate::macros::ElementBuilder {
+                fn from(builder: [<$camel_name Builder>]) -> Self {
                     builder.0
                 }
             }
 
             #[derive(Clone)]
-            pub struct [<$name:camel>]($crate::macros::Element);
+            pub struct $camel_name($crate::macros::Element);
 
-            impl $crate::macros::Builder for [<$name:camel>] {
+            impl $crate::macros::Builder for $camel_name {
                 type Target = Self;
 
                 fn build(self) -> Self::Target {
@@ -71,8 +98,8 @@ macro_rules! html_element {
                 }
             }
 
-            impl From<[<$name:camel>]> for $crate::macros::Element {
-                fn from(html_elem: [<$name:camel>]) -> Self {
+            impl From<$camel_name> for $crate::macros::Element {
+                fn from(html_elem: $camel_name) -> Self {
                     html_elem.0
                 }
             }
@@ -80,10 +107,20 @@ macro_rules! html_element {
     };
 }
 
+#[macro_export]
 macro_rules! dom_type {
-    ($name:ident < $elem_type:ty > $( { $($events:tt)* } )?) => {
+    ($name:ident $(- $name_tail:ident)* < $elem_type:ty > $( { $($events:tt)* } )? ) => {
         paste::item! {
-            impl [<$name:camel Builder>] {
+            dom_type!(
+                camel([<$name:camel $(- $name_tail:camel)* >])
+                < $elem_type >
+                $( { $($events)* } )?
+            );
+        }
+    };
+    (camel($name_camel:ident) < $elem_type:ty > $( { $($events:tt)* } )?) => {
+        paste::item! {
+            impl [<$name_camel Builder>] {
                 html_element_events!($elem_type);
                 element_events!($elem_type);
 
@@ -94,7 +131,7 @@ macro_rules! dom_type {
                 }
             }
 
-            impl $crate::macros::DomElement for [<$name:camel Builder>] {
+            impl $crate::macros::DomElement for [<$name_camel Builder>] {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
@@ -103,7 +140,7 @@ macro_rules! dom_type {
                 }
             }
 
-            impl $crate::macros::DomElement for [<$name:camel>] {
+            impl $crate::macros::DomElement for [<$name_camel>] {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
@@ -115,10 +152,11 @@ macro_rules! dom_type {
     };
 }
 
+#[macro_export]
 macro_rules! children_allowed {
-    ($name:ident) => {
+    ($name:ident $(- $name_tail:ident)*) => {
         paste::item! {
-            impl [<$name:camel Builder>] {
+            impl [<$name:camel $($name_tail:camel)* Builder>] {
                 pub fn text(self, child: impl $crate::macros::Text) -> Self {
                     Self(self.0.text(child))
                 }
@@ -134,6 +172,8 @@ macro_rules! children_allowed {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! html_element_events {
     ($elem_type:ty) => {
         events!($elem_type {
@@ -158,6 +198,8 @@ macro_rules! html_element_events {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! element_events {
     ($elem_type:ty) => {
         events!($elem_type {
@@ -200,6 +242,8 @@ macro_rules! element_events {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! events {
     ($elem_type:ty {
         $($name:ident: $event_type:ty),* $(,)?
@@ -223,6 +267,8 @@ macro_rules! events {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
@@ -237,6 +283,8 @@ macro_rules! attributes {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! attr_name {
     (accept_charset) => {
         "accept-charset"
@@ -265,4 +313,12 @@ macro_rules! attr_name {
     ($name:ident) => {
         stringify!($name)
     };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! text_name{
+    ($name:ident $(- $name_tail:ident)*) => {
+        concat!(stringify!($name) $(, "-", stringify!($name_tail))*)
+    }
 }
