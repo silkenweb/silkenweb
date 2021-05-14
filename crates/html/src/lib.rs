@@ -14,6 +14,7 @@
 //! ```
 
 use std::marker::PhantomData;
+
 use wasm_bindgen::JsCast;
 use web_sys as dom;
 
