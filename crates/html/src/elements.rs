@@ -97,7 +97,6 @@ html_element!(
     }
 );
 
-dom_type!(a<dom::HtmlAnchorElement>);
 children_allowed!(a);
 
 html_element!(
@@ -116,7 +115,6 @@ html_element!(
     abbr<dom::HtmlElement> {}
 );
 
-dom_type!(abbr<dom::HtmlElement>);
 children_allowed!(abbr);
 
 html_element!(
@@ -128,7 +126,6 @@ html_element!(
     b<dom::HtmlElement> {}
 );
 
-dom_type!(b<dom::HtmlElement>);
 children_allowed!(b);
 
 html_element!(
@@ -140,7 +137,6 @@ html_element!(
     bdi<dom::HtmlElement> {}
 );
 
-dom_type!(bdi<dom::HtmlElement>);
 children_allowed!(bdi);
 
 html_element!(
@@ -163,7 +159,6 @@ html_element!(
     }
 );
 
-dom_type!(bdo<dom::HtmlElement>);
 children_allowed!(bdo);
 
 html_element!(
@@ -175,8 +170,6 @@ html_element!(
     br<dom::HtmlBrElement> {}
 );
 
-dom_type!(br<dom::HtmlBrElement>);
-
 html_element!(
     /// The [HTML Citation element (`<cite>`)][mdn] is used to describe a
     /// reference to a cited creative work, and must include the title of
@@ -186,7 +179,6 @@ html_element!(
     cite<dom::HtmlElement> {}
 );
 
-dom_type!(cite<dom::HtmlElement>);
 children_allowed!(cite);
 
 html_element!(
@@ -198,7 +190,6 @@ html_element!(
     code<dom::HtmlElement> {}
 );
 
-dom_type!(code<dom::HtmlElement>);
 children_allowed!(code);
 
 html_element!(
@@ -217,7 +208,6 @@ html_element!(
     }
 );
 
-dom_type!(data<dom::HtmlDataElement>);
 children_allowed!(data);
 
 html_element!(
@@ -229,7 +219,6 @@ html_element!(
     dfn<dom::HtmlElement> {}
 );
 
-dom_type!(dfn<dom::HtmlElement>);
 children_allowed!(dfn);
 
 html_element!(
@@ -241,7 +230,6 @@ html_element!(
     em<dom::HtmlElement> {}
 );
 
-dom_type!(em<dom::HtmlElement>);
 children_allowed!(em);
 
 html_element!(
@@ -254,7 +242,6 @@ html_element!(
     i<dom::HtmlElement> {}
 );
 
-dom_type!(i<dom::HtmlElement>);
 children_allowed!(i);
 
 html_element!(
@@ -266,7 +253,6 @@ html_element!(
     kbd<dom::HtmlElement> {}
 );
 
-dom_type!(kbd<dom::HtmlElement>);
 children_allowed!(kbd);
 
 html_element!(
@@ -278,7 +264,6 @@ html_element!(
     mark<dom::HtmlElement> {}
 );
 
-dom_type!(mark<dom::HtmlElement>);
 children_allowed!(mark);
 
 html_element!(
@@ -298,7 +283,6 @@ html_element!(
     }
 );
 
-dom_type!(q<dom::HtmlQuoteElement>);
 children_allowed!(q);
 
 html_element!(
@@ -311,7 +295,6 @@ html_element!(
     rb<dom::HtmlElement> {}
 );
 
-dom_type!(rb<dom::HtmlElement>);
 children_allowed!(rb);
 
 html_element!(
@@ -324,7 +307,6 @@ html_element!(
     rp<dom::HtmlElement> {}
 );
 
-dom_type!(rp<dom::HtmlElement>);
 children_allowed!(rp);
 
 html_element!(
@@ -339,7 +321,6 @@ html_element!(
     rt<dom::HtmlElement> {}
 );
 
-dom_type!(rt<dom::HtmlElement>);
 children_allowed!(rt);
 
 html_element!(
@@ -357,7 +338,6 @@ html_element!(
     rtc<dom::HtmlElement> {}
 );
 
-dom_type!(rtc<dom::HtmlElement>);
 children_allowed!(rtc);
 
 html_element!(
@@ -368,7 +348,6 @@ html_element!(
     ruby<dom::HtmlElement> {}
 );
 
-dom_type!(ruby<dom::HtmlElement>);
 children_allowed!(ruby);
 
 html_element!(
@@ -384,7 +363,6 @@ html_element!(
     s<dom::HtmlElement> {}
 );
 
-dom_type!(s<dom::HtmlElement>);
 children_allowed!(s);
 
 html_element!(
@@ -395,7 +373,6 @@ html_element!(
     samp<dom::HtmlElement> {}
 );
 
-dom_type!(samp<dom::HtmlElement>);
 children_allowed!(samp);
 
 html_element!(
@@ -408,7 +385,6 @@ html_element!(
     small<dom::HtmlElement> {}
 );
 
-dom_type!(small<dom::HtmlElement>);
 children_allowed!(small);
 
 html_element!(
@@ -425,7 +401,6 @@ html_element!(
     span<dom::HtmlSpanElement> {}
 );
 
-dom_type!(span<dom::HtmlSpanElement>);
 children_allowed!(span);
 
 html_element!(
@@ -437,7 +412,6 @@ html_element!(
     strong<dom::HtmlElement> {}
 );
 
-dom_type!(strong<dom::HtmlElement>);
 children_allowed!(strong);
 
 html_element!(
@@ -448,7 +422,6 @@ html_element!(
     sub<dom::HtmlElement> {}
 );
 
-dom_type!(sub<dom::HtmlElement>);
 children_allowed!(sub);
 
 html_element!(
@@ -460,7 +433,6 @@ html_element!(
     sup<dom::HtmlElement> {}
 );
 
-dom_type!(sup<dom::HtmlElement>);
 children_allowed!(sup);
 
 html_element!(
@@ -476,7 +448,6 @@ html_element!(
     }
 );
 
-dom_type!(time<dom::HtmlTimeElement>);
 children_allowed!(time);
 
 html_element!(
@@ -488,7 +459,6 @@ html_element!(
     u<dom::HtmlElement> {}
 );
 
-dom_type!(u<dom::HtmlElement>);
 children_allowed!(u);
 
 html_element!(
@@ -499,7 +469,6 @@ html_element!(
     var<dom::HtmlElement> {}
 );
 
-dom_type!(var<dom::HtmlElement>);
 children_allowed!(var);
 
 html_element!(
@@ -511,8 +480,6 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr
     wbr<dom::HtmlElement> {}
 );
-
-dom_type!(wbr<dom::HtmlElement>);
 
 html_element!(
     /// The [HTML `<del>` element][mdn] represents a range of text that has been
@@ -537,7 +504,6 @@ html_element!(
     }
 );
 
-dom_type!(del<dom::HtmlModElement>);
 children_allowed!(del);
 
 html_element!(
@@ -563,7 +529,6 @@ html_element!(
     }
 );
 
-dom_type!(ins<dom::HtmlModElement>);
 children_allowed!(ins);
 
 html_element!(
@@ -575,7 +540,6 @@ html_element!(
     address<dom::HtmlElement> {}
 );
 
-dom_type!(address<dom::HtmlElement>);
 children_allowed!(address);
 
 html_element!(
@@ -588,7 +552,6 @@ html_element!(
     article<dom::HtmlElement> {}
 );
 
-dom_type!(article<dom::HtmlElement>);
 children_allowed!(article);
 
 html_element!(
@@ -600,7 +563,6 @@ html_element!(
     aside<dom::HtmlElement> {}
 );
 
-dom_type!(aside<dom::HtmlElement>);
 children_allowed!(aside);
 
 html_element!(
@@ -615,7 +577,6 @@ html_element!(
     footer<dom::HtmlElement> {}
 );
 
-dom_type!(footer<dom::HtmlElement>);
 children_allowed!(footer);
 
 html_element!(
@@ -628,7 +589,6 @@ html_element!(
     header<dom::HtmlElement> {}
 );
 
-dom_type!(header<dom::HtmlElement>);
 children_allowed!(header);
 
 html_element!(
@@ -640,7 +600,6 @@ html_element!(
     h1<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h1<dom::HtmlHeadingElement>);
 children_allowed!(h1);
 
 html_element!(
@@ -652,7 +611,6 @@ html_element!(
     h2<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h2<dom::HtmlHeadingElement>);
 children_allowed!(h2);
 
 html_element!(
@@ -664,7 +622,6 @@ html_element!(
     h3<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h3<dom::HtmlHeadingElement>);
 children_allowed!(h3);
 
 html_element!(
@@ -676,7 +633,6 @@ html_element!(
     h4<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h4<dom::HtmlHeadingElement>);
 children_allowed!(h4);
 
 html_element!(
@@ -688,7 +644,6 @@ html_element!(
     h5<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h5<dom::HtmlHeadingElement>);
 children_allowed!(h5);
 
 html_element!(
@@ -700,7 +655,6 @@ html_element!(
     h6<dom::HtmlHeadingElement> {}
 );
 
-dom_type!(h6<dom::HtmlHeadingElement>);
 children_allowed!(h6);
 
 html_element!(
@@ -713,7 +667,6 @@ html_element!(
     hgroup<dom::HtmlElement> {}
 );
 
-dom_type!(hgroup<dom::HtmlElement>);
 children_allowed!(hgroup);
 
 html_element!(
@@ -727,7 +680,6 @@ html_element!(
     main<dom::HtmlElement> {}
 );
 
-dom_type!(main<dom::HtmlElement>);
 children_allowed!(main);
 
 html_element!(
@@ -740,7 +692,6 @@ html_element!(
     nav<dom::HtmlElement> {}
 );
 
-dom_type!(nav<dom::HtmlElement>);
 children_allowed!(nav);
 
 html_element!(
@@ -752,7 +703,6 @@ html_element!(
     section<dom::HtmlElement> {}
 );
 
-dom_type!(section<dom::HtmlElement>);
 children_allowed!(section);
 
 html_element!(
@@ -786,8 +736,6 @@ html_element!(
         }
     }
 );
-
-dom_type!(embed<dom::HtmlEmbedElement>);
 
 html_element!(
     /// The [HTML Inline Frame element (`<iframe>`)][mdn] represents a nested
@@ -887,7 +835,6 @@ html_element!(
     }
 );
 
-dom_type!(iframe<dom::HtmlIFrameElement>);
 children_allowed!(iframe);
 
 html_element!(
@@ -930,7 +877,6 @@ html_element!(
     }
 );
 
-dom_type!(object<dom::HtmlObjectElement>);
 children_allowed!(object);
 
 html_element!(
@@ -950,8 +896,6 @@ html_element!(
     }
 );
 
-dom_type!(param<dom::HtmlParamElement>);
-
 html_element!(
     /// The [HTML `<picture>` element][mdn] contains zero or more
     /// [`<source>`][source] elements and one [`<img>`][img] element to
@@ -963,7 +907,6 @@ html_element!(
     picture<dom::HtmlPictureElement> {}
 );
 
-dom_type!(picture<dom::HtmlPictureElement>);
 children_allowed!(picture);
 
 html_element!(
@@ -1027,8 +970,6 @@ html_element!(
     }
 );
 
-dom_type!(source<dom::HtmlSourceElement>);
-
 html_element!(
     /// Use the [HTML `<canvas>` element][mdn] with either the [canvas scripting
     /// API][api] or the [WebGL API][gl] to draw graphics and animations.
@@ -1044,14 +985,14 @@ html_element!(
             /// The width of the coordinate space in CSS pixels. Defaults to 300.
             width: String,
         }
+
+        events {
+            webglcontextcreationerror: dom::WebGlContextEvent,
+            webglcontextlost: dom::WebGlContextEvent,
+            webglcontextrestored: dom::WebGlContextEvent,
+        }
     }
 );
-
-dom_type!(canvas<dom::HtmlCanvasElement> {
-    webglcontextcreationerror: dom::WebGlContextEvent,
-    webglcontextlost: dom::WebGlContextEvent,
-    webglcontextrestored: dom::WebGlContextEvent,
-});
 
 children_allowed!(canvas);
 
@@ -1064,7 +1005,6 @@ html_element!(
     noscript<dom::HtmlElement> {}
 );
 
-dom_type!(noscript<dom::HtmlElement>);
 children_allowed!(noscript);
 
 html_element!(
@@ -1169,7 +1109,6 @@ html_element!(
     }
 );
 
-dom_type!(script<dom::HtmlScriptElement>);
 children_allowed!(script);
 
 html_element!(
@@ -1258,8 +1197,6 @@ html_element!(
         }
     }
 );
-
-dom_type!(area<dom::HtmlAreaElement>);
 
 html_element!(
     /// The [HTML `<audio>` element][mdn] is used to embed sound content in
@@ -1386,7 +1323,6 @@ html_element!(
     }
 );
 
-dom_type!(audio<dom::HtmlAudioElement>);
 children_allowed!(audio);
 
 html_element!(
@@ -1576,8 +1512,6 @@ html_element!(
     }
 );
 
-dom_type!(img<dom::HtmlImageElement>);
-
 html_element!(
     /// The [HTML `<map>` element][mdn] is used with [`<area>`][area] elements
     /// to define an image map (a clickable link area).
@@ -1598,7 +1532,6 @@ html_element!(
     }
 );
 
-dom_type!(map<dom::HtmlMapElement>);
 children_allowed!(map);
 
 html_element!(
@@ -1670,10 +1603,12 @@ html_element!(
             /// must be defined.
             srclang: String,
         }
+
+        events {
+            cuechange: dom::Event
+        }
     }
 );
-
-dom_type!(track<dom::HtmlTrackElement> { cuechange: dom::Event });
 
 html_element!(
     /// The [HTML Video element (`<video>`)][mdn] embeds a media player which
@@ -1813,13 +1748,13 @@ html_element!(
             /// values only; no percentages).
             width: String,
         }
+
+        events {
+            enterpictureinpicture: dom::Event,
+            leavepictureinpicture: dom::Event,
+        }
     }
 );
-
-dom_type!(video<dom::HtmlVideoElement> {
-    enterpictureinpicture: dom::Event,
-    leavepictureinpicture: dom::Event,
-});
 
 children_allowed!(video);
 
@@ -1834,10 +1769,13 @@ html_element!(
             /// Indicates whether the details will be shown on page load.
             open: bool,
         }
+
+        events {
+            toggle: dom::Event
+        }
     }
 );
 
-dom_type!(details<dom::HtmlDetailsElement> { toggle: dom::Event} );
 children_allowed!(details);
 
 html_element!(
@@ -1852,13 +1790,14 @@ html_element!(
             /// to the user.
             open: bool,
         }
+
+        events {
+            cancel: dom::Event,
+            close: dom::Event,
+        }
     }
 );
 
-dom_type!(dialog<dom::HtmlDialogElement> {
-    cancel: dom::Event,
-    close: dom::Event,
-});
 children_allowed!(dialog);
 
 html_element!(
@@ -1872,7 +1811,6 @@ html_element!(
     menu<dom::HtmlMenuElement> {}
 );
 
-dom_type!(menu<dom::HtmlMenuElement>);
 children_allowed!(menu);
 
 html_element!(
@@ -1885,7 +1823,6 @@ html_element!(
     summary<dom::HtmlElement> {}
 );
 
-dom_type!(summary<dom::HtmlElement>);
 children_allowed!(summary);
 
 html_element!(
@@ -1909,7 +1846,6 @@ html_element!(
     }
 );
 
-dom_type!(blockquote<dom::HtmlQuoteElement>);
 children_allowed!(blockquote);
 
 html_element!(
@@ -1923,7 +1859,6 @@ html_element!(
     dd<dom::HtmlElement> {}
 );
 
-dom_type!(dd<dom::HtmlElement>);
 children_allowed!(dd);
 
 html_element!(
@@ -1936,7 +1871,6 @@ html_element!(
     div<dom::HtmlDivElement> {}
 );
 
-dom_type!(div<dom::HtmlDivElement>);
 children_allowed!(div);
 
 html_element!(
@@ -1952,7 +1886,6 @@ html_element!(
     dl<dom::HtmlDListElement> {}
 );
 
-dom_type!(dl<dom::HtmlDListElement>);
 children_allowed!(dl);
 
 html_element!(
@@ -1965,7 +1898,6 @@ html_element!(
     dt<dom::HtmlElement> {}
 );
 
-dom_type!(dt<dom::HtmlElement>);
 children_allowed!(dt);
 
 html_element!(
@@ -1978,7 +1910,6 @@ html_element!(
     figcaption<dom::HtmlElement> {}
 );
 
-dom_type!(figcaption<dom::HtmlElement>);
 children_allowed!(figcaption);
 
 html_element!(
@@ -1992,7 +1923,6 @@ html_element!(
     figure<dom::HtmlElement> {}
 );
 
-dom_type!(figure<dom::HtmlElement>);
 children_allowed!(figure);
 
 html_element!(
@@ -2004,8 +1934,6 @@ html_element!(
     hr<dom::HtmlHrElement> {}
 );
 
-dom_type!(hr<dom::HtmlHrElement>);
-
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
     ///
@@ -2013,7 +1941,6 @@ html_element!(
     li<dom::HtmlLiElement> {}
 );
 
-dom_type!(li<dom::HtmlLiElement>);
 children_allowed!(li);
 
 html_element!(
@@ -2054,7 +1981,6 @@ html_element!(
     }
 );
 
-dom_type!(ol<dom::HtmlOListElement>);
 children_allowed!(ol);
 
 html_element!(
@@ -2064,7 +1990,6 @@ html_element!(
     p<dom::HtmlParagraphElement> {}
 );
 
-dom_type!(p<dom::HtmlParagraphElement>);
 children_allowed!(p);
 
 html_element!(
@@ -2075,7 +2000,6 @@ html_element!(
     pre<dom::HtmlPreElement> {}
 );
 
-dom_type!(pre<dom::HtmlPreElement>);
 children_allowed!(pre);
 
 html_element!(
@@ -2086,7 +2010,6 @@ html_element!(
     ul<dom::HtmlUListElement> {}
 );
 
-dom_type!(ul<dom::HtmlUListElement>);
 children_allowed!(ul);
 
 html_element!(
@@ -2099,7 +2022,6 @@ html_element!(
     caption<dom::HtmlTableCaptionElement> {}
 );
 
-dom_type!(caption<dom::HtmlTableCaptionElement>);
 children_allowed!(caption);
 
 html_element!(
@@ -2118,8 +2040,6 @@ html_element!(
         }
     }
 );
-
-dom_type!(col<dom::HtmlTableColElement>);
 
 html_element!(
     /// The [HTML `<colgroup>` element][mdn] defines a group of columns within a
@@ -2144,7 +2064,6 @@ html_element!(
     }
 );
 
-dom_type!(colgroup<dom::HtmlTableColElement>);
 children_allowed!(colgroup);
 
 html_element!(
@@ -2156,7 +2075,6 @@ html_element!(
     table<dom::HtmlTableElement> {}
 );
 
-dom_type!(table<dom::HtmlTableElement>);
 children_allowed!(table);
 
 html_element!(
@@ -2170,7 +2088,6 @@ html_element!(
     tbody<dom::HtmlTableSectionElement> {}
 );
 
-dom_type!(tbody<dom::HtmlTableSectionElement>);
 children_allowed!(tbody);
 
 html_element!(
@@ -2202,7 +2119,6 @@ html_element!(
     }
 );
 
-dom_type!(td<dom::HtmlTableCellElement>);
 children_allowed!(td);
 
 html_element!(
@@ -2213,7 +2129,6 @@ html_element!(
     tfoot<dom::HtmlTableSectionElement> {}
 );
 
-dom_type!(tfoot<dom::HtmlTableSectionElement>);
 children_allowed!(tfoot);
 
 html_element!(
@@ -2272,7 +2187,6 @@ html_element!(
     }
 );
 
-dom_type!(th<dom::HtmlTableCellElement>);
 children_allowed!(th);
 
 html_element!(
@@ -2283,7 +2197,6 @@ html_element!(
     thead<dom::HtmlTableSectionElement> {}
 );
 
-dom_type!(thead<dom::HtmlTableSectionElement>);
 children_allowed!(thead);
 
 html_element!(
@@ -2297,7 +2210,6 @@ html_element!(
     tr<dom::HtmlTableRowElement> {}
 );
 
-dom_type!(tr<dom::HtmlTableRowElement>);
 children_allowed!(tr);
 
 html_element!(
@@ -2341,8 +2253,6 @@ html_element!(
     }
 );
 
-dom_type!(base<dom::HtmlBaseElement>);
-
 html_element!(
     /// The [HTML `<head>` element][mdn] contains machine-readable information
     /// ([metadata]) about the document, like its [title], [scripts], and
@@ -2356,7 +2266,6 @@ html_element!(
     head<dom::HtmlHeadElement> {}
 );
 
-dom_type!(head<dom::HtmlHeadElement>);
 children_allowed!(head);
 
 html_element!(
@@ -2510,8 +2419,6 @@ html_element!(
     }
 );
 
-dom_type!(link<dom::HtmlLinkElement>);
-
 html_element!(
     /// The [HTML `<meta>` element][mdn] represents [metadata] that cannot be
     /// represented by other HTML meta-related elements, like [`<base>`],
@@ -2590,8 +2497,6 @@ html_element!(
     }
 );
 
-dom_type!(meta<dom::HtmlMetaElement>);
-
 html_element!(
     /// The [HTML `<style>` element][mdn] contains style information for a
     /// document, or part of a document.
@@ -2617,7 +2522,6 @@ html_element!(
     }
 );
 
-dom_type!(style<dom::HtmlStyleElement>);
 children_allowed!(style);
 
 html_element!(
@@ -2629,7 +2533,6 @@ html_element!(
     title<dom::HtmlTitleElement> {}
 );
 
-dom_type!(title<dom::HtmlTitleElement>);
 children_allowed!(title);
 
 html_element!(
@@ -2760,7 +2663,6 @@ html_element!(
     }
 );
 
-dom_type!(button<dom::HtmlButtonElement>);
 children_allowed!(button);
 
 html_element!(
@@ -2773,7 +2675,6 @@ html_element!(
     datalist<dom::HtmlDataListElement> {}
 );
 
-dom_type!(datalist<dom::HtmlDataListElement>);
 children_allowed!(datalist);
 
 html_element!(
@@ -2807,7 +2708,6 @@ html_element!(
     }
 );
 
-dom_type!(fieldset<dom::HtmlFieldSetElement>);
 children_allowed!(fieldset);
 
 html_element!(
@@ -2898,16 +2798,16 @@ html_element!(
             /// type="image">` element.
             target: String,
         }
-    }
-);
 
-dom_type!(form<dom::HtmlFormElement> {
+        events {
             // The type should be FormDataEvent, but web_sys doesn't support it.
             formdata: dom::Event,
             reset: dom::Event,
             // The type should be SubmitEvent, but web_sys doesn't support it.
             submit: dom::Event,
-});
+        }
+    }
+);
 
 children_allowed!(form);
 
@@ -3360,10 +3260,12 @@ html_element!(
             /// button. See the image input type.
             width: String,
         }
+
+        events {
+            invalid: dom::Event
+        }
     }
 );
-
-dom_type!(input <dom::HtmlInputElement> { invalid: dom::Event });
 
 html_element!(
     /// The [HTML `<label>` element][mdn] represents a caption for an item in a
@@ -3395,7 +3297,6 @@ html_element!(
     }
 );
 
-dom_type!(label<dom::HtmlLabelElement>);
 children_allowed!(label);
 
 html_element!(
@@ -3407,7 +3308,6 @@ html_element!(
     legend<dom::HtmlLegendElement> {}
 );
 
-dom_type!(legend<dom::HtmlLegendElement>);
 children_allowed!(legend);
 
 html_element!(
@@ -3476,7 +3376,6 @@ html_element!(
     }
 );
 
-dom_type!(meter<dom::HtmlMeterElement>);
 children_allowed!(meter);
 
 html_element!(
@@ -3500,7 +3399,6 @@ html_element!(
     }
 );
 
-dom_type!(optgroup<dom::HtmlOptGroupElement>);
 children_allowed!(optgroup);
 
 html_element!(
@@ -3543,7 +3441,6 @@ html_element!(
     }
 );
 
-dom_type!(option<dom::HtmlOptionElement>);
 children_allowed!(option);
 
 html_element!(
@@ -3576,7 +3473,6 @@ html_element!(
     }
 );
 
-dom_type!(output<dom::HtmlOutputElement>);
 children_allowed!(output);
 
 html_element!(
@@ -3604,7 +3500,6 @@ html_element!(
     }
 );
 
-dom_type!(progress<dom::HtmlProgressElement>);
 children_allowed!(progress);
 
 html_element!(
@@ -3664,7 +3559,6 @@ html_element!(
     }
 );
 
-dom_type!(select<dom::HtmlSelectElement>);
 children_allowed!(select);
 
 html_element!(
@@ -3784,5 +3678,4 @@ html_element!(
     }
 );
 
-dom_type!(textarea<dom::HtmlTextAreaElement>);
 children_allowed!(textarea);

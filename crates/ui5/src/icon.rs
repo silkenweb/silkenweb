@@ -1,4 +1,4 @@
-use silkenweb::{dom_type, html_element};
+use silkenweb::html_element;
 use web_sys as dom;
 
 html_element!(
@@ -11,5 +11,3 @@ html_element!(
         }
     }
 );
-
-dom_type!(ui5-icon<dom::HtmlElement>);

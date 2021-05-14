@@ -18,16 +18,18 @@ pub mod private {
 /// to underscores when generating rust identifiers. For example:
 ///
 /// ```no_run
-/// # use silkenweb_html::{html_element, dom_type};
+/// # use silkenweb_html::html_element;
 /// use web_sys as dom;
 ///
-/// html_element!(my-html-element<dom::HtmlDivElement> {
-///     my-attribute: String
-/// });
-///
 /// // The types of the dom element and event carry through to the event handler.
-/// dom_type!(my-html-element<dom::HtmlDivElement> {
-///     my-event: dom::CustomEvent
+/// html_element!(my-html-element<dom::HtmlDivElement> {
+///     attributes {
+///         my-attribute: String
+///     }
+///
+///     events {
+///         my-event: dom::CustomEvent
+///     }
 /// });
 ///
 /// let elem = my_html_element()
@@ -47,6 +49,10 @@ macro_rules! html_element {
                     $attr:ident $(- $attr_tail:ident)*: $typ:ty
                 ),* $(,)?
             })?
+
+            $(events {
+                $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
+            })?
         }
     ) => { $crate::macros::private::item!{
         html_element!(
@@ -60,6 +66,10 @@ macro_rules! html_element {
                     $(#[$attr_meta])*
                     [< $attr $(_ $attr_tail)*>] ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
                 ),*})?
+
+                $(events {
+                    $($event $(- $event_tail)*: $event_type),*
+                })?
             }
         );
     }};
@@ -74,6 +84,10 @@ macro_rules! html_element {
                 $(#[$attr_meta:meta])*
                 $attr:ident ($text_attr:expr) : $typ:ty
             ),* $(,)? } )?
+
+            $(events {
+                $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
+            })?
         }
     ) => {
         $crate::macros::private::item! {
@@ -93,6 +107,19 @@ macro_rules! html_element {
                     style("style"): String,
                     $($($(#[$attr_meta])* $attr ($text_attr): $typ,)*)?
                 ];
+
+                $crate::html_element_events!($elem_type);
+                $crate::element_events!($elem_type);
+
+                $($crate::events!(
+                    $elem_type {
+                        $($event $(- $event_tail)*: $event_type),*
+                    }
+                 ); )?
+
+                 pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
+                     Self(self.0.effect(f))
+                 }
             }
 
             impl $crate::macros::Builder for [<$camel_name Builder>] {
@@ -104,6 +131,15 @@ macro_rules! html_element {
 
                 fn into_element(self) -> $crate::macros::Element {
                     self.build().into()
+                }
+            }
+
+            impl $crate::macros::DomElement for [<$camel_name Builder>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    use $crate::macros::JsCast;
+                    self.0.dom_element().unchecked_into()
                 }
             }
 
@@ -135,57 +171,18 @@ macro_rules! html_element {
                 }
             }
 
+            impl $crate::macros::DomElement for [<$camel_name>] {
+                type Target = $elem_type;
+
+                fn dom_element(&self) -> Self::Target {
+                    use $crate::macros::JsCast;
+                    self.0.dom_element().unchecked_into()
+                }
+            }
+
             impl From<$camel_name> for $crate::macros::Element {
                 fn from(html_elem: $camel_name) -> Self {
                     html_elem.0
-                }
-            }
-        }
-    };
-}
-
-/// Define the DOM type and events for an html element.
-///
-/// See [`html_element`] for a complete example of defining an html element.
-#[macro_export]
-macro_rules! dom_type {
-    ($name:ident $(- $name_tail:ident)* < $elem_type:ty > $( { $($events:tt)* } )? ) => {
-        $crate::macros::private::item! {
-            dom_type!(
-                camel([<$name:camel $( $name_tail:camel)* >])
-                < $elem_type >
-                $( { $($events)* } )?
-            );
-        }
-    };
-    (camel($name_camel:ident) < $elem_type:ty > $( { $($events:tt)* } )?) => {
-        $crate::macros::private::item! {
-            impl [<$name_camel Builder>] {
-                $crate::html_element_events!($elem_type);
-                $crate::element_events!($elem_type);
-
-                $( $crate::events!($elem_type { $($events)* }); )?
-
-                pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
-                    Self(self.0.effect(f))
-                }
-            }
-
-            impl $crate::macros::DomElement for [<$name_camel Builder>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
-                    self.0.dom_element().unchecked_into()
-                }
-            }
-
-            impl $crate::macros::DomElement for [<$name_camel>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
-                    self.0.dom_element().unchecked_into()
                 }
             }
         }
