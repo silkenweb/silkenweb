@@ -19,6 +19,7 @@ pub mod private {
 ///
 /// ```no_run
 /// # use silkenweb_html::html_element;
+/// use silkenweb_html::CustomEvent;
 /// use web_sys as dom;
 ///
 /// // The types of the dom element and event carry through to the event handler.
@@ -28,13 +29,18 @@ pub mod private {
 ///     }
 ///
 ///     events {
-///         my-event: dom::CustomEvent
+///         my-event: dom::MouseEvent
+///     }
+///
+///     custom_events {
+///         my-custom-event: dom::HtmlElement,
 ///     }
 /// });
 ///
 /// let elem = my_html_element()
 ///     .my_attribute("attribute-value")
-///     .on_my_event(|event: dom::CustomEvent, target: dom::HtmlDivElement| {});
+///     .on_my_event(|event: dom::MouseEvent, target: dom::HtmlDivElement| {})
+///     .on_my_custom_event(|event: CustomEvent<dom::HtmlElement>, target: dom::HtmlDivElement| {});
 /// ```
 #[macro_export]
 macro_rules! html_element {
@@ -53,6 +59,10 @@ macro_rules! html_element {
             $(events {
                 $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
             })?
+
+            $(custom_events {
+                $($custom_event:ident $(- $custom_event_tail:ident)*: $detail_type:ty),* $(,)?
+            })?
         }
     ) => { $crate::macros::private::item!{
         html_element!(
@@ -69,6 +79,10 @@ macro_rules! html_element {
 
                 $(events {
                     $($event $(- $event_tail)*: $event_type),*
+                })?
+
+                $(custom_events {
+                    $($custom_event $(- $custom_event_tail)*: $detail_type),*
                 })?
             }
         );
@@ -87,6 +101,10 @@ macro_rules! html_element {
 
             $(events {
                 $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
+            })?
+
+            $(custom_events {
+                $($custom_event:ident $(- $custom_event_tail:ident)*: $detail_type:ty),* $(,)?
             })?
         }
     ) => {
@@ -114,6 +132,12 @@ macro_rules! html_element {
                 $($crate::events!(
                     $elem_type {
                         $($event $(- $event_tail)*: $event_type),*
+                    }
+                 ); )?
+
+                 $($crate::custom_events!(
+                    $elem_type {
+                        $($custom_event $(- $custom_event_tail)*: $detail_type),*
                     }
                  ); )?
 
@@ -300,6 +324,31 @@ macro_rules! events {
                         let event: $event_type = js_ev.unchecked_into();
                         let target: $elem_type = event.current_target().unwrap().unchecked_into();
                         f(event, target);
+                    }))
+                }
+            )*
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! custom_events {
+    ($elem_type:ty {
+        $($name:ident $(- $name_tail:ident)*: $detail_type:ty),* $(,)?
+    }) => {
+        $crate::macros::private::item!{
+            $(
+                pub fn [<on_ $name $(_ $name_tail)* >] (
+                    self,
+                    mut f: impl 'static + FnMut($crate::CustomEvent<$detail_type>, $elem_type)
+                ) -> Self {
+                    Self(self.0.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
+                        use $crate::macros::JsCast;
+                        // I *think* it's safe to assume event and event.current_target aren't null
+                        let event: $crate::macros::private::dom::CustomEvent = js_ev.unchecked_into();
+                        let target: $elem_type = event.current_target().unwrap().unchecked_into();
+                        f(event.into(), target);
                     }))
                 }
             )*
