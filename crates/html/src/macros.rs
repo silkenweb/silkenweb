@@ -41,10 +41,12 @@ macro_rules! html_element {
         $name:ident $(- $name_tail:ident)*
         < $elem_type:ty >
         {
-            $(
-                $(#[$attr_meta:meta])*
-                $attr:ident $(- $attr_tail:ident)*: $typ:ty
-            ),* $(,)?
+            $(attributes {
+                $(
+                    $(#[$attr_meta:meta])*
+                    $attr:ident $(- $attr_tail:ident)*: $typ:ty
+                ),* $(,)?
+            })?
         }
     ) => { $crate::macros::private::item!{
         html_element!(
@@ -54,10 +56,10 @@ macro_rules! html_element {
             text ( $crate::text_name!($name $(- $name_tail)*) )
             < $elem_type >
             {
-                $(
+                $(attributes { $(
                     $(#[$attr_meta])*
                     [< $attr $(_ $attr_tail)*>] ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
-                ),*
+                ),*})?
             }
         );
     }};
@@ -68,10 +70,10 @@ macro_rules! html_element {
         text ( $text_name:expr )
         < $elem_type:ty >
         {
-            $(
+            $(attributes { $(
                 $(#[$attr_meta:meta])*
                 $attr:ident ($text_attr:expr) : $typ:ty
-            ),* $(,)?
+            ),* $(,)? } )?
         }
     ) => {
         $crate::macros::private::item! {
@@ -89,7 +91,7 @@ macro_rules! html_element {
                     id("id"): String,
                     class("class"): String,
                     style("style"): String,
-                    $($(#[$attr_meta])* $attr ($text_attr): $typ,)*
+                    $($($(#[$attr_meta])* $attr ($text_attr): $typ,)*)?
                 ];
             }
 
