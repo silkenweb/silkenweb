@@ -13,7 +13,7 @@ html_element!(
     /// within the same page, email addresses, or any other URL.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
-    a {
+    a <dom::HtmlAnchorElement> {
         /// Prompts the user to save the linked URL instead of navigating to it.
         /// Can be used with or without a value:
         ///
@@ -111,7 +111,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/abbr
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-title
-    abbr {}
+    abbr<dom::HtmlElement> {}
 );
 
 dom_type!(abbr<dom::HtmlElement>);
@@ -123,7 +123,7 @@ html_element!(
     /// otherwise granted special importance.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/b
-    b {}
+    b<dom::HtmlElement> {}
 );
 
 dom_type!(b<dom::HtmlElement>);
@@ -135,7 +135,7 @@ html_element!(
     /// isolation from its surrounding text.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdi
-    bdi {}
+    bdi<dom::HtmlElement> {}
 );
 
 dom_type!(bdi<dom::HtmlElement>);
@@ -147,7 +147,7 @@ html_element!(
     /// rendered in a different direction.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdo
-    bdo {
+    bdo<dom::HtmlElement> {
         /// The direction in which text should be rendered in this element's
         /// contents. Possible values are:
         ///
@@ -168,7 +168,7 @@ html_element!(
     /// where the division of lines is significant.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br
-    br {}
+    br<dom::HtmlBrElement> {}
 );
 
 dom_type!(br<dom::HtmlBrElement>);
@@ -179,7 +179,7 @@ html_element!(
     /// that work.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    cite {}
+    cite<dom::HtmlElement> {}
 );
 
 dom_type!(cite<dom::HtmlElement>);
@@ -191,7 +191,7 @@ html_element!(
     /// computer code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/code
-    code {}
+    code<dom::HtmlElement> {}
 );
 
 dom_type!(code<dom::HtmlElement>);
@@ -204,7 +204,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/data
     /// [time]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    data {
+    data<dom::HtmlDataElement> {
         /// This attribute specifies the machine-readable translation of the
         /// content of the element.
         value: String,
@@ -220,7 +220,7 @@ html_element!(
     /// sentence.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn
-    dfn {}
+    dfn<dom::HtmlElement> {}
 );
 
 dom_type!(dfn<dom::HtmlElement>);
@@ -232,7 +232,7 @@ html_element!(
     /// a greater degree of emphasis.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em
-    em {}
+    em<dom::HtmlElement> {}
 );
 
 dom_type!(em<dom::HtmlElement>);
@@ -245,7 +245,7 @@ html_element!(
     /// thoughts. It is typically displayed in italic type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
-    i {}
+    i<dom::HtmlElement> {}
 );
 
 dom_type!(i<dom::HtmlElement>);
@@ -257,7 +257,7 @@ html_element!(
     /// input, or any other text entry device.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd
-    kbd {}
+    kbd<dom::HtmlElement> {}
 );
 
 dom_type!(kbd<dom::HtmlElement>);
@@ -269,7 +269,7 @@ html_element!(
     /// marked passage's relevance or importance in the enclosing context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/mark
-    mark {}
+    mark<dom::HtmlElement> {}
 );
 
 dom_type!(mark<dom::HtmlElement>);
@@ -281,7 +281,7 @@ html_element!(
     /// surrounding the text in quotation marks.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q
-    q {
+    q<dom::HtmlQuoteElement> {
         /// The value of this attribute is a URL that designates a source
         /// document or message for the information quoted. This
         /// attribute is intended to point to information explaining the
@@ -300,7 +300,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rb
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rb {}
+    rb<dom::HtmlElement> {}
 );
 
 dom_type!(rb<dom::HtmlElement>);
@@ -313,7 +313,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rp
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rp {}
+    rp<dom::HtmlElement> {}
 );
 
 dom_type!(rp<dom::HtmlElement>);
@@ -328,7 +328,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rt {}
+    rt<dom::HtmlElement> {}
 );
 
 dom_type!(rt<dom::HtmlElement>);
@@ -346,7 +346,7 @@ html_element!(
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
     /// [rt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [rtc]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rtc
-    rtc {}
+    rtc<dom::HtmlElement> {}
 );
 
 dom_type!(rtc<dom::HtmlElement>);
@@ -357,7 +357,7 @@ html_element!(
     /// annotations are for showing pronunciation of East Asian characters.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    ruby {}
+    ruby<dom::HtmlElement> {}
 );
 
 dom_type!(ruby<dom::HtmlElement>);
@@ -373,7 +373,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/s
     /// [del]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
     /// [ins]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    s {}
+    s<dom::HtmlElement> {}
 );
 
 dom_type!(s<dom::HtmlElement>);
@@ -384,7 +384,7 @@ html_element!(
     /// which represents sample (or quoted) output from a computer program.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/samp
-    samp {}
+    samp<dom::HtmlElement> {}
 );
 
 dom_type!(samp<dom::HtmlElement>);
@@ -397,7 +397,7 @@ html_element!(
     /// small, such as from `small` to `x-small`.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/small
-    small {}
+    small<dom::HtmlElement> {}
 );
 
 dom_type!(small<dom::HtmlElement>);
@@ -414,7 +414,7 @@ html_element!(
     /// [class]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-class
     /// [id]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-id
     /// [lang]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-lang
-    span {}
+    span<dom::HtmlSpanElement> {}
 );
 
 dom_type!(span<dom::HtmlSpanElement>);
@@ -426,7 +426,7 @@ html_element!(
     /// Browsers typically render the contents in bold type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strong
-    strong {}
+    strong<dom::HtmlElement> {}
 );
 
 dom_type!(strong<dom::HtmlElement>);
@@ -437,7 +437,7 @@ html_element!(
     /// should be displayed as subscript for solely typographical reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sub
-    sub {}
+    sub<dom::HtmlElement> {}
 );
 
 dom_type!(sub<dom::HtmlElement>);
@@ -449,7 +449,7 @@ html_element!(
     /// reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sup
-    sup {}
+    sup<dom::HtmlElement> {}
 );
 
 dom_type!(sup<dom::HtmlElement>);
@@ -459,7 +459,7 @@ html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    time {
+    time<dom::HtmlTimeElement> {
         /// This attribute indicates the time and/or date of the element and
         /// must be in one of the formats described below.
         datetime: String,
@@ -475,7 +475,7 @@ html_element!(
     /// that it has a non-textual annotation.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/u
-    u {}
+    u<dom::HtmlElement> {}
 );
 
 dom_type!(u<dom::HtmlElement>);
@@ -486,7 +486,7 @@ html_element!(
     /// variable in a mathematical expression or a programming context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/var
-    var {}
+    var<dom::HtmlElement> {}
 );
 
 dom_type!(var<dom::HtmlElement>);
@@ -499,7 +499,7 @@ html_element!(
     /// that location.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr
-    wbr {}
+    wbr<dom::HtmlElement> {}
 );
 
 dom_type!(wbr<dom::HtmlElement>);
@@ -509,7 +509,7 @@ html_element!(
     /// deleted from a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
-    del {
+    del<dom::HtmlModElement> {
         /// A URI for a resource that explains the change (for example, meeting
         /// minutes).
         cite: String,
@@ -533,7 +533,7 @@ html_element!(
     /// added to a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    ins {
+    ins<dom::HtmlModElement> {
         /// A URI for a resource that explains the change (for example, meeting
         /// minutes).
         cite: String,
@@ -558,7 +558,7 @@ html_element!(
     /// organization.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/address
-    address {}
+    address<dom::HtmlElement> {}
 );
 
 dom_type!(address<dom::HtmlElement>);
@@ -571,7 +571,7 @@ html_element!(
     /// (e.g., in syndication).
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article
-    article {}
+    article<dom::HtmlElement> {}
 );
 
 dom_type!(article<dom::HtmlElement>);
@@ -583,7 +583,7 @@ html_element!(
     /// content.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/aside
-    aside {}
+    aside<dom::HtmlElement> {}
 );
 
 dom_type!(aside<dom::HtmlElement>);
@@ -598,7 +598,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/footer
     /// [sectioning content]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Sectioning_content
     /// [sectioning root]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Sections_and_Outlines_of_an_HTML5_document#Sectioning_roots
-    footer {}
+    footer<dom::HtmlElement> {}
 );
 
 dom_type!(footer<dom::HtmlElement>);
@@ -611,7 +611,7 @@ html_element!(
     /// author name, and other elements.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/header
-    header {}
+    header<dom::HtmlElement> {}
 );
 
 dom_type!(header<dom::HtmlElement>);
@@ -623,7 +623,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h1
-    h1 {}
+    h1<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h1<dom::HtmlHeadingElement>);
@@ -635,7 +635,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h2
-    h2 {}
+    h2<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h2<dom::HtmlHeadingElement>);
@@ -647,7 +647,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h3
-    h3 {}
+    h3<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h3<dom::HtmlHeadingElement>);
@@ -659,7 +659,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h4
-    h4 {}
+    h4<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h4<dom::HtmlHeadingElement>);
@@ -671,7 +671,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h5
-    h5 {}
+    h5<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h5<dom::HtmlHeadingElement>);
@@ -683,7 +683,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h6
-    h6 {}
+    h6<dom::HtmlHeadingElement> {}
 );
 
 dom_type!(h6<dom::HtmlHeadingElement>);
@@ -696,7 +696,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hgroup
     /// [heading]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements
-    hgroup {}
+    hgroup<dom::HtmlElement> {}
 );
 
 dom_type!(hgroup<dom::HtmlElement>);
@@ -710,7 +710,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main
     /// [body]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body
-    main {}
+    main<dom::HtmlElement> {}
 );
 
 dom_type!(main<dom::HtmlElement>);
@@ -723,7 +723,7 @@ html_element!(
     /// sections are menus, tables of contents, and indexes.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav
-    nav {}
+    nav<dom::HtmlElement> {}
 );
 
 dom_type!(nav<dom::HtmlElement>);
@@ -735,7 +735,7 @@ html_element!(
     /// — contained within an HTML document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/section
-    section {}
+    section<dom::HtmlElement> {}
 );
 
 dom_type!(section<dom::HtmlElement>);
@@ -748,7 +748,7 @@ html_element!(
     /// a browser plug-in.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/embed
-    embed {
+    embed<dom::HtmlEmbedElement> {
         /// The displayed height of the resource, in [CSS pixels]. This must be
         /// an absolute value; percentages are not allowed.
         ///
@@ -780,7 +780,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
     /// [browsing context]: https://developer.mozilla.org/en-US/docs/Glossary/browsing_context
-    iframe {
+    iframe<dom::HtmlIFrameElement> {
         /// Specifies a feature policy for the `<iframe>`.
         allow: String,
 
@@ -878,7 +878,7 @@ html_element!(
     /// resource to be handled by a plugin.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    object {
+    object<dom::HtmlObjectElement> {
         /// Specifies the URL of the resource.
         data: String,
 
@@ -919,7 +919,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
     /// [object]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    param {
+    param<dom::HtmlParamElement> {
         /// Name of the parameter.
         name: String,
 
@@ -938,7 +938,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [source]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source
     /// [img]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    picture {}
+    picture<dom::HtmlPictureElement> {}
 );
 
 dom_type!(picture<dom::HtmlPictureElement>);
@@ -953,7 +953,7 @@ html_element!(
     /// [picture]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [audio]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-    source {
+    source<dom::HtmlSourceElement> {
         /// Media query of the resource's intended media; this should be used
         /// only in a `<picture>` element.
         media: String,
@@ -1012,7 +1012,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas
     /// [api]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
     /// [gl]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
-    canvas {
+    canvas<dom::HtmlCanvasElement> {
         /// The height of the coordinate space in CSS pixels. Defaults to 150.
         height: String,
 
@@ -1035,7 +1035,7 @@ html_element!(
     /// is currently turned off in the browser.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noscript
-    noscript {}
+    noscript<dom::HtmlElement> {}
 );
 
 dom_type!(noscript<dom::HtmlElement>);
@@ -1047,7 +1047,7 @@ html_element!(
     /// JavaScript code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
-    script {
+    script<dom::HtmlScriptElement> {
         /// For classic scripts, if the async attribute is present, then the
         /// classic script will be fetched in parallel to parsing and
         /// evaluated as soon as it is available.
@@ -1152,7 +1152,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
     /// [hypertext link]: https://developer.mozilla.org/en-US/docs/Glossary/Hyperlink
     /// [map]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
-    area {
+    area<dom::HtmlAreaElement> {
         /// A text string alternative to display on browsers that do not display
         /// images. The text should be phrased so that it presents the
         /// user with the same kind of choice as the image would offer
@@ -1241,7 +1241,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
     /// [source]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source
     /// [stream]: https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
-    audio {
+    audio<dom::HtmlAudioElement> {
         /// If specified, the audio will automatically begin playback as soon as
         /// it can do so, without waiting for the entire audio file to
         /// finish downloading.
@@ -1361,7 +1361,7 @@ html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    img {
+    img<dom::HtmlImageElement> {
         /// Defines an alternative text description of the image.
         ///
         /// > Note: Browsers do not always display images. For example:
@@ -1550,7 +1550,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
     /// [area]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
-    map {
+    map<dom::HtmlMapElement> {
         /// The name attribute gives the map a name so that it can be
         /// referenced. The attribute must be present and must have a
         /// non-empty value with no space characters. The value of the
@@ -1578,7 +1578,7 @@ html_element!(
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
     /// [vtt]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Video_Text_Tracks_Format
     /// [ttml]: https://w3c.github.io/ttml2/index.html
-    track {
+    track<dom::HtmlTrackElement> {
         /// This attribute indicates that the track should be enabled unless the
         /// user's preferences indicate that another track is more
         /// appropriate. This may only be used on one track element per
@@ -1642,7 +1642,7 @@ html_element!(
     /// supports video playback into the document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-    video {
+    video<dom::HtmlVideoElement> {
         /// If specified, the video automatically begins to play back as soon as
         /// it can do so without stopping to finish loading the data.
         ///
@@ -1789,7 +1789,7 @@ html_element!(
     /// toggled into an "open" state.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    details {
+    details<dom::HtmlDetailsElement> {
         /// Indicates whether the details will be shown on page load.
         open: bool,
     }
@@ -1803,7 +1803,7 @@ html_element!(
     /// interactive component, such as an inspector or window.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-    dialog {
+    dialog<dom::HtmlDialogElement> {
         /// Indicates that the dialog is active and can be interacted with. When
         /// the open attribute is not set, the dialog shouldn't be shown
         /// to the user.
@@ -1825,7 +1825,7 @@ html_element!(
     /// clicked.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/menu
-    menu {}
+    menu<dom::HtmlMenuElement> {}
 );
 
 dom_type!(menu<dom::HtmlMenuElement>);
@@ -1838,7 +1838,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/summary
     /// [details]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    summary {}
+    summary<dom::HtmlElement> {}
 );
 
 dom_type!(summary<dom::HtmlElement>);
@@ -1854,7 +1854,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote
     /// [cite]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    blockquote {
+    blockquote<dom::HtmlQuoteElement> {
         /// A URL that designates a source document or message for the
         /// information quoted. This attribute is intended to point to
         /// information explaining the context or the reference
@@ -1874,7 +1874,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dd {}
+    dd<dom::HtmlElement> {}
 );
 
 dom_type!(dd<dom::HtmlElement>);
@@ -1887,7 +1887,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div
     /// [CSS]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    div {}
+    div<dom::HtmlDivElement> {}
 );
 
 dom_type!(div<dom::HtmlDivElement>);
@@ -1903,7 +1903,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dd]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
-    dl {}
+    dl<dom::HtmlDListElement> {}
 );
 
 dom_type!(dl<dom::HtmlDListElement>);
@@ -1916,7 +1916,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dt {}
+    dt<dom::HtmlElement> {}
 );
 
 dom_type!(dt<dom::HtmlElement>);
@@ -1929,7 +1929,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
     /// [figure]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
-    figcaption {}
+    figcaption<dom::HtmlElement> {}
 );
 
 dom_type!(figcaption<dom::HtmlElement>);
@@ -1943,7 +1943,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
     /// [figcaption]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
-    figure {}
+    figure<dom::HtmlElement> {}
 );
 
 dom_type!(figure<dom::HtmlElement>);
@@ -1955,7 +1955,7 @@ html_element!(
     /// or a shift of topic within a section.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr
-    hr {}
+    hr<dom::HtmlHrElement> {}
 );
 
 dom_type!(hr<dom::HtmlHrElement>);
@@ -1964,7 +1964,7 @@ html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li
-    li {}
+    li<dom::HtmlLiElement> {}
 );
 
 dom_type!(li<dom::HtmlLiElement>);
@@ -1975,7 +1975,7 @@ html_element!(
     /// typically rendered as a numbered list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ol
-    ol {
+    ol<dom::HtmlOListElement> {
         /// Specifies that the list’s items are in reverse order. Items will be
         /// numbered from high to low.
         reversed: bool,
@@ -2013,7 +2013,7 @@ html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p
-    p {}
+    p<dom::HtmlParagraphElement> {}
 );
 
 dom_type!(p<dom::HtmlParagraphElement>);
@@ -2024,7 +2024,7 @@ html_element!(
     /// be presented exactly as written in the HTML file.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre
-    pre {}
+    pre<dom::HtmlPreElement> {}
 );
 
 dom_type!(pre<dom::HtmlPreElement>);
@@ -2035,7 +2035,7 @@ html_element!(
     /// typically rendered as a bulleted list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul
-    ul {}
+    ul<dom::HtmlUListElement> {}
 );
 
 dom_type!(ul<dom::HtmlUListElement>);
@@ -2048,7 +2048,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/caption
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    caption {}
+    caption<dom::HtmlTableCaptionElement> {}
 );
 
 dom_type!(caption<dom::HtmlTableCaptionElement>);
@@ -2061,7 +2061,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
     /// [cg]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    col {
+    col<dom::HtmlTableColElement> {
         /// This attribute contains a positive integer indicating the number of
         /// consecutive columns the `<col>` element spans. If not
         /// present, its default value is 1.
@@ -2076,7 +2076,7 @@ html_element!(
     /// table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    colgroup {
+    colgroup<dom::HtmlTableColElement> {
         /// This attribute contains a positive integer indicating the number of
         /// consecutive columns the `<colgroup>` element spans. If not
         /// present, its default value is 1.
@@ -2101,7 +2101,7 @@ html_element!(
     /// and columns of cells containing data.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    table {}
+    table<dom::HtmlTableElement> {}
 );
 
 dom_type!(table<dom::HtmlTableElement>);
@@ -2115,7 +2115,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody
     /// [tr]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    tbody {}
+    tbody<dom::HtmlTableSectionElement> {}
 );
 
 dom_type!(tbody<dom::HtmlTableSectionElement>);
@@ -2126,7 +2126,7 @@ html_element!(
     /// data. It participates in the *table model*.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
-    td {
+    td<dom::HtmlTableCellElement> {
         /// This attribute contains a non-negative integer value that indicates
         /// for how many columns the cell extends. Its default value is
         /// 1. Values higher than 1000 will be considered as
@@ -2156,7 +2156,7 @@ html_element!(
     /// columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot
-    tfoot {}
+    tfoot<dom::HtmlTableSectionElement> {}
 );
 
 dom_type!(tfoot<dom::HtmlTableSectionElement>);
@@ -2170,7 +2170,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
     /// [scope]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-scope
     /// [headers]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-headers
-    th {
+    th<dom::HtmlTableCellElement> {
         /// This attribute contains a short abbreviated description of the
         /// cell's content. Some user-agents, such as speech readers,
         /// may present this description before the content itself.
@@ -2224,7 +2224,7 @@ html_element!(
     /// head of the columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead
-    thead {}
+    thead<dom::HtmlTableSectionElement> {}
 );
 
 dom_type!(thead<dom::HtmlTableSectionElement>);
@@ -2238,7 +2238,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [td]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
     /// [th]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
-    tr {}
+    tr<dom::HtmlTableRowElement> {}
 );
 
 dom_type!(tr<dom::HtmlTableRowElement>);
@@ -2254,7 +2254,7 @@ html_element!(
     /// such as <link>’s href attribute.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-    base {
+    base<dom::HtmlBaseElement> {
         /// The base URL to be used throughout the document for relative URLs.
         /// Absolute and relative URLs are allowed.
         href: String,
@@ -2295,7 +2295,7 @@ html_element!(
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [scripts]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [style sheets]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    head {}
+    head<dom::HtmlHeadElement> {}
 );
 
 dom_type!(head<dom::HtmlHeadElement>);
@@ -2311,7 +2311,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
     /// [stylesheets]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    link {
+    link<dom::HtmlLinkElement> {
         /// This attribute is only used when rel="preload" or rel="prefetch" has
         /// been set on the `<link>` element. It specifies the type of
         /// content being loaded by the `<link>`, which is necessary for
@@ -2469,7 +2469,7 @@ html_element!(
     /// [`<script>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [`<style>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
     /// [`<title>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
-    meta {
+    meta<dom::HtmlMetaElement> {
         /// This attribute declares the document's character encoding. If the
         /// attribute is present, its value must be an ASCII
         /// case-insensitive match for the string "utf-8".
@@ -2535,7 +2535,7 @@ html_element!(
     /// document, or part of a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    style {
+    style<dom::HtmlStyleElement> {
         /// This attribute defines which media the style should be applied to.
         /// Its value is a media query, which defaults to all if the
         /// attribute is missing.
@@ -2562,7 +2562,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [browser]: https://developer.mozilla.org/en-US/docs/Glossary/Browser
-    title {}
+    title<dom::HtmlTitleElement> {}
 );
 
 dom_type!(title<dom::HtmlTitleElement>);
@@ -2575,7 +2575,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button
     /// [forms]: https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms
-    button {
+    button<dom::HtmlButtonElement> {
         /// Specifies that the button should have input focus when the page
         /// loads. Only one element in a document can have this
         /// attribute.
@@ -2704,7 +2704,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
     /// [option]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option
-    datalist {}
+    datalist<dom::HtmlDataListElement> {}
 );
 
 dom_type!(datalist<dom::HtmlDataListElement>);
@@ -2716,7 +2716,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
     /// [label]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    fieldset {
+    fieldset<dom::HtmlFieldSetElement> {
         /// If this Boolean attribute is set, all form controls that are
         /// descendants of the `<fieldset>` are disabled, meaning they
         /// are not editable and won't be submitted along
@@ -2748,7 +2748,7 @@ html_element!(
     /// server.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form
-    form {
+    form<dom::HtmlFormElement> {
         /// Space-separated [character encodings] the server accepts. The
         /// browser uses them in the order in which they are listed. The
         /// default value means the same encoding as the page.
@@ -2849,7 +2849,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
     /// [user agent]: https://developer.mozilla.org/en-US/docs/Glossary/user_agent
-    input {
+    input<dom::HtmlInputElement> {
         /// Valid for the file input type only, the accept property defines
         /// which file types are selectable in a file upload control.
         /// See the file input type.
@@ -3298,7 +3298,7 @@ html_element!(
     /// user interface.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    label {
+    label<dom::HtmlLabelElement> {
         /// The id of a labelable form-related element in the same document as
         /// the `<label>` element. The first element in the document
         /// with an id matching the value of the for attribute is the
@@ -3330,7 +3330,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/legend
     /// [fieldset]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
-    legend {}
+    legend<dom::HtmlLegendElement> {}
 );
 
 dom_type!(legend<dom::HtmlLegendElement>);
@@ -3341,7 +3341,7 @@ html_element!(
     /// within a known range or a fractional value.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meter
-    meter {
+    meter<dom::HtmlMeterElement> {
         /// The current numeric value. This must be between the minimum and
         /// maximum values (min attribute and max attribute) if they are
         /// specified. If unspecified or malformed, the value is 0. If
@@ -3409,7 +3409,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    optgroup {
+    optgroup<dom::HtmlOptGroupElement> {
         /// If set, none of the items in this option group is selectable. Often
         /// browsers grey out such control and it won't receive any
         /// browsing events, like mouse clicks or focus-related ones.
@@ -3435,7 +3435,7 @@ html_element!(
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
     /// [optgroup]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [datalist]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
-    option {
+    option<dom::HtmlOptionElement> {
         /// If set, this option is not checkable. Often browsers grey out such
         /// control and it won't receive any browsing event, like mouse
         /// clicks or focus-related ones. If this attribute is not set,
@@ -3472,7 +3472,7 @@ html_element!(
     /// outcome of a user action.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/output
-    output {
+    output<dom::HtmlOutputElement> {
         /// A space-separated list of other elements’ ids, indicating that those
         /// elements contributed input values to (or otherwise affected)
         /// the calculation.
@@ -3503,7 +3503,7 @@ html_element!(
     /// bar.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress
-    progress {
+    progress<dom::HtmlProgressElement> {
         /// This attribute describes how much work the task indicated by the
         /// progress element requires. The max attribute, if present,
         /// must have a value greater than 0 and be a valid
@@ -3528,7 +3528,7 @@ html_element!(
     /// menu of options.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    select {
+    select<dom::HtmlSelectElement> {
         /// A DOMString providing a hint for a user agent's autocomplete
         /// feature.
         autocomplete: String,
@@ -3588,7 +3588,7 @@ html_element!(
     /// or feedback form.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
-    textarea {
+    textarea<dom::HtmlTextAreaElement> {
         /// This attribute indicates whether the value of the control can be
         /// automatically completed by the browser. Possible values are:
         ///

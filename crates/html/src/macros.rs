@@ -21,7 +21,7 @@ pub mod private {
 /// # use silkenweb_html::{html_element, dom_type};
 /// use web_sys as dom;
 ///
-/// html_element!(my-html-element {
+/// html_element!(my-html-element<dom::HtmlDivElement> {
 ///     my-attribute: String
 /// });
 ///
@@ -39,6 +39,7 @@ macro_rules! html_element {
     (
         $(#[$elem_meta:meta])*
         $name:ident $(- $name_tail:ident)*
+        < $elem_type:ty >
         {
             $(
                 $(#[$attr_meta:meta])*
@@ -50,7 +51,8 @@ macro_rules! html_element {
             $(#[$elem_meta])*
             snake ( [< $name $(_ $name_tail)* >] ),
             camel ( [< $name:camel $($name_tail:camel)* >] ),
-            text ( $crate::text_name!($name $(- $name_tail)*) ),
+            text ( $crate::text_name!($name $(- $name_tail)*) )
+            < $elem_type >
             {
                 $(
                     $(#[$attr_meta])*
@@ -63,7 +65,8 @@ macro_rules! html_element {
         $(#[$elem_meta:meta])*
         snake ( $snake_name:ident ),
         camel ( $camel_name:ident ),
-        text ( $text_name:expr ) $(,)?
+        text ( $text_name:expr )
+        < $elem_type:ty >
         {
             $(
                 $(#[$attr_meta:meta])*
