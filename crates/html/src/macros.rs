@@ -111,10 +111,12 @@ macro_rules! html_element {
         $crate::macros::private::item! {
             $(#[$elem_meta])*
             pub fn $snake_name() -> [<$camel_name Builder>] {
-                [<$camel_name Builder>]($crate::macros::tag($text_name))
+                [<$camel_name Builder>]{ builder: $crate::macros::tag($text_name) }
             }
 
-            pub struct [<$camel_name Builder>]($crate::macros::ElementBuilder);
+            pub struct [<$camel_name Builder>]{
+                builder: $crate::macros::ElementBuilder
+            }
 
             impl [<$camel_name Builder>] {
                 $crate::attributes![
@@ -142,7 +144,7 @@ macro_rules! html_element {
                  ); )?
 
                  pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
-                     Self(self.0.effect(f))
+                     Self{ builder: self.builder.effect(f) }
                  }
             }
 
@@ -150,7 +152,7 @@ macro_rules! html_element {
                 type Target = $camel_name;
 
                 fn build(self) -> Self::Target {
-                    $camel_name(self.0.build())
+                    $camel_name(self.builder.build())
                 }
 
                 fn into_element(self) -> $crate::macros::Element {
@@ -163,7 +165,7 @@ macro_rules! html_element {
 
                 fn dom_element(&self) -> Self::Target {
                     use $crate::macros::JsCast;
-                    self.0.dom_element().unchecked_into()
+                    self.builder.dom_element().unchecked_into()
                 }
             }
 
@@ -176,7 +178,7 @@ macro_rules! html_element {
 
             impl From<[<$camel_name Builder>]> for $crate::macros::ElementBuilder {
                 fn from(builder: [<$camel_name Builder>]) -> Self {
-                    builder.0
+                    builder.builder
                 }
             }
 
@@ -222,14 +224,14 @@ macro_rules! children_allowed {
         $crate::macros::private::item! {
             impl [<$name:camel $($name_tail:camel)* Builder>] {
                 pub fn text(self, child: impl $crate::macros::Text) -> Self {
-                    Self(self.0.text(child))
+                    Self{ builder: self.builder.text(child) }
                 }
 
                 pub fn child<Child>(self, c: Child) -> Self
                 where
                     Child: Into<$crate::macros::Element>
                 {
-                    Self(self.0.child(c.into()))
+                    Self{ builder: self.builder.child(c.into()) }
                 }
             }
         }
@@ -318,13 +320,21 @@ macro_rules! events {
                     self,
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
-                    Self(self.0.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
-                        use $crate::macros::JsCast;
-                        // I *think* it's safe to assume event and event.current_target aren't null
-                        let event: $event_type = js_ev.unchecked_into();
-                        let target: $elem_type = event.current_target().unwrap().unchecked_into();
-                        f(event, target);
-                    }))
+                    Self{
+                        builder: self.builder.on(
+                            $crate::text_name!($name $(- $name_tail)*),
+                            move |js_ev| {
+                                use $crate::macros::JsCast;
+                                // I *think* we can assume event and event.current_target aren't null
+                                let event: $event_type = js_ev.unchecked_into();
+                                let target: $elem_type = event
+                                    .current_target()
+                                    .unwrap()
+                                    .unchecked_into();
+                                f(event, target);
+                            }
+                        )
+                    }
                 }
             )*
         }
@@ -343,7 +353,7 @@ macro_rules! custom_events {
                     self,
                     mut f: impl 'static + FnMut($crate::CustomEvent<$detail_type>, $elem_type)
                 ) -> Self {
-                    Self(self.0.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
+                    Self(self.builder.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* it's safe to assume event and event.current_target aren't null
                         let event: $crate::macros::private::dom::CustomEvent = js_ev.unchecked_into();
@@ -366,7 +376,7 @@ macro_rules! attributes {
         $(
             $(#[$attr_meta])*
             pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
-                Self(self.0.attribute($text_attr, value))
+                Self{ builder: self.builder.attribute($text_attr, value) }
             }
         )*
     };
