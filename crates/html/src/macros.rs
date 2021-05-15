@@ -353,13 +353,22 @@ macro_rules! custom_events {
                     self,
                     mut f: impl 'static + FnMut($crate::CustomEvent<$detail_type>, $elem_type)
                 ) -> Self {
-                    Self(self.builder.on($crate::text_name!($name $(- $name_tail)*), move |js_ev| {
-                        use $crate::macros::JsCast;
-                        // I *think* it's safe to assume event and event.current_target aren't null
-                        let event: $crate::macros::private::dom::CustomEvent = js_ev.unchecked_into();
-                        let target: $elem_type = event.current_target().unwrap().unchecked_into();
-                        f(event.into(), target);
-                    }))
+                    Self{
+                        builder: self.builder.on(
+                            $crate::text_name!($name $(- $name_tail)*),
+                            move |js_ev| {
+                                use $crate::macros::JsCast;
+                                // I *think* it's safe to assume event and event.current_target aren't null
+                                let event: $crate::macros::private::dom::CustomEvent =
+                                    js_ev.unchecked_into();
+                                let target: $elem_type = event
+                                    .current_target()
+                                    .unwrap()
+                                    .unchecked_into();
+                                f(event.into(), target);
+                            }
+                        )
+                    }
                 }
             )*
         }
