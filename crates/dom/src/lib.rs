@@ -102,7 +102,7 @@ impl ElementBuilder {
     }
 
     /// Set an attribute. Attribute values can be reactive.
-    pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl AttributeValue<T>) -> Self {
+    pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl Attribute<T>) -> Self {
         value.set_attribute(name, &mut self);
         mem::drop(value);
         self
@@ -338,11 +338,11 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
 }
 
 /// A potentially reactive attribute.
-pub trait AttributeValue<T> {
+pub trait Attribute<T> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
 
-impl<T> AttributeValue<T> for T
+impl<T> Attribute<T> for T
 where
     T: StaticAttribute,
 {
@@ -351,26 +351,26 @@ where
     }
 }
 
-impl<'a> AttributeValue<String> for &'a str {
+impl<'a> Attribute<String> for &'a str {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
-impl<'a> AttributeValue<String> for &'a String {
+impl<'a> Attribute<String> for &'a String {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
-impl AttributeValue<String> for ReadSignal<&'static str> {
+impl Attribute<String> for ReadSignal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         self.map(|&value| value.to_string())
             .set_attribute(name, builder);
     }
 }
 
-impl<T> AttributeValue<T> for ReadSignal<T>
+impl<T> Attribute<T> for ReadSignal<T>
 where
     T: 'static + StaticAttribute,
 {
@@ -390,9 +390,9 @@ where
     }
 }
 
-impl<'a, T> AttributeValue<T> for &'a ReadSignal<T>
+impl<'a, T> Attribute<T> for &'a ReadSignal<T>
 where
-    ReadSignal<T>: AttributeValue<T>,
+    ReadSignal<T>: Attribute<T>,
     T: 'static,
 {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {

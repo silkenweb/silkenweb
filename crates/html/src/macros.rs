@@ -1,5 +1,5 @@
 pub use silkenweb_dom::{
-    tag, AttributeValue, Builder, DomElement, Effect, Element, ElementBuilder, Text,
+    tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
 };
 pub use wasm_bindgen::JsCast;
 
@@ -384,7 +384,7 @@ macro_rules! attributes {
     ),* $(,)? ) => {
         $(
             $(#[$attr_meta])*
-            pub fn $attr(self, value: impl $crate::macros::AttributeValue<$typ>) -> Self {
+            pub fn $attr(self, value: impl $crate::macros::Attribute<$typ>) -> Self {
                 Self{ builder: self.builder.attribute($text_attr, value) }
             }
         )*
