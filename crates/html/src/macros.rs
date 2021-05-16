@@ -33,7 +33,7 @@ pub mod private {
 ///     }
 ///
 ///     custom_events {
-///         my-custom-event: dom::HtmlElement,
+///         my-custom-event: CustomEvent<dom::HtmlElement>,
 ///     }
 /// });
 ///
@@ -61,7 +61,7 @@ macro_rules! html_element {
             })?
 
             $(custom_events {
-                $($custom_event:ident $(- $custom_event_tail:ident)*: $detail_type:ty),* $(,)?
+                $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
             })?
         }
     ) => { $crate::macros::private::item!{
@@ -82,7 +82,7 @@ macro_rules! html_element {
                 })?
 
                 $(custom_events {
-                    $($custom_event $(- $custom_event_tail)*: $detail_type),*
+                    $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                 })?
             }
         );
@@ -104,7 +104,7 @@ macro_rules! html_element {
             })?
 
             $(custom_events {
-                $($custom_event:ident $(- $custom_event_tail:ident)*: $detail_type:ty),* $(,)?
+                $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
             })?
         }
     ) => {
@@ -139,7 +139,7 @@ macro_rules! html_element {
 
                  $($crate::custom_events!(
                     $elem_type {
-                        $($custom_event $(- $custom_event_tail)*: $detail_type),*
+                        $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                     }
                  ); )?
 
@@ -345,13 +345,13 @@ macro_rules! events {
 #[macro_export]
 macro_rules! custom_events {
     ($elem_type:ty {
-        $($name:ident $(- $name_tail:ident)*: $detail_type:ty),* $(,)?
+        $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
     }) => {
         $crate::macros::private::item!{
             $(
                 pub fn [<on_ $name $(_ $name_tail)* >] (
                     self,
-                    mut f: impl 'static + FnMut($crate::CustomEvent<$detail_type>, $elem_type)
+                    mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
                     Self{
                         builder: self.builder.on(
