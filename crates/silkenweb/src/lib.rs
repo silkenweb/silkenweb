@@ -36,7 +36,8 @@
 pub use silkenweb_dom::{
     element_list, local_storage, mount,
     render::{after_render, render_updates},
-    session_storage, tag, tag_in_namespace, unmount, Builder, DomElement, Element, ElementBuilder,
+    session_storage, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement, Element,
+    ElementBuilder,
 };
 pub use silkenweb_html::{children_allowed, elements, html_element, CustomEvent};
 pub use silkenweb_reactive::{accumulators, clone, memo, signal};
