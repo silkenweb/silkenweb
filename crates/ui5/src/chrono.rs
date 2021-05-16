@@ -63,7 +63,7 @@ impl SelectedDatesChange {
     pub fn selected_dates(&self) -> impl Iterator<Item = String> {
         self.event
             .detail()
-            .unchecked_into::<DatesArray>()
+            .unchecked_into::<Values>()
             .values()
             .into_vec()
             .into_iter()
@@ -79,8 +79,8 @@ impl From<dom::CustomEvent> for SelectedDatesChange {
 
 #[wasm_bindgen]
 extern "C" {
-    pub type DatesArray;
+    type Values;
 
     #[wasm_bindgen(structural, method, getter)]
-    pub fn values(this: &DatesArray) -> Box<[JsValue]>;
+    fn values(this: &Values) -> Box<[JsValue]>;
 }
