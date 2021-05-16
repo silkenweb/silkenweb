@@ -1,4 +1,5 @@
-use silkenweb::{html_element, Builder};
+use parse_display::Display;
+use silkenweb::{html_element, AttributeValue, Builder};
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys as dom;
 
@@ -35,20 +36,32 @@ impl Ui5CalendarBuilder {
     }
 }
 
-// TODO: Currently we need to implement StaticAttribute for these. Need a way to
-// set any Display attr.
+#[derive(Display)]
 pub enum SelectionMode {
     Single,
     Range,
     Multiple,
 }
 
+impl AttributeValue for SelectionMode {
+    fn text(&self) -> String {
+        self.to_string()
+    }
+}
+
+#[derive(Display)]
 pub enum PrimaryCalendarType {
     Gregorian,
     Buddhist,
     Islamic,
     Japanese,
     Persian,
+}
+
+impl AttributeValue for PrimaryCalendarType {
+    fn text(&self) -> String {
+        self.to_string()
+    }
 }
 
 pub struct SelectedDatesChange {
