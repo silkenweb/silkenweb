@@ -289,9 +289,37 @@ impl Builder for Element {
     }
 }
 
+pub trait AttributeValue {
+    fn text(&self) -> String;
+}
+
+impl AttributeValue for f32 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for String {
+    fn text(&self) -> String {
+        self.clone()
+    }
+}
+
+impl AttributeValue for str {
+    fn text(&self) -> String {
+        self.to_string()
+    }
+}
+
 /// A non-reactive attribute.
 pub trait StaticAttribute {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
+}
+
+impl<T: AttributeValue> StaticAttribute for T {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        set_attribute(dom_element, name, self.text());
+    }
 }
 
 impl StaticAttribute for bool {
@@ -308,24 +336,6 @@ impl StaticAttribute for bool {
                 dom_element.remove_attribute(&name).unwrap();
             });
         }
-    }
-}
-
-impl StaticAttribute for f32 {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        set_attribute(dom_element, name, format!("{}", self));
-    }
-}
-
-impl StaticAttribute for String {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        set_attribute(dom_element, name, self);
-    }
-}
-
-impl StaticAttribute for str {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        set_attribute(dom_element, name, self);
     }
 }
 
