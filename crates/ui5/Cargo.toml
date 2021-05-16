@@ -15,6 +15,9 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 [dependencies]
 silkenweb = "0.1.1"
 web-sys = "0.3"
+chrono = "0.4.19"
+wasm-bindgen = "=0.2.73"
+js-sys = "0.3"
 
 [features]
 serde = ["silkenweb/serde"]

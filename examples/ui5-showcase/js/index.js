@@ -9,4 +9,6 @@ import "@ui5/webcomponents/dist/Icon.js";
 import "@ui5/webcomponents-icons/dist/activate.js";
 import "@ui5/webcomponents-icons/dist/accept.js";
 
+import "@ui5/webcomponents/dist/Calendar";
+
 import("../pkg/index.js").catch(console.error);
