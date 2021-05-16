@@ -1,12 +1,11 @@
-pub use silkenweb_dom::{
-    tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
-};
-pub use wasm_bindgen::JsCast;
-
 #[doc(hidden)]
 // Macro dependencies
 pub mod private {
     pub use paste::item;
+    pub use silkenweb_dom::{
+        tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
+    };
+    pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
 
@@ -111,11 +110,11 @@ macro_rules! html_element {
         $crate::macros::private::item! {
             $(#[$elem_meta])*
             pub fn $snake_name() -> [<$camel_name Builder>] {
-                [<$camel_name Builder>]{ builder: $crate::macros::tag($text_name) }
+                [<$camel_name Builder>]{ builder: $crate::macros::private::tag($text_name) }
             }
 
             pub struct [<$camel_name Builder>]{
-                builder: $crate::macros::ElementBuilder
+                builder: $crate::macros::private::ElementBuilder
             }
 
             impl [<$camel_name Builder>] {
@@ -143,70 +142,70 @@ macro_rules! html_element {
                     }
                  ); )?
 
-                 pub fn effect(self, f: impl $crate::macros::Effect<$elem_type>) -> Self {
+                 pub fn effect(self, f: impl $crate::macros::private::Effect<$elem_type>) -> Self {
                      Self{ builder: self.builder.effect(f) }
                  }
             }
 
-            impl $crate::macros::Builder for [<$camel_name Builder>] {
+            impl $crate::macros::private::Builder for [<$camel_name Builder>] {
                 type Target = $camel_name;
 
                 fn build(self) -> Self::Target {
                     $camel_name(self.builder.build())
                 }
 
-                fn into_element(self) -> $crate::macros::Element {
+                fn into_element(self) -> $crate::macros::private::Element {
                     self.build().into()
                 }
             }
 
-            impl $crate::macros::DomElement for [<$camel_name Builder>] {
+            impl $crate::macros::private::DomElement for [<$camel_name Builder>] {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
+                    use $crate::macros::private::JsCast;
                     self.builder.dom_element().unchecked_into()
                 }
             }
 
-            impl From<[<$camel_name Builder>]> for $crate::macros::Element {
+            impl From<[<$camel_name Builder>]> for $crate::macros::private::Element {
                 fn from(builder: [<$camel_name Builder>]) -> Self {
-                    use $crate::macros::Builder;
+                    use $crate::macros::private::Builder;
                     builder.build().into()
                 }
             }
 
-            impl From<[<$camel_name Builder>]> for $crate::macros::ElementBuilder {
+            impl From<[<$camel_name Builder>]> for $crate::macros::private::ElementBuilder {
                 fn from(builder: [<$camel_name Builder>]) -> Self {
                     builder.builder
                 }
             }
 
             #[derive(Clone)]
-            pub struct $camel_name($crate::macros::Element);
+            pub struct $camel_name($crate::macros::private::Element);
 
-            impl $crate::macros::Builder for $camel_name {
+            impl $crate::macros::private::Builder for $camel_name {
                 type Target = Self;
 
                 fn build(self) -> Self::Target {
                     self
                 }
 
-                fn into_element(self) -> $crate::macros::Element {
+                fn into_element(self) -> $crate::macros::private::Element {
                     self.build().into()
                 }
             }
 
-            impl $crate::macros::DomElement for [<$camel_name>] {
+            impl $crate::macros::private::DomElement for [<$camel_name>] {
                 type Target = $elem_type;
 
                 fn dom_element(&self) -> Self::Target {
-                    use $crate::macros::JsCast;
+                    use $crate::macros::private::JsCast;
                     self.0.dom_element().unchecked_into()
                 }
             }
 
-            impl From<$camel_name> for $crate::macros::Element {
+            impl From<$camel_name> for $crate::macros::private::Element {
                 fn from(html_elem: $camel_name) -> Self {
                     html_elem.0
                 }
@@ -223,13 +222,13 @@ macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
         $crate::macros::private::item! {
             impl [<$name:camel $($name_tail:camel)* Builder>] {
-                pub fn text(self, child: impl $crate::macros::Text) -> Self {
+                pub fn text(self, child: impl $crate::macros::private::Text) -> Self {
                     Self{ builder: self.builder.text(child) }
                 }
 
                 pub fn child<Child>(self, c: Child) -> Self
                 where
-                    Child: Into<$crate::macros::Element>
+                    Child: Into<$crate::macros::private::Element>
                 {
                     Self{ builder: self.builder.child(c.into()) }
                 }
@@ -324,7 +323,7 @@ macro_rules! events {
                         builder: self.builder.on(
                             $crate::text_name!($name $(- $name_tail)*),
                             move |js_ev| {
-                                use $crate::macros::JsCast;
+                                use $crate::macros::private::JsCast;
                                 // I *think* we can assume event and event.current_target aren't null
                                 let event: $event_type = js_ev.unchecked_into();
                                 let target: $elem_type = event
@@ -357,7 +356,7 @@ macro_rules! custom_events {
                         builder: self.builder.on(
                             $crate::text_name!($name $(- $name_tail)*),
                             move |js_ev| {
-                                use $crate::macros::JsCast;
+                                use $crate::macros::private::JsCast;
                                 // I *think* it's safe to assume event and event.current_target aren't null
                                 let event: $crate::macros::private::dom::CustomEvent =
                                     js_ev.unchecked_into();
@@ -384,7 +383,7 @@ macro_rules! attributes {
     ),* $(,)? ) => {
         $(
             $(#[$attr_meta])*
-            pub fn $attr(self, value: impl $crate::macros::Attribute<$typ>) -> Self {
+            pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
                 Self{ builder: self.builder.attribute($text_attr, value) }
             }
         )*
