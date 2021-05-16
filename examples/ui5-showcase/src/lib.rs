@@ -5,7 +5,6 @@
     clippy::module_name_repetitions,
     clippy::option_if_let_else
 )]
-use chrono::NaiveDate;
 use silkenweb::mount;
 use silkenweb_ui5::chrono::ui5_calendar;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
@@ -19,7 +18,12 @@ pub fn main_js() -> Result<(), JsValue> {
         "app",
         ui5_calendar()
             .format_pattern("yyyy-MM-dd")
-            .selected_date(format!("{}", NaiveDate::from_ymd(2000, 1, 1))),
+            .selected_date("2000-01-01".to_string())
+            .on_selected_dates_change(|event, _target| {
+                for d in event.selected_dates() {
+                    web_log::println!("{}", d);
+                }
+            }),
     );
 
     Ok(())

@@ -1,6 +1,3 @@
-use std::convert::TryInto;
-
-use chrono::{Date, TimeZone, Utc};
 use silkenweb::{html_element, Builder};
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys as dom;
@@ -63,24 +60,14 @@ impl SelectedDatesChange {
         &self.event
     }
 
-    pub fn selected_dates(&self) -> impl Iterator<Item = Date<Utc>> {
+    pub fn selected_dates(&self) -> impl Iterator<Item = String> {
         self.event
             .detail()
-            .dyn_into::<DatesArray>()
-            .expect("Detail must have `values` property")
+            .unchecked_into::<DatesArray>()
             .values()
             .into_vec()
             .into_iter()
-            .map(|obj| {
-                let date = obj
-                    .dyn_into::<js_sys::Date>()
-                    .expect("Type value must be `Date`");
-                Utc.ymd(
-                    date.get_utc_full_year().try_into().unwrap(),
-                    date.get_utc_month(),
-                    date.get_utc_day(),
-                )
-            })
+            .map(|obj| obj.as_string().unwrap())
     }
 }
 
