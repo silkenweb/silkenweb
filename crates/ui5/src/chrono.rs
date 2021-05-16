@@ -1,6 +1,6 @@
 use parse_display::Display;
 use silkenweb::{html_element, AttributeValue, Builder};
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys as dom;
 
 html_element!(
