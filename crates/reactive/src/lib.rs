@@ -6,6 +6,7 @@
     clippy::module_name_repetitions
 )]
 pub mod accumulators;
+pub mod containers;
 pub mod memo;
 pub mod signal;
 
