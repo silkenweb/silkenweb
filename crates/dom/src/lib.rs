@@ -11,7 +11,11 @@ pub mod render;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 use render::{after_render, queue_update};
-use silkenweb_reactive::{clone, signal::ReadSignal};
+use silkenweb_reactive::{
+    clone,
+    containers::{SignalVec, VecDelta},
+    signal::ReadSignal,
+};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys as dom;
 
@@ -94,7 +98,7 @@ impl ElementBuilder {
                 children: Vec::new(),
                 event_callbacks: Vec::new(),
                 reactive_attrs: HashMap::new(),
-                reactive_text: Vec::new(),
+                reactive_children: Vec::new(),
                 reactive_with_dom: Vec::new(),
             },
             text_nodes: Vec::new(),
@@ -116,6 +120,56 @@ impl ElementBuilder {
         self.append_child(&child.dom_element());
         self.element.children.push(child);
         self
+    }
+
+    // TODO: Docs and work out what to do with existing children.
+    pub fn children<T>(mut self, children: &ReadSignal<SignalVec<T>>) -> Element
+    where
+        T: 'static + DomElement,
+    {
+        for child in children.current().iter() {
+            self.append_child(&child.dom_element().into());
+            // TODO: Can we get rid of `self.element.children`? It just holds on
+            // to signals.
+        }
+
+        // TODO: We need a map_changes, so we don't respond to the first delta.
+        let dom_element = self.dom_element();
+
+        let reactor = children.map(move |children| {
+            clone!(dom_element);
+
+            match children.delta() {
+                VecDelta::Clear => {
+                    // TODO
+                }
+                VecDelta::Insert { index } => {
+                    let index = *index;
+                    let len = children.len();
+                    let child = children[index].dom_element().into();
+
+                    queue_update(move || {
+                        if index + 1 == len {
+                            dom_element.append_child(&child).unwrap();
+                        } else {
+                            todo!();
+                        }
+                    });
+                }
+                VecDelta::Remove { item, .. } => {
+                    let child = item.dom_element().into();
+
+                    queue_update(move || {
+                        dom_element.remove_child(&child).unwrap();
+                    });
+                }
+                VecDelta::Extend { .. } | VecDelta::Swap { .. } | VecDelta::Set { .. } => todo!(),
+            }
+        });
+
+        self.element.reactive_children.push(reactor);
+
+        self.build()
     }
 
     /// Add a text node after existing children. The text node can be reactive.
@@ -500,7 +554,7 @@ where
                 }
             });
 
-            builder.element.reactive_text.push(updater);
+            builder.element.reactive_children.push(updater);
         }
     }
 }
@@ -565,7 +619,7 @@ struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     reactive_attrs: HashMap<String, ReadSignal<()>>,
-    reactive_text: Vec<ReadSignal<()>>,
+    reactive_children: Vec<ReadSignal<()>>,
     reactive_with_dom: Vec<ReadSignal<()>>,
 }
 

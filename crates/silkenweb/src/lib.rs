@@ -40,7 +40,7 @@ pub use silkenweb_dom::{
     ElementBuilder,
 };
 pub use silkenweb_html::{children_allowed, elements, html_element, CustomEvent};
-pub use silkenweb_reactive::{accumulators, clone, memo, signal};
+pub use silkenweb_reactive::{accumulators, clone, containers, memo, signal};
 
 pub mod animation;
 pub mod router;

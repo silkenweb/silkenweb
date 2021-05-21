@@ -1,6 +1,6 @@
 use silkenweb::{
-    element_list::OrderedElementList,
-    elements::{button, div, hr, Button},
+    containers::SignalVec,
+    elements::{button, div, hr, Button, Div},
     mount,
     signal::Signal,
     Builder,
@@ -9,8 +9,9 @@ use silkenweb_tutorial_common::define_counter;
 
 // ANCHOR: main
 fn main() {
+    // TODO: Update tutorial text
     // ANCHOR: new_list
-    let list = Signal::new(OrderedElementList::new(div()));
+    let list = SignalVec::new();
     // ANCHOR_END: new_list
 
     mount(
@@ -26,19 +27,18 @@ fn main() {
                     .child(push_button(&list)),
             )
             .child(hr())
-            .child(list.read()),
+            .child(div().children(&list.read())),
     );
 }
 // ANCHOR_END: main
 
 // ANCHOR: push_button
-fn push_button(list: &Signal<OrderedElementList<usize>>) -> Button {
+fn push_button(list: &Signal<SignalVec<Div>>) -> Button {
     let push_elem = list.write();
     button()
         .on_click(move |_, _| {
             // ANCHOR: mutate_list
-            push_elem
-                .mutate(move |list| list.insert(list.len(), define_counter(&Signal::new(0)).into()))
+            push_elem.mutate(move |list| list.push(define_counter(&Signal::new(0)).build()))
             // ANCHOR_END: mutate_list
         })
         .text("+")
@@ -47,13 +47,13 @@ fn push_button(list: &Signal<OrderedElementList<usize>>) -> Button {
 // ANCHOR_END: push_button
 
 // ANCHOR: pop_button
-fn pop_button(list: &Signal<OrderedElementList<usize>>) -> Button {
+fn pop_button(list: &Signal<SignalVec<Div>>) -> Button {
     let pop_elem = list.write();
     button()
         .on_click(move |_, _| {
             pop_elem.mutate(move |list| {
                 if !list.is_empty() {
-                    list.remove(&(list.len() - 1))
+                    list.pop();
                 }
             })
         })

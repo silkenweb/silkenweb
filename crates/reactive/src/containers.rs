@@ -1,16 +1,18 @@
+use std::ops::Index;
+
 use crate::signal::Signal;
 
 // TODO: Name
 pub struct SignalVec<T> {
     data: Vec<T>,
-    delta: VecDelta,
+    delta: VecDelta<T>,
 }
 
-pub enum VecDelta {
+pub enum VecDelta<T> {
     Clear,
     Extend { start_index: usize },
     Insert { index: usize },
-    Remove { index: usize },
+    Remove { index: usize, item: T },
     Swap { index0: usize, index1: usize },
     Set { index: usize },
 }
@@ -43,13 +45,38 @@ impl<T: 'static> SignalVec<T> {
         self.data.is_empty()
     }
 
-    pub fn delta(&self) -> &VecDelta {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.data.iter()
+    }
+
+    pub fn delta(&self) -> &VecDelta<T> {
         &self.delta
     }
 
+    // TODO: Docs
     pub fn push(&mut self, item: T) {
         self.data.push(item);
-        self.delta = VecDelta::Insert { index: self.len() }
+        self.delta = VecDelta::Insert {
+            index: self.len() - 1,
+        }
+    }
+
+    /// # Panics
+    ///
+    /// If the list is empty
+    pub fn pop(&mut self) {
+        let item = self.data.pop().unwrap();
+
+        let index = self.len();
+        self.delta = VecDelta::Remove { index, item };
+    }
+}
+
+impl<T> Index<usize> for SignalVec<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.data[index]
     }
 }
 

@@ -5,6 +5,7 @@ pub mod private {
     pub use silkenweb_dom::{
         tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
     };
+    pub use silkenweb_reactive::{containers, signal::ReadSignal};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
@@ -224,6 +225,16 @@ macro_rules! children_allowed {
             impl [<$name:camel $($name_tail:camel)* Builder>] {
                 pub fn text(self, child: impl $crate::macros::private::Text) -> Self {
                     Self{ builder: self.builder.text(child) }
+                }
+
+                // TODO: Return Self::Target
+                pub fn children<T>(
+                    self,
+                    children: & $crate::macros::private::ReadSignal<$crate::macros::private::containers::SignalVec<T>>) -> $crate::macros::private::Element
+                where
+                    T: 'static + $crate::macros::private::DomElement,
+                {
+                    self.builder.children(children)
                 }
 
                 pub fn child<Child>(self, c: Child) -> Self
