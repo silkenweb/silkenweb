@@ -6,6 +6,7 @@ use crate::signal::{Signal, WriteSignal};
 pub struct SignalVec<T> {
     data: Vec<T>,
     delta: VecDelta<T>,
+    delta_index: DeltaIndex,
 }
 
 pub enum VecDelta<T> {
@@ -34,7 +35,13 @@ impl<T: 'static> SignalVec<T> {
         Signal::new(Self {
             data: Vec::new(),
             delta: VecDelta::Clear,
+            delta_index: DeltaIndex::default(),
         })
+    }
+
+    fn set_delta(&mut self, delta: VecDelta<T>) {
+        self.delta = delta;
+        self.delta_index.next();
     }
 }
 
@@ -43,9 +50,9 @@ impl<T: 'static> WriteSignal<SignalVec<T>> {
     pub fn push(&mut self, item: T) {
         self.mutate(|vec| {
             vec.data.push(item);
-            vec.delta = VecDelta::Insert {
+            vec.set_delta(VecDelta::Insert {
                 index: vec.len() - 1,
-            }
+            });
         })
     }
 
@@ -57,7 +64,7 @@ impl<T: 'static> WriteSignal<SignalVec<T>> {
             let item = vec.data.pop().unwrap();
 
             let index = vec.len();
-            vec.delta = VecDelta::Remove { index, item };
+            vec.set_delta(VecDelta::Remove { index, item });
         });
     }
 }
@@ -78,6 +85,10 @@ impl<T: 'static> SignalVec<T> {
     pub fn delta(&self) -> &VecDelta<T> {
         &self.delta
     }
+
+    pub fn delta_index(&self) -> DeltaIndex {
+        self.delta_index
+    }
 }
 
 impl<T> Index<usize> for SignalVec<T> {
@@ -85,6 +96,15 @@ impl<T> Index<usize> for SignalVec<T> {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Default)]
+pub struct DeltaIndex(u128);
+
+impl DeltaIndex {
+    pub fn next(&mut self) {
+        self.0 += 1;
     }
 }
 
