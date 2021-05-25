@@ -23,7 +23,7 @@ fn main() {
                 div()
                     .child(pop_button(&list))
                     // ANCHOR: list_len
-                    .text(list.read().map(|list| format!("{}", list.len())))
+                    .text(list.read().map(|list| format!("{}", list.data().len())))
                     // ANCHOR_END: list_len
                     .child(push_button(&list)),
             )
@@ -57,7 +57,7 @@ fn pop_button(list: &Signal<SignalVec<Div>>) -> Button {
     // TODO: Docs on why we use `current` rather than a signal.
     button()
         .on_click(move |_, _| {
-            if !list_read.current().is_empty() {
+            if !list_read.current().data().is_empty() {
                 list_write.pop();
             }
         })

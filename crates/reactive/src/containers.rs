@@ -1,12 +1,22 @@
-use std::ops::Index;
+use std::{
+    cell::{Cell, RefCell},
+    ops::Index,
+    rc::Rc,
+};
 
-use crate::signal::{Signal, WriteSignal};
+use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal, ZipSignal};
 
 // TODO: Name
 pub struct SignalVec<T> {
     data: Vec<T>,
     delta: VecDelta<T>,
     delta_index: DeltaIndex,
+}
+
+impl<T> Clone for SignalVec<T> {
+    fn clone(&self) -> Self {
+        todo!("Use Rc<RefCell<...>> for self.data")
+    }
 }
 
 pub enum VecDelta<T> {
@@ -51,7 +61,7 @@ impl<T: 'static> WriteSignal<SignalVec<T>> {
         self.mutate(|vec| {
             vec.data.push(item);
             vec.set_delta(VecDelta::Insert {
-                index: vec.len() - 1,
+                index: vec.data().len() - 1,
             });
         })
     }
@@ -63,23 +73,15 @@ impl<T: 'static> WriteSignal<SignalVec<T>> {
         self.mutate(|vec| {
             let item = vec.data.pop().unwrap();
 
-            let index = vec.len();
+            let index = vec.data().len();
             vec.set_delta(VecDelta::Remove { index, item });
         });
     }
 }
 
 impl<T: 'static> SignalVec<T> {
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.data.is_empty()
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
-        self.data.iter()
+    pub fn data(&self) -> &[T] {
+        &self.data
     }
 
     pub fn delta(&self) -> &VecDelta<T> {
@@ -88,6 +90,12 @@ impl<T: 'static> SignalVec<T> {
 
     pub fn delta_index(&self) -> DeltaIndex {
         self.delta_index
+    }
+
+    pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Filter<T>>) -> ReadSignal<Self> {
+        let filter_state = FilterState::default();
+
+        (vec, filter).zip().map_to(filter_state)
     }
 }
 
@@ -113,3 +121,59 @@ impl DeltaIndex {
 // - Store bool for each value in original vec.
 // - Optional map (maybe_map?), as chages to filter may not update the filtered
 //   list.
+
+pub struct Filter<T> {
+    f: Rc<dyn Fn(&T) -> bool>,
+    f_delta_index: DeltaIndex,
+}
+
+impl<T> Clone for Filter<T> {
+    fn clone(&self) -> Self {
+        Self {
+            f: self.f.clone(),
+            f_delta_index: self.f_delta_index,
+        }
+    }
+}
+
+struct FilterState<T> {
+    filter_delta_index: Cell<DeltaIndex>,
+    data_delta_index: Cell<DeltaIndex>,
+    data: Rc<RefCell<Vec<T>>>,
+}
+
+impl<T> Default for FilterState<T> {
+    fn default() -> Self {
+        Self {
+            filter_delta_index: Cell::new(DeltaIndex::default()),
+            data_delta_index: Cell::new(DeltaIndex::default()),
+            data: Rc::new(RefCell::new(Vec::default())),
+        }
+    }
+}
+
+impl<T> SignalReceiver<(SignalVec<T>, Filter<T>), SignalVec<T>> for FilterState<T>
+where
+    T: 'static,
+{
+    // TODO: Can we make self mutable here?
+    fn receive(&self, data: &(SignalVec<T>, Filter<T>)) -> SignalVec<T> {
+        let vec = &data.0;
+        let filter = &data.1;
+
+        if self.filter_delta_index.get() != filter.f_delta_index {
+            // TODO: If filter has changed, rescan everything.
+        }
+
+        if self.data_delta_index.get() != vec.delta_index {
+            self.data_delta_index.set(vec.delta_index);
+
+            match vec.delta() {
+                VecDelta::Clear => self.data.borrow_mut().clear(),
+                _ => todo!(),
+            }
+        }
+
+        todo!()
+    }
+}

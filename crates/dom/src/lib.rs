@@ -127,7 +127,7 @@ impl ElementBuilder {
     where
         T: 'static + DomElement,
     {
-        for child in children.current().iter() {
+        for child in children.current().data() {
             self.append_child(&child.dom_element().into());
             // TODO: Can we get rid of `self.element.children`? It just holds on
             // to signals.
@@ -145,7 +145,7 @@ impl ElementBuilder {
                 }
                 VecDelta::Insert { index } => {
                     let index = *index;
-                    let len = children.len();
+                    let len = children.data().len();
                     let child = children[index].dom_element().into();
 
                     queue_update(move || {
