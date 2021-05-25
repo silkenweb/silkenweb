@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use crate::signal::Signal;
+use crate::signal::{Signal, WriteSignal};
 
 // TODO: Name
 pub struct SignalVec<T> {
@@ -36,7 +36,33 @@ impl<T: 'static> SignalVec<T> {
             delta: VecDelta::Clear,
         })
     }
+}
 
+impl<T: 'static> WriteSignal<SignalVec<T>> {
+    // TODO: Docs
+    pub fn push(&mut self, item: T) {
+        self.mutate(|vec| {
+            vec.data.push(item);
+            vec.delta = VecDelta::Insert {
+                index: vec.len() - 1,
+            }
+        })
+    }
+
+    /// # Panics
+    ///
+    /// If the list is empty
+    pub fn pop(&mut self) {
+        self.mutate(|vec| {
+            let item = vec.data.pop().unwrap();
+
+            let index = vec.len();
+            vec.delta = VecDelta::Remove { index, item };
+        });
+    }
+}
+
+impl<T: 'static> SignalVec<T> {
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -51,24 +77,6 @@ impl<T: 'static> SignalVec<T> {
 
     pub fn delta(&self) -> &VecDelta<T> {
         &self.delta
-    }
-
-    // TODO: Docs
-    pub fn push(&mut self, item: T) {
-        self.data.push(item);
-        self.delta = VecDelta::Insert {
-            index: self.len() - 1,
-        }
-    }
-
-    /// # Panics
-    ///
-    /// If the list is empty
-    pub fn pop(&mut self) {
-        let item = self.data.pop().unwrap();
-
-        let index = self.len();
-        self.delta = VecDelta::Remove { index, item };
     }
 }
 

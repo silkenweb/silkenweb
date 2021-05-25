@@ -11,6 +11,7 @@ use silkenweb_tutorial_common::define_counter;
 fn main() {
     // TODO: Update tutorial text
     // ANCHOR: new_list
+    // TODO Rename all list stuff to `counters`
     let list = SignalVec::new();
     // ANCHOR_END: new_list
 
@@ -34,11 +35,13 @@ fn main() {
 
 // ANCHOR: push_button
 fn push_button(list: &Signal<SignalVec<Div>>) -> Button {
-    let push_elem = list.write();
+    let mut list_mut = list.write();
     button()
         .on_click(move |_, _| {
             // ANCHOR: mutate_list
-            push_elem.mutate(move |list| list.push(define_counter(&Signal::new(0)).build()))
+            // TODO: Doc why vec mutation is special: It needs to make sure a signal is
+            // updated for each delta.
+            list_mut.push(define_counter(&Signal::new(0)).build())
             // ANCHOR_END: mutate_list
         })
         .text("+")
@@ -48,14 +51,15 @@ fn push_button(list: &Signal<SignalVec<Div>>) -> Button {
 
 // ANCHOR: pop_button
 fn pop_button(list: &Signal<SignalVec<Div>>) -> Button {
-    let pop_elem = list.write();
+    let list_read = list.read();
+    let mut list_write = list.write();
+
+    // TODO: Docs on why we use `current` rather than a signal.
     button()
         .on_click(move |_, _| {
-            pop_elem.mutate(move |list| {
-                if !list.is_empty() {
-                    list.pop();
-                }
-            })
+            if !list_read.current().is_empty() {
+                list_write.pop();
+            }
         })
         .text("-")
         .build()
