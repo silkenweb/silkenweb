@@ -476,7 +476,7 @@ where
 {
     fn set_effect(self, builder: &mut ElementBuilder) {
         let dom_element = builder.dom_element().dyn_into().unwrap();
-        after_render(move || self(&dom_element))
+        after_render(move || self(&dom_element));
     }
 }
 
@@ -498,7 +498,7 @@ where
             after_render({
                 clone!(new_value, dom_element);
                 move || new_value(&dom_element)
-            })
+            });
         });
 
         builder.element.reactive_with_dom.push(updater);
@@ -518,19 +518,19 @@ fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
 
 impl<'a> Text for &'a str {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder)
+        set_static_text(self, builder);
     }
 }
 
 impl<'a> Text for &'a String {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder)
+        set_static_text(self, builder);
     }
 }
 
 impl Text for String {
     fn set_text(&self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder)
+        set_static_text(self, builder);
     }
 }
 

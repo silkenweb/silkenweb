@@ -96,7 +96,7 @@ where
     /// this has no effect.
     pub fn remove(&mut self, key: &Key) {
         if self.items.remove(key).is_some() {
-            self.visible_items.borrow_mut().remove(key)
+            self.visible_items.borrow_mut().remove(key);
         }
     }
 

@@ -56,7 +56,7 @@ pub fn main_js() -> Result<(), JsValue> {
                     .as_str()
                     .parse()
                     .unwrap(),
-            )
+            );
         });
 
     mount(

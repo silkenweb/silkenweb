@@ -45,7 +45,7 @@ fn main() {
         .attribute("height", HEIGHT);
 
     for i in 2..6 {
-        svg = svg.child(path(&ts, i, 150.0 * i.to_f64().unwrap()))
+        svg = svg.child(path(&ts, i, 150.0 * i.to_f64().unwrap()));
     }
 
     mount("app", svg);

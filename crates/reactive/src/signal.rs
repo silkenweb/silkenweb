@@ -138,7 +138,7 @@ impl<T: 'static> ReadSignal<T> {
 
                 move |new_value| {
                     if *child.read().current() != *new_value {
-                        child.write().set(new_value.clone())
+                        child.write().set(new_value.clone());
                     }
                 }
             }),
@@ -187,7 +187,7 @@ impl<T: 'static> ReadSignal<T> {
             .0
             .parents
             .borrow_mut()
-            .push(Box::new(Parent::new(dependent_callback, &self)));
+            .push(Box::new(Parent::new(dependent_callback, self)));
     }
 }
 

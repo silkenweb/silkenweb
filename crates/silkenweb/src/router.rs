@@ -56,8 +56,8 @@ pub fn set_url_path(path: impl 'static + AsRef<str>) {
                 .unwrap()
                 .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
                 .unwrap();
-        })
-    })
+        });
+    });
 }
 
 fn new_url_signal() -> Signal<Url> {

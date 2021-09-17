@@ -128,7 +128,7 @@ impl TodoApp {
             for data in todos {
                 let id = data.id;
                 next_id = max(next_id, data.id + 1);
-                let todo_item = TodoItem::new(data, dest_items.clone(), &active_count);
+                let todo_item = TodoItem::new(data, dest_items.clone(), active_count);
                 dest_items.mutate(move |items| items.insert(id, todo_item));
             }
         }
@@ -194,7 +194,7 @@ impl TodoApp {
                                         for item in items.values() {
                                             item.data.completed.write().set(new_completed);
                                         }
-                                    })
+                                    });
                                 }
                             })
                             .effect(all_complete.map(|&complete| {
@@ -280,7 +280,7 @@ impl TodoApp {
                         .text("Clear completed")
                         .on_click(move |_, _| {
                             write_items
-                                .mutate(|items| items.retain(|item| !*item.completed().current()))
+                                .mutate(|items| items.retain(|item| !*item.completed().current()));
                         })
                         .build(),
                 )
@@ -304,7 +304,7 @@ impl TodoApp {
                     &self_.active_count,
                 ),
             );
-        })
+        });
     }
 }
 
@@ -380,7 +380,7 @@ impl TodoItem {
                 move |keyup, input| match keyup.key().as_str() {
                     "Escape" => {
                         input.set_value(&self_.text().current());
-                        self_.editing.write().set(false)
+                        self_.editing.write().set(false);
                     }
                     "Enter" => self_.save_edits(&input),
                     _ => (),
@@ -391,7 +391,7 @@ impl TodoItem {
                     elem.set_hidden(!editing);
 
                     if editing {
-                        elem.focus().unwrap()
+                        elem.focus().unwrap();
                     }
                 }
             }))
@@ -482,5 +482,5 @@ const STORAGE_KEY: &str = "silkenweb_todo";
 fn store(storage: &Storage, items: &Vec<TodoStorage>) {
     storage
         .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-        .unwrap()
+        .unwrap();
 }
