@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        rust: [1.52]
+        rust: [1.55]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@main
@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        rust: [1.52]
+        rust: [1.55]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@main
@@ -47,7 +47,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        rust: [nightly-2021-04-25]
+        rust: [nightly-2021-09-16]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@main
@@ -66,7 +66,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        rust: [1.52]
+        rust: [1.55]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@main

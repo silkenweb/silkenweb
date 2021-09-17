@@ -1,5 +1,5 @@
 # Dockerfile for `act` (local github actions runner)
-FROM rust:1.52
+FROM rust:1.55
 
 RUN \
     apt-get update && \
