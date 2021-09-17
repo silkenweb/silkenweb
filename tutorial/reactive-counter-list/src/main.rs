@@ -1,5 +1,5 @@
 use silkenweb::{
-    containers::SignalVec,
+    containers::ChangingVec,
     elements::{button, div, hr, Button, Div},
     mount,
     signal::Signal,
@@ -12,7 +12,7 @@ fn main() {
     // TODO: Update tutorial text
     // ANCHOR: new_list
     // TODO Rename all list stuff to `counters`
-    let list = SignalVec::new();
+    let list = Signal::new(ChangingVec::new());
     // ANCHOR_END: new_list
 
     mount(
@@ -34,14 +34,12 @@ fn main() {
 // ANCHOR_END: main
 
 // ANCHOR: push_button
-fn push_button(list: &Signal<SignalVec<Div>>) -> Button {
-    let mut list_mut = list.write();
+fn push_button(list: &Signal<ChangingVec<Div>>) -> Button {
+    let list_write = list.write();
     button()
         .on_click(move |_, _| {
             // ANCHOR: mutate_list
-            // TODO: Doc why vec mutation is special: It needs to make sure a signal is
-            // updated for each delta.
-            list_mut.push(define_counter(&Signal::new(0)).build())
+            list_write.mutate(|v| v.push(define_counter(&Signal::new(0)).build()));
             // ANCHOR_END: mutate_list
         })
         .text("+")
@@ -50,15 +48,15 @@ fn push_button(list: &Signal<SignalVec<Div>>) -> Button {
 // ANCHOR_END: push_button
 
 // ANCHOR: pop_button
-fn pop_button(list: &Signal<SignalVec<Div>>) -> Button {
+fn pop_button(list: &Signal<ChangingVec<Div>>) -> Button {
     let list_read = list.read();
-    let mut list_write = list.write();
+    let list_write = list.write();
 
     // TODO: Docs on why we use `current` rather than a signal.
     button()
         .on_click(move |_, _| {
             if !list_read.current().data().is_empty() {
-                list_write.pop();
+                list_write.mutate(ChangingVec::pop);
             }
         })
         .text("-")

@@ -4,23 +4,22 @@ use std::{
     rc::Rc,
 };
 
-use crate::signal::{ReadSignal, Signal, SignalReceiver, WriteSignal, ZipSignal};
+use crate::signal::{ReadSignal, SignalReceiver, ZipSignal};
 
-// TODO: Name
-pub struct SignalVec<T> {
+pub struct ChangingVec<T> {
     data: Vec<T>,
     delta: VecDelta<T>,
     delta_index: DeltaIndex,
 }
 
-impl<T> Clone for SignalVec<T> {
+impl<T> Clone for ChangingVec<T> {
     fn clone(&self) -> Self {
-        todo!("Use Rc<RefCell<...>> for self.data")
+        todo!()
     }
 }
 
 pub enum VecDelta<T> {
-    Clear,
+    Assign,
     Extend { start_index: usize },
     Insert { index: usize },
     Remove { index: usize, item: T },
@@ -28,58 +27,44 @@ pub enum VecDelta<T> {
     Set { index: usize },
 }
 
-impl<T: 'static> SignalVec<T> {
-    // TODO: Are there any other ways to break the value = composition of deltas
-    // invariant?
+impl<T> Default for ChangingVec<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
-    /// Create a new [`Signal`] with an empty vec
-    ///
-    /// The underlying [`Vec`] is the composition of each delta seen in the
-    /// signal. To maintain this invariant:
-    /// - We only allow construction within a [`Signal`], so you can't assign to
-    ///   the value within the signal
-    /// - We don't provide a [`Clone`] impl to stop the [`SignalVec`] from
-    ///   escaping the signal.
-    /// This stops
-    pub fn new() -> Signal<Self> {
-        Signal::new(Self {
+impl<T> ChangingVec<T> {
+    pub fn new() -> Self {
+        Self {
             data: Vec::new(),
-            delta: VecDelta::Clear,
+            delta: VecDelta::Assign,
             delta_index: DeltaIndex::default(),
-        })
+        }
     }
 
     fn set_delta(&mut self, delta: VecDelta<T>) {
         self.delta = delta;
         self.delta_index.next();
     }
-}
 
-impl<T: 'static> WriteSignal<SignalVec<T>> {
     // TODO: Docs
     pub fn push(&mut self, item: T) {
-        self.mutate(|vec| {
-            vec.data.push(item);
-            vec.set_delta(VecDelta::Insert {
-                index: vec.data().len() - 1,
-            });
-        })
+        self.data.push(item);
+        self.set_delta(VecDelta::Insert {
+            index: self.data().len() - 1,
+        });
     }
 
     /// # Panics
     ///
     /// If the list is empty
     pub fn pop(&mut self) {
-        self.mutate(|vec| {
-            let item = vec.data.pop().unwrap();
+        let item = self.data.pop().unwrap();
 
-            let index = vec.data().len();
-            vec.set_delta(VecDelta::Remove { index, item });
-        });
+        let index = self.data().len();
+        self.set_delta(VecDelta::Remove { index, item });
     }
-}
 
-impl<T: 'static> SignalVec<T> {
     pub fn data(&self) -> &[T] {
         &self.data
     }
@@ -91,7 +76,10 @@ impl<T: 'static> SignalVec<T> {
     pub fn delta_index(&self) -> DeltaIndex {
         self.delta_index
     }
+}
 
+// TODO: Should this be a method on filter?
+impl<T: 'static> ChangingVec<T> {
     pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Filter<T>>) -> ReadSignal<Self> {
         let filter_state = FilterState::default();
 
@@ -99,7 +87,7 @@ impl<T: 'static> SignalVec<T> {
     }
 }
 
-impl<T> Index<usize> for SignalVec<T> {
+impl<T> Index<usize> for ChangingVec<T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -152,12 +140,12 @@ impl<T> Default for FilterState<T> {
     }
 }
 
-impl<T> SignalReceiver<(SignalVec<T>, Filter<T>), SignalVec<T>> for FilterState<T>
+impl<T> SignalReceiver<(ChangingVec<T>, Filter<T>), ChangingVec<T>> for FilterState<T>
 where
     T: 'static,
 {
     // TODO: Can we make self mutable here?
-    fn receive(&self, data: &(SignalVec<T>, Filter<T>)) -> SignalVec<T> {
+    fn receive(&self, data: &(ChangingVec<T>, Filter<T>)) -> ChangingVec<T> {
         let vec = &data.0;
         let filter = &data.1;
 
@@ -169,7 +157,7 @@ where
             self.data_delta_index.set(vec.delta_index);
 
             match vec.delta() {
-                VecDelta::Clear => self.data.borrow_mut().clear(),
+                VecDelta::Assign => self.data.borrow_mut().clear(),
                 _ => todo!(),
             }
         }

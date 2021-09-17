@@ -13,7 +13,7 @@ use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 use render::{after_render, queue_update};
 use silkenweb_reactive::{
     clone,
-    containers::{SignalVec, VecDelta},
+    containers::{ChangingVec, VecDelta},
     signal::ReadSignal,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -123,7 +123,7 @@ impl ElementBuilder {
     }
 
     // TODO: Docs and work out what to do with existing children.
-    pub fn children<T>(mut self, children: &ReadSignal<SignalVec<T>>) -> Element
+    pub fn children<T>(mut self, children: &ReadSignal<ChangingVec<T>>) -> Element
     where
         T: 'static + DomElement,
     {
@@ -140,7 +140,7 @@ impl ElementBuilder {
             clone!(dom_element);
 
             match children.delta() {
-                VecDelta::Clear => {
+                VecDelta::Assign => {
                     // TODO
                 }
                 VecDelta::Insert { index } => {

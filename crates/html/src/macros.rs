@@ -230,7 +230,7 @@ macro_rules! children_allowed {
                 // TODO: Return Self::Target
                 pub fn children<T>(
                     self,
-                    children: & $crate::macros::private::ReadSignal<$crate::macros::private::containers::SignalVec<T>>) -> $crate::macros::private::Element
+                    children: & $crate::macros::private::ReadSignal<$crate::macros::private::containers::ChangingVec<T>>) -> $crate::macros::private::Element
                 where
                     T: 'static + $crate::macros::private::DomElement,
                 {
