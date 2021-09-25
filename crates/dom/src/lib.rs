@@ -1,11 +1,4 @@
 //! A reactive interface to the DOM.
-#![allow(
-    clippy::missing_panics_doc,
-    clippy::missing_errors_doc,
-    clippy::must_use_candidate,
-    clippy::module_name_repetitions,
-    clippy::option_if_let_else
-)]
 pub mod element_list;
 pub mod render;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};

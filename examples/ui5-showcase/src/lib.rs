@@ -1,10 +1,3 @@
-#![allow(
-    clippy::missing_panics_doc,
-    clippy::missing_errors_doc,
-    clippy::must_use_candidate,
-    clippy::module_name_repetitions,
-    clippy::option_if_let_else
-)]
 use parse_display::{Display, FromStr};
 use silkenweb::{elements::div, mount, signal::Signal, Builder};
 use silkenweb_ui5::{

@@ -1,10 +1,4 @@
 //! Various primitives to make your code reactive to upstream updates.
-#![allow(
-    clippy::missing_panics_doc,
-    clippy::missing_errors_doc,
-    clippy::must_use_candidate,
-    clippy::module_name_repetitions
-)]
 pub mod accumulators;
 pub mod containers;
 pub mod memo;

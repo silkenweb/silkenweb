@@ -1,4 +1,3 @@
-#![allow(clippy::must_use_candidate)]
 use silkenweb::{
     elements::{button, div, Button, DivBuilder},
     signal::{ReadSignal, Signal, WriteSignal},

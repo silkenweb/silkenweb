@@ -1,4 +1,3 @@
-#![allow(clippy::must_use_candidate)]
 //! Builders for HTML elements.
 //!
 //! Each HTML element has a function, a struct and a builder struct. The

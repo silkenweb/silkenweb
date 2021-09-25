@@ -25,14 +25,6 @@
 //! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
-#![allow(
-    clippy::missing_panics_doc,
-    clippy::missing_errors_doc,
-    clippy::must_use_candidate,
-    clippy::module_name_repetitions,
-    clippy::option_if_let_else
-)]
-
 pub use silkenweb_dom::{
     element_list, local_storage, mount,
     render::{after_render, render_updates},
