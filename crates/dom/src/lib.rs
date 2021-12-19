@@ -6,7 +6,7 @@ use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 use render::{after_render, queue_update};
 use silkenweb_reactive::{
     clone,
-    containers::{ChangingVec, VecDelta},
+    containers::{ChangingVec, DeltaId, VecDelta},
     signal::ReadSignal,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -69,6 +69,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 pub struct ElementBuilder {
     element: ElementData,
     text_nodes: Vec<dom::Text>,
+    delta_id: Rc<RefCell<DeltaId>>,
 }
 
 impl ElementBuilder {
@@ -95,6 +96,7 @@ impl ElementBuilder {
                 reactive_with_dom: Vec::new(),
             },
             text_nodes: Vec::new(),
+            delta_id: Rc::default(),
         }
     }
 
@@ -115,7 +117,8 @@ impl ElementBuilder {
         self
     }
 
-    // TODO: Docs and work out what to do with existing children.
+    // TODO: Docs and work out what to do with existing children. `Self::child` and
+    // `Self::text` will interfere with reactivity to this.
     pub fn children<T>(mut self, children: &ReadSignal<ChangingVec<T>>) -> Element
     where
         T: 'static + DomElement,
@@ -128,36 +131,40 @@ impl ElementBuilder {
 
         // TODO: We need a map_changes, so we don't respond to the first delta.
         let dom_element = self.dom_element();
+        let delta_id = self.delta_id.clone();
 
         let reactor = children.map(move |children| {
             clone!(dom_element);
 
-            match children.delta() {
-                VecDelta::Assign => {
-                    // TODO
-                }
-                VecDelta::Insert { index } => {
-                    let index = *index;
-                    let len = children.data().len();
-                    let child = children[index].dom_element().into();
+            if let Some(delta) = children.delta(&delta_id.borrow()) {
+                match delta {
+                    VecDelta::Insert { index } => {
+                        let index = *index;
+                        let len = children.data().len();
+                        let child = children[index].dom_element().into();
 
-                    queue_update(move || {
-                        if index + 1 == len {
-                            dom_element.append_child(&child).unwrap();
-                        } else {
-                            todo!();
-                        }
-                    });
-                }
-                VecDelta::Remove { item, .. } => {
-                    let child = item.dom_element().into();
+                        queue_update(move || {
+                            if index + 1 == len {
+                                dom_element.append_child(&child).unwrap();
+                            } else {
+                                todo!();
+                            }
+                        });
+                    }
+                    VecDelta::Remove { item, .. } => {
+                        let child = item.dom_element().into();
 
-                    queue_update(move || {
-                        dom_element.remove_child(&child).unwrap();
-                    });
+                        queue_update(move || {
+                            dom_element.remove_child(&child).unwrap();
+                        });
+                    }
+                    VecDelta::Extend { .. } | VecDelta::Set { .. } => todo!(),
                 }
-                VecDelta::Extend { .. } | VecDelta::Swap { .. } | VecDelta::Set { .. } => todo!(),
+            } else {
+                // TODO: Clear and re assign children
             }
+
+            delta_id.replace(children.snapshot());
         });
 
         self.element.reactive_children.push(reactor);

@@ -1,30 +1,26 @@
-use std::{
-    cell::{Cell, RefCell},
-    ops::Index,
-    rc::Rc,
-};
+use std::{cell::RefCell, ops::Index, rc::Rc};
 
 use crate::signal::{ReadSignal, SignalReceiver, ZipSignal};
 
+// TODO: Move this into a `vec` sub-module?
+
+// TODO: Rename to `ChangeTrackingVec`?
 pub struct ChangingVec<T> {
     data: Vec<T>,
-    delta: VecDelta<T>,
-    delta_index: DeltaIndex,
+    delta: Option<VecDelta<T>>,
+    delta_id: DeltaId,
 }
 
-impl<T> Clone for ChangingVec<T> {
+impl<T: Clone> Clone for ChangingVec<T> {
     fn clone(&self) -> Self {
-        todo!()
+        // We can't derive `Clone` as `self` and the clone can evolve independantly, so
+        // we need a new `delta_id`.
+        Self {
+            data: self.data.clone(),
+            delta: None,
+            delta_id: DeltaId::default(),
+        }
     }
-}
-
-pub enum VecDelta<T> {
-    Assign,
-    Extend { start_index: usize },
-    Insert { index: usize },
-    Remove { index: usize, item: T },
-    Swap { index0: usize, index1: usize },
-    Set { index: usize },
 }
 
 impl<T> Default for ChangingVec<T> {
@@ -37,14 +33,9 @@ impl<T> ChangingVec<T> {
     pub fn new() -> Self {
         Self {
             data: Vec::new(),
-            delta: VecDelta::Assign,
-            delta_index: DeltaIndex::default(),
+            delta: None,
+            delta_id: DeltaId::default(),
         }
-    }
-
-    fn set_delta(&mut self, delta: VecDelta<T>) {
-        self.delta = delta;
-        self.delta_index.next();
     }
 
     // TODO: Docs
@@ -69,17 +60,26 @@ impl<T> ChangingVec<T> {
         &self.data
     }
 
-    pub fn delta(&self) -> &VecDelta<T> {
-        &self.delta
+    pub fn snapshot(&self) -> DeltaId {
+        self.delta_id.clone()
     }
 
-    pub fn delta_index(&self) -> DeltaIndex {
-        self.delta_index
+    pub fn delta(&self, previous: &DeltaId) -> Option<&VecDelta<T>> {
+        if self.delta_id.is_next(previous) {
+            self.delta.as_ref()
+        } else {
+            None
+        }
+    }
+
+    fn set_delta(&mut self, delta: VecDelta<T>) {
+        self.delta = Some(delta);
+        self.delta_id.next();
     }
 }
 
 // TODO: Should this be a method on filter?
-impl<T: 'static> ChangingVec<T> {
+impl<T: 'static + Clone> ChangingVec<T> {
     pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Filter<T>>) -> ReadSignal<Self> {
         let filter_state = FilterState::default();
 
@@ -95,12 +95,26 @@ impl<T> Index<usize> for ChangingVec<T> {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Default)]
-pub struct DeltaIndex(u128);
+pub enum VecDelta<T> {
+    Extend { start_index: usize },
+    Insert { index: usize },
+    Remove { index: usize, item: T },
+    Set { index: usize },
+}
 
-impl DeltaIndex {
+#[derive(Default, Clone)]
+pub struct DeltaId {
+    index: u128,
+    object_id: Rc<u8>,
+}
+
+impl DeltaId {
     pub fn next(&mut self) {
-        self.0 += 1;
+        self.index += 1;
+    }
+
+    pub fn is_next(&self, previous: &DeltaId) -> bool {
+        self.index == previous.index + 1 && Rc::ptr_eq(&self.object_id, &previous.object_id)
     }
 }
 
@@ -110,32 +124,24 @@ impl DeltaIndex {
 // - Optional map (maybe_map?), as chages to filter may not update the filtered
 //   list.
 
+#[derive(Clone)]
 pub struct Filter<T> {
-    f: Rc<dyn Fn(&T) -> bool>,
-    f_delta_index: DeltaIndex,
-}
-
-impl<T> Clone for Filter<T> {
-    fn clone(&self) -> Self {
-        Self {
-            f: self.f.clone(),
-            f_delta_index: self.f_delta_index,
-        }
-    }
+    _f: Rc<dyn Fn(&T) -> bool>,
+    _f_delta_index: DeltaId,
 }
 
 struct FilterState<T> {
-    filter_delta_index: Cell<DeltaIndex>,
-    data_delta_index: Cell<DeltaIndex>,
-    data: Rc<RefCell<Vec<T>>>,
+    _filter_delta_index: RefCell<DeltaId>,
+    _data_delta_index: RefCell<DeltaId>,
+    _data: Rc<RefCell<Vec<T>>>,
 }
 
 impl<T> Default for FilterState<T> {
     fn default() -> Self {
         Self {
-            filter_delta_index: Cell::new(DeltaIndex::default()),
-            data_delta_index: Cell::new(DeltaIndex::default()),
-            data: Rc::new(RefCell::new(Vec::default())),
+            _filter_delta_index: RefCell::new(DeltaId::default()),
+            _data_delta_index: RefCell::new(DeltaId::default()),
+            _data: Rc::new(RefCell::new(Vec::default())),
         }
     }
 }
@@ -145,23 +151,7 @@ where
     T: 'static,
 {
     // TODO: Can we make self mutable here?
-    fn receive(&self, data: &(ChangingVec<T>, Filter<T>)) -> ChangingVec<T> {
-        let vec = &data.0;
-        let filter = &data.1;
-
-        if self.filter_delta_index.get() != filter.f_delta_index {
-            // TODO: If filter has changed, rescan everything.
-        }
-
-        if self.data_delta_index.get() != vec.delta_index {
-            self.data_delta_index.set(vec.delta_index);
-
-            match vec.delta() {
-                VecDelta::Assign => self.data.borrow_mut().clear(),
-                _ => todo!(),
-            }
-        }
-
+    fn receive(&self, _data: &(ChangingVec<T>, Filter<T>)) -> ChangingVec<T> {
         todo!()
     }
 }
