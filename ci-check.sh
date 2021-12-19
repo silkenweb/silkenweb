@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-docker build . -t silkenweb-github-actions
-act -P ubuntu-latest=silkenweb-github-actions:latest "$@"
+time docker build . -t silkenweb-github-actions
+time act -P ubuntu-latest=silkenweb-github-actions:latest "$@"
