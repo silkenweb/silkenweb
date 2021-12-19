@@ -13,7 +13,7 @@ pub struct ChangingVec<T> {
 
 impl<T: Clone> Clone for ChangingVec<T> {
     fn clone(&self) -> Self {
-        // We can't derive `Clone` as `self` and the clone can evolve independantly, so
+        // We can't derive `Clone` because `self` and the clone can evolve independantly, so
         // we need a new `delta_id`.
         Self {
             data: self.data.clone(),
