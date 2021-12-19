@@ -1,5 +1,5 @@
 use silkenweb::{
-    containers::ChangingVec,
+    containers::ChangeTrackingVec,
     elements::{button, div, hr, Button, Div},
     mount,
     signal::Signal,
@@ -12,7 +12,7 @@ fn main() {
     // TODO: Update tutorial text
     // ANCHOR: new_list
     // TODO Rename all list stuff to `counters`
-    let list = Signal::new(ChangingVec::new());
+    let list = Signal::new(ChangeTrackingVec::new());
     // ANCHOR_END: new_list
 
     mount(
@@ -34,7 +34,7 @@ fn main() {
 // ANCHOR_END: main
 
 // ANCHOR: push_button
-fn push_button(list: &Signal<ChangingVec<Div>>) -> Button {
+fn push_button(list: &Signal<ChangeTrackingVec<Div>>) -> Button {
     let list_write = list.write();
     button()
         .on_click(move |_, _| {
@@ -48,7 +48,7 @@ fn push_button(list: &Signal<ChangingVec<Div>>) -> Button {
 // ANCHOR_END: push_button
 
 // ANCHOR: pop_button
-fn pop_button(list: &Signal<ChangingVec<Div>>) -> Button {
+fn pop_button(list: &Signal<ChangeTrackingVec<Div>>) -> Button {
     let list_read = list.read();
     let list_write = list.write();
 
@@ -56,7 +56,7 @@ fn pop_button(list: &Signal<ChangingVec<Div>>) -> Button {
     button()
         .on_click(move |_, _| {
             if !list_read.current().data().is_empty() {
-                list_write.mutate(ChangingVec::pop);
+                list_write.mutate(ChangeTrackingVec::pop);
             }
         })
         .text("-")

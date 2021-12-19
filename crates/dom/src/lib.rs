@@ -6,7 +6,7 @@ use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 use render::{after_render, queue_update};
 use silkenweb_reactive::{
     clone,
-    containers::{ChangingVec, DeltaId, VecDelta},
+    containers::{ChangeTrackingVec, DeltaId, VecDelta},
     signal::ReadSignal,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -119,7 +119,7 @@ impl ElementBuilder {
 
     // TODO: Docs and work out what to do with existing children. `Self::child` and
     // `Self::text` will interfere with reactivity to this.
-    pub fn children<T>(mut self, children: &ReadSignal<ChangingVec<T>>) -> Element
+    pub fn children<T>(mut self, children: &ReadSignal<ChangeTrackingVec<T>>) -> Element
     where
         T: 'static + DomElement,
     {

@@ -5,16 +5,16 @@ use crate::signal::{ReadSignal, SignalReceiver, ZipSignal};
 // TODO: Move this into a `vec` sub-module?
 
 // TODO: Rename to `ChangeTrackingVec`?
-pub struct ChangingVec<T> {
+pub struct ChangeTrackingVec<T> {
     data: Vec<T>,
     delta: Option<VecDelta<T>>,
     delta_id: DeltaId,
 }
 
-impl<T: Clone> Clone for ChangingVec<T> {
+impl<T: Clone> Clone for ChangeTrackingVec<T> {
     fn clone(&self) -> Self {
-        // We can't derive `Clone` because `self` and the clone can evolve independantly, so
-        // we need a new `delta_id`.
+        // We can't derive `Clone` because `self` and the clone can evolve
+        // independantly, so we need a new `delta_id`.
         Self {
             data: self.data.clone(),
             delta: None,
@@ -23,13 +23,13 @@ impl<T: Clone> Clone for ChangingVec<T> {
     }
 }
 
-impl<T> Default for ChangingVec<T> {
+impl<T> Default for ChangeTrackingVec<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> ChangingVec<T> {
+impl<T> ChangeTrackingVec<T> {
     pub fn new() -> Self {
         Self {
             data: Vec::new(),
@@ -79,7 +79,7 @@ impl<T> ChangingVec<T> {
 }
 
 // TODO: Should this be a method on filter?
-impl<T: 'static + Clone> ChangingVec<T> {
+impl<T: 'static + Clone> ChangeTrackingVec<T> {
     pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Filter<T>>) -> ReadSignal<Self> {
         let filter_state = FilterState::default();
 
@@ -87,7 +87,7 @@ impl<T: 'static + Clone> ChangingVec<T> {
     }
 }
 
-impl<T> Index<usize> for ChangingVec<T> {
+impl<T> Index<usize> for ChangeTrackingVec<T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -146,12 +146,12 @@ impl<T> Default for FilterState<T> {
     }
 }
 
-impl<T> SignalReceiver<(ChangingVec<T>, Filter<T>), ChangingVec<T>> for FilterState<T>
+impl<T> SignalReceiver<(ChangeTrackingVec<T>, Filter<T>), ChangeTrackingVec<T>> for FilterState<T>
 where
     T: 'static,
 {
     // TODO: Can we make self mutable here?
-    fn receive(&self, _data: &(ChangingVec<T>, Filter<T>)) -> ChangingVec<T> {
+    fn receive(&self, _data: &(ChangeTrackingVec<T>, Filter<T>)) -> ChangeTrackingVec<T> {
         todo!()
     }
 }
