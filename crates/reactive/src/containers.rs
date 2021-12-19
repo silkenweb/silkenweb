@@ -46,6 +46,12 @@ impl<T> ChangeTrackingVec<T> {
         });
     }
 
+    // TODO: Docs
+    pub fn insert(&mut self, index: usize, item: T) {
+        self.data.insert(index, item);
+        self.set_delta(VecDelta::Insert { index });
+    }
+
     /// # Panics
     ///
     /// If the list is empty
@@ -56,8 +62,26 @@ impl<T> ChangeTrackingVec<T> {
         self.set_delta(VecDelta::Remove { index, item });
     }
 
+    pub fn remove(&mut self, index: usize) {
+        let item = self.data.remove(index);
+
+        self.set_delta(VecDelta::Remove { index, item });
+    }
+
     pub fn data(&self) -> &[T] {
         &self.data
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.data.iter()
     }
 
     pub fn snapshot(&self) -> DeltaId {
@@ -80,8 +104,8 @@ impl<T> ChangeTrackingVec<T> {
 
 // TODO: Should this be a method on filter?
 impl<T: 'static + Clone> ChangeTrackingVec<T> {
-    pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Filter<T>>) -> ReadSignal<Self> {
-        let filter_state = FilterState::default();
+    pub fn filter(vec: ReadSignal<Self>, filter: ReadSignal<Predicate<T>>) -> ReadSignal<Self> {
+        let filter_state = Filter::default();
 
         (vec, filter).zip().map_to(filter_state)
     }
@@ -125,33 +149,34 @@ impl DeltaId {
 //   list.
 
 #[derive(Clone)]
-pub struct Filter<T> {
+pub struct Predicate<T> {
     _f: Rc<dyn Fn(&T) -> bool>,
-    _f_delta_index: DeltaId,
+    _f_delta_id: DeltaId,
 }
 
-struct FilterState<T> {
-    _filter_delta_index: RefCell<DeltaId>,
-    _data_delta_index: RefCell<DeltaId>,
-    _data: Rc<RefCell<Vec<T>>>,
+struct Filter<T> {
+    _filter_delta_id: RefCell<DeltaId>,
+    _data_delta_id: RefCell<DeltaId>,
+    _data: Rc<RefCell<ChangeTrackingVec<T>>>,
 }
 
-impl<T> Default for FilterState<T> {
+impl<T> Default for Filter<T> {
     fn default() -> Self {
         Self {
-            _filter_delta_index: RefCell::new(DeltaId::default()),
-            _data_delta_index: RefCell::new(DeltaId::default()),
-            _data: Rc::new(RefCell::new(Vec::default())),
+            _filter_delta_id: RefCell::new(DeltaId::default()),
+            _data_delta_id: RefCell::new(DeltaId::default()),
+            _data: Rc::new(RefCell::new(ChangeTrackingVec::default())),
         }
     }
 }
 
-impl<T> SignalReceiver<(ChangeTrackingVec<T>, Filter<T>), ChangeTrackingVec<T>> for FilterState<T>
+impl<T> SignalReceiver<(ChangeTrackingVec<T>, Predicate<T>), ChangeTrackingVec<T>> for Filter<T>
 where
     T: 'static,
 {
-    // TODO: Can we make self mutable here?
-    fn receive(&self, _data: &(ChangeTrackingVec<T>, Filter<T>)) -> ChangeTrackingVec<T> {
+    // TODO: Can we make self mutable here and eliminate the need for `RefCell`s in
+    // `Filter`?
+    fn receive(&self, filter: &(ChangeTrackingVec<T>, Predicate<T>)) -> ChangeTrackingVec<T> {
         todo!()
     }
 }
