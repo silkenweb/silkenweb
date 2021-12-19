@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        rust: [1.55]
+        rust: [1.57]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        rust: [1.55]
+        rust: [1.57]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -49,7 +49,7 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-bindgen-cli
-        version: 0.2.73
+        version: 0.2.78
     - name: Browser Tests
       # TODO: Chromium tests fail under `act`
       run: wasm-pack test --headless --firefox
@@ -86,7 +86,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        rust: [1.55]
+        rust: [1.57]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
