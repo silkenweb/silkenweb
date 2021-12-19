@@ -31,7 +31,7 @@ struct TodoApp {
     filter: ReadSignal<Filter>,
     active_count: SumTotal<usize>,
     // TODO: We want something that just collects signals together
-    store_items: ReadSignal<()>,
+    _store_items: ReadSignal<()>,
 }
 
 impl TodoApp {
@@ -70,7 +70,7 @@ impl TodoApp {
             id: Rc::new(Cell::new(next_id)),
             filter,
             active_count,
-            store_items,
+            _store_items: store_items,
         }
     }
 
@@ -336,7 +336,7 @@ struct TodoItem {
     data: TodoStorage,
     editing: Signal<bool>,
     parent: WriteSignal<ElementList<usize, Self>>,
-    active_count: ReadSignal<SumHandle>,
+    _active_count: ReadSignal<SumHandle>,
 }
 
 impl TodoItem {
@@ -355,7 +355,7 @@ impl TodoItem {
             data,
             editing: Signal::new(false),
             parent,
-            active_count,
+            _active_count: active_count,
         }
     }
 
