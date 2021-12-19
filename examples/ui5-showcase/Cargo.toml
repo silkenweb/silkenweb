@@ -4,7 +4,7 @@ description = "Showcase Silkenweb UI5 Components"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 categories = ["wasm"]
-edition = "2018"
+edition = "2021"
 readme=true
 
 [lib]

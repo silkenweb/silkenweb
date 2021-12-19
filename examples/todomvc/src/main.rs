@@ -291,17 +291,19 @@ impl TodoApp {
     }
 
     fn push(&self, text: String) {
-        let self_ = self.clone();
+        let id = self.id.clone();
+        let items = self.items.clone();
+        let active_count = self.active_count.clone();
 
         self.items.write().mutate(move |ts| {
-            let current_id = self_.id.replace(self_.id.get() + 1);
-            let parent = self_.items.write();
+            let current_id = id.replace(id.get() + 1);
+            let parent = items.write();
             ts.insert(
                 current_id,
                 TodoItem::new(
                     TodoStorage::new(current_id, text, false),
                     parent,
-                    &self_.active_count,
+                    &active_count,
                 ),
             );
         });

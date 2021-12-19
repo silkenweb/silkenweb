@@ -2,7 +2,7 @@
 name = "silkenweb"
 version = "0.1.1"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "A library for building single page web apps"
 readme = "../../README.md"
 homepage = "https://github.com/silkenweb/silkenweb"

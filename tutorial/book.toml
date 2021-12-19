@@ -7,4 +7,4 @@ title = "Learning Silkenweb With Entirely Too Many Counters"
 description = "A Silkenweb tutorial using counters"
 
 [rust]
-edition = "2018"
+edition = "2021"

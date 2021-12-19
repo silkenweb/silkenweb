@@ -2,7 +2,7 @@
 name = "silkenweb-dom"
 version = "0.1.1"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Silkenweb DOM API"
 readme = "../../README.md"
 homepage = "https://github.com/silkenweb/silkenweb"
