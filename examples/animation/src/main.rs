@@ -9,8 +9,8 @@ use silkenweb::{
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
 
-fn path(time: &ReadSignal<f64>, humps: usize, speed: f64) -> ReadSignal<Element> {
-    time.map(move |time| {
+fn path(time: &ReadSignal<f64>, humps: usize, speed: f64) -> Element {
+    let path = time.map(move |time| {
         let multiplier = (*time / speed).sin().to_f32().unwrap();
         let control_point = 150.0 * multiplier + 150.0;
         let half_height = HEIGHT / 2.0;
@@ -26,16 +26,17 @@ fn path(time: &ReadSignal<f64>, humps: usize, speed: f64) -> ReadSignal<Element>
         );
 
         assert!(humps >= 1);
-        let path = iter::repeat(format!(" t {},0", hump_width))
-            .take(humps - 1)
-            .fold(initial_path, |path, hump| path + &hump);
 
-        tag_in_namespace("http://www.w3.org/2000/svg", "path")
-            .attribute("d", path)
-            .attribute("stroke", "black")
-            .attribute("fill", "transparent")
-            .build()
-    })
+        iter::repeat(format!(" t {},0", hump_width))
+            .take(humps - 1)
+            .fold(initial_path, |path, hump| path + &hump)
+    });
+
+    tag_in_namespace("http://www.w3.org/2000/svg", "path")
+        .attribute("d", path)
+        .attribute("stroke", "black")
+        .attribute("fill", "transparent")
+        .build()
 }
 
 fn main() {
