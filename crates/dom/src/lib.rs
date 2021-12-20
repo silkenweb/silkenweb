@@ -102,6 +102,7 @@ impl ElementBuilder {
                 reactive_attrs: HashMap::new(),
                 reactive_children: Vec::new(),
                 reactive_with_dom: Vec::new(),
+                attribute_signals: HashMap::new(),
                 current_children: Rc::new(RefCell::new(Vec::new())),
                 children_signal: None,
                 signals: Vec::new(),
@@ -113,8 +114,36 @@ impl ElementBuilder {
 
     /// Set an attribute. Attribute values can be reactive.
     pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl Attribute<T>) -> Self {
+        self.element.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         mem::drop(value);
+        self
+    }
+
+    pub fn dyn_attribute(
+        mut self,
+        name: impl Into<String>,
+        value: impl 'static + Signal<Item = impl 'static + AsRef<str>>,
+    ) -> Self {
+        let name = name.into();
+        let dom_element = self.dom_element();
+
+        let signal = value.for_each({
+            clone!(name);
+            move |value| {
+                clone!(name, dom_element);
+                queue_update(move || dom_element.set_attribute(&name, value.as_ref()).unwrap());
+                async {}
+            }
+        });
+
+        let (handle, future) = cancelable_future(signal, || ());
+
+        // TODO: Do we want to spawn this future on RAF
+        spawn_local(future);
+
+        self.element.attribute_signals.insert(name, handle);
+
         self
     }
 
@@ -132,7 +161,7 @@ impl ElementBuilder {
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
-        let parent_elem = self.element.dom_element.clone();
+        let parent_elem = self.dom_element();
         let child_elems = self.element.current_children.clone();
 
         let updater = children.for_each(move |change| {
@@ -749,6 +778,7 @@ struct ElementData {
     reactive_attrs: HashMap<String, ReadSignal<()>>,
     reactive_children: Vec<ReadSignal<()>>,
     reactive_with_dom: Vec<ReadSignal<()>>,
+    attribute_signals: HashMap<String, SignalHandle>,
     current_children: Rc<RefCell<Vec<dom::Element>>>,
     children_signal: Option<SignalHandle>,
     signals: Vec<SignalHandle>,
