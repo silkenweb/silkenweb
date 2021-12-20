@@ -374,6 +374,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-counter-list"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-example-hello-world"
 version = "0.1.0"
 dependencies = [
