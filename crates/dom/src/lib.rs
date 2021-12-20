@@ -142,7 +142,7 @@ impl ElementBuilder {
             // TODO: Test each match arm
             // TODO: Tidy this code up, and factor some things out.
             match change {
-                VecDiff::Replace { mut values } => {
+                VecDiff::Replace { values } => {
                     let existing_children = child_elems.clone();
 
                     *child_elems = values
