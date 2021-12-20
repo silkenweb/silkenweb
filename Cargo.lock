@@ -377,6 +377,7 @@ dependencies = [
 name = "silkenweb-example-counter-list"
 version = "0.1.0"
 dependencies = [
+ "futures-signals",
  "silkenweb",
 ]
 

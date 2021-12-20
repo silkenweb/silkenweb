@@ -1,13 +1,16 @@
+use std::rc::Rc;
+
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::{MutableVec, SignalVecExt},
+};
 use silkenweb::{
-    containers::ChangeTrackingVec,
     elements::{button, div, hr, Button, Div, DivBuilder},
-    mount,
-    signal::{Signal, ReadSignal, WriteSignal},
-    Builder,
+    mount, Builder,
 };
 
 fn main() {
-    let list = Signal::new(ChangeTrackingVec::new());
+    let list = Rc::new(MutableVec::new());
 
     mount(
         "app",
@@ -15,51 +18,46 @@ fn main() {
             .text("How many counters would you like?")
             .child(
                 div()
-                    .child(pop_button(&list))
-                    .text(list.read().map(|list| format!("{}", list.data().len())))
-                    .child(push_button(&list)),
+                    .child(pop_button(list.clone()))
+                    .dyn_text(list.signal_vec_cloned().len().map(|len| format!("{}", len)))
+                    .child(push_button(list.clone())),
             )
             .child(hr())
-            .child(div().children(&list.read())),
+            .child(div().dyn_children(list.signal_vec_cloned())),
     );
 }
 
-fn push_button(list: &Signal<ChangeTrackingVec<Div>>) -> Button {
-    let list_write = list.write();
+fn push_button(list: Rc<MutableVec<Div>>) -> Button {
     button()
-        .on_click(move |_, _| {
-            list_write.mutate(|v| v.push(define_counter(&Signal::new(0)).build()));
-        })
+        .on_click(move |_, _| list.lock_mut().push_cloned(define_counter().build()))
         .text("+")
         .build()
 }
 
-fn pop_button(list: &Signal<ChangeTrackingVec<Div>>) -> Button {
-    let list_read = list.read();
-    let list_write = list.write();
-
+fn pop_button(list: Rc<MutableVec<Div>>) -> Button {
     button()
         .on_click(move |_, _| {
-            if !list_read.current().data().is_empty() {
-                list_write.mutate(ChangeTrackingVec::pop);
-            }
+            list.lock_mut().pop();
         })
         .text("-")
         .build()
 }
 
-pub fn define_counter(count: &Signal<i64>) -> DivBuilder {
-    let count_text: ReadSignal<String> = count.read().map(|i| format!("{}", i));
+pub fn define_counter() -> DivBuilder {
+    let count = Rc::new(Mutable::new(0));
+    let count_text = count.signal().map(|i| format!("{}", i));
 
     div()
-        .child(define_button("-", -1, count.write()))
-        .text(count_text)
-        .child(define_button("+", 1, count.write()))
+        .child(define_button("-", -1, count.clone()))
+        .dyn_text(count_text)
+        .child(define_button("+", 1, count))
 }
 
-pub fn define_button(label: &str, delta: i64, set_count: WriteSignal<i64>) -> Button {
+pub fn define_button(label: &str, delta: i64, count: Rc<Mutable<i64>>) -> Button {
     button()
-        .on_click(move |_, _| set_count.replace(move |&i| i + delta))
+        .on_click(move |_, _| {
+            count.replace_with(move |i| *i + delta);
+        })
         .text(label)
         .build()
 }
