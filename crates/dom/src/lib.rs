@@ -120,6 +120,7 @@ impl ElementBuilder {
         self
     }
 
+    // TODO: Combine this with attribute function
     pub fn dyn_attribute(
         mut self,
         name: impl Into<String>,
