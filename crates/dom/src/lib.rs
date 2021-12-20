@@ -7,6 +7,7 @@ use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future,
     signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt, VecDiff},
     CancelableFutureHandle,
 };
 use render::{after_render, queue_update};
@@ -101,6 +102,8 @@ impl ElementBuilder {
                 reactive_attrs: HashMap::new(),
                 reactive_children: Vec::new(),
                 reactive_with_dom: Vec::new(),
+                current_children: Rc::new(RefCell::new(Vec::new())),
+                children_signal: None,
                 signals: Vec::new(),
             },
             text_nodes: Vec::new(),
@@ -122,6 +125,87 @@ impl ElementBuilder {
 
         self.append_child(&child.dom_element());
         self.element.children.push(child);
+        self
+    }
+
+    pub fn dyn_children(
+        mut self,
+        children: impl 'static + SignalVec<Item = impl Into<Element>>,
+    ) -> Self {
+        let parent_elem = self.element.dom_element.clone();
+        let child_elems = self.element.current_children.clone();
+
+        let updater = children.for_each(move |change| {
+            let mut child_elems = child_elems.borrow_mut();
+            clone!(parent_elem);
+
+            // TODO: Test each match arm
+            // TODO: Tidy this code up, and factor some things out.
+            match change {
+                VecDiff::Replace { mut values } => {
+                    let existing_children = child_elems.clone();
+
+                    *child_elems = values
+                        .into_iter()
+                        .map(|elem| elem.into().dom_element())
+                        .collect();
+                    clone!(child_elems);
+
+                    queue_update(move || {
+                        for child in existing_children {
+                            parent_elem.remove_child(&child).unwrap();
+                        }
+
+                        for child in child_elems {
+                            parent_elem.append_child(&child).unwrap();
+                        }
+                    });
+                }
+                VecDiff::InsertAt { index, value } => todo!(),
+                VecDiff::UpdateAt { index, value } => todo!(),
+                VecDiff::RemoveAt { index } => todo!(),
+                VecDiff::Move {
+                    old_index,
+                    new_index,
+                } => todo!(),
+                VecDiff::Push { value } => {
+                    let child = value.into().dom_element();
+                    child_elems.push(child.clone());
+
+                    queue_update(move || {
+                        parent_elem.append_child(&child).unwrap();
+                    });
+                }
+                VecDiff::Pop {} => {
+                    let removed_child = child_elems.pop().unwrap();
+                    clone!(parent_elem);
+
+                    queue_update(move || {
+                        parent_elem.remove_child(&removed_child).unwrap();
+                    })
+                }
+                VecDiff::Clear {} => {
+                    let existing_children = child_elems.clone();
+
+                    child_elems.clear();
+
+                    queue_update(move || {
+                        for child in existing_children {
+                            parent_elem.remove_child(&child).unwrap();
+                        }
+                    });
+                }
+            }
+            async {}
+        });
+
+        let (handle, future) = cancelable_future(updater, || ());
+
+        // TODO: Do we want to spawn this future on RAF
+        spawn_local(future);
+
+        self.element.children_signal = Some(handle);
+
         self
     }
 
@@ -653,6 +737,8 @@ pub trait Builder {
 
 enum ElementKind {
     Static(ElementData),
+    // TODO: We don't need reactive elements. Reactive children and attributes should cover
+    // everything.
     Reactive(ReadSignal<dom::Element>),
 }
 
@@ -663,8 +749,12 @@ struct ElementData {
     reactive_attrs: HashMap<String, ReadSignal<()>>,
     reactive_children: Vec<ReadSignal<()>>,
     reactive_with_dom: Vec<ReadSignal<()>>,
-    signals: Vec<DiscardOnDrop<CancelableFutureHandle>>,
+    current_children: Rc<RefCell<Vec<dom::Element>>>,
+    children_signal: Option<SignalHandle>,
+    signals: Vec<SignalHandle>,
 }
+
+type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
 
 struct EventCallback {
     target: dom::Element,
