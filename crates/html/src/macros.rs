@@ -406,7 +406,7 @@ macro_rules! attributes {
     ),* $(,)? ) => {
         $(
             $(#[$attr_meta])*
-            pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
+            pub fn $attr(self, value: impl $crate::macros::private::Attribute) -> Self {
                 Self{ builder: self.builder.attribute($text_attr, value) }
             }
         )*

@@ -113,7 +113,7 @@ impl ElementBuilder {
     }
 
     /// Set an attribute. Attribute values can be reactive.
-    pub fn attribute<T>(mut self, name: impl AsRef<str>, value: impl Attribute<T>) -> Self {
+    pub fn attribute(mut self, name: impl AsRef<str>, value: impl Attribute) -> Self {
         self.element.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         mem::drop(value);
@@ -558,11 +558,11 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
 }
 
 /// A potentially reactive attribute.
-pub trait Attribute<T> {
+pub trait Attribute {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
 
-impl<T> Attribute<T> for T
+impl<T> Attribute for T
 where
     T: StaticAttribute,
 {
@@ -571,26 +571,26 @@ where
     }
 }
 
-impl<'a> Attribute<String> for &'a str {
+impl<'a> Attribute for &'a str {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
-impl<'a> Attribute<String> for &'a String {
+impl<'a> Attribute for &'a String {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
-impl Attribute<String> for ReadSignal<&'static str> {
+impl Attribute for ReadSignal<&'static str> {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         self.map(|&value| value.to_string())
             .set_attribute(name, builder);
     }
 }
 
-impl<T> Attribute<T> for ReadSignal<T>
+impl<T> Attribute for ReadSignal<T>
 where
     T: 'static + StaticAttribute,
 {
@@ -610,9 +610,9 @@ where
     }
 }
 
-impl<'a, T> Attribute<T> for &'a ReadSignal<T>
+impl<'a, T> Attribute for &'a ReadSignal<T>
 where
-    ReadSignal<T>: Attribute<T>,
+    ReadSignal<T>: Attribute,
     T: 'static,
 {
     fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
