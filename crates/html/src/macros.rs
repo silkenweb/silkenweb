@@ -8,6 +8,7 @@ pub mod private {
     pub use silkenweb_reactive::{containers, signal::ReadSignal};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
+    pub use futures_signals::signal::Signal;
 }
 
 /// Define an html element.
@@ -225,6 +226,10 @@ macro_rules! children_allowed {
             impl [<$name:camel $($name_tail:camel)* Builder>] {
                 pub fn text(self, child: impl $crate::macros::private::Text) -> Self {
                     Self{ builder: self.builder.text(child) }
+                }
+
+                pub fn dyn_text<Sig: 'static + $crate::macros::private::Signal<Item = impl AsRef<str>>>(self, text: Sig) -> Self {
+                    Self{ builder: self.builder.dyn_text(text) }
                 }
 
                 // TODO: Return Self::Target

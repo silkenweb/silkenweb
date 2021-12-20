@@ -1,19 +1,20 @@
 //! A minimal interactive example
+use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     elements::{button, div, p},
     mount,
-    signal::Signal,
 };
 
 fn main() {
-    let count = Signal::new(0);
-    let set_count = count.write();
-    let inc = move |_, _| set_count.replace(|&i| i + 1);
-    let count_text = count.read().map(|i| format!("{}", i));
+    let count = Mutable::new(0);
+    let count_text = count.signal().map(|i| format!("{}", i));
+    let inc = move |_, _| {
+        count.replace_with(|i| *i + 1);
+    };
 
     let app = div()
         .child(button().on_click(inc).text("+"))
-        .child(p().text(count_text));
+        .child(p().dyn_text(count_text));
 
     mount("app", app);
 }

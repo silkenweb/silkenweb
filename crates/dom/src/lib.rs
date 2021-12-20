@@ -1,15 +1,22 @@
 //! A reactive interface to the DOM.
 pub mod element_list;
 pub mod render;
-use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, future::Future, mem, rc::Rc};
 
+use discard::DiscardOnDrop;
+use futures_signals::{
+    cancelable_future,
+    signal::{Signal, SignalExt},
+    CancelableFutureHandle,
+};
 use render::{after_render, queue_update};
 use silkenweb_reactive::{
     clone,
     containers::{ChangeTrackingVec, DeltaId, VecDelta},
     signal::ReadSignal,
 };
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};
+use wasm_bindgen_futures::spawn_local;
 use web_sys as dom;
 
 /// Mount an element on the document.
@@ -94,6 +101,7 @@ impl ElementBuilder {
                 reactive_attrs: HashMap::new(),
                 reactive_children: Vec::new(),
                 reactive_with_dom: Vec::new(),
+                signals: Vec::new(),
             },
             text_nodes: Vec::new(),
             delta_id: Rc::default(),
@@ -172,11 +180,45 @@ impl ElementBuilder {
         self.build()
     }
 
+    // TODO: Remove reactivity (it's covered by `dyn_text`)
     /// Add a text node after existing children. The text node can be reactive.
     pub fn text(mut self, child: impl Text) -> Self {
         child.set_text(&mut self);
         mem::drop(child);
         self
+    }
+
+    pub fn dyn_text<Sig: 'static + Signal<Item = impl AsRef<str>>>(mut self, text: Sig) -> Self {
+        let text_node = document().create_text_node(intern(""));
+        self.append_child(&text_node);
+
+        let updater = text.for_each({
+            clone!(text_node);
+
+            move |new_value| {
+                queue_update({
+                    clone!(text_node);
+                    // TODO: Do we need to create a string here? Use Into<String> if we do.
+                    let new_value = new_value.as_ref().to_string();
+                    move || text_node.set_node_value(Some(new_value.as_ref()))
+                });
+                async {}
+            }
+        });
+
+        // TODO: Naming of `store_signal` and `updater`
+        self.store_signal(updater);
+
+        self
+    }
+
+    fn store_signal(&mut self, signal: impl 'static + Future<Output = ()>) {
+        let (handle, future) = cancelable_future(signal, || ());
+
+        // TODO: Do we want to spawn this future on RAF
+        spawn_local(future);
+
+        self.element.signals.push(handle);
     }
 
     /// Apply an effect after the next render. For example, to set the focus of
@@ -621,6 +663,7 @@ struct ElementData {
     reactive_attrs: HashMap<String, ReadSignal<()>>,
     reactive_children: Vec<ReadSignal<()>>,
     reactive_with_dom: Vec<ReadSignal<()>>,
+    signals: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
 struct EventCallback {
