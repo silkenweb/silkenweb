@@ -1,6 +1,6 @@
 use std::cell::{Cell, RefCell};
 
-use silkenweb_reactive::signal::{ReadSignal, Signal};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
 use crate::window;
@@ -14,7 +14,7 @@ pub fn after_render(x: impl 'static + FnOnce()) {
     RENDER.with(|r| r.after_render(x));
 }
 
-pub fn animation_timestamp() -> ReadSignal<f64> {
+pub fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
 }
 
@@ -34,7 +34,7 @@ struct Render {
     pending_updates: RefCell<Vec<Box<dyn FnOnce()>>>,
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
     on_animation_frame: Closure<dyn FnMut(JsValue)>,
-    animation_timestamp_millis: Signal<f64>,
+    animation_timestamp_millis: Mutable<f64>,
 }
 
 impl Render {
@@ -50,7 +50,7 @@ impl Render {
                     render_updates();
                 });
             })),
-            animation_timestamp_millis: Signal::new(0.0),
+            animation_timestamp_millis: Mutable::new(0.0),
         }
     }
 
@@ -63,8 +63,11 @@ impl Render {
         self.pending_effects.borrow_mut().push(Box::new(x));
     }
 
-    fn animation_timestamp(&self) -> ReadSignal<f64> {
-        self.animation_timestamp_millis.read()
+    fn animation_timestamp(&self) -> impl Signal<Item = f64> {
+        let base_timestamp = self.animation_timestamp_millis.get();
+        self.animation_timestamp_millis
+            .signal()
+            .map(move |t| t - base_timestamp)
     }
 
     pub fn render_updates(&self) {
@@ -88,7 +91,7 @@ impl Render {
     }
 
     fn update_animations(&self, timestamp: f64) {
-        self.animation_timestamp_millis.write().set(timestamp);
+        self.animation_timestamp_millis.set(timestamp);
     }
 }
 

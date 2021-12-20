@@ -7,4 +7,5 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../crates/silkenweb" }
+futures-signals = "0.3"
 num-traits = "0.2"

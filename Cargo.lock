@@ -336,6 +336,7 @@ dependencies = [
 name = "silkenweb"
 version = "0.1.1"
 dependencies = [
+ "futures-signals",
  "silkenweb-dom",
  "silkenweb-html",
  "silkenweb-reactive",
@@ -361,6 +362,7 @@ dependencies = [
 name = "silkenweb-example-animation"
 version = "0.1.0"
 dependencies = [
+ "futures-signals",
  "num-traits",
  "silkenweb",
 ]
