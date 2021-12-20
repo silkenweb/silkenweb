@@ -1,6 +1,7 @@
 #[doc(hidden)]
 // Macro dependencies
 pub mod private {
+    pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::item;
     pub use silkenweb_dom::{
         tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
@@ -8,7 +9,6 @@ pub mod private {
     pub use silkenweb_reactive::{containers, signal::ReadSignal};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
-    pub use futures_signals::signal::Signal;
 }
 
 /// Define an html element.
@@ -230,6 +230,13 @@ macro_rules! children_allowed {
 
                 pub fn dyn_text<Sig: 'static + $crate::macros::private::Signal<Item = impl AsRef<str>>>(self, text: Sig) -> Self {
                     Self{ builder: self.builder.dyn_text(text) }
+                }
+
+                pub fn dyn_children(
+                    self,
+                    children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
+                ) -> Self {
+                    Self{ builder: self.builder.dyn_children(children) }
                 }
 
                 // TODO: Return Self::Target
