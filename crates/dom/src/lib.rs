@@ -363,7 +363,7 @@ impl Builder for ElementBuilder {
     type Target = Element;
 
     fn build(self) -> Self::Target {
-        Element(Rc::new(ElementKind::Static(self.element)))
+        Element(Rc::new(self.element))
     }
 
     fn into_element(self) -> Element {
@@ -390,15 +390,13 @@ impl From<ElementBuilder> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 #[derive(Clone)]
-pub struct Element(Rc<ElementKind>);
+pub struct Element(Rc<ElementData>);
 
 impl DomElement for Element {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
-        match self.0.as_ref() {
-            ElementKind::Static(elem) => elem.dom_element.clone(),
-        }
+        self.0.dom_element.clone()
     }
 }
 
@@ -607,11 +605,6 @@ pub trait Builder {
     fn build(self) -> Self::Target;
 
     fn into_element(self) -> Element;
-}
-
-enum ElementKind {
-    // TODO: Remove this. It's just a wrapper now.
-    Static(ElementData),
 }
 
 struct ElementData {
