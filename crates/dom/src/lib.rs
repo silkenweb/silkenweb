@@ -603,35 +603,6 @@ where
     }
 }
 
-/*
-pub fn dyn_attribute(
-    mut self,
-    name: impl Into<String>,
-    value: impl 'static + Signal<Item = impl 'static + AsRef<str>>,
-) -> Self {
-    let name = name.into();
-    let dom_element = self.dom_element();
-
-    let signal = value.for_each({
-        clone!(name);
-        move |value| {
-            clone!(name, dom_element);
-            queue_update(move || dom_element.set_attribute(&name, value.as_ref()).unwrap());
-            async {}
-        }
-    });
-
-    let (handle, future) = cancelable_future(signal, || ());
-
-    // TODO: Do we want to spawn this future on RAF
-    spawn_local(future);
-
-    self.element.attribute_signals.insert(name, handle);
-
-    self
-}
-*/
-
 pub struct SignalType<T>(T);
 
 pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
