@@ -372,7 +372,7 @@ impl TodoItem {
         input()
             .class("edit")
             .type_("text")
-            .value(&self.text())
+            .value(self.text())
             .on_focusout({
                 let self_ = self.clone();
                 move |_, input| self_.save_edits(&input)

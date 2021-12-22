@@ -116,35 +116,6 @@ impl ElementBuilder {
     pub fn attribute(mut self, name: impl AsRef<str>, value: impl Attribute) -> Self {
         self.element.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
-        mem::drop(value);
-        self
-    }
-
-    // TODO: Combine this with attribute function
-    pub fn dyn_attribute(
-        mut self,
-        name: impl Into<String>,
-        value: impl 'static + Signal<Item = impl 'static + AsRef<str>>,
-    ) -> Self {
-        let name = name.into();
-        let dom_element = self.dom_element();
-
-        let signal = value.for_each({
-            clone!(name);
-            move |value| {
-                clone!(name, dom_element);
-                queue_update(move || dom_element.set_attribute(&name, value.as_ref()).unwrap());
-                async {}
-            }
-        });
-
-        let (handle, future) = cancelable_future(signal, || ());
-
-        // TODO: Do we want to spawn this future on RAF
-        spawn_local(future);
-
-        self.element.attribute_signals.insert(name, handle);
-
         self
     }
 
@@ -468,7 +439,7 @@ where
                 let new_dom_element: dom::Element = element.dom_element().into();
 
                 queue_update({
-                    let dom_element = dom_element.borrow().clone();
+                    let dom_element: dom::Element = dom_element.borrow().clone();
                     clone!(new_dom_element);
 
                     move || {
@@ -559,32 +530,32 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
 
 /// A potentially reactive attribute.
 pub trait Attribute {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder);
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
 
 impl<T> Attribute for T
 where
     T: StaticAttribute,
 {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        self.set_attribute(name, &builder.element.dom_element);
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        StaticAttribute::set_attribute(&self, name, &builder.element.dom_element);
     }
 }
 
 impl<'a> Attribute for &'a str {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
 impl<'a> Attribute for &'a String {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         set_attribute(&builder.element.dom_element, name, self);
     }
 }
 
 impl Attribute for ReadSignal<&'static str> {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         self.map(|&value| value.to_string())
             .set_attribute(name, builder);
     }
@@ -594,10 +565,11 @@ impl<T> Attribute for ReadSignal<T>
 where
     T: 'static + StaticAttribute,
 {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         let name = name.as_ref().to_string();
         let dom_element = builder.element.dom_element.clone();
-        self.current().set_attribute(&name, &dom_element);
+        let current: &T = &self.current();
+        StaticAttribute::set_attribute(current, &name, &dom_element);
 
         let updater = self.map({
             clone!(name);
@@ -610,14 +582,79 @@ where
     }
 }
 
-impl<'a, T> Attribute for &'a ReadSignal<T>
+/* TODO: We need Attribute implementing for f32, bool, String, str etc + Signal types
+Signal could be implemented for anything externally (even f32, String etc) - so it's impossible to pass signals to the same method.
+We could have a newtype wrapper to distinguish signals:
+
+fn mutable<I, T: Signal<Item = I>>(sig: T) -> Mutable<T> {}
+
+elem.my_attr(mutable(x))
+
+.
+.
+.
+
+We should allow Option attribute values as well, that remove/don't set on None.
+*/
+impl<Sig, Attr> Attribute for SignalType<Sig>
 where
-    ReadSignal<T>: Attribute,
-    T: 'static,
+    Attr: StaticAttribute,
+    Sig: 'static + Signal<Item = Attr>,
 {
-    fn set_attribute(&self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        (*self).set_attribute(name, builder);
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        let name = name.as_ref().to_string();
+        let dom_element = builder.dom_element();
+
+        let signal = self.0.for_each({
+            clone!(name);
+            move |new_value| {
+                StaticAttribute::set_attribute(&new_value, &name, &dom_element);
+                async {}
+            }
+        });
+
+        let (handle, future) = cancelable_future(signal, || ());
+
+        // TODO: Do we want to spawn this future on RAF
+        spawn_local(future);
+
+        builder.element.attribute_signals.insert(name, handle);
     }
+}
+
+/*
+pub fn dyn_attribute(
+    mut self,
+    name: impl Into<String>,
+    value: impl 'static + Signal<Item = impl 'static + AsRef<str>>,
+) -> Self {
+    let name = name.into();
+    let dom_element = self.dom_element();
+
+    let signal = value.for_each({
+        clone!(name);
+        move |value| {
+            clone!(name, dom_element);
+            queue_update(move || dom_element.set_attribute(&name, value.as_ref()).unwrap());
+            async {}
+        }
+    });
+
+    let (handle, future) = cancelable_future(signal, || ());
+
+    // TODO: Do we want to spawn this future on RAF
+    spawn_local(future);
+
+    self.element.attribute_signals.insert(name, handle);
+
+    self
+}
+*/
+
+pub struct SignalType<T>(T);
+
+pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
+    SignalType(sig)
 }
 
 /// An [`Effect`] that can be applied to an [`Element`] after rendering.

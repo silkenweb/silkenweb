@@ -28,7 +28,7 @@
 pub use silkenweb_dom::{
     element_list, local_storage, mount,
     render::{after_render, render_updates},
-    session_storage, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement, Element,
+    session_storage, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement, Element,signal,
     ElementBuilder,
 };
 pub use silkenweb_html::{children_allowed, elements, html_element, CustomEvent};

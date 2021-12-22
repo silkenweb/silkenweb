@@ -3,7 +3,7 @@ use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
-use silkenweb::{animation::infinite_animation, mount, tag_in_namespace, Builder, Element};
+use silkenweb::{animation::infinite_animation, mount, tag_in_namespace, Builder, Element, signal};
 
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
@@ -32,7 +32,7 @@ fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> El
     });
 
     tag_in_namespace("http://www.w3.org/2000/svg", "path")
-        .dyn_attribute("d", path)
+        .attribute("d", signal(path))
         .attribute("stroke", "black")
         .attribute("fill", "transparent")
         .build()
