@@ -1,5 +1,5 @@
 use parse_display::{Display, FromStr};
-use silkenweb::{elements::div, mount, signal::Signal, Builder};
+use silkenweb::{elements::div, mount, signal::Signal, Builder, ParentBuilder};
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
     icon::ui5_icon,

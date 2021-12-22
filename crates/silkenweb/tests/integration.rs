@@ -3,6 +3,7 @@ use silkenweb::{
     elements::{button, div, p, PBuilder},
     mount, render_updates, signal, tag, unmount,
 };
+use silkenweb_html::ParentBuilder;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 use web_sys as dom;

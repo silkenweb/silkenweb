@@ -31,7 +31,7 @@ pub use silkenweb_dom::{
     session_storage, signal, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement,
     Element, ElementBuilder,
 };
-pub use silkenweb_html::{children_allowed, elements, html_element, CustomEvent};
+pub use silkenweb_html::{children_allowed, elements, html_element, CustomEvent, ParentBuilder};
 pub use silkenweb_reactive::{accumulators, clone, containers, memo, signal};
 
 pub mod animation;

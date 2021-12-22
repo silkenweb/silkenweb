@@ -223,12 +223,12 @@ macro_rules! html_element {
 macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
         $crate::macros::private::item! {
-            impl [<$name:camel $($name_tail:camel)* Builder>] {
-                pub fn text(self, child: impl $crate::macros::private::Text) -> Self {
+            impl $crate::ParentBuilder for [<$name:camel $($name_tail:camel)* Builder>] {
+                fn text(self, child: impl $crate::macros::private::Text) -> Self {
                     Self{ builder: self.builder.text(child) }
                 }
 
-                pub fn dyn_children(
+                fn dyn_children(
                     self,
                     children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
                 ) -> Self {
@@ -236,7 +236,7 @@ macro_rules! children_allowed {
                 }
 
                 // TODO: Return Self::Target
-                pub fn children<T>(
+                fn children<T>(
                     self,
                     children: & $crate::macros::private::ReadSignal<$crate::macros::private::containers::ChangeTrackingVec<T>>) -> $crate::macros::private::Element
                 where
@@ -245,7 +245,7 @@ macro_rules! children_allowed {
                     self.builder.children(children)
                 }
 
-                pub fn child<Child>(self, c: Child) -> Self
+                fn child<Child>(self, c: Child) -> Self
                 where
                     Child: Into<$crate::macros::private::Element>
                 {
