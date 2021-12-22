@@ -2,7 +2,7 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     elements::{button, div, p},
-    mount,
+    mount, signal,
 };
 
 fn main() {
@@ -14,7 +14,7 @@ fn main() {
 
     let app = div()
         .child(button().on_click(inc).text("+"))
-        .child(p().dyn_text(count_text));
+        .child(p().text(signal(count_text)));
 
     mount("app", app);
 }

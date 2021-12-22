@@ -228,10 +228,6 @@ macro_rules! children_allowed {
                     Self{ builder: self.builder.text(child) }
                 }
 
-                pub fn dyn_text<Sig: 'static + $crate::macros::private::Signal<Item = impl AsRef<str>>>(self, text: Sig) -> Self {
-                    Self{ builder: self.builder.dyn_text(text) }
-                }
-
                 pub fn dyn_children(
                     self,
                     children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,

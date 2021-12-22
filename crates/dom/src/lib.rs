@@ -265,35 +265,9 @@ impl ElementBuilder {
         self.build()
     }
 
-    // TODO: Remove reactivity (it's covered by `dyn_text`)
     /// Add a text node after existing children. The text node can be reactive.
     pub fn text(mut self, child: impl Text) -> Self {
         child.set_text(&mut self);
-        mem::drop(child);
-        self
-    }
-
-    pub fn dyn_text<Sig: 'static + Signal<Item = impl AsRef<str>>>(mut self, text: Sig) -> Self {
-        let text_node = document().create_text_node(intern(""));
-        self.append_child(&text_node);
-
-        let updater = text.for_each({
-            clone!(text_node);
-
-            move |new_value| {
-                queue_update({
-                    clone!(text_node);
-                    // TODO: Do we need to create a string here? Use Into<String> if we do.
-                    let new_value = new_value.as_ref().to_string();
-                    move || text_node.set_node_value(Some(new_value.as_ref()))
-                });
-                async {}
-            }
-        });
-
-        // TODO: Naming of `store_signal` and `updater`
-        self.store_signal(updater);
-
         self
     }
 
@@ -610,6 +584,7 @@ where
 
 pub struct SignalType<T>(T);
 
+/// Create a newtype wrapper around a signal.
 pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
     SignalType(sig)
 }
@@ -657,7 +632,7 @@ where
 
 /// A Text element.
 pub trait Text {
-    fn set_text(&self, builder: &mut ElementBuilder);
+    fn set_text(self, builder: &mut ElementBuilder);
 }
 
 fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
@@ -667,20 +642,20 @@ fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
 }
 
 impl<'a> Text for &'a str {
-    fn set_text(&self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder);
+    fn set_text(self, builder: &mut ElementBuilder) {
+        set_static_text(&self, builder);
     }
 }
 
 impl<'a> Text for &'a String {
-    fn set_text(&self, builder: &mut ElementBuilder) {
+    fn set_text(self, builder: &mut ElementBuilder) {
         set_static_text(self, builder);
     }
 }
 
 impl Text for String {
-    fn set_text(&self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder);
+    fn set_text(self, builder: &mut ElementBuilder) {
+        set_static_text(&self, builder);
     }
 }
 
@@ -688,7 +663,7 @@ impl<T> Text for ReadSignal<T>
 where
     T: 'static + AsRef<str>,
 {
-    fn set_text(&self, builder: &mut ElementBuilder) {
+    fn set_text(self, builder: &mut ElementBuilder) {
         set_static_text(&self.current().as_ref(), builder);
 
         if let Some(text_node) = builder.text_nodes.last() {
@@ -709,13 +684,31 @@ where
     }
 }
 
-impl<'a, T> Text for &'a ReadSignal<T>
+impl<T, Sig> Text for SignalType<Sig>
 where
-    T: 'static,
-    ReadSignal<T>: Text,
+    T: 'static + AsRef<str>,
+    Sig: 'static + Signal<Item = T>,
 {
-    fn set_text(&self, builder: &mut ElementBuilder) {
-        (*self).set_text(builder);
+    fn set_text(self, builder: &mut ElementBuilder) {
+        let text_node = document().create_text_node(intern(""));
+        builder.append_child(&text_node);
+
+        let updater = self.0.for_each({
+            clone!(text_node);
+
+            move |new_value| {
+                queue_update({
+                    clone!(text_node);
+                    // TODO: Do we need to create a string here? Use Into<String> if we do.
+                    let new_value = new_value.as_ref().to_string();
+                    move || text_node.set_node_value(Some(new_value.as_ref()))
+                });
+                async {}
+            }
+        });
+
+        // TODO: Naming of `store_signal` and `updater`
+        builder.store_signal(updater);
     }
 }
 
