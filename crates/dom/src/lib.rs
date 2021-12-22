@@ -600,29 +600,6 @@ pub trait DomElement {
     fn dom_element(&self) -> Self::Target;
 }
 
-impl<T> DomElement for Option<T>
-where
-    T: DomElement,
-{
-    type Target = dom::Element;
-
-    fn dom_element(&self) -> Self::Target {
-        match self {
-            Some(elem) => elem.dom_element().into(),
-            None => {
-                // We use a hidden `div` element as a placeholder. We'll call
-                // `replace_with_with_node_1` if a reactive option changes to `Some`.
-                //
-                // Comments won't work as their interface is `Node` rather than `Element`, which
-                // means we can't call `replace`.
-                let none = document().create_element("div").unwrap();
-                none.unchecked_ref::<dom::HtmlElement>().set_hidden(true);
-                none
-            }
-        }
-    }
-}
-
 /// An HTML element builder.
 pub trait Builder {
     type Target;
