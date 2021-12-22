@@ -520,6 +520,25 @@ impl StaticAttribute for bool {
     }
 }
 
+/// Set the attribute, or remove it if the option is `None`.
+///
+/// Although this only really makes sense for attribute signals, we implement it
+/// for `StaticAttribute`s because we fall foul of orphan rules if we try to
+/// implement it for all signals of `AttributeValue`s.
+impl<T: AttributeValue> StaticAttribute for Option<T> {
+    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+        clone!(dom_element);
+        let name = name.as_ref().to_string();
+
+        match self {
+            Some(value) => set_attribute(&dom_element, name, value.text()),
+            None => queue_update(move || {
+                dom_element.remove_attribute(&name).unwrap();
+            }),
+        }
+    }
+}
+
 fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl AsRef<str>) {
     clone!(dom_element);
     let name = name.as_ref().to_string();
@@ -563,20 +582,6 @@ where
     }
 }
 
-/* TODO: We need Attribute implementing for f32, bool, String, str etc + Signal types
-Signal could be implemented for anything externally (even f32, String etc) - so it's impossible to pass signals to the same method.
-We could have a newtype wrapper to distinguish signals:
-
-fn mutable<I, T: Signal<Item = I>>(sig: T) -> Mutable<T> {}
-
-elem.my_attr(mutable(x))
-
-.
-.
-.
-
-We should allow Option attribute values as well, that remove/don't set on None.
-*/
 impl<Sig, Attr> Attribute for SignalType<Sig>
 where
     Attr: StaticAttribute,
