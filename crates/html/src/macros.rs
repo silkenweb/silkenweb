@@ -3,7 +3,7 @@
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::item;
-    pub use silkenweb_dom::{tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder};
+    pub use silkenweb_dom::{tag, Attribute, Builder, DomElement, Element, ElementBuilder};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
@@ -140,10 +140,20 @@ macro_rules! html_element {
                         $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                     }
                  ); )?
+            }
 
-                 pub fn effect(self, f: impl $crate::macros::private::Effect<$elem_type>) -> Self {
-                     Self{ builder: self.builder.effect(f) }
-                 }
+            impl $crate::Effects<$elem_type> for [<$camel_name Builder>] {
+                fn effect(self, f: impl 'static + ::std::ops::FnOnce(&$elem_type)) -> Self {
+                    Self{ builder: self.builder.effect(f) }
+                }
+
+                fn effect_signal<T: 'static>(
+                    mut self,
+                    sig: impl 'static + $crate::macros::private::Signal<Item = T>,
+                    f: impl 'static + Clone + Fn(&$elem_type, T),
+                ) -> Self {
+                    Self{ builder: self.builder.effect_signal(sig, f) }
+                }
             }
 
             impl $crate::macros::private::Builder for [<$camel_name Builder>] {

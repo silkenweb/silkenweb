@@ -126,7 +126,10 @@ impl ElementBuilder {
         todo!()
     }
 
-    pub fn optional_child_signal(self, child: impl Signal<Item = Option<impl Into<Element>>>) -> Self {
+    pub fn optional_child_signal(
+        self,
+        child: impl Signal<Item = Option<impl Into<Element>>>,
+    ) -> Self {
         todo!()
     }
 
@@ -252,6 +255,8 @@ impl ElementBuilder {
         self.element.signals.push(handle);
     }
 
+    // TODO: Test
+    // TODO: Update docs
     /// Apply an effect after the next render. For example, to set the focus of
     /// an element:
     ///
@@ -275,8 +280,33 @@ impl ElementBuilder {
     ///
     /// element.effect(is_hidden.map(|&hidden| move |elem: &HtmlInputElement| elem.set_hidden(hidden)));
     /// ```
-    pub fn effect<T>(mut self, child: impl Effect<T>) -> Self {
-        child.set_effect(&mut self);
+    pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
+        let dom_element = self.dom_element().dyn_into().unwrap();
+        after_render(move || f(&dom_element));
+
+        self
+    }
+
+    // TODO: Test
+    pub fn effect_signal<T, DomType>(
+        mut self,
+        sig: impl 'static + Signal<Item = T>,
+        f: impl 'static + Clone + Fn(&DomType, T),
+    ) -> Self
+    where
+        T: 'static,
+        DomType: 'static + Clone + JsCast,
+    {
+        let dom_element: DomType = self.dom_element().dyn_into().unwrap();
+
+        let future = sig.for_each(move |x| {
+            clone!(dom_element, f);
+            after_render(move || f(&dom_element, x));
+            async {}
+        });
+
+        self.store_signal(future);
+
         self
     }
 
@@ -560,22 +590,6 @@ pub struct SignalType<T>(T);
 /// Create a newtype wrapper around a signal.
 pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
     SignalType(sig)
-}
-
-/// An [`Effect`] that can be applied to an [`Element`] after rendering.
-pub trait Effect<T> {
-    fn set_effect(self, builder: &mut ElementBuilder);
-}
-
-impl<F, T> Effect<T> for F
-where
-    F: 'static + Fn(&T),
-    T: 'static + JsCast,
-{
-    fn set_effect(self, builder: &mut ElementBuilder) {
-        let dom_element = builder.dom_element().dyn_into().unwrap();
-        after_render(move || self(&dom_element));
-    }
 }
 
 // TODO(review): Find a better way to add all child types to dom

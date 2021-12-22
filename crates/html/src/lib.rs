@@ -50,7 +50,7 @@ impl<T> From<dom::CustomEvent> for CustomEvent<T> {
 }
 
 /// Methods to add child elements. These are in a trait to allow attribute
-/// methods to be disambiguated from any methods here.
+/// methods to be disambiguated..
 pub trait ParentBuilder {
     fn text(self, child: impl AsRef<str>) -> Self;
 
@@ -59,11 +59,23 @@ pub trait ParentBuilder {
     fn child_signal(self, child: impl Signal<Item = impl Into<Element>>) -> Self;
 
     fn optional_child_signal(self, child: impl Signal<Item = Option<impl Into<Element>>>) -> Self;
-    
+
     fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
         -> Self;
 
     fn child<Child>(self, c: Child) -> Self
     where
         Child: Into<Element>;
+}
+
+/// Methods to add effects. These are in a trait to allow attribute methods to
+/// be disambiguated.
+pub trait Effects<DomType> {
+    fn effect(self, f: impl 'static + FnOnce(&DomType)) -> Self;
+
+    fn effect_signal<T: 'static>(
+        self,
+        sig: impl 'static + Signal<Item = T>,
+        f: impl 'static + Clone + Fn(&DomType, T),
+    ) -> Self;
 }
