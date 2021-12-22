@@ -113,7 +113,11 @@ impl ElementBuilder {
     }
 
     /// Set an attribute. Attribute values can be reactive.
-    pub fn attribute(mut self, name: impl AsRef<str>, value: impl Attribute) -> Self {
+    pub fn attribute<T: StaticAttribute>(
+        mut self,
+        name: impl AsRef<str>,
+        value: impl Attribute<T>,
+    ) -> Self {
         self.element.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         self
@@ -448,7 +452,61 @@ pub trait AttributeValue {
     fn text(&self) -> String;
 }
 
+impl AttributeValue for i8 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for i16 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for i32 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for i64 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for u8 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for u16 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for u32 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for u64 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
 impl AttributeValue for f32 {
+    fn text(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl AttributeValue for f64 {
     fn text(&self) -> String {
         format!("{}", self)
     }
@@ -457,12 +515,6 @@ impl AttributeValue for f32 {
 impl AttributeValue for String {
     fn text(&self) -> String {
         self.clone()
-    }
-}
-
-impl<'a> AttributeValue for &'a str {
-    fn text(&self) -> String {
-        self.to_string()
     }
 }
 
@@ -522,11 +574,11 @@ fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl 
 }
 
 /// A potentially reactive attribute.
-pub trait Attribute {
+pub trait Attribute<T> {
     fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder);
 }
 
-impl<T> Attribute for T
+impl<T> Attribute<T> for T
 where
     T: StaticAttribute,
 {
@@ -535,7 +587,13 @@ where
     }
 }
 
-impl<T> Attribute for ReadSignal<T>
+impl<'a> Attribute<String> for &'a str {
+    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+        self.to_string().set_attribute(name, builder);
+    }
+}
+
+impl<T> Attribute<T> for ReadSignal<T>
 where
     T: 'static + StaticAttribute,
 {
@@ -556,7 +614,7 @@ where
     }
 }
 
-impl<Sig, Attr> Attribute for SignalType<Sig>
+impl<Sig, Attr> Attribute<Attr> for SignalType<Sig>
 where
     Attr: StaticAttribute,
     Sig: 'static + Signal<Item = Attr>,
