@@ -24,16 +24,16 @@
 //!     )
 //!     .child(p().text(router::url().map(|url| format!("URL Path is: {}", url.pathname()))));
 //! ```
+use futures_signals::signal::{Mutable, Signal};
 use silkenweb_dom::window;
-use silkenweb_reactive::signal::{ReadSignal, Signal};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::Url;
 
 /// A signal that will vary according to the current browser URL.
 ///
 /// See [module-level documentation](self) for an example.
-pub fn url() -> ReadSignal<Url> {
-    URL.with(Signal::read)
+pub fn url() -> impl Signal<Item = Url> {
+    URL.with(|url| url.signal_cloned())
 }
 
 /// Set the path portion of the URL.
@@ -49,18 +49,17 @@ pub fn url() -> ReadSignal<Url> {
 /// See [module-level documentation](self) for an example.
 pub fn set_url_path(path: impl 'static + AsRef<str>) {
     URL.with(move |url| {
-        url.write().mutate(move |url| {
-            url.set_pathname(path.as_ref());
-            window()
-                .history()
-                .unwrap()
-                .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
-                .unwrap();
-        });
+        let url = url.lock_mut();
+        url.set_pathname(path.as_ref());
+        window()
+            .history()
+            .unwrap()
+            .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
+            .unwrap();
     });
 }
 
-fn new_url_signal() -> Signal<Url> {
+fn new_url_signal() -> Mutable<Url> {
     let window = window();
     let url = Url::new(
         &window
@@ -73,15 +72,15 @@ fn new_url_signal() -> Signal<Url> {
     ON_POPSTATE
         .with(|on_popstate| window.set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
 
-    Signal::new(url)
+    Mutable::new(url)
 }
 
 thread_local! {
     static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_event: JsValue| {
-            URL.with(|url| url.write().set(
+            URL.with(|url| url.set(
                 Url::new(&window().location().href().expect("HRef must exist")).expect("URL must be valid")
             ));
         }));
-    static URL: Signal<Url> = new_url_signal();
+    static URL: Mutable<Url> = new_url_signal();
 }
