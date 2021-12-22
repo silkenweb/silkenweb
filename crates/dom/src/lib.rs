@@ -1,7 +1,7 @@
 //! A reactive interface to the DOM.
 pub mod element_list;
 pub mod render;
-use std::{cell::RefCell, collections::HashMap, future::Future, mem, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, future::Future, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
