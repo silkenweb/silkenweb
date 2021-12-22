@@ -486,7 +486,7 @@ impl AttributeValue for String {
     }
 }
 
-impl AttributeValue for str {
+impl<'a> AttributeValue for &'a str {
     fn text(&self) -> String {
         self.to_string()
     }
@@ -539,25 +539,6 @@ where
 {
     fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         StaticAttribute::set_attribute(&self, name, &builder.element.dom_element);
-    }
-}
-
-impl<'a> Attribute for &'a str {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        set_attribute(&builder.element.dom_element, name, self);
-    }
-}
-
-impl<'a> Attribute for &'a String {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        set_attribute(&builder.element.dom_element, name, self);
-    }
-}
-
-impl Attribute for ReadSignal<&'static str> {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        self.map(|&value| value.to_string())
-            .set_attribute(name, builder);
     }
 }
 
