@@ -40,25 +40,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "convert_case"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
-
-[[package]]
-name = "derive_more"
-version = "0.99.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
-dependencies = [
- "convert_case",
- "proc-macro2",
- "quote",
- "rustc_version",
- "syn",
-]
-
-[[package]]
 name = "discard"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -123,12 +104,6 @@ dependencies = [
  "pin-utils",
  "slab",
 ]
-
-[[package]]
-name = "itoa"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1aab8fc367588b89dcee83ab0fd66b72b50b72fa1904d7095045ace2b0c81c35"
 
 [[package]]
 name = "js-sys"
@@ -275,62 +250,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 
 [[package]]
-name = "rustc_version"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
-dependencies = [
- "semver",
-]
-
-[[package]]
-name = "ryu"
-version = "1.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
-
-[[package]]
 name = "scoped-tls"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
 
 [[package]]
-name = "semver"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
-
-[[package]]
 name = "serde"
 version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
-dependencies = [
- "serde_derive",
-]
-
-[[package]]
-name = "serde_derive"
-version = "1.0.132"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "serde_json"
-version = "1.0.73"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcbd0344bc6533bc7ec56df11d42fb70f1b912351c0825ccb7211b59d8af7cf5"
-dependencies = [
- "itoa",
- "ryu",
- "serde",
-]
 
 [[package]]
 name = "silkenweb"
@@ -394,20 +323,8 @@ dependencies = [
 name = "silkenweb-example-router"
 version = "0.1.0"
 dependencies = [
+ "futures-signals",
  "silkenweb",
-]
-
-[[package]]
-name = "silkenweb-examples-todomvc"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "derive_more",
- "js-sys",
- "serde",
- "serde_json",
- "silkenweb",
- "web-sys",
 ]
 
 [[package]]
@@ -428,52 +345,6 @@ version = "0.1.1"
 dependencies = [
  "num-traits",
  "serde",
-]
-
-[[package]]
-name = "silkenweb-tutorial-common"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
-]
-
-[[package]]
-name = "silkenweb-tutorial-counter"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
- "silkenweb-tutorial-common",
-]
-
-[[package]]
-name = "silkenweb-tutorial-counter-list"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
- "silkenweb-tutorial-common",
-]
-
-[[package]]
-name = "silkenweb-tutorial-counter-signal"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
-]
-
-[[package]]
-name = "silkenweb-tutorial-memoized-counter-list"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
- "silkenweb-tutorial-common",
-]
-
-[[package]]
-name = "silkenweb-tutorial-reactive-counter-list"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
- "silkenweb-tutorial-common",
 ]
 
 [[package]]
