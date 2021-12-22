@@ -14,9 +14,8 @@
 
 use std::marker::PhantomData;
 
-use futures_signals::{signal_vec::SignalVec, signal::Signal};
-use silkenweb_dom::{DomElement, Element};
-use silkenweb_reactive::{containers, signal::ReadSignal};
+use futures_signals::{signal::Signal, signal_vec::SignalVec};
+use silkenweb_dom::Element;
 use wasm_bindgen::JsCast;
 use web_sys as dom;
 
@@ -57,13 +56,12 @@ pub trait ParentBuilder {
 
     fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
 
+    fn child_signal(self, child: impl Signal<Item = impl Into<Element>>) -> Self;
+
+    fn optional_child_signal(self, child: impl Signal<Item = Option<impl Into<Element>>>) -> Self;
+    
     fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
         -> Self;
-
-    // TODO: Return Self::Target
-    fn children<T>(self, children: &ReadSignal<containers::ChangeTrackingVec<T>>) -> Element
-    where
-        T: 'static + DomElement;
 
     fn child<Child>(self, c: Child) -> Self
     where

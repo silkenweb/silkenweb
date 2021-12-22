@@ -1,5 +1,6 @@
+use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
-use silkenweb::{elements::div, mount, signal::Signal, Builder, ParentBuilder};
+use silkenweb::{elements::div, mount, Builder, ParentBuilder};
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
     icon::ui5_icon,
@@ -23,8 +24,8 @@ pub fn main_js() -> Result<(), JsValue> {
         })
         .build();
 
-    let selected = Signal::new(Selected::Calendar);
-    let set_selected = selected.write();
+    let selected = Mutable::new(Selected::Calendar);
+    let selected_signal = selected.signal();
 
     // TODO: Use "data-id" rather than "id". Can we make this more type safe?
     // TODO: Slots
@@ -41,7 +42,7 @@ pub fn main_js() -> Result<(), JsValue> {
                 .id(Selected::Icon.to_string()),
         )
         .on_selection_change(move |event, _target| {
-            set_selected.set(
+            selected.set(
                 event
                     .item()
                     .get_attribute("id")
@@ -56,7 +57,7 @@ pub fn main_js() -> Result<(), JsValue> {
         "app",
         div()
             .child(side_bar)
-            .child(selected.read().map(move |selection| match selection {
+            .child_signal(selected_signal.map(move |selection| match selection {
                 Selected::Calendar => calendar.clone().into_element(),
                 Selected::Icon => icon.clone().into_element(),
             })),
@@ -65,7 +66,7 @@ pub fn main_js() -> Result<(), JsValue> {
     Ok(())
 }
 
-#[derive(Display, FromStr)]
+#[derive(Display, FromStr, Copy, Clone)]
 enum Selected {
     Icon,
     Calendar,

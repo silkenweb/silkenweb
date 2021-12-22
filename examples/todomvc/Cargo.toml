@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../crates/silkenweb", features = ["serde"] }
+silkenweb = { path = "../../crates/silkenweb" }
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
 derive_more = "0.99"

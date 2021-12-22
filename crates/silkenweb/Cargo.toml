@@ -15,7 +15,6 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 [dependencies]
 silkenweb-html = "0.1.1"
 silkenweb-dom = "0.1.1"
-silkenweb-reactive = "0.1.1"
 futures-signals = "0.3"
 wasm-bindgen = "0.2.78"
 
@@ -29,6 +28,3 @@ features = [
 
 [dev-dependencies]
 wasm-bindgen-test= "0.3.28"
-
-[features]
-serde = ["silkenweb-reactive/serde"]

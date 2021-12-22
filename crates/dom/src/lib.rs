@@ -1,5 +1,4 @@
 //! A reactive interface to the DOM.
-pub mod element_list;
 pub mod render;
 use std::{cell::RefCell, collections::HashMap, future::Future, rc::Rc};
 
@@ -11,11 +10,6 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use render::{after_render, queue_update};
-use silkenweb_reactive::{
-    clone,
-    containers::{ChangeTrackingVec, DeltaId, VecDelta},
-    signal::ReadSignal,
-};
 use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
 use web_sys as dom;
@@ -77,7 +71,6 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 pub struct ElementBuilder {
     element: ElementData,
     text_nodes: Vec<dom::Text>,
-    delta_id: Rc<RefCell<DeltaId>>,
 }
 
 impl ElementBuilder {
@@ -99,16 +92,12 @@ impl ElementBuilder {
                 dom_element,
                 children: Vec::new(),
                 event_callbacks: Vec::new(),
-                reactive_attrs: HashMap::new(),
-                reactive_children: Vec::new(),
-                reactive_with_dom: Vec::new(),
                 attribute_signals: HashMap::new(),
                 current_children: Rc::new(RefCell::new(Vec::new())),
                 children_signal: None,
                 signals: Vec::new(),
             },
             text_nodes: Vec::new(),
-            delta_id: Rc::default(),
         }
     }
 
@@ -133,6 +122,15 @@ impl ElementBuilder {
         self
     }
 
+    pub fn child_signal(self, child: impl Signal<Item = impl Into<Element>>) -> Self {
+        todo!()
+    }
+
+    pub fn optional_child_signal(self, child: impl Signal<Item = Option<impl Into<Element>>>) -> Self {
+        todo!()
+    }
+
+    // TODO: Docs and work out what to do with existing children. `Self::child` and
     pub fn children_signal(
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
@@ -212,61 +210,6 @@ impl ElementBuilder {
         self.element.children_signal = Some(handle);
 
         self
-    }
-
-    // TODO: Docs and work out what to do with existing children. `Self::child` and
-    // `Self::text` will interfere with reactivity to this.
-    pub fn children<T>(mut self, children: &ReadSignal<ChangeTrackingVec<T>>) -> Element
-    where
-        T: 'static + DomElement,
-    {
-        for child in children.current().data() {
-            self.append_child(&child.dom_element().into());
-            // TODO: Can we get rid of `self.element.children`? It just holds on
-            // to signals.
-        }
-
-        // TODO: We need a map_changes, so we don't respond to the first delta.
-        let dom_element = self.dom_element();
-        let delta_id = self.delta_id.clone();
-
-        let reactor = children.map(move |children| {
-            clone!(dom_element);
-
-            if let Some(delta) = children.delta(&delta_id.borrow()) {
-                match delta {
-                    VecDelta::Insert { index } => {
-                        let index = *index;
-                        let len = children.data().len();
-                        let child = children[index].dom_element().into();
-
-                        queue_update(move || {
-                            if index + 1 == len {
-                                dom_element.append_child(&child).unwrap();
-                            } else {
-                                todo!();
-                            }
-                        });
-                    }
-                    VecDelta::Remove { item, .. } => {
-                        let child = item.dom_element().into();
-
-                        queue_update(move || {
-                            dom_element.remove_child(&child).unwrap();
-                        });
-                    }
-                    VecDelta::Extend { .. } | VecDelta::Set { .. } => todo!(),
-                }
-            } else {
-                // TODO: Clear and re assign children
-            }
-
-            delta_id.replace(children.snapshot());
-        });
-
-        self.element.reactive_children.push(reactor);
-
-        self.build()
     }
 
     /// Add a text node after existing children.
@@ -425,39 +368,7 @@ impl DomElement for Element {
     fn dom_element(&self) -> Self::Target {
         match self.0.as_ref() {
             ElementKind::Static(elem) => elem.dom_element.clone(),
-            ElementKind::Reactive(elem) => elem.current().clone(),
         }
-    }
-}
-
-impl<E> From<ReadSignal<E>> for Element
-where
-    E: 'static + DomElement,
-{
-    fn from(elem: ReadSignal<E>) -> Self {
-        let dom_element = Rc::new(RefCell::new(elem.current().dom_element().into()));
-
-        let updater = elem.map({
-            move |element| {
-                let new_dom_element: dom::Element = element.dom_element().into();
-
-                queue_update({
-                    let dom_element: dom::Element = dom_element.borrow().clone();
-                    clone!(new_dom_element);
-
-                    move || {
-                        dom_element
-                            .replace_with_with_node_1(&new_dom_element)
-                            .unwrap();
-                    }
-                });
-
-                dom_element.replace(new_dom_element.clone());
-                new_dom_element
-            }
-        });
-
-        Self(Rc::new(ElementKind::Reactive(updater)))
     }
 }
 
@@ -618,27 +529,6 @@ impl<'a> Attribute<String> for &'a str {
     }
 }
 
-impl<T> Attribute<T> for ReadSignal<T>
-where
-    T: 'static + StaticAttribute,
-{
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        let name = name.as_ref().to_string();
-        let dom_element = builder.element.dom_element.clone();
-        let current: &T = &self.current();
-        StaticAttribute::set_attribute(current, &name, &dom_element);
-
-        let updater = self.map({
-            clone!(name);
-            move |new_value| {
-                new_value.set_attribute(&name, &dom_element);
-            }
-        });
-
-        builder.element.reactive_attrs.insert(name, updater);
-    }
-}
-
 impl<Sig, Attr> Attribute<Attr> for SignalType<Sig>
 where
     Attr: StaticAttribute,
@@ -688,31 +578,6 @@ where
     }
 }
 
-impl<F, T> Effect<T> for ReadSignal<F>
-where
-    F: 'static + Clone + Fn(&T),
-    T: 'static + Clone + JsCast,
-{
-    fn set_effect(self, builder: &mut ElementBuilder) {
-        let dom_element: T = builder.dom_element().dyn_into().unwrap();
-        let current = self.current().clone();
-
-        after_render({
-            clone!(dom_element);
-            move || current(&dom_element)
-        });
-
-        let updater = self.map(move |new_value| {
-            after_render({
-                clone!(new_value, dom_element);
-                move || new_value(&dom_element)
-            });
-        });
-
-        builder.element.reactive_with_dom.push(updater);
-    }
-}
-
 // TODO(review): Find a better way to add all child types to dom
 /// Get a raw Javascript, non-reactive DOM element.
 pub trait DomElement {
@@ -754,19 +619,14 @@ pub trait Builder {
 }
 
 enum ElementKind {
+    // TODO: Remove this. It's just a wrapper now.
     Static(ElementData),
-    // TODO: We don't need reactive elements. Reactive children and attributes should cover
-    // everything.
-    Reactive(ReadSignal<dom::Element>),
 }
 
 struct ElementData {
     dom_element: dom::Element,
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
-    reactive_attrs: HashMap<String, ReadSignal<()>>,
-    reactive_children: Vec<ReadSignal<()>>,
-    reactive_with_dom: Vec<ReadSignal<()>>,
     attribute_signals: HashMap<String, SignalHandle>,
     current_children: Rc<RefCell<Vec<dom::Element>>>,
     children_signal: Option<SignalHandle>,
@@ -824,3 +684,36 @@ pub fn session_storage() -> Option<dom::Storage> {
 thread_local!(
     static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
+
+/// Clone all the identifiers supplied as arguments.
+///
+/// `clone!(x, y, z);` will generate:
+///
+/// ```
+/// # #[macro_use] extern crate silkenweb_reactive;
+/// # let (x, y, z) = (0, 0, 0);
+/// let x = x.clone();
+/// let y = y.clone();
+/// let z = z.clone();
+/// ```
+///
+/// This is useful for capturing variables by copy in closures. For example:
+///
+/// ```
+/// # #[macro_use] extern crate silkenweb_reactive;
+/// # let (x, y, z) = (0, 0, 0);
+/// # let signal = vec![0].into_iter();
+/// # fn do_something(x: u32, y: u32, z: u32) {}
+/// signal.map({
+///     clone!(x, y, z);
+///     move |_| do_something(x, y, z)
+/// });
+/// ```
+#[macro_export]
+macro_rules! clone{
+    ($($name:ident),* $(,)?) => {
+        $(
+            let $name = $name.clone();
+        )*
+    }
+}

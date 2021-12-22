@@ -4,7 +4,6 @@ pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::item;
     pub use silkenweb_dom::{tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder};
-    pub use silkenweb_reactive::{containers, signal::ReadSignal};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
@@ -230,28 +229,29 @@ macro_rules! children_allowed {
                     Self{ builder: self.builder.text_signal(child) }
                 }
 
-                fn children_signal(
-                    self,
-                    children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
-                ) -> Self {
-                    Self{ builder: self.builder.children_signal(children) }
-                }
-
-                // TODO: Return Self::Target
-                fn children<T>(
-                    self,
-                    children: & $crate::macros::private::ReadSignal<$crate::macros::private::containers::ChangeTrackingVec<T>>) -> $crate::macros::private::Element
-                where
-                    T: 'static + $crate::macros::private::DomElement,
-                {
-                    self.builder.children(children)
-                }
-
                 fn child<Child>(self, c: Child) -> Self
                 where
                     Child: Into<$crate::macros::private::Element>
                 {
                     Self{ builder: self.builder.child(c.into()) }
+                }
+
+                fn child_signal(self, child: impl $crate::macros::private::Signal<Item = impl Into<$crate::macros::private::Element>>) -> Self {
+                    Self{ builder: self.builder.child_signal(child) }
+                }
+
+                fn optional_child_signal(
+                    self,
+                    child: impl $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
+                ) -> Self {
+                    Self{ builder: self.builder.optional_child_signal(child) }
+                }
+
+                fn children_signal(
+                    self,
+                    children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
+                ) -> Self {
+                    Self{ builder: self.builder.children_signal(children) }
                 }
             }
         }
