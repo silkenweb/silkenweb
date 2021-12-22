@@ -1,8 +1,7 @@
+use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     elements::{button, div, p, PBuilder},
-    mount, render_updates,
-    signal::{Signal, WriteSignal},
-    tag, unmount,
+    mount, render_updates, signal, tag, unmount,
 };
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
@@ -29,8 +28,8 @@ fn simple_counter() {
 
     create_app_container(APP_ID);
 
-    let count = Signal::new(0);
-    let inc = count.write();
+    let count = Mutable::new(0);
+    let count_text = count.signal().map(|i| format!("{}", i));
 
     mount(
         APP_ID,
@@ -39,10 +38,12 @@ fn simple_counter() {
             .child(
                 button()
                     .id(BUTTON_ID)
-                    .on_click(move |_, _| inc.replace(|i| i + 1))
+                    .on_click(move |_, _| {
+                        count.replace_with(|i| *i + 1);
+                    })
                     .text("+"),
             )
-            .text(count.read().map(|i| format!("{}", i))),
+            .text(signal(count_text)),
     );
 
     render_updates();
@@ -64,11 +65,11 @@ fn text_content(text_id: &str) -> String {
 fn reactive_text() {
     create_app_container(APP_ID);
 
-    let text_signal = Signal::new("0");
+    let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(&text_signal.read()),
+        p().id("text").text(signal(text_signal.signal())),
         TEXT_ID,
-        &text_signal.write(),
+        &mut text_signal,
     );
 }
 
@@ -77,11 +78,11 @@ fn reactive_text() {
 fn reactive_text_reference() {
     create_app_container(APP_ID);
 
-    let text_signal = Signal::new("0");
+    let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(&text_signal.read()),
+        p().id("text").text(signal(text_signal.signal())),
         TEXT_ID,
-        &text_signal.write(),
+        &mut text_signal,
     );
 }
 
@@ -90,26 +91,26 @@ fn reactive_text_reference() {
 fn multiple_reactive_text() {
     create_app_container(APP_ID);
 
-    let first_text = Signal::new("{First 0}");
-    let second_text = Signal::new("{Second 0}");
+    let first_text = Mutable::new("{First 0}");
+    let second_text = Mutable::new("{Second 0}");
 
     mount(
         APP_ID,
         p().id(TEXT_ID)
-            .text(first_text.read())
-            .text(second_text.read()),
+            .text(signal(first_text.signal()))
+            .text(signal(second_text.signal())),
     );
 
     render_updates();
     assert_eq!("{First 0}{Second 0}", text_content(TEXT_ID));
-    first_text.write().set("{First 1}");
+    first_text.set("{First 1}");
     render_updates();
     assert_eq!(
         "{First 1}{Second 0}",
         text_content(TEXT_ID),
         "First is updated"
     );
-    second_text.write().set("{Second 1}");
+    second_text.set("{Second 1}");
     render_updates();
     assert_eq!(
         "{First 1}{Second 1}",
@@ -118,7 +119,7 @@ fn multiple_reactive_text() {
     );
 }
 
-fn verify_reactive_text(paragraph: PBuilder, text_id: &str, text: &WriteSignal<&'static str>) {
+fn verify_reactive_text(paragraph: PBuilder, text_id: &str, text: &mut Mutable<&'static str>) {
     mount(APP_ID, paragraph);
     render_updates();
     assert_eq!("0", text_content(text_id));
