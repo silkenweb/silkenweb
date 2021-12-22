@@ -148,7 +148,7 @@ macro_rules! html_element {
                 }
 
                 fn effect_signal<T: 'static>(
-                    mut self,
+                    self,
                     sig: impl 'static + $crate::macros::private::Signal<Item = T>,
                     f: impl 'static + Clone + Fn(&$elem_type, T),
                 ) -> Self {
