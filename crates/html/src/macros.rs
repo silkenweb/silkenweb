@@ -228,11 +228,11 @@ macro_rules! children_allowed {
                     Self{ builder: self.builder.text(child) }
                 }
 
-                fn dyn_children(
+                fn children_signal(
                     self,
                     children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
                 ) -> Self {
-                    Self{ builder: self.builder.dyn_children(children) }
+                    Self{ builder: self.builder.children_signal(children) }
                 }
 
                 // TODO: Return Self::Target

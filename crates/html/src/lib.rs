@@ -55,7 +55,7 @@ impl<T> From<dom::CustomEvent> for CustomEvent<T> {
 pub trait ParentBuilder {
     fn text(self, child: impl Text) -> Self;
 
-    fn dyn_children(
+    fn children_signal(
         self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self;

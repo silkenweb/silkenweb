@@ -133,7 +133,7 @@ impl ElementBuilder {
         self
     }
 
-    pub fn dyn_children(
+    pub fn children_signal(
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {

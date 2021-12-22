@@ -23,7 +23,7 @@ fn main() {
                     .child(push_button(list.clone())),
             )
             .child(hr())
-            .child(div().dyn_children(list.signal_vec_cloned())),
+            .child(div().children_signal(list.signal_vec_cloned())),
     );
 }
 
