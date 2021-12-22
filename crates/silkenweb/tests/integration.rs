@@ -1,7 +1,7 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     elements::{button, div, p, PBuilder},
-    mount, render_updates, signal, tag, unmount,
+    mount, render_updates, tag, unmount,
 };
 use silkenweb_html::ParentBuilder;
 use wasm_bindgen::JsCast;
@@ -44,7 +44,7 @@ fn simple_counter() {
                     })
                     .text("+"),
             )
-            .text(signal(count_text)),
+            .text_signal(count_text),
     );
 
     render_updates();
@@ -68,7 +68,7 @@ fn reactive_text() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(signal(text_signal.signal())),
+        p().id("text").text_signal(text_signal.signal()),
         TEXT_ID,
         &mut text_signal,
     );
@@ -81,7 +81,7 @@ fn reactive_text_reference() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(signal(text_signal.signal())),
+        p().id("text").text_signal(text_signal.signal()),
         TEXT_ID,
         &mut text_signal,
     );
@@ -98,8 +98,8 @@ fn multiple_reactive_text() {
     mount(
         APP_ID,
         p().id(TEXT_ID)
-            .text(signal(first_text.signal()))
-            .text(signal(second_text.signal())),
+            .text_signal(first_text.signal())
+            .text_signal(second_text.signal()),
     );
 
     render_updates();

@@ -14,9 +14,9 @@
 
 use std::marker::PhantomData;
 
-use futures_signals::signal_vec::SignalVec;
-use silkenweb_dom::{Text, DomElement, Element};
-use silkenweb_reactive::{signal::ReadSignal, containers};
+use futures_signals::{signal_vec::SignalVec, signal::Signal};
+use silkenweb_dom::{DomElement, Element};
+use silkenweb_reactive::{containers, signal::ReadSignal};
 use wasm_bindgen::JsCast;
 use web_sys as dom;
 
@@ -53,12 +53,12 @@ impl<T> From<dom::CustomEvent> for CustomEvent<T> {
 /// Methods to add child elements. These are in a trait to allow attribute
 /// methods to be disambiguated from any methods here.
 pub trait ParentBuilder {
-    fn text(self, child: impl Text) -> Self;
+    fn text(self, child: impl AsRef<str>) -> Self;
 
-    fn children_signal(
-        self,
-        children: impl 'static + SignalVec<Item = impl Into<Element>>,
-    ) -> Self;
+    fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
+
+    fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
+        -> Self;
 
     // TODO: Return Self::Target
     fn children<T>(self, children: &ReadSignal<containers::ChangeTrackingVec<T>>) -> Element

@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use silkenweb::{
     elements::{button, div, hr, Button, Div, DivBuilder},
-    mount, Builder, signal, ParentBuilder,
+    mount, Builder, ParentBuilder,
 };
 
 fn main() {
@@ -19,7 +19,7 @@ fn main() {
             .child(
                 div()
                     .child(pop_button(list.clone()))
-                    .text(signal(list.signal_vec_cloned().len().map(|len| format!("{}", len))))
+                    .text_signal(list.signal_vec_cloned().len().map(|len| format!("{}", len)))
                     .child(push_button(list.clone())),
             )
             .child(hr())
@@ -49,7 +49,7 @@ pub fn define_counter() -> DivBuilder {
 
     div()
         .child(define_button("-", -1, count.clone()))
-        .text(signal(count_text))
+        .text_signal(count_text)
         .child(define_button("+", 1, count))
 }
 

@@ -269,9 +269,34 @@ impl ElementBuilder {
         self.build()
     }
 
-    /// Add a text node after existing children. The text node can be reactive.
-    pub fn text(mut self, child: impl Text) -> Self {
-        child.set_text(&mut self);
+    /// Add a text node after existing children.
+    pub fn text(mut self, child: impl AsRef<str>) -> Self {
+        let text_node = document().create_text_node(child.as_ref());
+        self.append_child(&text_node);
+        self.text_nodes.push(text_node);
+        self
+    }
+
+    pub fn text_signal(mut self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self {
+        let text_node = document().create_text_node(intern(""));
+        self.append_child(&text_node);
+
+        let updater = child.for_each({
+            clone!(text_node);
+
+            move |new_value| {
+                queue_update({
+                    clone!(text_node);
+                    // TODO: Do we need to create a string here? Use Into<String> if we do.
+                    let new_value = new_value.into();
+                    move || text_node.set_node_value(Some(new_value.as_ref()))
+                });
+                async {}
+            }
+        });
+
+        // TODO: Naming of `store_signal` and `updater`
+        self.store_signal(updater);
         self
     }
 
@@ -685,88 +710,6 @@ where
         });
 
         builder.element.reactive_with_dom.push(updater);
-    }
-}
-
-/// A Text element.
-pub trait Text {
-    fn set_text(self, builder: &mut ElementBuilder);
-}
-
-fn set_static_text<T: AsRef<str>>(text: &T, builder: &mut ElementBuilder) {
-    let text_node = document().create_text_node(text.as_ref());
-    builder.append_child(&text_node);
-    builder.text_nodes.push(text_node);
-}
-
-impl<'a> Text for &'a str {
-    fn set_text(self, builder: &mut ElementBuilder) {
-        set_static_text(&self, builder);
-    }
-}
-
-impl<'a> Text for &'a String {
-    fn set_text(self, builder: &mut ElementBuilder) {
-        set_static_text(self, builder);
-    }
-}
-
-impl Text for String {
-    fn set_text(self, builder: &mut ElementBuilder) {
-        set_static_text(&self, builder);
-    }
-}
-
-impl<T> Text for ReadSignal<T>
-where
-    T: 'static + AsRef<str>,
-{
-    fn set_text(self, builder: &mut ElementBuilder) {
-        set_static_text(&self.current().as_ref(), builder);
-
-        if let Some(text_node) = builder.text_nodes.last() {
-            let updater = self.map({
-                clone!(text_node);
-
-                move |new_value| {
-                    queue_update({
-                        clone!(text_node);
-                        let new_value = new_value.as_ref().to_string();
-                        move || text_node.set_node_value(Some(new_value.as_ref()))
-                    });
-                }
-            });
-
-            builder.element.reactive_children.push(updater);
-        }
-    }
-}
-
-impl<T, Sig> Text for SignalType<Sig>
-where
-    T: 'static + AsRef<str>,
-    Sig: 'static + Signal<Item = T>,
-{
-    fn set_text(self, builder: &mut ElementBuilder) {
-        let text_node = document().create_text_node(intern(""));
-        builder.append_child(&text_node);
-
-        let updater = self.0.for_each({
-            clone!(text_node);
-
-            move |new_value| {
-                queue_update({
-                    clone!(text_node);
-                    // TODO: Do we need to create a string here? Use Into<String> if we do.
-                    let new_value = new_value.as_ref().to_string();
-                    move || text_node.set_node_value(Some(new_value.as_ref()))
-                });
-                async {}
-            }
-        });
-
-        // TODO: Naming of `store_signal` and `updater`
-        builder.store_signal(updater);
     }
 }
 

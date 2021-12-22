@@ -3,9 +3,7 @@
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::item;
-    pub use silkenweb_dom::{
-        tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder, Text,
-    };
+    pub use silkenweb_dom::{tag, Attribute, Builder, DomElement, Effect, Element, ElementBuilder};
     pub use silkenweb_reactive::{containers, signal::ReadSignal};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
@@ -224,8 +222,12 @@ macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
         $crate::macros::private::item! {
             impl $crate::ParentBuilder for [<$name:camel $($name_tail:camel)* Builder>] {
-                fn text(self, child: impl $crate::macros::private::Text) -> Self {
+                fn text(self, child: impl AsRef<str>) -> Self {
                     Self{ builder: self.builder.text(child) }
+                }
+
+                fn text_signal(self, child: impl 'static + $crate::macros::private::Signal<Item = impl Into<String>>) -> Self {
+                    Self{ builder: self.builder.text_signal(child) }
                 }
 
                 fn children_signal(
