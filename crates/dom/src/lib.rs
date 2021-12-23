@@ -89,7 +89,6 @@ impl ElementBuilder {
             children: Vec::new(),
             event_callbacks: Vec::new(),
             attribute_signals: HashMap::new(),
-            children_signal: None,
             signals: Vec::new(),
         })
     }
@@ -198,13 +197,7 @@ impl ElementBuilder {
             async {}
         });
 
-        let (handle, future) = cancelable_future(updater, || ());
-
-        // TODO: Do we want to spawn this future on RAF
-        spawn_local(future);
-
-        self.0.children_signal = Some(handle);
-
+        self.store_signal(updater);
         self
     }
 
@@ -604,8 +597,6 @@ struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     attribute_signals: HashMap<String, SignalHandle>,
-    // TODO: This can be combined with `signals`
-    children_signal: Option<SignalHandle>,
     signals: Vec<SignalHandle>,
 }
 
