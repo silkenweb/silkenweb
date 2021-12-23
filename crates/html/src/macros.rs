@@ -246,7 +246,7 @@ macro_rules! children_allowed {
                     Self{ builder: self.builder.child(c.into()) }
                 }
 
-                fn child_signal(self, child: impl $crate::macros::private::Signal<Item = impl Into<$crate::macros::private::Element>>) -> Self {
+                fn child_signal(self, child: impl 'static + $crate::macros::private::Signal<Item = impl Into<$crate::macros::private::Element>>) -> Self {
                     Self{ builder: self.builder.child_signal(child) }
                 }
 
