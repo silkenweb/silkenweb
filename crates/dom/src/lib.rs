@@ -68,10 +68,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 }
 
 /// Build an HTML element.
-pub struct ElementBuilder {
-    element: ElementData,
-    text_nodes: Vec<dom::Text>,
-}
+pub struct ElementBuilder(ElementData);
 
 impl ElementBuilder {
     pub fn new(tag: impl AsRef<str>) -> Self {
@@ -87,18 +84,15 @@ impl ElementBuilder {
     }
 
     fn new_element(dom_element: dom::Element) -> Self {
-        ElementBuilder {
-            element: ElementData {
-                dom_element,
-                children: Vec::new(),
-                event_callbacks: Vec::new(),
-                attribute_signals: HashMap::new(),
-                current_children: Rc::new(RefCell::new(Vec::new())),
-                children_signal: None,
-                signals: Vec::new(),
-            },
-            text_nodes: Vec::new(),
-        }
+        Self(ElementData {
+            dom_element,
+            children: Vec::new(),
+            event_callbacks: Vec::new(),
+            attribute_signals: HashMap::new(),
+            current_children: Rc::new(RefCell::new(Vec::new())),
+            children_signal: None,
+            signals: Vec::new(),
+        })
     }
 
     /// Set an attribute. Attribute values can be reactive.
@@ -107,7 +101,7 @@ impl ElementBuilder {
         name: impl AsRef<str>,
         value: impl Attribute<T>,
     ) -> Self {
-        self.element.attribute_signals.remove(name.as_ref());
+        self.0.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         self
     }
@@ -118,7 +112,7 @@ impl ElementBuilder {
         let child = child.into();
 
         self.append_child(&child.dom_element());
-        self.element.children.push(child);
+        self.0.children.push(child);
         self
     }
 
@@ -139,7 +133,7 @@ impl ElementBuilder {
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
         let parent_elem = self.dom_element();
-        let child_elems = self.element.current_children.clone();
+        let child_elems = self.0.current_children.clone();
 
         let updater = children.for_each(move |change| {
             let mut child_elems = child_elems.borrow_mut();
@@ -210,7 +204,7 @@ impl ElementBuilder {
         // TODO: Do we want to spawn this future on RAF
         spawn_local(future);
 
-        self.element.children_signal = Some(handle);
+        self.0.children_signal = Some(handle);
 
         self
     }
@@ -219,7 +213,6 @@ impl ElementBuilder {
     pub fn text(mut self, child: impl AsRef<str>) -> Self {
         let text_node = document().create_text_node(child.as_ref());
         self.append_child(&text_node);
-        self.text_nodes.push(text_node);
         self
     }
 
@@ -252,7 +245,7 @@ impl ElementBuilder {
         // TODO: Do we want to spawn this future on RAF
         spawn_local(future);
 
-        self.element.signals.push(handle);
+        self.0.signals.push(handle);
     }
 
     // TODO: Test
@@ -320,8 +313,8 @@ impl ElementBuilder {
     /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
     pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
         {
-            let dom_element = self.element.dom_element.clone();
-            self.element
+            let dom_element = self.0.dom_element.clone();
+            self.0
                 .event_callbacks
                 .push(EventCallback::new(dom_element, name, f));
         }
@@ -330,7 +323,7 @@ impl ElementBuilder {
     }
 
     fn insert_child_before(&mut self, new_node: &dom::Node, reference_node: &dom::Node) {
-        let dom_element = self.element.dom_element.clone();
+        let dom_element = self.0.dom_element.clone();
         clone!(new_node, reference_node);
 
         queue_update(move || {
@@ -341,7 +334,7 @@ impl ElementBuilder {
     }
 
     fn append_child(&mut self, element: &dom::Node) {
-        let dom_element = self.element.dom_element.clone();
+        let dom_element = self.0.dom_element.clone();
         clone!(element);
 
         queue_update(move || {
@@ -350,7 +343,7 @@ impl ElementBuilder {
     }
 
     fn remove_child(&mut self, element: &dom::Node) {
-        let dom_element = self.element.dom_element.clone();
+        let dom_element = self.0.dom_element.clone();
         clone!(element);
 
         queue_update(move || {
@@ -363,7 +356,7 @@ impl Builder for ElementBuilder {
     type Target = Element;
 
     fn build(self) -> Self::Target {
-        Element(Rc::new(self.element))
+        Element(Rc::new(self.0))
     }
 
     fn into_element(self) -> Element {
@@ -375,7 +368,7 @@ impl DomElement for ElementBuilder {
     type Target = dom::Element;
 
     fn dom_element(&self) -> Self::Target {
-        self.element.dom_element.clone()
+        self.0.dom_element.clone()
     }
 }
 
@@ -547,7 +540,7 @@ where
     T: StaticAttribute,
 {
     fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        StaticAttribute::set_attribute(&self, name, &builder.element.dom_element);
+        StaticAttribute::set_attribute(&self, name, &builder.0.dom_element);
     }
 }
 
@@ -579,7 +572,7 @@ where
         // TODO: Do we want to spawn this future on RAF
         spawn_local(future);
 
-        builder.element.attribute_signals.insert(name, handle);
+        builder.0.attribute_signals.insert(name, handle);
     }
 }
 
@@ -612,7 +605,9 @@ struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     attribute_signals: HashMap<String, SignalHandle>,
+    // TODO: I think this can be created in `children_signal`
     current_children: Rc<RefCell<Vec<dom::Element>>>,
+    // TODO: This can be combined with `signals`
     children_signal: Option<SignalHandle>,
     signals: Vec<SignalHandle>,
 }
