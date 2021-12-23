@@ -24,6 +24,8 @@
 //!     )
 //!     .child(p().text(router::url().map(|url| format!("URL Path is: {}", url.pathname()))));
 //! ```
+use std::ops::DerefMut;
+
 use futures_signals::signal::{Mutable, Signal};
 use silkenweb_dom::window;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
@@ -49,8 +51,10 @@ pub fn url() -> impl Signal<Item = Url> {
 /// See [module-level documentation](self) for an example.
 pub fn set_url_path(path: impl 'static + AsRef<str>) {
     URL.with(move |url| {
-        let url = url.lock_mut();
-        url.set_pathname(path.as_ref());
+        let mut url = url.lock_mut();
+        // Force a `deref_mut` to make sure `url` is marked as modified. `set_pathname`
+        // uses interior mutability, so we'll only `deref`.
+        url.deref_mut().set_pathname(path.as_ref());
         window()
             .history()
             .unwrap()
