@@ -289,7 +289,6 @@ impl ElementBuilder {
     }
 
     // TODO: Test
-    // TODO: Update docs
     /// Apply an effect after the next render. For example, to set the focus of
     /// an element:
     ///
@@ -305,13 +304,12 @@ impl ElementBuilder {
     ///
     /// ```no_run
     /// # use silkenweb_dom::tag;
-    /// # use silkenweb_reactive::signal::Signal;
+    /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use web_sys::HtmlInputElement;
     /// # let element = tag("input");
-    /// let hidden = Signal::new(false);
-    /// let is_hidden = hidden.read();
+    /// let is_hidden = Mutable::new(false);
     ///
-    /// element.effect(is_hidden.map(|&hidden| move |elem: &HtmlInputElement| elem.set_hidden(hidden)));
+    /// element.effect_signal(is_hidden.signal(), move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden));
     /// ```
     pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
         let dom_element = self.dom_element().clone().dyn_into().unwrap();
@@ -716,7 +714,7 @@ thread_local!(
 /// `clone!(x, y, z);` will generate:
 ///
 /// ```
-/// # #[macro_use] extern crate silkenweb_reactive;
+/// # #[macro_use] extern crate silkenweb_dom;
 /// # let (x, y, z) = (0, 0, 0);
 /// let x = x.clone();
 /// let y = y.clone();
@@ -726,7 +724,7 @@ thread_local!(
 /// This is useful for capturing variables by copy in closures. For example:
 ///
 /// ```
-/// # #[macro_use] extern crate silkenweb_reactive;
+/// # #[macro_use] extern crate silkenweb_dom;
 /// # let (x, y, z) = (0, 0, 0);
 /// # let signal = vec![0].into_iter();
 /// # fn do_something(x: u32, y: u32, z: u32) {}

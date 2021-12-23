@@ -8,12 +8,13 @@
 //! fill:
 //!
 //! ```no_run
-//! # use silkenweb::{animation::finite_animation, elements::progress, mount};
+//! # use futures_signals::signal::SignalExt;
+//! # use silkenweb::{signal, animation::finite_animation, elements::progress, mount};
 //!
 //! mount(
 //!     "app",
 //!     progress()
-//!         .value(finite_animation(10000.0).map(|&time| time as f32))
+//!         .value(signal(finite_animation(10000.0).map(|time| time as f32)))
 //!         .max(10000.0),
 //! );
 //! ```

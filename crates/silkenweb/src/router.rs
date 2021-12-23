@@ -7,9 +7,10 @@
 //! # Example
 //!
 //! ```no_run
+//! # use futures_signals::signal::SignalExt;
 //! # use silkenweb::{
 //! #     elements::{button, div, p},
-//! #     mount, router,
+//! #     mount, router, ParentBuilder,
 //! # };
 //! div()
 //!     .child(
@@ -22,7 +23,7 @@
 //!             .on_click(|_, _| router::set_url_path("/route_2"))
 //!             .text("Go to route 2"),
 //!     )
-//!     .child(p().text(router::url().map(|url| format!("URL Path is: {}", url.pathname()))));
+//!     .child(p().text_signal(router::url().map(|url| format!("URL Path is: {}", url.pathname()))));
 //! ```
 use std::ops::DerefMut;
 
