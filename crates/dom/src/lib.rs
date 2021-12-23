@@ -193,20 +193,18 @@ impl ElementBuilder {
         let child_elems = Rc::new(RefCell::new(Vec::new()));
 
         let updater = children.for_each(move |change| {
-            let mut child_elems = child_elems.borrow_mut();
-            clone!(parent_elem);
-
             // TODO: Test each match arm
             // TODO: Tidy this code up, and factor some things out.
             match change {
                 VecDiff::Replace { values } => {
+                    let mut child_elems = child_elems.borrow_mut();
                     let existing_children = child_elems.clone();
 
                     *child_elems = values
                         .into_iter()
                         .map(|elem| elem.into().dom_element().clone())
                         .collect();
-                    clone!(child_elems);
+                    clone!(child_elems, parent_elem);
 
                     queue_update(move || {
                         for child in existing_children {
@@ -227,24 +225,17 @@ impl ElementBuilder {
                 } => todo!(),
                 VecDiff::Push { value } => {
                     let child = value.into().dom_element().clone();
-                    child_elems.push(child.clone());
-
-                    queue_update(move || {
-                        parent_elem.append_child(&child).unwrap();
-                    });
+                    append_child(&parent_elem, &child);
+                    child_elems.borrow_mut().push(child);
                 }
                 VecDiff::Pop {} => {
-                    let removed_child = child_elems.pop().unwrap();
-                    clone!(parent_elem);
-
-                    queue_update(move || {
-                        parent_elem.remove_child(&removed_child).unwrap();
-                    })
+                    remove_child(&parent_elem, &child_elems.borrow_mut().pop().unwrap())
                 }
                 VecDiff::Clear {} => {
-                    let existing_children = child_elems.clone();
+                    let existing_children = child_elems.borrow().clone();
 
-                    child_elems.clear();
+                    child_elems.borrow_mut().clear();
+                    clone!(parent_elem);
 
                     queue_update(move || {
                         for child in existing_children {
@@ -454,33 +445,44 @@ impl Children {
 
     fn set_child(&mut self, index: usize, child: &dom::Node) {
         if let Some(existing) = self.children.insert(index, child.clone()) {
-            self.parent.remove_child(&existing).unwrap();
+            remove_child(&self.parent, &existing);
         }
 
-        let parent = self.parent.clone();
-        clone!(child);
-
         match self.children.range((index + 1)..).next() {
-            Some((_index, next_child)) => {
-                let reference_node = next_child.clone();
-
-                queue_update(move || {
-                    parent.insert_before(&child, Some(&reference_node)).unwrap();
-                });
-            }
-            None => {
-                queue_update(move || {
-                    parent.append_child(&child).unwrap();
-                });
-            }
+            Some((_index, next_child)) => insert_child_before(&self.parent, child, next_child),
+            None => append_child(&self.parent, child),
         }
     }
 
     fn remove_child(&mut self, index: usize) {
         if let Some(existing) = self.children.remove(&index) {
-            self.parent.remove_child(&existing).unwrap();
+            remove_child(&self.parent, &existing);
         }
     }
+}
+
+fn insert_child_before(parent: &dom::Node, new_child: &dom::Node, next_child: &dom::Node) {
+    clone!(parent, new_child, next_child);
+
+    queue_update(move || {
+        parent.insert_before(&new_child, Some(&next_child)).unwrap();
+    });
+}
+
+fn append_child(parent: &dom::Node, child: &dom::Node) {
+    clone!(parent, child);
+
+    queue_update(move || {
+        parent.append_child(&child).unwrap();
+    });
+}
+
+fn remove_child(parent: &dom::Node, child: &dom::Node) {
+    clone!(parent, child);
+
+    queue_update(move || {
+        parent.remove_child(&child).unwrap();
+    });
 }
 
 pub trait AttributeValue {
