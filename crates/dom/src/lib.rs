@@ -239,20 +239,28 @@ impl ElementBuilder {
 
     /// Add a text node after existing children.
     pub fn text(mut self, child: impl AsRef<str>) -> Self {
-        // TODO: Make this use dom::Node instead of dom::Element and implement this in
-        // terms of `fn child`
         let text_node = document().create_text_node(child.as_ref());
-        self.append_child(&text_node);
+        self.element
+            .children
+            .borrow_mut()
+            .set_child(self.child_index, &text_node);
+        self.child_index += 1;
         self
     }
 
-    pub fn text_signal(mut self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self {
-        // TODO: Make this use dom::Node instead of dom::Element and implement this in
-        // terms of `fn child_signal`
+    pub fn text_signal(
+        mut self,
+        child_signal: impl 'static + Signal<Item = impl Into<String>>,
+    ) -> Self {
         let text_node = document().create_text_node(intern(""));
-        self.append_child(&text_node);
+        let child_index = self.child_index;
+        self.child_index += 1;
+        self.element
+            .children
+            .borrow_mut()
+            .set_child(child_index, &text_node);
 
-        let updater = child.for_each({
+        let updater = child_signal.for_each({
             clone!(text_node);
 
             move |new_value| {
@@ -353,18 +361,6 @@ impl ElementBuilder {
 
         self
     }
-
-    fn append_child(&mut self, element: &dom::Node) {
-        append_child(&self.element.dom_element, element);
-    }
-}
-
-fn append_child(parent: &dom::Element, child: &dom::Node) {
-    clone!(parent, child);
-
-    queue_update(move || {
-        parent.append_child(&child).unwrap();
-    });
 }
 
 impl Builder for ElementBuilder {
@@ -421,6 +417,8 @@ impl Builder for Element {
 }
 
 // Keep track of children
+// TODO: Rename this to replace that it only keeps the first child from each
+// group
 struct Children {
     parent: dom::Element,
     children: BTreeMap<usize, dom::Node>,
@@ -449,7 +447,6 @@ impl Children {
                 });
             }
             None => {
-
                 queue_update(move || {
                     parent.append_child(&child).unwrap();
                 });
