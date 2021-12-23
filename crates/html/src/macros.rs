@@ -171,9 +171,9 @@ macro_rules! html_element {
             impl $crate::macros::private::DomElement for [<$camel_name Builder>] {
                 type Target = $elem_type;
 
-                fn dom_element(&self) -> Self::Target {
+                fn dom_element(&self) -> &Self::Target {
                     use $crate::macros::private::JsCast;
-                    self.builder.dom_element().unchecked_into()
+                    self.builder.dom_element().unchecked_ref()
                 }
             }
 
@@ -208,9 +208,9 @@ macro_rules! html_element {
             impl $crate::macros::private::DomElement for [<$camel_name>] {
                 type Target = $elem_type;
 
-                fn dom_element(&self) -> Self::Target {
+                fn dom_element(&self) -> &Self::Target {
                     use $crate::macros::private::JsCast;
-                    self.0.dom_element().unchecked_into()
+                    self.0.dom_element().unchecked_ref()
                 }
             }
 

@@ -157,7 +157,7 @@ impl ElementBuilder {
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
         // TODO: set_child
-        let parent_elem = self.dom_element();
+        let parent_elem = self.dom_element().clone();
         let child_elems = Rc::new(RefCell::new(Vec::new()));
 
         let updater = children.for_each(move |change| {
@@ -172,7 +172,7 @@ impl ElementBuilder {
 
                     *child_elems = values
                         .into_iter()
-                        .map(|elem| elem.into().dom_element())
+                        .map(|elem| elem.into().dom_element().clone())
                         .collect();
                     clone!(child_elems);
 
@@ -194,7 +194,7 @@ impl ElementBuilder {
                     new_index,
                 } => todo!(),
                 VecDiff::Push { value } => {
-                    let child = value.into().dom_element();
+                    let child = value.into().dom_element().clone();
                     child_elems.push(child.clone());
 
                     queue_update(move || {
@@ -297,7 +297,7 @@ impl ElementBuilder {
     /// element.effect(is_hidden.map(|&hidden| move |elem: &HtmlInputElement| elem.set_hidden(hidden)));
     /// ```
     pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
-        let dom_element = self.dom_element().dyn_into().unwrap();
+        let dom_element = self.dom_element().clone().dyn_into().unwrap();
         after_render(move || f(&dom_element));
 
         self
@@ -313,7 +313,7 @@ impl ElementBuilder {
         T: 'static,
         DomType: 'static + Clone + JsCast,
     {
-        let dom_element: DomType = self.dom_element().dyn_into().unwrap();
+        let dom_element: DomType = self.dom_element().clone().dyn_into().unwrap();
 
         let future = sig.for_each(move |x| {
             clone!(dom_element, f);
@@ -373,8 +373,8 @@ impl Builder for ElementBuilder {
 impl DomElement for ElementBuilder {
     type Target = dom::Element;
 
-    fn dom_element(&self) -> Self::Target {
-        self.element.dom_element.clone()
+    fn dom_element(&self) -> &Self::Target {
+        &self.element.dom_element
     }
 }
 
@@ -394,8 +394,8 @@ pub struct Element(Rc<ElementData>);
 impl DomElement for Element {
     type Target = dom::Element;
 
-    fn dom_element(&self) -> Self::Target {
-        self.0.dom_element.clone()
+    fn dom_element(&self) -> &Self::Target {
+        &self.0.dom_element
     }
 }
 
@@ -426,12 +426,12 @@ impl Children {
     }
 
     fn set_child(&mut self, index: usize, child: Element) {
-        let dom_child = child.dom_element();
+        let dom_child = child.dom_element().clone();
 
         match self.children.range((index + 1)..).next() {
             Some((_index, next_child)) => {
                 let parent = self.parent.clone();
-                let reference_node = next_child.dom_element();
+                let reference_node = next_child.dom_element().clone();
 
                 queue_update(move || {
                     parent
@@ -445,7 +445,7 @@ impl Children {
                 queue_update(move || {
                     parent.append_child(&dom_child).unwrap();
                 });
-            },
+            }
         }
 
         self.children.insert(index, child);
@@ -604,7 +604,7 @@ where
 {
     fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
         let name = name.as_ref().to_string();
-        let dom_element = builder.dom_element();
+        let dom_element = builder.dom_element().clone();
 
         let signal = self.0.for_each({
             clone!(name);
@@ -635,8 +635,7 @@ pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
 
-    // TODO: Make this return a reference
-    fn dom_element(&self) -> Self::Target;
+    fn dom_element(&self) -> &Self::Target;
 }
 
 /// An HTML element builder.
