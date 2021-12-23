@@ -96,6 +96,7 @@ impl ElementBuilder {
             element: ElementData {
                 dom_element: dom_element.clone(),
                 children: Rc::new(RefCell::new(Children::new(dom_element))),
+                static_children: Vec::new(),
                 event_callbacks: Vec::new(),
                 attribute_signals: HashMap::new(),
                 signals: Vec::new(),
@@ -118,10 +119,12 @@ impl ElementBuilder {
     /// Add a child element after existing children. The child element can be
     /// reactive.
     pub fn child(mut self, child: impl Into<Element>) -> Self {
+        let child = child.into();
         self.element
             .children
             .borrow_mut()
-            .set_child(self.child_index, child.into());
+            .set_child(self.child_index, child.dom_element());
+        self.element.static_children.push(child);
         self.child_index += 1;
         self
     }
@@ -133,9 +136,15 @@ impl ElementBuilder {
         let child_index = self.child_index;
         self.child_index += 1;
         let children = self.element.children.clone();
+        // Store the child in here until we replace it.
+        let mut _child_storage = None;
 
         let s = child_signal.for_each(move |child| {
-            children.borrow_mut().set_child(child_index, child.into());
+            let child = child.into();
+            children
+                .borrow_mut()
+                .set_child(child_index, child.dom_element());
+            _child_storage = Some(child);
             async {}
         });
 
@@ -414,7 +423,7 @@ impl Builder for Element {
 // Keep track of children
 struct Children {
     parent: dom::Element,
-    children: BTreeMap<usize, Element>,
+    children: BTreeMap<usize, dom::Node>,
 }
 
 impl Children {
@@ -425,30 +434,27 @@ impl Children {
         }
     }
 
-    fn set_child(&mut self, index: usize, child: Element) {
-        let dom_child = child.dom_element().clone();
+    fn set_child(&mut self, index: usize, child: &dom::Node) {
+        self.children.insert(index, child.clone());
+
+        let parent = self.parent.clone();
+        clone!(child);
 
         match self.children.range((index + 1)..).next() {
             Some((_index, next_child)) => {
-                let parent = self.parent.clone();
-                let reference_node = next_child.dom_element().clone();
+                let reference_node = next_child.clone();
 
                 queue_update(move || {
-                    parent
-                        .insert_before(&dom_child, Some(&reference_node))
-                        .unwrap();
+                    parent.insert_before(&child, Some(&reference_node)).unwrap();
                 });
             }
             None => {
-                let parent = self.parent.clone();
 
                 queue_update(move || {
-                    parent.append_child(&dom_child).unwrap();
+                    parent.append_child(&child).unwrap();
                 });
             }
         }
-
-        self.children.insert(index, child);
     }
 }
 
@@ -650,6 +656,7 @@ pub trait Builder {
 struct ElementData {
     dom_element: dom::Element,
     children: Rc<RefCell<Children>>,
+    static_children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     attribute_signals: HashMap<String, SignalHandle>,
     signals: Vec<SignalHandle>,
