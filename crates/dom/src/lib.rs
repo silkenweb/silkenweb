@@ -4,6 +4,7 @@ use std::{
     cell::RefCell,
     collections::{BTreeMap, HashMap},
     future::Future,
+    mem,
     rc::Rc,
 };
 
@@ -188,9 +189,11 @@ impl ElementBuilder {
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
-        // TODO: set_child
+        let child_index = self.child_index;
+        self.child_index += 1;
         let parent_elem = self.dom_element().clone();
         let child_elems = Rc::new(RefCell::new(Vec::new()));
+        let first_children_of_groups = self.element.children.clone();
 
         let updater = children.for_each(move |change| {
             // TODO: Test each match arm
@@ -204,6 +207,7 @@ impl ElementBuilder {
                         .into_iter()
                         .map(|elem| elem.into().dom_element().clone())
                         .collect();
+                    // TODO: Update `first_child_of_groups`
                     clone!(child_elems, parent_elem);
 
                     queue_update(move || {
@@ -227,9 +231,22 @@ impl ElementBuilder {
                     let child = value.into().dom_element().clone();
                     append_child(&parent_elem, &child);
                     child_elems.borrow_mut().push(child);
+
+                    // TODO: Update `first_child_of_groups`
                 }
                 VecDiff::Pop {} => {
-                    remove_child(&parent_elem, &child_elems.borrow_mut().pop().unwrap())
+                    let mut child_elems = child_elems.borrow_mut();
+                    let removed_child = child_elems.pop();
+                    let is_empty = child_elems.is_empty();
+                    mem::drop(child_elems);
+
+                    if is_empty {
+                        first_children_of_groups.borrow_mut().clear_child(child_index);
+                    }
+
+                    if let Some(removed_child) = removed_child {
+                        remove_child(&parent_elem, &removed_child)
+                    }
                 }
                 VecDiff::Clear {} => {
                     let existing_children = child_elems.borrow().clone();
@@ -242,6 +259,8 @@ impl ElementBuilder {
                             parent_elem.remove_child(&child).unwrap();
                         }
                     });
+
+                    first_children_of_groups.borrow_mut().clear_child(child_index);
                 }
             }
             async {}
@@ -458,6 +477,11 @@ impl Children {
         if let Some(existing) = self.children.remove(&index) {
             remove_child(&self.parent, &existing);
         }
+    }
+
+    fn clear_child(&mut self, index: usize) {
+        // TODO: `expect` value to have been removed (and for other methods).
+        self.children.remove(&index);
     }
 }
 
