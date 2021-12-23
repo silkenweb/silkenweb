@@ -529,7 +529,11 @@ pub trait StaticAttribute {
 
 impl<T: AttributeValue> StaticAttribute for T {
     fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
-        set_attribute(dom_element, name, self.text());
+        clone!(dom_element);
+        let name = name.as_ref().to_string();
+        let value = self.text();
+
+        queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
     }
 }
 
@@ -561,20 +565,12 @@ impl<T: AttributeValue> StaticAttribute for Option<T> {
         let name = name.as_ref().to_string();
 
         match self {
-            Some(value) => set_attribute(&dom_element, name, value.text()),
+            Some(value) => value.set_attribute(name, &dom_element),
             None => queue_update(move || {
                 dom_element.remove_attribute(&name).unwrap();
             }),
         }
     }
-}
-
-fn set_attribute(dom_element: &dom::Element, name: impl AsRef<str>, value: impl AsRef<str>) {
-    clone!(dom_element);
-    let name = name.as_ref().to_string();
-    let value = value.as_ref().to_string();
-
-    queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
 }
 
 /// A potentially reactive attribute.
