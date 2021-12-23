@@ -89,7 +89,6 @@ impl ElementBuilder {
             children: Vec::new(),
             event_callbacks: Vec::new(),
             attribute_signals: HashMap::new(),
-            current_children: Rc::new(RefCell::new(Vec::new())),
             children_signal: None,
             signals: Vec::new(),
         })
@@ -133,7 +132,7 @@ impl ElementBuilder {
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
         let parent_elem = self.dom_element();
-        let child_elems = self.0.current_children.clone();
+        let child_elems = Rc::new(RefCell::new(Vec::new()));
 
         let updater = children.for_each(move |change| {
             let mut child_elems = child_elems.borrow_mut();
@@ -605,8 +604,6 @@ struct ElementData {
     children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     attribute_signals: HashMap<String, SignalHandle>,
-    // TODO: I think this can be created in `children_signal`
-    current_children: Rc<RefCell<Vec<dom::Element>>>,
     // TODO: This can be combined with `signals`
     children_signal: Option<SignalHandle>,
     signals: Vec<SignalHandle>,
