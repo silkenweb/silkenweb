@@ -480,7 +480,6 @@ impl Children {
     }
 
     fn clear_child(&mut self, index: usize) {
-        // TODO: `expect` value to have been removed (and for other methods).
         self.children.remove(&index);
     }
 }
