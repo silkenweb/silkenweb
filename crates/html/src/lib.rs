@@ -58,7 +58,10 @@ pub trait ParentBuilder {
 
     fn child_signal(self, child: impl 'static + Signal<Item = impl Into<Element>>) -> Self;
 
-    fn optional_child_signal(self, child: impl Signal<Item = Option<impl Into<Element>>>) -> Self;
+    fn optional_child_signal(
+        self,
+        child: impl 'static + Signal<Item = Option<impl Into<Element>>>,
+    ) -> Self;
 
     fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
         -> Self;

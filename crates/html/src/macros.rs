@@ -252,7 +252,7 @@ macro_rules! children_allowed {
 
                 fn optional_child_signal(
                     self,
-                    child: impl $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
+                    child: impl 'static + $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
                 ) -> Self {
                     Self{ builder: self.builder.optional_child_signal(child) }
                 }

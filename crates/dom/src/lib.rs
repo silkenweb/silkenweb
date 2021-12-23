@@ -154,10 +154,33 @@ impl ElementBuilder {
     }
 
     pub fn optional_child_signal(
-        self,
-        child: impl Signal<Item = Option<impl Into<Element>>>,
+        mut self,
+        child_signal: impl 'static + Signal<Item = Option<impl Into<Element>>>,
     ) -> Self {
-        todo!()
+        let child_index = self.child_index;
+        self.child_index += 1;
+        let children = self.element.children.clone();
+        // Store the child in here until we replace it.
+        let mut _child_storage = None;
+
+        let s = child_signal.for_each(move |child| {
+            if let Some(child) = child {
+                let child = child.into();
+                children
+                    .borrow_mut()
+                    .set_child(child_index, child.dom_element());
+                _child_storage = Some(child);
+            } else {
+                children.borrow_mut().remove_child(child_index);
+                _child_storage = None;
+            }
+
+            async {}
+        });
+
+        self.store_signal(s);
+
+        self
     }
 
     // TODO: Docs and work out what to do with existing children. `Self::child` and
@@ -450,6 +473,12 @@ impl Children {
                     parent.append_child(&child).unwrap();
                 });
             }
+        }
+    }
+
+    fn remove_child(&mut self, index: usize) {
+        if let Some(existing) = self.children.remove(&index) {
+            self.parent.remove_child(&existing).unwrap();
         }
     }
 }
