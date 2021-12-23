@@ -430,7 +430,9 @@ impl Children {
     }
 
     fn set_child(&mut self, index: usize, child: &dom::Node) {
-        self.children.insert(index, child.clone());
+        if let Some(existing) = self.children.insert(index, child.clone()) {
+            self.parent.remove_child(&existing).unwrap();
+        }
 
         let parent = self.parent.clone();
         clone!(child);
