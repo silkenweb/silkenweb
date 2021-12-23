@@ -266,9 +266,8 @@ impl ElementBuilder {
             move |new_value| {
                 queue_update({
                     clone!(text_node);
-                    // TODO: Do we need to create a string here? Use Into<String> if we do.
                     let new_value = new_value.into();
-                    move || text_node.set_node_value(Some(new_value.as_ref()))
+                    move || text_node.set_node_value(Some(&new_value))
                 });
                 async {}
             }
