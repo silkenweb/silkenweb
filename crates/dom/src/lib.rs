@@ -300,7 +300,7 @@ impl ElementBuilder {
                 queue_update({
                     clone!(text_node);
                     let new_value = new_value.into();
-                    move || text_node.set_node_value(Some(&new_value))
+                    move || text_node.set_data(&new_value)
                 });
                 async {}
             }
