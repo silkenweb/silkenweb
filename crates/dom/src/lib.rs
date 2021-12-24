@@ -234,7 +234,6 @@ impl ElementBuilder {
                     }
 
                     append_child(&parent_elem, child.dom_element());
-                    child_elems.borrow_mut().push(child);
 
                     // TODO: Update `first_child_of_groups`
                 }
