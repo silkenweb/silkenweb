@@ -106,7 +106,7 @@ impl TodoApp {
                     .child(ul().class("todo-list").children_signal(
                         app.visible_items_signal().map({
                             clone!(app);
-                            move |item| TodoItem::render(app.clone(), item)
+                            move |item| TodoItem::render(item, app.clone())
                         }),
                     )),
             )
@@ -260,6 +260,10 @@ impl TodoApp {
             },
         )
     }
+
+    fn remove_item(&self, todo_id: u128) {
+        self.items.lock_mut().retain(|item| item.id != todo_id);
+    }
 }
 
 struct TodoItem {
@@ -279,30 +283,30 @@ impl TodoItem {
         })
     }
 
-    fn render(app: Rc<TodoApp>, todo: Rc<Self>) -> Li {
+    fn render(todo: Rc<Self>, app: Rc<TodoApp>) -> Li {
         li().class(signal(todo.class()))
-            .child(Self::define_edit(&todo))
-            .child(Self::define_view(app, &todo))
+            .child(Self::define_edit(&todo, &app))
+            .child(Self::define_view(&todo, app))
             .build()
     }
 
-    fn define_edit(todo: &Rc<Self>) -> Input {
+    fn define_edit(todo: &Rc<Self>, app: &Rc<TodoApp>) -> Input {
         input()
             .class("edit")
             .type_("text")
             .value(signal(todo.text()))
             .on_focusout({
-                clone!(todo);
-                move |_, input| todo.save_edits(&input)
+                clone!(todo, app);
+                move |_, input| todo.save_edits(&app, &input)
             })
             .on_keyup({
-                clone!(todo);
+                clone!(todo, app);
                 move |keyup, input| match keyup.key().as_str() {
                     "Escape" => {
                         input.set_value(&todo.text.get_cloned());
                         todo.editing.set(false);
                     }
-                    "Enter" => todo.save_edits(&input),
+                    "Enter" => todo.save_edits(&app, &input),
                     _ => (),
                 }
             })
@@ -316,7 +320,7 @@ impl TodoItem {
             .build()
     }
 
-    fn define_view(app: Rc<TodoApp>, todo: &Rc<TodoItem>) -> Div {
+    fn define_view(todo: &Rc<TodoItem>, app: Rc<TodoApp>) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -339,7 +343,7 @@ impl TodoItem {
             .child(button().class("destroy").on_click({
                 clone!(todo);
                 move |_, _| {
-                    app.items.lock_mut().retain(|item| item.id != todo.id);
+                    app.remove_item(todo.id);
                 }
             }))
             .effect_signal(todo.editing.signal(), |elem, editing| {
@@ -348,8 +352,21 @@ impl TodoItem {
             .build()
     }
 
-    fn save_edits(&self, input: &HtmlInputElement) {
-        todo!()
+    fn save_edits(&self, app: &TodoApp, input: &HtmlInputElement) {
+        if !self.editing.get() {
+            return;
+        }
+
+        let text = input.value();
+        let text = text.trim();
+        let id = self.id;
+
+        if text.is_empty() {
+            app.remove_item(id);
+        } else {
+            self.text.set(text.to_string());
+            self.editing.set(false);
+        }
     }
 
     fn class(&self) -> impl Signal<Item = String> {
