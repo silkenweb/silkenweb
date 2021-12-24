@@ -44,8 +44,9 @@ fn main() {
     // TODO: Find a better way to do this.
     let (route_handle, future) = cancelable_future(route, || ());
     spawn_local(future);
-    mount("app", TodoApp::render(app));
     DiscardOnDrop::leak(route_handle);
+    
+    mount("app", TodoApp::render(app));
 }
 
 struct TodoApp {
