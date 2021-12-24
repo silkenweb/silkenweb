@@ -319,7 +319,6 @@ impl TodoItem {
     }
 
     fn text(&self) -> impl Signal<Item = String> {
-        // TODO: signal_ref?
         self.text.signal_cloned()
     }
 
