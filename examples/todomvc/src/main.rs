@@ -1,12 +1,12 @@
 #[macro_use]
 extern crate derive_more;
 
-use std::{cell::Cell, cmp::max, iter, rc::Rc};
+use std::{cell::Cell, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future, map_ref,
-    signal::{not, Broadcaster, Mutable, Signal, SignalExt},
+    signal::{Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use silkenweb::{
