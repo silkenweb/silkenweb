@@ -204,10 +204,7 @@ impl ElementBuilder {
                     let mut child_elems = child_elems.borrow_mut();
                     let existing_children = child_elems.clone();
 
-                    *child_elems = values
-                        .into_iter()
-                        .map(|elem| elem.into())
-                        .collect();
+                    *child_elems = values.into_iter().map(|elem| elem.into()).collect();
                     // TODO: Update `first_child_of_groups`
                     clone!(child_elems, parent_elem);
 
