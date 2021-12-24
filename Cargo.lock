@@ -402,11 +402,13 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "derive_more",
+ "discard",
  "futures-signals",
  "js-sys",
  "serde",
  "serde_json",
  "silkenweb",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 

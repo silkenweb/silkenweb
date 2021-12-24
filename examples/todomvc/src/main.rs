@@ -3,8 +3,9 @@ extern crate derive_more;
 
 use std::{cell::Cell, cmp::max, iter, rc::Rc};
 
+use discard::DiscardOnDrop;
 use futures_signals::{
-    map_ref,
+    cancelable_future, map_ref,
     signal::{not, Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
@@ -18,14 +19,37 @@ use silkenweb::{
     router::url,
     signal, Builder, Effects, ParentBuilder,
 };
+use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
 
 fn main() {
     console_error_panic_hook::set_once();
-    mount("app", TodoApp::render(TodoApp::new()));
+    let app = TodoApp::new();
+
+    // TODO: Url could just be a mutable?
+    let route = url().for_each({
+        clone!(app);
+
+        move |url| {
+            app.filter.set(match url.hash().as_str() {
+                "#/active" => Filter::Active,
+                "#/completed" => Filter::Completed,
+                _ => Filter::All,
+            });
+
+            async {}
+        }
+    });
+
+    // TODO: Find a better way to do this.
+    let (route_handle, future) = cancelable_future(route, || ());
+    spawn_local(future);
+    mount("app", TodoApp::render(app));
+    DiscardOnDrop::leak(route_handle);
 }
 
 struct TodoApp {
+    todo_id: Cell<u128>,
     items: MutableVec<Rc<TodoItem>>,
     filter: Mutable<Filter>,
 }
@@ -33,6 +57,7 @@ struct TodoApp {
 impl TodoApp {
     fn new() -> Rc<Self> {
         Rc::new(Self {
+            todo_id: Cell::new(0),
             items: MutableVec::new(),
             filter: Mutable::new(Filter::All),
         })
@@ -51,7 +76,12 @@ impl TodoApp {
                         let text = text.trim().to_string();
 
                         if !text.is_empty() {
-                            app.items.lock_mut().push_cloned(TodoItem::new(text));
+                            let todo_id = app.todo_id.get();
+                            app.todo_id.set(todo_id + 1);
+
+                            app.items
+                                .lock_mut()
+                                .push_cloned(TodoItem::new(todo_id, text));
                             input.set_value("");
                         }
                     }
@@ -73,19 +103,35 @@ impl TodoApp {
                 section()
                     .class("main")
                     .child_signal(Self::define_todo_items(app.clone(), active_count.signal()))
-                    .child(
-                        ul().class("todo-list").children_signal(
-                            app.items
-                                .signal_vec_cloned()
-                                .map(|item| TodoItem::render(item)),
-                        ),
-                    ),
+                    .child(ul().class("todo-list").children_signal(
+                        app.visible_items_signal().map({
+                            clone!(app);
+                            move |item| TodoItem::render(app.clone(), item)
+                        }),
+                    )),
             )
             .optional_child_signal(Self::define_footer(app, active_count.signal()))
             .build()
     }
 
-    fn items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> {
+    fn visible_items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> {
+        let filter = Broadcaster::new(self.filter.signal());
+
+        self.items_signal().filter_signal_cloned(move |item| {
+            map_ref!(
+                let completed = item.completed.signal(),
+                let filter = filter.signal() => {
+                    match filter {
+                        Filter::All => true,
+                        Filter::Active => !*completed,
+                        Filter::Completed => *completed,
+                    }
+                }
+            )
+        })
+    }
+
+    fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
         self.items.signal_vec_cloned()
     }
 
@@ -217,24 +263,26 @@ impl TodoApp {
 }
 
 struct TodoItem {
+    id: u128,
     text: Mutable<String>,
     completed: Mutable<bool>,
     editing: Mutable<bool>,
 }
 
 impl TodoItem {
-    fn new(text: String) -> Rc<Self> {
+    fn new(id: u128, text: String) -> Rc<Self> {
         Rc::new(Self {
+            id,
             text: Mutable::new(text),
             completed: Mutable::new(false),
             editing: Mutable::new(false),
         })
     }
 
-    fn render(todo: Rc<Self>) -> Li {
+    fn render(app: Rc<TodoApp>, todo: Rc<Self>) -> Li {
         li().class(signal(todo.class()))
             .child(Self::define_edit(&todo))
-            .child(Self::define_view(&todo))
+            .child(Self::define_view(app, &todo))
             .build()
     }
 
@@ -268,7 +316,7 @@ impl TodoItem {
             .build()
     }
 
-    fn define_view(todo: &Rc<TodoItem>) -> Div {
+    fn define_view(app: Rc<TodoApp>, todo: &Rc<TodoItem>) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -288,7 +336,12 @@ impl TodoItem {
                 clone!(todo);
                 move |_, _| todo.editing.set(true)
             }))
-            .child(button().class("destroy").on_click(move |_, _| todo!()))
+            .child(button().class("destroy").on_click({
+                clone!(todo);
+                move |_, _| {
+                    app.items.lock_mut().retain(|item| item.id != todo.id);
+                }
+            }))
             .effect_signal(todo.editing.signal(), |elem, editing| {
                 elem.set_hidden(editing)
             })
