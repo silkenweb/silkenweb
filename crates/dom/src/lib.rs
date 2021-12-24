@@ -198,6 +198,7 @@ impl ElementBuilder {
         let updater = children.for_each(move |change| {
             // TODO: Test each match arm
             // TODO: Tidy this code up, and factor some things out.
+            // TODO: This needs thoroughly checking
             match change {
                 VecDiff::Replace { values } => {
                     let mut child_elems = child_elems.borrow_mut();
@@ -205,18 +206,18 @@ impl ElementBuilder {
 
                     *child_elems = values
                         .into_iter()
-                        .map(|elem| elem.into().dom_element().clone())
+                        .map(|elem| elem.into())
                         .collect();
                     // TODO: Update `first_child_of_groups`
                     clone!(child_elems, parent_elem);
 
                     queue_update(move || {
                         for child in existing_children {
-                            parent_elem.remove_child(&child).unwrap();
+                            parent_elem.remove_child(child.dom_element()).unwrap();
                         }
 
                         for child in child_elems {
-                            parent_elem.append_child(&child).unwrap();
+                            parent_elem.append_child(child.dom_element()).unwrap();
                         }
                     });
                 }
@@ -228,8 +229,14 @@ impl ElementBuilder {
                     new_index,
                 } => todo!(),
                 VecDiff::Push { value } => {
-                    let child = value.into().dom_element().clone();
-                    append_child(&parent_elem, &child);
+                    let child = value.into();
+
+                    {
+                        let mut child_elems = child_elems.borrow_mut();
+                        child_elems.push(child.clone());
+                    }
+
+                    append_child(&parent_elem, child.dom_element());
                     child_elems.borrow_mut().push(child);
 
                     // TODO: Update `first_child_of_groups`
@@ -247,7 +254,7 @@ impl ElementBuilder {
                     }
 
                     if let Some(removed_child) = removed_child {
-                        remove_child(&parent_elem, &removed_child)
+                        remove_child(&parent_elem, removed_child.dom_element())
                     }
                 }
                 VecDiff::Clear {} => {
@@ -258,7 +265,7 @@ impl ElementBuilder {
 
                     queue_update(move || {
                         for child in existing_children {
-                            parent_elem.remove_child(&child).unwrap();
+                            parent_elem.remove_child(child.dom_element()).unwrap();
                         }
                     });
 
