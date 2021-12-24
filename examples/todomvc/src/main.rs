@@ -118,7 +118,7 @@ impl TodoApp {
                                     }
                                 }
                             })
-                            .effect_signal(all_complete.signal(), move |elem, all_complete| {
+                            .effect_signal(all_complete.signal(), |elem, all_complete| {
                                 elem.set_checked(all_complete)
                             }),
                     )
@@ -258,7 +258,7 @@ impl TodoItem {
                     _ => (),
                 }
             })
-            .effect_signal(todo.editing.signal(), move |elem, editing| {
+            .effect_signal(todo.editing.signal(), |elem, editing| {
                 elem.set_hidden(!editing);
 
                 if editing {
