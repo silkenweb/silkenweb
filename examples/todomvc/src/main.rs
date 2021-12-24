@@ -24,35 +24,22 @@ use web_sys::HtmlInputElement;
 
 fn main() {
     console_error_panic_hook::set_once();
-    let app = TodoApp::new();
 
     // TODO: Url could just be a mutable?
-    let route = url().for_each({
-        clone!(app);
-
-        move |url| {
-            app.filter.set(match url.hash().as_str() {
-                "#/active" => Filter::Active,
-                "#/completed" => Filter::Completed,
-                _ => Filter::All,
-            });
-
-            async {}
+    let item_filter = url().map({
+        |url| match url.hash().as_str() {
+            "#/active" => Filter::Active,
+            "#/completed" => Filter::Completed,
+            _ => Filter::All,
         }
     });
 
-    // TODO: Find a better way to do this.
-    let (route_handle, future) = cancelable_future(route, || ());
-    spawn_local(future);
-    DiscardOnDrop::leak(route_handle);
-    
-    mount("app", TodoApp::render(app));
+    mount("app", TodoApp::render(TodoApp::new(), item_filter));
 }
 
 struct TodoApp {
     todo_id: Cell<u128>,
     items: MutableVec<Rc<TodoItem>>,
-    filter: Mutable<Filter>,
 }
 
 impl TodoApp {
@@ -60,11 +47,10 @@ impl TodoApp {
         Rc::new(Self {
             todo_id: Cell::new(0),
             items: MutableVec::new(),
-            filter: Mutable::new(Filter::All),
         })
     }
 
-    fn render(app: Rc<Self>) -> Section {
+    fn render(app: Rc<Self>, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
@@ -96,6 +82,7 @@ impl TodoApp {
             .signal_vec_cloned()
             .map_signal(|todo| todo.completed.signal());
         let active_count = Broadcaster::new(completed.filter(|completed| !completed).len());
+        let item_filter = Broadcaster::new(item_filter);
 
         section()
             .class("todoapp")
@@ -105,24 +92,31 @@ impl TodoApp {
                     .class("main")
                     .child_signal(Self::define_todo_items(app.clone(), active_count.signal()))
                     .child(ul().class("todo-list").children_signal(
-                        app.visible_items_signal().map({
+                        app.visible_items_signal(item_filter.signal()).map({
                             clone!(app);
                             move |item| TodoItem::render(item, app.clone())
                         }),
                     )),
             )
-            .optional_child_signal(Self::define_footer(app, active_count.signal()))
+            .optional_child_signal(Self::define_footer(
+                app,
+                item_filter.signal(),
+                active_count.signal(),
+            ))
             .build()
     }
 
-    fn visible_items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> {
-        let filter = Broadcaster::new(self.filter.signal());
+    fn visible_items_signal(
+        &self,
+        item_filter: impl Signal<Item = Filter>,
+    ) -> impl SignalVec<Item = Rc<TodoItem>> {
+        let item_filter = Broadcaster::new(item_filter);
 
         self.items_signal().filter_signal_cloned(move |item| {
             map_ref!(
                 let completed = item.completed.signal(),
-                let filter = filter.signal() => {
-                    match filter {
+                let item_filter = item_filter.signal() => {
+                    match item_filter {
                         Filter::All => true,
                         Filter::Active => !*completed,
                         Filter::Completed => *completed,
@@ -177,9 +171,11 @@ impl TodoApp {
 
     fn define_footer(
         app: Rc<Self>,
+        item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
     ) -> impl Signal<Item = Option<Footer>> {
         let active_count = Broadcaster::new(active_count);
+        let item_filter = Broadcaster::new(item_filter);
 
         app.items_signal().is_empty().map({
             clone!(app);
@@ -200,7 +196,7 @@ impl TodoApp {
                                         if active_count == 1 { "" } else { "s" }
                                     ))
                             }))
-                            .child(app.define_filters())
+                            .child(app.define_filters(item_filter.signal()))
                             .optional_child_signal(Self::define_clear_completed(
                                 app.clone(),
                                 active_count.signal(),
@@ -212,11 +208,16 @@ impl TodoApp {
         })
     }
 
-    fn define_filter_link(&self, filter: Filter, seperator: &str) -> LiBuilder {
+    fn define_filter_link(
+        &self,
+        filter: Filter,
+        item_filter: impl 'static + Signal<Item = Filter>,
+        seperator: &str,
+    ) -> LiBuilder {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class(signal(self.filter.signal().map(move |f| {
+            a().class(signal(item_filter.map(move |f| {
                 if filter == f { "selected" } else { "" }.to_string()
             })))
             .href(format!("/#/{}", filter_name.to_lowercase()))
@@ -225,11 +226,12 @@ impl TodoApp {
         .text(seperator)
     }
 
-    fn define_filters(&self) -> Ul {
+    fn define_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
+        let item_filter = Broadcaster::new(item_filter);
         ul().class("filters")
-            .child(self.define_filter_link(Filter::All, " "))
-            .child(self.define_filter_link(Filter::Active, " "))
-            .child(self.define_filter_link(Filter::Completed, ""))
+            .child(self.define_filter_link(Filter::All, item_filter.signal(), " "))
+            .child(self.define_filter_link(Filter::Active, item_filter.signal(), " "))
+            .child(self.define_filter_link(Filter::Completed, item_filter.signal(), ""))
             .build()
     }
 
