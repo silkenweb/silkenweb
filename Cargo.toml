@@ -2,7 +2,7 @@
 
 members = [
     "examples/ui5-showcase",
-    # "examples/todomvc",
+    "examples/todomvc",
     "examples/counter",
     "examples/counter-list",
     "examples/router",

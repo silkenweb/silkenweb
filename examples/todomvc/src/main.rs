@@ -3,90 +3,48 @@ extern crate derive_more;
 
 use std::{cell::Cell, cmp::max, iter, rc::Rc};
 
+use futures_signals::{
+    map_ref,
+    signal::{not, Broadcaster, Mutable, Signal, SignalExt},
+    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+};
 use serde::{Deserialize, Serialize};
 use silkenweb::{
-    accumulators::{SumElement, SumHandle, SumTotal},
     clone,
-    element_list::ElementList,
     elements::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
     local_storage, mount,
     router::url,
-    signal::{ReadSignal, Signal, WriteSignal, ZipSignal},
-    Builder,
+    signal, Builder, Effects, ParentBuilder,
 };
 use web_sys::{HtmlDivElement, HtmlInputElement, Storage};
 
 fn main() {
     console_error_panic_hook::set_once();
-    mount("app", TodoApp::new().render());
+    mount("app", TodoApp::render(TodoApp::new()));
 }
 
-#[derive(Clone)]
 struct TodoApp {
-    items: Signal<TodoList>,
-    id: Rc<Cell<usize>>,
-    filter: ReadSignal<Filter>,
-    active_count: SumTotal<usize>,
-    // TODO: We want something that just collects signals together
-    _store_items: ReadSignal<()>,
+    items: MutableVec<Rc<TodoItem>>,
+    filter: Mutable<Filter>,
 }
 
 impl TodoApp {
-    fn new() -> Self {
-        let items = Signal::new(ElementList::new(
-            ul().class("todo-list"),
-            TodoItem::render,
-            iter::empty(),
-        ));
-        let active_count = SumTotal::default();
-        let next_id = Self::read_items(&items.write(), &active_count);
-        let store_items = Self::store_items(&items.read());
-
-        let filter = url().map({
-            let write_items = items.write();
-            move |url| match url.hash().as_str() {
-                "#/active" => {
-                    Self::set_filter(&write_items, |item| {
-                        item.completed().map(|completed| !completed)
-                    });
-                    Filter::Active
-                }
-                "#/completed" => {
-                    Self::set_filter(&write_items, TodoItem::completed);
-                    Filter::Completed
-                }
-                _ => {
-                    Self::set_filter(&write_items, |_| Signal::new(true).read());
-                    Filter::All
-                }
-            }
-        });
-
-        Self {
-            items,
-            id: Rc::new(Cell::new(next_id)),
-            filter,
-            active_count,
-            _store_items: store_items,
-        }
+    fn new() -> Rc<Self> {
+        Rc::new(Self {
+            items: MutableVec::new(),
+            filter: Mutable::new(Filter::All),
+        })
     }
 
-    fn set_filter(
-        write_items: &WriteSignal<TodoList>,
-        f: impl 'static + Fn(&TodoItem) -> ReadSignal<bool>,
-    ) {
-        write_items.mutate(|items| items.filter(f));
-    }
-
-    fn render(&self) -> Section {
+    fn render(app: Rc<Self>) -> Section {
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
             .on_keyup({
-                let self_ = self.clone();
+                clone!(app);
 
                 move |keyup, input| {
                     if keyup.key() == "Enter" {
@@ -94,7 +52,7 @@ impl TodoApp {
                         let text = text.trim().to_string();
 
                         if !text.is_empty() {
-                            self_.push(text);
+                            app.items.lock_mut().push_cloned(TodoItem::new(text));
                             input.set_value("");
                         }
                     }
@@ -103,103 +61,70 @@ impl TodoApp {
             .effect(|elem: &HtmlInputElement| elem.focus().unwrap())
             .build();
 
+        let completed = app
+            .items
+            .signal_vec_cloned()
+            .map_signal(|todo| todo.completed.signal());
+        let active_count = Broadcaster::new(completed.filter(|completed| !completed).len());
+
         section()
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
             .child(
                 section()
                     .class("main")
-                    .child(self.define_todo_items())
-                    .child(self.items.read()),
+                    .child_signal(Self::define_todo_items(app.clone(), active_count.signal()))
+                    .child(
+                        ul().class("todo-list").children_signal(
+                            app.items
+                                .signal_vec_cloned()
+                                .map(|item| TodoItem::render(item)),
+                        ),
+                    ),
             )
-            .child(self.define_footer())
+            .optional_child_signal(Self::define_footer(app, active_count.signal()))
             .build()
     }
 
-    // Returns the next item id
-    fn read_items(dest_items: &WriteSignal<TodoList>, active_count: &SumTotal<usize>) -> usize {
-        let mut next_id = 0;
-
-        if let Some(todos_str) =
-            local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).ok().flatten())
-        {
-            let todos: Vec<TodoStorage> = serde_json::from_str(&todos_str).unwrap();
-
-            for data in todos {
-                let id = data.id;
-                next_id = max(next_id, data.id + 1);
-                let todo_item = TodoItem::new(data, dest_items.clone(), active_count);
-                dest_items.mutate(move |items| items.insert(id, todo_item));
-            }
-        }
-
-        next_id
+    fn items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> {
+        self.items.signal_vec_cloned()
     }
 
-    fn store_items(items: &ReadSignal<TodoList>) -> ReadSignal<()> {
-        // TODO: map_changes (only map changes, rather than initial value)
-        items
-            .map(|items| {
-                let mut store_items = Vec::new();
+    fn define_todo_items(
+        app: Rc<Self>,
+        active_count: impl 'static + Signal<Item = usize>,
+    ) -> impl Signal<Item = Div> {
+        let is_empty = app.items_signal().is_empty();
+        let all_complete = Broadcaster::new(active_count.map(|count| count == 0).dedupe());
 
-                if let Some(storage) = local_storage() {
-                    let items = items
-                        .values()
-                        .map(|item| item.data.clone())
-                        .collect::<Vec<_>>();
-                    store(&storage, &items);
-
-                    for item in &items {
-                        store_items.push({
-                            clone!(storage, items);
-                            item.on_change().map(move |_| store(&storage, &items))
-                        });
-                    }
-                }
-
-                store_items
-            })
-            .map(|_| ())
-    }
-
-    fn define_todo_items(&self) -> ReadSignal<Div> {
-        let is_empty = self.items.read().map(ElementList::is_empty).only_changes();
-        let all_complete = self
-            .active_count
-            .read()
-            .map(|&active_count| active_count == 0)
-            .only_changes();
-        let write_items = self.items.write();
-
-        is_empty.map(move |&is_empty| {
+        is_empty.map(move |is_empty| {
             if is_empty {
                 div()
             } else {
-                clone!(all_complete, write_items);
-                let initial_complete = *all_complete.current();
-
                 div()
                     .child(
                         input()
                             .id("toggle-all")
                             .class("toggle-all")
                             .type_("checkbox")
-                            .checked(initial_complete)
+                            .checked(signal(all_complete.signal()))
                             .on_change({
-                                clone!(all_complete);
-                                move |_, _| {
-                                    let new_completed = !*all_complete.current();
+                                clone!(app);
 
-                                    write_items.mutate(move |items| {
-                                        for item in items.values() {
-                                            item.data.completed.write().set(new_completed);
-                                        }
-                                    });
+                                move |_, elem| {
+                                    let checked = elem.checked();
+
+                                    for item in app.items.lock_ref().iter() {
+                                        item.completed.set_neq(checked);
+                                    }
                                 }
                             })
-                            .effect(all_complete.map(|&complete| {
-                                move |elem: &HtmlInputElement| elem.set_checked(complete)
-                            })),
+                            .effect_signal(
+                                all_complete.signal(),
+                                move |elem: &HtmlInputElement, all_complete| {
+                                    elem.set_checked(all_complete)
+                                },
+                            ),
                     )
                     .child(label().for_("toggle-all"))
             }
@@ -207,47 +132,50 @@ impl TodoApp {
         })
     }
 
-    fn define_footer(&self) -> ReadSignal<Option<Footer>> {
-        self.items
-            .read()
-            .map(ElementList::is_empty)
-            .only_changes()
-            .map({
-                let self_ = self.clone();
+    fn define_footer(
+        app: Rc<Self>,
+        active_count: impl 'static + Signal<Item = usize>,
+    ) -> impl Signal<Item = Option<Footer>> {
+        let active_count = Broadcaster::new(active_count);
 
-                move |&is_empty| {
-                    if is_empty {
-                        None
-                    } else {
-                        Some(
-                            footer()
-                                .class("footer")
-                                .child(self_.active_count.read().map(move |&active_count| {
-                                    span()
-                                        .class("todo-count")
-                                        .child(strong().text(format!("{}", active_count)))
-                                        .text(format!(
-                                            " item{} left",
-                                            if active_count == 1 { "" } else { "s" }
-                                        ))
-                                }))
-                                .child(self_.define_filters())
-                                .child(self_.define_clear_completed())
-                                .build(),
-                        )
-                    }
+        app.items_signal().is_empty().map({
+            clone!(app);
+
+            move |is_empty| {
+                if is_empty {
+                    None
+                } else {
+                    Some(
+                        footer()
+                            .class("footer")
+                            .child_signal(active_count.signal().map(move |active_count| {
+                                span()
+                                    .class("todo-count")
+                                    .child(strong().text(format!("{}", active_count)))
+                                    .text(format!(
+                                        " item{} left",
+                                        if active_count == 1 { "" } else { "s" }
+                                    ))
+                            }))
+                            .child(app.define_filters())
+                            .optional_child_signal(Self::define_clear_completed(
+                                app.clone(),
+                                active_count.signal(),
+                            ))
+                            .build(),
+                    )
                 }
-            })
+            }
+        })
     }
 
     fn define_filter_link(&self, filter: Filter, seperator: &str) -> LiBuilder {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class(
-                self.filter
-                    .map(move |f| if filter == *f { "selected" } else { "" }),
-            )
+            a().class(signal(self.filter.signal().map(move |f| {
+                if filter == f { "selected" } else { "" }.to_string()
+            })))
             .href(format!("/#/{}", filter_name.to_lowercase()))
             .text(&filter_name),
         )
@@ -262,212 +190,142 @@ impl TodoApp {
             .build()
     }
 
-    fn define_clear_completed(&self) -> ReadSignal<Option<Button>> {
-        let write_items = self.items.write();
-        let items_len = self.items.read().map(ElementList::len);
-        let any_completed = (self.active_count.read(), items_len)
-            .zip()
-            .map(|&(active_count, items_len)| active_count != items_len)
-            .only_changes();
+    fn define_clear_completed(
+        app: Rc<Self>,
+        active_count: impl 'static + Signal<Item = usize>,
+    ) -> impl Signal<Item = Option<Button>> {
+        let item_count = app.items.signal_vec_cloned().len();
 
-        any_completed.map(move |&any_completed| {
-            clone!(write_items);
+        // TODO: Combine signals to tuples (signal_product! macro)
+        map_ref!(item_count, active_count => (*item_count, *active_count)).map(
+            move |(item_count, active_count)| {
+                let any_completed = item_count != active_count;
+                clone!(app);
 
-            if any_completed {
-                Some(
-                    button()
-                        .class("clear-completed")
-                        .text("Clear completed")
-                        .on_click(move |_, _| {
-                            write_items
-                                .mutate(|items| items.retain(|item| !*item.completed().current()));
-                        })
-                        .build(),
-                )
-            } else {
-                None
-            }
-        })
-    }
-
-    fn push(&self, text: String) {
-        let id = self.id.clone();
-        let items = self.items.clone();
-        let active_count = self.active_count.clone();
-
-        self.items.write().mutate(move |ts| {
-            let current_id = id.replace(id.get() + 1);
-            let parent = items.write();
-            ts.insert(
-                current_id,
-                TodoItem::new(
-                    TodoStorage::new(current_id, text, false),
-                    parent,
-                    &active_count,
-                ),
-            );
-        });
+                if any_completed {
+                    Some(
+                        button()
+                            .class("clear-completed")
+                            .text("Clear completed")
+                            .on_click(move |_, _| {
+                                app.items.lock_mut().retain(|item| !item.completed.get())
+                            })
+                            .build(),
+                    )
+                } else {
+                    None
+                }
+            },
+        )
     }
 }
 
-type TodoList = ElementList<usize, TodoItem>;
-
-#[derive(Clone, Serialize, Deserialize)]
-struct TodoStorage {
-    id: usize,
-    text: Signal<String>,
-    completed: Signal<bool>,
-}
-
-impl TodoStorage {
-    fn new(id: usize, text: impl Into<String>, completed: bool) -> Self {
-        Self {
-            id,
-            text: Signal::new(text.into()),
-            completed: Signal::new(completed),
-        }
-    }
-
-    fn on_change(&self) -> ReadSignal<()> {
-        (self.text.read(), self.completed.read()).zip().map(|_| ())
-    }
-}
-
-#[derive(Clone)]
 struct TodoItem {
-    data: TodoStorage,
-    editing: Signal<bool>,
-    parent: WriteSignal<ElementList<usize, Self>>,
-    _active_count: ReadSignal<SumHandle>,
+    text: Mutable<String>,
+    completed: Mutable<bool>,
+    editing: Mutable<bool>,
 }
 
 impl TodoItem {
-    fn new(
-        data: TodoStorage,
-        parent: WriteSignal<ElementList<usize, Self>>,
-        active_count: &SumTotal<usize>,
-    ) -> Self {
-        let active_count = data
-            .completed
-            .read()
-            .map(|completed| (!completed) as usize)
-            .map_to(SumElement::new(active_count));
-
-        Self {
-            data,
-            editing: Signal::new(false),
-            parent,
-            _active_count: active_count,
-        }
+    fn new(text: String) -> Rc<Self> {
+        Rc::new(Self {
+            text: Mutable::new(text),
+            completed: Mutable::new(false),
+            editing: Mutable::new(false),
+        })
     }
 
-    fn render(&self) -> Li {
-        li().class(self.class())
-            .child(self.define_edit())
-            .child(self.define_view())
+    fn render(todo: Rc<Self>) -> Li {
+        li().class(signal(todo.class()))
+            .child(Self::define_edit(&todo))
+            .child(Self::define_view(&todo))
             .build()
     }
 
-    fn define_edit(&self) -> Input {
+    fn define_edit(todo: &Rc<Self>) -> Input {
         input()
             .class("edit")
             .type_("text")
-            .value(self.text())
+            .value(signal(todo.text()))
             .on_focusout({
-                let self_ = self.clone();
-                move |_, input| self_.save_edits(&input)
+                clone!(todo);
+                move |_, input| todo.save_edits(&input)
             })
             .on_keyup({
-                let self_ = self.clone();
+                clone!(todo);
                 move |keyup, input| match keyup.key().as_str() {
                     "Escape" => {
-                        input.set_value(&self_.text().current());
-                        self_.editing.write().set(false);
+                        input.set_value(&todo.text.get_cloned());
+                        todo.editing.set(false);
                     }
-                    "Enter" => self_.save_edits(&input),
+                    "Enter" => todo.save_edits(&input),
                     _ => (),
                 }
             })
-            .effect(self.editing.read().map(|&editing| {
-                move |elem: &HtmlInputElement| {
+            .effect_signal(
+                todo.editing.signal(),
+                move |elem: &HtmlInputElement, editing| {
                     elem.set_hidden(!editing);
 
                     if editing {
                         elem.focus().unwrap();
                     }
-                }
-            }))
+                },
+            )
             .build()
     }
 
-    fn define_view(&self) -> Div {
-        let completed = self.completed();
+    fn define_view(todo: &Rc<TodoItem>) -> Div {
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                let set_completed = self.data.completed.write();
-                move |_, _| set_completed.replace(|completed| !completed)
+                clone!(todo);
+                move |_, elem| todo.completed.set(elem.checked())
             })
-            .checked(*completed.current())
-            .effect(
-                completed
-                    .map(|&complete| move |elem: &HtmlInputElement| elem.set_checked(complete)),
-            );
-        let parent = self.parent.clone();
-        let id = self.data.id;
+            .checked(signal(todo.completed()))
+            .effect_signal(todo.completed(), |elem, completed| {
+                elem.set_checked(completed)
+            });
 
         div()
             .class("view")
             .child(completed_checkbox)
-            .child(label().text(self.text()).on_dblclick({
-                let set_editing = self.editing.write();
-                move |_, _| set_editing.set(true)
+            .child(label().text_signal(todo.text()).on_dblclick({
+                clone!(todo);
+                move |_, _| todo.editing.set(true)
             }))
-            .child(
-                button()
-                    .class("destroy")
-                    .on_click(move |_, _| parent.mutate(move |p| p.remove(&id))),
-            )
-            .effect(
-                self.editing
-                    .read()
-                    .map(|&editing| move |elem: &HtmlDivElement| elem.set_hidden(editing)),
-            )
+            .child(button().class("destroy").on_click(move |_, _| todo!()))
+            .effect_signal(todo.editing.signal(), |elem, editing| {
+                elem.set_hidden(editing)
+            })
             .build()
     }
 
     fn save_edits(&self, input: &HtmlInputElement) {
-        let text = input.value();
-        let text = text.trim();
-        let id = self.data.id;
-
-        if text.is_empty() {
-            self.parent.mutate(move |p| p.remove(&id));
-        } else if *self.editing.read().current() {
-            self.data.text.write().set(text.to_string());
-            self.editing.write().set(false);
-        }
+        todo!()
     }
 
-    fn class(&self) -> ReadSignal<String> {
-        (self.completed(), self.editing.read())
-            .zip()
-            .map(|&(completed, editing)| {
-                vec![(completed, "completed"), (editing, "editing")]
-                    .into_iter()
-                    .filter_map(|(flag, name)| if flag { Some(name) } else { None })
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            })
+    fn class(&self) -> impl Signal<Item = String> {
+        let completed = self.completed();
+        let editing = self.editing.signal();
+
+        map_ref!(completed, editing => (*completed, *editing)).map(|(completed, editing)| {
+            vec![(completed, "completed"), (editing, "editing")]
+                .into_iter()
+                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
     }
 
-    fn text(&self) -> ReadSignal<String> {
-        self.data.text.read()
+    fn text(&self) -> impl Signal<Item = String> {
+        // TODO: signal_ref?
+        self.text.signal_cloned()
     }
 
-    fn completed(&self) -> ReadSignal<bool> {
-        self.data.completed.read()
+    fn completed(&self) -> impl Signal<Item = bool> {
+        self.completed.signal()
     }
 }
 
@@ -476,13 +334,4 @@ enum Filter {
     All,
     Active,
     Completed,
-}
-
-const STORAGE_KEY: &str = "silkenweb_todo";
-
-#[allow(clippy::ptr_arg)]
-fn store(storage: &Storage, items: &Vec<TodoStorage>) {
-    storage
-        .set_item(STORAGE_KEY, &serde_json::to_string(&items).unwrap())
-        .unwrap();
 }
