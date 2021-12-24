@@ -8,18 +8,17 @@ use futures_signals::{
     signal::{not, Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use serde::{Deserialize, Serialize};
 use silkenweb::{
     clone,
     elements::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    local_storage, mount,
+    mount,
     router::url,
     signal, Builder, Effects, ParentBuilder,
 };
-use web_sys::{HtmlDivElement, HtmlInputElement, Storage};
+use web_sys::HtmlInputElement;
 
 fn main() {
     console_error_panic_hook::set_once();
