@@ -241,7 +241,9 @@ impl ElementBuilder {
                     mem::drop(child_elems);
 
                     if is_empty {
-                        first_children_of_groups.borrow_mut().clear_child(child_index);
+                        first_children_of_groups
+                            .borrow_mut()
+                            .clear_child(child_index);
                     }
 
                     if let Some(removed_child) = removed_child {
@@ -260,7 +262,9 @@ impl ElementBuilder {
                         }
                     });
 
-                    first_children_of_groups.borrow_mut().clear_child(child_index);
+                    first_children_of_groups
+                        .borrow_mut()
+                        .clear_child(child_index);
                 }
             }
             async {}
