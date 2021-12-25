@@ -16,8 +16,9 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 wasm-bindgen = "0.2.78"
 num-traits = "0.2"
 futures-signals = "0.3"
-wasm-bindgen-futures = "0.4"
 discard = "1.0"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
 
 [dependencies.web-sys]
 version = "0.3"

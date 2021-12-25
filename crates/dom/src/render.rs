@@ -1,7 +1,9 @@
 use std::cell::{Cell, RefCell};
 
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use js_sys::Promise;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen_futures::JsFuture;
 
 use crate::window;
 
@@ -21,7 +23,9 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
 /// Render any pending updates.
 ///
 /// This is mostly useful for testing.
-pub fn render_updates() {
+pub async fn render_updates() {
+    let promise = Promise::resolve(&JsValue::NULL);
+    JsFuture::from(promise).await.unwrap();
     RENDER.with(Render::render_updates);
 }
 
@@ -47,7 +51,7 @@ impl Render {
                 RENDER.with(|render| {
                     render.raf_pending.set(false);
                     render.update_animations(time_stamp.as_f64().unwrap());
-                    render_updates();
+                    render.render_updates();
                 });
             })),
             animation_timestamp_millis: Mutable::new(0.0),
