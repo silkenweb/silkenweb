@@ -12,8 +12,8 @@ use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 pub fn main_js() -> Result<(), JsValue> {
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
-    let icon = ui5_icon().name("activate").build();
-    let calendar = ui5_calendar()
+    let icon = || ui5_icon().name("activate").build();
+    let calendar = || ui5_calendar()
         .format_pattern("yyyy-MM-dd")
         .selected_date("2000-01-01".to_string())
         .selection_mode(SelectionMode::Multiple)
@@ -58,8 +58,8 @@ pub fn main_js() -> Result<(), JsValue> {
         div()
             .child(side_bar)
             .child_signal(selected_signal.map(move |selection| match selection {
-                Selected::Calendar => calendar.clone().into_element(),
-                Selected::Icon => icon.clone().into_element(),
+                Selected::Calendar => calendar().into_element(),
+                Selected::Icon => icon().into_element(),
             })),
     );
 

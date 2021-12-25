@@ -185,6 +185,12 @@ impl ElementBuilder {
         self
     }
 
+    fn clone_dom_elements<'a>(children: impl Iterator<Item = &'a Element>) -> Vec<dom::Element> {
+        children
+            .map(|c: &Element| c.dom_element().clone())
+            .collect()
+    }
+
     // TODO: Docs and work out what to do with existing children. `Self::child` and
     pub fn children_signal(
         mut self,
@@ -203,19 +209,20 @@ impl ElementBuilder {
             match change {
                 VecDiff::Replace { values } => {
                     let mut child_elems = child_elems.borrow_mut();
-                    let existing_children = child_elems.clone();
+                    let existing_children = Self::clone_dom_elements(child_elems.iter());
 
                     *child_elems = values.into_iter().map(|elem| elem.into()).collect();
                     // TODO: Update `first_child_of_groups`
-                    clone!(child_elems, parent_elem);
+                    clone!(parent_elem);
+                    let child_dom_elems = Self::clone_dom_elements(child_elems.iter());
 
                     queue_update(move || {
                         for child in existing_children {
-                            parent_elem.remove_child(child.dom_element()).unwrap();
+                            parent_elem.remove_child(&child).unwrap();
                         }
 
-                        for child in child_elems {
-                            parent_elem.append_child(child.dom_element()).unwrap();
+                        for child in child_dom_elems {
+                            parent_elem.append_child(&child).unwrap();
                         }
                     });
                 }
@@ -228,13 +235,14 @@ impl ElementBuilder {
                 } => todo!(),
                 VecDiff::Push { value } => {
                     let child = value.into();
+                    let child_dom_elem = child.dom_element().clone();
 
                     {
                         let mut child_elems = child_elems.borrow_mut();
-                        child_elems.push(child.clone());
+                        child_elems.push(child);
                     }
 
-                    append_child(&parent_elem, child.dom_element());
+                    append_child(&parent_elem, &child_dom_elem);
 
                     // TODO: Update `first_child_of_groups`
                 }
@@ -255,14 +263,16 @@ impl ElementBuilder {
                     }
                 }
                 VecDiff::Clear {} => {
-                    let existing_children = child_elems.borrow().clone();
+                    let mut child_elems = child_elems.borrow_mut();
+                    let existing_children = Self::clone_dom_elements(child_elems.iter());
 
-                    child_elems.borrow_mut().clear();
+                    child_elems.clear();
+                    mem::drop(child_elems);
                     clone!(parent_elem);
 
                     queue_update(move || {
                         for child in existing_children {
-                            parent_elem.remove_child(child.dom_element()).unwrap();
+                            parent_elem.remove_child(&child).unwrap();
                         }
                     });
 
@@ -434,7 +444,6 @@ impl From<ElementBuilder> for Element {
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
-#[derive(Clone)]
 pub struct Element(Rc<ElementData>);
 
 impl DomElement for Element {

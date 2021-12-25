@@ -190,7 +190,6 @@ macro_rules! html_element {
                 }
             }
 
-            #[derive(Clone)]
             pub struct $camel_name($crate::macros::private::Element);
 
             impl $crate::macros::private::Builder for $camel_name {

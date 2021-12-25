@@ -5,7 +5,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use silkenweb::{
-    elements::{button, div, hr, Button, Div, DivBuilder},
+    elements::{button, div, hr, Button, Div},
     mount, Builder, ParentBuilder,
 };
 
@@ -19,22 +19,25 @@ fn main() {
             .child(
                 div()
                     .child(pop_button(list.clone()))
-                    .text_signal(list.signal_vec_cloned().len().map(|len| format!("{}", len)))
+                    .text_signal(list.signal_vec().len().map(|len| format!("{}", len)))
                     .child(push_button(list.clone())),
             )
             .child(hr())
-            .child(div().children_signal(list.signal_vec_cloned())),
+            .child(div().children_signal(list.signal_vec().map(|_| define_counter()))),
     );
 }
 
-fn push_button(list: Rc<MutableVec<Div>>) -> Button {
+#[derive(Copy, Clone)]
+pub struct Counter;
+
+fn push_button(list: Rc<MutableVec<Counter>>) -> Button {
     button()
-        .on_click(move |_, _| list.lock_mut().push_cloned(define_counter().build()))
+        .on_click(move |_, _| list.lock_mut().push_cloned(Counter))
         .text("+")
         .build()
 }
 
-fn pop_button(list: Rc<MutableVec<Div>>) -> Button {
+fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
     button()
         .on_click(move |_, _| {
             list.lock_mut().pop();
@@ -43,7 +46,7 @@ fn pop_button(list: Rc<MutableVec<Div>>) -> Button {
         .build()
 }
 
-pub fn define_counter() -> DivBuilder {
+pub fn define_counter() -> Div {
     let count = Rc::new(Mutable::new(0));
     let count_text = count.signal().map(|i| format!("{}", i));
 
@@ -51,6 +54,7 @@ pub fn define_counter() -> DivBuilder {
         .child(define_button("-", -1, count.clone()))
         .text_signal(count_text)
         .child(define_button("+", 1, count))
+        .build()
 }
 
 pub fn define_button(label: &str, delta: i64, count: Rc<Mutable<i64>>) -> Button {
