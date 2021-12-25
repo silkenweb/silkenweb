@@ -126,7 +126,12 @@ impl ElementBuilder {
         self.children
             .borrow_mut()
             .set_child(self.child_index, child.dom_element());
-        self.element.static_children.push(child);
+
+        // We only keep children for the resource handles, so don't keep empty children.
+        if !child.is_empty() {
+            self.element.static_children.push(child);
+        }
+
         self.child_index += 1;
         self
     }
@@ -447,6 +452,14 @@ pub struct Element {
     static_children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     signals: Vec<SignalHandle>,
+}
+
+impl Element {
+    fn is_empty(&self) -> bool {
+        self.static_children.is_empty()
+            && self.event_callbacks.is_empty()
+            && self.signals.is_empty()
+    }
 }
 
 impl DomElement for Element {
