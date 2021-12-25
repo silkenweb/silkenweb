@@ -75,7 +75,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 
 /// Build an HTML element.
 pub struct ElementBuilder {
-    element: ElementData,
+    element: Element,
     attribute_signals: HashMap<String, SignalHandle>,
     child_index: usize,
 }
@@ -95,7 +95,7 @@ impl ElementBuilder {
 
     fn new_element(dom_element: dom::Element) -> Self {
         Self {
-            element: ElementData {
+            element: Element {
                 dom_element: dom_element.clone(),
                 children: Rc::new(RefCell::new(Children::new(dom_element))),
                 static_children: Vec::new(),
@@ -418,7 +418,7 @@ impl Builder for ElementBuilder {
         self.element
             .signals
             .extend(self.attribute_signals.into_values());
-        Element(Rc::new(self.element))
+        self.element
     }
 
     fn into_element(self) -> Element {
@@ -444,13 +444,19 @@ impl From<ElementBuilder> for Element {
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
-pub struct Element(Rc<ElementData>);
+pub struct Element {
+    dom_element: dom::Element,
+    children: Rc<RefCell<Children>>,
+    static_children: Vec<Element>,
+    event_callbacks: Vec<EventCallback>,
+    signals: Vec<SignalHandle>,
+}
 
 impl DomElement for Element {
     type Target = dom::Element;
 
     fn dom_element(&self) -> &Self::Target {
-        &self.0.dom_element
+        &self.dom_element
     }
 }
 
@@ -717,14 +723,6 @@ pub trait Builder {
     fn build(self) -> Self::Target;
 
     fn into_element(self) -> Element;
-}
-
-struct ElementData {
-    dom_element: dom::Element,
-    children: Rc<RefCell<Children>>,
-    static_children: Vec<Element>,
-    event_callbacks: Vec<EventCallback>,
-    signals: Vec<SignalHandle>,
 }
 
 type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
