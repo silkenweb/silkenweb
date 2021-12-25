@@ -247,7 +247,7 @@ impl ElementBuilder {
 
                     let mut child_elems = child_elems.borrow_mut();
                     let new_dom_elem = new_child.dom_element();
-                    
+
                     if index < child_elems.len() {
                         insert_child_before(
                             &parent_elem,
@@ -297,10 +297,7 @@ impl ElementBuilder {
                             .set_child(child_index, child_elems.first().unwrap().dom_element())
                     }
                 }
-                VecDiff::Move {
-                    old_index,
-                    new_index,
-                } => todo!(),
+                VecDiff::Move { .. } => todo!(),
                 VecDiff::Push { value } => {
                     let child = value.into();
 
