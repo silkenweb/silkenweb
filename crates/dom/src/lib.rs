@@ -76,6 +76,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 /// Build an HTML element.
 pub struct ElementBuilder {
     element: ElementData,
+    attribute_signals: HashMap<String, SignalHandle>,
     child_index: usize,
 }
 
@@ -99,9 +100,9 @@ impl ElementBuilder {
                 children: Rc::new(RefCell::new(Children::new(dom_element))),
                 static_children: Vec::new(),
                 event_callbacks: Vec::new(),
-                attribute_signals: HashMap::new(),
                 signals: Vec::new(),
             },
+            attribute_signals: HashMap::new(),
             child_index: 0,
         }
     }
@@ -112,7 +113,7 @@ impl ElementBuilder {
         name: impl AsRef<str>,
         value: impl Attribute<T>,
     ) -> Self {
-        self.element.attribute_signals.remove(name.as_ref());
+        self.attribute_signals.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         self
     }
@@ -403,7 +404,10 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
-    fn build(self) -> Self::Target {
+    fn build(mut self) -> Self::Target {
+        self.element
+            .signals
+            .extend(self.attribute_signals.into_values());
         Element(Rc::new(self.element))
     }
 
@@ -678,7 +682,7 @@ where
         // TODO: Do we want to spawn this future on RAF
         spawn_local(future);
 
-        builder.element.attribute_signals.insert(name, handle);
+        builder.attribute_signals.insert(name, handle);
     }
 }
 
@@ -711,7 +715,6 @@ struct ElementData {
     children: Rc<RefCell<Children>>,
     static_children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
-    attribute_signals: HashMap<String, SignalHandle>,
     signals: Vec<SignalHandle>,
 }
 
