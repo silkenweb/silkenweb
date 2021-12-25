@@ -13,16 +13,18 @@ pub fn main_js() -> Result<(), JsValue> {
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
     let icon = || ui5_icon().name("activate").build();
-    let calendar = || ui5_calendar()
-        .format_pattern("yyyy-MM-dd")
-        .selected_date("2000-01-01".to_string())
-        .selection_mode(SelectionMode::Multiple)
-        .on_selected_dates_change(|event, _target| {
-            for d in event.selected_dates() {
-                web_log::println!("{}", d);
-            }
-        })
-        .build();
+    let calendar = || {
+        ui5_calendar()
+            .format_pattern("yyyy-MM-dd")
+            .selected_date("2000-01-01".to_string())
+            .selection_mode(SelectionMode::Multiple)
+            .on_selected_dates_change(|event, _target| {
+                for d in event.selected_dates() {
+                    web_log::println!("{}", d);
+                }
+            })
+            .build()
+    };
 
     let selected = Mutable::new(Selected::Calendar);
     let selected_signal = selected.signal();

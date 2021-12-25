@@ -3,7 +3,7 @@ use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
-use silkenweb::{animation::infinite_animation, mount, tag_in_namespace, Builder, Element, signal};
+use silkenweb::{animation::infinite_animation, mount, signal, tag_in_namespace, Builder, Element};
 
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
