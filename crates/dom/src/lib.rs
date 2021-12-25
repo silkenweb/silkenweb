@@ -76,6 +76,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 /// Build an HTML element.
 pub struct ElementBuilder {
     element: Element,
+    children: Rc<RefCell<Children>>,
     attribute_signals: HashMap<String, SignalHandle>,
     child_index: usize,
 }
@@ -97,11 +98,11 @@ impl ElementBuilder {
         Self {
             element: Element {
                 dom_element: dom_element.clone(),
-                children: Rc::new(RefCell::new(Children::new(dom_element))),
                 static_children: Vec::new(),
                 event_callbacks: Vec::new(),
                 signals: Vec::new(),
             },
+            children: Rc::new(RefCell::new(Children::new(dom_element))),
             attribute_signals: HashMap::new(),
             child_index: 0,
         }
@@ -122,8 +123,7 @@ impl ElementBuilder {
     /// reactive.
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
-        self.element
-            .children
+        self.children
             .borrow_mut()
             .set_child(self.child_index, child.dom_element());
         self.element.static_children.push(child);
@@ -137,7 +137,7 @@ impl ElementBuilder {
     ) -> Self {
         let child_index = self.child_index;
         self.child_index += 1;
-        let children = self.element.children.clone();
+        let children = self.children.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
@@ -161,7 +161,7 @@ impl ElementBuilder {
     ) -> Self {
         let child_index = self.child_index;
         self.child_index += 1;
-        let children = self.element.children.clone();
+        let children = self.children.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
@@ -200,7 +200,7 @@ impl ElementBuilder {
         self.child_index += 1;
         let parent_elem = self.dom_element().clone();
         let child_elems = Rc::new(RefCell::new(Vec::new()));
-        let first_children_of_groups = self.element.children.clone();
+        let first_children_of_groups = self.children.clone();
 
         let updater = children.for_each(move |change| {
             // TODO: Test each match arm
@@ -291,8 +291,7 @@ impl ElementBuilder {
     /// Add a text node after existing children.
     pub fn text(mut self, child: impl AsRef<str>) -> Self {
         let text_node = document().create_text_node(child.as_ref());
-        self.element
-            .children
+        self.children
             .borrow_mut()
             .set_child(self.child_index, &text_node);
         self.child_index += 1;
@@ -306,8 +305,7 @@ impl ElementBuilder {
         let text_node = document().create_text_node(intern(""));
         let child_index = self.child_index;
         self.child_index += 1;
-        self.element
-            .children
+        self.children
             .borrow_mut()
             .set_child(child_index, &text_node);
 
@@ -446,7 +444,6 @@ impl From<ElementBuilder> for Element {
 /// it will be moved.
 pub struct Element {
     dom_element: dom::Element,
-    children: Rc<RefCell<Children>>,
     static_children: Vec<Element>,
     event_callbacks: Vec<EventCallback>,
     signals: Vec<SignalHandle>,
