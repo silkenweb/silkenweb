@@ -236,30 +236,81 @@ impl ElementBuilder {
                         }
                     });
                 }
-                VecDiff::InsertAt { index, value } => todo!(),
-                VecDiff::UpdateAt { index, value } => todo!(),
-                VecDiff::RemoveAt { index } => todo!(),
+                VecDiff::InsertAt { index, value } => {
+                    let new_child = value.into();
+
+                    if index == 0 {
+                        first_children_of_groups
+                            .borrow_mut()
+                            .set_child(child_index, new_child.dom_element());
+                    }
+
+                    let mut child_elems = child_elems.borrow_mut();
+
+                    // TODO: Are these assumptions guaranteed?
+                    assert!(!child_elems.is_empty());
+                    assert!(index < child_elems.len());
+
+                    insert_child_before(
+                        &parent_elem,
+                        new_child.dom_element(),
+                        child_elems[index].dom_element(),
+                    );
+
+                    child_elems.insert(index, new_child);
+                }
+                VecDiff::UpdateAt { index, value } => {
+                    let new_child = value.into();
+
+                    if index == 0 {
+                        first_children_of_groups
+                            .borrow_mut()
+                            .set_child(child_index, new_child.dom_element());
+                    }
+
+                    let mut child_elems = child_elems.borrow_mut();
+                    let old_child = child_elems
+                        .get_mut(index)
+                        .expect("Update: index out of range");
+
+                    replace_child(
+                        &parent_elem,
+                        new_child.dom_element(),
+                        old_child.dom_element(),
+                    );
+
+                    *old_child = new_child;
+                }
+                VecDiff::RemoveAt { index } => {
+                    let mut child_elems = child_elems.borrow_mut();
+
+                    let old_child = child_elems.remove(index);
+                    remove_child(&parent_elem, old_child.dom_element());
+
+                    if index == 0 {
+                        assert!(!child_elems.is_empty());
+                        first_children_of_groups
+                            .borrow_mut()
+                            .set_child(child_index, child_elems.first().unwrap().dom_element())
+                    }
+                }
                 VecDiff::Move {
                     old_index,
                     new_index,
                 } => todo!(),
                 VecDiff::Push { value } => {
                     let child = value.into();
-                    let child_dom_elem = child.dom_element().clone();
 
-                    {
-                        let mut child_elems = child_elems.borrow_mut();
+                    let mut child_elems = child_elems.borrow_mut();
 
-                        if child_elems.is_empty() {
-                            first_children_of_groups
-                                .borrow_mut()
-                                .set_child(child_index, child.dom_element());
-                        }
-
-                        child_elems.push(child);
+                    if child_elems.is_empty() {
+                        first_children_of_groups
+                            .borrow_mut()
+                            .set_child(child_index, child.dom_element());
                     }
 
-                    append_child(&parent_elem, &child_dom_elem);
+                    append_child(&parent_elem, child.dom_element());
+                    child_elems.push(child);
                 }
                 VecDiff::Pop {} => {
                     let mut child_elems = child_elems.borrow_mut();
@@ -539,6 +590,14 @@ fn append_child(parent: &dom::Node, child: &dom::Node) {
 
     queue_update(move || {
         parent.append_child(&child).unwrap();
+    });
+}
+
+fn replace_child(parent: &dom::Node, new_child: &dom::Node, old_child: &dom::Node) {
+    clone!(parent, new_child, old_child);
+
+    queue_update(move || {
+        parent.replace_child(&new_child, &old_child).unwrap();
     });
 }
 
