@@ -8,13 +8,14 @@ use futures_signals::{
     signal::{Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
+use serde::{Deserialize, Serialize};
 use silkenweb::{
     clone,
     elements::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    mount,
+    local_storage, mount,
     router::url,
     signal, Builder, Effects, ParentBuilder,
 };
@@ -32,20 +33,37 @@ fn main() {
         }
     });
 
-    mount("app", TodoApp::render(TodoApp::new(), item_filter));
+    mount("app", TodoApp::render(TodoApp::load(), item_filter));
 }
 
+#[derive(Serialize, Deserialize)]
 struct TodoApp {
     todo_id: Cell<u128>,
     items: MutableVec<Rc<TodoItem>>,
 }
 
 impl TodoApp {
-    fn new() -> Rc<Self> {
-        Rc::new(Self {
-            todo_id: Cell::new(0),
-            items: MutableVec::new(),
-        })
+    fn load() -> Rc<Self> {
+        Rc::new(
+            if let Some(app_str) =
+                local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).ok().flatten())
+            {
+                serde_json::from_str(&app_str).unwrap()
+            } else {
+                Self {
+                    todo_id: Cell::new(0),
+                    items: MutableVec::new(),
+                }
+            },
+        )
+    }
+
+    fn save(&self) {
+        if let Some(storage) = local_storage() {
+            storage
+                .set_item(STORAGE_KEY, &serde_json::to_string(self).unwrap())
+                .unwrap();
+        }
     }
 
     fn render(app: Rc<Self>, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
@@ -68,6 +86,7 @@ impl TodoApp {
                                 .lock_mut()
                                 .push_cloned(TodoItem::new(todo_id, text));
                             input.set_value("");
+                            app.save();
                         }
                     }
                 }
@@ -155,6 +174,8 @@ impl TodoApp {
                                     for item in app.items.lock_ref().iter() {
                                         item.completed.set_neq(checked);
                                     }
+
+                                    app.save();
                                 }
                             })
                             .effect_signal(all_complete.signal(), |elem, all_complete| {
@@ -251,7 +272,8 @@ impl TodoApp {
                             .class("clear-completed")
                             .text("Clear completed")
                             .on_click(move |_, _| {
-                                app.items.lock_mut().retain(|item| !item.completed.get())
+                                app.items.lock_mut().retain(|item| !item.completed.get());
+                                app.save();
                             })
                             .build(),
                     )
@@ -267,10 +289,12 @@ impl TodoApp {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 struct TodoItem {
     id: u128,
     text: Mutable<String>,
     completed: Mutable<bool>,
+    #[serde(skip)]
     editing: Mutable<bool>,
 }
 
@@ -307,7 +331,10 @@ impl TodoItem {
                         input.set_value(&todo.text.get_cloned());
                         todo.editing.set(false);
                     }
-                    "Enter" => todo.save_edits(&app, &input),
+                    "Enter" => {
+                        todo.save_edits(&app, &input);
+                        app.save();
+                    }
                     _ => (),
                 }
             })
@@ -326,8 +353,11 @@ impl TodoItem {
             .class("toggle")
             .type_("checkbox")
             .on_click({
-                clone!(todo);
-                move |_, elem| todo.completed.set(elem.checked())
+                clone!(todo, app);
+                move |_, elem| {
+                    todo.completed.set(elem.checked());
+                    app.save();
+                }
             })
             .checked(signal(todo.completed()))
             .effect_signal(todo.completed(), |elem, completed| {
@@ -345,6 +375,7 @@ impl TodoItem {
                 clone!(todo);
                 move |_, _| {
                     app.remove_item(todo.id);
+                    app.save();
                 }
             }))
             .effect_signal(todo.editing.signal(), |elem, editing| {
@@ -398,3 +429,5 @@ enum Filter {
     Active,
     Completed,
 }
+
+const STORAGE_KEY: &str = "silkenweb-examples-todomvc";
