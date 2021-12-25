@@ -71,7 +71,8 @@ async fn reactive_text() {
         p().id("text").text_signal(text_signal.signal()),
         TEXT_ID,
         &mut text_signal,
-    ).await;
+    )
+    .await;
 }
 
 // Verify reactive text when passing the signal by reference.
@@ -84,7 +85,8 @@ async fn reactive_text_reference() {
         p().id("text").text_signal(text_signal.signal()),
         TEXT_ID,
         &mut text_signal,
-    ).await;
+    )
+    .await;
 }
 
 // Make we support multiple reactive text children
@@ -120,7 +122,11 @@ async fn multiple_reactive_text() {
     );
 }
 
-async fn verify_reactive_text(paragraph: PBuilder, text_id: &str, text: &mut Mutable<&'static str>) {
+async fn verify_reactive_text(
+    paragraph: PBuilder,
+    text_id: &str,
+    text: &mut Mutable<&'static str>,
+) {
     mount(APP_ID, paragraph);
     render_updates().await;
     assert_eq!("0", text_content(text_id));
