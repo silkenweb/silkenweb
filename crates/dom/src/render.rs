@@ -20,12 +20,16 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
 }
 
+async fn wait_for_microtasks() {
+    let promise = Promise::resolve(&JsValue::NULL);
+    JsFuture::from(promise).await.unwrap();
+}
+
 /// Render any pending updates.
 ///
 /// This is mostly useful for testing.
 pub async fn render_updates() {
-    let promise = Promise::resolve(&JsValue::NULL);
-    JsFuture::from(promise).await.unwrap();
+    wait_for_microtasks().await;
     RENDER.with(Render::render_updates);
 }
 
