@@ -246,16 +246,17 @@ impl ElementBuilder {
                     }
 
                     let mut child_elems = child_elems.borrow_mut();
-
-                    // TODO: Are these assumptions guaranteed?
-                    assert!(!child_elems.is_empty());
-                    assert!(index < child_elems.len());
-
-                    insert_child_before(
-                        &parent_elem,
-                        new_child.dom_element(),
-                        child_elems[index].dom_element(),
-                    );
+                    let new_dom_elem = new_child.dom_element();
+                    
+                    if index < child_elems.len() {
+                        insert_child_before(
+                            &parent_elem,
+                            new_dom_elem,
+                            child_elems[index].dom_element(),
+                        );
+                    } else {
+                        append_child(&parent_elem, new_dom_elem);
+                    }
 
                     child_elems.insert(index, new_child);
                 }
@@ -287,10 +288,12 @@ impl ElementBuilder {
                     let old_child = child_elems.remove(index);
                     remove_child(&parent_elem, old_child.dom_element());
 
-                    if index == 0 {
-                        assert!(!child_elems.is_empty());
+                    let mut first_children_of_groups = first_children_of_groups.borrow_mut();
+
+                    if child_elems.is_empty() {
+                        first_children_of_groups.clear_child(child_index);
+                    } else if index == 0 {
                         first_children_of_groups
-                            .borrow_mut()
                             .set_child(child_index, child_elems.first().unwrap().dom_element())
                     }
                 }
