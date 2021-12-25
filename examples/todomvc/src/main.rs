@@ -3,9 +3,8 @@ extern crate derive_more;
 
 use std::{cell::Cell, rc::Rc};
 
-use discard::DiscardOnDrop;
 use futures_signals::{
-    cancelable_future, map_ref,
+    map_ref,
     signal::{Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
@@ -19,7 +18,6 @@ use silkenweb::{
     router::url,
     signal, Builder, Effects, ParentBuilder,
 };
-use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
 
 fn main() {
