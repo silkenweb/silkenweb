@@ -98,7 +98,6 @@ impl ElementBuilder {
         Self {
             element: Element {
                 dom_element: dom_element.clone(),
-                static_children: Vec::new(),
                 event_callbacks: Vec::new(),
                 signals: Vec::new(),
             },
@@ -126,10 +125,8 @@ impl ElementBuilder {
             .borrow_mut()
             .set_child(self.child_index, child.dom_element());
 
-        // We only keep children for the resource handles, so don't keep empty children.
-        if !child.is_empty() {
-            self.element.static_children.push(child);
-        }
+        self.element.event_callbacks.extend(child.event_callbacks);
+        self.element.signals.extend(child.signals);
 
         self.child_index += 1;
         self
@@ -448,17 +445,9 @@ impl From<ElementBuilder> for Element {
 /// it will be moved.
 pub struct Element {
     dom_element: dom::Element,
-    static_children: Vec<Element>,
+    // TODO: Make these read only vecs
     event_callbacks: Vec<EventCallback>,
     signals: Vec<SignalHandle>,
-}
-
-impl Element {
-    fn is_empty(&self) -> bool {
-        self.static_children.is_empty()
-            && self.event_callbacks.is_empty()
-            && self.signals.is_empty()
-    }
 }
 
 impl DomElement for Element {
