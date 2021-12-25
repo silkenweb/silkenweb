@@ -119,8 +119,7 @@ impl ElementBuilder {
         self
     }
 
-    /// Add a child element after existing children. The child element can be
-    /// reactive.
+    /// Add a child element after existing children.
     pub fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
         self.children
