@@ -123,7 +123,7 @@ impl ElementBuilder {
         let child = child.into();
         self.children
             .borrow_mut()
-            .set_child(self.child_index, child.dom_element());
+            .add_child(self.child_index, child.dom_element());
 
         self.element.event_callbacks.extend(child.event_callbacks);
         self.element.signals.extend(child.signals);
@@ -146,7 +146,7 @@ impl ElementBuilder {
             let child = child.into();
             children
                 .borrow_mut()
-                .set_child(child_index, child.dom_element());
+                .add_child(child_index, child.dom_element());
             _child_storage = Some(child);
             async {}
         });
@@ -171,7 +171,7 @@ impl ElementBuilder {
                 let child = child.into();
                 children
                     .borrow_mut()
-                    .set_child(child_index, child.dom_element());
+                    .add_child(child_index, child.dom_element());
                 _child_storage = Some(child);
             } else {
                 children.borrow_mut().remove_child(child_index);
@@ -211,9 +211,18 @@ impl ElementBuilder {
                 VecDiff::Replace { values } => {
                     let mut child_elems = child_elems.borrow_mut();
                     let existing_children = Self::clone_dom_elements(child_elems.iter());
-
                     *child_elems = values.into_iter().map(|elem| elem.into()).collect();
-                    // TODO: Update `first_child_of_groups`
+
+                    {
+                        let mut first_children_of_groups = first_children_of_groups.borrow_mut();
+
+                        match child_elems.first() {
+                            None => first_children_of_groups.clear_child(child_index),
+                            Some(first_child) => first_children_of_groups
+                                .set_child(child_index, first_child.dom_element()),
+                        }
+                    }
+
                     clone!(parent_elem);
                     let child_dom_elems = Self::clone_dom_elements(child_elems.iter());
 
@@ -240,12 +249,17 @@ impl ElementBuilder {
 
                     {
                         let mut child_elems = child_elems.borrow_mut();
+
+                        if child_elems.is_empty() {
+                            first_children_of_groups
+                                .borrow_mut()
+                                .set_child(child_index, child.dom_element());
+                        }
+
                         child_elems.push(child);
                     }
 
                     append_child(&parent_elem, &child_dom_elem);
-
-                    // TODO: Update `first_child_of_groups`
                 }
                 VecDiff::Pop {} => {
                     let mut child_elems = child_elems.borrow_mut();
@@ -294,7 +308,7 @@ impl ElementBuilder {
         let text_node = document().create_text_node(child.as_ref());
         self.children
             .borrow_mut()
-            .set_child(self.child_index, &text_node);
+            .add_child(self.child_index, &text_node);
         self.child_index += 1;
         self
     }
@@ -308,7 +322,7 @@ impl ElementBuilder {
         self.child_index += 1;
         self.children
             .borrow_mut()
-            .set_child(child_index, &text_node);
+            .add_child(child_index, &text_node);
 
         let updater = child_signal.for_each({
             clone!(text_node);
@@ -486,7 +500,7 @@ impl Children {
         }
     }
 
-    fn set_child(&mut self, index: usize, child: &dom::Node) {
+    fn add_child(&mut self, index: usize, child: &dom::Node) {
         if let Some(existing) = self.children.insert(index, child.clone()) {
             remove_child(&self.parent, &existing);
         }
@@ -495,6 +509,10 @@ impl Children {
             Some((_index, next_child)) => insert_child_before(&self.parent, child, next_child),
             None => append_child(&self.parent, child),
         }
+    }
+
+    fn set_child(&mut self, index: usize, child: &dom::Node) {
+        self.children.insert(index, child.clone());
     }
 
     fn remove_child(&mut self, index: usize) {
