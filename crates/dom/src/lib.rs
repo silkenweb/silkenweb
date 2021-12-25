@@ -192,7 +192,7 @@ impl ElementBuilder {
             .collect()
     }
 
-    // TODO: Docs and work out what to do with existing children. `Self::child` and
+    // TODO: Docs
     pub fn children_signal(
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
