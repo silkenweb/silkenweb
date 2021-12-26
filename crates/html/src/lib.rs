@@ -101,8 +101,11 @@ macro_rules! global_attributes {
 }
 
 pub trait HtmlElement: Sized {
-    fn attribute<T: StaticAttribute>(self, name: impl Into<String>, value: impl Attribute<T>)
-        -> Self;
+    fn attribute<T: StaticAttribute>(
+        self,
+        name: impl Into<String>,
+        value: impl Attribute<T>,
+    ) -> Self;
 
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
