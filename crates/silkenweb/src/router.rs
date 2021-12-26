@@ -53,12 +53,12 @@ pub fn url() -> ReadOnlyMutable<Url> {
 /// - Set the [`url()`] signal
 ///
 /// See [module-level documentation](self) for an example.
-pub fn set_url_path(path: impl 'static + AsRef<str>) {
+pub fn set_url_path(path: &str) {
     URL.with(move |url| {
         let mut url = url.lock_mut();
         // Force a `deref_mut` to make sure `url` is marked as modified. `set_pathname`
         // uses interior mutability, so we'll only `deref`.
-        url.deref_mut().set_pathname(path.as_ref());
+        url.deref_mut().set_pathname(path);
         window()
             .history()
             .unwrap()

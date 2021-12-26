@@ -62,14 +62,14 @@ pub fn document() -> dom::Document {
 /// An HTML element tag.
 ///
 /// For example: `tag("div")`
-pub fn tag(name: impl AsRef<str>) -> ElementBuilder {
+pub fn tag(name: &str) -> ElementBuilder {
     ElementBuilder::new(name)
 }
 
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> ElementBuilder {
+pub fn tag_in_namespace(namespace: &str, name: &str) -> ElementBuilder {
     ElementBuilder::new_in_namespace(namespace, name)
 }
 
@@ -82,14 +82,14 @@ pub struct ElementBuilder {
 }
 
 impl ElementBuilder {
-    pub fn new(tag: impl AsRef<str>) -> Self {
-        Self::new_element(document().create_element(tag.as_ref()).unwrap())
+    pub fn new(tag: &str) -> Self {
+        Self::new_element(document().create_element(tag).unwrap())
     }
 
-    pub fn new_in_namespace(namespace: impl AsRef<str>, tag: impl AsRef<str>) -> Self {
+    pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
         Self::new_element(
             document()
-                .create_element_ns(Some(namespace.as_ref()), tag.as_ref())
+                .create_element_ns(Some(namespace), tag)
                 .unwrap(),
         )
     }
@@ -110,10 +110,11 @@ impl ElementBuilder {
     /// Set an attribute. Attribute values can be reactive.
     pub fn attribute<T: StaticAttribute>(
         mut self,
-        name: impl AsRef<str>,
+        name: impl Into<String>,
         value: impl Attribute<T>,
     ) -> Self {
-        self.attribute_futures.remove(name.as_ref());
+        let name = name.into();
+        self.attribute_futures.remove(&name);
         value.set_attribute(name, &mut self);
         self
     }
@@ -210,8 +211,8 @@ impl ElementBuilder {
     }
 
     /// Add a text node after existing children.
-    pub fn text(mut self, child: impl AsRef<str>) -> Self {
-        let text_node = document().create_text_node(child.as_ref());
+    pub fn text(mut self, child: &str) -> Self {
+        let text_node = document().create_text_node(child);
         self.children
             .borrow_mut()
             .add_child(self.child_index, &text_node);
@@ -726,13 +727,13 @@ impl AttributeValue for String {
 
 /// A non-reactive attribute.
 pub trait StaticAttribute {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element);
+    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element);
 }
 
 impl<T: AttributeValue> StaticAttribute for T {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
         clone!(dom_element);
-        let name = name.as_ref().to_string();
+        let name = name.into();
         let value = self.text();
 
         queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
@@ -740,9 +741,9 @@ impl<T: AttributeValue> StaticAttribute for T {
 }
 
 impl StaticAttribute for bool {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
         clone!(dom_element);
-        let name = name.as_ref().to_string();
+        let name = name.into();
 
         if *self {
             queue_update(move || {
@@ -762,9 +763,9 @@ impl StaticAttribute for bool {
 /// for `StaticAttribute`s because we fall foul of orphan rules if we try to
 /// implement it for all signals of `AttributeValue`s.
 impl<T: AttributeValue> StaticAttribute for Option<T> {
-    fn set_attribute(&self, name: impl AsRef<str>, dom_element: &dom::Element) {
+    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
         clone!(dom_element);
-        let name = name.as_ref().to_string();
+        let name = name.into();
 
         match self {
             Some(value) => value.set_attribute(name, &dom_element),
@@ -777,20 +778,20 @@ impl<T: AttributeValue> StaticAttribute for Option<T> {
 
 /// A potentially reactive attribute.
 pub trait Attribute<T> {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder);
+    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder);
 }
 
 impl<T> Attribute<T> for T
 where
     T: StaticAttribute,
 {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
         StaticAttribute::set_attribute(&self, name, &builder.element.dom_element);
     }
 }
 
 impl<'a> Attribute<String> for &'a str {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
         self.to_string().set_attribute(name, builder);
     }
 }
@@ -800,8 +801,8 @@ where
     Attr: StaticAttribute,
     Sig: 'static + Signal<Item = Attr>,
 {
-    fn set_attribute(self, name: impl AsRef<str>, builder: &mut ElementBuilder) {
-        let name = name.as_ref().to_string();
+    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
+        let name = name.into();
         let dom_element = builder.dom_element().clone();
 
         let updater = self.0.for_each({

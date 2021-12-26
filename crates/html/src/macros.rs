@@ -204,7 +204,7 @@ macro_rules! html_element {
             impl $crate::HtmlElement for [<$camel_name Builder>] {
                 fn attribute<T: $crate::macros::private::StaticAttribute>(
                     self,
-                    name: impl AsRef<str>,
+                    name: impl Into<String>,
                     value: impl $crate::macros::private::Attribute<T>,
                 ) -> Self {
                     Self{ builder: self.builder.attribute(name, value) }
@@ -237,7 +237,7 @@ macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
         $crate::macros::private::paste! {
             impl $crate::ParentBuilder for [<$name:camel $($name_tail:camel)* Builder>] {
-                fn text(self, child: impl AsRef<str>) -> Self {
+                fn text(self, child: &str) -> Self {
                     Self{ builder: self.builder.text(child) }
                 }
 

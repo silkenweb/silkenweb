@@ -53,7 +53,7 @@ impl<T> From<dom::CustomEvent> for CustomEvent<T> {
 /// Methods to add child elements. These are in a trait to allow attribute
 /// methods to be disambiguated..
 pub trait ParentBuilder {
-    fn text(self, child: impl AsRef<str>) -> Self;
+    fn text(self, child: &str) -> Self;
 
     fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
 
@@ -101,7 +101,7 @@ macro_rules! global_attributes {
 }
 
 pub trait HtmlElement: Sized {
-    fn attribute<T: StaticAttribute>(self, name: impl AsRef<str>, value: impl Attribute<T>)
+    fn attribute<T: StaticAttribute>(self, name: impl Into<String>, value: impl Attribute<T>)
         -> Self;
 
     global_attributes![

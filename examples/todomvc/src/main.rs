@@ -193,8 +193,8 @@ impl TodoApp {
                             .child_signal(active_count.signal().map(move |active_count| {
                                 span()
                                     .class("todo-count")
-                                    .child(strong().text(format!("{}", active_count)))
-                                    .text(format!(
+                                    .child(strong().text(&format!("{}", active_count)))
+                                    .text(&format!(
                                         " item{} left",
                                         if active_count == 1 { "" } else { "s" }
                                     ))
