@@ -99,91 +99,75 @@ impl TodoApp {
             .map_signal(|todo| todo.completed.signal());
         let active_count = Broadcaster::new(completed.filter(|completed| !completed).len());
         let item_filter = Broadcaster::new(item_filter);
+        let is_empty = Broadcaster::new(app.items.signal_vec_cloned().is_empty());
 
         section()
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
-            .child(
-                section()
-                    .class("main")
-                    .child_signal(Self::define_todo_items(app.clone(), active_count.signal()))
-                    .child(ul().class("todo-list").children_signal(
-                        app.visible_items_signal(item_filter.signal()).map({
-                            clone!(app);
-                            move |item| TodoItem::render(item, app.clone())
-                        }),
-                    )),
-            )
+            .optional_child_signal(Self::define_main(
+                app.clone(),
+                item_filter.signal(),
+                active_count.signal(),
+                is_empty.signal(),
+            ))
             .optional_child_signal(Self::define_footer(
                 app,
                 item_filter.signal(),
                 active_count.signal(),
+                is_empty.signal(),
             ))
             .build()
     }
 
-    fn visible_items_signal(
-        &self,
-        item_filter: impl Signal<Item = Filter>,
-    ) -> impl SignalVec<Item = Rc<TodoItem>> {
-        let item_filter = Broadcaster::new(item_filter);
-
-        self.items_signal().filter_signal_cloned(move |item| {
-            map_ref!(
-                let completed = item.completed.signal(),
-                let item_filter = item_filter.signal() => {
-                    match item_filter {
-                        Filter::All => true,
-                        Filter::Active => !*completed,
-                        Filter::Completed => *completed,
-                    }
-                }
-            )
-        })
-    }
-
-    fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
-        self.items.signal_vec_cloned()
-    }
-
-    fn define_todo_items(
+    fn define_main(
         app: Rc<Self>,
+        item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
-    ) -> impl Signal<Item = Div> {
-        let is_empty = app.items_signal().is_empty();
+        is_empty: impl 'static + Signal<Item = bool>,
+    ) -> impl Signal<Item = Option<Section>> {
+        let item_filter = Broadcaster::new(item_filter);
         let all_complete = Broadcaster::new(active_count.map(|count| count == 0).dedupe());
 
         is_empty.map(move |is_empty| {
             if is_empty {
-                div()
+                None
             } else {
-                div()
-                    .child(
-                        input()
-                            .id("toggle-all")
-                            .class("toggle-all")
-                            .type_("checkbox")
-                            .checked(signal(all_complete.signal()))
-                            .on_change({
-                                clone!(app);
+                Some(
+                    section()
+                        .class("main")
+                        .child(
+                            input()
+                                .id("toggle-all")
+                                .class("toggle-all")
+                                .type_("checkbox")
+                                .checked(signal(all_complete.signal()))
+                                .on_change({
+                                    clone!(app);
 
-                                move |_, elem| {
-                                    let checked = elem.checked();
+                                    move |_, elem| {
+                                        let checked = elem.checked();
 
-                                    for item in app.items.lock_ref().iter() {
-                                        item.completed.set_neq(checked);
+                                        for item in app.items.lock_ref().iter() {
+                                            item.completed.set_neq(checked);
+                                        }
+
+                                        app.save();
                                     }
-
-                                    app.save();
-                                }
-                            })
-                            .effect_signal(all_complete.signal(), |elem, all_complete| {
-                                elem.set_checked(all_complete)
+                                })
+                                .effect_signal(all_complete.signal(), |elem, all_complete| {
+                                    elem.set_checked(all_complete)
+                                }),
+                        )
+                        .child(label().for_("toggle-all"))
+                        .child(ul().class("todo-list").children_signal(
+                            app.visible_items_signal(item_filter.signal()).map({
+                                clone!(app);
+                                move |item| TodoItem::render(item, app.clone())
                             }),
-                    )
-                    .child(label().for_("toggle-all"))
+                        ))
+                        .build(),
+                )
             }
-            .build()
         })
     }
 
@@ -191,11 +175,12 @@ impl TodoApp {
         app: Rc<Self>,
         item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
+        is_empty: impl 'static + Signal<Item = bool>,
     ) -> impl Signal<Item = Option<Footer>> {
         let active_count = Broadcaster::new(active_count);
         let item_filter = Broadcaster::new(item_filter);
 
-        app.items_signal().is_empty().map({
+        is_empty.map({
             clone!(app);
 
             move |is_empty| {
@@ -281,6 +266,30 @@ impl TodoApp {
                 }
             },
         )
+    }
+
+    fn visible_items_signal(
+        &self,
+        item_filter: impl Signal<Item = Filter>,
+    ) -> impl SignalVec<Item = Rc<TodoItem>> {
+        let item_filter = Broadcaster::new(item_filter);
+
+        self.items_signal().filter_signal_cloned(move |item| {
+            map_ref!(
+                let completed = item.completed.signal(),
+                let item_filter = item_filter.signal() => {
+                    match item_filter {
+                        Filter::All => true,
+                        Filter::Active => !*completed,
+                        Filter::Completed => *completed,
+                    }
+                }
+            )
+        })
+    }
+
+    fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
+        self.items.signal_vec_cloned()
     }
 
     fn remove_item(&self, todo_id: u128) {
