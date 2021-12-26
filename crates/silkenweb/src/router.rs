@@ -27,7 +27,7 @@
 //! ```
 use std::ops::DerefMut;
 
-use futures_signals::signal::{Mutable, Signal};
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use silkenweb_dom::window;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::Url;
@@ -35,8 +35,8 @@ use web_sys::Url;
 /// A signal that will vary according to the current browser URL.
 ///
 /// See [module-level documentation](self) for an example.
-pub fn url() -> impl Signal<Item = Url> {
-    URL.with(|url| url.signal_cloned())
+pub fn url() -> ReadOnlyMutable<Url> {
+    URL.with(|url| url.read_only())
 }
 
 /// Set the path portion of the URL.

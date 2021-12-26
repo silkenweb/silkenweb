@@ -24,8 +24,7 @@ use web_sys::HtmlInputElement;
 fn main() {
     console_error_panic_hook::set_once();
 
-    // TODO: Url could just be a mutable?
-    let item_filter = url().map({
+    let item_filter = url().signal_cloned().map({
         |url| match url.hash().as_str() {
             "#/active" => Filter::Active,
             "#/completed" => Filter::Completed,

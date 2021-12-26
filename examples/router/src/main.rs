@@ -20,7 +20,9 @@ fn main() {
             )
             .child(
                 p().text_signal(
-                    router::url().map(|url| format!("URL Path is: {}", url.pathname())),
+                    router::url()
+                        .signal_cloned()
+                        .map(|url| format!("URL Path is: {}", url.pathname())),
                 ),
             )
     });
