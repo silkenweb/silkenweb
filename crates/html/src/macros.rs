@@ -117,12 +117,14 @@ macro_rules! html_element {
             }
 
             impl [<$camel_name Builder>] {
-                $crate::attributes![
+                $crate::global_attributes![
                     // TODO: Add all global attrs.
-                    // TODO: Seperate macro for global attrs that doesn't require text attr
-                    id("id"): String,
-                    class("class"): String,
-                    style("style"): String,
+                    id: String,
+                    class: String,
+                    style: String,
+                ];
+
+                $crate::attributes![
                     $($($(#[$attr_meta])* $attr ($text_attr): $typ,)*)?
                 ];
 
@@ -401,6 +403,22 @@ macro_rules! custom_events {
                 }
             )*
         }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! global_attributes {
+    ($(
+        $(#[$attr_meta:meta])*
+        $attr:ident: $typ:ty
+    ),* $(,)? ) => {
+        $(
+            $(#[$attr_meta])*
+            pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
+                Self{ builder: self.builder.attribute($crate::text_name!($attr), value) }
+            }
+        )*
     };
 }
 
