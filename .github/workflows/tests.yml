@@ -42,14 +42,17 @@ jobs:
       with:
         crate: wasm-pack
         version: 0.10.2
+        use-tool-cache: true
     - uses: actions-rs/install@v0.1
       with:
         crate: trunk
         version: 0.14.0
+        use-tool-cache: true
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-bindgen-cli
         version: 0.2.78
+        use-tool-cache: true
     - name: Browser Tests
       # TODO: Chromium tests fail under `act`
       run: wasm-pack test --headless --firefox
@@ -79,5 +82,6 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: cargo-udeps
+        use-tool-cache: true
     - run: cargo fmt --all -- --check
     - run: cargo udeps --all-targets
