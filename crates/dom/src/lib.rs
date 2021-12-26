@@ -1,4 +1,5 @@
 //! A reactive interface to the DOM.
+// TODO: Split this file up
 pub mod render;
 use std::{
     cell::RefCell,
@@ -580,7 +581,7 @@ impl ChildVec {
 }
 
 // Keep track of children
-// TODO: Rename this to replace that it only keeps the first child from each
+// TODO: Rename this to reflect that it only keeps the first child from each
 // group
 struct Children {
     parent: dom::Element,
