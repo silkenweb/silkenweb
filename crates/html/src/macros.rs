@@ -201,7 +201,7 @@ macro_rules! html_element {
                 }
             }
 
-            impl $crate::HtmlElementAttributes for [<$camel_name Builder>] {
+            impl $crate::HtmlElement for [<$camel_name Builder>] {
                 fn attribute<T: $crate::macros::private::StaticAttribute>(
                     self,
                     name: impl AsRef<str>,

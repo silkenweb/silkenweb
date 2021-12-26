@@ -17,7 +17,7 @@ use silkenweb::{
     },
     local_storage, mount,
     router::url,
-    signal, Builder, Effects, HtmlElementAttributes, ParentBuilder,
+    signal, Builder, Effects, HtmlElement, ParentBuilder,
 };
 use web_sys::HtmlInputElement;
 

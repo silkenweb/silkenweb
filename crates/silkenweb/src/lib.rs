@@ -32,8 +32,7 @@ pub use silkenweb_dom::{
     Element, ElementBuilder,
 };
 pub use silkenweb_html::{
-    children_allowed, elements, html_element, CustomEvent, Effects, HtmlElementAttributes,
-    ParentBuilder,
+    children_allowed, elements, html_element, CustomEvent, Effects, HtmlElement, ParentBuilder,
 };
 
 pub mod animation;

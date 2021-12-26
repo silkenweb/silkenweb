@@ -100,7 +100,7 @@ macro_rules! global_attributes {
     }};
 }
 
-pub trait HtmlElementAttributes: Sized {
+pub trait HtmlElement: Sized {
     fn attribute<T: StaticAttribute>(self, name: impl AsRef<str>, value: impl Attribute<T>)
         -> Self;
 
