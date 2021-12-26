@@ -76,7 +76,7 @@ pub fn tag_in_namespace(namespace: impl AsRef<str>, name: impl AsRef<str>) -> El
 pub struct ElementBuilder {
     element: Element,
     children: Rc<RefCell<Children>>,
-    attribute_signals: HashMap<String, SignalHandle>,
+    attribute_futures: HashMap<String, SignalHandle>,
     child_index: usize,
 }
 
@@ -98,10 +98,10 @@ impl ElementBuilder {
             element: Element {
                 dom_element: dom_element.clone(),
                 event_callbacks: Vec::new(),
-                signals: Vec::new(),
+                futures: Vec::new(),
             },
             children: Rc::new(RefCell::new(Children::new(dom_element))),
-            attribute_signals: HashMap::new(),
+            attribute_futures: HashMap::new(),
             child_index: 0,
         }
     }
@@ -112,7 +112,7 @@ impl ElementBuilder {
         name: impl AsRef<str>,
         value: impl Attribute<T>,
     ) -> Self {
-        self.attribute_signals.remove(name.as_ref());
+        self.attribute_futures.remove(name.as_ref());
         value.set_attribute(name, &mut self);
         self
     }
@@ -125,7 +125,7 @@ impl ElementBuilder {
             .add_child(self.child_index, child.dom_element());
 
         self.element.event_callbacks.extend(child.event_callbacks);
-        self.element.signals.extend(child.signals);
+        self.element.futures.extend(child.futures);
 
         self.child_index += 1;
         self
@@ -141,7 +141,7 @@ impl ElementBuilder {
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
-        let s = child_signal.for_each(move |child| {
+        let updater = child_signal.for_each(move |child| {
             let child = child.into();
             children
                 .borrow_mut()
@@ -150,7 +150,7 @@ impl ElementBuilder {
             async {}
         });
 
-        self.store_signal(s);
+        self.store_future(updater);
 
         self
     }
@@ -165,7 +165,7 @@ impl ElementBuilder {
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
-        let s = child_signal.for_each(move |child| {
+        let updater = child_signal.for_each(move |child| {
             if let Some(child) = child {
                 let child = child.into();
                 children
@@ -180,7 +180,7 @@ impl ElementBuilder {
             async {}
         });
 
-        self.store_signal(s);
+        self.store_future(updater);
 
         self
     }
@@ -204,7 +204,7 @@ impl ElementBuilder {
             async {}
         });
 
-        self.store_signal(updater);
+        self.store_future(updater);
         self
     }
 
@@ -242,18 +242,12 @@ impl ElementBuilder {
             }
         });
 
-        // TODO: Naming of `store_signal` and `updater`
-        self.store_signal(updater);
+        self.store_future(updater);
         self
     }
 
-    fn store_signal(&mut self, signal: impl 'static + Future<Output = ()>) {
-        let (handle, future) = cancelable_future(signal, || ());
-
-        // TODO: Do we want to spawn this future on RAF
-        spawn_local(future);
-
-        self.element.signals.push(handle);
+    fn store_future(&mut self, future: impl 'static + Future<Output = ()>) {
+        self.element.futures.push(spawn_cancelable_future(future));
     }
 
     // TODO: Test
@@ -304,7 +298,7 @@ impl ElementBuilder {
             async {}
         });
 
-        self.store_signal(future);
+        self.store_future(future);
 
         self
     }
@@ -334,8 +328,8 @@ impl Builder for ElementBuilder {
 
     fn build(mut self) -> Self::Target {
         self.element
-            .signals
-            .extend(self.attribute_signals.into_values());
+            .futures
+            .extend(self.attribute_futures.into_values());
         self.element
     }
 
@@ -358,6 +352,16 @@ impl From<ElementBuilder> for Element {
     }
 }
 
+fn spawn_cancelable_future(
+    future: impl 'static + Future<Output = ()>,
+) -> DiscardOnDrop<CancelableFutureHandle> {
+    let (handle, cancelable_future) = cancelable_future(future, || ());
+
+    spawn_local(cancelable_future);
+
+    handle
+}
+
 /// An HTML element.
 ///
 /// Elements can only appear once in the document. If an element is added again,
@@ -366,7 +370,7 @@ pub struct Element {
     dom_element: dom::Element,
     // TODO: Make these read only vecs
     event_callbacks: Vec<EventCallback>,
-    signals: Vec<SignalHandle>,
+    futures: Vec<SignalHandle>,
 }
 
 impl DomElement for Element {
@@ -800,7 +804,7 @@ where
         let name = name.as_ref().to_string();
         let dom_element = builder.dom_element().clone();
 
-        let signal = self.0.for_each({
+        let updater = self.0.for_each({
             clone!(name);
             move |new_value| {
                 StaticAttribute::set_attribute(&new_value, &name, &dom_element);
@@ -808,12 +812,9 @@ where
             }
         });
 
-        let (handle, future) = cancelable_future(signal, || ());
-
-        // TODO: Do we want to spawn this future on RAF
-        spawn_local(future);
-
-        builder.attribute_signals.insert(name, handle);
+        builder
+            .attribute_futures
+            .insert(name, spawn_cancelable_future(updater));
     }
 }
 
