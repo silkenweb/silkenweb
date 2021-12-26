@@ -16,6 +16,7 @@ jobs:
         default: true
         components: clippy
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+      if: ${{ !env.ACT }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo build --all-targets
     - run: cargo test
@@ -40,21 +41,19 @@ jobs:
         toolchain: ${{ matrix.rust }}
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+      if: ${{ !env.ACT }}
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-pack
         version: 0.10.2
-        use-tool-cache: true
     - uses: actions-rs/install@v0.1
       with:
         crate: trunk
         version: 0.14.0
-        use-tool-cache: true
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-bindgen-cli
         version: 0.2.78
-        use-tool-cache: true
     - name: Browser Tests
       # TODO: Chromium tests fail under `act`
       run: wasm-pack test --headless --firefox
@@ -82,9 +81,9 @@ jobs:
         default: true
         components: rustfmt
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+      if: ${{ !env.ACT }}
     - uses: actions-rs/install@v0.1
       with:
         crate: cargo-udeps
-        use-tool-cache: true
     - run: cargo fmt --all -- --check
     - run: cargo udeps --all-targets
