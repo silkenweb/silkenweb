@@ -2,8 +2,7 @@
 // Macro dependencies
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
-    // TODO: Use `paste::paste` rather than `paste::item`
-    pub use paste::item;
+    pub use paste::paste;
     pub use silkenweb_dom::{
         tag, Attribute, Builder, DomElement, Element, ElementBuilder, StaticAttribute,
     };
@@ -65,7 +64,7 @@ macro_rules! html_element {
                 $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
             })?
         }
-    ) => { $crate::macros::private::item!{
+    ) => { $crate::macros::private::paste!{
         html_element!(
             $(#[$elem_meta])*
             snake ( [< $name $(_ $name_tail)* >] ),
@@ -109,7 +108,7 @@ macro_rules! html_element {
             })?
         }
     ) => {
-        $crate::macros::private::item! {
+        $crate::macros::private::paste! {
             $(#[$elem_meta])*
             pub fn $snake_name() -> [<$camel_name Builder>] {
                 [<$camel_name Builder>]{ builder: $crate::macros::private::tag($text_name) }
@@ -236,7 +235,7 @@ macro_rules! html_element {
 #[macro_export]
 macro_rules! children_allowed {
     ($name:ident $(- $name_tail:ident)*) => {
-        $crate::macros::private::item! {
+        $crate::macros::private::paste! {
             impl $crate::ParentBuilder for [<$name:camel $($name_tail:camel)* Builder>] {
                 fn text(self, child: impl AsRef<str>) -> Self {
                     Self{ builder: self.builder.text(child) }
@@ -351,7 +350,7 @@ macro_rules! events {
     ($elem_type:ty {
         $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
     }) => {
-        $crate::macros::private::item!{
+        $crate::macros::private::paste!{
             $(
                 pub fn [<on_ $name $(_ $name_tail)* >] (
                     self,
@@ -384,7 +383,7 @@ macro_rules! custom_events {
     ($elem_type:ty {
         $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
     }) => {
-        $crate::macros::private::item!{
+        $crate::macros::private::paste!{
             $(
                 pub fn [<on_ $name $(_ $name_tail)* >] (
                     self,
