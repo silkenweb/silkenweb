@@ -2,8 +2,9 @@
 // Macro dependencies
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
+    // TODO: Use `paste::paste` rather than `paste::item`
     pub use paste::item;
-    pub use silkenweb_dom::{tag, Attribute, Builder, DomElement, Element, ElementBuilder};
+    pub use silkenweb_dom::{tag, Attribute, StaticAttribute, Builder, DomElement, Element, ElementBuilder};
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
@@ -117,13 +118,6 @@ macro_rules! html_element {
             }
 
             impl [<$camel_name Builder>] {
-                $crate::global_attributes![
-                    // TODO: Add all global attrs.
-                    id: String,
-                    class: String,
-                    style: String,
-                ];
-
                 $crate::attributes![
                     $($($(#[$attr_meta])* $attr ($text_attr): $typ,)*)?
                 ];
@@ -203,6 +197,16 @@ macro_rules! html_element {
 
                 fn into_element(self) -> $crate::macros::private::Element {
                     self.build().into()
+                }
+            }
+
+            impl $crate::HtmlElementAttributes for [<$camel_name Builder>] {
+                fn attribute<T: $crate::macros::private::StaticAttribute>(
+                    self,
+                    name: impl AsRef<str>,
+                    value: impl $crate::macros::private::Attribute<T>,
+                ) -> Self {
+                    Self{ builder: self.builder.attribute(name, value) }
                 }
             }
 
@@ -403,22 +407,6 @@ macro_rules! custom_events {
                 }
             )*
         }
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! global_attributes {
-    ($(
-        $(#[$attr_meta:meta])*
-        $attr:ident: $typ:ty
-    ),* $(,)? ) => {
-        $(
-            $(#[$attr_meta])*
-            pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
-                Self{ builder: self.builder.attribute($crate::text_name!($attr), value) }
-            }
-        )*
     };
 }
 
