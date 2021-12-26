@@ -4,7 +4,9 @@ pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     // TODO: Use `paste::paste` rather than `paste::item`
     pub use paste::item;
-    pub use silkenweb_dom::{tag, Attribute, StaticAttribute, Builder, DomElement, Element, ElementBuilder};
+    pub use silkenweb_dom::{
+        tag, Attribute, Builder, DomElement, Element, ElementBuilder, StaticAttribute,
+    };
     pub use wasm_bindgen::JsCast;
     pub use web_sys as dom;
 }
