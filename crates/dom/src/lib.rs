@@ -4,7 +4,6 @@ use std::{
     cell::RefCell,
     collections::{BTreeMap, HashMap},
     future::Future,
-    mem,
     rc::Rc,
 };
 
@@ -186,167 +185,22 @@ impl ElementBuilder {
         self
     }
 
-    fn clone_dom_elements<'a>(children: impl Iterator<Item = &'a Element>) -> Vec<dom::Element> {
-        children
-            .map(|c: &Element| c.dom_element().clone())
-            .collect()
-    }
-
     // TODO: Docs
+    // TODO: tests
     pub fn children_signal(
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
         let child_index = self.child_index;
         self.child_index += 1;
-        let parent_elem = self.dom_element().clone();
-        let child_elems = Rc::new(RefCell::new(Vec::new()));
-        let first_children_of_groups = self.children.clone();
+        let child_vec = ChildVec::new(
+            self.dom_element().clone(),
+            self.children.clone(),
+            child_index,
+        );
 
-        let updater = children.for_each(move |change| {
-            // TODO: Test each match arm
-            // TODO: Tidy this code up, and factor some things out.
-            // TODO: This needs thoroughly checking
-            match change {
-                VecDiff::Replace { values } => {
-                    let mut child_elems = child_elems.borrow_mut();
-                    let existing_children = Self::clone_dom_elements(child_elems.iter());
-                    *child_elems = values.into_iter().map(|elem| elem.into()).collect();
-
-                    {
-                        let mut first_children_of_groups = first_children_of_groups.borrow_mut();
-
-                        match child_elems.first() {
-                            None => first_children_of_groups.clear_child(child_index),
-                            Some(first_child) => first_children_of_groups
-                                .set_child(child_index, first_child.dom_element()),
-                        }
-                    }
-
-                    clone!(parent_elem);
-                    let child_dom_elems = Self::clone_dom_elements(child_elems.iter());
-
-                    queue_update(move || {
-                        for child in existing_children {
-                            parent_elem.remove_child(&child).unwrap();
-                        }
-
-                        for child in child_dom_elems {
-                            parent_elem.append_child(&child).unwrap();
-                        }
-                    });
-                }
-                VecDiff::InsertAt { index, value } => {
-                    let new_child = value.into();
-
-                    if index == 0 {
-                        first_children_of_groups
-                            .borrow_mut()
-                            .set_child(child_index, new_child.dom_element());
-                    }
-
-                    let mut child_elems = child_elems.borrow_mut();
-                    let new_dom_elem = new_child.dom_element();
-
-                    if index < child_elems.len() {
-                        insert_child_before(
-                            &parent_elem,
-                            new_dom_elem,
-                            child_elems[index].dom_element(),
-                        );
-                    } else {
-                        append_child(&parent_elem, new_dom_elem);
-                    }
-
-                    child_elems.insert(index, new_child);
-                }
-                VecDiff::UpdateAt { index, value } => {
-                    let new_child = value.into();
-
-                    if index == 0 {
-                        first_children_of_groups
-                            .borrow_mut()
-                            .set_child(child_index, new_child.dom_element());
-                    }
-
-                    let mut child_elems = child_elems.borrow_mut();
-                    let old_child = child_elems
-                        .get_mut(index)
-                        .expect("Update: index out of range");
-
-                    replace_child(
-                        &parent_elem,
-                        new_child.dom_element(),
-                        old_child.dom_element(),
-                    );
-
-                    *old_child = new_child;
-                }
-                VecDiff::RemoveAt { index } => {
-                    let mut child_elems = child_elems.borrow_mut();
-
-                    let old_child = child_elems.remove(index);
-                    remove_child(&parent_elem, old_child.dom_element());
-
-                    let mut first_children_of_groups = first_children_of_groups.borrow_mut();
-
-                    if child_elems.is_empty() {
-                        first_children_of_groups.clear_child(child_index);
-                    } else if index == 0 {
-                        first_children_of_groups
-                            .set_child(child_index, child_elems.first().unwrap().dom_element())
-                    }
-                }
-                VecDiff::Move { .. } => todo!(),
-                VecDiff::Push { value } => {
-                    let child = value.into();
-
-                    let mut child_elems = child_elems.borrow_mut();
-
-                    if child_elems.is_empty() {
-                        first_children_of_groups
-                            .borrow_mut()
-                            .set_child(child_index, child.dom_element());
-                    }
-
-                    append_child(&parent_elem, child.dom_element());
-                    child_elems.push(child);
-                }
-                VecDiff::Pop {} => {
-                    let mut child_elems = child_elems.borrow_mut();
-                    let removed_child = child_elems.pop();
-                    let is_empty = child_elems.is_empty();
-                    mem::drop(child_elems);
-
-                    if is_empty {
-                        first_children_of_groups
-                            .borrow_mut()
-                            .clear_child(child_index);
-                    }
-
-                    if let Some(removed_child) = removed_child {
-                        remove_child(&parent_elem, removed_child.dom_element())
-                    }
-                }
-                VecDiff::Clear {} => {
-                    let mut child_elems = child_elems.borrow_mut();
-                    let existing_children = Self::clone_dom_elements(child_elems.iter());
-
-                    child_elems.clear();
-                    mem::drop(child_elems);
-                    clone!(parent_elem);
-
-                    queue_update(move || {
-                        for child in existing_children {
-                            parent_elem.remove_child(&child).unwrap();
-                        }
-                    });
-
-                    first_children_of_groups
-                        .borrow_mut()
-                        .clear_child(child_index);
-                }
-            }
+        let updater = children.for_each(move |update| {
+            child_vec.borrow_mut().apply_update(update);
             async {}
         });
 
@@ -532,6 +386,193 @@ impl Builder for Element {
 
     fn into_element(self) -> Element {
         self
+    }
+}
+
+struct ChildVec {
+    parent: dom::Element,
+    first_children_of_groups: Rc<RefCell<Children>>,
+    group_index: usize,
+    children: Vec<Element>,
+}
+
+impl ChildVec {
+    pub fn new(
+        parent: dom::Element,
+        first_children_of_groups: Rc<RefCell<Children>>,
+        group_index: usize,
+    ) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Self {
+            parent,
+            first_children_of_groups,
+            group_index,
+            children: Vec::new(),
+        }))
+    }
+
+    pub fn apply_update(&mut self, update: VecDiff<impl Into<Element>>) {
+        match update {
+            VecDiff::Replace { values } => self.replace(values),
+            VecDiff::InsertAt { index, value } => self.insert(index, value),
+            VecDiff::UpdateAt { index, value } => self.set_at(index, value),
+            VecDiff::RemoveAt { index } => {
+                self.remove(index);
+            }
+            VecDiff::Move {
+                old_index,
+                new_index,
+            } => self.relocate(old_index, new_index),
+            VecDiff::Push { value } => self.push(value),
+            VecDiff::Pop {} => self.pop(),
+            VecDiff::Clear {} => self.clear(),
+        }
+    }
+
+    pub fn replace(&mut self, new_children: Vec<impl Into<Element>>) {
+        self.clear();
+        self.children = new_children
+            .into_iter()
+            .map(Into::<Element>::into)
+            .collect();
+
+        {
+            let mut first_children_of_groups = self.first_children_of_groups.borrow_mut();
+
+            match self.children.first() {
+                None => first_children_of_groups.clear_child(self.group_index),
+                Some(first_child) => {
+                    first_children_of_groups.set_child(self.group_index, first_child.dom_element())
+                }
+            }
+        }
+
+        let children = self.child_dom_elements();
+        let parent = self.parent.clone();
+
+        queue_update(move || {
+            for child in children {
+                parent.append_child(&child).unwrap();
+            }
+        });
+    }
+
+    pub fn insert(&mut self, index: usize, new_child: impl Into<Element>) {
+        if index >= self.children.len() {
+            self.push(new_child);
+            return;
+        }
+
+        let new_child = new_child.into();
+
+        if index == 0 {
+            self.first_children_of_groups
+                .borrow_mut()
+                .set_child(self.group_index, new_child.dom_element());
+        }
+
+        let new_dom_elem = new_child.dom_element();
+
+        assert!(index < self.children.len());
+        insert_child_before(
+            &self.parent,
+            new_dom_elem,
+            self.children[index].dom_element(),
+        );
+        self.children.insert(index, new_child);
+    }
+
+    pub fn set_at(&mut self, index: usize, new_child: impl Into<Element>) {
+        let new_child = new_child.into();
+
+        if index == 0 {
+            self.first_children_of_groups
+                .borrow_mut()
+                .set_child(self.group_index, new_child.dom_element());
+        }
+
+        let old_child = &mut self.children[index];
+
+        replace_child(
+            &self.parent,
+            new_child.dom_element(),
+            old_child.dom_element(),
+        );
+
+        *old_child = new_child;
+    }
+
+    pub fn remove(&mut self, index: usize) -> Element {
+        let old_child = self.children.remove(index);
+        remove_child(&self.parent, old_child.dom_element());
+
+        let mut first_children_of_groups = self.first_children_of_groups.borrow_mut();
+
+        match self.children.first() {
+            None => first_children_of_groups.clear_child(self.group_index),
+            Some(first) => {
+                if index == 0 {
+                    first_children_of_groups.set_child(self.group_index, first.dom_element())
+                }
+            }
+        }
+
+        old_child
+    }
+
+    pub fn relocate(&mut self, old_index: usize, new_index: usize) {
+        let child = self.remove(old_index);
+        self.insert(new_index, child);
+    }
+
+    pub fn push(&mut self, new_child: impl Into<Element>) {
+        let new_child = new_child.into();
+
+        if self.children.is_empty() {
+            self.first_children_of_groups
+                .borrow_mut()
+                .set_child(self.group_index, new_child.dom_element());
+        }
+
+        append_child(&self.parent, new_child.dom_element());
+        self.children.push(new_child);
+    }
+
+    pub fn pop(&mut self) {
+        let removed_child = self.children.pop();
+
+        if self.children.is_empty() {
+            self.first_children_of_groups
+                .borrow_mut()
+                .clear_child(self.group_index);
+        }
+
+        if let Some(removed_child) = removed_child {
+            remove_child(&self.parent, removed_child.dom_element());
+        }
+    }
+
+    pub fn clear(&mut self) {
+        let existing_children = self.child_dom_elements();
+        self.children.clear();
+        let parent = self.parent.clone();
+
+        queue_update(move || {
+            for child in existing_children {
+                parent.remove_child(&child).unwrap();
+            }
+        });
+
+        self.first_children_of_groups
+            .borrow_mut()
+            .clear_child(self.group_index);
+    }
+
+    fn child_dom_elements(&self) -> Vec<dom::Element> {
+        self.children
+            .iter()
+            .map(Element::dom_element)
+            .cloned()
+            .collect()
     }
 }
 
