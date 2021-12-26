@@ -122,7 +122,7 @@ pub trait HtmlElementAttributes: Sized {
         /// - characters, all letters should default to uppercase
         autocapitalize: String,
         /// Indicates that an element is to be focused on page load, or as soon
-        /// as the <dialog> it is part of is displayed. This attribute is a
+        /// as the `<dialog>` it is part of is displayed. This attribute is a
         /// boolean, initially false.
         autofocus: bool,
         /// A space-separated list of the classes of the element. Classes allows
@@ -138,7 +138,7 @@ pub trait HtmlElementAttributes: Sized {
         ///   editable;
         /// - false, which indicates that the element must not be editable.
         contenteditable: String,
-        /// The id of a <menu> to use as the contextual menu for this element.
+        /// The id of a `<menu>` to use as the contextual menu for this element.
         contextmenu: String,
         /// An enumerated attribute indicating the directionality of the
         /// element's text. It can have the following values:
@@ -177,8 +177,8 @@ pub trait HtmlElementAttributes: Sized {
         id: String,
         /// Provides a hint to browsers as to the type of virtual keyboard
         /// configuration to use when editing this element or its contents. Used
-        /// primarily on <input> elements, but is usable on any element while in
-        /// contenteditable mode.
+        /// primarily on `<input>` elements, but is usable on any element while
+        /// in contenteditable mode.
         inputmode: String,
         /// Allows you to specify that a standard HTML element should behave
         /// like a registered custom built-in element (see Using custom elements
@@ -222,9 +222,9 @@ pub trait HtmlElementAttributes: Sized {
         /// via the ::part pseudo-element.
         part: String,
         /// Assigns a slot in a shadow DOM shadow tree to an element: An element
-        /// with a slot attribute is assigned to the slot created by the <slot>
-        /// element whose name attribute's value matches that slot attribute's
-        /// value.
+        /// with a slot attribute is assigned to the slot created by the
+        /// `<slot>` element whose name attribute's value matches that
+        /// slot attribute's value.
         slot: String,
         /// An enumerated attribute defines whether the element may be checked
         /// for spelling errors. It may have the following values:
@@ -236,7 +236,7 @@ pub trait HtmlElementAttributes: Sized {
         spellcheck: String,
         /// Contains CSS styling declarations to be applied to the element. Note
         /// that it is recommended for styles to be defined in a separate file
-        /// or files. This attribute and the <style> element have mainly the
+        /// or files. This attribute and the `<style>` element have mainly the
         /// purpose of allowing for quick styling, for example for testing
         /// purposes.
         style: String,
