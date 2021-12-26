@@ -368,7 +368,6 @@ fn spawn_cancelable_future(
 /// it will be moved.
 pub struct Element {
     dom_element: dom::Element,
-    // TODO: Make these read only vecs
     event_callbacks: Vec<EventCallback>,
     futures: Vec<SignalHandle>,
 }
@@ -825,7 +824,6 @@ pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
     SignalType(sig)
 }
 
-// TODO(review): Find a better way to add all child types to dom
 /// Get a raw Javascript, non-reactive DOM element.
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
