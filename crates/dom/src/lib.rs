@@ -672,7 +672,7 @@ macro_rules! define_attribute_values{
     }
 }
 
-define_attribute_values!( i8, i16, i32, i64);
+define_attribute_values!(i8, i16, i32, i64);
 define_attribute_values!(u8, u16, u32, u64);
 define_attribute_values!(f32, f64);
 define_attribute_values!(String);
