@@ -660,71 +660,22 @@ pub trait AttributeValue {
     fn text(&self) -> String;
 }
 
-impl AttributeValue for i8 {
-    fn text(&self) -> String {
-        format!("{}", self)
+macro_rules! define_attribute_values{
+    ($($typ:ty),* $(,)?) => {
+        $(
+            impl AttributeValue for $typ {
+                fn text(&self) -> String {
+                    format!("{}", self)
+                }
+            }
+        )*
     }
 }
 
-impl AttributeValue for i16 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for i32 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for i64 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for u8 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for u16 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for u32 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for u64 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for f32 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for f64 {
-    fn text(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl AttributeValue for String {
-    fn text(&self) -> String {
-        self.clone()
-    }
-}
+define_attribute_values!( i8, i16, i32, i64);
+define_attribute_values!(u8, u16, u32, u64);
+define_attribute_values!(f32, f64);
+define_attribute_values!(String);
 
 /// A non-reactive attribute.
 pub trait StaticAttribute {
