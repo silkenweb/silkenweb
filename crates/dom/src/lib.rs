@@ -83,7 +83,6 @@ pub struct ElementBuilder {
     element: Element,
     children: Rc<RefCell<Children>>,
     attribute_futures: HashMap<String, SignalHandle>,
-    child_index: usize,
 }
 
 impl ElementBuilder {
@@ -104,7 +103,6 @@ impl ElementBuilder {
             },
             children: Rc::new(RefCell::new(Children::new(dom_element))),
             attribute_futures: HashMap::new(),
-            child_index: 0,
         }
     }
 
@@ -125,12 +123,10 @@ impl ElementBuilder {
         let child = child.into();
         self.children
             .borrow_mut()
-            .add_child(self.child_index, child.dom_element());
-
+            .append_new_group(child.dom_element());
         self.element.event_callbacks.extend(child.event_callbacks);
         self.element.futures.extend(child.futures);
 
-        self.child_index += 1;
         self
     }
 
@@ -138,8 +134,7 @@ impl ElementBuilder {
         mut self,
         child_signal: impl 'static + Signal<Item = impl Into<Element>>,
     ) -> Self {
-        let child_index = self.child_index;
-        self.child_index += 1;
+        let group_index = self.children.borrow_mut().new_group();
         let children = self.children.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
@@ -148,7 +143,7 @@ impl ElementBuilder {
             let child = child.into();
             children
                 .borrow_mut()
-                .add_child(child_index, child.dom_element());
+                .add_child(group_index, child.dom_element());
             _child_storage = Some(child);
             async {}
         });
@@ -162,8 +157,7 @@ impl ElementBuilder {
         mut self,
         child_signal: impl 'static + Signal<Item = Option<impl Into<Element>>>,
     ) -> Self {
-        let child_index = self.child_index;
-        self.child_index += 1;
+        let group_index = self.children.borrow_mut().new_group();
         let children = self.children.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
@@ -173,10 +167,10 @@ impl ElementBuilder {
                 let child = child.into();
                 children
                     .borrow_mut()
-                    .add_child(child_index, child.dom_element());
+                    .add_child(group_index, child.dom_element());
                 _child_storage = Some(child);
             } else {
-                children.borrow_mut().remove_child(child_index);
+                children.borrow_mut().remove_child(group_index);
                 _child_storage = None;
             }
 
@@ -194,12 +188,11 @@ impl ElementBuilder {
         mut self,
         children: impl 'static + SignalVec<Item = impl Into<Element>>,
     ) -> Self {
-        let child_index = self.child_index;
-        self.child_index += 1;
+        let group_index = self.children.borrow_mut().new_group();
         let child_vec = ChildVec::new(
             self.dom_element().clone(),
             self.children.clone(),
-            child_index,
+            group_index,
         );
 
         let updater = children.for_each(move |update| {
@@ -212,12 +205,9 @@ impl ElementBuilder {
     }
 
     /// Add a text node after existing children.
-    pub fn text(mut self, child: &str) -> Self {
+    pub fn text(self, child: &str) -> Self {
         let text_node = document().create_text_node(child);
-        self.children
-            .borrow_mut()
-            .add_child(self.child_index, &text_node);
-        self.child_index += 1;
+        self.children.borrow_mut().append_new_group(&text_node);
         self
     }
 
@@ -226,11 +216,7 @@ impl ElementBuilder {
         child_signal: impl 'static + Signal<Item = impl Into<String>>,
     ) -> Self {
         let text_node = document().create_text_node(intern(""));
-        let child_index = self.child_index;
-        self.child_index += 1;
-        self.children
-            .borrow_mut()
-            .add_child(child_index, &text_node);
+        self.children.borrow_mut().append_new_group(&text_node);
 
         let updater = child_signal.for_each({
             clone!(text_node);
@@ -587,6 +573,10 @@ impl ChildVec {
 // group
 struct Children {
     parent: dom::Element,
+    next_group_index: usize,
+    // TODO: We should just use a `Vec<Option<dom::Node>>`.
+    // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
+    // insert and cannot be shrunk to fit.
     children: BTreeMap<usize, dom::Node>,
 }
 
@@ -594,8 +584,20 @@ impl Children {
     fn new(parent: dom::Element) -> Self {
         Self {
             parent,
+            next_group_index: 0,
             children: BTreeMap::new(),
         }
+    }
+
+    fn new_group(&mut self) -> usize {
+        let index = self.next_group_index;
+        self.next_group_index += 1;
+        index
+    }
+
+    fn append_new_group(&mut self, child: &dom::Node) {
+        let group_index = self.new_group();
+        self.add_child(group_index, child);
     }
 
     fn add_child(&mut self, index: usize, child: &dom::Node) {
