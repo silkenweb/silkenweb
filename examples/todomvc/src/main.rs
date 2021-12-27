@@ -4,7 +4,6 @@ extern crate derive_more;
 use std::{cell::Cell, rc::Rc};
 
 use futures_signals::{
-    map_ref,
     signal::{Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
@@ -15,7 +14,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    local_storage, mount,
+    local_storage, mount, product,
     router::url,
     signal, Builder, Effects, HtmlElement, ParentBuilder,
 };
@@ -242,10 +241,7 @@ impl TodoApp {
         app: Rc<Self>,
         active_count: impl 'static + Signal<Item = usize>,
     ) -> impl Signal<Item = Option<Button>> {
-        let item_count = app.items.signal_vec_cloned().len();
-
-        // TODO: Combine signals to tuples (signal_product! macro)
-        map_ref!(item_count, active_count => (*item_count, *active_count)).map(
+        product!(app.items.signal_vec_cloned().len(), active_count).map(
             move |(item_count, active_count)| {
                 let any_completed = item_count != active_count;
                 clone!(app);
@@ -275,15 +271,12 @@ impl TodoApp {
         let item_filter = Broadcaster::new(item_filter);
 
         self.items_signal().filter_signal_cloned(move |item| {
-            map_ref!(
-                let completed = item.completed.signal(),
-                let item_filter = item_filter.signal() => {
-                    match item_filter {
-                        Filter::All => true,
-                        Filter::Active => !*completed,
-                        Filter::Completed => *completed,
-                    }
-                }
+            product!(item.completed.signal(), item_filter.signal()).map(
+                |(completed, item_filter)| match item_filter {
+                    Filter::All => true,
+                    Filter::Active => !completed,
+                    Filter::Completed => completed,
+                },
             )
         })
     }
@@ -410,10 +403,7 @@ impl TodoItem {
     }
 
     fn class(&self) -> impl Signal<Item = String> {
-        let completed = self.completed();
-        let editing = self.editing.signal();
-
-        map_ref!(completed, editing => (*completed, *editing)).map(|(completed, editing)| {
+        product!(self.completed(), self.editing.signal()).map(|(completed, editing)| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| if flag { Some(name) } else { None })

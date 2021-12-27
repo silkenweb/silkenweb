@@ -20,6 +20,11 @@ use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
 use web_sys as dom;
 
+#[doc(hidden)]
+pub mod private {
+    pub use futures_signals::map_ref;
+}
+
 /// Mount an element on the document.
 ///
 /// `id` is the html element id of the parent element. The element is added as
@@ -921,4 +926,25 @@ macro_rules! clone{
             let $name = $name.clone();
         )*
     }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! named_product{
+    ( $($name:ident),* ; ; $($id:ident = $e:expr),*) => {
+        $crate::private::map_ref!(
+            $(let $id = $e),* => ($(*$id),*)
+        )
+    };
+    ($name:ident $(, $name_tail:ident)* ; $expression:expr $(, $expression_tail:expr)* ; $($id:ident = $e:expr),*) => {
+        $crate::named_product!($($name_tail),*; $($expression_tail),*; $($id = $e, )* $name = $expression )
+    };
+    ( ; $($expression:expr),* ; $($id:ident = $e:expr),*) => { compile_error!("Exceeded maximum of 10 arguments") }
+}
+
+#[macro_export]
+macro_rules! product{
+    ($($e:expr),* $(,)?) => {
+        $crate::named_product!(a, b, c, d, e, f, g, h, i, j; $($e),*; )
+    };
 }

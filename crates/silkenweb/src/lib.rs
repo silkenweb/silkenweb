@@ -26,7 +26,7 @@
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
 pub use silkenweb_dom::{
-    clone, local_storage, mount,
+    clone, local_storage, mount, product,
     render::{after_render, render_updates},
     session_storage, signal, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement,
     Element, ElementBuilder,
