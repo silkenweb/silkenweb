@@ -383,7 +383,7 @@ impl Builder for Element {
 
 struct ChildVec {
     parent: dom::Element,
-    first_children_of_groups: Rc<RefCell<ChildGroups>>,
+    child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
 }
@@ -391,12 +391,12 @@ struct ChildVec {
 impl ChildVec {
     pub fn new(
         parent: dom::Element,
-        first_children_of_groups: Rc<RefCell<ChildGroups>>,
+        child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
         Rc::new(RefCell::new(Self {
             parent,
-            first_children_of_groups,
+            child_groups,
             group_index,
             children: Vec::new(),
         }))
@@ -427,19 +427,17 @@ impl ChildVec {
             .map(Into::<Element>::into)
             .collect();
 
-        let mut first_children_of_groups = self.first_children_of_groups.borrow_mut();
+        let mut child_groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
-            first_children_of_groups.clear_first_child(self.group_index);
+            child_groups.clear_first_child(self.group_index);
             return;
         }
 
         let children = self.child_dom_elements();
-        first_children_of_groups.set_first_child(self.group_index, children.first().unwrap());
+        child_groups.set_first_child(self.group_index, children.first().unwrap());
         let parent = self.parent.clone();
-        let next_group_elem = first_children_of_groups
-            .get_next_group_elem(self.group_index)
-            .cloned();
+        let next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
         queue_update(move || {
             for child in children {
@@ -460,7 +458,7 @@ impl ChildVec {
         let new_dom_elem = new_child.dom_element();
 
         if index == 0 {
-            self.first_children_of_groups
+            self.child_groups
                 .borrow_mut()
                 .set_first_child(self.group_index, new_dom_elem);
         }
@@ -480,7 +478,7 @@ impl ChildVec {
         let new_child = new_child.into();
 
         if index == 0 {
-            self.first_children_of_groups
+            self.child_groups
                 .borrow_mut()
                 .set_first_child(self.group_index, new_child.dom_element());
         }
@@ -500,13 +498,13 @@ impl ChildVec {
         let old_child = self.children.remove(index);
         remove_child(&self.parent, old_child.dom_element());
 
-        let mut first_children_of_groups = self.first_children_of_groups.borrow_mut();
+        let mut child_groups = self.child_groups.borrow_mut();
 
         match self.children.first() {
-            None => first_children_of_groups.clear_first_child(self.group_index),
+            None => child_groups.clear_first_child(self.group_index),
             Some(first) => {
                 if index == 0 {
-                    first_children_of_groups.set_first_child(self.group_index, first.dom_element())
+                    child_groups.set_first_child(self.group_index, first.dom_element())
                 }
             }
         }
@@ -522,7 +520,7 @@ impl ChildVec {
     pub fn push(&mut self, new_child: impl Into<Element>) {
         let new_child = new_child.into();
         let new_child_dom = new_child.dom_element();
-        let mut groups = self.first_children_of_groups.borrow_mut();
+        let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
             groups.insert_only_child(self.group_index, new_child_dom);
@@ -537,7 +535,7 @@ impl ChildVec {
         let removed_child = self.children.pop();
 
         if self.children.is_empty() {
-            self.first_children_of_groups
+            self.child_groups
                 .borrow_mut()
                 .clear_first_child(self.group_index);
         }
@@ -558,7 +556,7 @@ impl ChildVec {
             }
         });
 
-        self.first_children_of_groups
+        self.child_groups
             .borrow_mut()
             .clear_first_child(self.group_index);
     }
