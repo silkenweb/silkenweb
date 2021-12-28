@@ -11,15 +11,16 @@ use web_sys as dom;
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
+    attribute::{Attribute, StaticAttribute},
     clone, document,
     render::{after_render, queue_update},
-    spawn_cancelable_future, Attribute, StaticAttribute,
+    spawn_cancelable_future,
 };
 
 mod child_groups;
 mod child_vec;
-mod event;
 mod dom_children;
+mod event;
 
 /// Build an HTML element.
 pub struct ElementBuilder {
