@@ -65,6 +65,34 @@ impl TodoApp {
         }
     }
 
+    fn new_todo(&self, text: String) {
+        let todo_id = self.todo_id.get();
+        self.todo_id.replace(todo_id + 1);
+
+        self.items
+            .lock_mut()
+            .push_cloned(TodoItem::new(todo_id, text));
+        self.save();
+    }
+
+    fn set_completed_states(&self, completed: bool) {
+        for item in self.items.lock_ref().iter() {
+            item.completed.set_neq(completed);
+        }
+
+        self.save();
+    }
+
+    fn clear_completed_todos(&self) {
+        self.items.lock_mut().retain(|item| !item.completed.get());
+        self.save();
+    }
+
+    fn remove_item(&self, todo_id: u128) {
+        self.items.lock_mut().retain(|item| item.id != todo_id);
+        self.save();
+    }
+
     fn render(app: Rc<Self>, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
         let input_elem = input()
             .class("new-todo")
@@ -78,14 +106,8 @@ impl TodoApp {
                         let text = text.trim().to_string();
 
                         if !text.is_empty() {
-                            let todo_id = app.todo_id.get();
-                            app.todo_id.set(todo_id + 1);
-
-                            app.items
-                                .lock_mut()
-                                .push_cloned(TodoItem::new(todo_id, text));
+                            app.new_todo(text);
                             input.set_value("");
-                            app.save();
                         }
                     }
                 }
@@ -94,12 +116,11 @@ impl TodoApp {
             .build();
 
         let completed = app
-            .items
-            .signal_vec_cloned()
+            .items_signal()
             .map_signal(|todo| todo.completed.signal());
         let active_count = Broadcaster::new(completed.filter(|completed| !completed).len());
         let item_filter = Broadcaster::new(item_filter);
-        let is_empty = Broadcaster::new(app.items.signal_vec_cloned().is_empty());
+        let is_empty = Broadcaster::new(app.items_signal().is_empty());
 
         section()
             .class("todoapp")
@@ -144,15 +165,7 @@ impl TodoApp {
                                 .on_change({
                                     clone!(app);
 
-                                    move |_, elem| {
-                                        let checked = elem.checked();
-
-                                        for item in app.items.lock_ref().iter() {
-                                            item.completed.set_neq(checked);
-                                        }
-
-                                        app.save();
-                                    }
+                                    move |_, elem| app.set_completed_states(elem.checked())
                                 })
                                 .effect_signal(all_complete.signal(), |elem, all_complete| {
                                     elem.set_checked(all_complete)
@@ -242,27 +255,22 @@ impl TodoApp {
         app: Rc<Self>,
         active_count: impl 'static + Signal<Item = usize>,
     ) -> impl Signal<Item = Option<Button>> {
-        product!(app.items.signal_vec_cloned().len(), active_count).map(
-            move |(item_count, active_count)| {
-                let any_completed = item_count != active_count;
-                clone!(app);
+        product!(app.items_signal().len(), active_count).map(move |(item_count, active_count)| {
+            let any_completed = item_count != active_count;
+            clone!(app);
 
-                if any_completed {
-                    Some(
-                        button()
-                            .class("clear-completed")
-                            .text("Clear completed")
-                            .on_click(move |_, _| {
-                                app.items.lock_mut().retain(|item| !item.completed.get());
-                                app.save();
-                            })
-                            .build(),
-                    )
-                } else {
-                    None
-                }
-            },
-        )
+            if any_completed {
+                Some(
+                    button()
+                        .class("clear-completed")
+                        .text("Clear completed")
+                        .on_click(move |_, _| app.clear_completed_todos())
+                        .build(),
+                )
+            } else {
+                None
+            }
+        })
     }
 
     fn visible_items_signal(
@@ -285,10 +293,6 @@ impl TodoApp {
     fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
         self.items.signal_vec_cloned()
     }
-
-    fn remove_item(&self, todo_id: u128) {
-        self.items.lock_mut().retain(|item| item.id != todo_id);
-    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -310,6 +314,41 @@ impl TodoItem {
         })
     }
 
+    fn set_editing(&self) {
+        self.editing.set(true);
+    }
+
+    fn set_completed(&self, app: &TodoApp, completed: bool) {
+        self.completed.set(completed);
+        app.save();
+    }
+
+    fn save_edits(&self, app: &TodoApp, text: String) {
+        if !self.editing.get() {
+            return;
+        }
+
+        let text = text.trim();
+
+        if text.is_empty() {
+            self.remove(app);
+        } else {
+            self.text.set(text.to_string());
+            self.editing.set(false);
+        }
+
+        app.save();
+    }
+
+    fn revert_edits(&self) -> String {
+        self.editing.set(false);
+        self.text.get_cloned()
+    }
+
+    fn remove(&self, app: &TodoApp) {
+        app.remove_item(self.id)
+    }
+
     fn render(todo: Rc<Self>, app: Rc<TodoApp>) -> Li {
         li().class(signal(todo.class()))
             .child(Self::define_edit(&todo, &app))
@@ -324,23 +363,17 @@ impl TodoItem {
             .value(signal(todo.text()))
             .on_focusout({
                 clone!(todo, app);
-                move |_, input| todo.save_edits(&app, &input)
+                move |_, input| todo.save_edits(&app, input.value())
             })
             .on_keyup({
                 clone!(todo, app);
                 move |keyup, input| match keyup.key().as_str() {
-                    "Escape" => {
-                        input.set_value(&todo.text.get_cloned());
-                        todo.editing.set(false);
-                    }
-                    "Enter" => {
-                        todo.save_edits(&app, &input);
-                        app.save();
-                    }
+                    "Escape" => input.set_value(&todo.revert_edits()),
+                    "Enter" => todo.save_edits(&app, input.value()),
                     _ => (),
                 }
             })
-            .effect_signal(todo.editing.signal(), |elem, editing| {
+            .effect_signal(todo.is_editing(), |elem, editing| {
                 elem.set_hidden(!editing);
 
                 if editing {
@@ -356,10 +389,7 @@ impl TodoItem {
             .type_("checkbox")
             .on_click({
                 clone!(todo, app);
-                move |_, elem| {
-                    todo.completed.set(elem.checked());
-                    app.save();
-                }
+                move |_, elem| todo.set_completed(&app, elem.checked())
             })
             .checked(signal(todo.completed()))
             .effect_signal(todo.completed(), |elem, completed| {
@@ -371,40 +401,18 @@ impl TodoItem {
             .child(completed_checkbox)
             .child(label().text_signal(todo.text()).on_dblclick({
                 clone!(todo);
-                move |_, _| todo.editing.set(true)
+                move |_, _| todo.set_editing()
             }))
             .child(button().class("destroy").on_click({
                 clone!(todo);
-                move |_, _| {
-                    app.remove_item(todo.id);
-                    app.save();
-                }
+                move |_, _| todo.remove(&app)
             }))
-            .effect_signal(todo.editing.signal(), |elem, editing| {
-                elem.set_hidden(editing)
-            })
+            .effect_signal(todo.is_editing(), |elem, editing| elem.set_hidden(editing))
             .build()
     }
 
-    fn save_edits(&self, app: &TodoApp, input: &HtmlInputElement) {
-        if !self.editing.get() {
-            return;
-        }
-
-        let text = input.value();
-        let text = text.trim();
-        let id = self.id;
-
-        if text.is_empty() {
-            app.remove_item(id);
-        } else {
-            self.text.set(text.to_string());
-            self.editing.set(false);
-        }
-    }
-
     fn class(&self) -> impl Signal<Item = String> {
-        product!(self.completed(), self.editing.signal()).map(|(completed, editing)| {
+        product!(self.completed(), self.is_editing()).map(|(completed, editing)| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| if flag { Some(name) } else { None })
@@ -419,6 +427,10 @@ impl TodoItem {
 
     fn completed(&self) -> impl Signal<Item = bool> {
         self.completed.signal()
+    }
+
+    fn is_editing(&self) -> impl Signal<Item = bool> {
+        self.editing.signal()
     }
 }
 
