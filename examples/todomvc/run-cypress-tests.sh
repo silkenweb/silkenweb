@@ -4,7 +4,7 @@ set -euo pipefail
 
 # We build first to try and mitigate cypress timing out waiting for our server.
 trunk build
-trunk serve --no-autoreload --ignore=cypress-tests &
+trunk serve --release --no-autoreload --ignore=cypress-tests &
 trap 'kill %%' EXIT
 
 (
