@@ -1,5 +1,4 @@
 //! A reactive interface to the DOM.
-// TODO: Split this file up
 pub mod render;
 use std::{cell::RefCell, collections::HashMap, future::Future};
 
