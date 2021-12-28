@@ -3,7 +3,11 @@ use std::{cell::RefCell, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use web_sys as dom;
 
-use super::{child_groups::ChildGroups, dom_children::{remove_child, replace_child}, Element};
+use super::{
+    child_groups::ChildGroups,
+    dom_children::{remove_child, replace_child},
+    Element,
+};
 use crate::{
     element::{dom_children::insert_child_before, DomElement},
     render::queue_update,

@@ -1,6 +1,6 @@
 use web_sys as dom;
 
-use crate::{clone, render::queue_update, ElementBuilder, DomElement};
+use crate::{clone, render::queue_update, DomElement, ElementBuilder};
 
 pub trait AttributeValue {
     fn text(&self) -> String;
