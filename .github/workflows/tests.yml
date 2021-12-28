@@ -59,8 +59,6 @@ jobs:
       run: wasm-pack test --headless --firefox
       working-directory: crates/silkenweb
     - name: Cypress tests
-      # TODO: Not sure why this doesn't work. Need to get access to a Mac to test.
-      if: matrix.os != 'macos-latest'
       working-directory: examples/todomvc
       run: |
         bash install-cypress.sh
