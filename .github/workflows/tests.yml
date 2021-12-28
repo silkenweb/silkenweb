@@ -58,13 +58,28 @@ jobs:
       # TODO: Chromium tests fail under `act`
       run: wasm-pack test --headless --firefox
       working-directory: crates/silkenweb
-    - name: Cypress tests
-      # TODO: Not sure why this doesn't work. Need to get access to a Mac to test.
+    - name: Cypress run
+      # Cypress doesn't support Safari yet
       if: matrix.os != 'macos-latest'
-      working-directory: examples/todomvc
-      run: |
-        bash install-cypress.sh
-        bash run-cypress-tests.sh
+      uses: cypress-io/github-action@v2
+      with:
+        working-directory: examples/todomvc/cypress-tests
+        start: npm start
+        build: npm run build
+        wait-on: 'http://localhost:8080'
+        browser: firefox
+    # Screenshots are only generated on failure
+    - uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: todomvc-cypress-screenshots
+        path: examples/todomvc/cypress-tests/cypress/screenshots
+    # Videos are generated regardless of success or failure
+    - uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: todomvc-cypress-videos
+        path: examples/todomvc/cypress-tests/cypress/videos
 
   nightly:
     strategy:
