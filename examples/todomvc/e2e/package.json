@@ -12,7 +12,6 @@
     "start-server-and-test": "^1.14.0"
   },
   "scripts": {
-    "build": "cd .. && trunk build",
     "start": "cd .. && trunk serve --no-autoreload --ignore=.",
     "cy:run": "cypress run",
     "test": "start-server-and-test start http://localhost:8080 cy:run"
