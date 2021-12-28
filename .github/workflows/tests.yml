@@ -64,8 +64,8 @@ jobs:
       uses: cypress-io/github-action@v2
       with:
         working-directory: examples/todomvc/cypress-tests
-        start: npm start
         build: npm run build
+        start: npm start
         wait-on: 'http://localhost:8080'
         browser: firefox
     # Screenshots are only generated on failure
