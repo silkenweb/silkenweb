@@ -26,10 +26,10 @@
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
 pub use silkenweb_dom::{
-    clone, local_storage, mount, product,
+    clone, mount, product,
     render::{after_render, render_updates},
-    session_storage, signal, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement,
-    Element, ElementBuilder,
+    signal, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement, Element,
+    ElementBuilder, Storage,
 };
 pub use silkenweb_html::{
     children_allowed, elements, html_element, CustomEvent, Effects, HtmlElement, ParentBuilder,

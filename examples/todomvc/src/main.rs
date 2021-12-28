@@ -14,9 +14,9 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    local_storage, mount, product,
+    mount, product,
     router::url,
-    signal, Builder, Effects, HtmlElement, ParentBuilder,
+    signal, Builder, Effects, HtmlElement, ParentBuilder, Storage,
 };
 use web_sys::HtmlInputElement;
 
@@ -43,8 +43,9 @@ struct TodoApp {
 impl TodoApp {
     fn load() -> Rc<Self> {
         Rc::new(
-            if let Some(app_str) =
-                local_storage().and_then(|storage| storage.get_item(STORAGE_KEY).ok().flatten())
+            if let Some(app_str) = Storage::local()
+                .ok()
+                .and_then(|storage| storage.get(STORAGE_KEY))
             {
                 serde_json::from_str(&app_str).unwrap()
             } else {
@@ -57,10 +58,10 @@ impl TodoApp {
     }
 
     fn save(&self) {
-        if let Some(storage) = local_storage() {
+        if let Ok(storage) = Storage::local() {
             storage
-                .set_item(STORAGE_KEY, &serde_json::to_string(self).unwrap())
-                .unwrap();
+                .insert(STORAGE_KEY, &serde_json::to_string(self).unwrap())
+                .expect("Out of space");
         }
     }
 

@@ -11,9 +11,11 @@ pub mod macros;
 
 mod attribute;
 mod element;
+mod storage;
 
 pub use attribute::{Attribute, AttributeValue, StaticAttribute};
 pub use element::{signal, Builder, DomElement, Element, ElementBuilder};
+pub use storage::Storage;
 
 /// Mount an element on the document.
 ///
@@ -76,20 +78,6 @@ fn spawn_cancelable_future(
     spawn_local(cancelable_future);
 
     handle
-}
-
-// TODO: We probably want a better storage API.
-// We want to be able to iterator over it like a map using Object::entries and
-// Object::keys
-/// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
-pub fn local_storage() -> Option<dom::Storage> {
-    // TODO: Under what circumstances can these fail?
-    window().local_storage().unwrap()
-}
-
-/// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
-pub fn session_storage() -> Option<dom::Storage> {
-    window().session_storage().unwrap()
 }
 
 thread_local!(
