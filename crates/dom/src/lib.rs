@@ -1,12 +1,7 @@
 //! A reactive interface to the DOM.
 // TODO: Split this file up
 pub mod render;
-use std::{
-    cell::RefCell,
-    collections::{BTreeMap, HashMap},
-    future::Future,
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashMap, future::Future, mem, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -575,33 +570,27 @@ impl ChildVec {
 /// This manages insertion and removal of groups of children
 struct ChildGroups {
     parent: dom::Element,
-    next_group_index: usize,
-    // TODO: We should just use a `Vec<Option<dom::Node>>`.
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
-    children: BTreeMap<usize, dom::Node>,
+    children: Vec<Option<dom::Node>>,
 }
 
 impl ChildGroups {
     pub fn new(parent: dom::Element) -> Self {
         Self {
             parent,
-            next_group_index: 0,
-            children: BTreeMap::new(),
+            children: Vec::new(),
         }
     }
 
     pub fn new_group(&mut self) -> usize {
-        let index = self.next_group_index;
-        self.next_group_index += 1;
+        let index = self.children.len();
+        self.children.push(None);
         index
     }
 
     pub fn get_next_group_elem(&self, index: usize) -> Option<&dom::Node> {
-        self.children
-            .range((index + 1)..)
-            .map(|(_key, value)| value)
-            .next()
+        self.children.split_at(index + 1).1.iter().flatten().next()
     }
 
     pub fn append_new_group(&mut self, child: &dom::Node) {
@@ -615,15 +604,13 @@ impl ChildGroups {
 
     /// Return `true` iff there was an existing node.
     pub fn upsert_only_child(&mut self, index: usize, child: &dom::Node) -> bool {
-        let existing = self
-            .children
-            .insert(index, child.clone())
+        let existed = mem::replace(&mut self.children[index], Some(child.clone()))
             .map(|existing| remove_child(&self.parent, &existing))
             .is_some();
 
         self.insert_last_child(index, child);
 
-        existing
+        existed
     }
 
     pub fn insert_last_child(&self, index: usize, child: &dom::Node) {
@@ -634,17 +621,21 @@ impl ChildGroups {
     }
 
     pub fn set_first_child(&mut self, index: usize, child: &dom::Node) {
-        self.children.insert(index, child.clone());
+        self.children[index] = Some(child.clone());
     }
 
     pub fn remove_child(&mut self, index: usize) {
-        if let Some(existing) = self.children.remove(&index) {
+        if let Some(existing) = mem::replace(&mut self.children[index], None) {
             remove_child(&self.parent, &existing);
         }
     }
 
     pub fn clear_first_child(&mut self, index: usize) {
-        self.children.remove(&index);
+        self.children[index] = None;
+    }
+
+    pub fn shrink_to_fit(&mut self) {
+        self.children.shrink_to_fit();
     }
 }
 
