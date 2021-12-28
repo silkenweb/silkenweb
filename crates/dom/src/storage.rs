@@ -12,28 +12,34 @@ macro_rules! unexpected_exception {
 pub struct Storage(dom::Storage);
 
 impl Storage {
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+    /// Get the window's local storage.
+    ///
+    /// [MDN Documentation][mdn]
     ///
     /// # Errors
     ///
-    /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
-    /// for when an error will be returned.
-    /// The error value is unspecified and will depend on the browser.
+    /// The [error value][mdn] is unspecified and will depend on the browser.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
     pub fn local() -> Result<Self, JsValue> {
         Ok(Self(window().local_storage()?.unwrap()))
     }
 
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
+    /// Get the window's session storage.
+    ///
+    /// [MDN Documentation][mdn]
     ///
     /// # Errors
     ///
-    /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
-    /// for when an error will be returned.
-    /// The error value is unspecified and will depend on the browser.
+    /// The [error value][mdn] is unspecified and will depend on the browser.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     pub fn session() -> Result<Self, JsValue> {
         Ok(Self(window().session_storage()?.unwrap()))
     }
 
+    /// Get the value associated with the key.
+    ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/getItem)
     pub fn get(&self, key: &str) -> Option<String> {
         self.0
@@ -41,16 +47,21 @@ impl Storage {
             .expect(unexpected_exception!("getItem"))
     }
 
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem)
+    /// Set the value associated with the key.
+    /// [MDN Documentation][mdn]
     ///
     /// # Errors
     ///
-    /// If the storage is full, an error is returned.
-    /// The error value is unspecified and will depend on the browser.
+    /// If the storage is full, an error is returned. The [error value][mdn] is
+    /// unspecified and will depend on the browser.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem
     pub fn insert(&self, key: &str, value: &str) -> Result<(), JsValue> {
         self.0.set_item(key, value)
     }
 
+    /// Remove a key/value pair.
+    ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem)
     pub fn remove(&self, key: &str) {
         self.0
@@ -58,19 +69,26 @@ impl Storage {
             .expect(unexpected_exception!("removeItem"))
     }
 
+    /// Clear the storage.
+    ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/clear)
     pub fn clear(&self) {
         self.0.clear().expect(unexpected_exception!("clear"))
     }
 
+    /// The number of stored keys.
+    ///
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/length)
     pub fn len(&self) -> u32 {
         self.0.length().expect(unexpected_exception!("length"))
     }
 
+    /// Is the storage empty?
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
+    /// Iterate over all the stored keys.
     pub fn keys(&self) -> impl Iterator<Item = String> {
         StorageIter {
             container: self.0.clone(),
