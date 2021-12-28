@@ -314,6 +314,9 @@ impl Builder for ElementBuilder {
         self.element
             .futures
             .extend(self.attribute_futures.into_values());
+        self.element.futures.shrink_to_fit();
+        self.element.event_callbacks.shrink_to_fit();
+        self.children.borrow_mut().shrink_to_fit();
         self.element
     }
 
