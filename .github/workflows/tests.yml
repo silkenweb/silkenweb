@@ -63,7 +63,7 @@ jobs:
       if: matrix.os != 'macos-latest'
       uses: cypress-io/github-action@v2
       with:
-        working-directory: examples/todomvc/cypress-tests
+        working-directory: examples/todomvc/e2e
         build: npm run build
         start: npm start
         wait-on: 'http://localhost:8080'
@@ -73,13 +73,13 @@ jobs:
       if: failure()
       with:
         name: todomvc-cypress-screenshots
-        path: examples/todomvc/cypress-tests/cypress/screenshots
+        path: examples/todomvc/e2e/cypress/screenshots
     # Videos are generated regardless of success or failure
     - uses: actions/upload-artifact@v2
       if: always()
       with:
         name: todomvc-cypress-videos
-        path: examples/todomvc/cypress-tests/cypress/videos
+        path: examples/todomvc/e2e/cypress/videos
 
   nightly:
     strategy:
