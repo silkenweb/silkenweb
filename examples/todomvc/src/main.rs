@@ -4,7 +4,7 @@ extern crate derive_more;
 use std::{cell::Cell, rc::Rc};
 
 use futures_signals::{
-    signal::{Broadcaster, Mutable, Signal, SignalExt},
+    signal::{not, Broadcaster, Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use serde::{Deserialize, Serialize};
@@ -302,11 +302,15 @@ impl TodoAppView {
     }
 
     fn any_completed(&self) -> impl Signal<Item = bool> {
-        self.active_count().map(|count| count != 0).dedupe()
+        not(self
+            .completed()
+            .filter(|completed| *completed)
+            .is_empty()
+            .dedupe())
     }
 
     fn active_count(&self) -> impl Signal<Item = usize> {
-        self.completed().filter(|completed| *completed).len()
+        self.completed().filter(|completed| !completed).len()
     }
 }
 
