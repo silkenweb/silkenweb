@@ -141,12 +141,12 @@ impl TodoAppView {
         section()
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
-            .optional_child_signal(self.define_main(
+            .optional_child_signal(self.render_main(
                 item_filter.signal(),
                 active_count.signal(),
                 is_empty.signal(),
             ))
-            .optional_child_signal(self.define_footer(
+            .optional_child_signal(self.render_footer(
                 item_filter.signal(),
                 active_count.signal(),
                 is_empty.signal(),
@@ -154,7 +154,7 @@ impl TodoAppView {
             .build()
     }
 
-    fn define_main(
+    fn render_main(
         &self,
         item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
@@ -201,7 +201,7 @@ impl TodoAppView {
         })
     }
 
-    fn define_footer(
+    fn render_footer(
         &self,
         item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
@@ -230,9 +230,9 @@ impl TodoAppView {
                                         if active_count == 1 { "" } else { "s" }
                                     ))
                             }))
-                            .child(app_view.define_filters(item_filter.signal()))
+                            .child(app_view.render_filters(item_filter.signal()))
                             .optional_child_signal(
-                                app_view.define_clear_completed(active_count.signal()),
+                                app_view.render_clear_completed(active_count.signal()),
                             )
                             .build(),
                     )
@@ -241,7 +241,7 @@ impl TodoAppView {
         })
     }
 
-    fn define_filter_link(
+    fn render_filter_link(
         &self,
         filter: Filter,
         item_filter: impl 'static + Signal<Item = Filter>,
@@ -259,16 +259,16 @@ impl TodoAppView {
         .text(seperator)
     }
 
-    fn define_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
+    fn render_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
         let item_filter = Broadcaster::new(item_filter);
         ul().class("filters")
-            .child(self.define_filter_link(Filter::All, item_filter.signal(), " "))
-            .child(self.define_filter_link(Filter::Active, item_filter.signal(), " "))
-            .child(self.define_filter_link(Filter::Completed, item_filter.signal(), ""))
+            .child(self.render_filter_link(Filter::All, item_filter.signal(), " "))
+            .child(self.render_filter_link(Filter::Active, item_filter.signal(), " "))
+            .child(self.render_filter_link(Filter::Completed, item_filter.signal(), ""))
             .build()
     }
 
-    fn define_clear_completed(
+    fn render_clear_completed(
         &self,
         active_count: impl 'static + Signal<Item = usize>,
     ) -> impl Signal<Item = Option<Button>> {
