@@ -16,16 +16,12 @@ use web_sys::HtmlInputElement;
 
 use crate::model::{Filter, TodoApp, TodoItem};
 
-#[derive(Clone)]
+#[derive(Constructor, Clone)]
 pub struct TodoAppView {
     app: Rc<TodoApp>,
 }
 
 impl TodoAppView {
-    pub fn new(app: Rc<TodoApp>) -> Self {
-        Self { app }
-    }
-
     pub fn render(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
         let app = &self.app;
         let input_elem = input()
