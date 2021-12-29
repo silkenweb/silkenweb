@@ -25,9 +25,6 @@
 //! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
-use std::pin::Pin;
-
-use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 pub use silkenweb_dom::{
     clone, mount, product,
     render::{after_render, render_updates},
@@ -40,34 +37,3 @@ pub use silkenweb_html::{
 
 pub mod animation;
 pub mod router;
-
-// TODO: Is this a sensible way to erase the type of the Signal?
-// TODO: Put this in a `silkenweb-signal-util` crate?
-pub struct BroadcastBoxed<T>(Broadcaster<Pin<Box<dyn Signal<Item = T>>>>);
-
-impl<T: 'static> BroadcastBoxed<T> {
-    pub fn new(sig: impl 'static + Signal<Item = T>) -> Self {
-        Self(Broadcaster::new(sig.boxed_local()))
-    }
-
-    pub fn signal_ref<B, F>(&self, f: F) -> impl 'static + Signal<Item = B>
-    where
-        F: 'static + FnMut(&T) -> B,
-    {
-        self.0.signal_ref(f)
-    }
-
-    pub fn signal(&self) -> impl 'static + Signal<Item = T>
-    where
-        T: Copy,
-    {
-        self.0.signal()
-    }
-
-    pub fn signal_cloned(&self) -> impl 'static + Signal<Item = T>
-    where
-        T: Clone,
-    {
-        self.0.signal_cloned()
-    }
-}
