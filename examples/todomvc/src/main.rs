@@ -175,7 +175,7 @@ impl TodoApp {
                         .child(ul().class("todo-list").children_signal(
                             app.visible_items_signal(item_filter.signal()).map({
                                 clone!(app);
-                                move |item| TodoItem::render(item, app.clone())
+                                move |item| TodoItemView::render(item, app.clone())
                             }),
                         ))
                         .build(),
@@ -349,14 +349,37 @@ impl TodoItem {
         app.remove_item(self.id)
     }
 
-    fn render(todo: Rc<Self>, app: Rc<TodoApp>) -> Li {
-        li().class(signal(todo.class()))
-            .child(Self::define_edit(&todo, &app))
-            .child(Self::define_view(&todo, app))
+    fn text(&self) -> impl Signal<Item = String> {
+        self.text.signal_cloned()
+    }
+
+    fn completed(&self) -> impl Signal<Item = bool> {
+        self.completed.signal()
+    }
+
+    fn is_editing(&self) -> impl Signal<Item = bool> {
+        self.editing.signal()
+    }
+}
+
+struct TodoItemView {
+    todo: Rc<TodoItem>,
+    app: Rc<TodoApp>,
+}
+
+impl TodoItemView {
+    fn render(todo: Rc<TodoItem>, app: Rc<TodoApp>) -> Li {
+        let view = TodoItemView { todo, app };
+        li().class(signal(view.class()))
+            .child(view.render_edit())
+            .child(view.render_view())
             .build()
     }
 
-    fn define_edit(todo: &Rc<Self>, app: &Rc<TodoApp>) -> Input {
+    fn render_edit(&self) -> Input {
+        let todo = &self.todo;
+        let app = &self.app;
+
         input()
             .class("edit")
             .type_("text")
@@ -383,7 +406,9 @@ impl TodoItem {
             .build()
     }
 
-    fn define_view(todo: &Rc<TodoItem>, app: Rc<TodoApp>) -> Div {
+    fn render_view(&self) -> Div {
+        let todo = &self.todo;
+        let app = &self.app;
         let completed_checkbox = input()
             .class("toggle")
             .type_("checkbox")
@@ -404,7 +429,7 @@ impl TodoItem {
                 move |_, _| todo.set_editing()
             }))
             .child(button().class("destroy").on_click({
-                clone!(todo);
+                clone!(todo, app);
                 move |_, _| todo.remove(&app)
             }))
             .effect_signal(todo.is_editing(), |elem, editing| elem.set_hidden(editing))
@@ -412,25 +437,14 @@ impl TodoItem {
     }
 
     fn class(&self) -> impl Signal<Item = String> {
-        product!(self.completed(), self.is_editing()).map(|(completed, editing)| {
+        let todo = &self.todo;
+        product!(todo.completed(), todo.is_editing()).map(|(completed, editing)| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| if flag { Some(name) } else { None })
                 .collect::<Vec<_>>()
                 .join(" ")
         })
-    }
-
-    fn text(&self) -> impl Signal<Item = String> {
-        self.text.signal_cloned()
-    }
-
-    fn completed(&self) -> impl Signal<Item = bool> {
-        self.completed.signal()
-    }
-
-    fn is_editing(&self) -> impl Signal<Item = bool> {
-        self.editing.signal()
     }
 }
 
