@@ -7,7 +7,7 @@ use silkenweb::{
     product, signal, Builder, Effects, HtmlElement, ParentBuilder,
 };
 
-use crate::{app_model::TodoApp, item_model::TodoItem};
+use crate::model::{TodoApp, TodoItem};
 
 pub struct TodoItemView {
     todo: Rc<TodoItem>,

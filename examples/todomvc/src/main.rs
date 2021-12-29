@@ -1,14 +1,13 @@
 #[macro_use]
 extern crate derive_more;
 
-use app_model::{Filter, TodoApp};
+use model::{Filter, TodoApp};
 use app_view::TodoAppView;
 use futures_signals::signal::SignalExt;
 use silkenweb::{mount, router::url};
 
-mod app_model;
+mod model;
 mod app_view;
-mod item_model;
 mod item_view;
 
 fn main() {

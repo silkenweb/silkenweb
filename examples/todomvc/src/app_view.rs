@@ -15,9 +15,8 @@ use silkenweb::{
 use web_sys::HtmlInputElement;
 
 use crate::{
-    app_model::{Filter, TodoApp},
-    item_model::TodoItem,
     item_view::TodoItemView,
+    model::{Filter, TodoApp, TodoItem},
 };
 
 #[derive(Clone)]
