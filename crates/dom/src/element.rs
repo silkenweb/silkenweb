@@ -179,6 +179,8 @@ impl ElementBuilder {
         self
     }
 
+    // TODO: Make this public? It might be useful if we have an expensive to compute
+    // signal that we want to store in a mutable.
     fn store_future(&mut self, future: impl 'static + Future<Output = ()>) {
         self.element.futures.push(spawn_cancelable_future(future));
     }
