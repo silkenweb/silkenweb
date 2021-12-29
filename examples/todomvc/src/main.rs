@@ -31,7 +31,7 @@ fn main() {
         }
     });
 
-    mount("app", TodoApp::render(TodoApp::load(), item_filter));
+    mount("app", TodoAppView::new(TodoApp::load()).render(item_filter));
 }
 
 #[derive(Serialize, Deserialize)]
@@ -93,7 +93,23 @@ impl TodoApp {
         self.save();
     }
 
-    fn render(app: Rc<Self>, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
+    fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
+        self.items.signal_vec_cloned()
+    }
+}
+
+#[derive(Clone)]
+struct TodoAppView {
+    app: Rc<TodoApp>,
+}
+
+impl TodoAppView {
+    fn new(app: Rc<TodoApp>) -> Self {
+        Self { app }
+    }
+
+    fn render(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
+        let app = &self.app;
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
@@ -125,14 +141,12 @@ impl TodoApp {
         section()
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
-            .optional_child_signal(Self::define_main(
-                app.clone(),
+            .optional_child_signal(self.define_main(
                 item_filter.signal(),
                 active_count.signal(),
                 is_empty.signal(),
             ))
-            .optional_child_signal(Self::define_footer(
-                app,
+            .optional_child_signal(self.define_footer(
                 item_filter.signal(),
                 active_count.signal(),
                 is_empty.signal(),
@@ -141,11 +155,12 @@ impl TodoApp {
     }
 
     fn define_main(
-        app: Rc<Self>,
+        &self,
         item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
         is_empty: impl 'static + Signal<Item = bool>,
     ) -> impl Signal<Item = Option<Section>> {
+        let app_view = self.clone();
         let item_filter = Broadcaster::new(item_filter);
         let all_complete = Broadcaster::new(active_count.map(|count| count == 0).dedupe());
 
@@ -153,6 +168,8 @@ impl TodoApp {
             if is_empty {
                 None
             } else {
+                let app = &app_view.app;
+
                 Some(
                     section()
                         .class("main")
@@ -173,7 +190,7 @@ impl TodoApp {
                         )
                         .child(label().for_("toggle-all"))
                         .child(ul().class("todo-list").children_signal(
-                            app.visible_items_signal(item_filter.signal()).map({
+                            app_view.visible_items_signal(item_filter.signal()).map({
                                 clone!(app);
                                 move |item| TodoItemView::render(item, app.clone())
                             }),
@@ -185,16 +202,17 @@ impl TodoApp {
     }
 
     fn define_footer(
-        app: Rc<Self>,
+        &self,
         item_filter: impl 'static + Signal<Item = Filter>,
         active_count: impl 'static + Signal<Item = usize>,
         is_empty: impl 'static + Signal<Item = bool>,
     ) -> impl Signal<Item = Option<Footer>> {
+        let app_view = self.clone();
         let active_count = Broadcaster::new(active_count);
         let item_filter = Broadcaster::new(item_filter);
 
         is_empty.map({
-            clone!(app);
+            clone!(app_view);
 
             move |is_empty| {
                 if is_empty {
@@ -212,11 +230,10 @@ impl TodoApp {
                                         if active_count == 1 { "" } else { "s" }
                                     ))
                             }))
-                            .child(app.define_filters(item_filter.signal()))
-                            .optional_child_signal(Self::define_clear_completed(
-                                app.clone(),
-                                active_count.signal(),
-                            ))
+                            .child(app_view.define_filters(item_filter.signal()))
+                            .optional_child_signal(
+                                app_view.define_clear_completed(active_count.signal()),
+                            )
                             .build(),
                     )
                 }
@@ -252,9 +269,10 @@ impl TodoApp {
     }
 
     fn define_clear_completed(
-        app: Rc<Self>,
+        &self,
         active_count: impl 'static + Signal<Item = usize>,
     ) -> impl Signal<Item = Option<Button>> {
+        let app = self.app.clone();
         product!(app.items_signal().len(), active_count).map(move |(item_count, active_count)| {
             let any_completed = item_count != active_count;
             clone!(app);
@@ -279,19 +297,15 @@ impl TodoApp {
     ) -> impl SignalVec<Item = Rc<TodoItem>> {
         let item_filter = Broadcaster::new(item_filter);
 
-        self.items_signal().filter_signal_cloned(move |item| {
-            product!(item.completed.signal(), item_filter.signal()).map(
-                |(completed, item_filter)| match item_filter {
+        self.app.items_signal().filter_signal_cloned(move |item| {
+            product!(item.completed(), item_filter.signal()).map(|(completed, item_filter)| {
+                match item_filter {
                     Filter::All => true,
                     Filter::Active => !completed,
                     Filter::Completed => completed,
-                },
-            )
+                }
+            })
         })
-    }
-
-    fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
-        self.items.signal_vec_cloned()
     }
 }
 
