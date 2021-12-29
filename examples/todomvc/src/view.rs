@@ -65,38 +65,34 @@ impl TodoAppView {
         let item_filter = Broadcaster::new(item_filter);
 
         self.is_empty().map(move |is_empty| {
-            if is_empty {
-                None
-            } else {
+            (!is_empty).then(|| {
                 let app = &app_view.app;
 
-                Some(
-                    section()
-                        .class("main")
-                        .child(
-                            input()
-                                .id("toggle-all")
-                                .class("toggle-all")
-                                .type_("checkbox")
-                                .on_change({
-                                    clone!(app);
-
-                                    move |_, elem| app.set_completed_states(elem.checked())
-                                })
-                                .effect_signal(app_view.all_completed(), |elem, all_complete| {
-                                    elem.set_checked(all_complete)
-                                }),
-                        )
-                        .child(label().for_("toggle-all"))
-                        .child(ul().class("todo-list").children_signal(
-                            app_view.visible_items_signal(item_filter.signal()).map({
+                section()
+                    .class("main")
+                    .child(
+                        input()
+                            .id("toggle-all")
+                            .class("toggle-all")
+                            .type_("checkbox")
+                            .on_change({
                                 clone!(app);
-                                move |item| TodoItemView::render(item, app.clone())
+
+                                move |_, elem| app.set_completed_states(elem.checked())
+                            })
+                            .effect_signal(app_view.all_completed(), |elem, all_complete| {
+                                elem.set_checked(all_complete)
                             }),
-                        ))
-                        .build(),
-                )
-            }
+                    )
+                    .child(label().for_("toggle-all"))
+                    .child(ul().class("todo-list").children_signal(
+                        app_view.visible_items_signal(item_filter.signal()).map({
+                            clone!(app);
+                            move |item| TodoItemView::render(item, app.clone())
+                        }),
+                    ))
+                    .build()
+            })
         })
     }
 
@@ -111,26 +107,22 @@ impl TodoAppView {
             clone!(app_view);
 
             move |is_empty| {
-                if is_empty {
-                    None
-                } else {
-                    Some(
-                        footer()
-                            .class("footer")
-                            .child_signal(app_view.active_count().map(move |active_count| {
-                                span()
-                                    .class("todo-count")
-                                    .child(strong().text(&format!("{}", active_count)))
-                                    .text(&format!(
-                                        " item{} left",
-                                        if active_count == 1 { "" } else { "s" }
-                                    ))
-                            }))
-                            .child(app_view.render_filters(item_filter.signal()))
-                            .optional_child_signal(app_view.render_clear_completed())
-                            .build(),
-                    )
-                }
+                (!is_empty).then(|| {
+                    footer()
+                        .class("footer")
+                        .child_signal(app_view.active_count().map(move |active_count| {
+                            span()
+                                .class("todo-count")
+                                .child(strong().text(&format!("{}", active_count)))
+                                .text(&format!(
+                                    " item{} left",
+                                    if active_count == 1 { "" } else { "s" }
+                                ))
+                        }))
+                        .child(app_view.render_filters(item_filter.signal()))
+                        .optional_child_signal(app_view.render_clear_completed())
+                        .build()
+                })
             }
         })
     }
@@ -167,17 +159,13 @@ impl TodoAppView {
         self.any_completed().map(move |any_completed| {
             clone!(app);
 
-            if any_completed {
-                Some(
-                    button()
-                        .class("clear-completed")
-                        .text("Clear completed")
-                        .on_click(move |_, _| app.clear_completed_todos())
-                        .build(),
-                )
-            } else {
-                None
-            }
+            any_completed.then(|| {
+                button()
+                    .class("clear-completed")
+                    .text("Clear completed")
+                    .on_click(move |_, _| app.clear_completed_todos())
+                    .build()
+            })
         })
     }
 
@@ -305,7 +293,7 @@ impl TodoItemView {
         product!(todo.completed(), todo.is_editing()).map(|(completed, editing)| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
-                .filter_map(|(flag, name)| if flag { Some(name) } else { None })
+                .filter_map(|(flag, name)| flag.then(|| name))
                 .collect::<Vec<_>>()
                 .join(" ")
         })
