@@ -40,7 +40,7 @@ impl TodoApp {
 
     pub fn new_todo(&self, text: String) {
         let todo_id = self.todo_id.get();
-        self.todo_id.replace(todo_id + 1);
+        self.todo_id.set(todo_id + 1);
 
         self.items
             .lock_mut()
@@ -62,12 +62,12 @@ impl TodoApp {
     }
 
     pub fn clear_completed_todos(&self) {
-        self.items.lock_mut().retain(|item| !item.is_completed());
+        self.items.lock_mut().retain(|item| !item.completed.get());
         self.save();
     }
 
     pub fn remove_item(&self, todo_id: u128) {
-        self.items.lock_mut().retain(|item| item.id() != todo_id);
+        self.items.lock_mut().retain(|item| item.id != todo_id);
         self.save();
     }
 
@@ -93,14 +93,6 @@ impl TodoItem {
             completed: Mutable::new(false),
             editing: Mutable::new(false),
         })
-    }
-
-    pub fn id(&self) -> u128 {
-        self.id
-    }
-
-    pub fn is_completed(&self) -> bool {
-        self.completed.get()
     }
 
     pub fn set_editing(&self) {
