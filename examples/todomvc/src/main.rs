@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate derive_more;
 
-use model::{Filter, TodoApp};
-use view::TodoAppView;
 use futures_signals::signal::SignalExt;
+use model::{Filter, TodoApp};
 use silkenweb::{mount, router::url};
+use view::TodoAppView;
 
 mod model;
 mod view;
