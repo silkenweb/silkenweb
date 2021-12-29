@@ -2,13 +2,12 @@
 extern crate derive_more;
 
 use model::{Filter, TodoApp};
-use app_view::TodoAppView;
+use view::TodoAppView;
 use futures_signals::signal::SignalExt;
 use silkenweb::{mount, router::url};
 
 mod model;
-mod app_view;
-mod item_view;
+mod view;
 
 fn main() {
     console_error_panic_hook::set_once();

@@ -1,6 +1,9 @@
 use std::{cell::Cell, rc::Rc};
 
-use futures_signals::{signal_vec::{MutableVec, SignalVec}, signal::{Mutable, Signal}};
+use futures_signals::{
+    signal::{Mutable, Signal},
+    signal_vec::{MutableVec, SignalVec},
+};
 use serde::{Deserialize, Serialize};
 use silkenweb::Storage;
 
