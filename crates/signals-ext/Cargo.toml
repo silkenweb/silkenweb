@@ -14,3 +14,4 @@ keywords = ["reactive"]
 [dependencies]
 futures-signals = "0.3"
 pin-project = "1.0"
+paste = "1.0"

@@ -4,6 +4,7 @@ use std::{
 };
 
 use futures_signals::signal::Signal;
+use paste::paste;
 use pin_project::pin_project;
 
 pub trait SignalProduct<Tuple, F> {
@@ -11,114 +12,59 @@ pub trait SignalProduct<Tuple, F> {
     fn signal_ref(self, f: F) -> Self::Output;
 }
 
-impl<S0, S1, F, O> SignalProduct<(S0, S1), F> for (S0, S1)
-where
-    S0: Signal,
-    S1: Signal,
-    F: FnMut(&S0::Item, &S1::Item) -> O,
-{
-    type Output = Map2<S0, S1, F>;
+macro_rules! signal_product{
+    ($name:ident; $($index:literal),*) => { paste!{
+        impl<$( [< S $index >] , )* F, O> SignalProduct<( $( [< S $index >] , )* ), F> for ( $( [< S $index >] , )* )
+        where
+            $( [< S $index >] : Signal , )*
+            F: FnMut($( & [< S $index >] ::Item, )*) -> O,
+        {
+            type Output = $name<$( [< S $index >] , )* F>;
 
-    fn signal_ref(self, f: F) -> Self::Output {
-        Map2 {
-            s0: RefSignal::new(self.0),
-            s1: RefSignal::new(self.1),
-            f,
+            fn signal_ref(self, f: F) -> Self::Output {
+                $name {
+                    $( [< s $index >] : RefSignal::new(self.$index) , )*
+                    f,
+                }
+            }
         }
-    }
-}
 
-#[pin_project]
-pub struct Map2<S0, S1, F>
-where
-    S0: Signal,
-    S1: Signal,
-{
-    #[pin]
-    s0: RefSignal<S0>,
-    #[pin]
-    s1: RefSignal<S1>,
-    f: F,
-}
-
-impl<S0, S1, Output, F> Signal for Map2<S0, S1, F>
-where
-    S0: Signal,
-    S1: Signal,
-    F: FnMut(&S0::Item, &S1::Item) -> Output,
-{
-    type Item = Output;
-
-    fn poll_change(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let mut all_done = true;
-        let mut any_changed = false;
-        let proj = self.project();
-
-        let i0 = proj.s0.poll_signal(cx, &mut all_done, &mut any_changed);
-        let i1 = proj.s1.poll_signal(cx, &mut all_done, &mut any_changed);
-
-        signal_result(all_done, any_changed, || (proj.f)(i0.unwrap(), i1.unwrap()))
-    }
-}
-
-impl<S0, S1, S2, F, O> SignalProduct<(S0, S1, S2), F> for (S0, S1, S2)
-where
-    S0: Signal,
-    S1: Signal,
-    S2: Signal,
-    F: FnMut(&S0::Item, &S1::Item, &S2::Item) -> O,
-{
-    type Output = Map3<S0, S1, S2, F>;
-
-    fn signal_ref(self, f: F) -> Self::Output {
-        Map3 {
-            s0: RefSignal::new(self.0),
-            s1: RefSignal::new(self.1),
-            s2: RefSignal::new(self.2),
-            f,
+        #[pin_project]
+        pub struct $name<$( [< S $index >] , )* F>
+        where
+            $( [< S $index >] : Signal , )*
+        {
+            $(
+                #[pin]
+                [< s $index >] : RefSignal< [< S $index >] >,
+            )*
+            f: F,
         }
-    }
+
+        impl<$( [< S $index >] , )* Output, F> Signal for $name<$( [< S $index >] , )* F>
+        where
+            $( [< S $index >] : Signal , )*
+            F: FnMut($( & [< S $index >] ::Item, )*) -> Output,
+        {
+            type Item = Output;
+
+            fn poll_change(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+                let mut all_done = true;
+                let mut any_changed = false;
+                let proj = self.project();
+
+                $(let [< i $index >] = proj. [< s $index >] .poll_signal(cx, &mut all_done, &mut any_changed);)*
+
+                signal_result(all_done, any_changed, || (proj.f)(
+                    $( [< i $index >] .unwrap(),)*
+                ))
+            }
+        }
+    }}
 }
 
-#[pin_project]
-pub struct Map3<S0, S1, S2, F>
-where
-    S0: Signal,
-    S1: Signal,
-    S2: Signal,
-{
-    #[pin]
-    s0: RefSignal<S0>,
-    #[pin]
-    s1: RefSignal<S1>,
-    #[pin]
-    s2: RefSignal<S2>,
-    f: F,
-}
-
-impl<S0, S1, S2, Output, F> Signal for Map3<S0, S1, S2, F>
-where
-    S0: Signal,
-    S1: Signal,
-    S2: Signal,
-    F: FnMut(&S0::Item, &S1::Item, &S2::Item) -> Output,
-{
-    type Item = Output;
-
-    fn poll_change(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let mut all_done = true;
-        let mut any_changed = false;
-        let proj = self.project();
-
-        let i0 = proj.s0.poll_signal(cx, &mut all_done, &mut any_changed);
-        let i1 = proj.s1.poll_signal(cx, &mut all_done, &mut any_changed);
-        let i2 = proj.s2.poll_signal(cx, &mut all_done, &mut any_changed);
-
-        signal_result(all_done, any_changed, || {
-            (proj.f)(i0.unwrap(), i1.unwrap(), i2.unwrap())
-        })
-    }
-}
+signal_product!(Map2; 0, 1);
+signal_product!(Map3; 0, 1, 2);
 
 fn signal_result<Output>(
     all_done: bool,

@@ -429,6 +429,7 @@ name = "silkenweb-signals-ext"
 version = "0.0.0"
 dependencies = [
  "futures-signals",
+ "paste",
  "pin-project",
 ]
 
