@@ -30,7 +30,7 @@ macro_rules! signal_product{
         }
 
         #[pin_project]
-        struct $name<$( $signal_type , )* F>
+        pub struct $name<$( $signal_type , )* F>
         where
             $( $signal_type : Signal , )*
         {
