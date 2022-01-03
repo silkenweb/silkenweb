@@ -25,9 +25,8 @@
 //! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
-pub use silkenweb_signals_ext::SignalProduct;
 pub use silkenweb_dom::{
-    clone, mount, product,
+    clone, mount,
     render::{after_render, render_updates},
     signal, tag, tag_in_namespace, unmount, AttributeValue, Builder, DomElement, Element,
     ElementBuilder, Storage,
@@ -35,6 +34,7 @@ pub use silkenweb_dom::{
 pub use silkenweb_html::{
     children_allowed, elements, html_element, CustomEvent, Effects, HtmlElement, ParentBuilder,
 };
+pub use silkenweb_signals_ext::SignalProduct;
 
 pub mod animation;
 pub mod router;

@@ -290,7 +290,7 @@ impl TodoItemView {
 
     fn class(&self) -> impl Signal<Item = String> {
         let todo = &self.todo;
-        product!(todo.completed(), todo.is_editing()).map(|(completed, editing)| {
+        (todo.completed(), todo.is_editing()).signal_ref(|completed, editing| {
             vec![(completed, "completed"), (editing, "editing")]
                 .into_iter()
                 .filter_map(|(flag, name)| flag.then(|| name))
