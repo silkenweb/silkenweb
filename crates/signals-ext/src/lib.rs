@@ -63,8 +63,16 @@ macro_rules! signal_product{
     }
 }
 
-signal_product!(Map2; (0, s0, S0, i0), (1, s1, S1, i1));
-signal_product!(Map3; (0, s0, S0, i0), (1, s1, S1, i1), (2, s2, S2, i2));
+macro_rules! signal_products{
+    ( ( $($index:tt),* ); []) => { paste! {
+    }};
+    ( ( $($index:tt),* ); [$count:tt $(, $tail_count:tt)*] ) => { paste! {
+        signal_product!( [< Map $count >] ; $( ( $index, [< s $index >], [< S $index >], [< i $index >]  ) ),*);
+        signal_products!(($($index, )* $count); [$($tail_count),*]);
+    }}
+}
+
+signal_products!((0, 1); [2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
 fn signal_result<Output>(
     all_done: bool,
