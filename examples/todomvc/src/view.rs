@@ -10,7 +10,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    product, signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
+    signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
 };
 use web_sys::HtmlInputElement;
 
