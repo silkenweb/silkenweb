@@ -64,8 +64,7 @@ macro_rules! signal_product{
 }
 
 macro_rules! signal_products{
-    ( ( $($index:tt),* ); []) => { paste! {
-    }};
+    ( ( $($index:tt),* ); []) => {};
     ( ( $($index:tt),* ); [$count:tt $(, $tail_count:tt)*] ) => { paste! {
         signal_product!( [< Map $count >] ; $( ( $index, [< s $index >], [< S $index >], [< i $index >]  ) ),*);
         signal_products!(($($index, )* $count); [$($tail_count),*]);
