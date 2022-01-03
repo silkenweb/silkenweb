@@ -13,38 +13,38 @@ pub trait SignalProduct<Tuple, F> {
 }
 
 macro_rules! signal_product{
-    ($name:ident; $($index:literal),*) => { paste!{
-        impl<$( [< S $index >] , )* F, O> SignalProduct<( $( [< S $index >] , )* ), F> for ( $( [< S $index >] , )* )
+    ($name:ident; $( ($index:tt, $signal_var:ident, $signal_type:ident, $item_var:ident) ),*) => {
+        impl<$( $signal_type , )* F, O> SignalProduct<( $( $signal_type , )* ), F> for ( $( $signal_type , )* )
         where
-            $( [< S $index >] : Signal , )*
-            F: FnMut($( & [< S $index >] ::Item, )*) -> O,
+            $( $signal_type : Signal , )*
+            F: FnMut($( & $signal_type ::Item, )*) -> O,
         {
-            type Output = $name<$( [< S $index >] , )* F>;
+            type Output = $name<$( $signal_type , )* F>;
 
             fn signal_ref(self, f: F) -> Self::Output {
                 $name {
-                    $( [< s $index >] : RefSignal::new(self.$index) , )*
+                    $( $signal_var : RefSignal::new(self.$index) , )*
                     f,
                 }
             }
         }
 
         #[pin_project]
-        pub struct $name<$( [< S $index >] , )* F>
+        pub struct $name<$( $signal_type , )* F>
         where
-            $( [< S $index >] : Signal , )*
+            $( $signal_type : Signal , )*
         {
             $(
                 #[pin]
-                [< s $index >] : RefSignal< [< S $index >] >,
+                $signal_var : RefSignal< $signal_type >,
             )*
             f: F,
         }
 
-        impl<$( [< S $index >] , )* Output, F> Signal for $name<$( [< S $index >] , )* F>
+        impl<$( $signal_type , )* Output, F> Signal for $name<$( $signal_type , )* F>
         where
-            $( [< S $index >] : Signal , )*
-            F: FnMut($( & [< S $index >] ::Item, )*) -> Output,
+            $( $signal_type : Signal , )*
+            F: FnMut($( & $signal_type ::Item, )*) -> Output,
         {
             type Item = Output;
 
@@ -53,18 +53,18 @@ macro_rules! signal_product{
                 let mut any_changed = false;
                 let proj = self.project();
 
-                $(let [< i $index >] = proj. [< s $index >] .poll_signal(cx, &mut all_done, &mut any_changed);)*
+                $(let $item_var = proj. $signal_var .poll_signal(cx, &mut all_done, &mut any_changed);)*
 
                 signal_result(all_done, any_changed, || (proj.f)(
-                    $( [< i $index >] .unwrap(),)*
+                    $( $item_var .unwrap(),)*
                 ))
             }
         }
-    }}
+    }
 }
 
-signal_product!(Map2; 0, 1);
-signal_product!(Map3; 0, 1, 2);
+signal_product!(Map2; (0, s0, S0, i0), (1, s1, S1, i1));
+signal_product!(Map3; (0, s0, S0, i0), (1, s1, S1, i1), (2, s2, S2, i2));
 
 fn signal_result<Output>(
     all_done: bool,
