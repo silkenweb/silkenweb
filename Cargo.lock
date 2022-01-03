@@ -339,6 +339,7 @@ dependencies = [
  "futures-signals",
  "silkenweb-dom",
  "silkenweb-html",
+ "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
@@ -421,6 +422,14 @@ dependencies = [
  "silkenweb-dom",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "silkenweb-signals-ext"
+version = "0.0.0"
+dependencies = [
+ "futures-signals",
+ "pin-project",
 ]
 
 [[package]]

@@ -10,7 +10,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    product, signal, Builder, Effects, HtmlElement, ParentBuilder,
+    product, signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
 };
 use web_sys::HtmlInputElement;
 
@@ -176,11 +176,11 @@ impl TodoAppView {
         let item_filter = Broadcaster::new(item_filter);
 
         self.app.items_signal().filter_signal_cloned(move |item| {
-            product!(item.completed(), item_filter.signal()).map(|(completed, item_filter)| {
+            (item.completed(), item_filter.signal()).signal_ref(|completed, item_filter| {
                 match item_filter {
                     Filter::All => true,
-                    Filter::Active => !completed,
-                    Filter::Completed => completed,
+                    Filter::Active => !*completed,
+                    Filter::Completed => *completed,
                 }
             })
         })

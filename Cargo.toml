@@ -12,6 +12,7 @@ members = [
     "crates/ui5",
     "crates/html",
     "crates/dom",
+    "crates/signals-ext",
 ]
 
 [profile.release]
@@ -22,4 +23,5 @@ opt-level = "z"
 [patch.crates-io]
 silkenweb-html = { path = "crates/html" }
 silkenweb-dom = { path = "crates/dom" }
+silkenweb-signals-ext = { path = "crates/signals-ext" }
 silkenweb = { path = "crates/silkenweb" }

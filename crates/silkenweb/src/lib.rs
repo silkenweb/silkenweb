@@ -25,6 +25,7 @@
 //! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
+pub use silkenweb_signals_ext::SignalProduct;
 pub use silkenweb_dom::{
     clone, mount, product,
     render::{after_render, render_updates},

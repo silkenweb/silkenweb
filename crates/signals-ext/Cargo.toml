@@ -1,0 +1,16 @@
+[package]
+name = "silkenweb-signals-ext"
+version = "0.0.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Extras for futures-signals"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui"]
+keywords = ["reactive"]
+
+[dependencies]
+futures-signals = "0.3"
+pin-project = "1.0"
