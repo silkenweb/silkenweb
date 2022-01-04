@@ -34,7 +34,9 @@ impl<T: AttributeValue> StaticAttribute for T {
         let name = name.into();
         let value = self.text();
 
-        queue_update(move || dom_element.set_attribute(&name, &value).unwrap());
+        queue_update(dom_element.is_connected(), move || {
+            dom_element.set_attribute(&name, &value).unwrap()
+        });
     }
 }
 
@@ -42,16 +44,15 @@ impl StaticAttribute for bool {
     fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
         clone!(dom_element);
         let name = name.into();
+        let value = *self;
 
-        if *self {
-            queue_update(move || {
+        queue_update(dom_element.is_connected(), move || {
+            if value {
                 dom_element.set_attribute(&name, "").unwrap();
-            });
-        } else {
-            queue_update(move || {
+            } else {
                 dom_element.remove_attribute(&name).unwrap();
-            });
-        }
+            }
+        });
     }
 }
 
@@ -67,7 +68,7 @@ impl<T: AttributeValue> StaticAttribute for Option<T> {
 
         match self {
             Some(value) => value.set_attribute(name, &dom_element),
-            None => queue_update(move || {
+            None => queue_update(dom_element.is_connected(), move || {
                 dom_element.remove_attribute(&name).unwrap();
             }),
         }

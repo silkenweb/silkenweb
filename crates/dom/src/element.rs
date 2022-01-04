@@ -166,7 +166,7 @@ impl ElementBuilder {
             clone!(text_node);
 
             move |new_value| {
-                queue_update({
+                queue_update(text_node.is_connected(), {
                     clone!(text_node);
                     let new_value = new_value.into();
                     move || text_node.set_data(&new_value)

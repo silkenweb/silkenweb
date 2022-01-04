@@ -7,8 +7,12 @@ use wasm_bindgen_futures::JsFuture;
 
 use crate::window;
 
-pub fn queue_update(x: impl 'static + FnOnce()) {
-    RENDER.with(|r| r.queue_update(x));
+pub fn queue_update(is_connected: bool, f: impl 'static + FnOnce()) {
+    if is_connected {
+        RENDER.with(|r| r.queue_update(f));
+    } else {
+        f();
+    }
 }
 
 /// Run a closure after the next render.

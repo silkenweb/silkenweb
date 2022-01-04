@@ -71,7 +71,7 @@ impl ChildVec {
         let parent = self.parent.clone();
         let next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
-        queue_update(move || {
+        queue_update(parent.is_connected(), move || {
             for child in children {
                 parent
                     .insert_before(&child, next_group_elem.as_ref())
@@ -182,7 +182,7 @@ impl ChildVec {
         self.children.clear();
         let parent = self.parent.clone();
 
-        queue_update(move || {
+        queue_update(parent.is_connected(), move || {
             for child in existing_children {
                 parent.remove_child(&child).unwrap();
             }
