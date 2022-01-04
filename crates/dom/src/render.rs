@@ -24,6 +24,9 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
 }
 
+// TODO: This should work when a microtask creates more microtasks, but needs
+// testing. For example a `Signal::map` that updates a `Mutable` with another
+// listener.
 async fn wait_for_microtasks() {
     let promise = Promise::resolve(&JsValue::NULL);
     JsFuture::from(promise).await.unwrap();
