@@ -29,6 +29,7 @@ macro_rules! signal_product{
             }
         }
 
+        #[must_use = "Signals do nothing unless polled"]
         #[pin_project]
         pub struct $name<$( $signal_type , )* F>
         where
