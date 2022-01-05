@@ -22,7 +22,6 @@ macro_rules! define_attribute_values{
 define_attribute_values!(i8, i16, i32, i64);
 define_attribute_values!(u8, u16, u32, u64);
 define_attribute_values!(f32, f64);
-define_attribute_values!(String);
 
 /// A non-reactive attribute.
 pub trait StaticAttribute: Clone {
@@ -31,9 +30,13 @@ pub trait StaticAttribute: Clone {
 
 impl<T: AttributeValue> StaticAttribute for T {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        let value = self.text();
+        dom_element.set_attribute(name, &self.text()).unwrap_throw();
+    }
+}
 
-        dom_element.set_attribute(name, &value).unwrap_throw();
+impl StaticAttribute for String {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        dom_element.set_attribute(name, self).unwrap_throw();
     }
 }
 
@@ -52,7 +55,7 @@ impl StaticAttribute for bool {
 /// Although this only really makes sense for attribute signals, we implement it
 /// for `StaticAttribute`s because we fall foul of orphan rules if we try to
 /// implement it for all signals of `AttributeValue`s.
-impl<T: AttributeValue> StaticAttribute for Option<T> {
+impl<T: StaticAttribute> StaticAttribute for Option<T> {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         match self {
             Some(value) => value.set_attribute(name, dom_element),
@@ -77,6 +80,9 @@ where
 
 impl<'a> Attribute<String> for &'a str {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
-        self.to_string().set_attribute(name, builder);
+        builder
+            .dom_element()
+            .set_attribute(name, self)
+            .unwrap_throw();
     }
 }
