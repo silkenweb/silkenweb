@@ -78,6 +78,7 @@ impl Render {
 
     fn after_render(&self, x: impl 'static + FnOnce()) {
         self.pending_effects.borrow_mut().push(Box::new(x));
+        self.request_render_updates();
     }
 
     fn animation_timestamp(&self) -> impl Signal<Item = f64> {
