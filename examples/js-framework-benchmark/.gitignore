@@ -1,0 +1,6 @@
+/target/
+/node_modules/
+/pkg/
+/wasm-pack.log
+/yarn-error.log
+/bundled-dist/
