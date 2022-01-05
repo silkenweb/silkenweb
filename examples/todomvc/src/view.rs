@@ -12,6 +12,7 @@ use silkenweb::{
     },
     signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
 };
+use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;
 
 use crate::model::{Filter, TodoApp, TodoItem};
@@ -42,7 +43,7 @@ impl TodoAppView {
                     }
                 }
             })
-            .effect(|elem: &HtmlInputElement| elem.focus().unwrap())
+            .effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw())
             .build();
 
         let item_filter = Broadcaster::new(item_filter);
@@ -252,7 +253,7 @@ impl TodoItemView {
                 elem.set_hidden(!editing);
 
                 if editing {
-                    elem.focus().unwrap();
+                    elem.focus().unwrap_throw();
                 }
             })
             .build()

@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use futures_signals::signal_vec::VecDiff;
+use wasm_bindgen::UnwrapThrowExt;
 use web_sys as dom;
 
 use super::{
@@ -67,7 +68,7 @@ impl ChildVec {
         }
 
         let children = self.child_dom_elements();
-        child_groups.set_first_child(self.group_index, children.first().unwrap());
+        child_groups.set_first_child(self.group_index, children.first().unwrap_throw());
         let parent = self.parent.clone();
         let next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
@@ -75,7 +76,7 @@ impl ChildVec {
             for child in children {
                 parent
                     .insert_before(&child, next_group_elem.as_ref())
-                    .unwrap();
+                    .unwrap_throw();
             }
         });
     }
@@ -184,7 +185,7 @@ impl ChildVec {
 
         queue_update(parent.is_connected(), move || {
             for child in existing_children {
-                parent.remove_child(&child).unwrap();
+                parent.remove_child(&child).unwrap_throw();
             }
         });
 

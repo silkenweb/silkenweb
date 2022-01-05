@@ -17,7 +17,7 @@ use std::marker::PhantomData;
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use paste::paste;
 use silkenweb_dom::{Attribute, Element, StaticAttribute};
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
 #[macro_use]
@@ -40,7 +40,7 @@ impl<T: JsCast> CustomEvent<T> {
     ///
     /// If the downcast fails.
     pub fn detail(&self) -> T {
-        self.0.detail().dyn_into().unwrap()
+        self.0.detail().dyn_into().unwrap_throw()
     }
 }
 

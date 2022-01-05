@@ -32,7 +32,7 @@ use std::ops::DerefMut;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use silkenweb_dom::window;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::Url;
 
 /// A signal that will vary according to the current browser URL.
@@ -61,9 +61,9 @@ pub fn set_url_path(path: &str) {
         url.deref_mut().set_pathname(path);
         window()
             .history()
-            .unwrap()
+            .unwrap_throw()
             .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
-            .unwrap();
+            .unwrap_throw();
     });
 }
 
@@ -73,9 +73,9 @@ fn new_url_signal() -> Mutable<Url> {
         &window
             .location()
             .href()
-            .expect("Must be able to get window 'href'"),
+            .expect_throw("Must be able to get window 'href'"),
     )
-    .expect("URL must be valid");
+    .expect_throw("URL must be valid");
 
     ON_POPSTATE
         .with(|on_popstate| window.set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
@@ -87,7 +87,7 @@ thread_local! {
     static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_event: JsValue| {
             URL.with(|url| url.set(
-                Url::new(&window().location().href().expect("HRef must exist")).expect("URL must be valid")
+                Url::new(&window().location().href().expect_throw("HRef must exist")).expect_throw("URL must be valid")
             ));
         }));
     static URL: Mutable<Url> = new_url_signal();

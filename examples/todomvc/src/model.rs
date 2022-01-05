@@ -6,6 +6,7 @@ use futures_signals::{
 };
 use serde::{Deserialize, Serialize};
 use silkenweb::Storage;
+use wasm_bindgen::UnwrapThrowExt;
 
 #[derive(Serialize, Deserialize)]
 pub struct TodoApp {
@@ -20,7 +21,7 @@ impl TodoApp {
                 .ok()
                 .and_then(|storage| storage.get(STORAGE_KEY))
             {
-                serde_json::from_str(&app_str).unwrap()
+                serde_json::from_str(&app_str).unwrap_throw()
             } else {
                 Self {
                     todo_id: Cell::new(0),
@@ -33,8 +34,8 @@ impl TodoApp {
     pub fn save(&self) {
         if let Ok(storage) = Storage::local() {
             storage
-                .insert(STORAGE_KEY, &serde_json::to_string(self).unwrap())
-                .expect("Out of space");
+                .insert(STORAGE_KEY, &serde_json::to_string(self).unwrap_throw())
+                .expect_throw("Out of space");
         }
     }
 

@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use wasm_bindgen::{intern, JsCast, JsValue};
+use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
@@ -34,11 +34,11 @@ pub struct ElementBuilder {
 
 impl ElementBuilder {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document().create_element(tag).unwrap())
+        Self::new_element(document().create_element(tag).unwrap_throw())
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document().create_element_ns(Some(namespace), tag).unwrap())
+        Self::new_element(document().create_element_ns(Some(namespace), tag).unwrap_throw())
     }
 
     fn new_element(dom_element: dom::Element) -> Self {
@@ -200,7 +200,7 @@ impl ElementBuilder {
     /// # use silkenweb_dom::tag;
     /// # use web_sys::HtmlInputElement;
     /// # let element = tag("input");
-    /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw());
     /// ```
     ///
     /// Effects can be reactive. For example, to set the visibibilty of an item
@@ -216,7 +216,7 @@ impl ElementBuilder {
     /// element.effect_signal(is_hidden.signal(), move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden));
     /// ```
     pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
-        let dom_element = self.dom_element().clone().dyn_into().unwrap();
+        let dom_element = self.dom_element().clone().dyn_into().unwrap_throw();
         after_render(move || f(&dom_element));
 
         self
@@ -232,7 +232,7 @@ impl ElementBuilder {
         T: 'static,
         DomType: 'static + Clone + JsCast,
     {
-        let dom_element: DomType = self.dom_element().clone().dyn_into().unwrap();
+        let dom_element: DomType = self.dom_element().clone().dyn_into().unwrap_throw();
 
         let future = sig.for_each(move |x| {
             clone!(dom_element, f);

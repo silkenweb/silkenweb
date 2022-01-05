@@ -1,5 +1,5 @@
 use silkenweb::{html_element, Builder};
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
 html_element!(
@@ -70,7 +70,7 @@ impl SelectionChanged {
             .unchecked_into::<Item>()
             .item()
             .dyn_into()
-            .unwrap()
+            .unwrap_throw()
     }
 }
 

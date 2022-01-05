@@ -429,6 +429,7 @@ dependencies = [
  "futures-signals",
  "num-traits",
  "silkenweb",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -474,6 +475,7 @@ dependencies = [
  "serde",
  "serde_json",
  "silkenweb",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
 ]

@@ -4,7 +4,7 @@ use silkenweb::{
     mount, render_updates, tag, unmount,
 };
 use silkenweb_html::{HtmlElement, ParentBuilder};
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 use web_sys as dom;
 
@@ -147,19 +147,19 @@ async fn verify_reactive_text(
 async fn create_app_container(app_id: &str) {
     // Clear the render queue
     render_updates().await;
-    let app_container = document().create_element("div").unwrap();
+    let app_container = document().create_element("div").unwrap_throw();
     app_container.set_id(app_id);
-    let body = document().body().unwrap();
-    body.append_child(&app_container).unwrap();
+    let body = document().body().unwrap_throw();
+    body.append_child(&app_container).unwrap_throw();
 }
 
 fn query_element(id: &str) -> dom::HtmlElement {
     document()
         .query_selector(&format!("#{}", id))
-        .unwrap()
-        .unwrap()
+        .unwrap_throw()
+        .unwrap_throw()
         .dyn_into()
-        .unwrap()
+        .unwrap_throw()
 }
 
 fn app_html() -> String {
@@ -167,7 +167,7 @@ fn app_html() -> String {
 }
 
 fn document() -> dom::Document {
-    dom::window().unwrap().document().unwrap()
+    dom::window().unwrap_throw().document().unwrap_throw()
 }
 
 const APP_ID: &str = "app";

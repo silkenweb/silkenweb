@@ -1,6 +1,6 @@
 use parse_display::Display;
 use silkenweb::{html_element, AttributeValue, Builder};
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
 html_element!(
@@ -80,7 +80,7 @@ impl SelectedDatesChange {
             .values()
             .into_vec()
             .into_iter()
-            .map(|obj| obj.as_string().unwrap())
+            .map(|obj| obj.as_string().unwrap_throw())
     }
 }
 

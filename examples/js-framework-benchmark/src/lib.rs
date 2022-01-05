@@ -17,7 +17,7 @@ use silkenweb::{
     elements::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
     mount, signal, Builder, HtmlElement, ParentBuilder,
 };
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 const ADJECTIVES: &[&str] = &[
     "pretty",
@@ -67,9 +67,9 @@ impl Row {
             id,
             label: Mutable::new(format!(
                 "{} {} {}",
-                ADJECTIVES.choose(rng).unwrap(),
-                COLOURS.choose(rng).unwrap(),
-                NOUNS.choose(rng).unwrap()
+                ADJECTIVES.choose(rng).unwrap_throw(),
+                COLOURS.choose(rng).unwrap_throw(),
+                NOUNS.choose(rng).unwrap_throw()
             )),
         })
     }

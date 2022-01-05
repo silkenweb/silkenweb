@@ -6,7 +6,7 @@ use silkenweb_ui5::{
     icon::ui5_icon,
     side_navigation::{ui5_side_navigation, ui5_side_navigation_item},
 };
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::{wasm_bindgen, JsValue}, UnwrapThrowExt};
 
 #[wasm_bindgen(start)]
 pub fn main_js() -> Result<(), JsValue> {
@@ -48,10 +48,10 @@ pub fn main_js() -> Result<(), JsValue> {
                 event
                     .item()
                     .get_attribute("id")
-                    .unwrap()
+                    .unwrap_throw()
                     .as_str()
                     .parse()
-                    .unwrap(),
+                    .unwrap_throw(),
             );
         });
 

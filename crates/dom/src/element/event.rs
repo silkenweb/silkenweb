@@ -1,4 +1,4 @@
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
 pub struct EventCallback {
@@ -12,7 +12,7 @@ impl EventCallback {
         let callback = Closure::wrap(Box::new(f) as Box<dyn FnMut(JsValue)>);
         target
             .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
-            .unwrap();
+            .unwrap_throw();
 
         Self {
             target,
@@ -29,6 +29,6 @@ impl Drop for EventCallback {
                 self.name,
                 self.callback.as_ref().as_ref().unchecked_ref(),
             )
-            .unwrap();
+            .unwrap_throw();
     }
 }

@@ -4,16 +4,17 @@ use std::iter;
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{animation::infinite_animation, mount, signal, tag_in_namespace, Builder, Element};
+use wasm_bindgen::UnwrapThrowExt;
 
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
 
 fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> Element {
     let path = time.map(move |time| {
-        let multiplier = (time / speed).sin().to_f32().unwrap();
+        let multiplier = (time / speed).sin().to_f32().unwrap_throw();
         let control_point = 150.0 * multiplier + 150.0;
         let half_height = HEIGHT / 2.0;
-        let hump_width = WIDTH / humps.to_f32().unwrap();
+        let hump_width = WIDTH / humps.to_f32().unwrap_throw();
 
         let initial_path = format!(
             "M 0,{} Q {},{} {},{}",
@@ -45,7 +46,7 @@ fn main() {
         .attribute("height", HEIGHT);
 
     for i in 2..6 {
-        svg = svg.child(path(ts.signal(), i, 150.0 * i.to_f64().unwrap()));
+        svg = svg.child(path(ts.signal(), i, 150.0 * i.to_f64().unwrap_throw()));
     }
 
     mount("app", svg);

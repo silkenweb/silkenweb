@@ -4,6 +4,7 @@ use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
+use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
 use web_sys as dom;
 
@@ -35,7 +36,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
         .get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
         .append_child(elem.dom_element())
-        .unwrap();
+        .unwrap_throw();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
@@ -49,11 +50,11 @@ pub fn unmount(id: &str) {
 }
 
 pub fn window() -> dom::Window {
-    dom::window().expect("Window must be available")
+    dom::window().expect_throw("Window must be available")
 }
 
 pub fn document() -> dom::Document {
-    window().document().expect("Window must contain a document")
+    window().document().expect_throw("Window must contain a document")
 }
 
 /// An HTML element tag.

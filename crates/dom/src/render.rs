@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use js_sys::Promise;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
 
 use crate::window;
@@ -31,7 +31,7 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
 // listener.
 async fn wait_for_microtasks() {
     let promise = Promise::resolve(&JsValue::NULL);
-    JsFuture::from(promise).await.unwrap();
+    JsFuture::from(promise).await.unwrap_throw();
 }
 
 /// Render any pending updates.
@@ -63,7 +63,7 @@ impl Render {
             on_animation_frame: Closure::wrap(Box::new(move |time_stamp: JsValue| {
                 RENDER.with(|render| {
                     render.raf_pending.set(false);
-                    render.update_animations(time_stamp.as_f64().unwrap());
+                    render.update_animations(time_stamp.as_f64().unwrap_throw());
                     render.render_updates();
                 });
             })),
@@ -104,7 +104,7 @@ impl Render {
 
             window()
                 .request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref())
-                .unwrap();
+                .unwrap_throw();
         }
     }
 

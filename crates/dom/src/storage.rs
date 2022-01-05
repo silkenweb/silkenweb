@@ -1,4 +1,4 @@
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
 use crate::window;
@@ -22,7 +22,7 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
     pub fn local() -> Result<Self, JsValue> {
-        Ok(Self(window().local_storage()?.unwrap()))
+        Ok(Self(window().local_storage()?.unwrap_throw()))
     }
 
     /// Get the window's session storage.
@@ -35,7 +35,7 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     pub fn session() -> Result<Self, JsValue> {
-        Ok(Self(window().session_storage()?.unwrap()))
+        Ok(Self(window().session_storage()?.unwrap_throw()))
     }
 
     /// Get the value associated with the key.
@@ -44,7 +44,7 @@ impl Storage {
     pub fn get(&self, key: &str) -> Option<String> {
         self.0
             .get_item(key)
-            .expect(unexpected_exception!("getItem"))
+            .expect_throw(unexpected_exception!("getItem"))
     }
 
     /// Set the value associated with the key.
@@ -66,21 +66,21 @@ impl Storage {
     pub fn remove(&self, key: &str) {
         self.0
             .remove_item(key)
-            .expect(unexpected_exception!("removeItem"))
+            .expect_throw(unexpected_exception!("removeItem"))
     }
 
     /// Clear the storage.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/clear)
     pub fn clear(&self) {
-        self.0.clear().expect(unexpected_exception!("clear"))
+        self.0.clear().expect_throw(unexpected_exception!("clear"))
     }
 
     /// The number of stored keys.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/length)
     pub fn len(&self) -> u32 {
-        self.0.length().expect(unexpected_exception!("length"))
+        self.0.length().expect_throw(unexpected_exception!("length"))
     }
 
     /// Is the storage empty?
@@ -109,7 +109,7 @@ impl Iterator for StorageIter {
         let item = self
             .container
             .key(self.index)
-            .expect(unexpected_exception!("key"));
+            .expect_throw(unexpected_exception!("key"));
         self.index += 1;
         item
     }
