@@ -23,10 +23,3 @@ js-sys = "0.3"
 wasm-bindgen = "0.2.78"
 rand = {version = "0.8", features = ["small_rng"]}
 getrandom = { version = "0.2", features = ["js"] }
-
-# TODO: Use a released version
-[patch.crates-io]
-silkenweb-html = { path = "../../../../../git/silkenweb/crates/html" }
-silkenweb-dom = { path = "../../../../../git/silkenweb/crates/dom" }
-silkenweb-signals-ext = { path = "../../../../../git/silkenweb/crates/signals-ext" }
-silkenweb = { path = "../../../../../git/silkenweb/crates/silkenweb" }
