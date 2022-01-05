@@ -9,12 +9,8 @@ use crate::window;
 
 // TODO: This causes a lot of cloning. Decide whether to run this synchronously
 // earlier, so we don't always need to clone.
-pub fn queue_update(is_connected: bool, f: impl 'static + FnOnce()) {
-    if is_connected {
+pub fn queue_update(f: impl 'static + FnOnce()) {
         RENDER.with(|r| r.queue_update(f));
-    } else {
-        f();
-    }
 }
 
 /// Run a closure after the next render.
