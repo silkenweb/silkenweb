@@ -201,6 +201,7 @@ impl ElementBuilder {
     /// ```no_run
     /// # use silkenweb_dom::tag;
     /// # use web_sys::HtmlInputElement;
+    /// # use wasm_bindgen::UnwrapThrowExt;
     /// # let element = tag("input");
     /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw());
     /// ```
