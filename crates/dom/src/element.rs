@@ -1,4 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, future::Future, rc::Rc};
+#[cfg(debug_assertions)]
+use std::collections::HashSet;
+use std::{self, cell::RefCell, future::Future, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -26,7 +28,8 @@ mod event;
 pub struct ElementBuilder {
     element: Element,
     children: Rc<RefCell<ChildGroups>>,
-    attribute_futures: HashMap<String, SignalHandle>,
+    #[cfg(debug_assertions)]
+    attributes: HashSet<String>,
 }
 
 impl ElementBuilder {
@@ -46,7 +49,8 @@ impl ElementBuilder {
                 futures: Vec::new(),
             },
             children: Rc::new(RefCell::new(ChildGroups::new(dom_element))),
-            attribute_futures: HashMap::new(),
+            #[cfg(debug_assertions)]
+            attributes: HashSet::new(),
         }
     }
 
@@ -57,7 +61,10 @@ impl ElementBuilder {
         value: impl Attribute<T>,
     ) -> Self {
         let name = name.into();
-        self.attribute_futures.remove(&name);
+
+        #[cfg(debug_assertions)]
+        debug_assert!(self.attributes.insert(name.clone()));
+
         value.set_attribute(name, &mut self);
         self
     }
@@ -262,9 +269,6 @@ impl Builder for ElementBuilder {
     type Target = Element;
 
     fn build(mut self) -> Self::Target {
-        self.element
-            .futures
-            .extend(self.attribute_futures.into_values());
         self.element.futures.shrink_to_fit();
         self.element.event_callbacks.shrink_to_fit();
         self.children.borrow_mut().shrink_to_fit();
@@ -355,9 +359,7 @@ where
             }
         });
 
-        builder
-            .attribute_futures
-            .insert(name, spawn_cancelable_future(updater));
+        builder.store_future(updater);
     }
 }
 
