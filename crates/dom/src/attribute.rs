@@ -1,9 +1,9 @@
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys as dom;
 
-use crate::{clone, render::queue_update, DomElement, ElementBuilder};
+use crate::{DomElement, ElementBuilder};
 
-pub trait AttributeValue {
+pub trait AttributeValue: Clone {
     fn text(&self) -> String;
 }
 
@@ -25,33 +25,25 @@ define_attribute_values!(f32, f64);
 define_attribute_values!(String);
 
 /// A non-reactive attribute.
-pub trait StaticAttribute {
-    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element);
+pub trait StaticAttribute: Clone {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element);
 }
 
 impl<T: AttributeValue> StaticAttribute for T {
-    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
-        clone!(dom_element);
-        let name = name.into();
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         let value = self.text();
 
-        queue_update(move || dom_element.set_attribute(&name, &value).unwrap_throw());
+        dom_element.set_attribute(name, &value).unwrap_throw();
     }
 }
 
 impl StaticAttribute for bool {
-    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
-        clone!(dom_element);
-        let name = name.into();
-        let value = *self;
-
-        queue_update(move || {
-            if value {
-                dom_element.set_attribute(&name, "").unwrap_throw();
-            } else {
-                dom_element.remove_attribute(&name).unwrap_throw();
-            }
-        });
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        if *self {
+            dom_element.set_attribute(name, "").unwrap_throw();
+        } else {
+            dom_element.remove_attribute(name).unwrap_throw();
+        }
     }
 }
 
@@ -61,35 +53,30 @@ impl StaticAttribute for bool {
 /// for `StaticAttribute`s because we fall foul of orphan rules if we try to
 /// implement it for all signals of `AttributeValue`s.
 impl<T: AttributeValue> StaticAttribute for Option<T> {
-    fn set_attribute(&self, name: impl Into<String>, dom_element: &dom::Element) {
-        clone!(dom_element);
-        let name = name.into();
-
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         match self {
-            Some(value) => value.set_attribute(name, &dom_element),
-            None => queue_update(move || {
-                dom_element.remove_attribute(&name).unwrap_throw();
-            }),
+            Some(value) => value.set_attribute(name, dom_element),
+            None => dom_element.remove_attribute(name).unwrap_throw(),
         }
     }
 }
 
 /// A potentially reactive attribute.
 pub trait Attribute<T> {
-    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder);
+    fn set_attribute(self, name: &str, builder: &mut ElementBuilder);
 }
 
 impl<T> Attribute<T> for T
 where
     T: StaticAttribute,
 {
-    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
         StaticAttribute::set_attribute(&self, name, builder.dom_element());
     }
 }
 
 impl<'a> Attribute<String> for &'a str {
-    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
+    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
         self.to_string().set_attribute(name, builder);
     }
 }

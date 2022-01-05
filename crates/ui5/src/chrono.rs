@@ -36,7 +36,7 @@ impl Ui5CalendarBuilder {
     }
 }
 
-#[derive(Display)]
+#[derive(Display, Copy, Clone)]
 pub enum SelectionMode {
     Single,
     Range,
@@ -49,7 +49,7 @@ impl AttributeValue for SelectionMode {
     }
 }
 
-#[derive(Display)]
+#[derive(Display, Copy, Clone)]
 pub enum PrimaryCalendarType {
     Gregorian,
     Buddhist,

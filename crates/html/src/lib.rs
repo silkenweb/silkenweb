@@ -103,7 +103,7 @@ macro_rules! global_attributes {
 pub trait HtmlElement: Sized {
     fn attribute<T: StaticAttribute>(
         self,
-        name: impl Into<String>,
+        name: &str,
         value: impl Attribute<T>,
     ) -> Self;
 

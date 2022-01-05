@@ -61,13 +61,11 @@ impl ElementBuilder {
     /// Set an attribute. Attribute values can be reactive.
     pub fn attribute<T: StaticAttribute>(
         mut self,
-        name: impl Into<String>,
+        name: &str,
         value: impl Attribute<T>,
     ) -> Self {
-        let name = name.into();
-
         #[cfg(debug_assertions)]
-        debug_assert!(self.attributes.insert(name.clone()));
+        debug_assert!(self.attributes.insert(name.into()));
 
         value.set_attribute(name, &mut self);
         self
@@ -348,17 +346,22 @@ type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
 
 impl<Sig, Attr> Attribute<Attr> for SignalType<Sig>
 where
-    Attr: StaticAttribute,
+    Attr: 'static + StaticAttribute,
     Sig: 'static + Signal<Item = Attr>,
 {
-    fn set_attribute(self, name: impl Into<String>, builder: &mut ElementBuilder) {
-        let name = name.into();
+    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
         let dom_element = builder.dom_element().clone();
 
         let updater = self.0.for_each({
-            clone!(name);
+            let name = name.to_owned();
+
             move |new_value| {
-                StaticAttribute::set_attribute(&new_value, &name, &dom_element);
+                clone!(name, dom_element, new_value);
+
+                queue_update(move || {
+                    StaticAttribute::set_attribute(&new_value, &name, &dom_element);
+                });
+
                 async {}
             }
         });
