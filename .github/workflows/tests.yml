@@ -55,6 +55,8 @@ jobs:
         crate: wasm-bindgen-cli
         version: 0.2.78
     - name: Browser Tests
+      # Browser tests intermittantly hang with windows github actions.
+      if: matrix.os != 'windows-latest'
       working-directory: crates/silkenweb
       run: wasm-pack test --headless --firefox
     # Make sure we build first so cypress doesn't time out
