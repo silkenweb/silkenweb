@@ -38,7 +38,11 @@ impl ElementBuilder {
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document().create_element_ns(Some(namespace), tag).unwrap_throw())
+        Self::new_element(
+            document()
+                .create_element_ns(Some(namespace), tag)
+                .unwrap_throw(),
+        )
     }
 
     fn new_element(dom_element: dom::Element) -> Self {

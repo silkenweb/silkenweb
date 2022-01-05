@@ -7,7 +7,9 @@ pub fn insert_child_before(parent: &dom::Node, new_child: &dom::Node, next_child
     clone!(parent, new_child, next_child);
 
     queue_update(parent.is_connected(), move || {
-        parent.insert_before(&new_child, Some(&next_child)).unwrap_throw();
+        parent
+            .insert_before(&new_child, Some(&next_child))
+            .unwrap_throw();
     });
 }
 

@@ -54,7 +54,9 @@ pub fn window() -> dom::Window {
 }
 
 pub fn document() -> dom::Document {
-    window().document().expect_throw("Window must contain a document")
+    window()
+        .document()
+        .expect_throw("Window must contain a document")
 }
 
 /// An HTML element tag.

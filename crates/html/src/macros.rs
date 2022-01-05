@@ -6,9 +6,8 @@ pub mod private {
     pub use silkenweb_dom::{
         tag, Attribute, Builder, DomElement, Element, ElementBuilder, StaticAttribute,
     };
-    pub use wasm_bindgen::JsCast;
+    pub use wasm_bindgen::{JsCast, UnwrapThrowExt};
     pub use web_sys as dom;
-    pub use wasm_bindgen::UnwrapThrowExt;
 }
 
 /// Define an html element.
@@ -364,7 +363,7 @@ macro_rules! events {
                                 use $crate::macros::private::JsCast;
                                 // I *think* we can assume event and event.current_target aren't null
                                 let event: $event_type = js_ev.unchecked_into();
-                                let target: $elem_type = 
+                                let target: $elem_type =
                                     $crate::macros::private::UnwrapThrowExt::unwrap_throw(
                                         event.current_target()
                                     )
@@ -399,7 +398,7 @@ macro_rules! custom_events {
                                 // I *think* it's safe to assume event and event.current_target aren't null
                                 let event: $crate::macros::private::dom::CustomEvent =
                                     js_ev.unchecked_into();
-                                let target: $elem_type = 
+                                let target: $elem_type =
                                     $crate::macros::private::UnwrapThrowExt::unwrap_throw(
                                         event.current_target()
                                     )

@@ -80,7 +80,9 @@ impl Storage {
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/length)
     pub fn len(&self) -> u32 {
-        self.0.length().expect_throw(unexpected_exception!("length"))
+        self.0
+            .length()
+            .expect_throw(unexpected_exception!("length"))
     }
 
     /// Is the storage empty?
