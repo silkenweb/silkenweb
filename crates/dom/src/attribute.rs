@@ -4,14 +4,18 @@ use web_sys as dom;
 use crate::{DomElement, ElementBuilder};
 
 pub trait AttributeValue: Clone {
-    fn text(&self) -> String;
+    type Text: AsRef<str>;
+
+    fn text(&self) -> Self::Text;
 }
 
 macro_rules! define_attribute_values{
     ($($typ:ty),* $(,)?) => {
         $(
             impl AttributeValue for $typ {
-                fn text(&self) -> String {
+                type Text = String;
+
+                fn text(&self) -> Self::Text {
                     format!("{}", self)
                 }
             }
@@ -30,7 +34,9 @@ pub trait StaticAttribute: Clone {
 
 impl<T: AttributeValue> StaticAttribute for T {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        dom_element.set_attribute(name, &self.text()).unwrap_throw();
+        dom_element
+            .set_attribute(name, self.text().as_ref())
+            .unwrap_throw();
     }
 }
 

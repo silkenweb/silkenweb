@@ -44,7 +44,9 @@ pub enum SelectionMode {
 }
 
 impl AttributeValue for SelectionMode {
-    fn text(&self) -> String {
+    type Text = String;
+
+    fn text(&self) -> Self::Text {
         self.to_string()
     }
 }
@@ -59,7 +61,9 @@ pub enum PrimaryCalendarType {
 }
 
 impl AttributeValue for PrimaryCalendarType {
-    fn text(&self) -> String {
+    type Text = String;
+
+    fn text(&self) -> Self::Text {
         self.to_string()
     }
 }
