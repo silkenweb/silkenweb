@@ -59,11 +59,7 @@ impl ElementBuilder {
     }
 
     /// Set an attribute. Attribute values can be reactive.
-    pub fn attribute<T: StaticAttribute>(
-        mut self,
-        name: &str,
-        value: impl Attribute<T>,
-    ) -> Self {
+    pub fn attribute<T: StaticAttribute>(mut self, name: &str, value: impl Attribute<T>) -> Self {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
 
