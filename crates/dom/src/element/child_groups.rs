@@ -13,6 +13,8 @@ pub struct ChildGroups {
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
     children: Vec<Option<dom::Node>>,
+    // `true` if the last child group can change.
+    last_is_dynamic: bool,
 }
 
 impl ChildGroups {
@@ -20,10 +22,12 @@ impl ChildGroups {
         Self {
             parent,
             children: Vec::new(),
+            last_is_dynamic: false,
         }
     }
 
     pub fn new_group(&mut self) -> usize {
+        self.last_is_dynamic = true;
         let index = self.children.len();
         self.children.push(None);
         index
@@ -35,8 +39,13 @@ impl ChildGroups {
 
     /// Append a new group. Don't wait for the next animation frame.
     pub fn append_new_group_sync(&mut self, child: &dom::Node) {
-        self.children.push(Some(child.clone()));
+        if self.last_is_dynamic {
+            self.children.push(Some(child.clone()));
+        }
+
         self.parent.append_child(child).unwrap_throw();
+        // We didn't give out an index, so this can't be dynamic.
+        self.last_is_dynamic = false;
     }
 
     pub fn insert_only_child(&mut self, index: usize, child: &dom::Node) {
