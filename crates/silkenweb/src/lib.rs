@@ -32,7 +32,8 @@ pub use silkenweb_dom::{
     ElementBuilder, Storage,
 };
 pub use silkenweb_html::{
-    children_allowed, elements, html_element, CustomEvent, Effects, HtmlElement, ParentBuilder,
+    children_allowed, elements, html_element, CustomEvent, Effects, ElementEvents, HtmlElement,
+    HtmlElementEvents, ParentBuilder,
 };
 pub use silkenweb_signals_ext::SignalProduct;
 

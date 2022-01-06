@@ -10,7 +10,8 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
+    signal, Builder, Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder,
+    SignalProduct,
 };
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;

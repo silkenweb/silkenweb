@@ -123,12 +123,9 @@ macro_rules! html_element {
                     $($($(#[$attr_meta])* $attr ($text_attr): $typ,)*)?
                 ];
 
-                $crate::html_element_events!($elem_type);
-                $crate::element_events!($elem_type);
-
                 $($crate::events!(
                     $elem_type {
-                        $($event $(- $event_tail)*: $event_type),*
+                        $(pub $event $(- $event_tail)*: $event_type),*
                     }
                  ); )?
 
@@ -137,6 +134,14 @@ macro_rules! html_element {
                         $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                     }
                  ); )?
+            }
+
+            impl $crate::HtmlElementEvents for [<$camel_name Builder>] {
+                type EventTarget = $elem_type;
+            }
+
+            impl $crate::ElementEvents for [<$camel_name Builder>] {
+                type EventTarget = $elem_type;
             }
 
             impl $crate::Effects<$elem_type> for [<$camel_name Builder>] {
@@ -169,7 +174,7 @@ macro_rules! html_element {
                     name: &'static str,
                     f: impl 'static + FnMut($crate::macros::private::JsValue)
                 ) -> Self {
-                    Self{ builder: self.builder.on(name, f) }
+                    Self{ builder: $crate::macros::private::Builder::on(self.builder, name, f) }
                 }
 
                 fn build(self) -> Self::Target {
@@ -272,109 +277,36 @@ macro_rules! children_allowed {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! html_element_events {
-    ($elem_type:ty) => {
-        $crate::events!($elem_type {
-            animationend: $crate::macros::private::dom::AnimationEvent,
-            animationiteration: $crate::macros::private::dom::AnimationEvent,
-            animationstart: $crate::macros::private::dom::AnimationEvent,
-            beforeinput: $crate::macros::private::dom::InputEvent,
-            change: $crate::macros::private::dom::Event,
-            gotpointercapture: $crate::macros::private::dom::PointerEvent,
-            input: $crate::macros::private::dom::InputEvent,
-            lostpointercapture: $crate::macros::private::dom::PointerEvent,
-            pointercancel: $crate::macros::private::dom::PointerEvent,
-            pointerdown: $crate::macros::private::dom::PointerEvent,
-            pointerenter: $crate::macros::private::dom::PointerEvent,
-            pointerleave: $crate::macros::private::dom::PointerEvent,
-            pointermove: $crate::macros::private::dom::PointerEvent,
-            pointerout: $crate::macros::private::dom::PointerEvent,
-            pointerover: $crate::macros::private::dom::PointerEvent,
-            pointerup: $crate::macros::private::dom::PointerEvent,
-            transitionend: $crate::macros::private::dom::TransitionEvent,
-        });
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! element_events {
-    ($elem_type:ty) => {
-        $crate::events!($elem_type {
-            auxclick: $crate::macros::private::dom::MouseEvent,
-            blur: $crate::macros::private::dom::FocusEvent,
-            click: $crate::macros::private::dom::MouseEvent,
-            compositionend: $crate::macros::private::dom::CompositionEvent,
-            compositionstart: $crate::macros::private::dom::CompositionEvent,
-            compositionupdate: $crate::macros::private::dom::CompositionEvent,
-            contextmenu: $crate::macros::private::dom::MouseEvent,
-            dblclick: $crate::macros::private::dom::MouseEvent,
-            error: $crate::macros::private::dom::Event,
-            focusin: $crate::macros::private::dom::FocusEvent,
-            focusout: $crate::macros::private::dom::FocusEvent,
-            focus: $crate::macros::private::dom::FocusEvent,
-            fullscreenchange: $crate::macros::private::dom::Event,
-            fullscreenerror: $crate::macros::private::dom::Event,
-            keydown: $crate::macros::private::dom::KeyboardEvent,
-            keyup: $crate::macros::private::dom::KeyboardEvent,
-            mousedown: $crate::macros::private::dom::MouseEvent,
-            mouseenter: $crate::macros::private::dom::MouseEvent,
-            mouseleave: $crate::macros::private::dom::MouseEvent,
-            mousemove: $crate::macros::private::dom::MouseEvent,
-            mouseout: $crate::macros::private::dom::MouseEvent,
-            mouseover: $crate::macros::private::dom::MouseEvent,
-            mouseup: $crate::macros::private::dom::MouseEvent,
-            scroll: $crate::macros::private::dom::Event,
-            select: $crate::macros::private::dom::Event,
-            touchcancel: $crate::macros::private::dom::TouchEvent,
-            touchend: $crate::macros::private::dom::TouchEvent,
-            touchmove: $crate::macros::private::dom::TouchEvent,
-            touchstart: $crate::macros::private::dom::TouchEvent,
-            wheel: $crate::macros::private::dom::WheelEvent,
-            /* The events are currently marked as unstable in web_sys:
-             *
-             * copy: $crate::macros::private::dom::ClipboardEvent,
-             * cut: $crate::macros::private::dom::ClipboardEvent,
-             * paste: $crate::macros::private::dom::ClipboardEvent, */
-        });
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
 macro_rules! events {
     ($elem_type:ty {
-        $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
+        $($visiblity:vis $name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
     }) => {
         $crate::macros::private::paste!{
             $(
-                pub fn [<on_ $name $(_ $name_tail)* >] (
+                $visiblity fn [<on_ $name $(_ $name_tail)* >] (
                     self,
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
-                    Self{
-                        builder: $crate::macros::private::Builder::on(
-                            self.builder,
-                            $crate::text_name!($name $(- $name_tail)*),
-                            move |js_ev| {
-                                use $crate::macros::private::JsCast;
-                                // I *think* we can assume event and event.current_target aren't null
-                                let event: $event_type = js_ev.unchecked_into();
-                                let target: $elem_type =
-                                    $crate::macros::private::UnwrapThrowExt::unwrap_throw(
-                                        event.current_target()
-                                    )
-                                    .unchecked_into();
-                                f(event, target);
-                            }
-                        )
-                    }
+                    $crate::macros::private::Builder::on(
+                        self,
+                        $crate::text_name!($name $(- $name_tail)*),
+                        move |js_ev| {
+                            use $crate::macros::private::JsCast;
+                            // I *think* we can assume event and event.current_target aren't null
+                            let event: $event_type = js_ev.unchecked_into();
+                            let target: $elem_type =
+                                $crate::macros::private::UnwrapThrowExt::unwrap_throw(
+                                    event.current_target()
+                                )
+                                .unchecked_into();
+                            f(event, target);
+                        }
+                    )
                 }
             )*
         }
     };
 }
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! custom_events {
@@ -387,23 +319,22 @@ macro_rules! custom_events {
                     self,
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
-                    Self{
-                        builder: self.builder.on(
-                            $crate::text_name!($name $(- $name_tail)*),
-                            move |js_ev| {
-                                use $crate::macros::private::JsCast;
-                                // I *think* it's safe to assume event and event.current_target aren't null
-                                let event: $crate::macros::private::dom::CustomEvent =
-                                    js_ev.unchecked_into();
-                                let target: $elem_type =
-                                    $crate::macros::private::UnwrapThrowExt::unwrap_throw(
-                                        event.current_target()
-                                    )
-                                    .unchecked_into();
-                                f(event.into(), target);
-                            }
-                        )
-                    }
+                    $crate::macros::private::Builder::on(
+                        self,
+                        $crate::text_name!($name $(- $name_tail)*),
+                        move |js_ev| {
+                            use $crate::macros::private::JsCast;
+                            // I *think* it's safe to assume event and event.current_target aren't null
+                            let event: $crate::macros::private::dom::CustomEvent =
+                                js_ev.unchecked_into();
+                            let target: $elem_type =
+                                $crate::macros::private::UnwrapThrowExt::unwrap_throw(
+                                    event.current_target()
+                                )
+                                .unchecked_into();
+                            f(event.into(), target);
+                        }
+                    )
                 }
             )*
         }

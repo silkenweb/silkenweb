@@ -2,7 +2,7 @@
 use futures_signals::signal::SignalExt;
 use silkenweb::{
     elements::{button, div, p},
-    mount, router, ParentBuilder,
+    mount, router, ElementEvents, ParentBuilder,
 };
 
 fn main() {

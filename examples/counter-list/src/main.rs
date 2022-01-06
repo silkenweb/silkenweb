@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use silkenweb::{
     elements::{button, div, hr, Button, Div},
-    mount, Builder, ParentBuilder,
+    mount, Builder, ElementEvents, ParentBuilder,
 };
 
 fn main() {

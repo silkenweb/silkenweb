@@ -1,7 +1,7 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     elements::{button, div, p, PBuilder},
-    mount, render_updates, tag, unmount,
+    mount, render_updates, tag, unmount, ElementEvents,
 };
 use silkenweb_html::{HtmlElement, ParentBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};

@@ -5,7 +5,7 @@
 //! attribute for that element, as well as methods for each event. For example:
 //!
 //! ```no_run
-//! # use silkenweb_html::elements::{a, A, ABuilder};
+//! # use silkenweb_html::{elements::{a, A, ABuilder}, ElementEvents};
 //! use web_sys as dom;
 //! let link: ABuilder = a()
 //!     .href("https://example.com/")
@@ -346,4 +346,70 @@ pub trait HtmlElement: Builder {
         /// - no, which indicates that the element will not be translated.
         translate: String,
     ];
+}
+
+pub trait HtmlElementEvents: Builder {
+    type EventTarget: JsCast;
+
+    events!(Self::EventTarget {
+        animationend: dom::AnimationEvent,
+        animationiteration: dom::AnimationEvent,
+        animationstart: dom::AnimationEvent,
+        beforeinput: dom::InputEvent,
+        change: dom::Event,
+        gotpointercapture: dom::PointerEvent,
+        input: dom::InputEvent,
+        lostpointercapture: dom::PointerEvent,
+        pointercancel: dom::PointerEvent,
+        pointerdown: dom::PointerEvent,
+        pointerenter: dom::PointerEvent,
+        pointerleave: dom::PointerEvent,
+        pointermove: dom::PointerEvent,
+        pointerout: dom::PointerEvent,
+        pointerover: dom::PointerEvent,
+        pointerup: dom::PointerEvent,
+        transitionend: dom::TransitionEvent,
+    });
+}
+
+pub trait ElementEvents: Builder {
+    type EventTarget: JsCast;
+
+    events!(Self::EventTarget {
+        auxclick: dom::MouseEvent,
+        blur: dom::FocusEvent,
+        click: dom::MouseEvent,
+        compositionend: dom::CompositionEvent,
+        compositionstart: dom::CompositionEvent,
+        compositionupdate: dom::CompositionEvent,
+        contextmenu: dom::MouseEvent,
+        dblclick: dom::MouseEvent,
+        error: dom::Event,
+        focusin: dom::FocusEvent,
+        focusout: dom::FocusEvent,
+        focus: dom::FocusEvent,
+        fullscreenchange: dom::Event,
+        fullscreenerror: dom::Event,
+        keydown: dom::KeyboardEvent,
+        keyup: dom::KeyboardEvent,
+        mousedown: dom::MouseEvent,
+        mouseenter: dom::MouseEvent,
+        mouseleave: dom::MouseEvent,
+        mousemove: dom::MouseEvent,
+        mouseout: dom::MouseEvent,
+        mouseover: dom::MouseEvent,
+        mouseup: dom::MouseEvent,
+        scroll: dom::Event,
+        select: dom::Event,
+        touchcancel: dom::TouchEvent,
+        touchend: dom::TouchEvent,
+        touchmove: dom::TouchEvent,
+        touchstart: dom::TouchEvent,
+        wheel: dom::WheelEvent,
+        /* The events are currently marked as unstable in web_sys:
+         *
+         * copy: $crate::macros::private::dom::ClipboardEvent,
+         * cut: $crate::macros::private::dom::ClipboardEvent,
+         * paste: $crate::macros::private::dom::ClipboardEvent, */
+    });
 }

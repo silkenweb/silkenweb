@@ -9,6 +9,7 @@
 //! ```no_run
 //! # use futures_signals::signal::SignalExt;
 //! # use silkenweb::{
+//! #     ElementEvents,
 //! #     elements::{button, div, p},
 //! #     mount, router, ParentBuilder,
 //! # };
