@@ -58,17 +58,9 @@ impl ElementBuilder {
         }
     }
 
-    /// Set an attribute. Attribute values can be reactive.
+    /// Set an attribute.
     pub fn attribute<U, T: StaticAttribute<U>>(self, name: &str, value: impl Attribute<T>) -> Self {
-        self.tagged_attribute(name, value)
-    }
-
-    pub fn tagged_attribute<T>(mut self, name: &str, value: impl Attribute<T>) -> Self {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.attributes.insert(name.into()));
-
-        value.set_attribute(name, &mut self);
-        self
+        Builder::attribute(self, name, value)
     }
 
     /// Add a child element after existing children.
@@ -275,6 +267,14 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
+    fn attribute<T>(mut self, name: &str, value: impl Attribute<T>) -> Self {
+        #[cfg(debug_assertions)]
+        debug_assert!(self.attributes.insert(name.into()));
+
+        value.set_attribute(name, &mut self);
+        self
+    }
+
     fn build(mut self) -> Self::Target {
         self.element.futures.shrink_to_fit();
         self.element.event_callbacks.shrink_to_fit();
@@ -319,18 +319,6 @@ impl DomElement for Element {
     }
 }
 
-impl Builder for Element {
-    type Target = Self;
-
-    fn build(self) -> Self::Target {
-        self
-    }
-
-    fn into_element(self) -> Element {
-        self
-    }
-}
-
 /// Get a raw Javascript, non-reactive DOM element.
 pub trait DomElement {
     type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
@@ -339,8 +327,10 @@ pub trait DomElement {
 }
 
 /// An HTML element builder.
-pub trait Builder {
+pub trait Builder: Sized {
     type Target;
+
+    fn attribute<T>(self, name: &str, value: impl Attribute<T>) -> Self;
 
     fn build(self) -> Self::Target;
 

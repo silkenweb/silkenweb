@@ -156,6 +156,14 @@ macro_rules! html_element {
             impl $crate::macros::private::Builder for [<$camel_name Builder>] {
                 type Target = $camel_name;
 
+                fn attribute<T>(
+                    self,
+                    name: &str,
+                    value: impl $crate::macros::private::Attribute<T>,
+                ) -> Self {
+                    Self{ builder: $crate::macros::private::Builder::attribute(self.builder, name, value) }
+                }
+
                 fn build(self) -> Self::Target {
                     $camel_name(self.builder.build())
                 }
@@ -189,27 +197,7 @@ macro_rules! html_element {
 
             pub struct $camel_name($crate::macros::private::Element);
 
-            impl $crate::macros::private::Builder for $camel_name {
-                type Target = Self;
-
-                fn build(self) -> Self::Target {
-                    self
-                }
-
-                fn into_element(self) -> $crate::macros::private::Element {
-                    self.build().into()
-                }
-            }
-
-            impl $crate::HtmlElement for [<$camel_name Builder>] {
-                fn attribute<T>(
-                    self,
-                    name: &str,
-                    value: impl $crate::macros::private::Attribute<T>,
-                ) -> Self {
-                    Self{ builder: self.builder.tagged_attribute(name, value) }
-                }
-            }
+            impl $crate::HtmlElement for [<$camel_name Builder>] {}
 
             impl $crate::macros::private::DomElement for [<$camel_name>] {
                 type Target = $elem_type;
@@ -423,7 +411,7 @@ macro_rules! attributes {
         $(
             $(#[$attr_meta])*
             pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
-                Self{ builder: self.builder.tagged_attribute($text_attr, value) }
+                Self{ builder: $crate::macros::private::Builder::attribute(self.builder, $text_attr, value) }
             }
         )*
     };

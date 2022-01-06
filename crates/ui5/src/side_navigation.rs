@@ -17,7 +17,7 @@ html_element!(
 impl Ui5SideNavigationBuilder {
     pub fn child(self, child: impl Builder<Target = Ui5SideNavigationItem>) -> Self {
         Self {
-            builder: self.builder.child(child.build().into_element()),
+            builder: self.builder.child(child.build()),
         }
     }
 }
@@ -38,7 +38,7 @@ html_element!(
 impl Ui5SideNavigationItemBuilder {
     pub fn child(self, child: impl Into<Ui5SideNavigationSubItem>) -> Self {
         Self {
-            builder: self.builder.child(child.into().into_element()),
+            builder: self.builder.child(child.into()),
         }
     }
 }

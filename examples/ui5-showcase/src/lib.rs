@@ -1,6 +1,6 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
-use silkenweb::{elements::div, mount, Builder, HtmlElement, ParentBuilder};
+use silkenweb::{elements::div, mount, Builder, Element, HtmlElement, ParentBuilder};
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
     icon::ui5_icon,
@@ -63,8 +63,8 @@ pub fn main_js() -> Result<(), JsValue> {
         div()
             .child(side_bar)
             .child_signal(selected_signal.map(move |selection| match selection {
-                Selected::Calendar => calendar().into_element(),
-                Selected::Icon => icon().into_element(),
+                Selected::Calendar => Element::from(calendar()),
+                Selected::Icon => Element::from(icon()),
             })),
     );
 
