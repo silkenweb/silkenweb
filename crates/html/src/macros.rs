@@ -202,7 +202,7 @@ macro_rules! html_element {
             }
 
             impl $crate::HtmlElement for [<$camel_name Builder>] {
-                fn attribute<T: $crate::macros::private::StaticAttribute>(
+                fn attribute<T>(
                     self,
                     name: &str,
                     value: impl $crate::macros::private::Attribute<T>,

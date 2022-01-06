@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use paste::paste;
-use silkenweb_dom::{Attribute, Element, StaticAttribute};
+use silkenweb_dom::{Attribute, Element};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
@@ -101,7 +101,7 @@ macro_rules! global_attributes {
 }
 
 pub trait HtmlElement: Sized {
-    fn attribute<T: StaticAttribute>(self, name: &str, value: impl Attribute<T>) -> Self;
+    fn attribute<T>(self, name: &str, value: impl Attribute<T>) -> Self;
 
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
