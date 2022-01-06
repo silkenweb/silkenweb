@@ -347,7 +347,7 @@ type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
 
 impl<Sig, Attr, T> Attribute<T> for SignalType<Sig>
 where
-    Attr: 'static + StaticAttribute<T>,
+    Attr: 'static + Clone + StaticAttribute<T>,
     Sig: 'static + Signal<Item = Attr>,
 {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
@@ -380,7 +380,7 @@ pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
 
 impl<Sig, Attr, T> Attribute<T> for OptionalSignalType<Sig>
 where
-    Attr: 'static + StaticAttribute<T>,
+    Attr: 'static + Clone + StaticAttribute<T>,
     Sig: 'static + Signal<Item = Option<Attr>>,
 {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {

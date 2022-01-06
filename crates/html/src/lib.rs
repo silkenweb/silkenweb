@@ -100,33 +100,74 @@ macro_rules! global_attributes {
     }};
 }
 
+pub trait ClassItem: AsRef<str> + Into<String> {}
+
+impl<'a> ClassItem for &'a str {}
+impl<'a> ClassItem for String {}
+
 pub struct Class;
 
-impl<'a, const COUNT: usize> StaticAttribute<Class> for [&'a str; COUNT] {
+impl<C: 'static + ClassItem, const COUNT: usize> StaticAttribute<Class> for [C; COUNT] {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter().copied(), dom_element);
+        set_class_attribute(name, self.iter(), dom_element);
     }
 }
 
-impl<'a, const COUNT: usize> Attribute<Class> for [&'a str; COUNT] {
+impl<'a, C: 'static + ClassItem> StaticAttribute<Class> for &'a [C] {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter(), dom_element);
+    }
+}
+
+impl<C: 'static + ClassItem> StaticAttribute<Class> for Vec<C> {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter(), dom_element);
+    }
+}
+
+impl<C: 'static + ClassItem, const COUNT: usize> Attribute<Class> for [C; COUNT] {
     fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
         StaticAttribute::set_attribute(&self, name, builder.dom_element());
     }
 }
 
-impl<'a, const COUNT: usize> StaticAttribute<Class> for [Option<&'a str>; COUNT] {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter().flatten().copied(), dom_element);
+impl<'a, C: 'static + ClassItem> Attribute<Class> for &'a [C] {
+    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
+        StaticAttribute::set_attribute(&self, name, builder.dom_element());
     }
 }
 
-fn set_class_attribute<T: AsRef<str> + Into<String>>(
+impl<C: 'static + ClassItem> Attribute<Class> for Vec<C> {
+    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
+        StaticAttribute::set_attribute(&self, name, builder.dom_element());
+    }
+}
+
+impl<C: 'static + ClassItem, const COUNT: usize> StaticAttribute<Class> for [Option<C>; COUNT] {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter().flatten(), dom_element);
+    }
+}
+
+impl<'a, C: 'static + ClassItem> StaticAttribute<Class> for &'a [Option<C>] {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter().flatten(), dom_element);
+    }
+}
+
+impl<C: 'static + ClassItem> StaticAttribute<Class> for Vec<Option<C>> {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter().flatten(), dom_element);
+    }
+}
+
+fn set_class_attribute<'a, C: 'static + ClassItem>(
     name: &str,
-    mut classes: impl Iterator<Item = T>,
+    mut classes: impl Iterator<Item = &'a C>,
     dom_element: &dom::Element,
 ) {
     if let Some(first) = classes.next() {
-        let mut text = first.into();
+        let mut text = first.as_ref().to_owned();
 
         for class in classes {
             text.push(' ');

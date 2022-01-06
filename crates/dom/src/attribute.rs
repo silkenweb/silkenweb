@@ -28,7 +28,7 @@ define_attribute_values!(u8, u16, u32, u64);
 define_attribute_values!(f32, f64);
 
 /// A non-reactive attribute.
-pub trait StaticAttribute<T>: Clone {
+pub trait StaticAttribute<T> {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element);
 }
 
