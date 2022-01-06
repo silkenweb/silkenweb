@@ -94,4 +94,7 @@ features = [
     "HtmlTrackElement",
     "HtmlUListElement",
     "HtmlVideoElement",
+
+    "SvgsvgElement",
+    "SvgPathElement"
 ]

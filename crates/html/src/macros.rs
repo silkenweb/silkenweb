@@ -4,7 +4,8 @@ pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::paste;
     pub use silkenweb_dom::{
-        tag, Attribute, Builder, DomElement, Element, ElementBuilder, StaticAttribute,
+        tag, tag_in_namespace, Attribute, Builder, DomElement, Element, ElementBuilder,
+        StaticAttribute,
     };
     pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
     pub use web_sys as dom;
@@ -44,7 +45,35 @@ pub mod private {
 /// ```
 #[macro_export]
 macro_rules! html_element {
+    ($($t:tt)*) => {
+        $crate::dom_element!(
+            attributes = [$crate::HtmlElement],
+            events = [$crate::HtmlElementEvents],
+            $($t)*
+        );
+    }
+}
+
+macro_rules! svg_element {
+    ($($t:tt)*) => {
+        $crate::dom_element!(
+            namespace = "http://www.w3.org/2000/svg",
+            // TODO: Add default attributes
+            attributes = [],
+            // TODO: Add default events
+            events = [],
+            $($t)*
+        );
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! dom_element {
     (
+        $(namespace = $namespace:literal, )?
+        attributes = [$($attribute_trait:ty),*],
+        events = [$($event_trait:ty),*],
         $(#[$elem_meta:meta])*
         $name:ident $(- $name_tail:ident)*
         < $elem_type:ty >
@@ -65,7 +94,10 @@ macro_rules! html_element {
             })?
         }
     ) => { $crate::macros::private::paste!{
-        html_element!(
+        $crate::dom_element!(
+            $(namespace = $namespace, )?
+            attributes = [$($attribute_trait),*],
+            events = [$($event_trait),*],
             $(#[$elem_meta])*
             snake ( [< $name $(_ $name_tail)* >] ),
             camel ( [< $name:camel $($name_tail:camel)* >] ),
@@ -88,6 +120,9 @@ macro_rules! html_element {
         );
     }};
     (
+        $(namespace = $namespace:literal, )?
+        attributes = [$($attribute_trait:ty),*],
+        events = [$($event_trait:ty),*],
         $(#[$elem_meta:meta])*
         snake ( $snake_name:ident ),
         camel ( $camel_name:ident ),
@@ -111,7 +146,9 @@ macro_rules! html_element {
         $crate::macros::private::paste! {
             $(#[$elem_meta])*
             pub fn $snake_name() -> [<$camel_name Builder>] {
-                [<$camel_name Builder>]{ builder: $crate::macros::private::tag($text_name) }
+                [<$camel_name Builder>]{ builder: $crate::create_element_fn!(
+                    $($namespace, )? $text_name
+                ) }
             }
 
             pub struct [<$camel_name Builder>]{
@@ -134,14 +171,6 @@ macro_rules! html_element {
                         $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                     }
                  ); )?
-            }
-
-            impl $crate::HtmlElementEvents for [<$camel_name Builder>] {
-                type EventTarget = $elem_type;
-            }
-
-            impl $crate::ElementEvents for [<$camel_name Builder>] {
-                type EventTarget = $elem_type;
             }
 
             impl $crate::Effects<$elem_type> for [<$camel_name Builder>] {
@@ -210,8 +239,6 @@ macro_rules! html_element {
 
             pub struct $camel_name($crate::macros::private::Element);
 
-            impl $crate::HtmlElement for [<$camel_name Builder>] {}
-
             impl $crate::macros::private::DomElement for [<$camel_name>] {
                 type Target = $elem_type;
 
@@ -226,7 +253,31 @@ macro_rules! html_element {
                     html_elem.0
                 }
             }
+
+            $(impl $attribute_trait for [<$camel_name Builder>] {})*
+
+            $(
+                impl $event_trait for [<$camel_name Builder>] {
+                    type EventTarget = $elem_type;
+                }
+            )*
+
+            impl $crate::ElementEvents for [<$camel_name Builder>] {
+                type EventTarget = $elem_type;
+            }
+
         }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! create_element_fn {
+    ($text_name:expr) => {
+        $crate::macros::private::tag($text_name)
+    };
+    ($namespace:literal, $text_name:expr) => {
+        $crate::macros::private::tag_in_namespace($namespace, $text_name)
     };
 }
 

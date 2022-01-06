@@ -3,13 +3,15 @@ use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
-use silkenweb::{animation::infinite_animation, mount, signal, tag_in_namespace, Builder, Element};
+use silkenweb::{
+    animation::infinite_animation, elements::svg, mount, signal, Builder, ParentBuilder,
+};
 use wasm_bindgen::UnwrapThrowExt;
 
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
 
-fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> Element {
+fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> svg::Path {
     let path = time.map(move |time| {
         let multiplier = (time / speed).sin().to_f32().unwrap_throw();
         let control_point = 150.0 * multiplier + 150.0;
@@ -32,18 +34,18 @@ fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> El
             .fold(initial_path, |path, hump| path + &hump)
     });
 
-    tag_in_namespace("http://www.w3.org/2000/svg", "path")
-        .attribute("d", signal(path))
-        .attribute("stroke", "black")
-        .attribute("fill", "transparent")
+    svg::path()
+        .d(signal(path))
+        .stroke("black")
+        .fill("transparent")
         .build()
 }
 
 fn main() {
     let ts = Broadcaster::new(infinite_animation());
-    let mut svg = tag_in_namespace("http://www.w3.org/2000/svg", "svg")
-        .attribute("width", WIDTH)
-        .attribute("height", HEIGHT);
+    let mut svg = svg::svg()
+        .width(WIDTH.to_string())
+        .height(HEIGHT.to_string());
 
     for i in 2..6 {
         svg = svg.child(path(ts.signal(), i, 150.0 * i.to_f64().unwrap_throw()));
