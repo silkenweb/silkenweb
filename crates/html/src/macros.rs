@@ -6,7 +6,7 @@ pub mod private {
     pub use silkenweb_dom::{
         tag, Attribute, Builder, DomElement, Element, ElementBuilder, StaticAttribute,
     };
-    pub use wasm_bindgen::{JsCast, UnwrapThrowExt};
+    pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
     pub use web_sys as dom;
 }
 
@@ -162,6 +162,14 @@ macro_rules! html_element {
                     value: impl $crate::macros::private::Attribute<T>,
                 ) -> Self {
                     Self{ builder: $crate::macros::private::Builder::attribute(self.builder, name, value) }
+                }
+
+                fn on(
+                    self,
+                    name: &'static str,
+                    f: impl 'static + FnMut($crate::macros::private::JsValue)
+                ) -> Self {
+                    Self{ builder: self.builder.on(name, f) }
                 }
 
                 fn build(self) -> Self::Target {
@@ -345,7 +353,8 @@ macro_rules! events {
                     mut f: impl 'static + FnMut($event_type, $elem_type)
                 ) -> Self {
                     Self{
-                        builder: self.builder.on(
+                        builder: $crate::macros::private::Builder::on(
+                            self.builder,
                             $crate::text_name!($name $(- $name_tail)*),
                             move |js_ev| {
                                 use $crate::macros::private::JsCast;

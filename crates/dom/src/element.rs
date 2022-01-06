@@ -243,25 +243,6 @@ impl ElementBuilder {
 
         self
     }
-
-    /// Register an event handler.
-    ///
-    /// `name` is the name of the event. See the [MDN Events] page for a list.
-    ///
-    /// `f` is the callback when the event fires and will be passed the
-    /// javascript `Event` object.
-    ///
-    /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
-    pub fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
-        {
-            let dom_element = self.element.dom_element.clone();
-            self.element
-                .event_callbacks
-                .push(EventCallback::new(dom_element, name, f));
-        }
-
-        self
-    }
 }
 
 impl Builder for ElementBuilder {
@@ -272,6 +253,17 @@ impl Builder for ElementBuilder {
         debug_assert!(self.attributes.insert(name.into()));
 
         value.set_attribute(name, &mut self);
+        self
+    }
+
+    fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+        {
+            let dom_element = self.element.dom_element.clone();
+            self.element
+                .event_callbacks
+                .push(EventCallback::new(dom_element, name, f));
+        }
+
         self
     }
 
@@ -331,6 +323,16 @@ pub trait Builder: Sized {
     type Target;
 
     fn attribute<T>(self, name: &str, value: impl Attribute<T>) -> Self;
+
+    /// Register an event handler.
+    ///
+    /// `name` is the name of the event. See the [MDN Events] page for a list.
+    ///
+    /// `f` is the callback when the event fires and will be passed the
+    /// javascript `Event` object.
+    ///
+    /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
+    fn on(self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self;
 
     fn build(self) -> Self::Target;
 
