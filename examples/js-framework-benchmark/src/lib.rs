@@ -15,7 +15,7 @@ use rand::{
 use silkenweb::{
     clone,
     elements::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
-    mount, signal, Builder, HtmlElement, ParentBuilder,
+    mount, optional_signal, Builder, HtmlElement, ParentBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -77,7 +77,7 @@ impl Row {
     fn render(&self, app: Rc<App>) -> Tr {
         let id = self.id;
 
-        tr().class(signal(
+        tr().class(optional_signal(
             app.selected_row_id
                 .signal_ref(move |selected| {
                     if let Some(selected) = selected {
@@ -87,7 +87,7 @@ impl Row {
                     }
                 })
                 .dedupe()
-                .map(|selected| if selected { "danger" } else { "" }.to_string()),
+                .map(|selected| selected.then(|| "danger".to_owned())),
         ))
         .child(td().class("col-md-1").text(&id.to_string()))
         .child(

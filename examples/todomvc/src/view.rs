@@ -10,7 +10,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
+    optional_signal, signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
 };
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;
@@ -137,9 +137,9 @@ impl TodoAppView {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class(signal(item_filter.map(move |f| {
-                if filter == f { "selected" } else { "" }.to_string()
-            })))
+            a().class(optional_signal(
+                item_filter.map(move |f| (filter == f).then(|| "selected".to_string())),
+            ))
             .href(format!("/#/{}", filter_name.to_lowercase()))
             .text(&filter_name),
         )

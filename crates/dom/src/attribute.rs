@@ -56,20 +56,6 @@ impl StaticAttribute for bool {
     }
 }
 
-/// Set the attribute, or remove it if the option is `None`.
-///
-/// Although this only really makes sense for attribute signals, we implement it
-/// for `StaticAttribute`s because we fall foul of orphan rules if we try to
-/// implement it for all signals of `AttributeValue`s.
-impl<T: StaticAttribute> StaticAttribute for Option<T> {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        match self {
-            Some(value) => value.set_attribute(name, dom_element),
-            None => dom_element.remove_attribute(name).unwrap_throw(),
-        }
-    }
-}
-
 /// A potentially reactive attribute.
 pub trait Attribute<T> {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder);

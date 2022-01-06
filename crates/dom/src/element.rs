@@ -373,3 +373,37 @@ pub struct SignalType<T>(T);
 pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
     SignalType(sig)
 }
+
+impl<Sig, Attr> Attribute<Attr> for OptionalSignalType<Sig>
+where
+    Attr: 'static + StaticAttribute,
+    Sig: 'static + Signal<Item = Option<Attr>>,
+{
+    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
+        let dom_element = builder.dom_element().clone();
+
+        let updater = self.0.for_each({
+            let name = name.to_owned();
+
+            move |new_value| {
+                clone!(name, dom_element, new_value);
+
+                queue_update(move || match new_value {
+                    Some(value) => StaticAttribute::set_attribute(&value, &name, &dom_element),
+                    None => dom_element.remove_attribute(&name).unwrap_throw(),
+                });
+
+                async {}
+            }
+        });
+
+        builder.store_future(updater);
+    }
+}
+
+pub struct OptionalSignalType<T>(T);
+
+/// Create a newtype wrapper around an optional signal.
+pub fn optional_signal<Sig: Signal<Item = T>, T>(sig: Sig) -> OptionalSignalType<Sig> {
+    OptionalSignalType(sig)
+}

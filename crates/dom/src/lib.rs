@@ -15,7 +15,7 @@ mod element;
 mod storage;
 
 pub use attribute::{Attribute, AttributeValue, StaticAttribute};
-pub use element::{signal, Builder, DomElement, Element, ElementBuilder};
+pub use element::{optional_signal, signal, Builder, DomElement, Element, ElementBuilder};
 pub use storage::Storage;
 
 /// Mount an element on the document.
