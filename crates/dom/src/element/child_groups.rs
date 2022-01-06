@@ -1,5 +1,6 @@
 use std::mem;
 
+use wasm_bindgen::UnwrapThrowExt;
 use web_sys as dom;
 
 use super::dom_children::{append_child, insert_child_before, remove_child};
@@ -32,9 +33,10 @@ impl ChildGroups {
         self.children.split_at(index + 1).1.iter().flatten().next()
     }
 
-    pub fn append_new_group(&mut self, child: &dom::Node) {
-        let group_index = self.new_group();
-        self.insert_only_child(group_index, child);
+    /// Append a new group. Don't wait for the next animation frame.
+    pub fn append_new_group_sync(&mut self, child: &dom::Node) {
+        self.children.push(Some(child.clone()));
+        self.parent.append_child(child).unwrap_throw();
     }
 
     pub fn insert_only_child(&mut self, index: usize, child: &dom::Node) {
@@ -59,14 +61,14 @@ impl ChildGroups {
         }
     }
 
-    pub fn set_first_child(&mut self, index: usize, child: &dom::Node) {
-        self.children[index] = Some(child.clone());
-    }
-
     pub fn remove_child(&mut self, index: usize) {
         if let Some(existing) = mem::replace(&mut self.children[index], None) {
             remove_child(&self.parent, &existing);
         }
+    }
+
+    pub fn set_first_child(&mut self, index: usize, child: &dom::Node) {
+        self.children[index] = Some(child.clone());
     }
 
     pub fn clear_first_child(&mut self, index: usize) {

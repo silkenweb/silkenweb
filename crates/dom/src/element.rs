@@ -76,7 +76,7 @@ impl ElementBuilder {
         let child = child.into();
         self.child_groups
             .borrow_mut()
-            .append_new_group(child.dom_element());
+            .append_new_group_sync(child.dom_element());
         self.element.event_callbacks.extend(child.event_callbacks);
         self.element.futures.extend(child.futures);
 
@@ -160,7 +160,9 @@ impl ElementBuilder {
     /// Add a text node after existing children.
     pub fn text(self, child: &str) -> Self {
         let text_node = document().create_text_node(child);
-        self.child_groups.borrow_mut().append_new_group(&text_node);
+        self.child_groups
+            .borrow_mut()
+            .append_new_group_sync(&text_node);
         self
     }
 
@@ -169,7 +171,9 @@ impl ElementBuilder {
         child_signal: impl 'static + Signal<Item = impl Into<String>>,
     ) -> Self {
         let text_node = document().create_text_node(intern(""));
-        self.child_groups.borrow_mut().append_new_group(&text_node);
+        self.child_groups
+            .borrow_mut()
+            .append_new_group_sync(&text_node);
 
         let updater = child_signal.for_each({
             clone!(text_node);
