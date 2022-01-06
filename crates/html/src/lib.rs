@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use paste::paste;
-use silkenweb_dom::{Attribute, Element};
+use silkenweb_dom::{Attribute, DomElement, Element, StaticAttribute};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
@@ -100,6 +100,45 @@ macro_rules! global_attributes {
     }};
 }
 
+pub struct Class;
+
+impl<'a, const COUNT: usize> StaticAttribute<Class> for [&'a str; COUNT] {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter().copied(), dom_element);
+    }
+}
+
+impl<'a, const COUNT: usize> Attribute<Class> for [&'a str; COUNT] {
+    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
+        StaticAttribute::set_attribute(&self, name, builder.dom_element());
+    }
+}
+
+impl<'a, const COUNT: usize> StaticAttribute<Class> for [Option<&'a str>; COUNT] {
+    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
+        set_class_attribute(name, self.iter().flatten().copied(), dom_element);
+    }
+}
+
+fn set_class_attribute<T: AsRef<str> + Into<String>>(
+    name: &str,
+    mut classes: impl Iterator<Item = T>,
+    dom_element: &dom::Element,
+) {
+    if let Some(first) = classes.next() {
+        let mut text = first.into();
+
+        for class in classes {
+            text.push(' ');
+            text.push_str(class.as_ref());
+        }
+
+        dom_element.set_attribute(name, &text).unwrap_throw();
+    } else {
+        dom_element.remove_attribute(name).unwrap_throw();
+    }
+}
+
 pub trait HtmlElement: Sized {
     fn attribute<T>(self, name: &str, value: impl Attribute<T>) -> Self;
 
@@ -128,7 +167,7 @@ pub trait HtmlElement: Sized {
         /// CSS and JavaScript to select and access specific elements via the
         /// class selectors or functions like the method
         /// Document.getElementsByClassName().
-        class: String,
+        class: Class,
         /// An enumerated attribute indicating if the element should be
         /// editable by the user. If so, the browser modifies its widget to
         /// allow editing. The attribute must take one of the following values:

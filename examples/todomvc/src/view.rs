@@ -10,7 +10,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    optional_signal, signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
+    signal, Builder, Effects, HtmlElement, ParentBuilder, SignalProduct,
 };
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;
@@ -26,7 +26,7 @@ impl TodoAppView {
     pub fn render(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
         let app = &self.app;
         let input_elem = input()
-            .class("new-todo")
+            .class(["new-todo"])
             .placeholder("What needs to be done?")
             .on_keyup({
                 clone!(app);
@@ -49,7 +49,7 @@ impl TodoAppView {
         let item_filter = Broadcaster::new(item_filter);
 
         section()
-            .class("todoapp")
+            .class(["todoapp"])
             .child(header().child(h1().text("todos")).child(input_elem))
             .optional_child_signal(self.render_main(item_filter.signal()))
             .optional_child_signal(self.render_footer(item_filter.signal()))
@@ -70,11 +70,11 @@ impl TodoAppView {
                 let app = &app_view.app;
 
                 section()
-                    .class("main")
+                    .class(["main"])
                     .child(
                         input()
                             .id("toggle-all")
-                            .class("toggle-all")
+                            .class(["toggle-all"])
                             .type_("checkbox")
                             .on_change({
                                 clone!(app);
@@ -86,7 +86,7 @@ impl TodoAppView {
                             }),
                     )
                     .child(label().for_("toggle-all"))
-                    .child(ul().class("todo-list").children_signal(
+                    .child(ul().class(["todo-list"]).children_signal(
                         app_view.visible_items_signal(item_filter.signal()).map({
                             clone!(app);
                             move |item| TodoItemView::render(item, app.clone())
@@ -110,10 +110,10 @@ impl TodoAppView {
             move |is_empty| {
                 (!is_empty).then(|| {
                     footer()
-                        .class("footer")
+                        .class(["footer"])
                         .child_signal(app_view.active_count().map(move |active_count| {
                             span()
-                                .class("todo-count")
+                                .class(["todo-count"])
                                 .child(strong().text(&format!("{}", active_count)))
                                 .text(&format!(
                                     " item{} left",
@@ -137,8 +137,8 @@ impl TodoAppView {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class(optional_signal(
-                item_filter.map(move |f| (filter == f).then(|| "selected".to_string())),
+            a().class(signal(
+                item_filter.map(move |f| [(filter == f).then(|| "selected")]),
             ))
             .href(format!("/#/{}", filter_name.to_lowercase()))
             .text(&filter_name),
@@ -148,7 +148,7 @@ impl TodoAppView {
 
     fn render_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
         let item_filter = Broadcaster::new(item_filter);
-        ul().class("filters")
+        ul().class(["filters"])
             .child(self.render_filter_link(Filter::All, item_filter.signal(), " "))
             .child(self.render_filter_link(Filter::Active, item_filter.signal(), " "))
             .child(self.render_filter_link(Filter::Completed, item_filter.signal(), ""))
@@ -162,7 +162,7 @@ impl TodoAppView {
 
             any_completed.then(|| {
                 button()
-                    .class("clear-completed")
+                    .class(["clear-completed"])
                     .text("Clear completed")
                     .on_click(move |_, _| app.clear_completed_todos())
                     .build()
@@ -234,7 +234,7 @@ impl TodoItemView {
         let app = &self.app;
 
         input()
-            .class("edit")
+            .class(["edit"])
             .type_("text")
             .value(signal(todo.text()))
             .on_focusout({
@@ -263,7 +263,7 @@ impl TodoItemView {
         let todo = &self.todo;
         let app = &self.app;
         let completed_checkbox = input()
-            .class("toggle")
+            .class(["toggle"])
             .type_("checkbox")
             .on_click({
                 clone!(todo, app);
@@ -275,13 +275,13 @@ impl TodoItemView {
             });
 
         div()
-            .class("view")
+            .class(["view"])
             .child(completed_checkbox)
             .child(label().text_signal(todo.text()).on_dblclick({
                 clone!(todo);
                 move |_, _| todo.set_editing()
             }))
-            .child(button().class("destroy").on_click({
+            .child(button().class(["destroy"]).on_click({
                 clone!(todo, app);
                 move |_, _| todo.remove(&app)
             }))
@@ -289,14 +289,10 @@ impl TodoItemView {
             .build()
     }
 
-    fn class(&self) -> impl Signal<Item = String> {
+    fn class(&self) -> impl Signal<Item = [Option<&'static str>; 2]> {
         let todo = &self.todo;
         (todo.completed(), todo.is_editing()).signal_ref(|completed, editing| {
-            vec![(completed, "completed"), (editing, "editing")]
-                .into_iter()
-                .filter_map(|(flag, name)| flag.then(|| name))
-                .collect::<Vec<_>>()
-                .join(" ")
+            [completed.then(|| "completed"), editing.then(|| "editing")]
         })
     }
 }

@@ -207,7 +207,7 @@ macro_rules! html_element {
                     name: &str,
                     value: impl $crate::macros::private::Attribute<T>,
                 ) -> Self {
-                    Self{ builder: self.builder.attribute(name, value) }
+                    Self{ builder: self.builder.tagged_attribute(name, value) }
                 }
             }
 
@@ -423,7 +423,7 @@ macro_rules! attributes {
         $(
             $(#[$attr_meta])*
             pub fn $attr(self, value: impl $crate::macros::private::Attribute<$typ>) -> Self {
-                Self{ builder: self.builder.attribute($text_attr, value) }
+                Self{ builder: self.builder.tagged_attribute($text_attr, value) }
             }
         )*
     };

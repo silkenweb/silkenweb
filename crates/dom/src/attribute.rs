@@ -28,11 +28,11 @@ define_attribute_values!(u8, u16, u32, u64);
 define_attribute_values!(f32, f64);
 
 /// A non-reactive attribute.
-pub trait StaticAttribute: Clone {
+pub trait StaticAttribute<T>: Clone {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element);
 }
 
-impl<T: AttributeValue> StaticAttribute for T {
+impl<T: AttributeValue> StaticAttribute<T> for T {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         dom_element
             .set_attribute(name, self.text().as_ref())
@@ -40,13 +40,13 @@ impl<T: AttributeValue> StaticAttribute for T {
     }
 }
 
-impl StaticAttribute for String {
+impl StaticAttribute<String> for String {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         dom_element.set_attribute(name, self).unwrap_throw();
     }
 }
 
-impl StaticAttribute for bool {
+impl StaticAttribute<bool> for bool {
     fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
         if *self {
             dom_element.set_attribute(name, "").unwrap_throw();
@@ -63,7 +63,7 @@ pub trait Attribute<T> {
 
 impl<T> Attribute<T> for T
 where
-    T: StaticAttribute,
+    T: StaticAttribute<T>,
 {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
         StaticAttribute::set_attribute(&self, name, builder.dom_element());

@@ -59,7 +59,11 @@ impl ElementBuilder {
     }
 
     /// Set an attribute. Attribute values can be reactive.
-    pub fn attribute<T>(mut self, name: &str, value: impl Attribute<T>) -> Self {
+    pub fn attribute<U, T: StaticAttribute<U>>(self, name: &str, value: impl Attribute<T>) -> Self {
+        self.tagged_attribute(name, value)
+    }
+
+    pub fn tagged_attribute<T>(mut self, name: &str, value: impl Attribute<T>) -> Self {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
 
@@ -341,9 +345,9 @@ pub trait Builder {
 
 type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
 
-impl<Sig, Attr> Attribute<Attr> for SignalType<Sig>
+impl<Sig, Attr, T> Attribute<T> for SignalType<Sig>
 where
-    Attr: 'static + StaticAttribute,
+    Attr: 'static + StaticAttribute<T>,
     Sig: 'static + Signal<Item = Attr>,
 {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
@@ -374,9 +378,9 @@ pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
     SignalType(sig)
 }
 
-impl<Sig, Attr> Attribute<Attr> for OptionalSignalType<Sig>
+impl<Sig, Attr, T> Attribute<T> for OptionalSignalType<Sig>
 where
-    Attr: 'static + StaticAttribute,
+    Attr: 'static + StaticAttribute<T>,
     Sig: 'static + Signal<Item = Option<Attr>>,
 {
     fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
