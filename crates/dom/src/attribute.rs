@@ -1,7 +1,7 @@
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys as dom;
 
-use crate::{DomElement, ElementBuilder};
+use crate::ElementBuilder;
 
 pub trait AttributeValue: Clone {
     type Text: AsRef<str>;

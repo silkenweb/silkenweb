@@ -4,8 +4,7 @@ pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::paste;
     pub use silkenweb_dom::{
-        tag, tag_in_namespace, Attribute, Builder, DomElement, Element, ElementBuilder,
-        StaticAttribute,
+        tag, tag_in_namespace, Attribute, Builder, Element, ElementBuilder, StaticAttribute,
     };
     pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
     pub use web_sys as dom;
@@ -215,15 +214,6 @@ macro_rules! dom_element {
                 }
             }
 
-            impl $crate::macros::private::DomElement for [<$camel_name Builder>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> &Self::Target {
-                    use $crate::macros::private::JsCast;
-                    self.builder.dom_element().unchecked_ref()
-                }
-            }
-
             impl From<[<$camel_name Builder>]> for $crate::macros::private::Element {
                 fn from(builder: [<$camel_name Builder>]) -> Self {
                     use $crate::macros::private::Builder;
@@ -238,15 +228,6 @@ macro_rules! dom_element {
             }
 
             pub struct $camel_name($crate::macros::private::Element);
-
-            impl $crate::macros::private::DomElement for [<$camel_name>] {
-                type Target = $elem_type;
-
-                fn dom_element(&self) -> &Self::Target {
-                    use $crate::macros::private::JsCast;
-                    self.0.dom_element().unchecked_ref()
-                }
-            }
 
             impl From<$camel_name> for $crate::macros::private::Element {
                 fn from(html_elem: $camel_name) -> Self {

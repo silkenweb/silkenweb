@@ -68,7 +68,7 @@ impl ElementBuilder {
         let child = child.into();
         self.child_groups
             .borrow_mut()
-            .append_new_group_sync(child.dom_element());
+            .append_new_group_sync(&child.dom_element);
         self.element.event_callbacks.extend(child.event_callbacks);
         self.element.futures.extend(child.futures);
 
@@ -88,7 +88,7 @@ impl ElementBuilder {
             let child = child.into();
             children
                 .borrow_mut()
-                .upsert_only_child(group_index, child.dom_element());
+                .upsert_only_child(group_index, &child.dom_element);
             _child_storage = Some(child);
             async {}
         });
@@ -112,7 +112,7 @@ impl ElementBuilder {
                 let child = child.into();
                 children
                     .borrow_mut()
-                    .upsert_only_child(group_index, child.dom_element());
+                    .upsert_only_child(group_index, &child.dom_element);
                 _child_storage = Some(child);
             } else {
                 children.borrow_mut().remove_child(group_index);
@@ -243,6 +243,10 @@ impl ElementBuilder {
 
         self
     }
+
+    pub fn dom_element(&self) -> &dom::Element {
+        &self.element.dom_element
+    }
 }
 
 impl Builder for ElementBuilder {
@@ -279,14 +283,6 @@ impl Builder for ElementBuilder {
     }
 }
 
-impl DomElement for ElementBuilder {
-    type Target = dom::Element;
-
-    fn dom_element(&self) -> &Self::Target {
-        &self.element.dom_element
-    }
-}
-
 impl From<ElementBuilder> for Element {
     fn from(builder: ElementBuilder) -> Self {
         builder.build()
@@ -298,24 +294,9 @@ impl From<ElementBuilder> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 pub struct Element {
-    dom_element: dom::Element,
+    pub(super) dom_element: dom::Element,
     event_callbacks: Vec<EventCallback>,
     futures: Vec<SignalHandle>,
-}
-
-impl DomElement for Element {
-    type Target = dom::Element;
-
-    fn dom_element(&self) -> &Self::Target {
-        &self.dom_element
-    }
-}
-
-/// Get a raw Javascript, non-reactive DOM element.
-pub trait DomElement {
-    type Target: Into<dom::Element> + AsRef<dom::Element> + Clone;
-
-    fn dom_element(&self) -> &Self::Target;
 }
 
 /// An HTML element builder.
