@@ -10,8 +10,7 @@ use silkenweb::{
         a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
         Div, Footer, Input, Li, LiBuilder, Section, Ul,
     },
-    signal, Builder, Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder,
-    SignalProduct,
+    Builder, Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder, SignalProduct,
 };
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;
@@ -138,11 +137,9 @@ impl TodoAppView {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class(signal(
-                item_filter.map(move |f| [(filter == f).then(|| "selected")]),
-            ))
-            .href(format!("/#/{}", filter_name.to_lowercase()))
-            .text(&filter_name),
+            a().class_signal_opt(item_filter.map(move |f| [(filter == f).then(|| "selected")]))
+                .href(&format!("/#/{}", filter_name.to_lowercase()))
+                .text(&filter_name),
         )
         .text(seperator)
     }
@@ -224,7 +221,7 @@ pub struct TodoItemView {
 impl TodoItemView {
     pub fn render(todo: Rc<TodoItem>, app: Rc<TodoApp>) -> Li {
         let view = TodoItemView { todo, app };
-        li().class(signal(view.class()))
+        li().class_signal_opt(view.class())
             .child(view.render_edit())
             .child(view.render_view())
             .build()
@@ -237,7 +234,7 @@ impl TodoItemView {
         input()
             .class(["edit"])
             .type_("text")
-            .value(signal(todo.text()))
+            .value_signal(todo.text())
             .on_focusout({
                 clone!(todo, app);
                 move |_, input| todo.save_edits(&app, input.value())
@@ -270,7 +267,7 @@ impl TodoItemView {
                 clone!(todo, app);
                 move |_, elem| app.set_completed(&todo, elem.checked())
             })
-            .checked(signal(todo.completed()))
+            .checked_signal(todo.completed())
             .effect_signal(todo.completed(), |elem, completed| {
                 elem.set_checked(completed)
             });

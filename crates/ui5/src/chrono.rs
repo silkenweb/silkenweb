@@ -31,7 +31,7 @@ html_element!(
 impl Ui5CalendarBuilder {
     pub fn selected_date(self, date: String) -> Self {
         Self {
-            builder: self.builder.child(ui5_date().value(date).into_element()),
+            builder: self.builder.child(ui5_date().value(&date).into_element()),
         }
     }
 }
@@ -44,9 +44,7 @@ pub enum SelectionMode {
 }
 
 impl AttributeValue for SelectionMode {
-    type Text = String;
-
-    fn text(&self) -> Self::Text {
+    fn text(self) -> String {
         self.to_string()
     }
 }
@@ -61,9 +59,7 @@ pub enum PrimaryCalendarType {
 }
 
 impl AttributeValue for PrimaryCalendarType {
-    type Text = String;
-
-    fn text(&self) -> Self::Text {
+    fn text(self) -> String {
         self.to_string()
     }
 }

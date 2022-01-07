@@ -14,9 +14,12 @@
 
 use std::marker::PhantomData;
 
-use futures_signals::{signal::Signal, signal_vec::SignalVec};
+use futures_signals::{
+    signal::{Signal, SignalExt},
+    signal_vec::SignalVec,
+};
 use paste::paste;
-use silkenweb_dom::{Attribute, Builder, Element, StaticAttribute};
+use silkenweb_dom::{Builder, Element};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
@@ -89,83 +92,15 @@ macro_rules! global_attributes {
         $(#[$attr_meta:meta])*
         $attr:ident: $typ:ty
     ),* $(,)? ) => { paste!{
-        $(
-            $(#[$attr_meta])*
-            #[doc = ""]
-            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-            fn $attr(self, value: impl Attribute<$typ>) -> Self {
-                self.attribute($crate::text_name!($attr), value)
-            }
-        )*
+        $crate::attributes![
+            $($(#[$attr_meta])* $attr ($crate::text_name!($attr)): $typ,)*
+        ];
     }};
 }
 
-pub trait ClassItem: AsRef<str> + Into<String> {}
+fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> String {
+    let mut classes = classes.into_iter();
 
-impl<'a> ClassItem for &'a str {}
-impl<'a> ClassItem for String {}
-
-pub struct Class;
-
-impl<C: 'static + ClassItem, const COUNT: usize> StaticAttribute<Class> for [C; COUNT] {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter(), dom_element);
-    }
-}
-
-impl<'a, C: 'static + ClassItem> StaticAttribute<Class> for &'a [C] {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter(), dom_element);
-    }
-}
-
-impl<C: 'static + ClassItem> StaticAttribute<Class> for Vec<C> {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter(), dom_element);
-    }
-}
-
-impl<C: 'static + ClassItem, const COUNT: usize> Attribute<Class> for [C; COUNT] {
-    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
-        StaticAttribute::set_attribute(&self, name, builder.dom_element());
-    }
-}
-
-impl<'a, C: 'static + ClassItem> Attribute<Class> for &'a [C] {
-    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
-        StaticAttribute::set_attribute(&self, name, builder.dom_element());
-    }
-}
-
-impl<C: 'static + ClassItem> Attribute<Class> for Vec<C> {
-    fn set_attribute(self, name: &str, builder: &mut silkenweb_dom::ElementBuilder) {
-        StaticAttribute::set_attribute(&self, name, builder.dom_element());
-    }
-}
-
-impl<C: 'static + ClassItem, const COUNT: usize> StaticAttribute<Class> for [Option<C>; COUNT] {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter().flatten(), dom_element);
-    }
-}
-
-impl<'a, C: 'static + ClassItem> StaticAttribute<Class> for &'a [Option<C>] {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter().flatten(), dom_element);
-    }
-}
-
-impl<C: 'static + ClassItem> StaticAttribute<Class> for Vec<Option<C>> {
-    fn set_attribute(&self, name: &str, dom_element: &dom::Element) {
-        set_class_attribute(name, self.iter().flatten(), dom_element);
-    }
-}
-
-fn set_class_attribute<'a, C: 'static + ClassItem>(
-    name: &str,
-    mut classes: impl Iterator<Item = &'a C>,
-    dom_element: &dom::Element,
-) {
     if let Some(first) = classes.next() {
         let mut text = first.as_ref().to_owned();
 
@@ -174,13 +109,61 @@ fn set_class_attribute<'a, C: 'static + ClassItem>(
             text.push_str(class.as_ref());
         }
 
-        dom_element.set_attribute(name, &text).unwrap_throw();
+        text
     } else {
-        dom_element.remove_attribute(name).unwrap_throw();
+        String::new()
     }
 }
 
 pub trait HtmlElement: Builder {
+    fn class<T: AsRef<str>>(self, value: impl IntoIterator<Item = T>) -> Self {
+        let text = class_attribute_text(value);
+
+        if text.is_empty() {
+            self
+        } else {
+            // TODO: Remove need for type annotations
+            self.attribute("class", text)
+        }
+    }
+
+    // TODO: Name everything consistently (signal -> dyn or signal -> dyn?)
+    fn class_signal<T: AsRef<str>, Iter: IntoIterator<Item = T>>(
+        self,
+        value: impl Signal<Item = Iter> + 'static,
+    ) -> Self {
+        self.attribute_signal(
+            "class",
+            value.map(move |class| {
+                let text = class_attribute_text(class);
+
+                if text.is_empty() {
+                    None
+                } else {
+                    Some(text)
+                }
+            }),
+        )
+    }
+
+    fn class_signal_opt<T: AsRef<str>, Iter: IntoIterator<Item = Option<T>>>(
+        self,
+        value: impl Signal<Item = Iter> + 'static,
+    ) -> Self {
+        self.attribute_signal(
+            "class",
+            value.map(move |class| {
+                let text = class_attribute_text(class.into_iter().flatten());
+
+                if text.is_empty() {
+                    None
+                } else {
+                    Some(text)
+                }
+            }),
+        )
+    }
+
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
         /// element. This attribute consists of a space-separated list of
@@ -202,11 +185,6 @@ pub trait HtmlElement: Builder {
         /// as the `<dialog>` it is part of is displayed. This attribute is a
         /// boolean, initially false.
         autofocus: bool,
-        /// A space-separated list of the classes of the element. Classes allows
-        /// CSS and JavaScript to select and access specific elements via the
-        /// class selectors or functions like the method
-        /// Document.getElementsByClassName().
-        class: Class,
         /// An enumerated attribute indicating if the element should be
         /// editable by the user. If so, the browser modifies its widget to
         /// allow editing. The attribute must take one of the following values:

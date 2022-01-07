@@ -39,12 +39,12 @@ pub fn main_js() -> Result<(), JsValue> {
             ui5_side_navigation_item()
                 .selected(true)
                 .text("Calendar")
-                .id(Selected::Calendar.to_string()),
+                .id(&Selected::Calendar.to_string()),
         )
         .child(
             ui5_side_navigation_item()
                 .text("Icon")
-                .id(Selected::Icon.to_string()),
+                .id(&Selected::Icon.to_string()),
         )
         .on_selection_change(move |event, _target| {
             selected.set(

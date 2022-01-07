@@ -13,7 +13,7 @@ use web_sys as dom;
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
-    attribute::{Attribute, StaticAttribute},
+    attribute::StaticAttribute,
     clone, document,
     render::{after_render, queue_update},
     spawn_cancelable_future,
@@ -56,11 +56,6 @@ impl ElementBuilder {
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
-    }
-
-    /// Set an attribute.
-    pub fn attribute<U, T: StaticAttribute<U>>(self, name: &str, value: impl Attribute<T>) -> Self {
-        Builder::attribute(self, name, value)
     }
 
     /// Add a child element after existing children.
@@ -244,7 +239,7 @@ impl ElementBuilder {
         self
     }
 
-    pub fn dom_element(&self) -> &dom::Element {
+    fn dom_element(&self) -> &dom::Element {
         &self.element.dom_element
     }
 }
@@ -252,11 +247,35 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
-    fn attribute<T>(mut self, name: &str, value: impl Attribute<T>) -> Self {
+    fn attribute<T: StaticAttribute>(mut self, name: &str, value: T) -> Self {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
 
-        value.set_attribute(name, &mut self);
+        value.set_attribute(name, self.dom_element());
+        self
+    }
+
+    // TODO: Check we can set Optional attributes.
+    fn attribute_signal<T: 'static + StaticAttribute>(
+        mut self,
+        name: &str,
+        value: impl Signal<Item = T> + 'static,
+    ) -> Self {
+        let dom_element = self.dom_element().clone();
+
+        let updater = value.for_each({
+            let name = name.to_owned();
+
+            move |new_value| {
+                clone!(name, dom_element);
+
+                queue_update(move || new_value.set_attribute(&name, &dom_element));
+
+                async {}
+            }
+        });
+
+        self.store_future(updater);
         self
     }
 
@@ -303,7 +322,13 @@ pub struct Element {
 pub trait Builder: Sized {
     type Target;
 
-    fn attribute<T>(self, name: &str, value: impl Attribute<T>) -> Self;
+    fn attribute<T: StaticAttribute>(self, name: &str, value: T) -> Self;
+
+    fn attribute_signal<T: 'static + StaticAttribute>(
+        self,
+        name: &str,
+        value: impl Signal<Item = T> + 'static,
+    ) -> Self;
 
     /// Register an event handler.
     ///
@@ -321,70 +346,3 @@ pub trait Builder: Sized {
 }
 
 type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
-
-impl<Sig, Attr, T> Attribute<T> for SignalType<Sig>
-where
-    Attr: 'static + Clone + StaticAttribute<T>,
-    Sig: 'static + Signal<Item = Attr>,
-{
-    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
-        let dom_element = builder.dom_element().clone();
-
-        let updater = self.0.for_each({
-            let name = name.to_owned();
-
-            move |new_value| {
-                clone!(name, dom_element, new_value);
-
-                queue_update(move || {
-                    StaticAttribute::set_attribute(&new_value, &name, &dom_element);
-                });
-
-                async {}
-            }
-        });
-
-        builder.store_future(updater);
-    }
-}
-
-pub struct SignalType<T>(T);
-
-/// Create a newtype wrapper around a signal.
-pub fn signal<Sig: Signal<Item = T>, T>(sig: Sig) -> SignalType<Sig> {
-    SignalType(sig)
-}
-
-impl<Sig, Attr, T> Attribute<T> for OptionalSignalType<Sig>
-where
-    Attr: 'static + Clone + StaticAttribute<T>,
-    Sig: 'static + Signal<Item = Option<Attr>>,
-{
-    fn set_attribute(self, name: &str, builder: &mut ElementBuilder) {
-        let dom_element = builder.dom_element().clone();
-
-        let updater = self.0.for_each({
-            let name = name.to_owned();
-
-            move |new_value| {
-                clone!(name, dom_element, new_value);
-
-                queue_update(move || match new_value {
-                    Some(value) => StaticAttribute::set_attribute(&value, &name, &dom_element),
-                    None => dom_element.remove_attribute(&name).unwrap_throw(),
-                });
-
-                async {}
-            }
-        });
-
-        builder.store_future(updater);
-    }
-}
-
-pub struct OptionalSignalType<T>(T);
-
-/// Create a newtype wrapper around an optional signal.
-pub fn optional_signal<Sig: Signal<Item = T>, T>(sig: Sig) -> OptionalSignalType<Sig> {
-    OptionalSignalType(sig)
-}

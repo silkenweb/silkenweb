@@ -3,9 +3,7 @@ use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
-use silkenweb::{
-    animation::infinite_animation, elements::svg, mount, signal, Builder, ParentBuilder,
-};
+use silkenweb::{animation::infinite_animation, elements::svg, mount, Builder, ParentBuilder};
 use wasm_bindgen::UnwrapThrowExt;
 
 const WIDTH: f32 = 600.0;
@@ -35,7 +33,7 @@ fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> sv
     });
 
     svg::path()
-        .d(signal(path))
+        .d_signal(path)
         .stroke("black")
         .fill("transparent")
         .build()
@@ -44,8 +42,8 @@ fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> sv
 fn main() {
     let ts = Broadcaster::new(infinite_animation());
     let mut svg = svg::svg()
-        .width(WIDTH.to_string())
-        .height(HEIGHT.to_string());
+        .width(&WIDTH.to_string())
+        .height(&HEIGHT.to_string());
 
     for i in 2..6 {
         svg = svg.child(path(ts.signal(), i, 150.0 * i.to_f64().unwrap_throw()));
