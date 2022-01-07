@@ -13,7 +13,7 @@ use web_sys as dom;
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
-    attribute::StaticAttribute,
+    attribute::Attribute,
     clone, document,
     render::{after_render, queue_update},
     spawn_cancelable_future,
@@ -247,7 +247,7 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
-    fn attribute<T: StaticAttribute>(mut self, name: &str, value: T) -> Self {
+    fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
 
@@ -256,7 +256,7 @@ impl Builder for ElementBuilder {
     }
 
     // TODO: Check we can set Optional attributes.
-    fn attribute_signal<T: 'static + StaticAttribute>(
+    fn attribute_signal<T: 'static + Attribute>(
         mut self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
@@ -322,9 +322,9 @@ pub struct Element {
 pub trait Builder: Sized {
     type Target;
 
-    fn attribute<T: StaticAttribute>(self, name: &str, value: T) -> Self;
+    fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
 
-    fn attribute_signal<T: 'static + StaticAttribute>(
+    fn attribute_signal<T: 'static + Attribute>(
         self,
         name: &str,
         value: impl Signal<Item = T> + 'static,

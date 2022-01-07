@@ -3,9 +3,7 @@
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::paste;
-    pub use silkenweb_dom::{
-        tag, tag_in_namespace, Builder, Element, ElementBuilder, StaticAttribute,
-    };
+    pub use silkenweb_dom::{tag, tag_in_namespace, Attribute, Builder, Element, ElementBuilder};
     pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
     pub use web_sys as dom;
 }
@@ -189,11 +187,11 @@ macro_rules! dom_element {
             impl $crate::macros::private::Builder for [<$camel_name Builder>] {
                 type Target = $camel_name;
 
-                fn attribute<T: $crate::macros::private::StaticAttribute>(self, name: &str, value: T) -> Self {
+                fn attribute<T: $crate::macros::private::Attribute>(self, name: &str, value: T) -> Self {
                     Self{ builder: self.builder.attribute(name, value) }
                 }
 
-                fn attribute_signal<T: 'static + $crate::macros::private::StaticAttribute>(
+                fn attribute_signal<T: 'static + $crate::macros::private::Attribute>(
                     self,
                     name: &str,
                     value: impl $crate::macros::private::Signal<Item = T> + 'static,
@@ -402,7 +400,7 @@ macro_rules! attr_signal_fn {
         #[allow(non_snake_case)]
         $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::private::Signal<Item = T> + 'static) -> Self
         where
-            T: $crate::macros::private::StaticAttribute + AsRef<str> + 'static
+            T: $crate::macros::private::Attribute + AsRef<str> + 'static
         {
             $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
         }
@@ -414,7 +412,7 @@ macro_rules! attr_signal_fn {
         #[allow(non_snake_case)]
         $visibility fn [< $attr _signal_opt >]<T>(self, value: impl $crate::macros::private::Signal<Item = ::std::option::Option<T>> + 'static) -> Self
         where
-            T: $crate::macros::private::StaticAttribute + AsRef<str> + 'static
+            T: $crate::macros::private::Attribute + AsRef<str> + 'static
         {
             $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
         }

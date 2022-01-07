@@ -1,7 +1,7 @@
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys as dom;
 
-pub trait AttributeValue: Clone {
+pub trait AttributeValue {
     fn text(self) -> String;
 }
 
@@ -27,24 +27,18 @@ impl AttributeValue for String {
     }
 }
 
-impl<'a> AttributeValue for &'a str {
-    fn text(self) -> String {
-        self.to_owned()
-    }
-}
-
 /// A non-reactive attribute.
-pub trait StaticAttribute {
+pub trait Attribute {
     fn set_attribute(self, name: &str, dom_element: &dom::Element);
 }
 
-impl<T: AttributeValue> StaticAttribute for T {
+impl<T: AttributeValue> Attribute for T {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         dom_element.set_attribute(name, &self.text()).unwrap_throw();
     }
 }
 
-impl<T: StaticAttribute> StaticAttribute for Option<T> {
+impl<T: Attribute> Attribute for Option<T> {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         if let Some(value) = self {
             value.set_attribute(name, dom_element);
@@ -54,12 +48,18 @@ impl<T: StaticAttribute> StaticAttribute for Option<T> {
     }
 }
 
-impl StaticAttribute for bool {
+impl Attribute for bool {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         if self {
             dom_element.set_attribute(name, "").unwrap_throw();
         } else {
             dom_element.remove_attribute(name).unwrap_throw();
         }
+    }
+}
+
+impl<'a> Attribute for &'a str {
+    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+        dom_element.set_attribute(name, self).unwrap_throw();
     }
 }

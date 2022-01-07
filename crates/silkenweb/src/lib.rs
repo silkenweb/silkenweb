@@ -28,7 +28,8 @@
 pub use silkenweb_dom::{
     clone, mount,
     render::{after_render, render_updates},
-    tag, tag_in_namespace, unmount, AttributeValue, Builder, Element, ElementBuilder, Storage,
+    tag, tag_in_namespace, unmount, Attribute, AttributeValue, Builder, Element, ElementBuilder,
+    Storage,
 };
 pub use silkenweb_html::{
     children_allowed, elements, html_element, CustomEvent, Effects, ElementEvents, HtmlElement,
