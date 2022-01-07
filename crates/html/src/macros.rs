@@ -469,6 +469,7 @@ macro_rules! attributes {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_attr {
+    // TODO: Would be nice use raw identifiers here, but paste doesn't let you say '[<r# $name ... >]
     (as_) => {
         "as"
     };
