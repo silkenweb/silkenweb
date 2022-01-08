@@ -247,6 +247,7 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
+    // TODO: This warns in release mode as `self` doesn't need to be mutable.
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
