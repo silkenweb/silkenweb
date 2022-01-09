@@ -14,7 +14,7 @@ mod attribute;
 mod element;
 mod storage;
 
-pub use attribute::{Attribute, AttributeValue};
+pub use attribute::{AsAttribute, Attribute, AttributeValue};
 pub use element::{Builder, Element, ElementBuilder};
 pub use storage::Storage;
 

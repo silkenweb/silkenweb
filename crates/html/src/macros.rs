@@ -3,7 +3,9 @@
 pub mod private {
     pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
     pub use paste::paste;
-    pub use silkenweb_dom::{tag, tag_in_namespace, Attribute, Builder, Element, ElementBuilder};
+    pub use silkenweb_dom::{
+        tag, tag_in_namespace, AsAttribute, Attribute, Builder, Element, ElementBuilder,
+    };
     pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
     pub use web_sys as dom;
 }
@@ -377,72 +379,6 @@ macro_rules! custom_events {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! string_arg_type {
-    (String) => {
-        &str
-    };
-    ($t:ty) => {
-        $t
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! attr_signal_fn {
-    (
-        $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident ($text_attr:expr): String
-    ) => { $crate::macros::private::paste!{
-        $(#[$attr_meta])*
-        #[doc = ""]
-        #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-        #[allow(clippy::wrong_self_convention)]
-        #[allow(non_snake_case)]
-        $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::private::Signal<Item = T> + 'static) -> Self
-        where
-            T: $crate::macros::private::Attribute + AsRef<str> + 'static
-        {
-            $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
-        }
-
-        $(#[$attr_meta])*
-        #[doc = ""]
-        #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-        #[allow(clippy::wrong_self_convention)]
-        #[allow(non_snake_case)]
-        $visibility fn [< $attr _signal_opt >]<T>(self, value: impl $crate::macros::private::Signal<Item = ::std::option::Option<T>> + 'static) -> Self
-        where
-            T: $crate::macros::private::Attribute + AsRef<str> + 'static
-        {
-            $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
-        }
-    }};
-    (
-        $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
-    ) => { $crate::macros::private::paste!{
-        $(#[$attr_meta])*
-        #[doc = ""]
-        #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-        #[allow(clippy::wrong_self_convention)]
-        #[allow(non_snake_case)]
-        $visibility fn [< $attr _signal >](self, value: impl $crate::macros::private::Signal<Item = $typ> + 'static) -> Self {
-            $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
-        }
-
-        $(#[$attr_meta])*
-        #[doc = ""]
-        #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-        #[allow(clippy::wrong_self_convention)]
-        #[allow(non_snake_case)]
-        $visibility fn [< $attr _signal_opt >](self, value: impl $crate::macros::private::Signal<Item = ::std::option::Option<$typ>> + 'static) -> Self {
-            $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
-        }
-    }};
-}
-
-#[doc(hidden)]
-#[macro_export]
 macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
@@ -452,14 +388,21 @@ macro_rules! attributes {
             $(#[$attr_meta])*
             #[doc = ""]
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-            $visibility fn $attr(self, value: $crate::string_arg_type!($typ)) -> Self {
+            $visibility fn $attr(self, value: impl $crate::macros::private::AsAttribute<$typ>) -> Self {
                 $crate::macros::private::Builder::attribute(self, $text_attr, value)
             }
 
-            $crate::attr_signal_fn!(
-                $(#[$attr_meta])*
-                $visibility $attr ($text_attr): $typ
-            );
+            $(#[$attr_meta])*
+            #[doc = ""]
+            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
+            #[allow(clippy::wrong_self_convention)]
+            #[allow(non_snake_case)]
+            $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::private::Signal<Item = T> + 'static) -> Self
+            where
+                T: $crate::macros::private::AsAttribute<$typ> + 'static
+            {
+                $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
+            }
         )*
     }};
 }

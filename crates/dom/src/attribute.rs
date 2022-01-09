@@ -32,11 +32,15 @@ pub trait Attribute {
     fn set_attribute(self, name: &str, dom_element: &dom::Element);
 }
 
+pub trait AsAttribute<T>: Attribute {}
+
 impl<T: AttributeValue> Attribute for T {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         dom_element.set_attribute(name, &self.text()).unwrap_throw();
     }
 }
+
+impl<T: AttributeValue> AsAttribute<T> for T {}
 
 impl<T: Attribute> Attribute for Option<T> {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
@@ -48,6 +52,8 @@ impl<T: Attribute> Attribute for Option<T> {
     }
 }
 
+impl<U: Attribute, T: AsAttribute<U>> AsAttribute<U> for Option<T> {}
+
 impl Attribute for bool {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         if self {
@@ -58,8 +64,20 @@ impl Attribute for bool {
     }
 }
 
+impl AsAttribute<bool> for bool {}
+
 impl<'a> Attribute for &'a str {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
         dom_element.set_attribute(name, self).unwrap_throw();
     }
 }
+
+impl<'a> AsAttribute<String> for &'a str {}
+
+impl<'a> Attribute for &'a String {
+    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+        dom_element.set_attribute(name, self).unwrap_throw();
+    }
+}
+
+impl<'a> AsAttribute<String> for &'a String {}
