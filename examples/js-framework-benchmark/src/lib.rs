@@ -89,14 +89,13 @@ impl Row {
                 .dedupe()
                 .map(|selected| selected.then(|| "danger")),
         )
-        .child(td().class(["col-md-1"]).text(&id.to_string()))
-        .child(td().class(["col-md-4"]).child(
-            a().text_signal(self.label.signal_cloned()).on_click({
-                clone!(app);
-                move |_, _| app.select_row(id)
-            }),
-        ))
-        .child(
+        .children([
+            td().class(["col-md-1"]).text(&id.to_string()),
+            td().class(["col-md-4"])
+                .child(a().text_signal(self.label.signal_cloned()).on_click({
+                    clone!(app);
+                    move |_, _| app.select_row(id)
+                })),
             td().class(["col-md-1"]).child(
                 a().child(
                     span()
@@ -107,8 +106,8 @@ impl Row {
                     app.remove_row(id);
                 }),
             ),
-        )
-        .child(td().class(["col-md-6"]))
+            td().class(["col-md-6"]),
+        ])
         .build()
     }
 }
@@ -189,18 +188,14 @@ impl App {
         div()
             .class(["jumbotron"])
             .child(
-                div()
-                    .class(["row"])
-                    .child(
-                        div()
-                            .class(["col-md-6"])
-                            .child(h1().text("Silkenweb keyed")),
-                    )
-                    .child(
-                        div()
-                            .class(["col-md-6"])
-                            .child(self.render_action_buttons()),
-                    ),
+                div().class(["row"]).children([
+                    div()
+                        .class(["col-md-6"])
+                        .child(h1().text("Silkenweb keyed")),
+                    div()
+                        .class(["col-md-6"])
+                        .child(self.render_action_buttons()),
+                ]),
             )
             .build()
     }
@@ -208,12 +203,14 @@ impl App {
     fn render_action_buttons(self: &Rc<Self>) -> Div {
         div()
             .class(["row"])
-            .child(self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)))
-            .child(self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)))
-            .child(self.render_button("add", "Append 1,000 rows", |app| app.append(1_000)))
-            .child(self.render_button("update", "Update every 10th row", |app| app.update()))
-            .child(self.render_button("clear", "Clear", |app| app.clear()))
-            .child(self.render_button("swaprows", "Swap Rows", |app| app.swap()))
+            .children([
+                self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)),
+                self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)),
+                self.render_button("add", "Append 1,000 rows", |app| app.append(1_000)),
+                self.render_button("update", "Update every 10th row", |app| app.update()),
+                self.render_button("clear", "Clear", |app| app.clear()),
+                self.render_button("swaprows", "Swap Rows", |app| app.swap()),
+            ])
             .build()
     }
 

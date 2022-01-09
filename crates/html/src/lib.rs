@@ -60,6 +60,22 @@ pub trait ParentBuilder {
 
     fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
 
+    fn child<Child>(self, c: Child) -> Self
+    where
+        Child: Into<Element>;
+
+    fn children<Child, Children>(mut self, children: Children) -> Self
+    where
+        Child: Into<Element>,
+        Children: IntoIterator<Item = Child>,
+    {
+        for child in children {
+            self = self.child(child);
+        }
+
+        self
+    }
+
     fn child_signal(self, child: impl 'static + Signal<Item = impl Into<Element>>) -> Self;
 
     fn optional_child_signal(

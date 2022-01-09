@@ -20,6 +20,17 @@ impl Ui5SideNavigationBuilder {
             builder: self.builder.child(child.build()),
         }
     }
+
+    pub fn children(
+        mut self,
+        children: impl IntoIterator<Item = impl Builder<Target = Ui5SideNavigationItem>>,
+    ) -> Self {
+        for c in children {
+            self = self.child(c);
+        }
+
+        self
+    }
 }
 
 html_element!(

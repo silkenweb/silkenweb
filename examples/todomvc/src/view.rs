@@ -147,9 +147,11 @@ impl TodoAppView {
     fn render_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
         let item_filter = Broadcaster::new(item_filter);
         ul().class(["filters"])
-            .child(self.render_filter_link(Filter::All, item_filter.signal(), " "))
-            .child(self.render_filter_link(Filter::Active, item_filter.signal(), " "))
-            .child(self.render_filter_link(Filter::Completed, item_filter.signal(), ""))
+            .children([
+                self.render_filter_link(Filter::All, item_filter.signal(), " "),
+                self.render_filter_link(Filter::Active, item_filter.signal(), " "),
+                self.render_filter_link(Filter::Completed, item_filter.signal(), ""),
+            ])
             .build()
     }
 
