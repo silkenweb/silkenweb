@@ -1,4 +1,4 @@
-use wasm_bindgen::{UnwrapThrowExt, intern};
+use wasm_bindgen::{intern, UnwrapThrowExt};
 use web_sys as dom;
 
 pub trait AttributeValue {
@@ -36,7 +36,9 @@ pub trait AsAttribute<T>: Attribute {}
 
 impl<T: AttributeValue> Attribute for T {
     fn set_attribute(self, name: &str, dom_element: &dom::Element) {
-        dom_element.set_attribute(intern(name), &self.text()).unwrap_throw();
+        dom_element
+            .set_attribute(intern(name), &self.text())
+            .unwrap_throw();
     }
 }
 
