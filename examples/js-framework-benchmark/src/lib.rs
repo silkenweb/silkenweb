@@ -79,13 +79,7 @@ impl Row {
 
         tr().class_signal(
             app.selected_row_id
-                .signal_ref(move |selected| {
-                    if let Some(selected) = selected {
-                        *selected == id
-                    } else {
-                        false
-                    }
-                })
+                .signal_ref(move |selected| *selected == Some(id))
                 .dedupe()
                 .map(|selected| selected.then(|| "danger")),
         )
