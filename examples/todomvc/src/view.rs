@@ -137,7 +137,7 @@ impl TodoAppView {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class_signal_opt(item_filter.map(move |f| [(filter == f).then(|| "selected")]))
+            a().class_signal(item_filter.map(move |f| (filter == f).then(|| "selected")))
                 .href(&format!("/#/{}", filter_name.to_lowercase()))
                 .text(&filter_name),
         )
@@ -221,7 +221,7 @@ pub struct TodoItemView {
 impl TodoItemView {
     pub fn render(todo: Rc<TodoItem>, app: Rc<TodoApp>) -> Li {
         let view = TodoItemView { todo, app };
-        li().class_signal_opt(view.class())
+        li().class_signal(view.class())
             .child(view.render_edit())
             .child(view.render_view())
             .build()
@@ -287,10 +287,13 @@ impl TodoItemView {
             .build()
     }
 
-    fn class(&self) -> impl Signal<Item = [Option<&'static str>; 2]> {
+    fn class(&self) -> impl Signal<Item = impl Iterator<Item = &'static str>> {
         let todo = &self.todo;
         (todo.completed(), todo.is_editing()).signal_ref(|completed, editing| {
-            [completed.then(|| "completed"), editing.then(|| "editing")]
+            completed
+                .then(|| "completed")
+                .into_iter()
+                .chain(editing.then(|| "editing").into_iter())
         })
     }
 }

@@ -77,7 +77,7 @@ impl Row {
     fn render(&self, app: Rc<App>) -> Tr {
         let id = self.id;
 
-        tr().class_signal_opt(
+        tr().class_signal(
             app.selected_row_id
                 .signal_ref(move |selected| {
                     if let Some(selected) = selected {
@@ -87,7 +87,7 @@ impl Row {
                     }
                 })
                 .dedupe()
-                .map(|selected| [selected.then(|| "danger")]),
+                .map(|selected| selected.then(|| "danger")),
         )
         .child(td().class(["col-md-1"]).text(&id.to_string()))
         .child(td().class(["col-md-4"]).child(

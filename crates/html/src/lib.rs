@@ -144,24 +144,6 @@ pub trait HtmlElement: Builder {
         )
     }
 
-    fn class_signal_opt<T: AsRef<str>, Iter: IntoIterator<Item = Option<T>>>(
-        self,
-        value: impl Signal<Item = Iter> + 'static,
-    ) -> Self {
-        self.attribute_signal(
-            "class",
-            value.map(move |class| {
-                let text = class_attribute_text(class.into_iter().flatten());
-
-                if text.is_empty() {
-                    None
-                } else {
-                    Some(text)
-                }
-            }),
-        )
-    }
-
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
         /// element. This attribute consists of a space-separated list of
