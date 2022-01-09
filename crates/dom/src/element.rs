@@ -239,6 +239,13 @@ impl ElementBuilder {
         self
     }
 
+
+    fn check_attribute_unique(&mut self, name: &str) {
+        #[cfg(debug_assertions)]
+        debug_assert!(self.attributes.insert(name.into()));
+        let _ = name;
+    }
+
     fn dom_element(&self) -> &dom::Element {
         &self.element.dom_element
     }
@@ -247,21 +254,19 @@ impl ElementBuilder {
 impl Builder for ElementBuilder {
     type Target = Element;
 
-    // TODO: This warns in release mode as `self` doesn't need to be mutable.
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.attributes.insert(name.into()));
+        self.check_attribute_unique(name);
 
         value.set_attribute(name, self.dom_element());
         self
     }
 
-    // TODO: Check we can set Optional attributes.
     fn attribute_signal<T: 'static + Attribute>(
         mut self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
+        self.check_attribute_unique(name);
         let dom_element = self.dom_element().clone();
 
         let updater = value.for_each({
