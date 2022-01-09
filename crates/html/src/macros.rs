@@ -286,18 +286,11 @@ macro_rules! children_allowed {
                 where
                     Child: Into<$crate::macros::private::Element>
                 {
-                    Self{ builder: self.builder.child(c.into()) }
+                    Self{ builder: self.builder.child(c) }
                 }
 
                 fn child_signal(self, child: impl 'static + $crate::macros::private::Signal<Item = impl Into<$crate::macros::private::Element>>) -> Self {
                     Self{ builder: self.builder.child_signal(child) }
-                }
-
-                fn optional_child_signal(
-                    self,
-                    child: impl 'static + $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
-                ) -> Self {
-                    Self{ builder: self.builder.optional_child_signal(child) }
                 }
 
                 fn children_signal(
@@ -305,6 +298,13 @@ macro_rules! children_allowed {
                     children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
                 ) -> Self {
                     Self{ builder: self.builder.children_signal(children) }
+                }
+
+                fn optional_child_signal(
+                    self,
+                    child: impl 'static + $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
+                ) -> Self {
+                    Self{ builder: self.builder.optional_child_signal(child) }
                 }
             }
         }

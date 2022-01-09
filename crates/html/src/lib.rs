@@ -55,7 +55,7 @@ impl<T> From<dom::CustomEvent> for CustomEvent<T> {
 
 /// Methods to add child elements. These are in a trait to allow attribute
 /// methods to be disambiguated..
-pub trait ParentBuilder {
+pub trait ParentBuilder: Sized {
     fn text(self, child: &str) -> Self;
 
     fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
@@ -78,17 +78,13 @@ pub trait ParentBuilder {
 
     fn child_signal(self, child: impl 'static + Signal<Item = impl Into<Element>>) -> Self;
 
+    fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
+        -> Self;
+
     fn optional_child_signal(
         self,
         child: impl 'static + Signal<Item = Option<impl Into<Element>>>,
     ) -> Self;
-
-    fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
-        -> Self;
-
-    fn child<Child>(self, c: Child) -> Self
-    where
-        Child: Into<Element>;
 }
 
 /// Methods to add effects. These are in a trait to allow attribute methods to
