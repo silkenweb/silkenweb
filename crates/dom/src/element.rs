@@ -34,13 +34,13 @@ pub struct ElementBuilder {
 
 impl ElementBuilder {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document().create_element(tag).unwrap_throw())
+        Self::new_element(document().create_element(intern(tag)).unwrap_throw())
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
         Self::new_element(
             document()
-                .create_element_ns(Some(namespace), tag)
+                .create_element_ns(Some(intern(namespace)), intern(tag))
                 .unwrap_throw(),
         )
     }
@@ -239,7 +239,6 @@ impl ElementBuilder {
         self
     }
 
-
     fn check_attribute_unique(&mut self, name: &str) {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
@@ -290,7 +289,7 @@ impl Builder for ElementBuilder {
             let dom_element = self.element.dom_element.clone();
             self.element
                 .event_callbacks
-                .push(EventCallback::new(dom_element, name, f));
+                .push(EventCallback::new(dom_element, intern(name), f));
         }
 
         self
