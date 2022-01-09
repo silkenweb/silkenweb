@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, mem, rc::Rc};
 
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
@@ -174,17 +174,22 @@ impl ChildVec {
     pub fn clear(&mut self) {
         let existing_children = self.child_dom_elements();
         self.children.clear();
+        let mut child_groups = self.child_groups.borrow_mut();
+
+        child_groups.clear_first_child(self.group_index);
+        let is_only_group = child_groups.is_single_group();
+        mem::drop(child_groups);
         let parent = self.parent.clone();
 
-        queue_update(move || {
-            for child in existing_children {
-                parent.remove_child(&child).unwrap_throw();
-            }
-        });
-
-        self.child_groups
-            .borrow_mut()
-            .clear_first_child(self.group_index);
+        if is_only_group {
+            queue_update(move || parent.set_inner_html(""));
+        } else {
+            queue_update(move || {
+                for child in existing_children {
+                    parent.remove_child(&child).unwrap_throw();
+                }
+            });
+        }
     }
 
     fn child_dom_elements(&self) -> Vec<dom::Element> {

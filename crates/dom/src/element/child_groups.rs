@@ -15,6 +15,7 @@ pub struct ChildGroups {
     children: Vec<Option<dom::Node>>,
     // `true` if the last child group can change.
     last_is_dynamic: bool,
+    group_count: usize,
 }
 
 impl ChildGroups {
@@ -23,10 +24,16 @@ impl ChildGroups {
             parent,
             children: Vec::new(),
             last_is_dynamic: false,
+            group_count: 0,
         }
     }
 
+    pub fn is_single_group(&self) -> bool {
+        self.group_count == 1
+    }
+
     pub fn new_group(&mut self) -> usize {
+        self.group_count += 1;
         self.last_is_dynamic = true;
         let index = self.children.len();
         self.children.push(None);
@@ -43,6 +50,7 @@ impl ChildGroups {
             self.children.push(Some(child.clone()));
         }
 
+        self.group_count += 1;
         self.parent.append_child(child).unwrap_throw();
         // We didn't give out an index, so this can't be dynamic.
         self.last_is_dynamic = false;
