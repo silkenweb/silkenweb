@@ -122,12 +122,10 @@ pub trait HtmlElement: Builder {
         if text.is_empty() {
             self
         } else {
-            // TODO: Remove need for type annotations
             self.attribute("class", text)
         }
     }
 
-    // TODO: Name everything consistently (signal -> dyn or signal -> dyn?)
     fn class_signal<T: AsRef<str>, Iter: IntoIterator<Item = T>>(
         self,
         value: impl Signal<Item = Iter> + 'static,
