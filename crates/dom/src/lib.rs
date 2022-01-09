@@ -1,5 +1,4 @@
 //! A reactive interface to the DOM.
-pub mod render;
 use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
@@ -8,10 +7,11 @@ use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
 use web_sys as dom;
 
-pub mod macros;
+mod macros;
 
 mod attribute;
 mod element;
+pub mod render;
 mod storage;
 
 pub use attribute::{AsAttribute, Attribute, AttributeValue};
