@@ -3,30 +3,6 @@
 //! Get the URL with [`url()`], and set it however you want to. For example:
 //! - with an anchor element like `<a href="/some/link">Some link</a>`
 //! - with [`set_url_path`].
-//!
-//! # Example
-//!
-//! ```no_run
-//! # use silkenweb::{
-//! #     ElementEvents,
-//! #     elements::{button, div, p},
-//! #     mount, router, ParentBuilder,
-//! # };
-//! div()
-//!     .child(
-//!         button()
-//!             .on_click(|_, _| router::set_url_path("/route_1"))
-//!             .text("Go to route 1"),
-//!     )
-//!     .child(
-//!         button()
-//!             .on_click(|_, _| router::set_url_path("/route_2"))
-//!             .text("Go to route 2"),
-//!     )
-//!     .child(p().text_signal(
-//!         router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
-//!     ));
-//! ```
 use std::ops::DerefMut;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
