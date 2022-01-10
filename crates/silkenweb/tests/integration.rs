@@ -1,4 +1,4 @@
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::{button, div, p, PBuilder},
     mount, render_updates, tag, unmount, ElementEvents,
