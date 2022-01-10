@@ -207,7 +207,10 @@ impl ElementBuilder {
     /// # let element = tag("input");
     /// let is_hidden = Mutable::new(false);
     ///
-    /// element.effect_signal(is_hidden.signal(), move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden));
+    /// element.effect_signal(
+    ///     is_hidden.signal(),
+    ///     move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden),
+    /// );
     /// ```
     pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
         let dom_element = self.dom_element().clone().dyn_into().unwrap_throw();

@@ -25,8 +25,8 @@
 //!             .text("Go to route 2"),
 //!     )
 //!     .child(p().text_signal(
-//!         router::url()
-//!             .signal_ref(|url| format!("URL Path is: {}", url.pathname()))));
+//!         router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
+//!     ));
 //! ```
 use std::ops::DerefMut;
 
