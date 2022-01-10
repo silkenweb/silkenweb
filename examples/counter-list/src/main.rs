@@ -48,7 +48,7 @@ fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
 
 pub fn define_counter() -> Div {
     let count = Rc::new(Mutable::new(0));
-    let count_text = count.signal().map(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{}", i));
 
     div()
         .child(define_button("-", -1, count.clone()))

@@ -26,8 +26,7 @@
 //!     )
 //!     .child(p().text_signal(
 //!         router::url()
-//!             .signal_cloned()
-//!             .map(|url| format!("URL Path is: {}", url.pathname()))));
+//!             .signal_ref(|url| format!("URL Path is: {}", url.pathname()))));
 //! ```
 use std::ops::DerefMut;
 

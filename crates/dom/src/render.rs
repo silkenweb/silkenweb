@@ -1,6 +1,6 @@
 use std::cell::{Cell, RefCell};
 
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{Mutable, Signal};
 use js_sys::Promise;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
@@ -78,8 +78,7 @@ impl Render {
     fn animation_timestamp(&self) -> impl Signal<Item = f64> {
         let base_timestamp = self.animation_timestamp_millis.get();
         self.animation_timestamp_millis
-            .signal()
-            .map(move |t| t - base_timestamp)
+            .signal_ref(move |t| t - base_timestamp)
     }
 
     pub fn render_updates(&self) {

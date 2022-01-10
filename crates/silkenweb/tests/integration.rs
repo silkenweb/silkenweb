@@ -30,7 +30,7 @@ async fn simple_counter() {
     create_app_container(APP_ID).await;
 
     let count = Mutable::new(0);
-    let count_text = count.signal().map(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{}", i));
 
     mount(
         APP_ID,

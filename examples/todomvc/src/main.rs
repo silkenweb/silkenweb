@@ -12,7 +12,7 @@ mod view;
 fn main() {
     console_error_panic_hook::set_once();
 
-    let item_filter = url().signal_cloned().map({
+    let item_filter = url().signal_ref({
         |url| match url.hash().as_str() {
             "#/active" => Filter::Active,
             "#/completed" => Filter::Completed,

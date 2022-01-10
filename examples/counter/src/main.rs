@@ -7,7 +7,7 @@ use silkenweb::{
 
 fn main() {
     let count = Mutable::new(0);
-    let count_text = count.signal().map(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{}", i));
     let inc = move |_, _| {
         count.replace_with(|i| *i + 1);
     };
