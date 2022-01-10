@@ -110,50 +110,35 @@ macro_rules! global_attributes {
     }};
 }
 
-fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> String {
+fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> Option<String> {
     let mut classes = classes.into_iter();
 
     if let Some(first) = classes.next() {
         let mut text = first.as_ref().to_owned();
 
         for class in classes {
+            let class = class.as_ref();
+            text.reserve(1 + class.len());
             text.push(' ');
-            text.push_str(class.as_ref());
+            text.push_str(class);
         }
 
-        text
+        Some(text)
     } else {
-        String::new()
+        None
     }
 }
 
 pub trait HtmlElement: Builder {
     fn class<T: AsRef<str>>(self, value: impl IntoIterator<Item = T>) -> Self {
-        let text = class_attribute_text(value);
-
-        if text.is_empty() {
-            self
-        } else {
-            self.attribute("class", text)
-        }
+        self.attribute("class", class_attribute_text(value))
     }
 
     fn class_signal<T: AsRef<str>, Iter: IntoIterator<Item = T>>(
         self,
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
-        self.attribute_signal(
-            "class",
-            value.map(move |class| {
-                let text = class_attribute_text(class);
-
-                if text.is_empty() {
-                    None
-                } else {
-                    Some(text)
-                }
-            }),
-        )
+        self.attribute_signal("class", value.map(move |class| class_attribute_text(class)))
     }
 
     global_attributes![
