@@ -23,6 +23,7 @@ use silkenweb_dom::{Builder, Element};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
+#[doc(hidden)]
 #[macro_use]
 pub mod macros;
 pub mod elements;

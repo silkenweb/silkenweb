@@ -1,14 +1,10 @@
-#[doc(hidden)]
-// Macro dependencies
-pub mod private {
-    pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
-    pub use paste::paste;
-    pub use silkenweb_dom::{
-        tag, tag_in_namespace, AsAttribute, Attribute, Builder, Element, ElementBuilder,
-    };
-    pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
-    pub use web_sys as dom;
-}
+pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
+pub use paste::paste;
+pub use silkenweb_dom::{
+    tag, tag_in_namespace, AsAttribute, Attribute, Builder, Element, ElementBuilder,
+};
+pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+pub use web_sys as dom;
 
 /// Define an html element.
 ///
@@ -92,7 +88,7 @@ macro_rules! dom_element {
                 $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
             })?
         }
-    ) => { $crate::macros::private::paste!{
+    ) => { $crate::macros::paste!{
         $crate::dom_element!(
             $(namespace = $namespace, )?
             attributes = [$($attribute_trait),*],
@@ -150,7 +146,7 @@ macro_rules! dom_element {
         }
 
         pub struct $camel_builder_name {
-            builder: $crate::macros::private::ElementBuilder
+            builder: $crate::macros::ElementBuilder
         }
 
         impl $camel_builder_name {
@@ -178,61 +174,61 @@ macro_rules! dom_element {
 
             fn effect_signal<T: 'static>(
                 self,
-                sig: impl 'static + $crate::macros::private::Signal<Item = T>,
+                sig: impl 'static + $crate::macros::Signal<Item = T>,
                 f: impl 'static + Clone + Fn(&$elem_type, T),
             ) -> Self {
                 Self{ builder: self.builder.effect_signal(sig, f) }
             }
         }
 
-        impl $crate::macros::private::Builder for $camel_builder_name {
+        impl $crate::macros::Builder for $camel_builder_name {
             type Target = $camel_name;
 
-            fn attribute<T: $crate::macros::private::Attribute>(self, name: &str, value: T) -> Self {
+            fn attribute<T: $crate::macros::Attribute>(self, name: &str, value: T) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
             }
 
-            fn attribute_signal<T: 'static + $crate::macros::private::Attribute>(
+            fn attribute_signal<T: 'static + $crate::macros::Attribute>(
                 self,
                 name: &str,
-                value: impl $crate::macros::private::Signal<Item = T> + 'static,
+                value: impl $crate::macros::Signal<Item = T> + 'static,
             ) -> Self {
-                Self{ builder: $crate::macros::private::Builder::attribute_signal(self.builder, name, value) }
+                Self{ builder: $crate::macros::Builder::attribute_signal(self.builder, name, value) }
             }
 
             fn on(
                 self,
                 name: &'static str,
-                f: impl 'static + FnMut($crate::macros::private::JsValue)
+                f: impl 'static + FnMut($crate::macros::JsValue)
             ) -> Self {
-                Self{ builder: $crate::macros::private::Builder::on(self.builder, name, f) }
+                Self{ builder: $crate::macros::Builder::on(self.builder, name, f) }
             }
 
             fn build(self) -> Self::Target {
                 $camel_name(self.builder.build())
             }
 
-            fn into_element(self) -> $crate::macros::private::Element {
+            fn into_element(self) -> $crate::macros::Element {
                 self.build().into()
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::private::Element {
+        impl From<$camel_builder_name> for $crate::macros::Element {
             fn from(builder: $camel_builder_name) -> Self {
-                use $crate::macros::private::Builder;
+                use $crate::macros::Builder;
                 builder.build().into()
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::private::ElementBuilder {
+        impl From<$camel_builder_name> for $crate::macros::ElementBuilder {
             fn from(builder: $camel_builder_name) -> Self {
                 builder.builder
             }
         }
 
-        pub struct $camel_name($crate::macros::private::Element);
+        pub struct $camel_name($crate::macros::Element);
 
-        impl From<$camel_name> for $crate::macros::private::Element {
+        impl From<$camel_name> for $crate::macros::Element {
             fn from(html_elem: $camel_name) -> Self {
                 html_elem.0
             }
@@ -256,10 +252,10 @@ macro_rules! dom_element {
 #[macro_export]
 macro_rules! create_element_fn {
     ($text_name:expr) => {
-        $crate::macros::private::tag($text_name)
+        $crate::macros::tag($text_name)
     };
     ($namespace:literal, $text_name:expr) => {
-        $crate::macros::private::tag_in_namespace($namespace, $text_name)
+        $crate::macros::tag_in_namespace($namespace, $text_name)
     };
 }
 
@@ -276,31 +272,31 @@ macro_rules! children_allowed {
                 Self{ builder: self.builder.text(child) }
             }
 
-            fn text_signal(self, child: impl 'static + $crate::macros::private::Signal<Item = impl Into<String>>) -> Self {
+            fn text_signal(self, child: impl 'static + $crate::macros::Signal<Item = impl Into<String>>) -> Self {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
             fn child<Child>(self, c: Child) -> Self
             where
-                Child: Into<$crate::macros::private::Element>
+                Child: Into<$crate::macros::Element>
             {
                 Self{ builder: self.builder.child(c) }
             }
 
-            fn child_signal(self, child: impl 'static + $crate::macros::private::Signal<Item = impl Into<$crate::macros::private::Element>>) -> Self {
+            fn child_signal(self, child: impl 'static + $crate::macros::Signal<Item = impl Into<$crate::macros::Element>>) -> Self {
                 Self{ builder: self.builder.child_signal(child) }
             }
 
             fn children_signal(
                 self,
-                children: impl 'static + $crate::macros::private::SignalVec<Item = impl Into<$crate::macros::private::Element>>,
+                children: impl 'static + $crate::macros::SignalVec<Item = impl Into<$crate::macros::Element>>,
             ) -> Self {
                 Self{ builder: self.builder.children_signal(children) }
             }
 
             fn optional_child_signal(
                 self,
-                child: impl 'static + $crate::macros::private::Signal<Item = ::std::option::Option<impl Into<$crate::macros::private::Element>>>
+                child: impl 'static + $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Element>>>
             ) -> Self {
                 Self{ builder: self.builder.optional_child_signal(child) }
             }
@@ -313,21 +309,21 @@ macro_rules! children_allowed {
 macro_rules! events {
     ($elem_type:ty {
         $($visiblity:vis $name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
-    }) => { $crate::macros::private::paste!{
+    }) => { $crate::macros::paste!{
         $(
             $visiblity fn [<on_ $name $(_ $name_tail)* >] (
                 self,
                 mut f: impl 'static + FnMut($event_type, $elem_type)
             ) -> Self {
-                $crate::macros::private::Builder::on(
+                $crate::macros::Builder::on(
                     self,
                     $crate::text_name!($name $(- $name_tail)*),
                     move |js_ev| {
-                        use $crate::macros::private::JsCast;
+                        use $crate::macros::JsCast;
                         // I *think* we can assume event and event.current_target aren't null
                         let event: $event_type = js_ev.unchecked_into();
                         let target: $elem_type =
-                            $crate::macros::private::UnwrapThrowExt::unwrap_throw(
+                            $crate::macros::UnwrapThrowExt::unwrap_throw(
                                 event.current_target()
                             )
                             .unchecked_into();
@@ -344,22 +340,22 @@ macro_rules! events {
 macro_rules! custom_events {
     ($elem_type:ty {
         $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
-    }) => { $crate::macros::private::paste!{
+    }) => { $crate::macros::paste!{
         $(
             pub fn [<on_ $name $(_ $name_tail)* >] (
                 self,
                 mut f: impl 'static + FnMut($event_type, $elem_type)
             ) -> Self {
-                $crate::macros::private::Builder::on(
+                $crate::macros::Builder::on(
                     self,
                     $crate::text_name!($name $(- $name_tail)*),
                     move |js_ev| {
-                        use $crate::macros::private::JsCast;
+                        use $crate::macros::JsCast;
                         // I *think* it's safe to assume event and event.current_target aren't null
-                        let event: $crate::macros::private::dom::CustomEvent =
+                        let event: $crate::macros::dom::CustomEvent =
                             js_ev.unchecked_into();
                         let target: $elem_type =
-                            $crate::macros::private::UnwrapThrowExt::unwrap_throw(
+                            $crate::macros::UnwrapThrowExt::unwrap_throw(
                                 event.current_target()
                             )
                             .unchecked_into();
@@ -377,13 +373,13 @@ macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
         $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
-    ),* $(,)? ) => { $crate::macros::private::paste!{
+    ),* $(,)? ) => { $crate::macros::paste!{
         $(
             $(#[$attr_meta])*
             #[doc = ""]
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-            $visibility fn $attr(self, value: impl $crate::macros::private::AsAttribute<$typ>) -> Self {
-                $crate::macros::private::Builder::attribute(self, $text_attr, value)
+            $visibility fn $attr(self, value: impl $crate::macros::AsAttribute<$typ>) -> Self {
+                $crate::macros::Builder::attribute(self, $text_attr, value)
             }
 
             $(#[$attr_meta])*
@@ -391,11 +387,11 @@ macro_rules! attributes {
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
             #[allow(clippy::wrong_self_convention)]
             #[allow(non_snake_case)]
-            $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::private::Signal<Item = T> + 'static) -> Self
+            $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::Signal<Item = T> + 'static) -> Self
             where
-                T: $crate::macros::private::AsAttribute<$typ> + 'static
+                T: $crate::macros::AsAttribute<$typ> + 'static
             {
-                $crate::macros::private::Builder::attribute_signal(self, $text_attr, value)
+                $crate::macros::Builder::attribute_signal(self, $text_attr, value)
             }
         )*
     }};
@@ -439,7 +435,7 @@ macro_rules! text_name{
 #[doc(hidden)]
 #[macro_export]
 macro_rules! camel_name{
-    ($name:ident $($name_tail:ident)*) => { $crate::macros::private::paste!{
+    ($name:ident $($name_tail:ident)*) => { $crate::macros::paste!{
         [< $name:camel $($name_tail:camel)* >]
     }}
 }
