@@ -19,6 +19,7 @@ jobs:
       if: ${{ !env.ACT }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo build --all-targets
+    - run: cargo doc
     - run: cargo test
     - run: cargo test --benches --tests --release
 
