@@ -14,8 +14,7 @@
 //! mount(
 //!     "app",
 //!     progress()
-//!         .value_signal(finite_animation(10000.0).map(|time| time as f32))
-//!         .max(10000.0),
+//!         .value_signal(finite_animation(10000.0).map(|time| time.map_or(10000.0, |t| t as f32))),
 //! );
 //! ```
 use futures_signals::signal::{Signal, SignalExt};
@@ -39,17 +38,17 @@ pub fn infinite_animation() -> impl 'static + Signal<Item = f64> {
 ///
 /// The signal will tick each frame until `duration_millis` has elapsed. The
 /// value will never exceed `duration_millis` and the last value will be
-/// `duration_millis`, unless the signal is dropped first.
+/// `None`, unless the signal is dropped first.
 ///
 /// See [module-level documentation](self) for more details.
-pub fn finite_animation(duration_millis: f64) -> impl 'static + Signal<Item = f64> {
+pub fn finite_animation(duration_millis: f64) -> impl 'static + Signal<Item = Option<f64>> {
     animation_timestamp()
         .map(move |time| {
             if time < duration_millis {
                 request_render_updates();
-                time
+                Some(time)
             } else {
-                duration_millis
+                None
             }
         })
         .dedupe()
