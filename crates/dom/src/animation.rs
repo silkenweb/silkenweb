@@ -3,22 +3,9 @@
 //! Each time signal is in milliseconds, and starts from 0. Any live
 //! animation time signals will be updated each frame, and are strictly
 //! increasing.
-//!
-//! For example, this will show a progress bar that takes 10 seconds to
-//! fill:
-//!
-//! ```no_run
-//! # use futures_signals::signal::SignalExt;
-//! # use silkenweb::{animation::finite_animation, elements::progress, mount};
-//!
-//! mount(
-//!     "app",
-//!     progress()
-//!         .value_signal(finite_animation(10000.0).map(|time| time.map_or(10000.0, |t| t as f32))),
-//! );
-//! ```
 use futures_signals::signal::{Signal, SignalExt};
-use silkenweb_dom::render::{animation_timestamp, request_render_updates};
+
+use crate::render::{animation_timestamp, request_render_updates};
 
 /// Provide an infinite time signal for animations.
 ///
