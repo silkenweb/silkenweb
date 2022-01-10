@@ -131,11 +131,11 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
 }
 
 pub trait HtmlElement: Builder {
-    fn class<T: AsRef<str>>(self, value: impl IntoIterator<Item = T>) -> Self {
+    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         self.attribute("class", class_attribute_text(value))
     }
 
-    fn class_signal<T: AsRef<str>, Iter: IntoIterator<Item = T>>(
+    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
         self,
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
