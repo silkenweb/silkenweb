@@ -5,7 +5,7 @@ use js_sys::Promise;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
 
-use crate::{ document};
+use crate::document;
 
 pub fn queue_update(f: impl 'static + FnOnce()) {
     RENDER.with(|r| r.queue_update(f));
