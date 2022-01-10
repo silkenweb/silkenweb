@@ -1,5 +1,5 @@
 //! A minimal interactive example
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::{button, div, p},
     mount, ElementEvents, ParentBuilder,

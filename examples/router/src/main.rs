@@ -1,5 +1,4 @@
 //! A minimal routing example
-use futures_signals::signal::SignalExt;
 use silkenweb::{
     elements::{button, div, p},
     mount, router, ElementEvents, ParentBuilder,

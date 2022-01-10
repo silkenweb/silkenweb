@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate derive_more;
 
-use futures_signals::signal::SignalExt;
 use model::{Filter, TodoApp};
 use silkenweb::{mount, router::url};
 use view::TodoAppView;
