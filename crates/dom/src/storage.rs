@@ -1,7 +1,7 @@
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
-use crate::window;
+use crate::document;
 
 macro_rules! unexpected_exception {
     ($name:literal) => {
@@ -22,7 +22,7 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
     pub fn local() -> Result<Self, JsValue> {
-        Ok(Self(window().local_storage()?.unwrap_throw()))
+        Ok(Self(document::local_storage()?))
     }
 
     /// Get the window's session storage.
@@ -35,7 +35,7 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     pub fn session() -> Result<Self, JsValue> {
-        Ok(Self(window().session_storage()?.unwrap_throw()))
+        Ok(Self(document::session_storage()?))
     }
 
     /// Get the value associated with the key.

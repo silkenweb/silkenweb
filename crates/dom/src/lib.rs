@@ -5,14 +5,16 @@ use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
-use web_sys as dom;
 
 mod macros;
 
 mod attribute;
+mod document;
 mod element;
-pub mod render;
 mod storage;
+
+pub mod render;
+pub mod router;
 
 pub use attribute::{AsAttribute, Attribute, AttributeValue};
 pub use element::{Builder, Element, ElementBuilder};
@@ -32,8 +34,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     unmount(id);
     let elem = elem.into();
 
-    document()
-        .get_element_by_id(id)
+    document::get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
         .append_child(&elem.dom_element)
         .unwrap_throw();
@@ -47,16 +48,6 @@ pub fn unmount(id: &str) {
     if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.dom_element.remove();
     }
-}
-
-pub fn window() -> dom::Window {
-    dom::window().expect_throw("Window must be available")
-}
-
-pub fn document() -> dom::Document {
-    window()
-        .document()
-        .expect_throw("Window must contain a document")
 }
 
 /// An HTML element tag.

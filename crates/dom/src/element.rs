@@ -34,15 +34,11 @@ pub struct ElementBuilder {
 
 impl ElementBuilder {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document().create_element(intern(tag)).unwrap_throw())
+        Self::new_element(document::create_element(intern(tag)))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(
-            document()
-                .create_element_ns(Some(intern(namespace)), intern(tag))
-                .unwrap_throw(),
-        )
+        Self::new_element(document::create_element_ns(intern(namespace), intern(tag)))
     }
 
     fn new_element(dom_element: dom::Element) -> Self {
@@ -146,7 +142,7 @@ impl ElementBuilder {
 
     /// Add a text node after existing children.
     pub fn text(self, child: &str) -> Self {
-        let text_node = document().create_text_node(child);
+        let text_node = document::create_text_node(child);
         self.child_groups
             .borrow_mut()
             .append_new_group_sync(&text_node);
@@ -157,7 +153,7 @@ impl ElementBuilder {
         mut self,
         child_signal: impl 'static + Signal<Item = impl Into<String>>,
     ) -> Self {
-        let text_node = document().create_text_node(intern(""));
+        let text_node = document::create_text_node(intern(""));
         self.child_groups
             .borrow_mut()
             .append_new_group_sync(&text_node);
