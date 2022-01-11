@@ -3,14 +3,15 @@ use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
+use global::document;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
 
 mod macros;
 
 mod attribute;
-mod document;
 mod element;
+mod global;
 mod render;
 mod storage;
 

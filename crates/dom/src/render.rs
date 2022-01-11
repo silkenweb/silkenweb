@@ -5,7 +5,7 @@ use js_sys::Promise;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
 
-use crate::document;
+use crate::global::window;
 
 pub fn queue_update(f: impl 'static + FnOnce()) {
     RENDER.with(|r| r.queue_update(f));
@@ -95,7 +95,7 @@ impl Render {
         if !self.raf_pending.get() {
             self.raf_pending.set(true);
 
-            document::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
+            window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
         }
     }
 

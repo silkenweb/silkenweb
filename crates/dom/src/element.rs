@@ -14,7 +14,8 @@ use web_sys as dom;
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
     attribute::Attribute,
-    clone, document,
+    clone,
+    global::document,
     render::{after_render, queue_update},
     spawn_cancelable_future,
 };

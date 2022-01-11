@@ -9,7 +9,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::Url;
 
-use crate::document;
+use crate::global::window;
 
 /// A signal that will vary according to the current browser URL.
 ///
@@ -35,7 +35,7 @@ pub fn set_url_path(path: &str) {
         // Force a `deref_mut` to make sure `url` is marked as modified. `set_pathname`
         // uses interior mutability, so we'll only `deref`.
         url.deref_mut().set_pathname(path);
-        document::history()
+        window::history()
             .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
             .unwrap_throw();
     });
@@ -43,14 +43,14 @@ pub fn set_url_path(path: &str) {
 
 fn new_url_signal() -> Mutable<Url> {
     let url = Url::new(
-        &document::location()
+        &window::location()
             .href()
             .expect_throw("Must be able to get window 'href'"),
     )
     .expect_throw("URL must be valid");
 
     ON_POPSTATE
-        .with(|on_popstate| document::set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
+        .with(|on_popstate| window::set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
 
     Mutable::new(url)
 }
@@ -59,7 +59,7 @@ thread_local! {
     static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
         Closure::wrap(Box::new(move |_event: JsValue| {
             URL.with(|url| url.set(
-                Url::new(&document::location().href().expect_throw("HRef must exist")).expect_throw("URL must be valid")
+                Url::new(&window::location().href().expect_throw("HRef must exist")).expect_throw("URL must be valid")
             ));
         }));
     static URL: Mutable<Url> = new_url_signal();
