@@ -16,9 +16,6 @@
 //! - [animation] is a simple animation example
 //! - [todomvc] is an example of a simple app
 //!
-//! For a more complete introduction, see
-//! [Learning Silkenweb With Entirely Too Many Counters](https://silkenweb.netlify.app/)
-//!
 //! [trunk]: https://trunkrs.dev/
 //! [hello-world]: https://github.com/silkenweb/silkenweb/tree/main/examples/hello-world
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
