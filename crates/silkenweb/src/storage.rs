@@ -1,6 +1,5 @@
+use silkenweb_dom::global::window;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
-
-use crate::global::window;
 
 macro_rules! unexpected_exception {
     ($name:literal) => {

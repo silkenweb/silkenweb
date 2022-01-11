@@ -14,7 +14,6 @@ pub mod attribute;
 pub mod element;
 pub mod global;
 pub mod render;
-pub mod storage;
 
 /// Mount an element on the document.
 ///

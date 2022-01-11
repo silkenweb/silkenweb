@@ -29,9 +29,7 @@ pub use silkenweb_dom::{
     attribute::{Attribute, AttributeValue},
     clone,
     element::{Element, ElementBuilder, GenericElementBuilder},
-    mount, render,
-    storage::Storage,
-    tag, tag_in_namespace, unmount,
+    mount, render, tag, tag_in_namespace, unmount,
 };
 pub use silkenweb_html::{
     elements, html_element, parent_element, CustomEvent, Effects, ElementEvents, HtmlElement,
@@ -41,3 +39,6 @@ pub use silkenweb_signals_ext::SignalProduct;
 
 pub mod animation;
 pub mod router;
+pub mod storage;
+
+pub use storage::Storage;
