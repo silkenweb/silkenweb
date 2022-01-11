@@ -99,7 +99,7 @@ html_element!(
     }
 );
 
-children_allowed!(a);
+parent_element!(a);
 
 html_element!(
     /// The [HTML Abbreviation element (`<abbr>`)][mdn] represents an
@@ -117,7 +117,7 @@ html_element!(
     abbr<dom::HtmlElement> {}
 );
 
-children_allowed!(abbr);
+parent_element!(abbr);
 
 html_element!(
     /// The [HTML Bring Attention To element (`<b>`)][mdn] is used to draw the
@@ -128,7 +128,7 @@ html_element!(
     b<dom::HtmlElement> {}
 );
 
-children_allowed!(b);
+parent_element!(b);
 
 html_element!(
     /// The [HTML Bidirectional Isolate element (`<bdi>`)][mdn] tells the
@@ -139,7 +139,7 @@ html_element!(
     bdi<dom::HtmlElement> {}
 );
 
-children_allowed!(bdi);
+parent_element!(bdi);
 
 html_element!(
     /// The [HTML Bidirectional Text Override element (`<bdo>`)][mdn] overrides
@@ -161,7 +161,7 @@ html_element!(
     }
 );
 
-children_allowed!(bdo);
+parent_element!(bdo);
 
 html_element!(
     /// The [HTML `<br>` element][mdn] produces a line break in text
@@ -181,7 +181,7 @@ html_element!(
     cite<dom::HtmlElement> {}
 );
 
-children_allowed!(cite);
+parent_element!(cite);
 
 html_element!(
     /// The [HTML `<code>` element][mdn] displays its contents styled in a
@@ -192,7 +192,7 @@ html_element!(
     code<dom::HtmlElement> {}
 );
 
-children_allowed!(code);
+parent_element!(code);
 
 html_element!(
     /// The [HTML `<data>` element][mdn] links a given content with a
@@ -210,7 +210,7 @@ html_element!(
     }
 );
 
-children_allowed!(data);
+parent_element!(data);
 
 html_element!(
     /// The [HTML Definition element (`<dfn>`)][mdn] is used to indicate the
@@ -221,7 +221,7 @@ html_element!(
     dfn<dom::HtmlElement> {}
 );
 
-children_allowed!(dfn);
+parent_element!(dfn);
 
 html_element!(
     /// The [HTML `<em>` element][mdn] marks text that has stress emphasis. The
@@ -232,7 +232,7 @@ html_element!(
     em<dom::HtmlElement> {}
 );
 
-children_allowed!(em);
+parent_element!(em);
 
 html_element!(
     /// The [HTML `<i>` element][mdn] represents a range of text that is set off
@@ -244,7 +244,7 @@ html_element!(
     i<dom::HtmlElement> {}
 );
 
-children_allowed!(i);
+parent_element!(i);
 
 html_element!(
     /// The [HTML Keyboard Input element (`<kbd>`)][mdn] represents a span of
@@ -255,7 +255,7 @@ html_element!(
     kbd<dom::HtmlElement> {}
 );
 
-children_allowed!(kbd);
+parent_element!(kbd);
 
 html_element!(
     /// The [HTML Mark Text element (`<mark>`)][mdn] represents text which is
@@ -266,7 +266,7 @@ html_element!(
     mark<dom::HtmlElement> {}
 );
 
-children_allowed!(mark);
+parent_element!(mark);
 
 html_element!(
     /// The [HTML `<q>` element][mdn]  indicates that the enclosed text is a
@@ -285,7 +285,7 @@ html_element!(
     }
 );
 
-children_allowed!(q);
+parent_element!(q);
 
 html_element!(
     /// The [HTML Ruby Base (`<rb>`) element][mdn] is used to delimit the base
@@ -297,7 +297,7 @@ html_element!(
     rb<dom::HtmlElement> {}
 );
 
-children_allowed!(rb);
+parent_element!(rb);
 
 html_element!(
     /// The [HTML Ruby Fallback Parenthesis (`<rp>`) element][mdn] is used to
@@ -309,7 +309,7 @@ html_element!(
     rp<dom::HtmlElement> {}
 );
 
-children_allowed!(rp);
+parent_element!(rp);
 
 html_element!(
     /// The [HTML Ruby Text (`<rt>`) element][mdn] specifies the ruby text
@@ -323,7 +323,7 @@ html_element!(
     rt<dom::HtmlElement> {}
 );
 
-children_allowed!(rt);
+parent_element!(rt);
 
 html_element!(
     /// The [HTML Ruby Text Container (`<rtc>`) element][mdn] embraces semantic
@@ -340,7 +340,7 @@ html_element!(
     rtc<dom::HtmlElement> {}
 );
 
-children_allowed!(rtc);
+parent_element!(rtc);
 
 html_element!(
     /// The [HTML `<ruby>` element][mdn] represents a ruby annotation. Ruby
@@ -350,7 +350,7 @@ html_element!(
     ruby<dom::HtmlElement> {}
 );
 
-children_allowed!(ruby);
+parent_element!(ruby);
 
 html_element!(
     /// The [HTML `<s>` element][mdn] renders text with a strikethrough, or a
@@ -365,7 +365,7 @@ html_element!(
     s<dom::HtmlElement> {}
 );
 
-children_allowed!(s);
+parent_element!(s);
 
 html_element!(
     /// The [HTML Sample Element (`<samp>`)][mdn] is used to enclose inline text
@@ -375,7 +375,7 @@ html_element!(
     samp<dom::HtmlElement> {}
 );
 
-children_allowed!(samp);
+parent_element!(samp);
 
 html_element!(
     /// The [HTML `<small>` element][mdn] represents side-comments and small
@@ -387,7 +387,7 @@ html_element!(
     small<dom::HtmlElement> {}
 );
 
-children_allowed!(small);
+parent_element!(small);
 
 html_element!(
     /// The [HTML `<span>` element][mdn] is a generic inline container for
@@ -403,7 +403,7 @@ html_element!(
     span<dom::HtmlSpanElement> {}
 );
 
-children_allowed!(span);
+parent_element!(span);
 
 html_element!(
     /// The [HTML Strong Importance Element (`<strong>`)][mdn] indicates that
@@ -414,7 +414,7 @@ html_element!(
     strong<dom::HtmlElement> {}
 );
 
-children_allowed!(strong);
+parent_element!(strong);
 
 html_element!(
     /// The [HTML Subscript element (`<sub>`)][mdn] specifies inline text which
@@ -424,7 +424,7 @@ html_element!(
     sub<dom::HtmlElement> {}
 );
 
-children_allowed!(sub);
+parent_element!(sub);
 
 html_element!(
     /// The [HTML Superscript element (`<sup>`)][mdn] specifies inline text
@@ -435,7 +435,7 @@ html_element!(
     sup<dom::HtmlElement> {}
 );
 
-children_allowed!(sup);
+parent_element!(sup);
 
 html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
@@ -450,7 +450,7 @@ html_element!(
     }
 );
 
-children_allowed!(time);
+parent_element!(time);
 
 html_element!(
     /// The [HTML Unarticulated Annotation Element (`<u>`)][mdn] represents a
@@ -461,7 +461,7 @@ html_element!(
     u<dom::HtmlElement> {}
 );
 
-children_allowed!(u);
+parent_element!(u);
 
 html_element!(
     /// The [HTML Variable element (`<var>`)][mdn] represents the name of a
@@ -471,7 +471,7 @@ html_element!(
     var<dom::HtmlElement> {}
 );
 
-children_allowed!(var);
+parent_element!(var);
 
 html_element!(
     /// The [HTML `<wbr>` element][mdn] represents a word break opportunity—a
@@ -506,7 +506,7 @@ html_element!(
     }
 );
 
-children_allowed!(del);
+parent_element!(del);
 
 html_element!(
     /// The [HTML `<ins>` element][mdn] represents a range of text that has been
@@ -531,7 +531,7 @@ html_element!(
     }
 );
 
-children_allowed!(ins);
+parent_element!(ins);
 
 html_element!(
     /// The [HTML `<address>` element][mdn] indicates that the enclosed HTML
@@ -542,7 +542,7 @@ html_element!(
     address<dom::HtmlElement> {}
 );
 
-children_allowed!(address);
+parent_element!(address);
 
 html_element!(
     /// The [HTML `<article>` element][mdn] represents a self-contained
@@ -554,7 +554,7 @@ html_element!(
     article<dom::HtmlElement> {}
 );
 
-children_allowed!(article);
+parent_element!(article);
 
 html_element!(
     /// The [HTML `<aside>` element][mdn] represents a portion of a document
@@ -565,7 +565,7 @@ html_element!(
     aside<dom::HtmlElement> {}
 );
 
-children_allowed!(aside);
+parent_element!(aside);
 
 html_element!(
     /// The [HTML `<footer>` element][mdn] represents a footer for its nearest
@@ -579,7 +579,7 @@ html_element!(
     footer<dom::HtmlElement> {}
 );
 
-children_allowed!(footer);
+parent_element!(footer);
 
 html_element!(
     /// The [HTML `<header>` element][mdn] represents introductory content,
@@ -591,7 +591,7 @@ html_element!(
     header<dom::HtmlElement> {}
 );
 
-children_allowed!(header);
+parent_element!(header);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -602,7 +602,7 @@ html_element!(
     h1<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h1);
+parent_element!(h1);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -613,7 +613,7 @@ html_element!(
     h2<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h2);
+parent_element!(h2);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -624,7 +624,7 @@ html_element!(
     h3<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h3);
+parent_element!(h3);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -635,7 +635,7 @@ html_element!(
     h4<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h4);
+parent_element!(h4);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -646,7 +646,7 @@ html_element!(
     h5<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h5);
+parent_element!(h5);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -657,7 +657,7 @@ html_element!(
     h6<dom::HtmlHeadingElement> {}
 );
 
-children_allowed!(h6);
+parent_element!(h6);
 
 html_element!(
     /// The [HTML `<hgroup>` element][mdn] represents a multi-level heading for
@@ -669,7 +669,7 @@ html_element!(
     hgroup<dom::HtmlElement> {}
 );
 
-children_allowed!(hgroup);
+parent_element!(hgroup);
 
 html_element!(
     /// The [HTML `<main>` element][mdn] represents the dominant content of the
@@ -682,7 +682,7 @@ html_element!(
     main<dom::HtmlElement> {}
 );
 
-children_allowed!(main);
+parent_element!(main);
 
 html_element!(
     /// The [HTML `<nav>` element][mdn] represents a section of a page whose
@@ -694,7 +694,7 @@ html_element!(
     nav<dom::HtmlElement> {}
 );
 
-children_allowed!(nav);
+parent_element!(nav);
 
 html_element!(
     /// The [HTML `<section>` element][mdn] represents a standalone section —
@@ -705,7 +705,7 @@ html_element!(
     section<dom::HtmlElement> {}
 );
 
-children_allowed!(section);
+parent_element!(section);
 
 html_element!(
     /// The [HTML `<embed>` element][mdn] embeds external content at the
@@ -837,7 +837,7 @@ html_element!(
     }
 );
 
-children_allowed!(iframe);
+parent_element!(iframe);
 
 html_element!(
     /// The [HTML `<object>` element][mdn] represents an external resource,
@@ -879,7 +879,7 @@ html_element!(
     }
 );
 
-children_allowed!(object);
+parent_element!(object);
 
 html_element!(
     /// The [HTML `<param>` element][param] defines parameters for an
@@ -909,7 +909,7 @@ html_element!(
     picture<dom::HtmlPictureElement> {}
 );
 
-children_allowed!(picture);
+parent_element!(picture);
 
 html_element!(
     /// The [HTML `<source>` element][source] specifies multiple media resources
@@ -996,7 +996,7 @@ html_element!(
     }
 );
 
-children_allowed!(canvas);
+parent_element!(canvas);
 
 html_element!(
     /// The [HTML `<noscript>` element][mdn] defines a section of HTML to be
@@ -1007,7 +1007,7 @@ html_element!(
     noscript<dom::HtmlElement> {}
 );
 
-children_allowed!(noscript);
+parent_element!(noscript);
 
 html_element!(
     /// The [HTML `<script>` element][mdn] is used to embed or reference
@@ -1111,7 +1111,7 @@ html_element!(
     }
 );
 
-children_allowed!(script);
+parent_element!(script);
 
 html_element!(
     /// The [HTML `<area>` element][mdn] defines a hot-spot region on an image,
@@ -1325,7 +1325,7 @@ html_element!(
     }
 );
 
-children_allowed!(audio);
+parent_element!(audio);
 
 html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
@@ -1534,7 +1534,7 @@ html_element!(
     }
 );
 
-children_allowed!(map);
+parent_element!(map);
 
 html_element!(
     /// The [HTML `<track>` element][mdn] is used as a child of the media
@@ -1758,7 +1758,7 @@ html_element!(
     }
 );
 
-children_allowed!(video);
+parent_element!(video);
 
 html_element!(
     /// The [HTML Details Element (`<details>`)][mdn] creates a disclosure
@@ -1778,7 +1778,7 @@ html_element!(
     }
 );
 
-children_allowed!(details);
+parent_element!(details);
 
 html_element!(
     /// The [HTML `<dialog>` element][mdn] represents a dialog box or other
@@ -1800,7 +1800,7 @@ html_element!(
     }
 );
 
-children_allowed!(dialog);
+parent_element!(dialog);
 
 html_element!(
     /// The [HTML `<menu>` element][mdn] represents a group of commands that a
@@ -1813,7 +1813,7 @@ html_element!(
     menu<dom::HtmlMenuElement> {}
 );
 
-children_allowed!(menu);
+parent_element!(menu);
 
 html_element!(
     /// The [HTML Disclosure Summary element (`<summary>`)][mdn] element
@@ -1825,7 +1825,7 @@ html_element!(
     summary<dom::HtmlElement> {}
 );
 
-children_allowed!(summary);
+parent_element!(summary);
 
 html_element!(
     /// The [HTML `<blockquote>` element][mdn] (or *HTML Block Quotation
@@ -1848,7 +1848,7 @@ html_element!(
     }
 );
 
-children_allowed!(blockquote);
+parent_element!(blockquote);
 
 html_element!(
     /// The [HTML `<dd>` element][mdn] provides the description, definition, or
@@ -1861,7 +1861,7 @@ html_element!(
     dd<dom::HtmlElement> {}
 );
 
-children_allowed!(dd);
+parent_element!(dd);
 
 html_element!(
     /// The [HTML Content Division element (`<div>`)][mdn] is the generic
@@ -1873,7 +1873,7 @@ html_element!(
     div<dom::HtmlDivElement> {}
 );
 
-children_allowed!(div);
+parent_element!(div);
 
 html_element!(
     /// The [HTML `<dl>` element][mdn] represents a description list. The
@@ -1888,7 +1888,7 @@ html_element!(
     dl<dom::HtmlDListElement> {}
 );
 
-children_allowed!(dl);
+parent_element!(dl);
 
 html_element!(
     /// The [HTML `<dt>` element][mdn] specifies a term in a description or
@@ -1900,7 +1900,7 @@ html_element!(
     dt<dom::HtmlElement> {}
 );
 
-children_allowed!(dt);
+parent_element!(dt);
 
 html_element!(
     /// The [HTML `<figcaption>` or Figure Caption element][mdn] represents a
@@ -1912,7 +1912,7 @@ html_element!(
     figcaption<dom::HtmlElement> {}
 );
 
-children_allowed!(figcaption);
+parent_element!(figcaption);
 
 html_element!(
     /// The [HTML `<figure>` (Figure With Optional Caption) element][mdn]
@@ -1925,7 +1925,7 @@ html_element!(
     figure<dom::HtmlElement> {}
 );
 
-children_allowed!(figure);
+parent_element!(figure);
 
 html_element!(
     /// The [HTML `<hr>` element][mdn] represents a thematic break between
@@ -1943,7 +1943,7 @@ html_element!(
     li<dom::HtmlLiElement> {}
 );
 
-children_allowed!(li);
+parent_element!(li);
 
 html_element!(
     /// The [HTML `<ol>` element][mdn] represents an ordered list of items,
@@ -1983,7 +1983,7 @@ html_element!(
     }
 );
 
-children_allowed!(ol);
+parent_element!(ol);
 
 html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
@@ -1992,7 +1992,7 @@ html_element!(
     p<dom::HtmlParagraphElement> {}
 );
 
-children_allowed!(p);
+parent_element!(p);
 
 html_element!(
     /// The [HTML `<pre>` element][mdn] represents preformatted text which is to
@@ -2002,7 +2002,7 @@ html_element!(
     pre<dom::HtmlPreElement> {}
 );
 
-children_allowed!(pre);
+parent_element!(pre);
 
 html_element!(
     /// The [HTML `<ul>` element][mdn] represents an unordered list of items,
@@ -2012,7 +2012,7 @@ html_element!(
     ul<dom::HtmlUListElement> {}
 );
 
-children_allowed!(ul);
+parent_element!(ul);
 
 html_element!(
     /// The [HTML Table Caption element (`<caption>`)][mdn] specifies the
@@ -2024,7 +2024,7 @@ html_element!(
     caption<dom::HtmlTableCaptionElement> {}
 );
 
-children_allowed!(caption);
+parent_element!(caption);
 
 html_element!(
     /// The [HTML `<col>` element][mdn] defines a column within a table and is
@@ -2066,7 +2066,7 @@ html_element!(
     }
 );
 
-children_allowed!(colgroup);
+parent_element!(colgroup);
 
 html_element!(
     /// The [HTML `<table>` element][mdn] represents tabular data — that is,
@@ -2077,7 +2077,7 @@ html_element!(
     table<dom::HtmlTableElement> {}
 );
 
-children_allowed!(table);
+parent_element!(table);
 
 html_element!(
     /// The [HTML Table Body element (`<tbody>`)][mdn] encapsulates a set of
@@ -2090,7 +2090,7 @@ html_element!(
     tbody<dom::HtmlTableSectionElement> {}
 );
 
-children_allowed!(tbody);
+parent_element!(tbody);
 
 html_element!(
     /// The [HTML `<td>` element][mdn] defines a cell of a table that contains
@@ -2121,7 +2121,7 @@ html_element!(
     }
 );
 
-children_allowed!(td);
+parent_element!(td);
 
 html_element!(
     /// The [HTML `<tfoot>` element][mdn] defines a set of rows summarizing the
@@ -2131,7 +2131,7 @@ html_element!(
     tfoot<dom::HtmlTableSectionElement> {}
 );
 
-children_allowed!(tfoot);
+parent_element!(tfoot);
 
 html_element!(
     /// The [HTML `<th>` element][mdn] defines a cell as header of a group of
@@ -2189,7 +2189,7 @@ html_element!(
     }
 );
 
-children_allowed!(th);
+parent_element!(th);
 
 html_element!(
     /// The [HTML `<thead>` element][mdn] defines a set of rows defining the
@@ -2199,7 +2199,7 @@ html_element!(
     thead<dom::HtmlTableSectionElement> {}
 );
 
-children_allowed!(thead);
+parent_element!(thead);
 
 html_element!(
     /// The [HTML `<tr>` element][mdn] defines a row of cells in a table. The
@@ -2212,7 +2212,7 @@ html_element!(
     tr<dom::HtmlTableRowElement> {}
 );
 
-children_allowed!(tr);
+parent_element!(tr);
 
 html_element!(
     /// The [HTML `<base> element`][mdn] specifies the base URL to use for all
@@ -2268,7 +2268,7 @@ html_element!(
     head<dom::HtmlHeadElement> {}
 );
 
-children_allowed!(head);
+parent_element!(head);
 
 html_element!(
     /// The [HTML External Resource Link element (`<link>`)][mdn] specifies
@@ -2524,7 +2524,7 @@ html_element!(
     }
 );
 
-children_allowed!(style);
+parent_element!(style);
 
 html_element!(
     /// The [HTML Title element (`<title>`)][mdn] defines the document's title
@@ -2535,7 +2535,7 @@ html_element!(
     title<dom::HtmlTitleElement> {}
 );
 
-children_allowed!(title);
+parent_element!(title);
 
 html_element!(
     /// The [HTML `<button>` element][mdn] represents a clickable button, which
@@ -2665,7 +2665,7 @@ html_element!(
     }
 );
 
-children_allowed!(button);
+parent_element!(button);
 
 html_element!(
     /// The [HTML `<datalist>` element][mdn] contains a set of
@@ -2677,7 +2677,7 @@ html_element!(
     datalist<dom::HtmlDataListElement> {}
 );
 
-children_allowed!(datalist);
+parent_element!(datalist);
 
 html_element!(
     /// The [HTML `<fieldset>` element][mdn] is used to group several controls
@@ -2710,7 +2710,7 @@ html_element!(
     }
 );
 
-children_allowed!(fieldset);
+parent_element!(fieldset);
 
 html_element!(
     /// The [HTML `<form>` element][mdn] represents a document section that
@@ -2811,7 +2811,7 @@ html_element!(
     }
 );
 
-children_allowed!(form);
+parent_element!(form);
 
 html_element!(
     /// The [HTML `<input>` element][mdn] is used to create interactive controls
@@ -3299,7 +3299,7 @@ html_element!(
     }
 );
 
-children_allowed!(label);
+parent_element!(label);
 
 html_element!(
     /// The [HTML `<legend>` element][mdn] represents a caption for the content
@@ -3310,7 +3310,7 @@ html_element!(
     legend<dom::HtmlLegendElement> {}
 );
 
-children_allowed!(legend);
+parent_element!(legend);
 
 html_element!(
     /// The [HTML `<meter>` element][mdn] represents either a scalar value
@@ -3378,7 +3378,7 @@ html_element!(
     }
 );
 
-children_allowed!(meter);
+parent_element!(meter);
 
 html_element!(
     /// The [HTML `<optgroup>` element][mdn] creates a grouping of options
@@ -3401,7 +3401,7 @@ html_element!(
     }
 );
 
-children_allowed!(optgroup);
+parent_element!(optgroup);
 
 html_element!(
     /// The [HTML `<option>` element][mdn] is used to define an item contained
@@ -3443,7 +3443,7 @@ html_element!(
     }
 );
 
-children_allowed!(option);
+parent_element!(option);
 
 html_element!(
     /// The [HTML Output element (`<output>`)][mdn] is a container element into
@@ -3475,7 +3475,7 @@ html_element!(
     }
 );
 
-children_allowed!(output);
+parent_element!(output);
 
 html_element!(
     /// The [HTML `<progress>` element][progress] displays an indicator showing
@@ -3502,7 +3502,7 @@ html_element!(
     }
 );
 
-children_allowed!(progress);
+parent_element!(progress);
 
 html_element!(
     /// The [HTML `<select>` element][mdn] represents a control that provides a
@@ -3561,7 +3561,7 @@ html_element!(
     }
 );
 
-children_allowed!(select);
+parent_element!(select);
 
 html_element!(
     /// The [HTML `<textarea>` element][mdn] represents a multi-line plain-text
@@ -3680,4 +3680,4 @@ html_element!(
     }
 );
 
-children_allowed!(textarea);
+parent_element!(textarea);

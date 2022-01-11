@@ -264,7 +264,7 @@ macro_rules! create_element_fn {
 ///
 /// See [`html_element`] for a complete example of defining an html element.
 #[macro_export]
-macro_rules! children_allowed {
+macro_rules! parent_element {
     ($name:ident $(- $name_tail:ident)*) => {
         impl $crate::ParentBuilder for
             $crate::camel_name!{$name $($name_tail)* Builder}

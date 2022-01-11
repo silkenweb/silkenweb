@@ -13,7 +13,7 @@ svg_element!(
     }
 );
 
-children_allowed!(svg);
+parent_element!(svg);
 
 svg_element!(
     path <dom::SvgPathElement> {
