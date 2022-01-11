@@ -2,6 +2,7 @@
 use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
+use element::{Element, ElementBuilder};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
 use wasm_bindgen::UnwrapThrowExt;
@@ -9,16 +10,11 @@ use wasm_bindgen_futures::spawn_local;
 
 mod macros;
 
-mod attribute;
-mod element;
-mod storage;
-
+pub mod attribute;
+pub mod element;
 pub mod global;
 pub mod render;
-
-pub use attribute::{AsAttribute, Attribute, AttributeValue};
-pub use element::{Builder, Element, ElementBuilder};
-pub use storage::Storage;
+pub mod storage;
 
 /// Mount an element on the document.
 ///

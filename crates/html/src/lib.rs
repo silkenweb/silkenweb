@@ -19,7 +19,7 @@ use futures_signals::{
     signal_vec::SignalVec,
 };
 use paste::paste;
-use silkenweb_dom::{Builder, Element};
+use silkenweb_dom::element::{Builder, Element};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
