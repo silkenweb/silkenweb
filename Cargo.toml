@@ -11,7 +11,7 @@ members = [
     "examples/js-framework-benchmark",
     "crates/silkenweb",
     "crates/ui5",
-    "crates/html",
+    "crates/elements",
     "crates/dom",
     "crates/signals-ext",
 ]
@@ -22,7 +22,7 @@ lto = true
 opt-level = "z"
 
 [patch.crates-io]
-silkenweb-html = { path = "crates/html" }
+silkenweb-elements = { path = "crates/elements" }
 silkenweb-dom = { path = "crates/dom" }
 silkenweb-signals-ext = { path = "crates/signals-ext" }
 silkenweb = { path = "crates/silkenweb" }

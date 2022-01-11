@@ -13,7 +13,7 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [dependencies]
-silkenweb-html = "0.1.1"
+silkenweb-elements = "0.1.1"
 silkenweb-dom = "0.1.1"
 silkenweb-signals-ext = "0.0.0"
 futures-signals = "0.3"

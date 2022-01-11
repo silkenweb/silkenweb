@@ -1,9 +1,9 @@
 [package]
-name = "silkenweb-html"
+name = "silkenweb-elements"
 version = "0.1.1"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
-description = "Silkenweb HTML types"
+description = "Silkenweb HTML and SVG types"
 readme = "../../README.md"
 homepage = "https://github.com/silkenweb/silkenweb"
 repository = "https://github.com/silkenweb/silkenweb"

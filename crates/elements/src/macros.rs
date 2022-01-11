@@ -16,8 +16,8 @@ pub use web_sys;
 /// to underscores when generating rust identifiers. For example:
 ///
 /// ```no_run
-/// # use silkenweb_html::html_element;
-/// use silkenweb_html::CustomEvent;
+/// # use silkenweb_elements::html_element;
+/// use silkenweb_elements::CustomEvent;
 ///
 /// // The types of the dom element and event carry through to the event handler.
 /// html_element!(my-html-element<web_sys::HtmlDivElement> {
