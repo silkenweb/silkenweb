@@ -5,7 +5,8 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use silkenweb::{
-    dom::{clone, element::ElementBuilder},
+    clone,
+    dom::element::ElementBuilder,
     elements::{
         html::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,

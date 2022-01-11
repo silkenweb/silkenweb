@@ -22,12 +22,18 @@
 //! [router]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 //! [animation]: https://github.com/silkenweb/silkenweb/tree/main/examples/animation
 //! [todomvc]: https://github.com/silkenweb/silkenweb/tree/main/examples/todomvc
+#[doc(inline)]
 pub use silkenweb_dom as dom;
+#[doc(inline)]
 pub use silkenweb_elements as elements;
+#[doc(inline)]
 pub use silkenweb_signals_ext as signals_ext;
 
 pub mod animation;
 pub mod router;
 pub mod storage;
 
-pub use storage::Storage;
+#[doc(inline)]
+pub use crate::dom::clone;
+#[doc(inline)]
+pub use crate::storage::Storage;

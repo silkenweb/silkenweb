@@ -13,7 +13,8 @@ use rand::{
     Rng, SeedableRng,
 };
 use silkenweb::{
-    dom::{clone, element::ElementBuilder, mount},
+    clone,
+    dom::{element::ElementBuilder, mount},
     elements::{
         html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
         ElementEvents, HtmlElement, ParentBuilder,
