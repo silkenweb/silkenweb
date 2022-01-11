@@ -84,7 +84,7 @@ impl GenericElementBuilder {
             async {}
         });
 
-        self.store_future(updater);
+        self.spawn_future(updater);
 
         self
     }
@@ -113,7 +113,7 @@ impl GenericElementBuilder {
             async {}
         });
 
-        self.store_future(updater);
+        self.spawn_future(updater);
 
         self
     }
@@ -136,7 +136,7 @@ impl GenericElementBuilder {
             async {}
         });
 
-        self.store_future(updater);
+        self.spawn_future(updater);
         self
     }
 
@@ -171,13 +171,11 @@ impl GenericElementBuilder {
             }
         });
 
-        self.store_future(updater);
+        self.spawn_future(updater);
         self
     }
 
-    // TODO: Make this public? It might be useful if we have an expensive to compute
-    // signal that we want to store in a mutable.
-    fn store_future(&mut self, future: impl Future<Output = ()> + 'static) {
+    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
         self.element.futures.push(spawn_cancelable_future(future));
     }
 
@@ -233,7 +231,7 @@ impl GenericElementBuilder {
             async {}
         });
 
-        self.store_future(future);
+        self.spawn_future(future);
 
         self
     }
@@ -279,7 +277,7 @@ impl ElementBuilder for GenericElementBuilder {
             }
         });
 
-        self.store_future(updater);
+        self.spawn_future(updater);
         self
     }
 
