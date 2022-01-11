@@ -58,7 +58,7 @@ impl<T> From<web_sys::CustomEvent> for CustomEvent<T> {
 pub trait ParentBuilder: Sized {
     fn text(self, child: &str) -> Self;
 
-    fn text_signal(self, child: impl 'static + Signal<Item = impl Into<String>>) -> Self;
+    fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
 
     fn child<Child>(self, c: Child) -> Self
     where
@@ -76,26 +76,26 @@ pub trait ParentBuilder: Sized {
         self
     }
 
-    fn child_signal(self, child: impl 'static + Signal<Item = impl Into<Element>>) -> Self;
+    fn child_signal(self, child: impl Signal<Item = impl Into<Element>> + 'static) -> Self;
 
-    fn children_signal(self, children: impl 'static + SignalVec<Item = impl Into<Element>>)
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Element>> + 'static)
         -> Self;
 
     fn optional_child_signal(
         self,
-        child: impl 'static + Signal<Item = Option<impl Into<Element>>>,
+        child: impl Signal<Item = Option<impl Into<Element>>> + 'static,
     ) -> Self;
 }
 
 /// Methods to add effects. These are in a trait to allow attribute methods to
 /// be disambiguated.
 pub trait Effects<DomType> {
-    fn effect(self, f: impl 'static + FnOnce(&DomType)) -> Self;
+    fn effect(self, f: impl FnOnce(&DomType) + 'static) -> Self;
 
     fn effect_signal<T: 'static>(
         self,
-        sig: impl 'static + Signal<Item = T>,
-        f: impl 'static + Clone + Fn(&DomType, T),
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Fn(&DomType, T) + Clone + 'static,
     ) -> Self;
 }
 

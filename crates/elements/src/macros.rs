@@ -169,14 +169,14 @@ macro_rules! dom_element {
         }
 
         impl $crate::Effects<$elem_type> for $camel_builder_name {
-            fn effect(self, f: impl 'static + ::std::ops::FnOnce(&$elem_type)) -> Self {
+            fn effect(self, f: impl ::std::ops::FnOnce(&$elem_type) + 'static) -> Self {
                 Self{ builder: self.builder.effect(f) }
             }
 
             fn effect_signal<T: 'static>(
                 self,
-                sig: impl 'static + $crate::macros::Signal<Item = T>,
-                f: impl 'static + Clone + Fn(&$elem_type, T),
+                sig: impl $crate::macros::Signal<Item = T> + 'static,
+                f: impl Fn(&$elem_type, T) + Clone + 'static,
             ) -> Self {
                 Self{ builder: self.builder.effect_signal(sig, f) }
             }
@@ -189,7 +189,7 @@ macro_rules! dom_element {
                 Self{ builder: self.builder.attribute(name, value) }
             }
 
-            fn attribute_signal<T: 'static + $crate::macros::Attribute>(
+            fn attribute_signal<T: $crate::macros::Attribute + 'static>(
                 self,
                 name: &str,
                 value: impl $crate::macros::Signal<Item = T> + 'static,
@@ -200,7 +200,7 @@ macro_rules! dom_element {
             fn on(
                 self,
                 name: &'static str,
-                f: impl 'static + FnMut($crate::macros::JsValue)
+                f: impl FnMut($crate::macros::JsValue) + 'static
             ) -> Self {
                 Self{ builder: $crate::macros::ElementBuilder::on(self.builder, name, f) }
             }
@@ -272,7 +272,7 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text(child) }
             }
 
-            fn text_signal(self, child: impl 'static + $crate::macros::Signal<Item = impl Into<String>>) -> Self {
+            fn text_signal(self, child: impl $crate::macros::Signal<Item = impl Into<String>> + 'static) -> Self {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
@@ -283,20 +283,20 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.child(c) }
             }
 
-            fn child_signal(self, child: impl 'static + $crate::macros::Signal<Item = impl Into<$crate::macros::Element>>) -> Self {
+            fn child_signal(self, child: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Element>> + 'static) -> Self {
                 Self{ builder: self.builder.child_signal(child) }
             }
 
             fn children_signal(
                 self,
-                children: impl 'static + $crate::macros::SignalVec<Item = impl Into<$crate::macros::Element>>,
+                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::macros::Element>> + 'static,
             ) -> Self {
                 Self{ builder: self.builder.children_signal(children) }
             }
 
             fn optional_child_signal(
                 self,
-                child: impl 'static + $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Element>>>
+                child: impl $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Element>>> + 'static
             ) -> Self {
                 Self{ builder: self.builder.optional_child_signal(child) }
             }
@@ -313,7 +313,7 @@ macro_rules! events {
         $(
             $visiblity fn [<on_ $name $(_ $name_tail)* >] (
                 self,
-                mut f: impl 'static + FnMut($event_type, $elem_type)
+                mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
                 $crate::macros::ElementBuilder::on(
                     self,
@@ -344,7 +344,7 @@ macro_rules! custom_events {
         $(
             pub fn [<on_ $name $(_ $name_tail)* >] (
                 self,
-                mut f: impl 'static + FnMut($event_type, $elem_type)
+                mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
                 $crate::macros::ElementBuilder::on(
                     self,

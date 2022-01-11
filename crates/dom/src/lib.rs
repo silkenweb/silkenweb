@@ -60,7 +60,7 @@ pub fn tag_in_namespace(namespace: &str, name: &str) -> GenericElementBuilder {
 }
 
 fn spawn_cancelable_future(
-    future: impl 'static + Future<Output = ()>,
+    future: impl Future<Output = ()> + 'static,
 ) -> DiscardOnDrop<CancelableFutureHandle> {
     let (handle, cancelable_future) = cancelable_future(future, || ());
 

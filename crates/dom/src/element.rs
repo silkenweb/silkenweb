@@ -68,7 +68,7 @@ impl GenericElementBuilder {
 
     pub fn child_signal(
         mut self,
-        child_signal: impl 'static + Signal<Item = impl Into<Element>>,
+        child_signal: impl Signal<Item = impl Into<Element>> + 'static,
     ) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
         let children = self.child_groups.clone();
@@ -91,7 +91,7 @@ impl GenericElementBuilder {
 
     pub fn optional_child_signal(
         mut self,
-        child_signal: impl 'static + Signal<Item = Option<impl Into<Element>>>,
+        child_signal: impl Signal<Item = Option<impl Into<Element>>> + 'static,
     ) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
         let children = self.child_groups.clone();
@@ -122,7 +122,7 @@ impl GenericElementBuilder {
     // TODO: tests
     pub fn children_signal(
         mut self,
-        children: impl 'static + SignalVec<Item = impl Into<Element>>,
+        children: impl SignalVec<Item = impl Into<Element>> + 'static,
     ) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
         let child_vec = ChildVec::new(
@@ -151,7 +151,7 @@ impl GenericElementBuilder {
 
     pub fn text_signal(
         mut self,
-        child_signal: impl 'static + Signal<Item = impl Into<String>>,
+        child_signal: impl Signal<Item = impl Into<String>> + 'static,
     ) -> Self {
         let text_node = document::create_text_node(intern(""));
         self.child_groups
@@ -177,7 +177,7 @@ impl GenericElementBuilder {
 
     // TODO: Make this public? It might be useful if we have an expensive to compute
     // signal that we want to store in a mutable.
-    fn store_future(&mut self, future: impl 'static + Future<Output = ()>) {
+    fn store_future(&mut self, future: impl Future<Output = ()> + 'static) {
         self.element.futures.push(spawn_cancelable_future(future));
     }
 
@@ -208,7 +208,7 @@ impl GenericElementBuilder {
     ///     move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden),
     /// );
     /// ```
-    pub fn effect<DomType: 'static + JsCast>(self, f: impl 'static + FnOnce(&DomType)) -> Self {
+    pub fn effect<DomType: JsCast + 'static>(self, f: impl FnOnce(&DomType) + 'static) -> Self {
         let dom_element = self.dom_element().clone().dyn_into().unwrap_throw();
         after_render(move || f(&dom_element));
 
@@ -218,12 +218,12 @@ impl GenericElementBuilder {
     // TODO: Test
     pub fn effect_signal<T, DomType>(
         mut self,
-        sig: impl 'static + Signal<Item = T>,
-        f: impl 'static + Clone + Fn(&DomType, T),
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Clone + Fn(&DomType, T) + 'static,
     ) -> Self
     where
         T: 'static,
-        DomType: 'static + Clone + JsCast,
+        DomType: Clone + JsCast + 'static,
     {
         let dom_element: DomType = self.dom_element().clone().dyn_into().unwrap_throw();
 
@@ -259,7 +259,7 @@ impl ElementBuilder for GenericElementBuilder {
         self
     }
 
-    fn attribute_signal<T: 'static + Attribute>(
+    fn attribute_signal<T: Attribute + 'static>(
         mut self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
@@ -283,7 +283,7 @@ impl ElementBuilder for GenericElementBuilder {
         self
     }
 
-    fn on(mut self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+    fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
         {
             let dom_element = self.element.dom_element.clone();
             self.element
@@ -328,7 +328,7 @@ pub trait ElementBuilder: Sized {
 
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
 
-    fn attribute_signal<T: 'static + Attribute>(
+    fn attribute_signal<T: Attribute + 'static>(
         self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
@@ -342,7 +342,7 @@ pub trait ElementBuilder: Sized {
     /// javascript `Event` object.
     ///
     /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
-    fn on(self, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self;
+    fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
 
     fn build(self) -> Self::Target;
 

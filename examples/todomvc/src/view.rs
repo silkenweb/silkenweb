@@ -27,7 +27,7 @@ pub struct TodoAppView {
 }
 
 impl TodoAppView {
-    pub fn render(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Section {
+    pub fn render(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {
         let app = &self.app;
         let input_elem = input()
             .class(["new-todo"])
@@ -62,7 +62,7 @@ impl TodoAppView {
 
     fn render_main(
         &self,
-        item_filter: impl 'static + Signal<Item = Filter>,
+        item_filter: impl Signal<Item = Filter> + 'static,
     ) -> impl Signal<Item = Option<Section>> {
         let app_view = self.clone();
         // TODO: Store this in a mutable, rather than using a Broadcaster? Where to run
@@ -103,7 +103,7 @@ impl TodoAppView {
 
     fn render_footer(
         &self,
-        item_filter: impl 'static + Signal<Item = Filter>,
+        item_filter: impl Signal<Item = Filter> + 'static,
     ) -> impl Signal<Item = Option<Footer>> {
         let app_view = self.clone();
         let item_filter = Broadcaster::new(item_filter);
@@ -135,7 +135,7 @@ impl TodoAppView {
     fn render_filter_link(
         &self,
         filter: Filter,
-        item_filter: impl 'static + Signal<Item = Filter>,
+        item_filter: impl Signal<Item = Filter> + 'static,
         seperator: &str,
     ) -> LiBuilder {
         let filter_name = format!("{}", filter);
@@ -148,7 +148,7 @@ impl TodoAppView {
         .text(seperator)
     }
 
-    fn render_filters(&self, item_filter: impl 'static + Signal<Item = Filter>) -> Ul {
+    fn render_filters(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Ul {
         let item_filter = Broadcaster::new(item_filter);
         ul().class(["filters"])
             .children([

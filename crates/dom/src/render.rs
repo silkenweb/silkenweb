@@ -7,12 +7,12 @@ use wasm_bindgen_futures::JsFuture;
 
 use crate::global::window;
 
-pub(super) fn queue_update(f: impl 'static + FnOnce()) {
+pub(super) fn queue_update(f: impl FnOnce() + 'static) {
     RENDER.with(|r| r.queue_update(f));
 }
 
 /// Run a closure after the next render.
-pub fn after_render(f: impl 'static + FnOnce()) {
+pub fn after_render(f: impl FnOnce() + 'static) {
     RENDER.with(|r| r.after_render(f));
 }
 
@@ -63,12 +63,12 @@ impl Render {
         self.render_updates();
     }
 
-    fn queue_update(&self, x: impl 'static + FnOnce()) {
+    fn queue_update(&self, x: impl FnOnce() + 'static) {
         self.pending_updates.borrow_mut().push(Box::new(x));
         self.request_render();
     }
 
-    fn after_render(&self, x: impl 'static + FnOnce()) {
+    fn after_render(&self, x: impl FnOnce() + 'static) {
         self.pending_effects.borrow_mut().push(Box::new(x));
         self.request_render();
     }

@@ -11,7 +11,7 @@ use silkenweb_dom::render::{animation_timestamp, request_render};
 /// The signal will tick each frame until it is dropped.
 ///
 /// See [module-level documentation](self) for more details.
-pub fn infinite_animation() -> impl 'static + Signal<Item = f64> {
+pub fn infinite_animation() -> impl Signal<Item = f64> + 'static {
     animation_timestamp()
         .map(|time| {
             request_render();
@@ -27,7 +27,7 @@ pub fn infinite_animation() -> impl 'static + Signal<Item = f64> {
 /// `None`, unless the signal is dropped first.
 ///
 /// See [module-level documentation](self) for more details.
-pub fn finite_animation(duration_millis: f64) -> impl 'static + Signal<Item = Option<f64>> {
+pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>> + 'static {
     animation_timestamp()
         .map(move |time| {
             if time < duration_millis {

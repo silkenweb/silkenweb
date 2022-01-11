@@ -13,7 +13,7 @@ use wasm_bindgen::UnwrapThrowExt;
 const WIDTH: f32 = 600.0;
 const HEIGHT: f32 = 300.0;
 
-fn path(time: impl 'static + Signal<Item = f64>, humps: usize, speed: f64) -> svg::Path {
+fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> svg::Path {
     let path = time.map(move |time| {
         let multiplier = (time / speed).sin().to_f32().unwrap_throw();
         let control_point = 150.0 * multiplier + 150.0;

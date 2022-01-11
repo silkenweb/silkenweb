@@ -72,7 +72,7 @@ impl TodoApp {
         self.save();
     }
 
-    pub fn items_signal(&self) -> impl 'static + SignalVec<Item = Rc<TodoItem>> {
+    pub fn items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> + 'static {
         self.items.signal_vec_cloned()
     }
 }

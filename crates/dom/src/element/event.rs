@@ -10,7 +10,7 @@ impl EventCallback {
     pub fn new(
         target: web_sys::Element,
         name: &'static str,
-        f: impl 'static + FnMut(JsValue),
+        f: impl FnMut(JsValue) + 'static,
     ) -> Self {
         let callback = Closure::wrap(Box::new(f) as Box<dyn FnMut(JsValue)>);
         target
