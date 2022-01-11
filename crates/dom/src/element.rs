@@ -26,14 +26,14 @@ mod dom_children;
 mod event;
 
 /// Build an HTML element.
-pub struct ElementBuilder {
+pub struct GenericElementBuilder {
     element: Element,
     child_groups: Rc<RefCell<ChildGroups>>,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
 
-impl ElementBuilder {
+impl GenericElementBuilder {
     pub fn new(tag: &str) -> Self {
         Self::new_element(document::create_element(intern(tag)))
     }
@@ -250,7 +250,7 @@ impl ElementBuilder {
     }
 }
 
-impl Builder for ElementBuilder {
+impl Builder for GenericElementBuilder {
     type Target = Element;
 
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
@@ -307,8 +307,8 @@ impl Builder for ElementBuilder {
     }
 }
 
-impl From<ElementBuilder> for Element {
-    fn from(builder: ElementBuilder) -> Self {
+impl From<GenericElementBuilder> for Element {
+    fn from(builder: GenericElementBuilder) -> Self {
         builder.build()
     }
 }

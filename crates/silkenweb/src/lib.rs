@@ -28,7 +28,7 @@
 pub use silkenweb_dom::{
     attribute::{Attribute, AttributeValue},
     clone,
-    element::{Builder, Element, ElementBuilder},
+    element::{Builder, Element, GenericElementBuilder},
     mount, render,
     storage::Storage,
     tag, tag_in_namespace, unmount,
