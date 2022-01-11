@@ -272,7 +272,10 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text(child) }
             }
 
-            fn text_signal(self, child: impl $crate::macros::Signal<Item = impl Into<String>> + 'static) -> Self {
+            fn text_signal(
+                self,
+                child: impl $crate::macros::Signal<Item = impl Into<String>> + 'static
+            ) -> Self {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
@@ -283,7 +286,10 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.child(c) }
             }
 
-            fn child_signal(self, child: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Element>> + 'static) -> Self {
+            fn child_signal(
+                self,
+                child: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Element>> + 'static
+            ) -> Self {
                 Self{ builder: self.builder.child_signal(child) }
             }
 
@@ -387,7 +393,10 @@ macro_rules! attributes {
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
             #[allow(clippy::wrong_self_convention)]
             #[allow(non_snake_case)]
-            $visibility fn [< $attr _signal >]<T>(self, value: impl $crate::macros::Signal<Item = T> + 'static) -> Self
+            $visibility fn [< $attr _signal >]<T>(
+                self,
+                value: impl $crate::macros::Signal<Item = T> + 'static
+            ) -> Self
             where
                 T: $crate::macros::AsAttribute<$typ> + 'static
             {
