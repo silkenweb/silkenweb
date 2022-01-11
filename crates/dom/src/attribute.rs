@@ -1,5 +1,4 @@
 use wasm_bindgen::{intern, UnwrapThrowExt};
-use web_sys as dom;
 
 pub trait AttributeValue {
     fn text(self) -> String;
@@ -29,13 +28,13 @@ impl AttributeValue for String {
 
 /// A non-reactive attribute.
 pub trait Attribute {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element);
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element);
 }
 
 pub trait AsAttribute<T>: Attribute {}
 
 impl<T: AttributeValue> Attribute for T {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element
             .set_attribute(intern(name), &self.text())
             .unwrap_throw();
@@ -45,7 +44,7 @@ impl<T: AttributeValue> Attribute for T {
 impl<T: AttributeValue> AsAttribute<T> for T {}
 
 impl<T: Attribute> Attribute for Option<T> {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         let name = intern(name);
 
         if let Some(value) = self {
@@ -59,7 +58,7 @@ impl<T: Attribute> Attribute for Option<T> {
 impl<U: Attribute, T: AsAttribute<U>> AsAttribute<U> for Option<T> {}
 
 impl Attribute for bool {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         let name = intern(name);
 
         if self {
@@ -73,7 +72,7 @@ impl Attribute for bool {
 impl AsAttribute<bool> for bool {}
 
 impl<'a> Attribute for &'a str {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element.set_attribute(intern(name), self).unwrap_throw();
     }
 }
@@ -81,7 +80,7 @@ impl<'a> Attribute for &'a str {
 impl<'a> AsAttribute<String> for &'a str {}
 
 impl<'a> Attribute for &'a String {
-    fn set_attribute(self, name: &str, dom_element: &dom::Element) {
+    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element.set_attribute(intern(name), self).unwrap_throw();
     }
 }

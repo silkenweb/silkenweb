@@ -1,9 +1,8 @@
 use silkenweb::{html_element, ElementBuilder};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
-use web_sys as dom;
 
 html_element!(
-    ui5-side-navigation<dom::HtmlElement> {
+    ui5-side-navigation<web_sys::HtmlElement> {
         attributes {
             collapsed: bool,
         }
@@ -34,7 +33,7 @@ impl Ui5SideNavigationBuilder {
 }
 
 html_element!(
-    ui5-side-navigation-item<dom::HtmlElement> {
+    ui5-side-navigation-item<web_sys::HtmlElement> {
         attributes {
             expanded: bool,
             // TODO: enum for icons
@@ -55,7 +54,7 @@ impl Ui5SideNavigationItemBuilder {
 }
 
 html_element!(
-    ui5-side-navigation-sub-item<dom::HtmlElement> {
+    ui5-side-navigation-sub-item<web_sys::HtmlElement> {
         attributes {
             expanded: bool,
             // TODO: enum for icons
@@ -67,15 +66,15 @@ html_element!(
 );
 
 pub struct SelectionChanged {
-    event: dom::CustomEvent,
+    event: web_sys::CustomEvent,
 }
 
 impl SelectionChanged {
-    pub fn event(&self) -> &dom::CustomEvent {
+    pub fn event(&self) -> &web_sys::CustomEvent {
         &self.event
     }
 
-    pub fn item(&self) -> dom::HtmlElement {
+    pub fn item(&self) -> web_sys::HtmlElement {
         self.event
             .detail()
             .unchecked_into::<Item>()
@@ -85,8 +84,8 @@ impl SelectionChanged {
     }
 }
 
-impl From<dom::CustomEvent> for SelectionChanged {
-    fn from(event: dom::CustomEvent) -> Self {
+impl From<web_sys::CustomEvent> for SelectionChanged {
+    fn from(event: web_sys::CustomEvent) -> Self {
         Self { event }
     }
 }

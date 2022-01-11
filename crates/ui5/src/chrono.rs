@@ -1,10 +1,9 @@
 use parse_display::Display;
 use silkenweb::{html_element, AttributeValue, ElementBuilder};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
-use web_sys as dom;
 
 html_element!(
-    ui5-calendar<dom::HtmlElement> {
+    ui5-calendar<web_sys::HtmlElement> {
         attributes {
             hide-week-numbers: bool,
             selection-mode: SelectionMode,
@@ -21,7 +20,7 @@ html_element!(
 );
 
 html_element!(
-    ui5-date<dom::HtmlElement> {
+    ui5-date<web_sys::HtmlElement> {
         attributes {
             value: String,
         }
@@ -65,11 +64,11 @@ impl AttributeValue for PrimaryCalendarType {
 }
 
 pub struct SelectedDatesChange {
-    event: dom::CustomEvent,
+    event: web_sys::CustomEvent,
 }
 
 impl SelectedDatesChange {
-    pub fn event(&self) -> &dom::CustomEvent {
+    pub fn event(&self) -> &web_sys::CustomEvent {
         &self.event
     }
 
@@ -84,8 +83,8 @@ impl SelectedDatesChange {
     }
 }
 
-impl From<dom::CustomEvent> for SelectedDatesChange {
-    fn from(event: dom::CustomEvent) -> Self {
+impl From<web_sys::CustomEvent> for SelectedDatesChange {
+    fn from(event: web_sys::CustomEvent) -> Self {
         Self { event }
     }
 }

@@ -6,7 +6,7 @@ pub use silkenweb_dom::{
     tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
-pub use web_sys as dom;
+pub use web_sys;
 
 /// Define an html element.
 ///
@@ -18,27 +18,26 @@ pub use web_sys as dom;
 /// ```no_run
 /// # use silkenweb_html::html_element;
 /// use silkenweb_html::CustomEvent;
-/// use web_sys as dom;
 ///
 /// // The types of the dom element and event carry through to the event handler.
-/// html_element!(my-html-element<dom::HtmlDivElement> {
+/// html_element!(my-html-element<web_sys::HtmlDivElement> {
 ///     attributes {
 ///         my-attribute: String
 ///     }
 ///
 ///     events {
-///         my-event: dom::MouseEvent
+///         my-event: web_sys::MouseEvent
 ///     }
 ///
 ///     custom_events {
-///         my-custom-event: CustomEvent<dom::HtmlElement>,
+///         my-custom-event: CustomEvent<web_sys::HtmlElement>,
 ///     }
 /// });
 ///
 /// let elem = my_html_element()
 ///     .my_attribute("attribute-value")
-///     .on_my_event(|event: dom::MouseEvent, target: dom::HtmlDivElement| {})
-///     .on_my_custom_event(|event: CustomEvent<dom::HtmlElement>, target: dom::HtmlDivElement| {});
+///     .on_my_event(|event: web_sys::MouseEvent, target: web_sys::HtmlDivElement| {})
+///     .on_my_custom_event(|event: CustomEvent<web_sys::HtmlElement>, target: web_sys::HtmlDivElement| {});
 /// ```
 #[macro_export]
 macro_rules! html_element {
@@ -353,7 +352,7 @@ macro_rules! custom_events {
                     move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* it's safe to assume event and event.current_target aren't null
-                        let event: $crate::macros::dom::CustomEvent =
+                        let event: $crate::macros::web_sys::CustomEvent =
                             js_ev.unchecked_into();
                         let target: $elem_type =
                             $crate::macros::UnwrapThrowExt::unwrap_throw(

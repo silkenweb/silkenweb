@@ -2,7 +2,6 @@ use std::{cell::RefCell, mem, rc::Rc};
 
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
-use web_sys as dom;
 
 use super::{
     child_groups::ChildGroups,
@@ -12,7 +11,7 @@ use super::{
 use crate::{element::dom_children::insert_child_before, render::queue_update};
 
 pub struct ChildVec {
-    parent: dom::Element,
+    parent: web_sys::Element,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
@@ -20,7 +19,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: dom::Element,
+        parent: web_sys::Element,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
@@ -192,7 +191,7 @@ impl ChildVec {
         }
     }
 
-    fn child_dom_elements(&self) -> Vec<dom::Element> {
+    fn child_dom_elements(&self) -> Vec<web_sys::Element> {
         self.children
             .iter()
             .map(|elem| &elem.dom_element)

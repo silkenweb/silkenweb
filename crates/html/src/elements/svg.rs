@@ -1,8 +1,6 @@
-use web_sys as dom;
-
 // TODO: Add all svg elements
 svg_element!(
-    svg <dom::SvgsvgElement> {
+    svg <web_sys::SvgsvgElement> {
         // TODO: Add all attributes
         attributes {
             width: String,
@@ -16,7 +14,7 @@ svg_element!(
 parent_element!(svg);
 
 svg_element!(
-    path <dom::SvgPathElement> {
+    path <web_sys::SvgPathElement> {
         // TODO: Add all attributes
         attributes {
             d: String,

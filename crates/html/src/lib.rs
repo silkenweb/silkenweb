@@ -6,10 +6,9 @@
 //!
 //! ```no_run
 //! # use silkenweb_html::{elements::{a, A, ABuilder}, ElementEvents};
-//! use web_sys as dom;
 //! let link: ABuilder = a()
 //!     .href("https://example.com/")
-//!     .on_click(|event: dom::MouseEvent, link: dom::HtmlAnchorElement| {});
+//!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
 //! ```
 
 use std::marker::PhantomData;
@@ -21,7 +20,6 @@ use futures_signals::{
 use paste::paste;
 use silkenweb_dom::element::{Element, ElementBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys as dom;
 
 #[doc(hidden)]
 #[macro_use]
@@ -30,11 +28,11 @@ pub mod elements;
 
 /// Wrap a [`web_sys::CustomEvent`] and cast detail.
 #[derive(Clone)]
-pub struct CustomEvent<T>(dom::CustomEvent, PhantomData<T>);
+pub struct CustomEvent<T>(web_sys::CustomEvent, PhantomData<T>);
 
 impl<T: JsCast> CustomEvent<T> {
     /// The original event.
-    pub fn event(&self) -> &dom::CustomEvent {
+    pub fn event(&self) -> &web_sys::CustomEvent {
         &self.0
     }
 
@@ -48,8 +46,8 @@ impl<T: JsCast> CustomEvent<T> {
     }
 }
 
-impl<T> From<dom::CustomEvent> for CustomEvent<T> {
-    fn from(src: dom::CustomEvent) -> Self {
+impl<T> From<web_sys::CustomEvent> for CustomEvent<T> {
+    fn from(src: web_sys::CustomEvent) -> Self {
         Self(src, PhantomData)
     }
 }
@@ -308,23 +306,23 @@ pub trait HtmlElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 
     events!(Self::EventTarget {
-        animationend: dom::AnimationEvent,
-        animationiteration: dom::AnimationEvent,
-        animationstart: dom::AnimationEvent,
-        beforeinput: dom::InputEvent,
-        change: dom::Event,
-        gotpointercapture: dom::PointerEvent,
-        input: dom::InputEvent,
-        lostpointercapture: dom::PointerEvent,
-        pointercancel: dom::PointerEvent,
-        pointerdown: dom::PointerEvent,
-        pointerenter: dom::PointerEvent,
-        pointerleave: dom::PointerEvent,
-        pointermove: dom::PointerEvent,
-        pointerout: dom::PointerEvent,
-        pointerover: dom::PointerEvent,
-        pointerup: dom::PointerEvent,
-        transitionend: dom::TransitionEvent,
+        animationend: web_sys::AnimationEvent,
+        animationiteration: web_sys::AnimationEvent,
+        animationstart: web_sys::AnimationEvent,
+        beforeinput: web_sys::InputEvent,
+        change: web_sys::Event,
+        gotpointercapture: web_sys::PointerEvent,
+        input: web_sys::InputEvent,
+        lostpointercapture: web_sys::PointerEvent,
+        pointercancel: web_sys::PointerEvent,
+        pointerdown: web_sys::PointerEvent,
+        pointerenter: web_sys::PointerEvent,
+        pointerleave: web_sys::PointerEvent,
+        pointermove: web_sys::PointerEvent,
+        pointerout: web_sys::PointerEvent,
+        pointerover: web_sys::PointerEvent,
+        pointerup: web_sys::PointerEvent,
+        transitionend: web_sys::TransitionEvent,
     });
 }
 
@@ -332,40 +330,40 @@ pub trait ElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 
     events!(Self::EventTarget {
-        auxclick: dom::MouseEvent,
-        blur: dom::FocusEvent,
-        click: dom::MouseEvent,
-        compositionend: dom::CompositionEvent,
-        compositionstart: dom::CompositionEvent,
-        compositionupdate: dom::CompositionEvent,
-        contextmenu: dom::MouseEvent,
-        dblclick: dom::MouseEvent,
-        error: dom::Event,
-        focusin: dom::FocusEvent,
-        focusout: dom::FocusEvent,
-        focus: dom::FocusEvent,
-        fullscreenchange: dom::Event,
-        fullscreenerror: dom::Event,
-        keydown: dom::KeyboardEvent,
-        keyup: dom::KeyboardEvent,
-        mousedown: dom::MouseEvent,
-        mouseenter: dom::MouseEvent,
-        mouseleave: dom::MouseEvent,
-        mousemove: dom::MouseEvent,
-        mouseout: dom::MouseEvent,
-        mouseover: dom::MouseEvent,
-        mouseup: dom::MouseEvent,
-        scroll: dom::Event,
-        select: dom::Event,
-        touchcancel: dom::TouchEvent,
-        touchend: dom::TouchEvent,
-        touchmove: dom::TouchEvent,
-        touchstart: dom::TouchEvent,
-        wheel: dom::WheelEvent,
+        auxclick: web_sys::MouseEvent,
+        blur: web_sys::FocusEvent,
+        click: web_sys::MouseEvent,
+        compositionend: web_sys::CompositionEvent,
+        compositionstart: web_sys::CompositionEvent,
+        compositionupdate: web_sys::CompositionEvent,
+        contextmenu: web_sys::MouseEvent,
+        dblclick: web_sys::MouseEvent,
+        error: web_sys::Event,
+        focusin: web_sys::FocusEvent,
+        focusout: web_sys::FocusEvent,
+        focus: web_sys::FocusEvent,
+        fullscreenchange: web_sys::Event,
+        fullscreenerror: web_sys::Event,
+        keydown: web_sys::KeyboardEvent,
+        keyup: web_sys::KeyboardEvent,
+        mousedown: web_sys::MouseEvent,
+        mouseenter: web_sys::MouseEvent,
+        mouseleave: web_sys::MouseEvent,
+        mousemove: web_sys::MouseEvent,
+        mouseout: web_sys::MouseEvent,
+        mouseover: web_sys::MouseEvent,
+        mouseup: web_sys::MouseEvent,
+        scroll: web_sys::Event,
+        select: web_sys::Event,
+        touchcancel: web_sys::TouchEvent,
+        touchend: web_sys::TouchEvent,
+        touchmove: web_sys::TouchEvent,
+        touchstart: web_sys::TouchEvent,
+        wheel: web_sys::WheelEvent,
         /* The events are currently marked as unstable in web_sys:
          *
-         * copy: $crate::macros::private::dom::ClipboardEvent,
-         * cut: $crate::macros::private::dom::ClipboardEvent,
-         * paste: $crate::macros::private::dom::ClipboardEvent, */
+         * copy: $crate::macros::private::web_sys::ClipboardEvent,
+         * cut: $crate::macros::private::web_sys::ClipboardEvent,
+         * paste: $crate::macros::private::web_sys::ClipboardEvent, */
     });
 }

@@ -1,5 +1,4 @@
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
-use web_sys as dom;
 
 use crate::global::window;
 
@@ -9,7 +8,7 @@ macro_rules! unexpected_exception {
     };
 }
 
-pub struct Storage(dom::Storage);
+pub struct Storage(web_sys::Storage);
 
 impl Storage {
     /// Get the window's local storage.
@@ -100,7 +99,7 @@ impl Storage {
 }
 
 struct StorageIter {
-    container: dom::Storage,
+    container: web_sys::Storage,
     index: u32,
 }
 

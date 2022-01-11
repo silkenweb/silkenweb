@@ -9,7 +9,6 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
-use web_sys as dom;
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
@@ -42,7 +41,7 @@ impl GenericElementBuilder {
         Self::new_element(document::create_element_ns(intern(namespace), intern(tag)))
     }
 
-    fn new_element(dom_element: dom::Element) -> Self {
+    fn new_element(dom_element: web_sys::Element) -> Self {
         Self {
             element: Element {
                 dom_element: dom_element.clone(),
@@ -245,7 +244,7 @@ impl GenericElementBuilder {
         let _ = name;
     }
 
-    fn dom_element(&self) -> &dom::Element {
+    fn dom_element(&self) -> &web_sys::Element {
         &self.element.dom_element
     }
 }
@@ -318,7 +317,7 @@ impl From<GenericElementBuilder> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 pub struct Element {
-    pub(super) dom_element: dom::Element,
+    pub(super) dom_element: web_sys::Element,
     event_callbacks: Vec<EventCallback>,
     futures: Vec<SignalHandle>,
 }

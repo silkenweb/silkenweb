@@ -1,14 +1,17 @@
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
-use web_sys as dom;
 
 pub struct EventCallback {
-    target: dom::Element,
+    target: web_sys::Element,
     name: &'static str,
     callback: Closure<dyn FnMut(JsValue)>,
 }
 
 impl EventCallback {
-    pub fn new(target: dom::Element, name: &'static str, f: impl 'static + FnMut(JsValue)) -> Self {
+    pub fn new(
+        target: web_sys::Element,
+        name: &'static str,
+        f: impl 'static + FnMut(JsValue),
+    ) -> Self {
         let callback = Closure::wrap(Box::new(f) as Box<dyn FnMut(JsValue)>);
         target
             .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())

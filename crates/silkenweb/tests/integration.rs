@@ -8,7 +8,6 @@ use silkenweb::{
 use silkenweb_html::{HtmlElement, ParentBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
-use web_sys as dom;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -155,7 +154,7 @@ async fn create_app_container(app_id: &str) {
     body.append_child(&app_container).unwrap_throw();
 }
 
-fn query_element(id: &str) -> dom::HtmlElement {
+fn query_element(id: &str) -> web_sys::HtmlElement {
     document()
         .query_selector(&format!("#{}", id))
         .unwrap_throw()
@@ -168,8 +167,8 @@ fn app_html() -> String {
     query_element(APP_ID).inner_html()
 }
 
-fn document() -> dom::Document {
-    dom::window().unwrap_throw().document().unwrap_throw()
+fn document() -> web_sys::Document {
+    web_sys::window().unwrap_throw().document().unwrap_throw()
 }
 
 const APP_ID: &str = "app";

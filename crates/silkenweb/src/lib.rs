@@ -34,7 +34,7 @@ pub use silkenweb_dom::{
     tag, tag_in_namespace, unmount,
 };
 pub use silkenweb_html::{
-    parent_element, elements, html_element, CustomEvent, Effects, ElementEvents, HtmlElement,
+    elements, html_element, parent_element, CustomEvent, Effects, ElementEvents, HtmlElement,
     HtmlElementEvents, ParentBuilder,
 };
 pub use silkenweb_signals_ext::SignalProduct;

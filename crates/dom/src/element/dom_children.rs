@@ -1,9 +1,9 @@
 use wasm_bindgen::UnwrapThrowExt;
-use web_sys as dom;
+use web_sys::Node;
 
 use crate::{clone, render::queue_update};
 
-pub fn insert_child_before(parent: &dom::Node, new_child: &dom::Node, next_child: &dom::Node) {
+pub fn insert_child_before(parent: &Node, new_child: &Node, next_child: &Node) {
     clone!(parent, new_child, next_child);
 
     queue_update(move || {
@@ -13,7 +13,7 @@ pub fn insert_child_before(parent: &dom::Node, new_child: &dom::Node, next_child
     });
 }
 
-pub fn append_child(parent: &dom::Node, child: &dom::Node) {
+pub fn append_child(parent: &Node, child: &Node) {
     clone!(parent, child);
 
     queue_update(move || {
@@ -21,7 +21,7 @@ pub fn append_child(parent: &dom::Node, child: &dom::Node) {
     });
 }
 
-pub fn replace_child(parent: &dom::Node, new_child: &dom::Node, old_child: &dom::Node) {
+pub fn replace_child(parent: &Node, new_child: &Node, old_child: &Node) {
     clone!(parent, new_child, old_child);
 
     queue_update(move || {
@@ -29,7 +29,7 @@ pub fn replace_child(parent: &dom::Node, new_child: &dom::Node, old_child: &dom:
     });
 }
 
-pub fn remove_child(parent: &dom::Node, child: &dom::Node) {
+pub fn remove_child(parent: &Node, child: &Node) {
     clone!(parent, child);
 
     queue_update(move || {
