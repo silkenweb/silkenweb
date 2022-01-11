@@ -13,9 +13,11 @@ use rand::{
     Rng, SeedableRng,
 };
 use silkenweb::{
-    clone,
-    html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
-    mount, ElementBuilder, ElementEvents, HtmlElement, ParentBuilder,
+    dom::{clone, element::ElementBuilder, mount},
+    elements::{
+        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
+        ElementEvents, HtmlElement, ParentBuilder,
+    },
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 

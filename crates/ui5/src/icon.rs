@@ -1,4 +1,4 @@
-use silkenweb::html_element;
+use silkenweb::elements::html_element;
 
 html_element!(
     ui5-icon<web_sys::HtmlElement> {

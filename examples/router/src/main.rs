@@ -1,7 +1,11 @@
 //! A minimal routing example
 use silkenweb::{
-    html::{button, div, p},
-    mount, router, ElementEvents, ParentBuilder,
+    dom::mount,
+    elements::{
+        html::{button, div, p},
+        ElementEvents, ParentBuilder,
+    },
+    router,
 };
 
 fn main() {

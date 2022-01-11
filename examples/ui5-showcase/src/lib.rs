@@ -1,6 +1,12 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
-use silkenweb::{html::div, mount, Element, ElementBuilder, HtmlElement, ParentBuilder};
+use silkenweb::{
+    dom::{
+        element::{Element, ElementBuilder},
+        mount,
+    },
+    elements::{html::div, HtmlElement, ParentBuilder},
+};
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
     icon::ui5_icon,

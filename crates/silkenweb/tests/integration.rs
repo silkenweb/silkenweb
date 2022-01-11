@@ -1,9 +1,10 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    html::{button, div, p, PBuilder},
-    mount,
-    render::render_now,
-    tag, unmount, ElementEvents,
+    dom::{mount, render::render_now, tag, unmount},
+    elements::{
+        html::{button, div, p, PBuilder},
+        ElementEvents,
+    },
 };
 use silkenweb_elements::{HtmlElement, ParentBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};

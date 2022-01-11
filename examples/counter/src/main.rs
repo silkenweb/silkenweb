@@ -1,8 +1,11 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    html::{button, div, p},
-    mount, ElementEvents, ParentBuilder,
+    dom::mount,
+    elements::{
+        html::{button, div, p},
+        ElementEvents, ParentBuilder,
+    },
 };
 
 fn main() {

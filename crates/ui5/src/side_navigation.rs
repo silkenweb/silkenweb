@@ -1,4 +1,4 @@
-use silkenweb::{html_element, ElementBuilder};
+use silkenweb::{dom::element::ElementBuilder, elements::html_element};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
 html_element!(

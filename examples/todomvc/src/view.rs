@@ -5,13 +5,15 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use silkenweb::{
-    clone,
-    html::{
-        a, button, div, footer, h1, header, input, label, li, section, span, strong, ul, Button,
-        Div, Footer, Input, Li, LiBuilder, Section, Ul,
+    dom::{clone, element::ElementBuilder},
+    elements::{
+        html::{
+            a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,
+            Button, Div, Footer, Input, Li, LiBuilder, Section, Ul,
+        },
+        Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder,
     },
-    Effects, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder,
-    SignalProduct,
+    signals_ext::SignalProduct,
 };
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;

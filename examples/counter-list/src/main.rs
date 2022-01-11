@@ -5,8 +5,11 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use silkenweb::{
-    html::{button, div, hr, Button, Div},
-    mount, ElementBuilder, ElementEvents, ParentBuilder,
+    dom::{element::ElementBuilder, mount},
+    elements::{
+        html::{button, div, hr, Button, Div},
+        ElementEvents, ParentBuilder,
+    },
 };
 
 fn main() {

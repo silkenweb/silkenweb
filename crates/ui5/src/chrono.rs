@@ -1,5 +1,8 @@
 use parse_display::Display;
-use silkenweb::{html_element, AttributeValue, ElementBuilder};
+use silkenweb::{
+    dom::{attribute::AttributeValue, element::ElementBuilder},
+    elements::html_element,
+};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
 html_element!(

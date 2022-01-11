@@ -4,8 +4,7 @@
 //! animation time signals will be updated each frame, and are strictly
 //! increasing.
 use futures_signals::signal::{Signal, SignalExt};
-
-use crate::render::{animation_timestamp, request_render};
+use silkenweb_dom::render::{animation_timestamp, request_render};
 
 /// Provide an infinite time signal for animations.
 ///
