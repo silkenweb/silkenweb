@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    elements::{button, div, p, PBuilder},
+    html::{button, div, p, PBuilder},
     mount,
     render::render_now,
     tag, unmount, ElementEvents,

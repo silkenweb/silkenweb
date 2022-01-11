@@ -5,7 +5,7 @@
 //! attribute for that element, as well as methods for each event. For example:
 //!
 //! ```no_run
-//! # use silkenweb_elements::{elements::{a, A, ABuilder}, ElementEvents};
+//! # use silkenweb_elements::{html::{a, A, ABuilder}, ElementEvents};
 //! let link: ABuilder = a()
 //!     .href("https://example.com/")
 //!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
@@ -24,7 +24,8 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 #[doc(hidden)]
 #[macro_use]
 pub mod macros;
-pub mod elements;
+pub mod html;
+pub mod svg;
 
 /// Wrap a [`web_sys::CustomEvent`] and cast detail.
 #[derive(Clone)]

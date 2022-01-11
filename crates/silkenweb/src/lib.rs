@@ -31,8 +31,9 @@ pub use silkenweb_dom::{
     element::{Element, ElementBuilder, GenericElementBuilder},
     mount, render, tag, tag_in_namespace, unmount,
 };
+pub use silkenweb_elements as elements;
 pub use silkenweb_elements::{
-    elements, html_element, parent_element, CustomEvent, Effects, ElementEvents, HtmlElement,
+    html, html_element, parent_element, CustomEvent, Effects, ElementEvents, HtmlElement,
     HtmlElementEvents, ParentBuilder,
 };
 pub use silkenweb_signals_ext::SignalProduct;

@@ -5,8 +5,6 @@
 //!
 //! [Moxie DOM]: https://github.com/anp/moxie
 
-pub mod svg;
-
 html_element!(
     /// The [HTML `<a>` element (or *anchor* element)][mdn], along with its href
     /// attribute, creates a hyperlink to other web pages, files, locations

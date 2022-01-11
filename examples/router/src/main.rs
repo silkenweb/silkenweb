@@ -1,6 +1,6 @@
 //! A minimal routing example
 use silkenweb::{
-    elements::{button, div, p},
+    html::{button, div, p},
     mount, router, ElementEvents, ParentBuilder,
 };
 

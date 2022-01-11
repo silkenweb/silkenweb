@@ -14,7 +14,7 @@ use rand::{
 };
 use silkenweb::{
     clone,
-    elements::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
+    html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
     mount, ElementBuilder, ElementEvents, HtmlElement, ParentBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
