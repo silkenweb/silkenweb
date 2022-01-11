@@ -14,14 +14,22 @@ module.exports = {
     filename: "[name].js"
   },
   devServer: {
-    contentBase: dist,
+    static: {
+      directory: dist,
+    },
+  },
+  performance: {
+    hints: false,
+  },
+  experiments: {
+    syncWebAssembly: true
   },
   plugins: [
-    new CopyPlugin([
-      path.resolve(__dirname, "static")
-    ]),
-
-    new WasmPackPlugin({
+    new CopyPlugin({
+      patterns: [
+        { from: "static" },
+      ],
+    }), new WasmPackPlugin({
       crateDirectory: __dirname,
     }),
   ]
