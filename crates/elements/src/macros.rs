@@ -5,7 +5,7 @@ pub use silkenweb_dom::{
     element::{Element, ElementBuilder, GenericElementBuilder},
     tag, tag_in_namespace,
 };
-pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+pub use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
 /// Define an html element.
@@ -91,7 +91,7 @@ macro_rules! dom_element {
         }
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
-            $(namespace = $namespace, )?
+            $(namespace = $crate::macros::intern($namespace), )?
             attributes = [$($attribute_trait),*],
             events = [$($event_trait),*],
             $(#[$elem_meta])*
@@ -116,7 +116,7 @@ macro_rules! dom_element {
         );
     }};
     (
-        $(namespace = $namespace:literal, )?
+        $(namespace = $namespace:expr, )?
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
         $(#[$elem_meta:meta])*
@@ -254,7 +254,7 @@ macro_rules! create_element_fn {
     ($text_name:expr) => {
         $crate::macros::tag($text_name)
     };
-    ($namespace:literal, $text_name:expr) => {
+    ($namespace:expr, $text_name:expr) => {
         $crate::macros::tag_in_namespace($namespace, $text_name)
     };
 }
@@ -409,6 +409,14 @@ macro_rules! attributes {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_attr {
+    ($($name:tt)*) => {
+        $crate::macros::intern($crate::naked_text_attr!($($name)*))
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! naked_text_attr {
     // TODO: Would be nice use raw identifiers here, but paste doesn't let you say '[<r# $name ... >]
     (as_) => {
         "as"
@@ -429,13 +437,21 @@ macro_rules! text_attr {
         "type"
     };
     ($($name:tt)*) => {
-        $crate::text_name!($($name)*)
+        $crate::naked_text_name!($($name)*)
     };
 }
 
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_name{
+    ($name:ident $(- $name_tail:ident)*) => {
+        $crate::macros::intern($crate::naked_text_name!($name $( - $name_tail)*))
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! naked_text_name{
     ($name:ident $(- $name_tail:ident)*) => {
         concat!(stringify!($name) $(, "-", stringify!($name_tail))*)
     }

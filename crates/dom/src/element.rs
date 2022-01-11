@@ -34,11 +34,11 @@ pub struct GenericElementBuilder {
 
 impl GenericElementBuilder {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document::create_element(intern(tag)))
+        Self::new_element(document::create_element(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document::create_element_ns(intern(namespace), intern(tag)))
+        Self::new_element(document::create_element_ns(namespace, tag))
     }
 
     fn new_element(dom_element: web_sys::Element) -> Self {
@@ -288,7 +288,7 @@ impl ElementBuilder for GenericElementBuilder {
             let dom_element = self.element.dom_element.clone();
             self.element
                 .event_callbacks
-                .push(EventCallback::new(dom_element, intern(name), f));
+                .push(EventCallback::new(dom_element, name, f));
         }
 
         self
