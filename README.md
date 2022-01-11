@@ -19,15 +19,18 @@ A library for building reactive single page web apps.
 ## Example: A Simple Counter
 
 ```rust
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use silkenweb::{
-    elements::{button, div, p},
-    mount, ParentBuilder,
+    dom::mount,
+    elements::{
+        html::{button, div, p},
+        ElementEvents, ParentBuilder,
+    },
 };
 
 fn main() {
     let count = Mutable::new(0);
-    let count_text = count.signal().map(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{}", i));
     let inc = move |_, _| {
         count.replace_with(|i| *i + 1);
     };
