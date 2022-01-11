@@ -12,15 +12,14 @@ mod macros;
 mod attribute;
 mod element;
 mod global;
-mod render;
 mod storage;
 
 pub mod animation;
+pub mod render;
 pub mod router;
 
 pub use attribute::{AsAttribute, Attribute, AttributeValue};
 pub use element::{Builder, Element, ElementBuilder};
-pub use render::render_updates;
 pub use storage::Storage;
 
 /// Mount an element on the document.

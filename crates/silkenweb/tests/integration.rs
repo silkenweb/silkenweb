@@ -1,7 +1,9 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::{button, div, p, PBuilder},
-    mount, render_updates, tag, unmount, ElementEvents,
+    mount,
+    render::render_now,
+    tag, unmount, ElementEvents,
 };
 use silkenweb_html::{HtmlElement, ParentBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
@@ -16,7 +18,7 @@ async fn mount_unmount() {
 
     let message = "Hello, world!";
     mount(APP_ID, tag("p").text(message));
-    render_updates().await;
+    render_now().await;
     assert_eq!(format!(r#"<p>{}</p>"#, message), app_html());
     unmount(APP_ID);
     assert_eq!("", app_html());
@@ -47,12 +49,12 @@ async fn simple_counter() {
             .text_signal(count_text),
     );
 
-    render_updates().await;
+    render_now().await;
     let counter_text = || query_element(COUNTER_ID).inner_text();
     assert_eq!("+0", counter_text(), "Counter is initially zero");
     query_element(BUTTON_ID).click();
     assert_eq!("+0", counter_text(), "Counter unchanged before render");
-    render_updates().await;
+    render_now().await;
     assert_eq!("+1", counter_text(), "Counter incremented after render");
 }
 
@@ -104,17 +106,17 @@ async fn multiple_reactive_text() {
             .text_signal(second_text.signal()),
     );
 
-    render_updates().await;
+    render_now().await;
     assert_eq!("{First 0}{Second 0}", text_content(TEXT_ID));
     first_text.set("{First 1}");
-    render_updates().await;
+    render_now().await;
     assert_eq!(
         "{First 1}{Second 0}",
         text_content(TEXT_ID),
         "First is updated"
     );
     second_text.set("{Second 1}");
-    render_updates().await;
+    render_now().await;
     assert_eq!(
         "{First 1}{Second 1}",
         text_content(TEXT_ID),
@@ -128,7 +130,7 @@ async fn verify_reactive_text(
     text: &mut Mutable<&'static str>,
 ) {
     mount(APP_ID, paragraph);
-    render_updates().await;
+    render_now().await;
     assert_eq!("0", text_content(text_id));
     text.set("1");
     assert_eq!(
@@ -136,7 +138,7 @@ async fn verify_reactive_text(
         text_content(text_id),
         "Text unaffected by signal before render"
     );
-    render_updates().await;
+    render_now().await;
     assert_eq!(
         "1",
         text_content(text_id),
@@ -146,7 +148,7 @@ async fn verify_reactive_text(
 
 async fn create_app_container(app_id: &str) {
     // Clear the render queue
-    render_updates().await;
+    render_now().await;
     let app_container = document().create_element("div").unwrap_throw();
     app_container.set_id(app_id);
     let body = document().body().unwrap_throw();

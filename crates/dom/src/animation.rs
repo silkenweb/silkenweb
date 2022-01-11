@@ -5,7 +5,7 @@
 //! increasing.
 use futures_signals::signal::{Signal, SignalExt};
 
-use crate::render::{animation_timestamp, request_render_updates};
+use crate::render::{animation_timestamp, request_render};
 
 /// Provide an infinite time signal for animations.
 ///
@@ -15,7 +15,7 @@ use crate::render::{animation_timestamp, request_render_updates};
 pub fn infinite_animation() -> impl 'static + Signal<Item = f64> {
     animation_timestamp()
         .map(|time| {
-            request_render_updates();
+            request_render();
             time
         })
         .dedupe()
@@ -32,7 +32,7 @@ pub fn finite_animation(duration_millis: f64) -> impl 'static + Signal<Item = Op
     animation_timestamp()
         .map(move |time| {
             if time < duration_millis {
-                request_render_updates();
+                request_render();
                 Some(time)
             } else {
                 None
