@@ -11,12 +11,10 @@ mod macros;
 
 mod attribute;
 mod element;
-mod global;
 mod storage;
 
-pub mod animation;
+pub mod global;
 pub mod render;
-pub mod router;
 
 pub use attribute::{AsAttribute, Attribute, AttributeValue};
 pub use element::{Builder, Element, ElementBuilder};

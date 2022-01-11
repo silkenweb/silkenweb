@@ -6,10 +6,9 @@
 use std::ops::DerefMut;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use silkenweb_dom::global::window;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::Url;
-
-use crate::global::window;
 
 /// A signal that will vary according to the current browser URL.
 ///
