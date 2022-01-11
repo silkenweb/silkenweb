@@ -1,4 +1,4 @@
-use silkenweb::{html_element, Builder};
+use silkenweb::{html_element, ElementBuilder};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 use web_sys as dom;
 
@@ -15,7 +15,7 @@ html_element!(
 );
 
 impl Ui5SideNavigationBuilder {
-    pub fn child(self, child: impl Builder<Target = Ui5SideNavigationItem>) -> Self {
+    pub fn child(self, child: impl ElementBuilder<Target = Ui5SideNavigationItem>) -> Self {
         Self {
             builder: self.builder.child(child.build()),
         }
@@ -23,7 +23,7 @@ impl Ui5SideNavigationBuilder {
 
     pub fn children(
         mut self,
-        children: impl IntoIterator<Item = impl Builder<Target = Ui5SideNavigationItem>>,
+        children: impl IntoIterator<Item = impl ElementBuilder<Target = Ui5SideNavigationItem>>,
     ) -> Self {
         for c in children {
             self = self.child(c);

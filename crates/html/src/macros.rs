@@ -2,7 +2,7 @@ pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
-    element::{Builder, Element, GenericElementBuilder},
+    element::{Element, ElementBuilder, GenericElementBuilder},
     tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
@@ -183,7 +183,7 @@ macro_rules! dom_element {
             }
         }
 
-        impl $crate::macros::Builder for $camel_builder_name {
+        impl $crate::macros::ElementBuilder for $camel_builder_name {
             type Target = $camel_name;
 
             fn attribute<T: $crate::macros::Attribute>(self, name: &str, value: T) -> Self {
@@ -195,7 +195,7 @@ macro_rules! dom_element {
                 name: &str,
                 value: impl $crate::macros::Signal<Item = T> + 'static,
             ) -> Self {
-                Self{ builder: $crate::macros::Builder::attribute_signal(self.builder, name, value) }
+                Self{ builder: $crate::macros::ElementBuilder::attribute_signal(self.builder, name, value) }
             }
 
             fn on(
@@ -203,7 +203,7 @@ macro_rules! dom_element {
                 name: &'static str,
                 f: impl 'static + FnMut($crate::macros::JsValue)
             ) -> Self {
-                Self{ builder: $crate::macros::Builder::on(self.builder, name, f) }
+                Self{ builder: $crate::macros::ElementBuilder::on(self.builder, name, f) }
             }
 
             fn build(self) -> Self::Target {
@@ -217,8 +217,7 @@ macro_rules! dom_element {
 
         impl From<$camel_builder_name> for $crate::macros::Element {
             fn from(builder: $camel_builder_name) -> Self {
-                use $crate::macros::Builder;
-                builder.build().into()
+                $crate::macros::ElementBuilder::build(builder).into()
             }
         }
 
@@ -317,7 +316,7 @@ macro_rules! events {
                 self,
                 mut f: impl 'static + FnMut($event_type, $elem_type)
             ) -> Self {
-                $crate::macros::Builder::on(
+                $crate::macros::ElementBuilder::on(
                     self,
                     $crate::text_name!($name $(- $name_tail)*),
                     move |js_ev| {
@@ -348,7 +347,7 @@ macro_rules! custom_events {
                 self,
                 mut f: impl 'static + FnMut($event_type, $elem_type)
             ) -> Self {
-                $crate::macros::Builder::on(
+                $crate::macros::ElementBuilder::on(
                     self,
                     $crate::text_name!($name $(- $name_tail)*),
                     move |js_ev| {
@@ -381,7 +380,7 @@ macro_rules! attributes {
             #[doc = ""]
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
             $visibility fn $attr(self, value: impl $crate::macros::AsAttribute<$typ>) -> Self {
-                $crate::macros::Builder::attribute(self, $text_attr, value)
+                $crate::macros::ElementBuilder::attribute(self, $text_attr, value)
             }
 
             $(#[$attr_meta])*
@@ -393,7 +392,7 @@ macro_rules! attributes {
             where
                 T: $crate::macros::AsAttribute<$typ> + 'static
             {
-                $crate::macros::Builder::attribute_signal(self, $text_attr, value)
+                $crate::macros::ElementBuilder::attribute_signal(self, $text_attr, value)
             }
         )*
     }};

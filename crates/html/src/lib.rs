@@ -19,7 +19,7 @@ use futures_signals::{
     signal_vec::SignalVec,
 };
 use paste::paste;
-use silkenweb_dom::element::{Builder, Element};
+use silkenweb_dom::element::{Element, ElementBuilder};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys as dom;
 
@@ -130,7 +130,7 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
     }
 }
 
-pub trait HtmlElement: Builder {
+pub trait HtmlElement: ElementBuilder {
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         self.attribute("class", class_attribute_text(value))
     }
@@ -304,7 +304,7 @@ pub trait HtmlElement: Builder {
     ];
 }
 
-pub trait HtmlElementEvents: Builder {
+pub trait HtmlElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 
     events!(Self::EventTarget {
@@ -328,7 +328,7 @@ pub trait HtmlElementEvents: Builder {
     });
 }
 
-pub trait ElementEvents: Builder {
+pub trait ElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 
     events!(Self::EventTarget {

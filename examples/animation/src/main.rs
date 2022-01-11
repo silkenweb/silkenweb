@@ -3,7 +3,9 @@ use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
-use silkenweb::{animation::infinite_animation, elements::svg, mount, Builder, ParentBuilder};
+use silkenweb::{
+    animation::infinite_animation, elements::svg, mount, ElementBuilder, ParentBuilder,
+};
 use wasm_bindgen::UnwrapThrowExt;
 
 const WIDTH: f32 = 600.0;

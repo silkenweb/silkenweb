@@ -250,7 +250,7 @@ impl GenericElementBuilder {
     }
 }
 
-impl Builder for GenericElementBuilder {
+impl ElementBuilder for GenericElementBuilder {
     type Target = Element;
 
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
@@ -324,7 +324,7 @@ pub struct Element {
 }
 
 /// An HTML element builder.
-pub trait Builder: Sized {
+pub trait ElementBuilder: Sized {
     type Target;
 
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
