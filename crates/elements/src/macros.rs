@@ -447,10 +447,51 @@ macro_rules! text_name{
 #[doc(hidden)]
 #[macro_export]
 macro_rules! naked_text_name{
-    // Use `paste` to remove the `r#` from the text name
-    ($name:ident $(- $name_tail:ident)*) => { $crate::macros::paste!{
-        concat!(stringify!( [< $name >] ) $(, "-", stringify!($name_tail))*)
-    }}
+    ($name:ident $(- $name_tail:ident)*) => {
+        concat!($crate::stringify_raw!($name) $(, "-", $crate::stringify_raw!($name_tail))*)
+    }
+}
+
+// TODO: Tests for raw identifiers
+#[doc(hidden)]
+#[macro_export]
+macro_rules! stringify_raw{
+    (r#as) => { "as" };
+    (r#async) => { "async" };
+    (r#await) => { "await" };
+    (r#break) => { "break" };
+    (r#const) => { "const" };
+    (r#continue) => { "continue" };
+    (r#dyn) => { "dyn" };
+    (r#else) => { "else" };
+    (r#enum) => { "enum" };
+    (r#extern) => { "extern" };
+    (r#false) => { "false" };
+    (r#fn) => { "fn" };
+    (r#for) => { "for" };
+    (r#if) => { "if" };
+    (r#impl) => { "impl" };
+    (r#in) => { "in" };
+    (r#let) => { "let" };
+    (r#loop) => { "loop" };
+    (r#match) => { "match" };
+    (r#mod) => { "mod" };
+    (r#move) => { "move" };
+    (r#mut) => { "mut" };
+    (r#pub) => { "pub" };
+    (r#ref) => { "ref" };
+    (r#return) => { "return" };
+    (r#static) => { "static" };
+    (r#struct) => { "struct" };
+    (r#trait) => { "trait" };
+    (r#true) => { "true" };
+    (r#type) => { "type" };
+    (r#union) => { "union" };
+    (r#unsafe) => { "unsafe" };
+    (r#use) => { "use" };
+    (r#where) => { "where" };
+    (r#while) => { "while" };
+    ($name:tt) => { stringify!($name) }
 }
 
 #[doc(hidden)]
