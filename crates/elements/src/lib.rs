@@ -105,7 +105,10 @@ macro_rules! global_attributes {
         $attr:ident: $typ:ty
     ),* $(,)? ) => { paste!{
         $crate::attributes![
-            $($(#[$attr_meta])* $attr ($crate::text_name!($attr)): $typ,)*
+            $($(#[$attr_meta])*
+            #[doc = ""]
+            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
+            $attr ($crate::text_name!($attr)): $typ,)*
         ];
     }};
 }

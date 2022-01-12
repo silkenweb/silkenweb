@@ -384,15 +384,11 @@ macro_rules! attributes {
     ),* $(,)? ) => { $crate::macros::paste!{
         $(
             $(#[$attr_meta])*
-            #[doc = ""]
-            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
             $visibility fn $attr(self, value: impl $crate::macros::AsAttribute<$typ>) -> Self {
                 $crate::macros::ElementBuilder::attribute(self, $text_attr, value)
             }
 
             $(#[$attr_meta])*
-            #[doc = ""]
-            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
             #[allow(clippy::wrong_self_convention)]
             #[allow(non_snake_case)]
             $visibility fn [< $attr _signal >]<T>(
