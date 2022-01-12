@@ -71,13 +71,13 @@ macro_rules! dom_element {
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
         $(#[$elem_meta:meta])*
-        $name:ident $(- $name_tail:ident)*
+        $name:ident $(- $name_tail:tt)*
         < $elem_type:ty >
         {
             $(attributes {
                 $(
                     $(#[$attr_meta:meta])*
-                    $attr:ident $(- $attr_tail:ident)*: $typ:ty
+                    $attr:ident $(- $attr_tail:tt)*: $typ:ty
                 ),* $(,)?
             })?
 
@@ -452,7 +452,7 @@ macro_rules! text_attr {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_name{
-    ($name:ident $(- $name_tail:ident)*) => {
+    ($name:ident $(- $name_tail:tt)*) => {
         $crate::macros::intern($crate::naked_text_name!($name $( - $name_tail)*))
     }
 }
@@ -460,7 +460,7 @@ macro_rules! text_name{
 #[doc(hidden)]
 #[macro_export]
 macro_rules! naked_text_name{
-    ($name:ident $(- $name_tail:ident)*) => {
+    ($name:ident $(- $name_tail:tt)*) => {
         concat!($crate::stringify_raw!($name) $(, "-", $crate::stringify_raw!($name_tail))*)
     }
 }
@@ -582,7 +582,7 @@ macro_rules! stringify_raw {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! camel_name{
-    ($name:ident $($name_tail:ident)*) => { $crate::macros::paste!{
+    ($name:ident $($name_tail:tt)*) => { $crate::macros::paste!{
         [< $name:camel $($name_tail:camel)* >]
     }}
 }
