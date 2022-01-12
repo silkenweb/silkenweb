@@ -418,19 +418,11 @@ macro_rules! attributes {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_attr {
-    ($($name:tt)*) => {
-        $crate::macros::intern($crate::naked_text_attr!($($name)*))
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! naked_text_attr {
     (current_time) => {
-        "currentTime"
+        $crate::text_name!(currentTime)
     };
     ($($name:tt)*) => {
-        $crate::naked_text_name!($($name)*)
+        $crate::text_name!($($name)*)
     };
 }
 
