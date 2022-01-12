@@ -37,3 +37,11 @@ pub mod storage;
 pub use crate::dom::clone;
 #[doc(inline)]
 pub use crate::storage::Storage;
+
+pub mod prelude {
+    pub use crate::{
+        clone,
+        dom::mount,
+        elements::{Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    };
+}

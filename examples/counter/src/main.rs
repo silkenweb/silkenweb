@@ -1,12 +1,6 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
-use silkenweb::{
-    dom::mount,
-    elements::{
-        html::{button, div, p},
-        ElementEvents, ParentBuilder,
-    },
-};
+use silkenweb::{elements::html::*, prelude::*};
 
 fn main() {
     let count = Mutable::new(0);

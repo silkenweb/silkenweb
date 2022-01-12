@@ -20,13 +20,7 @@ A library for building reactive single page web apps.
 
 ```rust
 use futures_signals::signal::Mutable;
-use silkenweb::{
-    dom::mount,
-    elements::{
-        html::{button, div, p},
-        ElementEvents, ParentBuilder,
-    },
-};
+use silkenweb::{elements::html::*, prelude::*};
 
 fn main() {
     let count = Mutable::new(0);
