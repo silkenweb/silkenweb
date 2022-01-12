@@ -95,13 +95,15 @@ macro_rules! dom_element {
             attributes = [$($attribute_trait),*],
             events = [$($event_trait),*],
             $(#[$elem_meta])*
-            snake ( [< $name $(_ $name_tail)* >] ),
+            snake ( [< $name:snake $(_ $name_tail:snake)* >] ),
             camel ( [< $name:camel $($name_tail:camel)* >], [< $name:camel $($name_tail:camel)* Builder >] ),
             text ( $crate::text_name!($name $(- $name_tail)*) )
             < $elem_type >
             {
                 $(attributes { $(
                     $(#[$attr_meta])*
+                    // TODO: If [this](https://github.com/dtolnay/paste/issues/74#issue-1100247715) paste issue gets resolved,
+                    // use `[< $attr:snake >]` and replace `text_attr!` usage with `text_name`.
                     $attr $($attr_tail)* ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
                 ),*})?
 
