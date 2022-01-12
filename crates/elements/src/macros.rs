@@ -82,11 +82,13 @@ macro_rules! dom_element {
             })?
 
             $(events {
-                $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
+                $(#[$event_meta:meta])*
+                $($event:ident $(- $event_tail:tt)*: $event_type:ty),* $(,)?
             })?
 
             $(custom_events {
-                $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
+                $(#[$custom_event_meta:meta])*
+                $($custom_event:ident $(- $custom_event_tail:tt)*: $custom_event_type:ty),* $(,)?
             })?
         }
     ) => { $crate::macros::paste!{
@@ -108,10 +110,12 @@ macro_rules! dom_element {
                 ),*})?
 
                 $(events {
+                    $(#[$event_meta])*
                     $($event $(- $event_tail)*: $event_type),*
                 })?
 
                 $(custom_events {
+                    $(#[$custom_event_meta])*
                     $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
                 })?
             }
@@ -133,11 +137,16 @@ macro_rules! dom_element {
             ),* $(,)? } )?
 
             $(events {
-                $($event:ident $(- $event_tail:ident)*: $event_type:ty),* $(,)?
+                $(
+                    $(#[$event_meta:meta])*
+                    $event:ident $(- $event_tail:tt)*: $event_type:ty
+                ),* $(,)?
             })?
 
-            $(custom_events {
-                $($custom_event:ident $(- $custom_event_tail:ident)*: $custom_event_type:ty),* $(,)?
+            $(custom_events { $(
+                    $(#[$custom_event_meta:meta])*
+                    $custom_event:ident $(- $custom_event_tail:tt)*: $custom_event_type:ty
+                ),* $(,)?
             })?
         }
     ) => {
@@ -159,13 +168,19 @@ macro_rules! dom_element {
 
             $($crate::events!(
                 $elem_type {
-                    $(pub $event $(- $event_tail)*: $event_type),*
+                    $(
+                        $(#[$event_meta])*
+                        pub $event $(- $event_tail)*: $event_type
+                    ),*
                 }
             ); )?
 
             $($crate::custom_events!(
                 $elem_type {
-                    $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
+                    $(
+                        $(#[$custom_event_meta])*
+                        $custom_event $(- $custom_event_tail)*: $custom_event_type
+                    ),*
                 }
             ); )?
         }
@@ -316,9 +331,13 @@ macro_rules! parent_element {
 #[macro_export]
 macro_rules! events {
     ($elem_type:ty {
-        $($visiblity:vis $name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
+        $(
+            $(#[$event_meta:meta])*
+            $visiblity:vis $name:ident $(- $name_tail:tt)*: $event_type:ty
+        ),* $(,)?
     }) => { $crate::macros::paste!{
         $(
+            $(#[$event_meta])*
             $visiblity fn [<on_ $name $(_ $name_tail)* >] (
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
@@ -347,9 +366,13 @@ macro_rules! events {
 #[macro_export]
 macro_rules! custom_events {
     ($elem_type:ty {
-        $($name:ident $(- $name_tail:ident)*: $event_type:ty),* $(,)?
+        $(
+            $(#[$event_meta:meta])*
+            $name:ident $(- $name_tail:tt)*: $event_type:ty
+        ),* $(,)?
     }) => { $crate::macros::paste!{
         $(
+            $(#[$event_meta])*
             pub fn [<on_ $name $(_ $name_tail)* >] (
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
