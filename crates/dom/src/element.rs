@@ -317,7 +317,7 @@ impl From<GenericElementBuilder> for Element {
 pub struct Element {
     pub(super) dom_element: web_sys::Element,
     event_callbacks: Vec<EventCallback>,
-    futures: Vec<SignalHandle>,
+    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
 /// An HTML element builder.
@@ -346,5 +346,3 @@ pub trait ElementBuilder: Sized {
 
     fn into_element(self) -> Element;
 }
-
-type SignalHandle = DiscardOnDrop<CancelableFutureHandle>;
