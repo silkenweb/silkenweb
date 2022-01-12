@@ -102,7 +102,7 @@ macro_rules! dom_element {
             {
                 $(attributes { $(
                     $(#[$attr_meta])*
-                    [< $attr $(_ $attr_tail)* >] ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
+                    $attr $($attr_tail)* ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
                 ),*})?
 
                 $(events {
@@ -127,7 +127,7 @@ macro_rules! dom_element {
         {
             $(attributes { $(
                 $(#[$attr_meta:meta])*
-                $attr:ident ($text_attr:expr) : $typ:ty
+                $attr:ident $($attr_tail:ident)* ($text_attr:expr) : $typ:ty
             ),* $(,)? } )?
 
             $(events {
@@ -152,7 +152,7 @@ macro_rules! dom_element {
 
         impl $camel_builder_name {
             $crate::attributes![
-                $($($(#[$attr_meta])* pub $attr ($text_attr): $typ,)*)?
+                $($($(#[$attr_meta])* pub $attr $($attr_tail)* ($text_attr): $typ,)*)?
             ];
 
             $($crate::events!(
@@ -404,6 +404,17 @@ macro_rules! attributes {
             }
         )*
     }};
+    ($(
+        $(#[$attr_meta:meta])*
+        $visibility:vis $attr:ident $($attr_tail:ident)* ($text_attr:expr): $typ:ty
+    ),* $(,)? ) => { $crate::macros::paste!{
+        $crate::attributes!(
+            $(
+                $(#[$attr_meta])*
+                $visibility [< $attr $(_ $attr_tail)* >] ($text_attr): $typ
+            ),*
+        );
+    }};
 }
 
 #[doc(hidden)]
@@ -417,24 +428,8 @@ macro_rules! text_attr {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! naked_text_attr {
-    // TODO: Would be nice use raw identifiers here, but paste doesn't let you say '[<r# $name ... >]
-    (as_) => {
-        "as"
-    };
-    (async_) => {
-        "async"
-    };
-    (for_) => {
-        "for"
-    };
     (current_time) => {
         "currentTime"
-    };
-    (loop_) => {
-        "loop"
-    };
-    (type_) => {
-        "type"
     };
     ($($name:tt)*) => {
         $crate::naked_text_name!($($name)*)
@@ -452,9 +447,10 @@ macro_rules! text_name{
 #[doc(hidden)]
 #[macro_export]
 macro_rules! naked_text_name{
-    ($name:ident $(- $name_tail:ident)*) => {
-        concat!(stringify!($name) $(, "-", stringify!($name_tail))*)
-    }
+    // Use `paste` to remove the `r#` from the text name
+    ($name:ident $(- $name_tail:ident)*) => { $crate::macros::paste!{
+        concat!(stringify!( [< $name >] ) $(, "-", stringify!($name_tail))*)
+    }}
 }
 
 #[doc(hidden)]

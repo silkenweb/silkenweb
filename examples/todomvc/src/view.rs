@@ -79,7 +79,7 @@ impl TodoAppView {
                         input()
                             .id("toggle-all")
                             .class(["toggle-all"])
-                            .type_("checkbox")
+                            .r#type("checkbox")
                             .on_change({
                                 clone!(app);
 
@@ -89,7 +89,7 @@ impl TodoAppView {
                                 elem.set_checked(all_complete)
                             }),
                     )
-                    .child(label().for_("toggle-all"))
+                    .child(label().r#for("toggle-all"))
                     .child(ul().class(["todo-list"]).children_signal(
                         app_view.visible_items_signal(item_filter.signal()).map({
                             clone!(app);
@@ -239,7 +239,7 @@ impl TodoItemView {
 
         input()
             .class(["edit"])
-            .type_("text")
+            .r#type("text")
             .value_signal(todo.text())
             .on_focusout({
                 clone!(todo, app);
@@ -268,7 +268,7 @@ impl TodoItemView {
         let app = &self.app;
         let completed_checkbox = input()
             .class(["toggle"])
-            .type_("checkbox")
+            .r#type("checkbox")
             .on_click({
                 clone!(todo, app);
                 move |_, elem| app.set_completed(&todo, elem.checked())

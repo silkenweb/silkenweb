@@ -222,7 +222,7 @@ impl App {
             .child(
                 button()
                     .class(["btn", "btn-primary", "btn-block"])
-                    .type_("button")
+                    .r#type("button")
                     .id(id)
                     .text(title)
                     .on_click(move |_, _| on_click(&app)),

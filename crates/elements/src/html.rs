@@ -90,7 +90,7 @@ html_element!(
 
             /// Hints at the linked URL’s format with a MIME type. No built-in
             /// functionality.
-            type_: String,
+            r#type: String,
         }
     }
 );
@@ -724,7 +724,7 @@ html_element!(
             /// The [MIME type] to use to select the plug-in to instantiate.
             ///
             /// [MIME type]: https://developer.mozilla.org/en-US/docs/Glossary/MIME_type
-            type_: String,
+            r#type: String,
 
             /// The displayed width of the resource, in [CSS pixels]. This must be
             /// an absolute value; percentages are not allowed.
@@ -859,7 +859,7 @@ html_element!(
 
             /// The content type of the resource specified by data. At least one of
             /// data and type must be defined.
-            type_: String,
+            r#type: String,
 
             /// Indicates if the type attribute and the actual content type of the
             /// resource must match to be used.
@@ -963,7 +963,7 @@ html_element!(
 
             /// The MIME media type of the resource, optionally with a codecs
             /// parameter.
-            type_: String,
+            r#type: String,
         }
     }
 );
@@ -1026,7 +1026,7 @@ html_element!(
             /// where the browser would have to load and evaluate scripts
             /// before continuing to parse. defer has a similar
             /// effect in this case.
-            async_: bool,
+            r#async: bool,
 
             /// Normal script elements pass minimal information to the
             /// window.onerror for scripts which do not pass the standard
@@ -1102,7 +1102,7 @@ html_element!(
             /// processed by the browser. Developers must use a valid MIME type that
             /// is not a JavaScript MIME type to denote data blocks. The src
             /// attribute will be ignored.
-            type_: String,
+            r#type: String,
         }
     }
 );
@@ -1281,7 +1281,7 @@ html_element!(
 
             /// If specified, the audio player will automatically seek back to the
             /// start upon reaching the end of the audio.
-            loop_: bool,
+            r#loop: bool,
 
             /// Indicates whether the audio will be initially silenced. Its default
             /// value is false.
@@ -1691,7 +1691,7 @@ html_element!(
 
             /// If specified, the browser will automatically seek back to the start
             /// upon reaching the end of the video.
-            loop_: bool,
+            r#loop: bool,
 
             /// Indicates the default setting of the audio contained in the video.
             /// If set, the audio will be initially silenced. Its default
@@ -1974,7 +1974,7 @@ html_element!(
             /// technical documents where items are referenced by their
             /// number/letter), use the CSS list-style-type property
             /// instead.
-            type_: String,
+            r#type: String,
         }
     }
 );
@@ -2305,7 +2305,7 @@ html_element!(
             /// | | video    | `<video>` elements
             /// | | worker   | Worker, SharedWorker
             /// |
-            as_: String,
+            r#as: String,
 
             /// This enumerated attribute indicates whether CORS must be used when
             /// fetching the resource. CORS-enabled images can be reused in
@@ -2412,7 +2412,7 @@ html_element!(
             /// recommended practice. It is also used on rel="preload" link
             /// types, to make sure the browser only downloads file
             /// types that it supports.
-            type_: String,
+            r#type: String,
         }
     }
 );
@@ -2651,7 +2651,7 @@ html_element!(
             ///   pressed by default.
             /// It can have client-side scripts listen to the element's events,
             /// which are triggered when the events occur.
-            type_: String,
+            r#type: String,
 
             /// Defines the value associated with the button’s name when it’s
             /// submitted with the form data. This value is passed to the
@@ -3243,7 +3243,7 @@ html_element!(
             /// text is used, creating a plaintext input field.
             ///
             /// Permitted values are listed in `<input>` types above.
-            type_: String,
+            r#type: String,
 
             /// The input control's value. When specified in the HTML, this is the
             /// initial value, and from then on it can be altered or
@@ -3283,7 +3283,7 @@ html_element!(
             /// Note: A `<label>` element can have both a for attribute and a
             /// contained control element, as long as the for attribute
             /// points to the contained control element.
-            for_: String,
+            r#for: String,
 
             /// The `<form>` element with which the label is associated (its form
             /// owner). If specified, the value of the attribute is the id
@@ -3452,7 +3452,7 @@ html_element!(
             /// A space-separated list of other elements’ ids, indicating that those
             /// elements contributed input values to (or otherwise affected)
             /// the calculation.
-            for_: String,
+            r#for: String,
 
             /// The `<form>` element to associate the output with (its form owner).
             /// The value of this attribute must be the id of a `<form>` in
