@@ -19,7 +19,7 @@ use futures_signals::{
 };
 use paste::paste;
 use silkenweb_dom::element::{Element, ElementBuilder};
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::{intern, JsCast, UnwrapThrowExt};
 
 #[doc(hidden)]
 #[macro_use]
@@ -134,14 +134,17 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
 
 pub trait HtmlElement: ElementBuilder {
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        self.attribute("class", class_attribute_text(value))
+        self.attribute(intern("class"), class_attribute_text(value))
     }
 
     fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
         self,
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
-        self.attribute_signal("class", value.map(move |class| class_attribute_text(class)))
+        self.attribute_signal(
+            intern("class"),
+            value.map(move |class| class_attribute_text(class)),
+        )
     }
 
     global_attributes![
