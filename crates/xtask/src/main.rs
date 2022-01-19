@@ -6,16 +6,25 @@ use xtask_base::{
 
 #[derive(Parser)]
 enum Commands {
+    /// Generate all derived files. Will overwrite existing content.
     Codegen {
+        /// If set, just check the file contents are up to date.
         #[clap(long)]
         check: bool,
     },
+    /// Run CI checks
     Ci {
+        /// Leave out some of the more expensive tests
+        /// 
+        /// Cypress and release build tests are excluded
         #[clap(long)]
         fast: bool,
+        /// Only run tasks for the specified toolchain
         toolchain: Option<Toolchain>,
     },
+    /// Run TodoMVC with `trunk`
     TodomvcRun,
+    /// Run the TodoMVC Cypress tests
     TodomvcCypress,
     #[clap(flatten)]
     Common(CommonCmds),
