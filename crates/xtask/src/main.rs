@@ -15,7 +15,7 @@ enum Commands {
     /// Run CI checks
     Ci {
         /// Leave out some of the more expensive tests
-        /// 
+        ///
         /// Cypress and release build tests are excluded
         #[clap(long)]
         fast: bool,
