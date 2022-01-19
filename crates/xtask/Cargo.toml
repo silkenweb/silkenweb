@@ -1,0 +1,9 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = "3.0.9"
+xtask-base = { git = "https://github.com/simon-bourne/rust-xtask-base" }
+xshell = "0.1.17"
