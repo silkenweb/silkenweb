@@ -22,7 +22,7 @@ enum Commands {
 }
 
 fn main() {
-    run(|| {
+    run(|workspace| {
         match Commands::parse() {
             Commands::Codegen { check } => {
                 build_readme(".", check)?;
@@ -48,7 +48,7 @@ fn main() {
             Commands::TodomvcCypress => {
                 cypress("install")?;
             }
-            Commands::Common(cmds) => cmds.run::<Commands>()?,
+            Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
         }
 
         Ok(())
