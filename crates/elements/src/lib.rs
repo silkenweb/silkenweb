@@ -87,18 +87,6 @@ pub trait ParentBuilder: Sized {
     ) -> Self;
 }
 
-/// Methods to add effects. These are in a trait to allow attribute methods to
-/// be disambiguated.
-pub trait Effects<DomType> {
-    fn effect(self, f: impl FnOnce(&DomType) + 'static) -> Self;
-
-    fn effect_signal<T: 'static>(
-        self,
-        sig: impl Signal<Item = T> + 'static,
-        f: impl Fn(&DomType, T) + Clone + 'static,
-    ) -> Self;
-}
-
 macro_rules! global_attributes {
     ($(
         $(#[$attr_meta:meta])*

@@ -185,22 +185,9 @@ macro_rules! dom_element {
             ); )?
         }
 
-        impl $crate::Effects<$elem_type> for $camel_builder_name {
-            fn effect(self, f: impl ::std::ops::FnOnce(&$elem_type) + 'static) -> Self {
-                Self{ builder: self.builder.effect(f) }
-            }
-
-            fn effect_signal<T: 'static>(
-                self,
-                sig: impl $crate::macros::Signal<Item = T> + 'static,
-                f: impl Fn(&$elem_type, T) + Clone + 'static,
-            ) -> Self {
-                Self{ builder: self.builder.effect_signal(sig, f) }
-            }
-        }
-
         impl $crate::macros::ElementBuilder for $camel_builder_name {
             type Target = $camel_name;
+            type DomType = $elem_type;
 
             fn attribute<T: $crate::macros::Attribute>(self, name: &str, value: T) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
@@ -212,6 +199,32 @@ macro_rules! dom_element {
                 value: impl $crate::macros::Signal<Item = T> + 'static,
             ) -> Self {
                 Self{ builder: $crate::macros::ElementBuilder::attribute_signal(self.builder, name, value) }
+            }
+
+            fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
+                Self {
+                    builder: self.builder.effect(|elem| {
+                        f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))
+                    })
+                }
+            }
+
+            fn effect_signal<T: 'static>(
+                self,
+                sig: impl $crate::macros::Signal<Item = T> + 'static,
+                f: impl Fn(&Self::DomType, T) + Clone + 'static,
+            ) -> Self {
+                Self{
+                    builder: self.builder.effect_signal(
+                        sig,
+                        move |elem, signal| {
+                            f(
+                                $crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)),
+                                signal,
+                            )
+                        }
+                    )
+                }
             }
 
             fn on(

@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{intern, JsCast, JsValue};
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
 use crate::{
@@ -179,63 +179,6 @@ impl GenericElementBuilder {
         self.element.futures.push(spawn_cancelable_future(future));
     }
 
-    // TODO: Test
-    /// Apply an effect after the next render. For example, to set the focus of
-    /// an element:
-    ///
-    /// ```no_run
-    /// # use silkenweb_dom::tag;
-    /// # use web_sys::HtmlInputElement;
-    /// # use wasm_bindgen::UnwrapThrowExt;
-    /// # let element = tag("input");
-    /// element.effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw());
-    /// ```
-    ///
-    /// Effects can be reactive. For example, to set the visibibilty of an item
-    /// based on a `hidden` boolean signal:
-    ///
-    /// ```no_run
-    /// # use silkenweb_dom::tag;
-    /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use web_sys::HtmlInputElement;
-    /// # let element = tag("input");
-    /// let is_hidden = Mutable::new(false);
-    ///
-    /// element.effect_signal(
-    ///     is_hidden.signal(),
-    ///     move |elem: &HtmlInputElement, is_hidden| elem.set_hidden(is_hidden),
-    /// );
-    /// ```
-    pub fn effect<DomType: JsCast + 'static>(self, f: impl FnOnce(&DomType) + 'static) -> Self {
-        let dom_element = self.dom_element().clone().dyn_into().unwrap_throw();
-        after_render(move || f(&dom_element));
-
-        self
-    }
-
-    // TODO: Test
-    pub fn effect_signal<T, DomType>(
-        mut self,
-        sig: impl Signal<Item = T> + 'static,
-        f: impl Clone + Fn(&DomType, T) + 'static,
-    ) -> Self
-    where
-        T: 'static,
-        DomType: Clone + JsCast + 'static,
-    {
-        let dom_element: DomType = self.dom_element().clone().dyn_into().unwrap_throw();
-
-        let future = sig.for_each(move |x| {
-            clone!(dom_element, f);
-            after_render(move || f(&dom_element, x));
-            async {}
-        });
-
-        self.spawn_future(future);
-
-        self
-    }
-
     fn check_attribute_unique(&mut self, name: &str) {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
@@ -248,6 +191,7 @@ impl GenericElementBuilder {
 }
 
 impl ElementBuilder for GenericElementBuilder {
+    type DomType = web_sys::Element;
     type Target = Element;
 
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
@@ -278,6 +222,37 @@ impl ElementBuilder for GenericElementBuilder {
         });
 
         self.spawn_future(updater);
+        self
+    }
+
+    /// Apply an effect after the next render.
+    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+        let dom_element = self.dom_element().clone();
+        after_render(move || f(&dom_element));
+
+        self
+    }
+
+    /// Apply an effect after the next render each time a singal yields a new
+    /// value.
+    fn effect_signal<T>(
+        mut self,
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Clone + Fn(&Self::DomType, T) + 'static,
+    ) -> Self
+    where
+        T: 'static,
+    {
+        let dom_element = self.dom_element().clone();
+
+        let future = sig.for_each(move |x| {
+            clone!(dom_element, f);
+            after_render(move || f(&dom_element, x));
+            async {}
+        });
+
+        self.spawn_future(future);
+
         self
     }
 
@@ -323,6 +298,7 @@ pub struct Element {
 /// An HTML element builder.
 pub trait ElementBuilder: Sized {
     type Target;
+    type DomType: JsCast + 'static;
 
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
 
@@ -330,6 +306,14 @@ pub trait ElementBuilder: Sized {
         self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
+    ) -> Self;
+
+    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
+
+    fn effect_signal<T: 'static>(
+        self,
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Fn(&Self::DomType, T) + Clone + 'static,
     ) -> Self;
 
     /// Register an event handler.

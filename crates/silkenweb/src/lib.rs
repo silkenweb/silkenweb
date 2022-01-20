@@ -42,6 +42,6 @@ pub mod prelude {
     pub use crate::{
         clone,
         dom::mount,
-        elements::{Effects, ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+        elements::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     };
 }
