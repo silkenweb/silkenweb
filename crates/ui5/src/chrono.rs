@@ -36,7 +36,7 @@ html_element!(
 impl Ui5CalendarBuilder {
     pub fn selected_date(self, date: String) -> Self {
         Self {
-            builder: self.builder.child(ui5_date().value(&date).into_element()),
+            builder: self.builder.child(ui5_date().value(&date).build()),
         }
     }
 }

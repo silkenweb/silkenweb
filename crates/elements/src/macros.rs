@@ -242,10 +242,6 @@ macro_rules! dom_element {
             fn build(self) -> Self::Target {
                 $camel_name(self.builder.build())
             }
-
-            fn into_element(self) -> $crate::macros::Element {
-                self.build().into()
-            }
         }
 
         impl From<$camel_builder_name> for $crate::macros::Element {

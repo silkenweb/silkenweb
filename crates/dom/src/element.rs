@@ -259,10 +259,6 @@ impl ElementBuilder for ElementBuilderBase {
         self.child_groups.borrow_mut().shrink_to_fit();
         self.element
     }
-
-    fn into_element(self) -> Element {
-        self.build()
-    }
 }
 
 impl From<ElementBuilderBase> for Element {
@@ -315,8 +311,6 @@ pub trait ElementBuilder: Sized {
     fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
 
     fn build(self) -> Self::Target;
-
-    fn into_element(self) -> Element;
 }
 
 pub trait ParentBuilder: Sized {
