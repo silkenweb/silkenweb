@@ -5,7 +5,8 @@ use silkenweb::{
         element::{Element, ElementBuilder},
         mount,
     },
-    elements::{html::div, HtmlElement, ParentBuilder},
+    elements::{html::div, HtmlElement},
+    prelude::ParentBuilder,
 };
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},

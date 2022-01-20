@@ -8,8 +8,9 @@ use silkenweb::{
     dom::{element::ElementBuilder, mount},
     elements::{
         html::{button, div, hr, Button, Div},
-        ElementEvents, ParentBuilder,
+        ElementEvents,
     },
+    prelude::ParentBuilder,
 };
 
 fn main() {

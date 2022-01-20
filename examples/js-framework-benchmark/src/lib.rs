@@ -14,10 +14,13 @@ use rand::{
 };
 use silkenweb::{
     clone,
-    dom::{element::ElementBuilder, mount},
+    dom::{
+        element::{ElementBuilder, ParentBuilder},
+        mount,
+    },
     elements::{
         html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
-        ElementEvents, HtmlElement, ParentBuilder,
+        ElementEvents, HtmlElement,
     },
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};

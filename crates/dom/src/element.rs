@@ -54,8 +54,24 @@ impl GenericElementBuilder {
         }
     }
 
+    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
+        self.element.futures.push(spawn_cancelable_future(future));
+    }
+
+    fn check_attribute_unique(&mut self, name: &str) {
+        #[cfg(debug_assertions)]
+        debug_assert!(self.attributes.insert(name.into()));
+        let _ = name;
+    }
+
+    fn dom_element(&self) -> &web_sys::Element {
+        &self.element.dom_element
+    }
+}
+
+impl ParentBuilder for GenericElementBuilder {
     /// Add a child element after existing children.
-    pub fn child(mut self, child: impl Into<Element>) -> Self {
+    fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
         self.child_groups
             .borrow_mut()
@@ -66,7 +82,7 @@ impl GenericElementBuilder {
         self
     }
 
-    pub fn child_signal(
+    fn child_signal(
         mut self,
         child_signal: impl Signal<Item = impl Into<Element>> + 'static,
     ) -> Self {
@@ -89,7 +105,7 @@ impl GenericElementBuilder {
         self
     }
 
-    pub fn optional_child_signal(
+    fn optional_child_signal(
         mut self,
         child_signal: impl Signal<Item = Option<impl Into<Element>>> + 'static,
     ) -> Self {
@@ -120,7 +136,7 @@ impl GenericElementBuilder {
 
     // TODO: Docs
     // TODO: tests
-    pub fn children_signal(
+    fn children_signal(
         mut self,
         children: impl SignalVec<Item = impl Into<Element>> + 'static,
     ) -> Self {
@@ -141,7 +157,7 @@ impl GenericElementBuilder {
     }
 
     /// Add a text node after existing children.
-    pub fn text(self, child: &str) -> Self {
+    fn text(self, child: &str) -> Self {
         let text_node = document::create_text_node(child);
         self.child_groups
             .borrow_mut()
@@ -149,7 +165,7 @@ impl GenericElementBuilder {
         self
     }
 
-    pub fn text_signal(
+    fn text_signal(
         mut self,
         child_signal: impl Signal<Item = impl Into<String>> + 'static,
     ) -> Self {
@@ -173,20 +189,6 @@ impl GenericElementBuilder {
 
         self.spawn_future(updater);
         self
-    }
-
-    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.element.futures.push(spawn_cancelable_future(future));
-    }
-
-    fn check_attribute_unique(&mut self, name: &str) {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.attributes.insert(name.into()));
-        let _ = name;
-    }
-
-    fn dom_element(&self) -> &web_sys::Element {
-        &self.element.dom_element
     }
 }
 
@@ -329,4 +331,30 @@ pub trait ElementBuilder: Sized {
     fn build(self) -> Self::Target;
 
     fn into_element(self) -> Element;
+}
+
+pub trait ParentBuilder: Sized {
+    fn text(self, child: &str) -> Self;
+
+    fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
+
+    fn child(self, c: impl Into<Element>) -> Self;
+
+    fn children(mut self, children: impl IntoIterator<Item = impl Into<Element>>) -> Self {
+        for child in children {
+            self = self.child(child);
+        }
+
+        self
+    }
+
+    fn child_signal(self, child: impl Signal<Item = impl Into<Element>> + 'static) -> Self;
+
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Element>> + 'static)
+        -> Self;
+
+    fn optional_child_signal(
+        self,
+        child: impl Signal<Item = Option<impl Into<Element>>> + 'static,
+    ) -> Self;
 }

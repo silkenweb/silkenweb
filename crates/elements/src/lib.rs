@@ -13,12 +13,9 @@
 
 use std::marker::PhantomData;
 
-use futures_signals::{
-    signal::{Signal, SignalExt},
-    signal_vec::SignalVec,
-};
+use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
-use silkenweb_dom::element::{Element, ElementBuilder};
+use silkenweb_dom::element::ElementBuilder;
 use wasm_bindgen::{intern, JsCast, UnwrapThrowExt};
 
 #[doc(hidden)]
@@ -51,40 +48,6 @@ impl<T> From<web_sys::CustomEvent> for CustomEvent<T> {
     fn from(src: web_sys::CustomEvent) -> Self {
         Self(src, PhantomData)
     }
-}
-
-/// Methods to add child elements. These are in a trait to allow attribute
-/// methods to be disambiguated..
-pub trait ParentBuilder: Sized {
-    fn text(self, child: &str) -> Self;
-
-    fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
-
-    fn child<Child>(self, c: Child) -> Self
-    where
-        Child: Into<Element>;
-
-    fn children<Child, Children>(mut self, children: Children) -> Self
-    where
-        Child: Into<Element>,
-        Children: IntoIterator<Item = Child>,
-    {
-        for child in children {
-            self = self.child(child);
-        }
-
-        self
-    }
-
-    fn child_signal(self, child: impl Signal<Item = impl Into<Element>> + 'static) -> Self;
-
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Element>> + 'static)
-        -> Self;
-
-    fn optional_child_signal(
-        self,
-        child: impl Signal<Item = Option<impl Into<Element>>> + 'static,
-    ) -> Self;
 }
 
 macro_rules! global_attributes {

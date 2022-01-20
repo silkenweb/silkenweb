@@ -5,8 +5,11 @@ use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
     animation::infinite_animation,
-    dom::{element::ElementBuilder, mount},
-    elements::{svg, ParentBuilder},
+    dom::{
+        element::{ElementBuilder, ParentBuilder},
+        mount,
+    },
+    elements::svg,
 };
 use wasm_bindgen::UnwrapThrowExt;
 

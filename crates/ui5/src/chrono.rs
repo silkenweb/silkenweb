@@ -1,6 +1,9 @@
 use parse_display::Display;
 use silkenweb::{
-    dom::{attribute::AttributeValue, element::ElementBuilder},
+    dom::{
+        attribute::AttributeValue,
+        element::{ElementBuilder, ParentBuilder},
+    },
     elements::html_element,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};

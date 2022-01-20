@@ -2,7 +2,7 @@ pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
-    element::{Element, ElementBuilder, GenericElementBuilder},
+    element::{Element, ElementBuilder, GenericElementBuilder, ParentBuilder},
     tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
@@ -295,7 +295,7 @@ macro_rules! create_element_fn {
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident $(- $name_tail:ident)*) => {
-        impl $crate::ParentBuilder for
+        impl $crate::macros::ParentBuilder for
             $crate::camel_name!{$name $($name_tail)* Builder}
         {
             fn text(self, child: &str) -> Self {
@@ -309,9 +309,7 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
-            fn child<Child>(self, c: Child) -> Self
-            where
-                Child: Into<$crate::macros::Element>
+            fn child(self, c: impl Into<$crate::macros::Element>) -> Self
             {
                 Self{ builder: self.builder.child(c) }
             }
