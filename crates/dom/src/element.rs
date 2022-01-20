@@ -25,14 +25,14 @@ mod dom_children;
 mod event;
 
 /// Build an HTML element.
-pub struct GenericElementBuilder {
+pub struct ElementBuilderBase {
     element: Element,
     child_groups: Rc<RefCell<ChildGroups>>,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
 
-impl GenericElementBuilder {
+impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
         Self::new_element(document::create_element(tag))
     }
@@ -65,7 +65,7 @@ impl GenericElementBuilder {
     }
 }
 
-impl ParentBuilder for GenericElementBuilder {
+impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
@@ -123,8 +123,6 @@ impl ParentBuilder for GenericElementBuilder {
         self.spawn_future(updater)
     }
 
-    // TODO: Docs
-    // TODO: tests
     fn children_signal(
         self,
         children: impl SignalVec<Item = impl Into<Element>> + 'static,
@@ -176,7 +174,7 @@ impl ParentBuilder for GenericElementBuilder {
     }
 }
 
-impl ElementBuilder for GenericElementBuilder {
+impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
@@ -267,8 +265,8 @@ impl ElementBuilder for GenericElementBuilder {
     }
 }
 
-impl From<GenericElementBuilder> for Element {
-    fn from(builder: GenericElementBuilder) -> Self {
+impl From<ElementBuilderBase> for Element {
+    fn from(builder: ElementBuilderBase) -> Self {
         builder.build()
     }
 }

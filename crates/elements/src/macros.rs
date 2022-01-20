@@ -2,7 +2,7 @@ pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
-    element::{Element, ElementBuilder, GenericElementBuilder, ParentBuilder},
+    element::{Element, ElementBuilder, ElementBuilderBase, ParentBuilder},
     tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
@@ -158,7 +158,7 @@ macro_rules! dom_element {
         }
 
         pub struct $camel_builder_name {
-            builder: $crate::macros::GenericElementBuilder
+            builder: $crate::macros::ElementBuilderBase
         }
 
         impl $camel_builder_name {
@@ -254,7 +254,7 @@ macro_rules! dom_element {
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::GenericElementBuilder {
+        impl From<$camel_builder_name> for $crate::macros::ElementBuilderBase {
             fn from(builder: $camel_builder_name) -> Self {
                 builder.builder
             }

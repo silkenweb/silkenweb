@@ -2,7 +2,7 @@
 use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
-use element::{Element, GenericElementBuilder};
+use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
 use wasm_bindgen::UnwrapThrowExt;
@@ -48,15 +48,15 @@ pub fn unmount(id: &str) {
 /// An HTML element tag.
 ///
 /// For example: `tag("div")`
-pub fn tag(name: &str) -> GenericElementBuilder {
-    GenericElementBuilder::new(name)
+pub fn tag(name: &str) -> ElementBuilderBase {
+    ElementBuilderBase::new(name)
 }
 
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: &str, name: &str) -> GenericElementBuilder {
-    GenericElementBuilder::new_in_namespace(namespace, name)
+pub fn tag_in_namespace(namespace: &str, name: &str) -> ElementBuilderBase {
+    ElementBuilderBase::new_in_namespace(namespace, name)
 }
 
 fn spawn_cancelable_future(
