@@ -243,12 +243,10 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        {
-            let dom_element = self.element.dom_element.clone();
-            self.element
-                .event_callbacks
-                .push(EventCallback::new(dom_element, name, f));
-        }
+        let dom_element = self.element.dom_element.clone();
+        self.element
+            .event_callbacks
+            .push(EventCallback::new(dom_element, name, f));
 
         self
     }
