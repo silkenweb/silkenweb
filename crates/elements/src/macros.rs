@@ -250,12 +250,6 @@ macro_rules! dom_element {
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::ElementBuilderBase {
-            fn from(builder: $camel_builder_name) -> Self {
-                builder.builder
-            }
-        }
-
         pub struct $camel_name($crate::macros::Element);
 
         impl From<$camel_name> for $crate::macros::Element {
