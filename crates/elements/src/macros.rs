@@ -227,6 +227,10 @@ macro_rules! dom_element {
                 }
             }
 
+            fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
+                Self{ builder: self.builder.spawn_future(future) }
+            }
+
             fn on(
                 self,
                 name: &'static str,

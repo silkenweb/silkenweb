@@ -54,10 +54,6 @@ impl GenericElementBuilder {
         }
     }
 
-    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.element.futures.push(spawn_cancelable_future(future));
-    }
-
     fn check_attribute_unique(&mut self, name: &str) {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
@@ -82,10 +78,7 @@ impl ParentBuilder for GenericElementBuilder {
         self
     }
 
-    fn child_signal(
-        mut self,
-        child_signal: impl Signal<Item = impl Into<Element>> + 'static,
-    ) -> Self {
+    fn child_signal(self, child_signal: impl Signal<Item = impl Into<Element>> + 'static) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
         let children = self.child_groups.clone();
         // Store the child in here until we replace it.
@@ -100,13 +93,11 @@ impl ParentBuilder for GenericElementBuilder {
             async {}
         });
 
-        self.spawn_future(updater);
-
-        self
+        self.spawn_future(updater)
     }
 
     fn optional_child_signal(
-        mut self,
+        self,
         child_signal: impl Signal<Item = Option<impl Into<Element>>> + 'static,
     ) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
@@ -129,15 +120,13 @@ impl ParentBuilder for GenericElementBuilder {
             async {}
         });
 
-        self.spawn_future(updater);
-
-        self
+        self.spawn_future(updater)
     }
 
     // TODO: Docs
     // TODO: tests
     fn children_signal(
-        mut self,
+        self,
         children: impl SignalVec<Item = impl Into<Element>> + 'static,
     ) -> Self {
         let group_index = self.child_groups.borrow_mut().new_group();
@@ -152,8 +141,7 @@ impl ParentBuilder for GenericElementBuilder {
             async {}
         });
 
-        self.spawn_future(updater);
-        self
+        self.spawn_future(updater)
     }
 
     /// Add a text node after existing children.
@@ -165,10 +153,7 @@ impl ParentBuilder for GenericElementBuilder {
         self
     }
 
-    fn text_signal(
-        mut self,
-        child_signal: impl Signal<Item = impl Into<String>> + 'static,
-    ) -> Self {
+    fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
         let text_node = document::create_text_node(intern(""));
         self.child_groups
             .borrow_mut()
@@ -187,8 +172,7 @@ impl ParentBuilder for GenericElementBuilder {
             }
         });
 
-        self.spawn_future(updater);
-        self
+        self.spawn_future(updater)
     }
 }
 
@@ -223,8 +207,7 @@ impl ElementBuilder for GenericElementBuilder {
             }
         });
 
-        self.spawn_future(updater);
-        self
+        self.spawn_future(updater)
     }
 
     /// Apply an effect after the next render.
@@ -238,7 +221,7 @@ impl ElementBuilder for GenericElementBuilder {
     /// Apply an effect after the next render each time a singal yields a new
     /// value.
     fn effect_signal<T>(
-        mut self,
+        self,
         sig: impl Signal<Item = T> + 'static,
         f: impl Clone + Fn(&Self::DomType, T) + 'static,
     ) -> Self
@@ -253,8 +236,11 @@ impl ElementBuilder for GenericElementBuilder {
             async {}
         });
 
-        self.spawn_future(future);
+        self.spawn_future(future)
+    }
 
+    fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
+        self.element.futures.push(spawn_cancelable_future(future));
         self
     }
 
@@ -317,6 +303,8 @@ pub trait ElementBuilder: Sized {
         sig: impl Signal<Item = T> + 'static,
         f: impl Fn(&Self::DomType, T) + Clone + 'static,
     ) -> Self;
+
+    fn spawn_future(self, future: impl Future<Output = ()> + 'static) -> Self;
 
     /// Register an event handler.
     ///
