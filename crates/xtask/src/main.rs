@@ -1,4 +1,5 @@
 use clap::Parser;
+use scopeguard::defer;
 use xshell::{cmd, pushd};
 use xtask_base::{
     build_readme, ci, generate_open_source_files, run, CommonCmds, Toolchain, WorkflowResult,
@@ -25,7 +26,10 @@ enum Commands {
     /// Run TodoMVC with `trunk`
     TodomvcRun,
     /// Run the TodoMVC Cypress tests
-    TodomvcCypress,
+    TodomvcCypress {
+        #[clap(long)]
+        gui: bool,
+    },
     #[clap(flatten)]
     Common(CommonCmds),
 }
@@ -43,7 +47,7 @@ fn main() {
                 ci(fast, toolchain)?;
 
                 if !fast {
-                    cypress("ci")?;
+                    cypress("ci", "run")?;
                 }
 
                 if toolchain.map_or(true, |tc| tc == Toolchain::Stable) {
@@ -54,8 +58,8 @@ fn main() {
                 let _dir = pushd("examples/todomvc")?;
                 cmd!("trunk serve --open").run()?;
             }
-            Commands::TodomvcCypress => {
-                cypress("install")?;
+            Commands::TodomvcCypress { gui } => {
+                cypress("install", if gui { "open" } else { "run" })?;
             }
             Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
         }
@@ -64,10 +68,16 @@ fn main() {
     });
 }
 
-fn cypress(install_cmd: &str) -> WorkflowResult<()> {
-    let _dir = pushd("examples/todomvc/e2e")?;
-    cmd!("npm {install_cmd}").run()?;
-    cmd!("npm test").run()?;
+fn cypress(npm_install_cmd: &str, cypress_cmd: &str) -> WorkflowResult<()> {
+    let _dir = pushd("examples/todomvc")?;
+    cmd!("trunk build").run()?;
+    let trunk = duct::cmd("trunk", ["serve", "--no-autoreload", "--ignore=."]).start()?;
+    defer! { let _ = trunk.kill(); };
+
+    let _dir = pushd("e2e")?;
+    cmd!("npm {npm_install_cmd}").run()?;
+    cmd!("npx cypress {cypress_cmd}").run()?;
+
     Ok(())
 }
 
