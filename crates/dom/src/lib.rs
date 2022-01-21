@@ -31,7 +31,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
 
     document::get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .append_child(&elem.dom_element)
+        .append_child(&elem.eval_dom_element())
         .unwrap_throw();
     APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
@@ -41,7 +41,8 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
     if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
-        elem.dom_element.remove();
+        todo!()
+        // elem.eval_dom_element().remove();
     }
 }
 

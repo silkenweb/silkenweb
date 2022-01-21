@@ -1,14 +1,14 @@
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
 pub struct EventCallback {
-    target: web_sys::Element,
+    target: web_sys::Node,
     name: &'static str,
     callback: Closure<dyn FnMut(JsValue)>,
 }
 
 impl EventCallback {
     pub fn new(
-        target: web_sys::Element,
+        target: web_sys::Node,
         name: &'static str,
         f: impl FnMut(JsValue) + 'static,
     ) -> Self {
