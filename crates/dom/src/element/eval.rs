@@ -171,7 +171,7 @@ impl StrictElement {
 }
 
 struct StrictElementData {
-    pub(super) dom_element: web_sys::Node,
+    dom_element: web_sys::Node,
     event_callbacks: Vec<EventCallback>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
