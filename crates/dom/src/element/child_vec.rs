@@ -5,10 +5,10 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     child_groups::ChildGroups,
-    eval::{StrictElement, StrictNode},
+    eval::{StrictElement, StrictNodeBase},
     Element,
 };
-use crate::render::queue_update;
+use crate::{render::queue_update, element::eval::StrictNodeRef};
 
 pub struct ChildVec {
     parent: StrictElement,
@@ -64,7 +64,7 @@ impl ChildVec {
         }
 
         let children = self.child_element_refs();
-        child_groups.set_first_child(self.group_index, children.first().unwrap_throw());
+        child_groups.set_first_child(self.group_index, children.first().unwrap_throw().clone());
         let parent = self.parent.clone();
         let next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
@@ -87,14 +87,14 @@ impl ChildVec {
         if index == 0 {
             self.child_groups
                 .borrow_mut()
-                .set_first_child(self.group_index, &new_child_node);
+                .set_first_child(self.group_index, new_child_node.clone());
         }
 
         assert!(index < self.children.len());
 
         self.parent.insert_child_before(
-            &new_child_node,
-            Some(&self.children[index].0.clone_into_node()),
+            new_child_node,
+            Some(self.children[index].0.clone_into_node()),
         );
 
         self.children.insert(index, new_child);
@@ -107,20 +107,20 @@ impl ChildVec {
         if index == 0 {
             self.child_groups
                 .borrow_mut()
-                .set_first_child(self.group_index, &new_child_node);
+                .set_first_child(self.group_index, new_child_node.clone());
         }
 
         let old_child = &mut self.children[index];
 
         self.parent
-            .replace_child(&new_child_node, &old_child.0.clone_into_node());
+            .replace_child(new_child_node, old_child.0.clone_into_node());
 
         *old_child = new_child;
     }
 
     pub fn remove(&mut self, index: usize) -> Element {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(&old_child.0.clone_into_node());
+        self.parent.remove_child(old_child.0.clone_into_node());
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -128,7 +128,7 @@ impl ChildVec {
             None => child_groups.clear_first_child(self.group_index),
             Some(first) => {
                 if index == 0 {
-                    child_groups.set_first_child(self.group_index, &first.0.clone_into_node())
+                    child_groups.set_first_child(self.group_index, first.0.clone_into_node())
                 }
             }
         }
@@ -147,9 +147,9 @@ impl ChildVec {
         let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
-            groups.insert_only_child(self.group_index, &new_child_node);
+            groups.insert_only_child(self.group_index, new_child_node);
         } else {
-            groups.insert_last_child(self.group_index, &new_child_node);
+            groups.insert_last_child(self.group_index, new_child_node);
         }
 
         self.children.push(new_child);
@@ -165,7 +165,7 @@ impl ChildVec {
         }
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(&removed_child.0.clone_into_node());
+            self.parent.remove_child(removed_child.0.clone_into_node());
         }
     }
 
@@ -177,12 +177,12 @@ impl ChildVec {
         child_groups.clear_first_child(self.group_index);
         let is_only_group = child_groups.is_single_group();
         mem::drop(child_groups);
-        
+
         if is_only_group {
             self.parent.clear_children();
         } else {
             let parent = self.parent.clone();
-            
+
             queue_update(move || {
                 for child in existing_children {
                     parent.remove_child_now(&child);
@@ -191,7 +191,7 @@ impl ChildVec {
         }
     }
 
-    fn child_element_refs(&self) -> Vec<StrictNode> {
+    fn child_element_refs(&self) -> Vec<StrictNodeBase> {
         self.children
             .iter()
             .map(|elem| elem.0.clone_into_node())

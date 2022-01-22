@@ -16,7 +16,7 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    eval::{StrictElement, StrictNode},
+    eval::{StrictElement, StrictText, StrictNodeRef},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
@@ -66,8 +66,7 @@ impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(self, child: impl Into<Element>) -> Self {
         let child = child.into();
-        self.child_groups_mut()
-            .append_new_group_sync(&child.0.clone_into_node());
+        self.child_groups_mut().append_new_group_sync(&child.0);
         self.element.0.store_child(child.0);
 
         self
@@ -83,7 +82,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, &child.0.clone_into_node());
+                .upsert_only_child(group_index, child.0.clone_into_node());
             _child_storage = Some(child);
             async {}
         });
@@ -105,7 +104,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, &child.0.clone_into_node());
+                    .upsert_only_child(group_index, child.0.clone_into_node());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -139,13 +138,13 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let text_node = StrictNode::new_text(child);
+        let text_node = StrictText::new(child);
         self.child_groups_mut().append_new_group_sync(&text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let text_node = StrictNode::new_text(intern(""));
+        let text_node = StrictText::new(intern(""));
         self.child_groups_mut().append_new_group_sync(&text_node);
 
         let updater = child_signal.for_each({
