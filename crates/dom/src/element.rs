@@ -16,14 +16,14 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    eval::{StrictElement, StrictNodeRef, StrictText},
+    strict::{StrictElement, StrictNodeRef, StrictText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
 mod child_groups;
 mod child_vec;
-mod eval;
 mod event;
+mod strict;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
@@ -248,7 +248,7 @@ impl From<ElementBuilderBase> for Element {
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
-pub struct Element(eval::StrictElement);
+pub struct Element(strict::StrictElement);
 
 impl Element {
     pub(super) fn eval_dom_element(&self) -> web_sys::Element {

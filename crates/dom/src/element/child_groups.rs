@@ -1,6 +1,6 @@
 use std::mem;
 
-use super::eval::{StrictElement, StrictNodeBase, StrictNodeRef};
+use super::strict::{StrictElement, StrictNodeBase, StrictNodeRef};
 
 /// Groups of children with the same parent
 ///

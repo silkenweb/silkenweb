@@ -5,10 +5,10 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     child_groups::ChildGroups,
-    eval::{StrictElement, StrictNodeBase},
+    strict::{StrictElement, StrictNodeBase},
     Element,
 };
-use crate::{element::eval::StrictNodeRef, render::queue_update};
+use crate::{element::strict::StrictNodeRef, render::queue_update};
 
 pub struct ChildVec {
     parent: StrictElement,

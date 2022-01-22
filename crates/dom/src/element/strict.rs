@@ -21,7 +21,7 @@ use crate::{
 #[derive(Clone)]
 pub struct StrictElement {
     dom_element: StrictNode<web_sys::Element>,
-    handles: Rc<RefCell<StrictElementHandles>>,
+    handles: Rc<RefCell<ElementHandles>>,
 }
 
 impl StrictElement {
@@ -36,7 +36,7 @@ impl StrictElement {
     fn new_element(dom_element: web_sys::Element) -> Self {
         Self {
             dom_element: StrictNode(dom_element),
-            handles: Rc::new(RefCell::new(StrictElementHandles {
+            handles: Rc::new(RefCell::new(ElementHandles {
                 event_callbacks: Vec::new(),
                 futures: Vec::new(),
             })),
@@ -148,7 +148,7 @@ impl StrictElement {
         self.dom_element().clone()
     }
 
-    fn handles_mut(&self) -> RefMut<StrictElementHandles> {
+    fn handles_mut(&self) -> RefMut<ElementHandles> {
         self.handles.as_ref().borrow_mut()
     }
 
@@ -217,7 +217,7 @@ impl StrictNodeRef for StrictElement {
     }
 }
 
-struct StrictElementHandles {
+struct ElementHandles {
     event_callbacks: Vec<EventCallback>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
