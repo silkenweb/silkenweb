@@ -98,16 +98,18 @@ pub struct LazyNode<T>(LazyEnum<StrictNode<T>, StrictNode<T>>);
 impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     pub fn append_child_now(&mut self, child: &mut impl LazyNodeRef) {
         match (&mut self.0, child.as_node_mut().0) {
-            (LazyEnum::Value(parent), LazyEnum::Value(child)) => parent.append_child_now(child),
+            (LazyEnum::Value(parent), LazyEnum::Value(child)) => {
+                return parent.append_child_now(child)
+            }
             (LazyEnum::Thunk(parent), LazyEnum::Thunk(child)) => {
-                parent.as_mut().unwrap().append_child_now(child.unwrap())
+                return parent.as_mut().unwrap().append_child_now(child.unwrap())
             }
-            _ => {
-                self.eval();
-                child.eval();
-                todo!();
-            }
+            _ => (),
         }
+
+        self.eval();
+        child.eval();
+        self.append_child_now(child);
     }
 
     pub fn insert_child_before(&mut self, child: LazyNodeBase, next_child: Option<LazyNodeBase>) {
