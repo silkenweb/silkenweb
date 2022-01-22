@@ -151,11 +151,7 @@ impl ParentBuilder for ElementBuilderBase {
             clone!(text_node);
 
             move |new_value| {
-                queue_update({
-                    clone!(text_node);
-                    let new_value = new_value.into();
-                    move || text_node.set_text(new_value)
-                });
+                text_node.set_text(new_value.into());
                 async {}
             }
         });
