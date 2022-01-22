@@ -129,7 +129,8 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         let parent = self.dom_node().clone();
 
         queue_update(move || {
-            // TODO: Is this the same as `set_inner_html`?
+            // This is specified to remove all nodes, if I'm reading it correctly:
+            // <https://dom.spec.whatwg.org/#dom-node-textcontent>
             parent.set_text_content(None);
         })
     }
