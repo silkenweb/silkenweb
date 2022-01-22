@@ -1,9 +1,4 @@
-use std::{
-    cell::{RefCell, RefMut},
-    future::Future,
-    mem,
-    rc::Rc,
-};
+use std::future::Future;
 
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
@@ -20,7 +15,8 @@ use crate::{
 
 pub struct StrictElement {
     dom_element: StrictNode<web_sys::Element>,
-    handles: Rc<RefCell<ElementHandles>>,
+    event_callbacks: Vec<EventCallback>,
+    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
 impl StrictElement {
@@ -35,46 +31,33 @@ impl StrictElement {
     fn new_element(dom_element: web_sys::Element) -> Self {
         Self {
             dom_element: StrictNode(dom_element),
-            handles: Rc::new(RefCell::new(ElementHandles {
-                event_callbacks: Vec::new(),
-                futures: Vec::new(),
-            })),
+            event_callbacks: Vec::new(),
+            futures: Vec::new(),
         }
     }
 
     pub fn shrink_to_fit(&mut self) {
-        let mut data = self.handles_mut();
-        data.event_callbacks.shrink_to_fit();
-        data.futures.shrink_to_fit();
+        self.event_callbacks.shrink_to_fit();
+        self.futures.shrink_to_fit();
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.handles_mut()
-            .futures
-            .push(spawn_cancelable_future(future));
+        self.futures.push(spawn_cancelable_future(future));
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        let mut data = self.handles_mut();
         let dom_element = self.dom_element().clone();
-        data.event_callbacks
+        self.event_callbacks
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&self, child: Self) {
-        let mut data = self.handles_mut();
-        let mut child_data = child.handles_mut();
-        data.event_callbacks
-            .extend(mem::take(&mut child_data.event_callbacks));
-        data.futures.extend(mem::take(&mut child_data.futures));
+    pub fn store_child(&mut self, child: Self) {
+        self.event_callbacks.extend(child.event_callbacks);
+        self.futures.extend(child.futures);
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
         self.dom_element().clone()
-    }
-
-    fn handles_mut(&self) -> RefMut<ElementHandles> {
-        self.handles.as_ref().borrow_mut()
     }
 
     fn dom_element(&self) -> &web_sys::Element {
@@ -219,9 +202,4 @@ impl StrictNodeRef for StrictElement {
     fn as_node_ref(&self) -> &StrictNode<Self::Node> {
         &self.dom_element
     }
-}
-
-struct ElementHandles {
-    event_callbacks: Vec<EventCallback>,
-    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }

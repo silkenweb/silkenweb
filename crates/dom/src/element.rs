@@ -70,7 +70,7 @@ impl ElementBuilderBase {
 
 impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
-    fn child(self, child: impl Into<Element>) -> Self {
+    fn child(mut self, child: impl Into<Element>) -> Self {
         let child = child.into();
         self.child_groups_mut().append_new_group_sync(&child.0);
         self.element.0.store_child(child.0);
