@@ -43,9 +43,11 @@ impl ElementBuilderBase {
     }
 
     fn new_element(element: StrictElement) -> Self {
+        let node = element.clone_into_node();
+
         Self {
-            element: Element(element.clone()),
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(element))),
+            element: Element(element),
+            child_groups: Rc::new(RefCell::new(ChildGroups::new(node))),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -123,7 +125,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.0.clone(),
+            self.element.0.clone_into_node(),
             self.child_groups.clone(),
             group_index,
         );

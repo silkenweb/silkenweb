@@ -70,71 +70,6 @@ impl StrictElement {
         data.futures.extend(mem::take(&mut child_data.futures));
     }
 
-    pub fn append_child_now(&self, child: &impl StrictNodeRef) {
-        self.dom_element()
-            .append_child(child.as_node_ref().dom_node())
-            .unwrap_throw();
-    }
-
-    pub fn insert_child_before(&self, child: StrictNodeBase, next_child: Option<StrictNodeBase>) {
-        let parent = self.clone();
-
-        queue_update(move || {
-            parent.insert_child_before_now(&child, next_child.as_ref());
-        });
-    }
-
-    pub fn insert_child_before_now(
-        &self,
-        child: &impl StrictNodeRef,
-        next_child: Option<&impl StrictNodeRef>,
-    ) {
-        if let Some(next_child) = next_child {
-            self.dom_element()
-                .insert_before(
-                    child.as_node_ref().dom_node(),
-                    Some(next_child.as_node_ref().dom_node()),
-                )
-                .unwrap_throw();
-        } else {
-            self.append_child_now(child);
-        }
-    }
-
-    pub fn replace_child(&self, new_child: StrictNodeBase, old_child: StrictNodeBase) {
-        let parent = self.dom_element().clone();
-        clone!(new_child, old_child);
-
-        queue_update(move || {
-            parent
-                .replace_child(&new_child.0, &old_child.0)
-                .unwrap_throw();
-        });
-    }
-
-    pub fn remove_child_now(&self, child: &impl StrictNodeRef) {
-        self.dom_element()
-            .remove_child(child.as_node_ref().dom_node())
-            .unwrap_throw();
-    }
-
-    pub fn remove_child(&self, child: StrictNodeBase) {
-        let parent = self.dom_element().clone();
-
-        queue_update(move || {
-            parent.remove_child(&child.0).unwrap_throw();
-        });
-    }
-
-    pub fn clear_children(&self) {
-        let parent = self.dom_element().clone();
-
-        queue_update(move || {
-            // TODO: Is this the same as `set_inner_html`?
-            parent.set_text_content(None);
-        })
-    }
-
     pub fn attribute<T: Attribute>(&self, name: &str, value: T) {
         value.set_attribute(name, self.dom_element());
     }
@@ -160,7 +95,72 @@ impl StrictElement {
 #[derive(Clone)]
 pub struct StrictNode<T>(T);
 
-impl<T: AsRef<web_sys::Node>> StrictNode<T> {
+impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
+    pub fn append_child_now(&self, child: &impl StrictNodeRef) {
+        self.dom_node()
+            .append_child(child.as_node_ref().dom_node())
+            .unwrap_throw();
+    }
+
+    pub fn insert_child_before(&self, child: StrictNodeBase, next_child: Option<StrictNodeBase>) {
+        let parent = self.clone();
+
+        queue_update(move || {
+            parent.insert_child_before_now(&child, next_child.as_ref());
+        });
+    }
+
+    pub fn insert_child_before_now(
+        &self,
+        child: &impl StrictNodeRef,
+        next_child: Option<&impl StrictNodeRef>,
+    ) {
+        if let Some(next_child) = next_child {
+            self.dom_node()
+                .insert_before(
+                    child.as_node_ref().dom_node(),
+                    Some(next_child.as_node_ref().dom_node()),
+                )
+                .unwrap_throw();
+        } else {
+            self.append_child_now(child);
+        }
+    }
+
+    pub fn replace_child(&self, new_child: StrictNodeBase, old_child: StrictNodeBase) {
+        let parent = self.dom_node().clone();
+        clone!(new_child, old_child);
+
+        queue_update(move || {
+            parent
+                .replace_child(&new_child.0, &old_child.0)
+                .unwrap_throw();
+        });
+    }
+
+    pub fn remove_child_now(&self, child: &impl StrictNodeRef) {
+        self.dom_node()
+            .remove_child(child.as_node_ref().dom_node())
+            .unwrap_throw();
+    }
+
+    pub fn remove_child(&self, child: StrictNodeBase) {
+        let parent = self.dom_node().clone();
+
+        queue_update(move || {
+            parent.remove_child(&child.0).unwrap_throw();
+        });
+    }
+
+    pub fn clear_children(&self) {
+        let parent = self.dom_node().clone();
+
+        queue_update(move || {
+            // TODO: Is this the same as `set_inner_html`?
+            parent.set_text_content(None);
+        })
+    }
+
     fn dom_node(&self) -> &web_sys::Node {
         self.0.as_ref()
     }
@@ -184,7 +184,7 @@ impl StrictText {
 }
 
 pub trait StrictNodeRef {
-    type Node: AsRef<web_sys::Node> + Into<web_sys::Node>;
+    type Node: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static;
 
     fn as_node_ref(&self) -> &StrictNode<Self::Node>;
 
@@ -193,7 +193,10 @@ pub trait StrictNodeRef {
     }
 }
 
-impl<T: AsRef<web_sys::Node> + Into<web_sys::Node>> StrictNodeRef for StrictNode<T> {
+impl<T> StrictNodeRef for StrictNode<T>
+where
+    T: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static,
+{
     type Node = T;
 
     fn as_node_ref(&self) -> &StrictNode<Self::Node> {

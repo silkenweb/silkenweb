@@ -1,12 +1,12 @@
 use std::mem;
 
-use super::strict::{StrictElement, StrictNodeBase, StrictNodeRef};
+use super::strict::{StrictNodeBase, StrictNodeRef};
 
 /// Groups of children with the same parent
 ///
 /// This manages insertion and removal of groups of children
 pub struct ChildGroups {
-    parent: StrictElement,
+    parent: StrictNodeBase,
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
     children: Vec<Option<StrictNodeBase>>,
@@ -16,7 +16,7 @@ pub struct ChildGroups {
 }
 
 impl ChildGroups {
-    pub fn new(parent: StrictElement) -> Self {
+    pub fn new(parent: StrictNodeBase) -> Self {
         Self {
             parent,
             children: Vec::new(),

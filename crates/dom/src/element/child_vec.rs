@@ -3,15 +3,11 @@ use std::{cell::RefCell, mem, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{
-    child_groups::ChildGroups,
-    strict::{StrictElement, StrictNodeBase},
-    Element,
-};
+use super::{child_groups::ChildGroups, strict::StrictNodeBase, Element};
 use crate::{element::strict::StrictNodeRef, render::queue_update};
 
 pub struct ChildVec {
-    parent: StrictElement,
+    parent: StrictNodeBase,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
@@ -19,7 +15,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: StrictElement,
+        parent: StrictNodeBase,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
