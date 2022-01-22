@@ -23,6 +23,7 @@ use crate::{attribute::Attribute, clone, render::queue_update};
 mod child_groups;
 mod child_vec;
 mod event;
+mod lazy;
 mod strict;
 
 /// Build an HTML element.
