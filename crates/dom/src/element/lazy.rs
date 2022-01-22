@@ -1,6 +1,6 @@
 // TODO: Enable dead code warnings
 #![allow(dead_code)]
-use std::future::Future;
+use std::{convert::identity, future::Future};
 
 use wasm_bindgen::JsValue;
 
@@ -22,6 +22,15 @@ enum LazyEnum<Value, Thunk> {
 impl<Value, Thunk> LazyEnum<Value, Thunk> {
     fn thunk(thunk: Thunk) -> Self {
         Self::Thunk(Some(thunk))
+    }
+
+    fn eval(&mut self, f: impl FnOnce(Thunk) -> Value) {
+        let thunk = match self {
+            LazyEnum::Value(_) => return,
+            LazyEnum::Thunk(node) => node.take().unwrap(),
+        };
+
+        *self = LazyEnum::Value(f(thunk));
     }
 }
 
@@ -79,12 +88,7 @@ impl LazyElement {
     }
 
     fn eval(&mut self) {
-        let thunk = match &mut self.0 {
-            LazyEnum::Value(_) => return,
-            LazyEnum::Thunk(elem) => elem.take().unwrap(),
-        };
-
-        self.0 = LazyEnum::Value(thunk);
+        self.0.eval(identity);
     }
 }
 
@@ -92,18 +96,22 @@ impl LazyElement {
 pub struct LazyNode<T>(LazyEnum<StrictNode<T>, StrictNode<T>>);
 
 impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
-    pub fn append_child_now(&self, child: &impl LazyNodeRef) {
-        match (&self.0, child.as_node_ref().0) {
+    pub fn append_child_now(&mut self, child: &mut impl LazyNodeRef) {
+        match (&mut self.0, child.as_node_mut().0) {
             (LazyEnum::Value(parent), LazyEnum::Value(child)) => parent.append_child_now(child),
             (LazyEnum::Thunk(parent), LazyEnum::Thunk(child)) => {
-                parent.as_ref().unwrap().append_child_now(child.unwrap())
+                parent.as_mut().unwrap().append_child_now(child.unwrap())
             }
-            _ => todo!(),
+            _ => {
+                self.eval();
+                child.eval();
+                todo!();
+            }
         }
     }
 
-    pub fn insert_child_before(&self, child: LazyNodeBase, next_child: Option<LazyNodeBase>) {
-        match (&self.0, child.0, next_child) {
+    pub fn insert_child_before(&mut self, child: LazyNodeBase, next_child: Option<LazyNodeBase>) {
+        match (&mut self.0, child.0, next_child) {
             (LazyEnum::Value(parent), LazyEnum::Value(child), None) => {
                 parent.insert_child_before(child, None)
             }
@@ -113,7 +121,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
                 Some(LazyNode(LazyEnum::Value(next_child))),
             ) => parent.insert_child_before(child, Some(next_child)),
             (LazyEnum::Thunk(parent), LazyEnum::Thunk(child), None) => parent
-                .as_ref()
+                .as_mut()
                 .unwrap()
                 .insert_child_before(child.unwrap(), None),
             (
@@ -121,7 +129,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
                 LazyEnum::Thunk(child),
                 Some(LazyNode(LazyEnum::Thunk(next_child))),
             ) => parent
-                .as_ref()
+                .as_mut()
                 .unwrap()
                 .insert_child_before(child.unwrap(), Some(next_child.unwrap())),
             _ => todo!(),
@@ -129,17 +137,17 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     }
 
     pub fn insert_child_before_now(
-        &self,
-        child: &impl LazyNodeRef,
-        next_child: Option<&impl LazyNodeRef>,
+        &mut self,
+        child: &mut impl LazyNodeRef,
+        next_child: Option<&mut impl LazyNodeRef>,
     ) {
         match (
-            &self.0,
-            child.as_node_ref().0,
-            next_child.map(|c| c.as_node_ref().0),
+            &mut self.0,
+            child.as_node_mut().0,
+            next_child.map(|c| c.as_node_mut().0),
         ) {
             (LazyEnum::Value(parent), LazyEnum::Value(child), None) => {
-                let next_child: Option<&StrictElement> = None;
+                let next_child: Option<&mut StrictElement> = None;
                 parent.insert_child_before_now(child, next_child)
             }
             (
@@ -148,9 +156,9 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
                 Some(LazyEnum::Value(next_child)),
             ) => parent.insert_child_before_now(child, Some(next_child)),
             (LazyEnum::Thunk(parent), LazyEnum::Thunk(child), None) => {
-                let next_child: Option<&StrictElement> = None;
+                let next_child: Option<&mut StrictElement> = None;
                 parent
-                    .as_ref()
+                    .as_mut()
                     .unwrap()
                     .insert_child_before_now(child.unwrap(), next_child)
             }
@@ -159,45 +167,49 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
                 LazyEnum::Thunk(child),
                 Some(LazyEnum::Thunk(next_child)),
             ) => parent
-                .as_ref()
+                .as_mut()
                 .unwrap()
                 .insert_child_before_now(child.unwrap(), Some(next_child.unwrap())),
             _ => todo!(),
         }
     }
 
-    pub fn replace_child(&self, _new_child: LazyNodeBase, _old_child: LazyNodeBase) {
+    pub fn replace_child(&mut self, _new_child: LazyNodeBase, _old_child: LazyNodeBase) {
         todo!()
     }
 
-    pub fn remove_child_now(&self, _child: &impl LazyNodeRef) {
+    pub fn remove_child_now(&mut self, _child: &impl LazyNodeRef) {
         todo!()
     }
 
-    pub fn remove_child(&self, _child: LazyNodeBase) {
+    pub fn remove_child(&mut self, _child: LazyNodeBase) {
         todo!()
     }
 
-    pub fn clear_children(&self) {
-        match &self.0 {
+    pub fn clear_children(&mut self) {
+        match &mut self.0 {
             LazyEnum::Value(node) => node.clear_children(),
-            LazyEnum::Thunk(node) => node.as_ref().unwrap().clear_children(),
+            LazyEnum::Thunk(node) => node.as_mut().unwrap().clear_children(),
         }
+    }
+
+    fn eval(&mut self) {
+        self.0.eval(identity);
     }
 }
 
 impl LazyNode<web_sys::Element> {
-    pub fn attribute<A: Attribute>(&self, name: &str, value: A) {
-        match &self.0 {
+    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
+        match &mut self.0 {
             LazyEnum::Value(elem) => elem.attribute(name, value),
-            LazyEnum::Thunk(elem) => elem.as_ref().unwrap().attribute(name, value),
+            LazyEnum::Thunk(elem) => elem.as_mut().unwrap().attribute(name, value),
         }
     }
 
-    pub fn effect(&self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        match &self.0 {
+    pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        match &mut self.0 {
             LazyEnum::Value(elem) => elem.effect(f),
-            LazyEnum::Thunk(elem) => elem.as_ref().unwrap().effect(f),
+            LazyEnum::Thunk(elem) => elem.as_mut().unwrap().effect(f),
         }
     }
 }
@@ -212,10 +224,10 @@ impl LazyText {
         Self(LazyEnum::thunk(StrictText::new(text)))
     }
 
-    pub fn set_text(&self, text: String) {
-        match &self.0 {
+    pub fn set_text(&mut self, text: String) {
+        match &mut self.0 {
             LazyEnum::Value(node) => node.set_text(text),
-            LazyEnum::Thunk(node) => node.as_ref().unwrap().set_text(text),
+            LazyEnum::Thunk(node) => node.as_mut().unwrap().set_text(text),
         }
     }
 }
@@ -225,12 +237,16 @@ pub trait LazyNodeRef {
 
     fn as_node_ref(&self) -> Lazy<&StrictNode<Self::Node>, &StrictNode<Self::Node>>;
 
+    fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>>;
+
     fn clone_into_node(&self) -> Lazy<StrictNodeBase, StrictNodeBase> {
         Lazy(match self.as_node_ref().0 {
             LazyEnum::Value(node) => LazyEnum::Value(node.clone_into_node()),
             LazyEnum::Thunk(node) => LazyEnum::thunk(node.unwrap().clone_into_node()),
         })
     }
+
+    fn eval(&mut self);
 }
 
 impl<T> LazyNodeRef for LazyNode<T>
@@ -245,6 +261,17 @@ where
             LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_ref().unwrap().as_node_ref()),
         })
     }
+
+    fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>> {
+        Lazy(match &mut self.0 {
+            LazyEnum::Value(node) => LazyEnum::Value(node.as_node_mut()),
+            LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_mut().unwrap().as_node_mut()),
+        })
+    }
+
+    fn eval(&mut self) {
+        self.0.eval(identity);
+    }
 }
 
 impl LazyNodeRef for LazyText {
@@ -256,6 +283,17 @@ impl LazyNodeRef for LazyText {
             LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_ref().unwrap().as_node_ref()),
         })
     }
+
+    fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>> {
+        Lazy(match &mut self.0 {
+            LazyEnum::Value(node) => LazyEnum::Value(node.as_node_mut()),
+            LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_mut().unwrap().as_node_mut()),
+        })
+    }
+
+    fn eval(&mut self) {
+        self.0.eval(identity);
+    }
 }
 
 impl LazyNodeRef for LazyElement {
@@ -266,5 +304,16 @@ impl LazyNodeRef for LazyElement {
             LazyEnum::Value(node) => LazyEnum::Value(node.as_node_ref()),
             LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_ref().unwrap().as_node_ref()),
         })
+    }
+
+    fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>> {
+        Lazy(match &mut self.0 {
+            LazyEnum::Value(node) => LazyEnum::Value(node.as_node_mut()),
+            LazyEnum::Thunk(node) => LazyEnum::thunk(node.as_mut().unwrap().as_node_mut()),
+        })
+    }
+
+    fn eval(&mut self) {
+        self.0.eval(identity);
     }
 }

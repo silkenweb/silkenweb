@@ -69,24 +69,28 @@ impl StrictElement {
 pub struct StrictNode<T>(T);
 
 impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
-    pub fn append_child_now(&self, child: &impl StrictNodeRef) {
+    pub fn append_child_now(&mut self, child: &mut impl StrictNodeRef) {
         self.dom_node()
             .append_child(child.as_node_ref().dom_node())
             .unwrap_throw();
     }
 
-    pub fn insert_child_before(&self, child: StrictNodeBase, next_child: Option<StrictNodeBase>) {
-        let parent = self.clone();
+    pub fn insert_child_before(
+        &mut self,
+        mut child: StrictNodeBase,
+        mut next_child: Option<StrictNodeBase>,
+    ) {
+        let mut parent = self.clone();
 
         queue_update(move || {
-            parent.insert_child_before_now(&child, next_child.as_ref());
+            parent.insert_child_before_now(&mut child, next_child.as_mut());
         });
     }
 
     pub fn insert_child_before_now(
-        &self,
-        child: &impl StrictNodeRef,
-        next_child: Option<&impl StrictNodeRef>,
+        &mut self,
+        child: &mut impl StrictNodeRef,
+        next_child: Option<&mut impl StrictNodeRef>,
     ) {
         if let Some(next_child) = next_child {
             self.dom_node()
@@ -100,7 +104,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         }
     }
 
-    pub fn replace_child(&self, new_child: StrictNodeBase, old_child: StrictNodeBase) {
+    pub fn replace_child(&mut self, new_child: StrictNodeBase, old_child: StrictNodeBase) {
         let parent = self.dom_node().clone();
         clone!(new_child, old_child);
 
@@ -111,13 +115,13 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         });
     }
 
-    pub fn remove_child_now(&self, child: &impl StrictNodeRef) {
+    pub fn remove_child_now(&mut self, child: &impl StrictNodeRef) {
         self.dom_node()
             .remove_child(child.as_node_ref().dom_node())
             .unwrap_throw();
     }
 
-    pub fn remove_child(&self, child: StrictNodeBase) {
+    pub fn remove_child(&mut self, child: StrictNodeBase) {
         let parent = self.dom_node().clone();
 
         queue_update(move || {
@@ -125,7 +129,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         });
     }
 
-    pub fn clear_children(&self) {
+    pub fn clear_children(&mut self) {
         let parent = self.dom_node().clone();
 
         queue_update(move || {
@@ -141,11 +145,11 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
 }
 
 impl StrictNode<web_sys::Element> {
-    pub fn attribute<A: Attribute>(&self, name: &str, value: A) {
+    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         value.set_attribute(name, &self.0);
     }
 
-    pub fn effect(&self, f: impl FnOnce(&web_sys::Element) + 'static) {
+    pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let dom_element = self.0.clone();
         after_render(move || f(&dom_element));
     }
@@ -161,7 +165,7 @@ impl StrictText {
         Self(StrictNode(document::create_text_node(text)))
     }
 
-    pub fn set_text(&self, text: String) {
+    pub fn set_text(&mut self, text: String) {
         let node = self.0.clone();
 
         queue_update(move || node.0.set_text_content(Some(&text)));
@@ -172,6 +176,8 @@ pub trait StrictNodeRef {
     type Node: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static;
 
     fn as_node_ref(&self) -> &StrictNode<Self::Node>;
+
+    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node>;
 
     fn clone_into_node(&self) -> StrictNodeBase {
         StrictNode(self.as_node_ref().dom_node().clone())
@@ -187,6 +193,10 @@ where
     fn as_node_ref(&self) -> &StrictNode<Self::Node> {
         self
     }
+
+    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
+        self
+    }
 }
 
 impl StrictNodeRef for StrictText {
@@ -195,6 +205,10 @@ impl StrictNodeRef for StrictText {
     fn as_node_ref(&self) -> &StrictNode<Self::Node> {
         &self.0
     }
+
+    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
+        &mut self.0
+    }
 }
 
 impl StrictNodeRef for StrictElement {
@@ -202,5 +216,9 @@ impl StrictNodeRef for StrictElement {
 
     fn as_node_ref(&self) -> &StrictNode<Self::Node> {
         &self.dom_element
+    }
+
+    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
+        &mut self.dom_element
     }
 }

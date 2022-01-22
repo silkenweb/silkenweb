@@ -67,13 +67,17 @@ impl ElementBuilderBase {
     fn as_node_ref(&self) -> &StrictNode<web_sys::Element> {
         self.element.0.as_node_ref()
     }
+
+    fn as_node_mut(&mut self) -> &mut StrictNode<web_sys::Element> {
+        self.element.0.as_node_mut()
+    }
 }
 
 impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(mut self, child: impl Into<Element>) -> Self {
-        let child = child.into();
-        self.child_groups_mut().append_new_group_sync(&child.0);
+        let mut child = child.into();
+        self.child_groups_mut().append_new_group_sync(&mut child.0);
         self.element.0.store_child(child.0);
 
         self
@@ -145,18 +149,18 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let text_node = StrictText::new(child);
-        self.child_groups_mut().append_new_group_sync(&text_node);
+        let mut text_node = StrictText::new(child);
+        self.child_groups_mut()
+            .append_new_group_sync(&mut text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let text_node = StrictText::new(intern(""));
-        self.child_groups_mut().append_new_group_sync(&text_node);
+        let mut text_node = StrictText::new(intern(""));
+        self.child_groups_mut()
+            .append_new_group_sync(&mut text_node);
 
         let updater = child_signal.for_each({
-            clone!(text_node);
-
             move |new_value| {
                 text_node.set_text(new_value.into());
                 async {}
@@ -174,7 +178,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.as_node_ref().attribute(name, value);
+        self.as_node_mut().attribute(name, value);
         self
     }
 
@@ -190,7 +194,8 @@ impl ElementBuilder for ElementBuilderBase {
             let name = name.to_owned();
 
             move |new_value| {
-                clone!(name, element);
+                clone!(name);
+                let mut element = element.clone();
 
                 queue_update(move || element.attribute(&name, new_value));
 
@@ -202,8 +207,8 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     /// Apply an effect after the next render.
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.as_node_ref().effect(f);
+    fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+        self.as_node_mut().effect(f);
         self
     }
 
@@ -220,7 +225,8 @@ impl ElementBuilder for ElementBuilderBase {
         let element = self.as_node_ref().clone();
 
         let future = sig.for_each(move |x| {
-            clone!(f, element);
+            clone!(f);
+            let mut element = element.clone();
             element.effect(move |elem| f(elem, x));
             async {}
         });

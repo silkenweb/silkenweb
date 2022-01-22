@@ -61,12 +61,12 @@ impl ChildVec {
 
         let children = self.child_element_refs();
         child_groups.set_first_child(self.group_index, children.first().unwrap_throw().clone());
-        let parent = self.parent.clone();
-        let next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
+        let mut parent = self.parent.clone();
+        let mut next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
         queue_update(move || {
-            for child in children {
-                parent.insert_child_before_now(&child, next_group_elem.as_ref());
+            for mut child in children {
+                parent.insert_child_before_now(&mut child, next_group_elem.as_mut());
             }
         });
     }
@@ -177,7 +177,7 @@ impl ChildVec {
         if is_only_group {
             self.parent.clear_children();
         } else {
-            let parent = self.parent.clone();
+            let mut parent = self.parent.clone();
 
             queue_update(move || {
                 for child in existing_children {

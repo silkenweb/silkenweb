@@ -42,7 +42,7 @@ impl ChildGroups {
     }
 
     /// Append a new group. Don't wait for the next animation frame.
-    pub fn append_new_group_sync(&mut self, child: &impl StrictNodeRef) {
+    pub fn append_new_group_sync(&mut self, child: &mut impl StrictNodeRef) {
         if self.last_is_dynamic {
             self.children.push(Some(child.clone_into_node()));
         }
@@ -68,7 +68,7 @@ impl ChildGroups {
         existed
     }
 
-    pub fn insert_last_child(&self, index: usize, child: StrictNodeBase) {
+    pub fn insert_last_child(&mut self, index: usize, child: StrictNodeBase) {
         self.parent
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
