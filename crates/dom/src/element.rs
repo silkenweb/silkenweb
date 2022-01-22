@@ -13,7 +13,11 @@ use futures_signals::{
 };
 use wasm_bindgen::{intern, JsCast, JsValue};
 
-use self::{child_groups::ChildGroups, child_vec::ChildVec, eval::StrictElement};
+use self::{
+    child_groups::ChildGroups,
+    child_vec::ChildVec,
+    eval::{StrictElement, StrictNode},
+};
 use crate::{attribute::Attribute, clone, render::queue_update};
 
 mod child_groups;
@@ -62,8 +66,9 @@ impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(self, child: impl Into<Element>) -> Self {
         let child = child.into();
-        self.child_groups_mut().append_new_group_sync(&child.0);
-        self.element.0.add_child(child.0);
+        self.child_groups_mut()
+            .append_new_group_sync(&child.0.clone_into_node());
+        self.element.0.store_child(child.0);
 
         self
     }
@@ -78,7 +83,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, &child.0);
+                .upsert_only_child(group_index, &child.0.clone_into_node());
             _child_storage = Some(child);
             async {}
         });
@@ -100,7 +105,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, &child.0);
+                    .upsert_only_child(group_index, &child.0.clone_into_node());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -134,13 +139,13 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let text_node = StrictElement::new_text(child);
+        let text_node = StrictNode::new_text(child);
         self.child_groups_mut().append_new_group_sync(&text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let text_node = StrictElement::new_text(intern(""));
+        let text_node = StrictNode::new_text(intern(""));
         self.child_groups_mut().append_new_group_sync(&text_node);
 
         let updater = child_signal.for_each({
@@ -251,7 +256,7 @@ impl From<ElementBuilderBase> for Element {
 pub struct Element(eval::StrictElement);
 
 impl Element {
-    pub(super) fn eval_dom_element(&self) -> web_sys::Node {
+    pub(super) fn eval_dom_element(&self) -> web_sys::Element {
         self.0.eval_dom_element()
     }
 }

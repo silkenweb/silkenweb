@@ -41,8 +41,7 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
     if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
-        todo!()
-        // elem.eval_dom_element().remove();
+        elem.eval_dom_element().remove();
     }
 }
 
