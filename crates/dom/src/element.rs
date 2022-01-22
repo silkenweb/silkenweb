@@ -16,7 +16,7 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    eval::{StrictElement, StrictText, StrictNodeRef},
+    eval::{StrictElement, StrictNodeRef, StrictText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 

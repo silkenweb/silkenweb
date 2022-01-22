@@ -8,7 +8,7 @@ use super::{
     eval::{StrictElement, StrictNodeBase},
     Element,
 };
-use crate::{render::queue_update, element::eval::StrictNodeRef};
+use crate::{element::eval::StrictNodeRef, render::queue_update};
 
 pub struct ChildVec {
     parent: StrictElement,
