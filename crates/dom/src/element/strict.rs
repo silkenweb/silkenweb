@@ -18,7 +18,6 @@ use crate::{
     spawn_cancelable_future,
 };
 
-#[derive(Clone)]
 pub struct StrictElement {
     dom_element: StrictNode<web_sys::Element>,
     handles: Rc<RefCell<ElementHandles>>,
@@ -68,15 +67,6 @@ impl StrictElement {
         data.event_callbacks
             .extend(mem::take(&mut child_data.event_callbacks));
         data.futures.extend(mem::take(&mut child_data.futures));
-    }
-
-    pub fn attribute<T: Attribute>(&self, name: &str, value: T) {
-        value.set_attribute(name, self.dom_element());
-    }
-
-    pub fn effect(&self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        let dom_element = self.dom_element().clone();
-        after_render(move || f(&dom_element));
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
@@ -163,6 +153,17 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
 
     fn dom_node(&self) -> &web_sys::Node {
         self.0.as_ref()
+    }
+}
+
+impl StrictNode<web_sys::Element> {
+    pub fn attribute<A: Attribute>(&self, name: &str, value: A) {
+        value.set_attribute(name, &self.0);
+    }
+
+    pub fn effect(&self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        let dom_element = self.0.clone();
+        after_render(move || f(&dom_element));
     }
 }
 
