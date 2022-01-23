@@ -7,7 +7,7 @@ use wasm_bindgen::JsValue;
 use super::strict::{StrictElement, StrictNode, StrictNodeRef, StrictText};
 use crate::attribute::Attribute;
 
-// TODO: Use `StrictElement` as the thunk type for now, jsut to get us going.
+// TODO: Use `StrictElement` as the thunk type for now, just to get us going.
 pub struct LazyElement(LazyEnum<StrictElement, StrictElement>);
 
 #[derive(Clone)]
@@ -220,6 +220,27 @@ impl LazyNode<web_sys::Element> {
     }
 }
 
+// TODO: We don't want 2 implementations of `attribute` and `effect`
+impl Lazy<&mut StrictNode<web_sys::Element>, &mut StrictNode<web_sys::Element>> {
+    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
+        map1(
+            self.0.as_mut(),
+            value,
+            |elem, value| elem.attribute(name, value),
+            |elem, value| elem.attribute(name, value),
+        );
+    }
+
+    pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        map1(
+            self.0.as_mut(),
+            f,
+            |elem, f| elem.effect(f),
+            |elem, f| elem.effect(f),
+        );
+    }
+}
+
 pub type LazyNodeBase = LazyNode<web_sys::Node>;
 
 #[derive(Clone)]
@@ -253,6 +274,15 @@ pub trait LazyNodeRef {
             (),
             |node, _| node.clone_into_node(),
             |node, _| node.clone_into_node(),
+        ))
+    }
+
+    fn clone_into_x(&self) -> LazyNode<Self::Node> {
+        LazyNode(map1(
+            self.as_node_ref().0,
+            (),
+            |x, _| x.clone(),
+            |x, _| x.clone(),
         ))
     }
 }

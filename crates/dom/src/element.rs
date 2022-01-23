@@ -16,7 +16,7 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    hydration::{HydrationElement, HydrationNode, HydrationNodeRef, HydrationText},
+    hydration::{HydrationElement, HydrationNodeRef, HydrationText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
@@ -63,14 +63,6 @@ impl ElementBuilderBase {
 
     fn child_groups_mut(&self) -> RefMut<ChildGroups> {
         self.child_groups.as_ref().borrow_mut()
-    }
-
-    fn as_node_ref(&self) -> &HydrationNode<web_sys::Element> {
-        self.element.0.as_node_ref()
-    }
-
-    fn as_node_mut(&mut self) -> &mut HydrationNode<web_sys::Element> {
-        self.element.0.as_node_mut()
     }
 }
 
@@ -179,7 +171,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.as_node_mut().attribute(name, value);
+        self.element.0.as_node_mut().attribute(name, value);
         self
     }
 
@@ -189,7 +181,7 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let element = self.as_node_ref().clone();
+        let element = self.element.0.clone_into_x();
 
         let updater = value.for_each({
             let name = name.to_owned();
@@ -209,7 +201,7 @@ impl ElementBuilder for ElementBuilderBase {
 
     /// Apply an effect after the next render.
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.as_node_mut().effect(f);
+        self.element.0.as_node_mut().effect(f);
         self
     }
 
@@ -223,7 +215,7 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let element = self.as_node_ref().clone();
+        let element = self.element.0.clone_into_x();
 
         let future = sig.for_each(move |x| {
             clone!(f);

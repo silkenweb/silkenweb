@@ -182,6 +182,11 @@ pub trait StrictNodeRef {
     fn clone_into_node(&self) -> StrictNodeBase {
         StrictNode(self.as_node_ref().dom_node().clone())
     }
+
+    // TODO: Name this properly
+    fn clone_into_x(&self) -> StrictNode<Self::Node> {
+        self.as_node_ref().clone()
+    }
 }
 
 impl<T> StrictNodeRef for StrictNode<T>
