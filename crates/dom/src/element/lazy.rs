@@ -151,14 +151,13 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
                 |parent, child, next_child| parent.insert_child_before_now(child, Some(next_child)),
             );
         } else {
-            let next_child_value: Option<&mut StrictElement> = None;
-            let next_child_thunk: Option<&mut StrictElement> = None;
+            type NextChild<'a> = Option<&'a mut StrictElement>;
 
             call2(
                 self.0.as_mut(),
                 child.as_node_mut().0,
-                |parent, child| parent.insert_child_before_now(child, next_child_value),
-                |parent, child| parent.insert_child_before_now(child, next_child_thunk),
+                |parent, child| parent.insert_child_before_now(child, None as NextChild),
+                |parent, child| parent.insert_child_before_now(child, None as NextChild),
             );
         }
     }
