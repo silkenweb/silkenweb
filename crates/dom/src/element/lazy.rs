@@ -270,6 +270,28 @@ impl LazyNodeRef for LazyElement {
     }
 }
 
+fn as_node_ref<'a, Value: StrictNodeRef, Thunk: StrictNodeRef>(
+    node: LazyEnum<&'a Value, &'a Thunk>,
+) -> Lazy<&'a StrictNode<Value::Node>, &'a StrictNode<Thunk::Node>> {
+    Lazy(map1(
+        node,
+        (),
+        |node, _| node.as_node_ref(),
+        |node, _| node.as_node_ref(),
+    ))
+}
+
+fn as_node_mut<'a, Value: StrictNodeRef, Thunk: StrictNodeRef>(
+    node: LazyEnum<&'a mut Value, &'a mut Thunk>,
+) -> Lazy<&'a mut StrictNode<Value::Node>, &'a mut StrictNode<Thunk::Node>> {
+    Lazy(map1(
+        node,
+        (),
+        |node, _| node.as_node_mut(),
+        |node, _| node.as_node_mut(),
+    ))
+}
+
 #[derive(Clone)]
 pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 
@@ -302,28 +324,6 @@ impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
             LazyEnum::Thunk(node) => node.into(),
         }
     }
-}
-
-fn as_node_ref<'a, Value: StrictNodeRef, Thunk: StrictNodeRef>(
-    node: LazyEnum<&'a Value, &'a Thunk>,
-) -> Lazy<&'a StrictNode<Value::Node>, &'a StrictNode<Thunk::Node>> {
-    Lazy(map1(
-        node,
-        (),
-        |node, _| node.as_node_ref(),
-        |node, _| node.as_node_ref(),
-    ))
-}
-
-fn as_node_mut<'a, Value: StrictNodeRef, Thunk: StrictNodeRef>(
-    node: LazyEnum<&'a mut Value, &'a mut Thunk>,
-) -> Lazy<&'a mut StrictNode<Value::Node>, &'a mut StrictNode<Thunk::Node>> {
-    Lazy(map1(
-        node,
-        (),
-        |node, _| node.as_node_mut(),
-        |node, _| node.as_node_mut(),
-    ))
 }
 
 fn map1<XValue, XThunk, Args, ValueResult, ThunkResult>(
