@@ -1,6 +1,6 @@
 // TODO: Enable dead code warnings
 #![allow(dead_code)]
-use std::{convert::identity, future::Future};
+use std::future::Future;
 
 use wasm_bindgen::JsValue;
 
@@ -13,21 +13,18 @@ pub struct LazyElement(LazyEnum<StrictElement, StrictElement>);
 #[derive(Clone)]
 pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 
-fn call2<XValue, XThunk, YValue, YThunk>(
+fn call2<XValue, XThunk: Into<XValue>, YValue, YThunk: Into<YValue>>(
     x: LazyEnum<XValue, XThunk>,
     y: LazyEnum<YValue, YThunk>,
     f_value: impl FnOnce(XValue, YValue),
     f_thunk: impl FnOnce(XThunk, YThunk),
-    // TODO: trait for converting a thunk to a value?
-    eval_x: impl FnOnce(XThunk) -> XValue,
-    eval_y: impl FnOnce(YThunk) -> YValue,
 ) {
     match (x, y) {
         (LazyEnum::Value(x), LazyEnum::Value(y)) => f_value(x, y),
         (LazyEnum::Thunk(x), LazyEnum::Thunk(y)) => f_thunk(x.unwrap(), y.unwrap()),
         (mut x, mut y) => {
-            x.eval(eval_x);
-            y.eval(eval_y);
+            x.eval();
+            y.eval();
             match (x, y) {
                 (LazyEnum::Value(x), LazyEnum::Value(y)) => f_value(x, y),
                 _ => panic!("Evaluation of lazy thunk failed"),
@@ -47,20 +44,22 @@ impl<Value, Thunk> LazyEnum<Value, Thunk> {
         Self::Thunk(Some(thunk))
     }
 
-    fn eval(&mut self, f: impl FnOnce(Thunk) -> Value) {
-        let thunk = match self {
-            LazyEnum::Value(_) => return,
-            LazyEnum::Thunk(node) => node.take().unwrap(),
-        };
-
-        *self = LazyEnum::Value(f(thunk));
-    }
-
     fn as_mut(&mut self) -> LazyEnum<&mut Value, &mut Thunk> {
         match self {
             LazyEnum::Value(value) => LazyEnum::Value(value),
             LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_mut()),
         }
+    }
+}
+
+impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
+    fn eval(&mut self) {
+        let thunk = match self {
+            LazyEnum::Value(_) => return,
+            LazyEnum::Thunk(node) => node.take().unwrap(),
+        };
+
+        *self = LazyEnum::Value(thunk.into());
     }
 }
 
@@ -102,8 +101,6 @@ impl LazyElement {
             child.0,
             |parent, child| parent.store_child(child),
             |parent, child| parent.store_child(child),
-            identity,
-            identity,
         );
     }
 
@@ -125,8 +122,6 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
             child.as_node_mut().0,
             |parent, child| parent.append_child_now(child),
             |parent, child| parent.append_child_now(child),
-            identity,
-            identity,
         );
     }
 
@@ -205,8 +200,6 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
             child.as_node_mut().0,
             |parent, child| parent.remove_child_now(child),
             |parent, child| parent.remove_child_now(child),
-            identity,
-            identity,
         );
     }
 
@@ -216,8 +209,6 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
             child.0,
             |parent, child| parent.remove_child(child),
             |parent, child| parent.remove_child(child),
-            identity,
-            identity,
         );
     }
 
