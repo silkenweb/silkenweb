@@ -16,7 +16,7 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    hydration::{HydrationElement, HydrationNodeRef, HydrationText},
+    hydration::{HydrationElement, HydrationNodeBase, HydrationNodeRef, HydrationText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
@@ -86,7 +86,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, child.0.clone_into_node().into_base());
+                .upsert_only_child(group_index, child.base_node());
             _child_storage = Some(child);
             async {}
         });
@@ -108,7 +108,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, child.0.clone_into_node().into_base());
+                    .upsert_only_child(group_index, child.base_node());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -127,7 +127,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.0.clone_into_node().into_base(),
+            self.element.base_node(),
             self.child_groups.clone(),
             group_index,
         );
@@ -259,6 +259,10 @@ pub struct Element(hydration::HydrationElement);
 impl Element {
     pub(super) fn eval_dom_element(&self) -> web_sys::Element {
         self.0.eval_dom_element()
+    }
+
+    fn base_node(&self) -> HydrationNodeBase {
+        self.0.clone_into_node().into_base()
     }
 }
 

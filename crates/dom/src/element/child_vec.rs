@@ -4,10 +4,7 @@ use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
 use super::{child_groups::ChildGroups, Element};
-use crate::{
-    element::hydration::{HydrationNodeBase, HydrationNodeRef},
-    render::queue_update,
-};
+use crate::{element::hydration::HydrationNodeBase, render::queue_update};
 
 pub struct ChildVec {
     parent: HydrationNodeBase,
@@ -81,7 +78,7 @@ impl ChildVec {
         }
 
         let new_child = new_child.into();
-        let new_child_node = new_child.0.clone_into_node().into_base();
+        let new_child_node = new_child.base_node();
 
         if index == 0 {
             self.child_groups
@@ -91,17 +88,15 @@ impl ChildVec {
 
         assert!(index < self.children.len());
 
-        self.parent.insert_child_before(
-            new_child_node,
-            Some(self.children[index].0.clone_into_node().into_base()),
-        );
+        self.parent
+            .insert_child_before(new_child_node, Some(self.children[index].base_node()));
 
         self.children.insert(index, new_child);
     }
 
     pub fn set_at(&mut self, index: usize, new_child: impl Into<Element>) {
         let new_child = new_child.into();
-        let new_child_node = new_child.0.clone_into_node().into_base();
+        let new_child_node = new_child.base_node();
 
         if index == 0 {
             self.child_groups
@@ -112,15 +107,14 @@ impl ChildVec {
         let old_child = &mut self.children[index];
 
         self.parent
-            .replace_child(new_child_node, old_child.0.clone_into_node().into_base());
+            .replace_child(new_child_node, old_child.base_node());
 
         *old_child = new_child;
     }
 
     pub fn remove(&mut self, index: usize) -> Element {
         let old_child = self.children.remove(index);
-        self.parent
-            .remove_child(old_child.0.clone_into_node().into_base());
+        self.parent.remove_child(old_child.base_node());
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -128,8 +122,7 @@ impl ChildVec {
             None => child_groups.clear_first_child(self.group_index),
             Some(first) => {
                 if index == 0 {
-                    child_groups
-                        .set_first_child(self.group_index, first.0.clone_into_node().into_base())
+                    child_groups.set_first_child(self.group_index, first.base_node())
                 }
             }
         }
@@ -144,7 +137,7 @@ impl ChildVec {
 
     pub fn push(&mut self, new_child: impl Into<Element>) {
         let new_child = new_child.into();
-        let new_child_node = new_child.0.clone_into_node().into_base();
+        let new_child_node = new_child.base_node();
         let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
@@ -166,8 +159,7 @@ impl ChildVec {
         }
 
         if let Some(removed_child) = removed_child {
-            self.parent
-                .remove_child(removed_child.0.clone_into_node().into_base());
+            self.parent.remove_child(removed_child.base_node());
         }
     }
 
@@ -194,9 +186,6 @@ impl ChildVec {
     }
 
     fn child_element_refs(&self) -> Vec<HydrationNodeBase> {
-        self.children
-            .iter()
-            .map(|elem| elem.0.clone_into_node().into_base())
-            .collect()
+        self.children.iter().map(|elem| elem.base_node()).collect()
     }
 }
