@@ -10,46 +10,6 @@ use crate::attribute::Attribute;
 // TODO: Use `StrictElement` as the thunk type for now, just to get us going.
 pub struct LazyElement(LazyEnum<StrictElement, StrictElement>);
 
-#[derive(Clone)]
-pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
-
-#[derive(Clone)]
-enum LazyEnum<Value, Thunk> {
-    Value(Value),
-    Thunk(Option<Thunk>),
-}
-
-impl<Value, Thunk> LazyEnum<Value, Thunk> {
-    fn thunk(thunk: Thunk) -> Self {
-        Self::Thunk(Some(thunk))
-    }
-
-    fn as_ref(&self) -> LazyEnum<&Value, &Thunk> {
-        match self {
-            LazyEnum::Value(value) => LazyEnum::Value(value),
-            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_ref()),
-        }
-    }
-
-    fn as_mut(&mut self) -> LazyEnum<&mut Value, &mut Thunk> {
-        match self {
-            LazyEnum::Value(value) => LazyEnum::Value(value),
-            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_mut()),
-        }
-    }
-}
-
-impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
-    fn eval(&mut self) {
-        let thunk = match self {
-            LazyEnum::Value(_) => return,
-            LazyEnum::Thunk(node) => node.take().unwrap(),
-        };
-
-        *self = LazyEnum::Value(thunk.into());
-    }
-}
-
 impl LazyElement {
     pub fn new(tag: &str) -> Self {
         Self(LazyEnum::thunk(StrictElement::new(tag)))
@@ -307,6 +267,46 @@ impl LazyNodeRef for LazyElement {
 
     fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>> {
         as_node_mut(self.0.as_mut())
+    }
+}
+
+#[derive(Clone)]
+pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
+
+#[derive(Clone)]
+enum LazyEnum<Value, Thunk> {
+    Value(Value),
+    Thunk(Option<Thunk>),
+}
+
+impl<Value, Thunk> LazyEnum<Value, Thunk> {
+    fn thunk(thunk: Thunk) -> Self {
+        Self::Thunk(Some(thunk))
+    }
+
+    fn as_ref(&self) -> LazyEnum<&Value, &Thunk> {
+        match self {
+            LazyEnum::Value(value) => LazyEnum::Value(value),
+            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_ref()),
+        }
+    }
+
+    fn as_mut(&mut self) -> LazyEnum<&mut Value, &mut Thunk> {
+        match self {
+            LazyEnum::Value(value) => LazyEnum::Value(value),
+            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_mut()),
+        }
+    }
+}
+
+impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
+    fn eval(&mut self) {
+        let thunk = match self {
+            LazyEnum::Value(_) => return,
+            LazyEnum::Thunk(node) => node.take().unwrap(),
+        };
+
+        *self = LazyEnum::Value(thunk.into());
     }
 }
 
