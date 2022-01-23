@@ -22,6 +22,7 @@ use crate::{attribute::Attribute, clone, render::queue_update};
 
 mod child_groups;
 mod child_vec;
+mod deferred;
 mod event;
 mod hydration;
 mod lazy;
