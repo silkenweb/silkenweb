@@ -45,6 +45,37 @@ fn call2<XValue, XThunk: Into<XValue>, YValue, YThunk: Into<YValue>>(
     }
 }
 
+fn call3<
+    XValue,
+    XThunk: Into<XValue>,
+    YValue,
+    YThunk: Into<YValue>,
+    ZValue,
+    ZThunk: Into<ZValue>,
+>(
+    x: LazyEnum<XValue, XThunk>,
+    y: LazyEnum<YValue, YThunk>,
+    z: LazyEnum<ZValue, ZThunk>,
+    f_value: impl FnOnce(XValue, YValue, ZValue),
+    f_thunk: impl FnOnce(XThunk, YThunk, ZThunk),
+) {
+    match (x, y, z) {
+        (LazyEnum::Value(x), LazyEnum::Value(y), LazyEnum::Value(z)) => f_value(x, y, z),
+        (LazyEnum::Thunk(x), LazyEnum::Thunk(y), LazyEnum::Thunk(z)) => {
+            f_thunk(x.unwrap(), y.unwrap(), z.unwrap())
+        }
+        (mut x, mut y, mut z) => {
+            x.eval();
+            y.eval();
+            z.eval();
+            match (x, y, z) {
+                (LazyEnum::Value(x), LazyEnum::Value(y), LazyEnum::Value(z)) => f_value(x, y, z),
+                _ => panic!("Evaluation of lazy thunk failed"),
+            }
+        }
+    }
+}
+
 #[derive(Clone)]
 enum LazyEnum<Value, Thunk> {
     Value(Value),
@@ -151,29 +182,21 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     }
 
     pub fn insert_child_before(&mut self, child: LazyNodeBase, next_child: Option<LazyNodeBase>) {
-        // TODO: How to abstract out call3, but with last as Option<Lazy...>
-        match (&mut self.0, child.0, next_child) {
-            (LazyEnum::Value(parent), LazyEnum::Value(child), None) => {
-                parent.insert_child_before(child, None)
-            }
-            (
-                LazyEnum::Value(parent),
-                LazyEnum::Value(child),
-                Some(LazyNode(LazyEnum::Value(next_child))),
-            ) => parent.insert_child_before(child, Some(next_child)),
-            (LazyEnum::Thunk(parent), LazyEnum::Thunk(child), None) => parent
-                .as_mut()
-                .unwrap()
-                .insert_child_before(child.unwrap(), None),
-            (
-                LazyEnum::Thunk(parent),
-                LazyEnum::Thunk(child),
-                Some(LazyNode(LazyEnum::Thunk(next_child))),
-            ) => parent
-                .as_mut()
-                .unwrap()
-                .insert_child_before(child.unwrap(), Some(next_child.unwrap())),
-            _ => todo!(),
+        if let Some(next_child) = next_child {
+            call3(
+                self.0.as_mut(),
+                child.0,
+                next_child.0,
+                |parent, child, next_child| parent.insert_child_before(child, Some(next_child)),
+                |parent, child, next_child| parent.insert_child_before(child, Some(next_child)),
+            );
+        } else {
+            call2(
+                self.0.as_mut(),
+                child.0,
+                |parent, child| parent.insert_child_before(child, None),
+                |parent, child| parent.insert_child_before(child, None),
+            );
         }
     }
 
@@ -182,36 +205,24 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
         child: &mut impl LazyNodeRef,
         next_child: Option<&mut impl LazyNodeRef>,
     ) {
-        match (
-            &mut self.0,
-            child.as_node_mut().0,
-            next_child.map(|c| c.as_node_mut().0),
-        ) {
-            (LazyEnum::Value(parent), LazyEnum::Value(child), None) => {
-                let next_child: Option<&mut StrictElement> = None;
-                parent.insert_child_before_now(child, next_child)
-            }
-            (
-                LazyEnum::Value(parent),
-                LazyEnum::Value(child),
-                Some(LazyEnum::Value(next_child)),
-            ) => parent.insert_child_before_now(child, Some(next_child)),
-            (LazyEnum::Thunk(parent), LazyEnum::Thunk(child), None) => {
-                let next_child: Option<&mut StrictElement> = None;
-                parent
-                    .as_mut()
-                    .unwrap()
-                    .insert_child_before_now(child.unwrap(), next_child)
-            }
-            (
-                LazyEnum::Thunk(parent),
-                LazyEnum::Thunk(child),
-                Some(LazyEnum::Thunk(next_child)),
-            ) => parent
-                .as_mut()
-                .unwrap()
-                .insert_child_before_now(child.unwrap(), Some(next_child.unwrap())),
-            _ => todo!(),
+        if let Some(next_child) = next_child {
+            call3(
+                self.0.as_mut(),
+                child.as_node_mut().0,
+                next_child.as_node_mut().0,
+                |parent, child, next_child| parent.insert_child_before_now(child, Some(next_child)),
+                |parent, child, next_child| parent.insert_child_before_now(child, Some(next_child)),
+            );
+        } else {
+            let next_child_value: Option<&mut StrictElement> = None;
+            let next_child_thunk: Option<&mut StrictElement> = None;
+
+            call2(
+                self.0.as_mut(),
+                child.as_node_mut().0,
+                |parent, child| parent.insert_child_before_now(child, next_child_value),
+                |parent, child| parent.insert_child_before_now(child, next_child_thunk),
+            );
         }
     }
 
