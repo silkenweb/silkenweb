@@ -44,7 +44,7 @@ impl ChildGroups {
     /// Append a new group. Don't wait for the next animation frame.
     pub fn append_new_group_sync(&mut self, child: &mut impl HydrationNodeRef) {
         if self.last_is_dynamic {
-            self.children.push(Some(child.clone_into_node()));
+            self.children.push(Some(child.clone_into_base_node()));
         }
 
         self.group_count += 1;

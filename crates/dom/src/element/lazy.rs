@@ -255,16 +255,16 @@ pub trait LazyNodeRef {
 
     fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>>;
 
-    fn clone_into_node(&self) -> LazyNodeBase {
+    fn clone_into_base_node(&self) -> LazyNodeBase {
         LazyNode(map1(
             self.as_node_ref().0,
             (),
-            |node, _| node.clone_into_node(),
-            |node, _| node.clone_into_node(),
+            |node, _| node.clone_into_base_node(),
+            |node, _| node.clone_into_base_node(),
         ))
     }
 
-    fn clone_into_x(&self) -> LazyNode<Self::Node> {
+    fn clone_into_node(&self) -> LazyNode<Self::Node> {
         LazyNode(map1(
             self.as_node_ref().0,
             (),
