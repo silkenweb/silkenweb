@@ -115,7 +115,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         });
     }
 
-    pub fn remove_child_now(&mut self, child: &impl StrictNodeRef) {
+    pub fn remove_child_now(&mut self, child: &mut impl StrictNodeRef) {
         self.dom_node()
             .remove_child(child.as_node_ref().dom_node())
             .unwrap_throw();

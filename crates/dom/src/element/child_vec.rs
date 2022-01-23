@@ -3,11 +3,14 @@ use std::{cell::RefCell, mem, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{child_groups::ChildGroups, strict::StrictNodeBase, Element};
-use crate::{element::strict::StrictNodeRef, render::queue_update};
+use super::{child_groups::ChildGroups, Element};
+use crate::{
+    element::hydration::{HydrationNodeBase, HydrationNodeRef},
+    render::queue_update,
+};
 
 pub struct ChildVec {
-    parent: StrictNodeBase,
+    parent: HydrationNodeBase,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
@@ -15,7 +18,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: StrictNodeBase,
+        parent: HydrationNodeBase,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
@@ -180,14 +183,14 @@ impl ChildVec {
             let mut parent = self.parent.clone();
 
             queue_update(move || {
-                for child in existing_children {
-                    parent.remove_child_now(&child);
+                for mut child in existing_children {
+                    parent.remove_child_now(&mut child);
                 }
             });
         }
     }
 
-    fn child_element_refs(&self) -> Vec<StrictNodeBase> {
+    fn child_element_refs(&self) -> Vec<HydrationNodeBase> {
         self.children
             .iter()
             .map(|elem| elem.0.clone_into_node())

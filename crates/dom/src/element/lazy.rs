@@ -4,7 +4,7 @@ use std::future::Future;
 
 use wasm_bindgen::JsValue;
 
-use super::strict::{StrictElement, StrictNode, StrictNodeBase, StrictNodeRef, StrictText};
+use super::strict::{StrictElement, StrictNode, StrictNodeRef, StrictText};
 use crate::attribute::Attribute;
 
 // TODO: Use `StrictElement` as the thunk type for now, jsut to get us going.
@@ -175,7 +175,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     pub fn remove_child_now(&mut self, child: &mut impl LazyNodeRef) {
         call2(
             self.0.as_mut(),
-            child.as_node_ref().0,
+            child.as_node_mut().0,
             StrictNode::remove_child_now,
             StrictNode::remove_child_now,
         );
@@ -247,8 +247,8 @@ pub trait LazyNodeRef {
 
     fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>>;
 
-    fn clone_into_node(&self) -> Lazy<StrictNodeBase, StrictNodeBase> {
-        Lazy(map1(
+    fn clone_into_node(&self) -> LazyNodeBase {
+        LazyNode(map1(
             self.as_node_ref().0,
             (),
             |node, _| node.clone_into_node(),
