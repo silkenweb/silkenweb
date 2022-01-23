@@ -163,6 +163,12 @@ impl StrictNode<web_sys::Element> {
 
 pub type StrictNodeBase = StrictNode<web_sys::Node>;
 
+impl<T: Into<web_sys::Node>> StrictNode<T> {
+    pub fn into_base(self) -> StrictNodeBase {
+        StrictNode(self.0.into())
+    }
+}
+
 #[derive(Clone)]
 pub struct StrictText(StrictNode<web_sys::Text>);
 
@@ -184,10 +190,6 @@ pub trait StrictNodeRef {
     fn as_node_ref(&self) -> &StrictNode<Self::Node>;
 
     fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node>;
-
-    fn clone_into_base_node(&self) -> StrictNodeBase {
-        StrictNode(self.as_node_ref().dom_node().clone())
-    }
 
     fn clone_into_node(&self) -> StrictNode<Self::Node> {
         self.as_node_ref().clone()

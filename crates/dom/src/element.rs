@@ -45,7 +45,7 @@ impl ElementBuilderBase {
     }
 
     fn new_element(element: HydrationElement) -> Self {
-        let node = element.clone_into_base_node();
+        let node = element.clone_into_node().into_base();
 
         Self {
             element: Element(element),
@@ -86,7 +86,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, child.0.clone_into_base_node());
+                .upsert_only_child(group_index, child.0.clone_into_node().into_base());
             _child_storage = Some(child);
             async {}
         });
@@ -108,7 +108,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, child.0.clone_into_base_node());
+                    .upsert_only_child(group_index, child.0.clone_into_node().into_base());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -127,7 +127,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.0.clone_into_base_node(),
+            self.element.0.clone_into_node().into_base(),
             self.child_groups.clone(),
             group_index,
         );

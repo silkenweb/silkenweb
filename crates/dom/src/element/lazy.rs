@@ -230,6 +230,12 @@ impl Lazy<&mut StrictNode<web_sys::Element>, &mut StrictNode<web_sys::Element>> 
 
 pub type LazyNodeBase = LazyNode<web_sys::Node>;
 
+impl<T: Into<web_sys::Node>> LazyNode<T> {
+    pub fn into_base(self) -> LazyNodeBase {
+        LazyNode(map1(self.0, (), |x, _| x.into_base(), |x, _| x.into_base()))
+    }
+}
+
 #[derive(Clone)]
 pub struct LazyText(LazyEnum<StrictText, StrictText>);
 
@@ -254,15 +260,6 @@ pub trait LazyNodeRef {
     fn as_node_ref(&self) -> Lazy<&StrictNode<Self::Node>, &StrictNode<Self::Node>>;
 
     fn as_node_mut(&mut self) -> Lazy<&mut StrictNode<Self::Node>, &mut StrictNode<Self::Node>>;
-
-    fn clone_into_base_node(&self) -> LazyNodeBase {
-        LazyNode(map1(
-            self.as_node_ref().0,
-            (),
-            |node, _| node.clone_into_base_node(),
-            |node, _| node.clone_into_base_node(),
-        ))
-    }
 
     fn clone_into_node(&self) -> LazyNode<Self::Node> {
         LazyNode(map1(
