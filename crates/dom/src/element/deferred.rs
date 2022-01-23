@@ -4,7 +4,6 @@ use std::future::Future;
 
 use wasm_bindgen::JsValue;
 
-use super::strict::StrictNodeBase;
 use crate::attribute::Attribute;
 
 pub struct DeferredElement {}
@@ -105,7 +104,7 @@ impl DeferredNode<web_sys::Element> {
 pub type DeferredNodeBase = DeferredNode<web_sys::Node>;
 
 impl<T: Into<web_sys::Node>> DeferredNode<T> {
-    pub fn into_base(self) -> StrictNodeBase {
+    pub fn into_base(self) -> DeferredNodeBase {
         todo!()
     }
 }
