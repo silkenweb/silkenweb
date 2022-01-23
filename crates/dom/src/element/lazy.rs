@@ -99,8 +99,8 @@ impl LazyElement {
         call2(
             self.0.as_mut(),
             child.0,
-            |parent, child| parent.store_child(child),
-            |parent, child| parent.store_child(child),
+            StrictElement::store_child,
+            StrictElement::store_child,
         );
     }
 
@@ -120,8 +120,8 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
         call2(
             self.0.as_mut(),
             child.as_node_mut().0,
-            |parent, child| parent.append_child_now(child),
-            |parent, child| parent.append_child_now(child),
+            StrictNode::append_child_now,
+            StrictNode::append_child_now,
         );
     }
 
@@ -197,9 +197,9 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     pub fn remove_child_now(&mut self, child: &mut impl LazyNodeRef) {
         call2(
             self.0.as_mut(),
-            child.as_node_mut().0,
-            |parent, child| parent.remove_child_now(child),
-            |parent, child| parent.remove_child_now(child),
+            child.as_node_ref().0,
+            StrictNode::remove_child_now,
+            StrictNode::remove_child_now,
         );
     }
 
@@ -207,8 +207,8 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
         call2(
             self.0.as_mut(),
             child.0,
-            |parent, child| parent.remove_child(child),
-            |parent, child| parent.remove_child(child),
+            StrictNode::remove_child,
+            StrictNode::remove_child,
         );
     }
 
