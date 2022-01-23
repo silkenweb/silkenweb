@@ -163,8 +163,14 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
         }
     }
 
-    pub fn replace_child(&mut self, _new_child: LazyNodeBase, _old_child: LazyNodeBase) {
-        todo!()
+    pub fn replace_child(&mut self, new_child: LazyNodeBase, old_child: LazyNodeBase) {
+        call3(
+            self.0.as_mut(),
+            new_child.0,
+            old_child.0,
+            |parent, new_child, old_child| parent.replace_child(new_child, old_child),
+            |parent, new_child, old_child| parent.replace_child(new_child, old_child),
+        );
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl LazyNodeRef) {
