@@ -145,6 +145,12 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
 }
 
 impl StrictNode<web_sys::Element> {
+    // TODO: When this becomes part of a trait, the warning should go.
+    #[allow(dead_code)]
+    pub fn to_mut(&mut self) -> &mut Self {
+        self
+    }
+
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         value.set_attribute(name, &self.0);
     }

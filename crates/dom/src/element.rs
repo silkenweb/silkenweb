@@ -190,7 +190,7 @@ impl ElementBuilder for ElementBuilderBase {
                 clone!(name);
                 let mut element = element.clone();
 
-                queue_update(move || element.attribute(&name, new_value));
+                queue_update(move || element.to_mut().attribute(&name, new_value));
 
                 async {}
             }
@@ -220,7 +220,7 @@ impl ElementBuilder for ElementBuilderBase {
         let future = sig.for_each(move |x| {
             clone!(f);
             let mut element = element.clone();
-            element.effect(move |elem| f(elem, x));
+            element.to_mut().effect(move |elem| f(elem, x));
             async {}
         });
 

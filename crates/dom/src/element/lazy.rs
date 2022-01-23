@@ -201,26 +201,13 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
 }
 
 impl LazyNode<web_sys::Element> {
-    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        map1(
-            self.0.as_mut(),
-            value,
-            |elem, value| elem.attribute(name, value),
-            |elem, value| elem.attribute(name, value),
-        );
-    }
-
-    pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        map1(
-            self.0.as_mut(),
-            f,
-            |elem, f| elem.effect(f),
-            |elem, f| elem.effect(f),
-        );
+    pub fn to_mut(
+        &mut self,
+    ) -> Lazy<&mut StrictNode<web_sys::Element>, &mut StrictNode<web_sys::Element>> {
+        Lazy(self.0.as_mut())
     }
 }
 
-// TODO: We don't want 2 implementations of `attribute` and `effect`
 impl Lazy<&mut StrictNode<web_sys::Element>, &mut StrictNode<web_sys::Element>> {
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         map1(
