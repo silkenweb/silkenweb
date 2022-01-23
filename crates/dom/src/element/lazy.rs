@@ -12,11 +12,11 @@ pub struct LazyElement(LazyEnum<StrictElement, StrictElement>);
 
 impl LazyElement {
     pub fn new(tag: &str) -> Self {
-        Self(LazyEnum::thunk(StrictElement::new(tag)))
+        Self(LazyEnum::Thunk(StrictElement::new(tag)))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(LazyEnum::thunk(StrictElement::new_in_namespace(
+        Self(LazyEnum::Thunk(StrictElement::new_in_namespace(
             namespace, tag,
         )))
     }
@@ -60,7 +60,7 @@ impl LazyElement {
     pub fn eval_dom_element(&self) -> web_sys::Element {
         match &self.0 {
             LazyEnum::Value(elem) => elem.eval_dom_element(),
-            LazyEnum::Thunk(elem) => elem.as_ref().unwrap().eval_dom_element(),
+            LazyEnum::Thunk(elem) => elem.eval_dom_element(),
         }
     }
 }
@@ -201,7 +201,7 @@ pub struct LazyText(LazyEnum<StrictText, StrictText>);
 
 impl LazyText {
     pub fn new(text: &str) -> Self {
-        Self(LazyEnum::thunk(StrictText::new(text)))
+        Self(LazyEnum::Thunk(StrictText::new(text)))
     }
 
     pub fn set_text(&mut self, text: String) {
@@ -276,37 +276,31 @@ pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 #[derive(Clone)]
 enum LazyEnum<Value, Thunk> {
     Value(Value),
-    Thunk(Option<Thunk>),
+    Thunk(Thunk),
 }
 
 impl<Value, Thunk> LazyEnum<Value, Thunk> {
-    fn thunk(thunk: Thunk) -> Self {
-        Self::Thunk(Some(thunk))
-    }
-
     fn as_ref(&self) -> LazyEnum<&Value, &Thunk> {
         match self {
             LazyEnum::Value(value) => LazyEnum::Value(value),
-            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_ref()),
+            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk),
         }
     }
 
     fn as_mut(&mut self) -> LazyEnum<&mut Value, &mut Thunk> {
         match self {
             LazyEnum::Value(value) => LazyEnum::Value(value),
-            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk.as_mut()),
+            LazyEnum::Thunk(thunk) => LazyEnum::Thunk(thunk),
         }
     }
 }
 
 impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
-    fn eval(&mut self) {
-        let thunk = match self {
-            LazyEnum::Value(_) => return,
-            LazyEnum::Thunk(node) => node.take().unwrap(),
-        };
-
-        *self = LazyEnum::Value(thunk.into());
+    fn eval(self) -> Value {
+        match self {
+            LazyEnum::Value(v) => v,
+            LazyEnum::Thunk(node) => node.into(),
+        }
     }
 }
 
@@ -340,7 +334,7 @@ fn map1<XValue, XThunk, Args, ValueResult, ThunkResult>(
 ) -> LazyEnum<ValueResult, ThunkResult> {
     match x {
         LazyEnum::Value(x) => LazyEnum::Value(f_value(x, args)),
-        LazyEnum::Thunk(x) => LazyEnum::thunk(f_thunk(x.unwrap(), args)),
+        LazyEnum::Thunk(x) => LazyEnum::Thunk(f_thunk(x, args)),
     }
 }
 
@@ -352,15 +346,8 @@ fn call2<XValue, XThunk: Into<XValue>, YValue, YThunk: Into<YValue>>(
 ) {
     match (x, y) {
         (LazyEnum::Value(x), LazyEnum::Value(y)) => f_value(x, y),
-        (LazyEnum::Thunk(x), LazyEnum::Thunk(y)) => f_thunk(x.unwrap(), y.unwrap()),
-        (mut x, mut y) => {
-            x.eval();
-            y.eval();
-            match (x, y) {
-                (LazyEnum::Value(x), LazyEnum::Value(y)) => f_value(x, y),
-                _ => panic!("Evaluation of lazy thunk failed"),
-            }
-        }
+        (LazyEnum::Thunk(x), LazyEnum::Thunk(y)) => f_thunk(x, y),
+        (x, y) => f_value(x.eval(), y.eval()),
     }
 }
 
@@ -380,17 +367,7 @@ fn call3<
 ) {
     match (x, y, z) {
         (LazyEnum::Value(x), LazyEnum::Value(y), LazyEnum::Value(z)) => f_value(x, y, z),
-        (LazyEnum::Thunk(x), LazyEnum::Thunk(y), LazyEnum::Thunk(z)) => {
-            f_thunk(x.unwrap(), y.unwrap(), z.unwrap())
-        }
-        (mut x, mut y, mut z) => {
-            x.eval();
-            y.eval();
-            z.eval();
-            match (x, y, z) {
-                (LazyEnum::Value(x), LazyEnum::Value(y), LazyEnum::Value(z)) => f_value(x, y, z),
-                _ => panic!("Evaluation of lazy thunk failed"),
-            }
-        }
+        (LazyEnum::Thunk(x), LazyEnum::Thunk(y), LazyEnum::Thunk(z)) => f_thunk(x, y, z),
+        (x, y, z) => f_value(x.eval(), y.eval(), z.eval()),
     }
 }
