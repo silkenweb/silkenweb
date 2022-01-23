@@ -13,6 +13,17 @@ pub struct LazyElement(LazyEnum<StrictElement, StrictElement>);
 #[derive(Clone)]
 pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 
+fn call1<XValue, XThunk>(
+    x: LazyEnum<XValue, XThunk>,
+    f_value: impl FnOnce(XValue),
+    f_thunk: impl FnOnce(XThunk),
+) {
+    match x {
+        LazyEnum::Value(x) => f_value(x),
+        LazyEnum::Thunk(x) => f_thunk(x.unwrap()),
+    }
+}
+
 fn call2<XValue, XThunk: Into<XValue>, YValue, YThunk: Into<YValue>>(
     x: LazyEnum<XValue, XThunk>,
     y: LazyEnum<YValue, YThunk>,
@@ -75,10 +86,11 @@ impl LazyElement {
     }
 
     pub fn shrink_to_fit(&mut self) {
-        match &mut self.0 {
-            LazyEnum::Value(elem) => elem.shrink_to_fit(),
-            LazyEnum::Thunk(elem) => elem.as_mut().unwrap().shrink_to_fit(),
-        }
+        call1(
+            self.0.as_mut(),
+            StrictElement::shrink_to_fit,
+            StrictElement::shrink_to_fit,
+        )
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
@@ -213,11 +225,11 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> LazyNode<T> {
     }
 
     pub fn clear_children(&mut self) {
-        // TODO: call1
-        match &mut self.0 {
-            LazyEnum::Value(node) => node.clear_children(),
-            LazyEnum::Thunk(node) => node.as_mut().unwrap().clear_children(),
-        }
+        call1(
+            self.0.as_mut(),
+            StrictNode::clear_children,
+            StrictNode::clear_children,
+        )
     }
 }
 
