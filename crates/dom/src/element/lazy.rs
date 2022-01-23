@@ -1,6 +1,6 @@
 // TODO: Enable dead code warnings
 #![allow(dead_code)]
-use std::future::Future;
+use std::{future::Future, marker::PhantomData};
 
 use wasm_bindgen::JsValue;
 
@@ -297,14 +297,14 @@ impl<Value, Thunk> Lazy<Value, Thunk> {
 
     fn as_ref(&self) -> Lazy<&Value, &Thunk> {
         match &self.0 {
-            LazyEnum::Value(value) => Lazy(LazyEnum::Value(value)),
+            LazyEnum::Value(value, _) => Lazy(LazyEnum::Value(value, PhantomData)),
             LazyEnum::Thunk(thunk) => Lazy(LazyEnum::Thunk(thunk)),
         }
     }
 
     fn as_mut(&mut self) -> Lazy<&mut Value, &mut Thunk> {
         match &mut self.0 {
-            LazyEnum::Value(value) => Lazy(LazyEnum::Value(value)),
+            LazyEnum::Value(value, _) => Lazy(LazyEnum::Value(value, PhantomData)),
             LazyEnum::Thunk(thunk) => Lazy(LazyEnum::Thunk(thunk)),
         }
     }
@@ -318,14 +318,14 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
 
 #[derive(Clone)]
 enum LazyEnum<Value, Thunk> {
-    Value(Value),
+    Value(Value, PhantomData<Thunk>),
     Thunk(Thunk),
 }
 
 impl<Value, Thunk: Into<Value>> LazyEnum<Value, Thunk> {
     fn eval(self) -> Value {
         match self {
-            LazyEnum::Value(v) => v,
+            LazyEnum::Value(v, _) => v,
             LazyEnum::Thunk(node) => node.into(),
         }
     }
@@ -338,7 +338,7 @@ fn map1<XValue, XThunk, Args, ValueResult, ThunkResult>(
     f_thunk: impl FnOnce(XThunk, Args) -> ThunkResult,
 ) -> Lazy<ValueResult, ThunkResult> {
     Lazy(match x.0 {
-        LazyEnum::Value(x) => LazyEnum::Value(f_value(x, args)),
+        LazyEnum::Value(x, _) => LazyEnum::Value(f_value(x, args), PhantomData),
         LazyEnum::Thunk(x) => LazyEnum::Thunk(f_thunk(x, args)),
     })
 }
@@ -350,7 +350,7 @@ fn call2<XValue, XThunk: Into<XValue>, YValue, YThunk: Into<YValue>>(
     f_thunk: impl FnOnce(XThunk, YThunk),
 ) {
     match (x.0, y.0) {
-        (LazyEnum::Value(x), LazyEnum::Value(y)) => f_value(x, y),
+        (LazyEnum::Value(x, _), LazyEnum::Value(y, _)) => f_value(x, y),
         (LazyEnum::Thunk(x), LazyEnum::Thunk(y)) => f_thunk(x, y),
         (x, y) => f_value(x.eval(), y.eval()),
     }
@@ -371,7 +371,7 @@ fn call3<
     f_thunk: impl FnOnce(XThunk, YThunk, ZThunk),
 ) {
     match (x.0, y.0, z.0) {
-        (LazyEnum::Value(x), LazyEnum::Value(y), LazyEnum::Value(z)) => f_value(x, y, z),
+        (LazyEnum::Value(x, _), LazyEnum::Value(y, _), LazyEnum::Value(z, _)) => f_value(x, y, z),
         (LazyEnum::Thunk(x), LazyEnum::Thunk(y), LazyEnum::Thunk(z)) => f_thunk(x, y, z),
         (x, y, z) => f_value(x.eval(), y.eval(), z.eval()),
     }
