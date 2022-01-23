@@ -1,4 +1,5 @@
-// TODO: Extract some traits to make it more obvious that Lazy* and Strict* are compatible.
+// TODO: Extract some traits to make it more obvious that Lazy* and Strict* are
+// compatible.
 
 pub use super::lazy::{
     LazyElement as HydrationElement, LazyNode as HydrationNode, LazyNodeBase as HydrationNodeBase,
