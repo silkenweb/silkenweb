@@ -13,11 +13,11 @@ pub struct HydrationElement(Lazy<StrictElement, StrictElement>);
 
 impl HydrationElement {
     pub fn new(tag: &str) -> Self {
-        Self(Lazy::thunk(StrictElement::new(tag)))
+        Self(Lazy::value(StrictElement::new(tag)))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Lazy::thunk(StrictElement::new_in_namespace(namespace, tag)))
+        Self(Lazy::value(StrictElement::new_in_namespace(namespace, tag)))
     }
 
     pub fn shrink_to_fit(&mut self) {
@@ -199,7 +199,7 @@ pub struct HydrationText(Lazy<StrictText, StrictText>);
 
 impl HydrationText {
     pub fn new(text: &str) -> Self {
-        Self(Lazy::thunk(StrictText::new(text)))
+        Self(Lazy::value(StrictText::new(text)))
     }
 
     pub fn set_text(&mut self, text: String) {

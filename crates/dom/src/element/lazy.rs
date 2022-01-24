@@ -4,6 +4,12 @@ use std::marker::PhantomData;
 pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 
 impl<Value, Thunk> Lazy<Value, Thunk> {
+    pub fn value(v: Value) -> Self {
+        Self(LazyEnum::Value(v, PhantomData))
+    }
+
+    // TODO: Enable dead code warnings
+    #[allow(dead_code)]
     pub fn thunk(t: Thunk) -> Self {
         Self(LazyEnum::Thunk(t))
     }
@@ -31,9 +37,9 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
 
 #[derive(Clone)]
 enum LazyEnum<Value, Thunk> {
+    Value(Value, PhantomData<Thunk>),
     // TODO: Enable dead code warnings
     #[allow(dead_code)]
-    Value(Value, PhantomData<Thunk>),
     Thunk(Thunk),
 }
 
