@@ -2,67 +2,64 @@
 #![allow(dead_code, unused_variables)]
 use std::future::Future;
 
+use discard::DiscardOnDrop;
+use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::JsValue;
 
-use crate::attribute::Attribute;
+use super::strict::StrictElement;
+use crate::{attribute::Attribute, spawn_cancelable_future};
 
-pub struct DeferredElement {}
+pub struct DeferredElement {
+    namespace: Option<String>,
+    tag: String,
+    children: Vec<Self>,
+    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
+    events: Vec<Box<dyn FnOnce(&mut StrictElement)>>,
+}
 
 impl DeferredElement {
     pub fn new(tag: &str) -> Self {
-        todo!()
+        Self {
+            namespace: None,
+            tag: tag.to_owned(),
+            children: Vec::new(),
+            futures: Vec::new(),
+            events: Vec::new(),
+        }
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        todo!()
-    }
-
-    fn new_element(dom_element: web_sys::Element) -> Self {
-        todo!()
-    }
-
-    pub fn shrink_to_fit(&mut self) {
-        todo!()
+        Self {
+            namespace: Some(namespace.to_owned()),
+            tag: tag.to_owned(),
+            children: Vec::new(),
+            futures: Vec::new(),
+            events: Vec::new(),
+        }
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        todo!()
+        self.futures.push(spawn_cancelable_future(future));
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        todo!()
+        self.events.push(Box::new(move |elem| elem.on(name, f)))
     }
 
     pub fn store_child(&mut self, child: Self) {
-        todo!()
-    }
-
-    pub fn eval_dom_element(&self) -> web_sys::Element {
-        todo!()
-    }
-
-    fn dom_element(&self) -> &web_sys::Element {
-        todo!()
+        self.children.push(child);
     }
 }
 
 #[derive(Clone)]
 pub struct DeferredNode<T>(T);
 
-impl<T: AsRef<web_sys::Node> + Clone + 'static> DeferredNode<T> {
-    pub fn append_child_now(&mut self, child: &mut impl DeferredNodeRef) {
+impl DeferredNode<web_sys::Element> {
+    pub fn append_child(&mut self, child: &mut impl DeferredNodeRef) {
         todo!()
     }
 
     pub fn insert_child_before(
-        &mut self,
-        child: DeferredNodeBase,
-        next_child: Option<DeferredNodeBase>,
-    ) {
-        todo!()
-    }
-
-    pub fn insert_child_before_now(
         &mut self,
         child: &mut impl DeferredNodeRef,
         next_child: Option<&mut impl DeferredNodeRef>,
@@ -70,15 +67,15 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> DeferredNode<T> {
         todo!()
     }
 
-    pub fn replace_child(&mut self, new_child: DeferredNodeBase, old_child: DeferredNodeBase) {
+    pub fn replace_child(
+        &mut self,
+        new_child: &mut impl DeferredNodeRef,
+        old_child: &mut impl DeferredNodeRef,
+    ) {
         todo!()
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl DeferredNodeRef) {
-        todo!()
-    }
-
-    pub fn remove_child(&mut self, child: DeferredNodeBase) {
+    pub fn remove_child(&mut self, child: &mut impl DeferredNodeRef) {
         todo!()
     }
 
@@ -86,12 +83,6 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> DeferredNode<T> {
         todo!()
     }
 
-    fn dom_node(&self) -> &web_sys::Node {
-        todo!()
-    }
-}
-
-impl DeferredNode<web_sys::Element> {
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         todo!()
     }
