@@ -1,6 +1,6 @@
 // TODO: Enable warnings
 #![allow(dead_code, unused_variables)]
-use std::future::Future;
+use std::{cell::RefCell, future::Future, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
@@ -15,6 +15,13 @@ pub struct DeferredElement {
     children: Vec<Self>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
     events: Vec<Box<dyn FnOnce(&mut StrictElement)>>,
+}
+
+// TODO: Use an Rc for data and derive this
+impl Clone for DeferredElement {
+    fn clone(&self) -> Self {
+        todo!()
+    }
 }
 
 impl DeferredElement {
@@ -49,33 +56,28 @@ impl DeferredElement {
     pub fn store_child(&mut self, child: Self) {
         self.children.push(child);
     }
-}
 
-#[derive(Clone)]
-pub struct DeferredNode<T>(T);
-
-impl DeferredNode<web_sys::Element> {
-    pub fn append_child(&mut self, child: &mut impl DeferredNodeRef) {
+    pub fn append_child(&mut self, child: impl Into<DeferredNode>) {
         todo!()
     }
 
     pub fn insert_child_before(
         &mut self,
-        child: &mut impl DeferredNodeRef,
-        next_child: Option<&mut impl DeferredNodeRef>,
+        child: impl Into<DeferredNode>,
+        next_child: Option<impl Into<DeferredNode>>,
     ) {
         todo!()
     }
 
     pub fn replace_child(
         &mut self,
-        new_child: &mut impl DeferredNodeRef,
-        old_child: &mut impl DeferredNodeRef,
+        new_child: impl Into<DeferredNode>,
+        old_child: impl Into<DeferredNode>,
     ) {
         todo!()
     }
 
-    pub fn remove_child(&mut self, child: &mut impl DeferredNodeRef) {
+    pub fn remove_child(&mut self, child: impl Into<DeferredNode>) {
         todo!()
     }
 
@@ -92,74 +94,27 @@ impl DeferredNode<web_sys::Element> {
     }
 }
 
-pub type DeferredNodeBase = DeferredNode<web_sys::Node>;
-
-impl<T: Into<web_sys::Node>> DeferredNode<T> {
-    pub fn into_base(self) -> DeferredNodeBase {
+impl From<DeferredElement> for StrictElement {
+    fn from(_: DeferredElement) -> Self {
         todo!()
     }
 }
 
 #[derive(Clone)]
-pub struct DeferredText(DeferredNode<web_sys::Text>);
+pub struct DeferredText(Rc<RefCell<String>>);
 
 impl DeferredText {
     pub fn new(text: &str) -> Self {
-        todo!()
+        Self(Rc::new(RefCell::new(text.to_owned())))
     }
 
     pub fn set_text(&mut self, text: String) {
-        todo!()
+        *self.0.borrow_mut() = text;
     }
 }
 
-pub trait DeferredNodeRef {
-    type Node: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static;
-
-    fn as_node_ref(&self) -> &DeferredNode<Self::Node>;
-
-    fn as_node_mut(&mut self) -> &mut DeferredNode<Self::Node>;
-
-    fn clone_into_node(&self) -> DeferredNode<Self::Node> {
-        self.as_node_ref().clone()
-    }
-}
-
-impl<T> DeferredNodeRef for DeferredNode<T>
-where
-    T: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static,
-{
-    type Node = T;
-
-    fn as_node_ref(&self) -> &DeferredNode<Self::Node> {
-        self
-    }
-
-    fn as_node_mut(&mut self) -> &mut DeferredNode<Self::Node> {
-        self
-    }
-}
-
-impl DeferredNodeRef for DeferredText {
-    type Node = web_sys::Text;
-
-    fn as_node_ref(&self) -> &DeferredNode<Self::Node> {
-        todo!()
-    }
-
-    fn as_node_mut(&mut self) -> &mut DeferredNode<Self::Node> {
-        todo!()
-    }
-}
-
-impl DeferredNodeRef for DeferredElement {
-    type Node = web_sys::Element;
-
-    fn as_node_ref(&self) -> &DeferredNode<Self::Node> {
-        todo!()
-    }
-
-    fn as_node_mut(&mut self) -> &mut DeferredNode<Self::Node> {
-        todo!()
-    }
-}
+// TODO: Rename to DeferredBaseNode
+#[derive(Clone)]
+pub struct DeferredNode(
+    // TODO: This will contain an enum of Text|Element
+);
