@@ -46,7 +46,7 @@ impl ElementBuilderBase {
     }
 
     fn new_element(element: HydrationElement) -> Self {
-        let node = element.clone_into_node().into_base();
+        let node = element.clone_into_node();
 
         Self {
             element: Element(element),
@@ -128,7 +128,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.base_node(),
+            self.element.0.clone_into_node(),
             self.child_groups.clone(),
             group_index,
         );

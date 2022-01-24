@@ -1,12 +1,12 @@
 use std::mem;
 
-use super::hydration::{HydrationNodeBase, HydrationNodeRef};
+use super::hydration::{HydrationNode, HydrationNodeBase, HydrationNodeRef};
 
 /// Groups of children with the same parent
 ///
 /// This manages insertion and removal of groups of children
 pub struct ChildGroups {
-    parent: HydrationNodeBase,
+    parent: HydrationNode<web_sys::Element>,
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
     children: Vec<Option<HydrationNodeBase>>,
@@ -16,7 +16,7 @@ pub struct ChildGroups {
 }
 
 impl ChildGroups {
-    pub fn new(parent: HydrationNodeBase) -> Self {
+    pub fn new(parent: HydrationNode<web_sys::Element>) -> Self {
         Self {
             parent,
             children: Vec::new(),

@@ -68,7 +68,7 @@ impl StrictElement {
 #[derive(Clone)]
 pub struct StrictNode<T>(T);
 
-impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
+impl StrictNode<web_sys::Element> {
     pub fn append_child_now(&mut self, child: &mut impl StrictNodeRef) {
         self.dom_node()
             .append_child(child.as_node_ref().dom_node())
@@ -139,12 +139,6 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
         })
     }
 
-    fn dom_node(&self) -> &web_sys::Node {
-        self.0.as_ref()
-    }
-}
-
-impl StrictNode<web_sys::Element> {
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         value.set_attribute(name, &self.0);
     }
@@ -152,6 +146,12 @@ impl StrictNode<web_sys::Element> {
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let dom_element = self.0.clone();
         after_render(move || f(&dom_element));
+    }
+}
+
+impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
+    fn dom_node(&self) -> &web_sys::Node {
+        self.0.as_ref()
     }
 }
 

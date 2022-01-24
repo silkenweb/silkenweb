@@ -64,7 +64,7 @@ impl HydrationElement {
 #[derive(Clone)]
 pub struct HydrationNode<T>(Lazy<StrictNode<T>, StrictNode<T>>);
 
-impl<T: AsRef<web_sys::Node> + Clone + 'static> HydrationNode<T> {
+impl HydrationNode<web_sys::Element> {
     pub fn append_child_now(&mut self, child: &mut impl HydrationNodeRef) {
         call2(
             self.0.as_mut(),
@@ -158,9 +158,7 @@ impl<T: AsRef<web_sys::Node> + Clone + 'static> HydrationNode<T> {
             |node, _| node.clear_children(),
         );
     }
-}
 
-impl HydrationNode<web_sys::Element> {
     pub fn to_mut(
         &mut self,
     ) -> Lazy<&mut StrictNode<web_sys::Element>, &mut StrictNode<web_sys::Element>> {

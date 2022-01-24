@@ -3,11 +3,11 @@ use std::{cell::RefCell, mem, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{child_groups::ChildGroups, Element};
+use super::{child_groups::ChildGroups, hydration::HydrationNode, Element};
 use crate::{element::hydration::HydrationNodeBase, render::queue_update};
 
 pub struct ChildVec {
-    parent: HydrationNodeBase,
+    parent: HydrationNode<web_sys::Element>,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
@@ -15,7 +15,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: HydrationNodeBase,
+        parent: HydrationNode<web_sys::Element>,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
