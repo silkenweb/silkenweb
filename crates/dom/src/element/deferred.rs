@@ -118,3 +118,15 @@ impl DeferredText {
 pub struct DeferredNode(
     // TODO: This will contain an enum of Text|Element
 );
+
+impl From<DeferredText> for DeferredNode {
+    fn from(_: DeferredText) -> Self {
+        todo!()
+    }
+}
+
+impl From<DeferredElement> for DeferredNode {
+    fn from(_: DeferredElement) -> Self {
+        todo!()
+    }
+}
