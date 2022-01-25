@@ -7,7 +7,7 @@ use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::JsValue;
 
 use super::real::{RealElement, RealText};
-use crate::{attribute::Attribute, global::document, spawn_cancelable_future};
+use crate::{attribute::Attribute, spawn_cancelable_future};
 
 pub struct VElement {
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
@@ -15,17 +15,11 @@ pub struct VElement {
 
 impl VElement {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document::create_element(tag))
+        todo!()
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document::create_element_ns(namespace, tag))
-    }
-
-    fn new_element(dom_element: web_sys::Element) -> Self {
-        Self {
-            futures: Vec::new(),
-        }
+        todo!()
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
@@ -37,10 +31,6 @@ impl VElement {
     }
 
     pub fn store_child(&mut self, child: &mut Self) {
-        todo!()
-    }
-
-    pub fn eval_dom_element(&self) -> web_sys::Element {
         todo!()
     }
 
@@ -78,7 +68,7 @@ impl VElement {
 }
 
 impl From<VElement> for RealElement {
-    fn from(_: VElement) -> Self {
+    fn from(element: VElement) -> Self {
         todo!()
     }
 }
@@ -97,7 +87,7 @@ impl VText {
 }
 
 impl From<VText> for RealText {
-    fn from(_: VText) -> Self {
+    fn from(text: VText) -> Self {
         todo!()
     }
 }
