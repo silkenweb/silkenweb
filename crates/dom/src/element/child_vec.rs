@@ -5,7 +5,7 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     child_groups::ChildGroups,
-    dom::{DomElement, DomNode},
+    dom::{DomElement, DomNodeData},
     Element,
 };
 use crate::render::queue_update;
@@ -14,7 +14,7 @@ pub struct ChildVec {
     parent: DomElement,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
-    children: Vec<DomNode>,
+    children: Vec<DomNodeData>,
 }
 
 impl ChildVec {
@@ -53,7 +53,7 @@ impl ChildVec {
         self.clear();
         self.children = new_children
             .into_iter()
-            .map(|child| child.into().base_node())
+            .map(|child| child.into().into_node())
             .collect();
 
         let mut child_groups = self.child_groups.borrow_mut();
@@ -76,10 +76,10 @@ impl ChildVec {
     }
 
     pub fn insert(&mut self, index: usize, new_child: impl Into<Element>) {
-        self.insert_node(index, new_child.into().base_node())
+        self.insert_node(index, new_child.into().into_node())
     }
 
-    fn insert_node(&mut self, index: usize, new_child: DomNode) {
+    fn insert_node(&mut self, index: usize, new_child: DomNodeData) {
         if index >= self.children.len() {
             self.push_node(new_child);
             return;
@@ -100,7 +100,7 @@ impl ChildVec {
     }
 
     pub fn set_at(&mut self, index: usize, new_child: impl Into<Element>) {
-        let new_child = new_child.into().base_node();
+        let new_child = new_child.into().into_node();
 
         if index == 0 {
             self.child_groups
@@ -116,7 +116,7 @@ impl ChildVec {
         *old_child = new_child;
     }
 
-    pub fn remove(&mut self, index: usize) -> DomNode {
+    pub fn remove(&mut self, index: usize) -> DomNodeData {
         let old_child = self.children.remove(index);
         self.parent.remove_child(old_child.clone());
 
@@ -140,10 +140,10 @@ impl ChildVec {
     }
 
     pub fn push(&mut self, new_child: impl Into<Element>) {
-        self.push_node(new_child.into().base_node())
+        self.push_node(new_child.into().into_node())
     }
 
-    fn push_node(&mut self, new_child: DomNode) {
+    fn push_node(&mut self, new_child: DomNodeData) {
         let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {

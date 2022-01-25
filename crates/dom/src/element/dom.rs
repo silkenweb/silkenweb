@@ -82,13 +82,17 @@ impl DomElement {
         self.data().dom_element.clone()
     }
 
-    pub fn append_child_now(&mut self, child: &mut impl DomNodeRef) {
+    pub fn append_child_now(&mut self, child: &mut impl DomNode) {
         self.dom_element()
             .append_child(&child.dom_node())
             .unwrap_throw();
     }
 
-    pub fn insert_child_before(&mut self, mut child: DomNode, mut next_child: Option<DomNode>) {
+    pub fn insert_child_before(
+        &mut self,
+        mut child: impl DomNode + 'static,
+        mut next_child: Option<impl DomNode + 'static>,
+    ) {
         let mut parent = self.clone();
 
         queue_update(move || {
@@ -98,8 +102,8 @@ impl DomElement {
 
     pub fn insert_child_before_now(
         &mut self,
-        child: &mut impl DomNodeRef,
-        next_child: Option<&mut impl DomNodeRef>,
+        child: &mut impl DomNode,
+        next_child: Option<&mut impl DomNode>,
     ) {
         if let Some(next_child) = next_child {
             self.dom_element()
@@ -110,7 +114,7 @@ impl DomElement {
         }
     }
 
-    pub fn replace_child(&mut self, new_child: DomNode, old_child: DomNode) {
+    pub fn replace_child(&mut self, new_child: impl DomNode, old_child: impl DomNode) {
         let parent = self.dom_element().clone();
         let new_child = new_child.dom_node().clone();
         let old_child = old_child.dom_node().clone();
@@ -120,13 +124,13 @@ impl DomElement {
         });
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl DomNodeRef) {
+    pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
         self.dom_element()
             .remove_child(&child.dom_node())
             .unwrap_throw();
     }
 
-    pub fn remove_child(&mut self, child: DomNode) {
+    pub fn remove_child(&mut self, child: impl DomNode + 'static) {
         let parent = self.dom_element().clone();
 
         queue_update(move || {
@@ -173,10 +177,11 @@ impl DomText {
     }
 }
 
+/// This is for storing dom nodes without `Box<dyn DomNode>`
 #[derive(Clone)]
-pub struct DomNode(DomNodeEnum);
+pub struct DomNodeData(DomNodeEnum);
 
-impl DomNode {
+impl DomNodeData {
     fn dom_node(&self) -> Ref<web_sys::Node> {
         match &self.0 {
             DomNodeEnum::Element(elem) => Ref::map(elem.dom_element(), AsRef::as_ref),
@@ -191,13 +196,13 @@ enum DomNodeEnum {
     Text(DomText),
 }
 
-impl From<DomElement> for DomNode {
+impl From<DomElement> for DomNodeData {
     fn from(elem: DomElement) -> Self {
         Self(DomNodeEnum::Element(elem))
     }
 }
 
-impl From<DomText> for DomNode {
+impl From<DomText> for DomNodeData {
     fn from(text: DomText) -> Self {
         Self(DomNodeEnum::Text(text))
     }
@@ -207,23 +212,23 @@ impl From<DomText> for DomNode {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNodeRef: Clone + Into<DomNode> {
+pub trait DomNode: Clone + Into<DomNodeData> {
     fn dom_node(&self) -> Ref<web_sys::Node>;
 }
 
-impl DomNodeRef for DomNode {
+impl DomNode for DomNodeData {
     fn dom_node(&self) -> Ref<web_sys::Node> {
         self.dom_node()
     }
 }
 
-impl DomNodeRef for DomElement {
+impl DomNode for DomElement {
     fn dom_node(&self) -> Ref<web_sys::Node> {
         Ref::map(self.dom_element(), AsRef::as_ref)
     }
 }
 
-impl DomNodeRef for DomText {
+impl DomNode for DomText {
     fn dom_node(&self) -> Ref<web_sys::Node> {
         Ref::map(self.0.borrow(), AsRef::as_ref)
     }

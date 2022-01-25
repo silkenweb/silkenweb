@@ -16,7 +16,7 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    dom::{DomElement, DomNode, DomText},
+    dom::{DomElement, DomNodeData, DomText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
@@ -84,7 +84,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, child.base_node());
+                .upsert_only_child(group_index, child.clone_into_node());
             _child_storage = Some(child);
             async {}
         });
@@ -106,7 +106,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, child.base_node());
+                    .upsert_only_child(group_index, child.clone_into_node());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -213,11 +213,10 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let element = self.element.0.clone();
+        let mut element = self.element.0.clone();
 
         let future = sig.for_each(move |x| {
             clone!(f);
-            let mut element = element.clone();
             element.effect(move |elem| f(elem, x));
             async {}
         });
@@ -259,8 +258,12 @@ impl Element {
         self.0.eval_dom_element()
     }
 
-    fn base_node(&self) -> DomNode {
+    fn clone_into_node(&self) -> DomNodeData {
         self.0.clone().into()
+    }
+
+    fn into_node(self) -> DomNodeData {
+        self.0.into()
     }
 }
 
