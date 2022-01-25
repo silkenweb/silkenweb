@@ -331,12 +331,8 @@ type LazyText = Lazy<RealText, VText>;
 // way around this? Maybe a `Borrowed` type on the `DomNode` trait?
 pub trait Thunk {
     fn is_thunk(&self) -> bool;
-
-    // TODO:
-    // fn evaluate(&mut self);
 }
 
-// TODO: If args are not all thunks, evaluate then all.
 fn all_thunks<const COUNT: usize>(args: [&dyn Thunk; COUNT]) -> bool {
     args.into_iter().all(Thunk::is_thunk)
 }
