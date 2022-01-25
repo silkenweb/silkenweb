@@ -16,14 +16,14 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    strict::{StrictElement, StrictNode, StrictText},
+    dom::{DomElement, DomNode, DomText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
 mod child_groups;
 mod child_vec;
+mod dom;
 mod event;
-mod strict;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
@@ -35,14 +35,14 @@ pub struct ElementBuilderBase {
 
 impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(StrictElement::new(tag))
+        Self::new_element(DomElement::new(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(StrictElement::new_in_namespace(namespace, tag))
+        Self::new_element(DomElement::new_in_namespace(namespace, tag))
     }
 
-    fn new_element(element: StrictElement) -> Self {
+    fn new_element(element: DomElement) -> Self {
         let node = element.clone();
 
         Self {
@@ -140,14 +140,14 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let mut text_node = StrictText::new(child);
+        let mut text_node = DomText::new(child);
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let mut text_node = StrictText::new(intern(""));
+        let mut text_node = DomText::new(intern(""));
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
 
@@ -252,14 +252,14 @@ impl From<ElementBuilderBase> for Element {
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
-pub struct Element(StrictElement);
+pub struct Element(DomElement);
 
 impl Element {
     pub(super) fn eval_dom_element(&self) -> web_sys::Element {
         self.0.eval_dom_element()
     }
 
-    fn base_node(&self) -> StrictNode {
+    fn base_node(&self) -> DomNode {
         self.0.clone().into()
     }
 }

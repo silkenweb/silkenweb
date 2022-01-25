@@ -5,21 +5,21 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     child_groups::ChildGroups,
-    strict::{StrictElement, StrictNode},
+    dom::{DomElement, DomNode},
     Element,
 };
 use crate::render::queue_update;
 
 pub struct ChildVec {
-    parent: StrictElement,
+    parent: DomElement,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
-    children: Vec<StrictNode>,
+    children: Vec<DomNode>,
 }
 
 impl ChildVec {
     pub fn new(
-        parent: StrictElement,
+        parent: DomElement,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
@@ -79,7 +79,7 @@ impl ChildVec {
         self.insert_node(index, new_child.into().base_node())
     }
 
-    fn insert_node(&mut self, index: usize, new_child: StrictNode) {
+    fn insert_node(&mut self, index: usize, new_child: DomNode) {
         if index >= self.children.len() {
             self.push_node(new_child);
             return;
@@ -116,7 +116,7 @@ impl ChildVec {
         *old_child = new_child;
     }
 
-    pub fn remove(&mut self, index: usize) -> StrictNode {
+    pub fn remove(&mut self, index: usize) -> DomNode {
         let old_child = self.children.remove(index);
         self.parent.remove_child(old_child.clone());
 
@@ -143,7 +143,7 @@ impl ChildVec {
         self.push_node(new_child.into().base_node())
     }
 
-    fn push_node(&mut self, new_child: StrictNode) {
+    fn push_node(&mut self, new_child: DomNode) {
         let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
