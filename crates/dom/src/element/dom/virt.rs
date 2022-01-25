@@ -6,9 +6,8 @@ use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::JsValue;
 
-use crate::{attribute::Attribute, global::document, spawn_cancelable_future};
-
 use super::real::{RealElement, RealText};
+use crate::{attribute::Attribute, global::document, spawn_cancelable_future};
 
 pub struct VElement {
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
@@ -37,7 +36,7 @@ impl VElement {
         todo!()
     }
 
-    pub fn store_child(&mut self, child: Self) {
+    pub fn store_child(&mut self, child: &mut Self) {
         todo!()
     }
 
@@ -61,7 +60,7 @@ impl VElement {
         todo!()
     }
 
-    pub fn remove_child(&mut self, child: impl VNode + 'static) {
+    pub fn remove_child(&mut self, child: &mut impl VNode) {
         todo!()
     }
 
@@ -92,8 +91,8 @@ impl VText {
         Self(text.to_owned())
     }
 
-    pub fn set_text(&mut self, text: &str) {
-        self.0 = text.to_owned();
+    pub fn set_text(&mut self, text: String) {
+        self.0 = text;
     }
 }
 

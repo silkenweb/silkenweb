@@ -9,7 +9,7 @@ use wasm_bindgen::JsValue;
 
 use self::{
     real::{RealElement, RealNode, RealText},
-    virt::{VElement, VText},
+    virt::{VElement, VNode, VText},
 };
 use crate::{attribute::Attribute, render::queue_update};
 
@@ -36,29 +36,47 @@ impl DomElement {
         RefMut::map(self.0.borrow_mut(), Lazy::value)
     }
 
+    fn virt(&self) -> RefMut<VElement> {
+        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
+    }
+
     pub fn shrink_to_fit(&mut self) {
-        self.real().shrink_to_fit();
+        if !all_thunks([self]) {
+            self.real().shrink_to_fit();
+        }
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.real().spawn_future(future);
+        if all_thunks([self]) {
+            self.virt().spawn_future(future);
+        } else {
+            self.real().spawn_future(future);
+        }
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.real().on(name, f);
+        if all_thunks([self]) {
+            self.virt().on(name, f);
+        } else {
+            self.real().on(name, f);
+        }
     }
 
     pub fn store_child(&mut self, child: Self) {
-        self.real().store_child(&mut child.real());
+        if all_thunks([self, &child]) {
+            self.virt().store_child(&mut child.virt());
+        } else {
+            self.real().store_child(&mut child.real());
+        }
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
-        self.real().eval_dom_element()
+        self.real().dom_element()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
         if all_thunks([self, child]) {
-            todo!()
+            self.virt().append_child(child)
         } else {
             self.real().append_child(child)
         }
@@ -81,7 +99,17 @@ impl DomElement {
         child: &mut impl DomNode,
         next_child: Option<&mut impl DomNode>,
     ) {
-        self.real().insert_child_before(child, next_child);
+        let mut is_all_thunks = all_thunks([self, child]);
+
+        if let Some(next_child) = &next_child {
+            is_all_thunks &= next_child.is_thunk();
+        };
+
+        if is_all_thunks {
+            self.virt().insert_child_before(child, next_child);
+        } else {
+            self.real().insert_child_before(child, next_child);
+        }
     }
 
     pub fn replace_child(
@@ -89,13 +117,21 @@ impl DomElement {
         mut new_child: impl DomNode + 'static,
         mut old_child: impl DomNode + 'static,
     ) {
-        let parent = self.clone();
+        if all_thunks([self, &new_child, &old_child]) {
+            self.virt().replace_child(&mut new_child, &mut old_child);
+        } else {
+            let parent = self.clone();
 
-        queue_update(move || parent.real().replace_child(&mut new_child, &mut old_child));
+            queue_update(move || parent.real().replace_child(&mut new_child, &mut old_child));
+        }
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
-        self.real().remove_child(child);
+        if all_thunks([self, child]) {
+            self.virt().remove_child(child);
+        } else {
+            self.real().remove_child(child);
+        }
     }
 
     pub fn remove_child(&mut self, mut child: impl DomNode + 'static) {
@@ -107,17 +143,29 @@ impl DomElement {
     }
 
     pub fn clear_children(&mut self) {
-        let parent = self.clone();
+        if all_thunks([self]) {
+            self.virt().clear_children();
+        } else {
+            let parent = self.clone();
 
-        queue_update(move || parent.real().clear_children())
+            queue_update(move || parent.real().clear_children())
+        }
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        self.real().attribute(name, value);
+        if all_thunks([self]) {
+            self.virt().attribute(name, value);
+        } else {
+            self.real().attribute(name, value);
+        }
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.real().effect(f);
+        if all_thunks([self]) {
+            self.virt().effect(f);
+        } else {
+            self.real().effect(f);
+        }
     }
 }
 
@@ -130,13 +178,21 @@ impl DomText {
     }
 
     pub fn set_text(&mut self, text: String) {
-        let parent = self.clone();
+        if all_thunks([self]) {
+            self.virt().set_text(text);
+        } else {
+            let parent = self.clone();
 
-        queue_update(move || parent.real().set_text(&text));
+            queue_update(move || parent.real().set_text(&text));
+        }
     }
 
     fn real(&self) -> RefMut<RealText> {
         RefMut::map(self.0.borrow_mut(), Lazy::value)
+    }
+
+    fn virt(&self) -> RefMut<VText> {
+        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
     }
 }
 
@@ -168,7 +224,7 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + RealNode + Thunk {}
+pub trait DomNode: Clone + Into<DomNodeData> + RealNode + VNode + Thunk {}
 
 impl RealNode for DomNodeData {
     fn dom_node(&self) -> web_sys::Node {
@@ -178,6 +234,8 @@ impl RealNode for DomNodeData {
         }
     }
 }
+
+impl VNode for DomNodeData {}
 
 impl Thunk for DomNodeData {
     fn is_thunk(&self) -> bool {
@@ -205,6 +263,8 @@ impl RealNode for DomElement {
     }
 }
 
+impl VNode for DomElement {}
+
 impl DomNode for DomElement {}
 
 impl RealNode for DomText {
@@ -212,6 +272,8 @@ impl RealNode for DomText {
         self.real().dom_node()
     }
 }
+
+impl VNode for DomText {}
 
 impl DomNode for DomText {}
 
@@ -241,6 +303,13 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
         match self {
             Lazy::Value(value, _) => value,
             Lazy::Thunk(_) => unreachable!(),
+        }
+    }
+
+    fn thunk(&mut self) -> &mut Thunk {
+        match self {
+            Lazy::Value(_, _) => panic!("Expected a thunk"),
+            Lazy::Thunk(thunk) => return thunk.as_mut().unwrap(),
         }
     }
 }

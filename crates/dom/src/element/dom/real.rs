@@ -45,7 +45,7 @@ impl RealElement {
         self.futures.extend(mem::take(&mut child.futures));
     }
 
-    pub fn eval_dom_element(&self) -> web_sys::Element {
+    pub fn dom_element(&self) -> web_sys::Element {
         self.dom_element.clone()
     }
 
