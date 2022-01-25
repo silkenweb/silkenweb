@@ -103,36 +103,11 @@ impl From<VText> for RealText {
     }
 }
 
-// TODO: Do we need this?
-/// This is for storing dom nodes without `Box<dyn VNode>`
-pub struct VNodeData(VNodeEnum);
-
-impl VNodeData {}
-
-enum VNodeEnum {
-    Element(VElement),
-    Text(VText),
-}
-
-impl From<VElement> for VNodeData {
-    fn from(elem: VElement) -> Self {
-        Self(VNodeEnum::Element(elem))
-    }
-}
-
-impl From<VText> for VNodeData {
-    fn from(text: VText) -> Self {
-        Self(VNodeEnum::Text(text))
-    }
-}
-
 /// A node in the DOM
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait VNode: Into<VNodeData> {}
-
-impl VNode for VNodeData {}
+pub trait VNode {}
 
 impl VNode for VElement {}
 

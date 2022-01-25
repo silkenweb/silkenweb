@@ -116,48 +116,12 @@ impl RealText {
     }
 }
 
-// TODO: Do we need this?
-/// This is for storing dom nodes without `Box<dyn RealNode>`
-pub struct RealNodeData(RealNodeEnum);
-
-impl RealNodeData {
-    fn dom_node(&self) -> &web_sys::Node {
-        match &self.0 {
-            RealNodeEnum::Element(elem) => elem.dom_element.as_ref(),
-            RealNodeEnum::Text(text) => text.0.as_ref(),
-        }
-    }
-}
-
-enum RealNodeEnum {
-    Element(RealElement),
-    Text(RealText),
-}
-
-impl From<RealElement> for RealNodeData {
-    fn from(elem: RealElement) -> Self {
-        Self(RealNodeEnum::Element(elem))
-    }
-}
-
-impl From<RealText> for RealNodeData {
-    fn from(text: RealText) -> Self {
-        Self(RealNodeEnum::Text(text))
-    }
-}
-
 /// A node in the DOM
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
 pub trait RealNode {
     fn dom_node(&self) -> web_sys::Node;
-}
-
-impl RealNode for RealNodeData {
-    fn dom_node(&self) -> web_sys::Node {
-        self.dom_node().clone()
-    }
 }
 
 impl RealNode for RealElement {
