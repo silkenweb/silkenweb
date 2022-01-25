@@ -1,5 +1,5 @@
 use std::{
-    cell::{Ref, RefCell, RefMut},
+    cell::{RefCell, RefMut},
     future::Future,
     marker::PhantomData,
     rc::Rc,
@@ -21,52 +21,46 @@ pub struct DomElement(Rc<RefCell<LazyElement>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::value(RealElement::new(tag)))))
+        Self(Rc::new(RefCell::new(Lazy::new_value(RealElement::new(
+            tag,
+        )))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::value(
+        Self(Rc::new(RefCell::new(Lazy::new_value(
             RealElement::new_in_namespace(namespace, tag),
         ))))
     }
 
-    fn data(&self) -> Ref<RealElement> {
-        Ref::map(self.0.borrow(), |lazy_elem| match lazy_elem {
-            Lazy::Value(elem, _) => elem,
-        })
-    }
-
-    fn data_mut(&mut self) -> RefMut<RealElement> {
-        RefMut::map(self.0.borrow_mut(), |lazy_elem| match lazy_elem {
-            Lazy::Value(elem, _) => elem,
-        })
+    fn real(&self) -> RefMut<RealElement> {
+        RefMut::map(self.0.borrow_mut(), Lazy::value)
     }
 
     pub fn shrink_to_fit(&mut self) {
-        self.data_mut().shrink_to_fit();
+        self.real().shrink_to_fit();
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.data_mut().spawn_future(future);
+        self.real().spawn_future(future);
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.data_mut().on(name, f);
+        self.real().on(name, f);
     }
 
-    pub fn store_child(&mut self, mut child: Self) {
-        self.data_mut().store_child(&mut child.data_mut());
+    pub fn store_child(&mut self, child: Self) {
+        self.real().store_child(&mut child.real());
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
-        self.data().eval_dom_element()
+        self.real().eval_dom_element()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
         if all_thunks([self, child]) {
             todo!()
         } else {
-            self.data_mut().append_child(child)
+            self.real().append_child(child)
         }
     }
 
@@ -87,7 +81,7 @@ impl DomElement {
         child: &mut impl DomNode,
         next_child: Option<&mut impl DomNode>,
     ) {
-        self.data_mut().insert_child_before(child, next_child);
+        self.real().insert_child_before(child, next_child);
     }
 
     pub fn replace_child(
@@ -95,17 +89,13 @@ impl DomElement {
         mut new_child: impl DomNode + 'static,
         mut old_child: impl DomNode + 'static,
     ) {
-        let mut parent = self.clone();
+        let parent = self.clone();
 
-        queue_update(move || {
-            parent
-                .data_mut()
-                .replace_child(&mut new_child, &mut old_child)
-        });
+        queue_update(move || parent.real().replace_child(&mut new_child, &mut old_child));
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
-        self.data_mut().remove_child(child);
+        self.real().remove_child(child);
     }
 
     pub fn remove_child(&mut self, mut child: impl DomNode + 'static) {
@@ -117,17 +107,17 @@ impl DomElement {
     }
 
     pub fn clear_children(&mut self) {
-        let mut parent = self.clone();
+        let parent = self.clone();
 
-        queue_update(move || parent.data_mut().clear_children())
+        queue_update(move || parent.real().clear_children())
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        self.data_mut().attribute(name, value);
+        self.real().attribute(name, value);
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.data_mut().effect(f);
+        self.real().effect(f);
     }
 }
 
@@ -136,25 +126,17 @@ pub struct DomText(Rc<RefCell<LazyText>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::value(RealText::new(text)))))
+        Self(Rc::new(RefCell::new(Lazy::new_value(RealText::new(text)))))
     }
 
     pub fn set_text(&mut self, text: String) {
-        let mut parent = self.clone();
+        let parent = self.clone();
 
-        queue_update(move || parent.data_mut().set_text(&text));
+        queue_update(move || parent.real().set_text(&text));
     }
 
-    fn data(&self) -> Ref<RealText> {
-        Ref::map(self.0.borrow(), |lazy_elem| match lazy_elem {
-            Lazy::Value(elem, _) => elem,
-        })
-    }
-
-    fn data_mut(&mut self) -> RefMut<RealText> {
-        RefMut::map(self.0.borrow_mut(), |lazy_elem| match lazy_elem {
-            Lazy::Value(text, _) => text,
-        })
+    fn real(&self) -> RefMut<RealText> {
+        RefMut::map(self.0.borrow_mut(), Lazy::value)
     }
 }
 
@@ -219,7 +201,7 @@ impl DomNode for DomNodeData {
 
 impl RealNode for DomElement {
     fn dom_node(&self) -> web_sys::Node {
-        self.data().dom_node()
+        self.real().dom_node()
     }
 }
 
@@ -227,7 +209,7 @@ impl DomNode for DomElement {}
 
 impl RealNode for DomText {
     fn dom_node(&self) -> web_sys::Node {
-        self.data().dom_node()
+        self.real().dom_node()
     }
 }
 
@@ -235,12 +217,31 @@ impl DomNode for DomText {}
 
 enum Lazy<Value, Thunk> {
     Value(Value, PhantomData<Thunk>),
-    // TODO: Thunk(Option<Thunk>),
+    // TODO: feature to disable this at compile time
+    #[allow(dead_code)]
+    Thunk(Option<Thunk>),
 }
 
 impl<Value, Thunk> Lazy<Value, Thunk> {
-    fn value(x: Value) -> Self {
+    fn new_value(x: Value) -> Self {
         Self::Value(x, PhantomData)
+    }
+}
+
+impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
+    fn value(&mut self) -> &mut Value {
+        *self = Self::Value(
+            match self {
+                Lazy::Value(value, _) => return value,
+                Lazy::Thunk(thunk) => thunk.take().unwrap().into(),
+            },
+            PhantomData,
+        );
+
+        match self {
+            Lazy::Value(value, _) => value,
+            Lazy::Thunk(_) => unreachable!(),
+        }
     }
 }
 
@@ -248,6 +249,7 @@ impl<V, T> Thunk for Rc<RefCell<Lazy<V, T>>> {
     fn is_thunk(&self) -> bool {
         match *self.borrow() {
             Lazy::Value(_, _) => false,
+            Lazy::Thunk(_) => true,
         }
     }
 }

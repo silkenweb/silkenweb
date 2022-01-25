@@ -8,6 +8,8 @@ use wasm_bindgen::JsValue;
 
 use crate::{attribute::Attribute, global::document, spawn_cancelable_future};
 
+use super::real::{RealElement, RealText};
+
 pub struct VElement {
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
@@ -76,6 +78,12 @@ impl VElement {
     }
 }
 
+impl From<VElement> for RealElement {
+    fn from(_: VElement) -> Self {
+        todo!()
+    }
+}
+
 #[derive(Clone)]
 pub struct VText(String);
 
@@ -86,6 +94,12 @@ impl VText {
 
     pub fn set_text(&mut self, text: &str) {
         self.0 = text.to_owned();
+    }
+}
+
+impl From<VText> for RealText {
+    fn from(_: VText) -> Self {
+        todo!()
     }
 }
 
