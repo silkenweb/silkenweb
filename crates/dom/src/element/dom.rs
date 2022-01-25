@@ -1,38 +1,45 @@
 use std::{
     cell::{Ref, RefCell, RefMut},
     future::Future,
+    marker::PhantomData,
     rc::Rc,
 };
 
 use wasm_bindgen::JsValue;
 
-use self::real::{RealElement, RealNode, RealText};
+use self::{
+    real::{RealElement, RealNode, RealText},
+    virt::{VElement, VText},
+};
 use crate::{attribute::Attribute, render::queue_update};
 
 mod real;
 mod virt;
 
-// TODO: This will become an Rc<RefCell<Lazy<RealElement, VElement>>>
 #[derive(Clone)]
-pub struct DomElement(Rc<RefCell<RealElement>>);
+pub struct DomElement(Rc<RefCell<LazyElement>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(RealElement::new(tag))))
+        Self(Rc::new(RefCell::new(Lazy::value(RealElement::new(tag)))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(RealElement::new_in_namespace(
-            namespace, tag,
+        Self(Rc::new(RefCell::new(Lazy::value(
+            RealElement::new_in_namespace(namespace, tag),
         ))))
     }
 
     fn data(&self) -> Ref<RealElement> {
-        self.0.borrow()
+        Ref::map(self.0.borrow(), |lazy_elem| match lazy_elem {
+            Lazy::Value(elem, _) => elem,
+        })
     }
 
     fn data_mut(&mut self) -> RefMut<RealElement> {
-        self.0.borrow_mut()
+        RefMut::map(self.0.borrow_mut(), |lazy_elem| match lazy_elem {
+            Lazy::Value(elem, _) => elem,
+        })
     }
 
     pub fn shrink_to_fit(&mut self) {
@@ -121,17 +128,29 @@ impl DomElement {
 }
 
 #[derive(Clone)]
-pub struct DomText(Rc<RefCell<RealText>>);
+pub struct DomText(Rc<RefCell<LazyText>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(RealText::new(text))))
+        Self(Rc::new(RefCell::new(Lazy::value(RealText::new(text)))))
     }
 
     pub fn set_text(&mut self, text: String) {
-        let parent = self.clone();
+        let mut parent = self.clone();
 
-        queue_update(move || parent.0.borrow_mut().set_text(&text));
+        queue_update(move || parent.data_mut().set_text(&text));
+    }
+
+    fn data(&self) -> Ref<RealText> {
+        Ref::map(self.0.borrow(), |lazy_elem| match lazy_elem {
+            Lazy::Value(elem, _) => elem,
+        })
+    }
+
+    fn data_mut(&mut self) -> RefMut<RealText> {
+        RefMut::map(self.0.borrow_mut(), |lazy_elem| match lazy_elem {
+            Lazy::Value(text, _) => text,
+        })
     }
 }
 
@@ -186,8 +205,22 @@ impl DomNode for DomElement {}
 
 impl RealNode for DomText {
     fn dom_node(&self) -> web_sys::Node {
-        self.0.borrow().dom_node()
+        self.data().dom_node()
     }
 }
 
 impl DomNode for DomText {}
+
+enum Lazy<Value, Thunk> {
+    Value(Value, PhantomData<Thunk>),
+    // TODO: Thunk(Option<Thunk>),
+}
+
+impl<Value, Thunk> Lazy<Value, Thunk> {
+    fn value(x: Value) -> Self {
+        Self::Value(x, PhantomData)
+    }
+}
+
+type LazyElement = Lazy<RealElement, VElement>;
+type LazyText = Lazy<RealText, VText>;
