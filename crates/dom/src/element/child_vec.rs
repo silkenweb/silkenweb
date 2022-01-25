@@ -3,19 +3,23 @@ use std::{cell::RefCell, mem, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{child_groups::ChildGroups, hydration::HydrationNode, Element};
-use crate::{element::hydration::HydrationNodeBase, render::queue_update};
+use super::{
+    child_groups::ChildGroups,
+    strict::{StrictElement, StrictNode},
+    Element,
+};
+use crate::render::queue_update;
 
 pub struct ChildVec {
-    parent: HydrationNode<web_sys::Element>,
+    parent: StrictElement,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
-    children: Vec<Element>,
+    children: Vec<StrictNode>,
 }
 
 impl ChildVec {
     pub fn new(
-        parent: HydrationNode<web_sys::Element>,
+        parent: StrictElement,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
@@ -49,7 +53,7 @@ impl ChildVec {
         self.clear();
         self.children = new_children
             .into_iter()
-            .map(Into::<Element>::into)
+            .map(|child| child.into().base_node())
             .collect();
 
         let mut child_groups = self.child_groups.borrow_mut();
@@ -59,7 +63,7 @@ impl ChildVec {
             return;
         }
 
-        let children = self.child_element_refs();
+        let children = self.children.clone();
         child_groups.set_first_child(self.group_index, children.first().unwrap_throw().clone());
         let mut parent = self.parent.clone();
         let mut next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
@@ -72,49 +76,49 @@ impl ChildVec {
     }
 
     pub fn insert(&mut self, index: usize, new_child: impl Into<Element>) {
+        self.insert_node(index, new_child.into().base_node())
+    }
+
+    fn insert_node(&mut self, index: usize, new_child: StrictNode) {
         if index >= self.children.len() {
-            self.push(new_child);
+            self.push_node(new_child);
             return;
         }
-
-        let new_child = new_child.into();
-        let new_child_node = new_child.base_node();
 
         if index == 0 {
             self.child_groups
                 .borrow_mut()
-                .set_first_child(self.group_index, new_child_node.clone());
+                .set_first_child(self.group_index, new_child.clone());
         }
 
         assert!(index < self.children.len());
 
         self.parent
-            .insert_child_before(new_child_node, Some(self.children[index].base_node()));
+            .insert_child_before(new_child.clone(), Some(self.children[index].clone()));
 
         self.children.insert(index, new_child);
     }
 
     pub fn set_at(&mut self, index: usize, new_child: impl Into<Element>) {
-        let new_child = new_child.into();
-        let new_child_node = new_child.base_node();
+        let new_child = new_child.into().base_node();
 
         if index == 0 {
             self.child_groups
                 .borrow_mut()
-                .set_first_child(self.group_index, new_child_node.clone());
+                .set_first_child(self.group_index, new_child.clone());
         }
 
         let old_child = &mut self.children[index];
 
         self.parent
-            .replace_child(new_child_node, old_child.base_node());
+            .replace_child(new_child.clone(), old_child.clone());
 
         *old_child = new_child;
     }
 
-    pub fn remove(&mut self, index: usize) -> Element {
+    pub fn remove(&mut self, index: usize) -> StrictNode {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(old_child.base_node());
+        self.parent.remove_child(old_child.clone());
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -122,7 +126,7 @@ impl ChildVec {
             None => child_groups.clear_first_child(self.group_index),
             Some(first) => {
                 if index == 0 {
-                    child_groups.set_first_child(self.group_index, first.base_node())
+                    child_groups.set_first_child(self.group_index, first.clone())
                 }
             }
         }
@@ -132,18 +136,20 @@ impl ChildVec {
 
     pub fn relocate(&mut self, old_index: usize, new_index: usize) {
         let child = self.remove(old_index);
-        self.insert(new_index, child);
+        self.insert_node(new_index, child);
     }
 
     pub fn push(&mut self, new_child: impl Into<Element>) {
-        let new_child = new_child.into();
-        let new_child_node = new_child.base_node();
+        self.push_node(new_child.into().base_node())
+    }
+
+    fn push_node(&mut self, new_child: StrictNode) {
         let mut groups = self.child_groups.borrow_mut();
 
         if self.children.is_empty() {
-            groups.insert_only_child(self.group_index, new_child_node);
+            groups.insert_only_child(self.group_index, new_child.clone());
         } else {
-            groups.insert_last_child(self.group_index, new_child_node);
+            groups.insert_last_child(self.group_index, new_child.clone());
         }
 
         self.children.push(new_child);
@@ -159,12 +165,12 @@ impl ChildVec {
         }
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(removed_child.base_node());
+            self.parent.remove_child(removed_child);
         }
     }
 
     pub fn clear(&mut self) {
-        let existing_children = self.child_element_refs();
+        let existing_children = self.children.clone();
         self.children.clear();
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -183,9 +189,5 @@ impl ChildVec {
                 }
             });
         }
-    }
-
-    fn child_element_refs(&self) -> Vec<HydrationNodeBase> {
-        self.children.iter().map(|elem| elem.base_node()).collect()
     }
 }

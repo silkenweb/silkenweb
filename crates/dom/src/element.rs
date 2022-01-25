@@ -16,16 +16,13 @@ use wasm_bindgen::{intern, JsCast, JsValue};
 use self::{
     child_groups::ChildGroups,
     child_vec::ChildVec,
-    hydration::{HydrationElement, HydrationNodeBase, HydrationNodeRef, HydrationText},
+    strict::{StrictElement, StrictNode, StrictText},
 };
 use crate::{attribute::Attribute, clone, render::queue_update};
 
 mod child_groups;
 mod child_vec;
-mod deferred;
 mod event;
-mod hydration;
-mod lazy;
 mod strict;
 
 /// Build an HTML element.
@@ -38,15 +35,15 @@ pub struct ElementBuilderBase {
 
 impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(tag))
+        Self::new_element(StrictElement::new(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(HydrationElement::new_in_namespace(namespace, tag))
+        Self::new_element(StrictElement::new_in_namespace(namespace, tag))
     }
 
-    fn new_element(element: HydrationElement) -> Self {
-        let node = element.clone_into_node();
+    fn new_element(element: StrictElement) -> Self {
+        let node = element.clone();
 
         Self {
             element: Element(element),
@@ -128,7 +125,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.0.clone_into_node(),
+            self.element.0.clone(),
             self.child_groups.clone(),
             group_index,
         );
@@ -143,14 +140,14 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let mut text_node = HydrationText::new(child);
+        let mut text_node = StrictText::new(child);
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let mut text_node = HydrationText::new(intern(""));
+        let mut text_node = StrictText::new(intern(""));
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
 
@@ -172,7 +169,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.0.as_node_mut().attribute(name, value);
+        self.element.0.attribute(name, value);
         self
     }
 
@@ -182,7 +179,7 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let element = self.element.0.clone_into_node();
+        let element = self.element.0.clone();
 
         let updater = value.for_each({
             let name = name.to_owned();
@@ -191,7 +188,7 @@ impl ElementBuilder for ElementBuilderBase {
                 clone!(name);
                 let mut element = element.clone();
 
-                queue_update(move || element.to_mut().attribute(&name, new_value));
+                queue_update(move || element.attribute(&name, new_value));
 
                 async {}
             }
@@ -202,7 +199,7 @@ impl ElementBuilder for ElementBuilderBase {
 
     /// Apply an effect after the next render.
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.element.0.as_node_mut().effect(f);
+        self.element.0.effect(f);
         self
     }
 
@@ -216,12 +213,12 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let element = self.element.0.clone_into_node();
+        let element = self.element.0.clone();
 
         let future = sig.for_each(move |x| {
             clone!(f);
             let mut element = element.clone();
-            element.to_mut().effect(move |elem| f(elem, x));
+            element.effect(move |elem| f(elem, x));
             async {}
         });
 
@@ -255,15 +252,15 @@ impl From<ElementBuilderBase> for Element {
 ///
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
-pub struct Element(hydration::HydrationElement);
+pub struct Element(StrictElement);
 
 impl Element {
     pub(super) fn eval_dom_element(&self) -> web_sys::Element {
         self.0.eval_dom_element()
     }
 
-    fn base_node(&self) -> HydrationNodeBase {
-        self.0.clone_into_node().into_base()
+    fn base_node(&self) -> StrictNode {
+        self.0.clone().into()
     }
 }
 

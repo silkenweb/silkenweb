@@ -1,22 +1,22 @@
 use std::mem;
 
-use super::hydration::{HydrationNode, HydrationNodeBase, HydrationNodeRef};
+use super::strict::{StrictElement, StrictNode, StrictNodeRef};
 
 /// Groups of children with the same parent
 ///
 /// This manages insertion and removal of groups of children
 pub struct ChildGroups {
-    parent: HydrationNode<web_sys::Element>,
+    parent: StrictElement,
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
-    children: Vec<Option<HydrationNodeBase>>,
+    children: Vec<Option<StrictNode>>,
     // `true` if the last child group can change.
     last_is_dynamic: bool,
     group_count: usize,
 }
 
 impl ChildGroups {
-    pub fn new(parent: HydrationNode<web_sys::Element>) -> Self {
+    pub fn new(parent: StrictElement) -> Self {
         Self {
             parent,
             children: Vec::new(),
@@ -37,15 +37,14 @@ impl ChildGroups {
         index
     }
 
-    pub fn get_next_group_elem(&self, index: usize) -> Option<&HydrationNodeBase> {
+    pub fn get_next_group_elem(&self, index: usize) -> Option<&StrictNode> {
         self.children.split_at(index + 1).1.iter().flatten().next()
     }
 
     /// Append a new group. Don't wait for the next animation frame.
-    pub fn append_new_group_sync(&mut self, child: &mut impl HydrationNodeRef) {
+    pub fn append_new_group_sync(&mut self, child: &mut impl StrictNodeRef) {
         if self.last_is_dynamic {
-            self.children
-                .push(Some(child.clone_into_node().into_base()));
+            self.children.push(Some(child.clone().into()));
         }
 
         self.group_count += 1;
@@ -54,12 +53,12 @@ impl ChildGroups {
         self.last_is_dynamic = false;
     }
 
-    pub fn insert_only_child(&mut self, index: usize, child: HydrationNodeBase) {
+    pub fn insert_only_child(&mut self, index: usize, child: StrictNode) {
         assert!(!self.upsert_only_child(index, child));
     }
 
     /// Return `true` iff there was an existing node.
-    pub fn upsert_only_child(&mut self, index: usize, child: HydrationNodeBase) -> bool {
+    pub fn upsert_only_child(&mut self, index: usize, child: StrictNode) -> bool {
         let existed = mem::replace(&mut self.children[index], Some(child.clone()))
             .map(|existing| self.parent.remove_child(existing))
             .is_some();
@@ -69,7 +68,7 @@ impl ChildGroups {
         existed
     }
 
-    pub fn insert_last_child(&mut self, index: usize, child: HydrationNodeBase) {
+    pub fn insert_last_child(&mut self, index: usize, child: StrictNode) {
         self.parent
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
@@ -80,7 +79,7 @@ impl ChildGroups {
         }
     }
 
-    pub fn set_first_child(&mut self, index: usize, child: HydrationNodeBase) {
+    pub fn set_first_child(&mut self, index: usize, child: StrictNode) {
         self.children[index] = Some(child);
     }
 

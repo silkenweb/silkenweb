@@ -1,4 +1,9 @@
-use std::future::Future;
+use std::{
+    cell::{Ref, RefCell, RefMut},
+    future::Future,
+    mem,
+    rc::Rc,
+};
 
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
@@ -7,14 +12,16 @@ use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use super::event::EventCallback;
 use crate::{
     attribute::Attribute,
-    clone,
     global::document,
     render::{after_render, queue_update},
     spawn_cancelable_future,
 };
 
-pub struct StrictElement {
-    dom_element: StrictNode<web_sys::Element>,
+#[derive(Clone)]
+pub struct StrictElement(Rc<RefCell<StrictElementData>>);
+
+struct StrictElementData {
+    dom_element: web_sys::Element,
     event_callbacks: Vec<EventCallback>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
@@ -29,56 +36,62 @@ impl StrictElement {
     }
 
     fn new_element(dom_element: web_sys::Element) -> Self {
-        Self {
-            dom_element: StrictNode(dom_element),
+        Self(Rc::new(RefCell::new(StrictElementData {
+            dom_element,
             event_callbacks: Vec::new(),
             futures: Vec::new(),
-        }
+        })))
+    }
+
+    fn data(&self) -> Ref<StrictElementData> {
+        self.0.borrow()
+    }
+
+    fn data_mut(&mut self) -> RefMut<StrictElementData> {
+        self.0.borrow_mut()
     }
 
     pub fn shrink_to_fit(&mut self) {
-        self.event_callbacks.shrink_to_fit();
-        self.futures.shrink_to_fit();
+        let mut data = self.data_mut();
+        data.event_callbacks.shrink_to_fit();
+        data.futures.shrink_to_fit();
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.futures.push(spawn_cancelable_future(future));
+        self.data_mut()
+            .futures
+            .push(spawn_cancelable_future(future));
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        let dom_element = self.dom_element().clone();
-        self.event_callbacks
+        let mut data = self.data_mut();
+        let dom_element = data.dom_element.clone();
+        data.event_callbacks
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: Self) {
-        self.event_callbacks.extend(child.event_callbacks);
-        self.futures.extend(child.futures);
+    pub fn store_child(&mut self, mut child: Self) {
+        let mut data = self.data_mut();
+        let mut child = child.data_mut();
+        data.event_callbacks
+            .extend(mem::take(&mut child.event_callbacks));
+        data.futures.extend(mem::take(&mut child.futures));
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
-        self.dom_element().clone()
+        self.data().dom_element.clone()
     }
 
-    fn dom_element(&self) -> &web_sys::Element {
-        &self.dom_element.0
-    }
-}
-
-#[derive(Clone)]
-pub struct StrictNode<T>(T);
-
-impl StrictNode<web_sys::Element> {
     pub fn append_child_now(&mut self, child: &mut impl StrictNodeRef) {
-        self.dom_node()
-            .append_child(child.as_node_ref().dom_node())
+        self.dom_element()
+            .append_child(&child.dom_node())
             .unwrap_throw();
     }
 
     pub fn insert_child_before(
         &mut self,
-        mut child: StrictNodeBase,
-        mut next_child: Option<StrictNodeBase>,
+        mut child: StrictNode,
+        mut next_child: Option<StrictNode>,
     ) {
         let mut parent = self.clone();
 
@@ -93,44 +106,40 @@ impl StrictNode<web_sys::Element> {
         next_child: Option<&mut impl StrictNodeRef>,
     ) {
         if let Some(next_child) = next_child {
-            self.dom_node()
-                .insert_before(
-                    child.as_node_ref().dom_node(),
-                    Some(next_child.as_node_ref().dom_node()),
-                )
+            self.dom_element()
+                .insert_before(&child.dom_node(), Some(&next_child.dom_node()))
                 .unwrap_throw();
         } else {
             self.append_child_now(child);
         }
     }
 
-    pub fn replace_child(&mut self, new_child: StrictNodeBase, old_child: StrictNodeBase) {
-        let parent = self.dom_node().clone();
-        clone!(new_child, old_child);
+    pub fn replace_child(&mut self, new_child: StrictNode, old_child: StrictNode) {
+        let parent = self.dom_element().clone();
+        let new_child = new_child.dom_node().clone();
+        let old_child = old_child.dom_node().clone();
 
         queue_update(move || {
-            parent
-                .replace_child(&new_child.0, &old_child.0)
-                .unwrap_throw();
+            parent.replace_child(&new_child, &old_child).unwrap_throw();
         });
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl StrictNodeRef) {
-        self.dom_node()
-            .remove_child(child.as_node_ref().dom_node())
+        self.dom_element()
+            .remove_child(&child.dom_node())
             .unwrap_throw();
     }
 
-    pub fn remove_child(&mut self, child: StrictNodeBase) {
-        let parent = self.dom_node().clone();
+    pub fn remove_child(&mut self, child: StrictNode) {
+        let parent = self.dom_element().clone();
 
         queue_update(move || {
-            parent.remove_child(&child.0).unwrap_throw();
+            parent.remove_child(&child.dom_node()).unwrap_throw();
         });
     }
 
     pub fn clear_children(&mut self) {
-        let parent = self.dom_node().clone();
+        let parent = self.dom_element().clone();
 
         queue_update(move || {
             // This is specified to remove all nodes, if I'm reading it correctly:
@@ -140,91 +149,86 @@ impl StrictNode<web_sys::Element> {
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        value.set_attribute(name, &self.0);
+        value.set_attribute(name, &self.dom_element());
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        let dom_element = self.0.clone();
+        let dom_element = self.dom_element().clone();
         after_render(move || f(&dom_element));
     }
-}
 
-impl<T: AsRef<web_sys::Node> + Clone + 'static> StrictNode<T> {
-    fn dom_node(&self) -> &web_sys::Node {
-        self.0.as_ref()
-    }
-}
-
-pub type StrictNodeBase = StrictNode<web_sys::Node>;
-
-impl<T: Into<web_sys::Node>> StrictNode<T> {
-    pub fn into_base(self) -> StrictNodeBase {
-        StrictNode(self.0.into())
+    fn dom_element(&self) -> Ref<web_sys::Element> {
+        Ref::map(self.data(), |data| &data.dom_element)
     }
 }
 
 #[derive(Clone)]
-pub struct StrictText(StrictNode<web_sys::Text>);
+pub struct StrictText(RefCell<web_sys::Text>);
 
 impl StrictText {
     pub fn new(text: &str) -> Self {
-        Self(StrictNode(document::create_text_node(text)))
+        Self(RefCell::new(document::create_text_node(text)))
     }
 
     pub fn set_text(&mut self, text: String) {
-        let node = self.0.clone();
+        let node = self.0.borrow().clone();
 
-        queue_update(move || node.0.set_text_content(Some(&text)));
+        queue_update(move || node.set_text_content(Some(&text)));
     }
 }
 
-pub trait StrictNodeRef {
-    type Node: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static;
+#[derive(Clone)]
+pub struct StrictNode(StrictNodeEnum);
 
-    fn as_node_ref(&self) -> &StrictNode<Self::Node>;
-
-    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node>;
-
-    fn clone_into_node(&self) -> StrictNode<Self::Node> {
-        self.as_node_ref().clone()
+impl StrictNode {
+    fn dom_node(&self) -> Ref<web_sys::Node> {
+        match &self.0 {
+            StrictNodeEnum::Element(elem) => Ref::map(elem.dom_element(), AsRef::as_ref),
+            StrictNodeEnum::Text(text) => Ref::map(text.0.borrow(), AsRef::as_ref),
+        }
     }
 }
 
-impl<T> StrictNodeRef for StrictNode<T>
-where
-    T: AsRef<web_sys::Node> + Into<web_sys::Node> + Clone + 'static,
-{
-    type Node = T;
+#[derive(Clone)]
+enum StrictNodeEnum {
+    Element(StrictElement),
+    Text(StrictText),
+}
 
-    fn as_node_ref(&self) -> &StrictNode<Self::Node> {
-        self
-    }
-
-    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
-        self
+impl From<StrictElement> for StrictNode {
+    fn from(elem: StrictElement) -> Self {
+        Self(StrictNodeEnum::Element(elem))
     }
 }
 
-impl StrictNodeRef for StrictText {
-    type Node = web_sys::Text;
-
-    fn as_node_ref(&self) -> &StrictNode<Self::Node> {
-        &self.0
+impl From<StrictText> for StrictNode {
+    fn from(text: StrictText) -> Self {
+        Self(StrictNodeEnum::Text(text))
     }
+}
 
-    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
-        &mut self.0
+/// A node in the DOM
+///
+/// This lets us pass a reference to an element or text as a node, without
+/// actually constructing a node
+pub trait StrictNodeRef: Clone + Into<StrictNode> {
+    fn dom_node(&self) -> Ref<web_sys::Node>;
+}
+
+impl StrictNodeRef for StrictNode {
+    fn dom_node(&self) -> Ref<web_sys::Node> {
+        self.dom_node()
     }
 }
 
 impl StrictNodeRef for StrictElement {
-    type Node = web_sys::Element;
-
-    fn as_node_ref(&self) -> &StrictNode<Self::Node> {
-        &self.dom_element
+    fn dom_node(&self) -> Ref<web_sys::Node> {
+        Ref::map(self.dom_element(), AsRef::as_ref)
     }
+}
 
-    fn as_node_mut(&mut self) -> &mut StrictNode<Self::Node> {
-        &mut self.dom_element
+impl StrictNodeRef for StrictText {
+    fn dom_node(&self) -> Ref<web_sys::Node> {
+        Ref::map(self.0.borrow(), AsRef::as_ref)
     }
 }
