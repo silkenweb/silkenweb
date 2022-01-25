@@ -63,7 +63,11 @@ impl DomElement {
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
-        self.data_mut().append_child(child)
+        if all_thunks([self, child]) {
+            todo!()
+        } else {
+            self.data_mut().append_child(child)
+        }
     }
 
     pub fn insert_child_before(
@@ -182,13 +186,22 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + RealNode {}
+pub trait DomNode: Clone + Into<DomNodeData> + RealNode + Thunk {}
 
 impl RealNode for DomNodeData {
     fn dom_node(&self) -> web_sys::Node {
         match &self.0 {
             DomNodeEnum::Element(elem) => elem.dom_node(),
             DomNodeEnum::Text(text) => text.dom_node(),
+        }
+    }
+}
+
+impl Thunk for DomNodeData {
+    fn is_thunk(&self) -> bool {
+        match &self.0 {
+            DomNodeEnum::Element(elem) => elem.is_thunk(),
+            DomNodeEnum::Text(text) => text.is_thunk(),
         }
     }
 }
@@ -222,5 +235,40 @@ impl<Value, Thunk> Lazy<Value, Thunk> {
     }
 }
 
+impl<V, T> Thunk for Rc<RefCell<Lazy<V, T>>> {
+    fn is_thunk(&self) -> bool {
+        match *self.borrow() {
+            Lazy::Value(_, _) => false,
+        }
+    }
+}
+
 type LazyElement = Lazy<RealElement, VElement>;
 type LazyText = Lazy<RealText, VText>;
+
+// TODO: Typically, we'd check if `is_thunk`, `evaluate` if needed and pass the
+// arg on to a function. Each of these will borrow for Rc types. Can we find a
+// way around this? Maybe a `Borrowed` type on the `DomNode` trait?
+pub trait Thunk {
+    fn is_thunk(&self) -> bool;
+
+    // TODO:
+    // fn evaluate(&mut self);
+}
+
+// TODO: If args are not all thunks, evaluate then all.
+fn all_thunks<const COUNT: usize>(args: [&dyn Thunk; COUNT]) -> bool {
+    args.into_iter().all(Thunk::is_thunk)
+}
+
+impl Thunk for DomElement {
+    fn is_thunk(&self) -> bool {
+        self.0.is_thunk()
+    }
+}
+
+impl Thunk for DomText {
+    fn is_thunk(&self) -> bool {
+        self.0.is_thunk()
+    }
+}
