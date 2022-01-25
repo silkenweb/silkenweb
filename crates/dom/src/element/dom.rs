@@ -206,7 +206,16 @@ impl Thunk for DomNodeData {
     }
 }
 
-impl DomNode for DomNodeData {}
+impl DomNode for DomNodeData {
+    // TODO: When we get GAT's maybe we can do something like this to avoid multiple
+    // borrows:
+    //
+    // ```rust
+    // type BorrowedMut<'a> = DomNodeEnum<RefMut<'a, DomElement>, RefMut<'a, DomText>>;
+    //
+    // fn borrow_mut(&'a mut self) -> Self::BorrowedMut<'a>;
+    // ```
+}
 
 impl RealNode for DomElement {
     fn dom_node(&self) -> web_sys::Node {
