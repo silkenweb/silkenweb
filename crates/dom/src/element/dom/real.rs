@@ -1,20 +1,12 @@
-use std::future::Future;
-
-use discard::DiscardOnDrop;
-use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::DomElement;
 use crate::{
     attribute::Attribute, element::event::EventCallback, global::document, render::after_render,
-    spawn_cancelable_future,
 };
 
 pub struct RealElement {
     dom_element: web_sys::Element,
     event_callbacks: Vec<EventCallback>,
-    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
-    stored_children: Vec<DomElement>,
 }
 
 impl RealElement {
@@ -28,15 +20,6 @@ impl RealElement {
 
     pub fn shrink_to_fit(&mut self) {
         self.event_callbacks.shrink_to_fit();
-        self.futures.shrink_to_fit();
-    }
-
-    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.store_future(spawn_cancelable_future(future));
-    }
-
-    pub fn store_future(&mut self, future: DiscardOnDrop<CancelableFutureHandle>) {
-        self.futures.push(future);
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
@@ -45,8 +28,8 @@ impl RealElement {
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: DomElement) {
-        self.stored_children.push(child);
+    pub fn store_child(&mut self, child: &mut Self) {
+        self.event_callbacks.append(&mut child.event_callbacks);
     }
 
     pub fn dom_element(&self) -> web_sys::Element {
@@ -102,8 +85,6 @@ impl RealElement {
         Self {
             dom_element,
             event_callbacks: Vec::new(),
-            futures: Vec::new(),
-            stored_children: Vec::new(),
         }
     }
 }

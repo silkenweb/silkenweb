@@ -1,14 +1,12 @@
-use std::{collections::HashMap, future::Future};
+use std::collections::HashMap;
 
-use discard::DiscardOnDrop;
-use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::JsValue;
 
 use super::{
     real::{RealElement, RealText},
     DomElement, DomNodeData,
 };
-use crate::{attribute::Attribute, spawn_cancelable_future};
+use crate::attribute::Attribute;
 
 pub struct VElement {
     namespace: Option<String>,
@@ -16,7 +14,6 @@ pub struct VElement {
     attributes: HashMap<String, Option<String>>,
     children: Vec<DomNodeData>,
     stored_children: Vec<DomElement>,
-    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut RealElement)>>,
 }
 
@@ -40,13 +37,8 @@ impl VElement {
             attributes: HashMap::new(),
             children: Vec::new(),
             stored_children: Vec::new(),
-            futures: Vec::new(),
             hydrate_actions: Vec::new(),
         }
-    }
-
-    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.futures.push(spawn_cancelable_future(future));
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
@@ -124,17 +116,15 @@ impl From<VElement> for RealElement {
             elem.append_child(&mut child);
         }
 
-        for future in element.futures {
-            elem.store_future(future);
-        }
-
         for child in element.stored_children {
-            elem.store_child(child);
+            elem.store_child(&mut child.real());
         }
 
         for event in element.hydrate_actions {
             event(&mut elem);
         }
+
+        elem.shrink_to_fit();
 
         elem
     }

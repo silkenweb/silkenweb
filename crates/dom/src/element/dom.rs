@@ -1,8 +1,7 @@
 use std::{
     cell::{RefCell, RefMut},
-    future::Future,
     marker::PhantomData,
-    rc::{self, Rc},
+    rc::Rc,
 };
 
 use wasm_bindgen::JsValue;
@@ -44,14 +43,6 @@ impl DomElement {
         }
     }
 
-    pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        if all_thunks([self]) {
-            self.virt().spawn_future(future);
-        } else {
-            self.real().spawn_future(future);
-        }
-    }
-
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
         if all_thunks([self]) {
             self.virt().on(name, f);
@@ -64,7 +55,7 @@ impl DomElement {
         if all_thunks([self, &child]) {
             self.virt().store_child(child);
         } else {
-            self.real().store_child(child);
+            self.real().store_child(&mut child.real());
         }
     }
 
@@ -172,18 +163,6 @@ impl DomElement {
         } else {
             self.real().effect(f);
         }
-    }
-
-    pub fn weak(&self) -> WeakDomElement {
-        WeakDomElement(Rc::downgrade(&self.0))
-    }
-}
-
-pub struct WeakDomElement(rc::Weak<RefCell<LazyElement>>);
-
-impl WeakDomElement {
-    pub fn upgrade(&self) -> DomElement {
-        DomElement(self.0.upgrade().unwrap())
     }
 }
 
