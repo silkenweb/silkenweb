@@ -1,9 +1,10 @@
-use std::{future::Future, mem};
+use std::future::Future;
 
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
+use super::DomElement;
 use crate::{
     attribute::Attribute, element::event::EventCallback, global::document, render::after_render,
     spawn_cancelable_future,
@@ -13,6 +14,7 @@ pub struct RealElement {
     dom_element: web_sys::Element,
     event_callbacks: Vec<EventCallback>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
+    stored_children: Vec<DomElement>,
 }
 
 impl RealElement {
@@ -43,10 +45,8 @@ impl RealElement {
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: &mut Self) {
-        self.event_callbacks
-            .extend(mem::take(&mut child.event_callbacks));
-        self.futures.extend(mem::take(&mut child.futures));
+    pub fn store_child(&mut self, child: DomElement) {
+        self.stored_children.push(child);
     }
 
     pub fn dom_element(&self) -> web_sys::Element {
@@ -103,6 +103,7 @@ impl RealElement {
             dom_element,
             event_callbacks: Vec::new(),
             futures: Vec::new(),
+            stored_children: Vec::new(),
         }
     }
 }

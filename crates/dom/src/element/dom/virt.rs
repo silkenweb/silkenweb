@@ -129,7 +129,7 @@ impl From<VElement> for RealElement {
         }
 
         for child in element.stored_children {
-            elem.store_child(&mut child.real());
+            elem.store_child(child);
         }
 
         for event in element.hydrate_actions {

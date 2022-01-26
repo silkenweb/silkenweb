@@ -5,13 +5,13 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     child_groups::ChildGroups,
-    dom::{DomElement, DomNodeData},
+    dom::{DomNodeData, WeakDomElement},
     Element,
 };
 use crate::render::queue_update;
 
 pub struct ChildVec {
-    parent: DomElement,
+    parent: WeakDomElement,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<DomNodeData>,
@@ -19,7 +19,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: DomElement,
+        parent: WeakDomElement,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Rc<RefCell<Self>> {
@@ -65,7 +65,7 @@ impl ChildVec {
 
         let children = self.children.clone();
         child_groups.set_first_child(self.group_index, children.first().unwrap_throw().clone());
-        let mut parent = self.parent.clone();
+        let mut parent = self.parent.upgrade();
         let mut next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
 
         queue_update(move || {
@@ -94,6 +94,7 @@ impl ChildVec {
         assert!(index < self.children.len());
 
         self.parent
+            .upgrade()
             .insert_child_before(new_child.clone(), Some(self.children[index].clone()));
 
         self.children.insert(index, new_child);
@@ -111,6 +112,7 @@ impl ChildVec {
         let old_child = &mut self.children[index];
 
         self.parent
+            .upgrade()
             .replace_child(new_child.clone(), old_child.clone());
 
         *old_child = new_child;
@@ -118,7 +120,7 @@ impl ChildVec {
 
     pub fn remove(&mut self, index: usize) -> DomNodeData {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(old_child.clone());
+        self.parent.upgrade().remove_child(old_child.clone());
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -165,7 +167,7 @@ impl ChildVec {
         }
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(removed_child);
+            self.parent.upgrade().remove_child(removed_child);
         }
     }
 
@@ -177,12 +179,11 @@ impl ChildVec {
         child_groups.clear_first_child(self.group_index);
         let is_only_group = child_groups.is_single_group();
         mem::drop(child_groups);
+        let mut parent = self.parent.upgrade();
 
         if is_only_group {
-            self.parent.clear_children();
+            parent.clear_children();
         } else {
-            let mut parent = self.parent.clone();
-
             queue_update(move || {
                 for mut child in existing_children {
                     parent.remove_child_now(&mut child);

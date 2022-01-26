@@ -47,7 +47,7 @@ impl ElementBuilderBase {
 
         Self {
             element: Element(element),
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(node))),
+            child_groups: Rc::new(RefCell::new(ChildGroups::new(node.weak()))),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -125,7 +125,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_vec = ChildVec::new(
-            self.element.0.clone(),
+            self.element.0.weak(),
             self.child_groups.clone(),
             group_index,
         );
@@ -179,14 +179,14 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let element = self.element.0.clone();
+        let element = self.element.0.weak();
 
         let updater = value.for_each({
             let name = name.to_owned();
 
             move |new_value| {
                 clone!(name);
-                let mut element = element.clone();
+                let mut element = element.upgrade();
 
                 queue_update(move || element.attribute(&name, new_value));
 
@@ -213,11 +213,11 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let mut element = self.element.0.clone();
+        let element = self.element.0.weak();
 
         let future = sig.for_each(move |x| {
             clone!(f);
-            element.effect(move |elem| f(elem, x));
+            element.upgrade().effect(move |elem| f(elem, x));
             async {}
         });
 

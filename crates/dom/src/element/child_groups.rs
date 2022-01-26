@@ -1,12 +1,12 @@
 use std::mem;
 
-use super::dom::{DomElement, DomNode, DomNodeData};
+use super::dom::{DomNode, DomNodeData, WeakDomElement};
 
 /// Groups of children with the same parent
 ///
 /// This manages insertion and removal of groups of children
 pub struct ChildGroups {
-    parent: DomElement,
+    parent: WeakDomElement,
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
     children: Vec<Option<DomNodeData>>,
@@ -16,7 +16,7 @@ pub struct ChildGroups {
 }
 
 impl ChildGroups {
-    pub fn new(parent: DomElement) -> Self {
+    pub fn new(parent: WeakDomElement) -> Self {
         Self {
             parent,
             children: Vec::new(),
@@ -48,7 +48,7 @@ impl ChildGroups {
         }
 
         self.group_count += 1;
-        self.parent.append_child_now(child);
+        self.parent.upgrade().append_child_now(child);
         // We didn't give out an index, so this can't be dynamic.
         self.last_is_dynamic = false;
     }
@@ -60,7 +60,7 @@ impl ChildGroups {
     /// Return `true` iff there was an existing node.
     pub fn upsert_only_child(&mut self, index: usize, child: DomNodeData) -> bool {
         let existed = mem::replace(&mut self.children[index], Some(child.clone()))
-            .map(|existing| self.parent.remove_child(existing))
+            .map(|existing| self.parent.upgrade().remove_child(existing))
             .is_some();
 
         self.insert_last_child(index, child);
@@ -70,12 +70,13 @@ impl ChildGroups {
 
     pub fn insert_last_child(&mut self, index: usize, child: DomNodeData) {
         self.parent
+            .upgrade()
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
 
     pub fn remove_child(&mut self, index: usize) {
         if let Some(existing) = mem::replace(&mut self.children[index], None) {
-            self.parent.remove_child(existing);
+            self.parent.upgrade().remove_child(existing);
         }
     }
 
