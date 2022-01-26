@@ -72,6 +72,15 @@ impl DomElement {
         self.real().dom_element()
     }
 
+    pub fn hydrate(&self, node: &web_sys::Node) -> web_sys::Node {
+        if self.is_thunk() {
+            self.virt().hydrate(node)
+        }
+        else {
+            self.eval_dom_element().into()
+        }
+    }
+
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
         if all_thunks([self, child]) {
             self.virt().append_child(child)

@@ -29,15 +29,30 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     unmount(id);
     let elem = elem.into();
 
-    insert_into_dom(id, &elem.eval_dom_element());
+    mount_point(id)
+        .append_child(&elem.eval_dom_element())
+        .unwrap_throw();
     insert_component(id, elem);
 }
 
-fn insert_into_dom(id: &str, elem: &web_sys::Element) {
-    document::get_element_by_id(id)
-        .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .append_child(elem)
-        .unwrap_throw();
+pub fn hydrate(id: &str, elem: impl Into<Element>) {
+    unmount(id);
+    let elem = elem.into();
+
+    let mount_point = mount_point(id);
+
+    if let Some(hydration_point) = mount_point.first_child() {
+        elem.hydrate(&hydration_point);
+    } else {
+        mount_point
+            .append_child(&elem.eval_dom_element())
+            .unwrap_throw();
+    }
+    insert_component(id, elem);
+}
+
+fn mount_point(id: &str) -> web_sys::Element {
+    document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
 }
 
 fn insert_component(id: &str, elem: Element) {

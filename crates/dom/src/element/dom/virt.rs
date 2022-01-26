@@ -1,5 +1,3 @@
-// TODO: Enable this warning
-#![allow(dead_code, unused_variables)]
 use std::{collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
@@ -29,6 +27,10 @@ impl VElement {
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
         Self::new_element(Some(namespace), tag)
+    }
+
+    pub fn hydrate(&self, _node: &web_sys::Node) -> web_sys::Node {
+        todo!()
     }
 
     fn new_element(namespace: Option<&str>, tag: &str) -> Self {

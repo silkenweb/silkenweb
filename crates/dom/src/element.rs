@@ -258,6 +258,10 @@ impl Element {
         self.0.eval_dom_element()
     }
 
+    pub(super) fn hydrate(&self, node: &web_sys::Node) -> web_sys::Node {
+        self.0.hydrate(node)
+    }
+
     fn clone_into_node(&self) -> DomNodeData {
         self.0.clone().into()
     }
