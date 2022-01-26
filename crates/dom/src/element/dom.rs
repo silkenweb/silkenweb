@@ -4,7 +4,7 @@ use std::{
     rc::Rc,
 };
 
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 
 use self::{
     real::{RealElement, RealNode, RealText},
@@ -63,12 +63,11 @@ impl DomElement {
         self.real().dom_element()
     }
 
-    pub fn hydrate(&self, node: &web_sys::Node) -> web_sys::Node {
-        if self.is_thunk() {
-            self.virt().hydrate(node)
-        } else {
-            self.eval_dom_element().into()
-        }
+    pub fn hydrate(&self, element: web_sys::Element) -> web_sys::Element {
+        RefMut::map(self.0.borrow_mut(), |lazy| {
+            lazy.value_with(|virt_elem| virt_elem.hydrate(element))
+        })
+        .dom_element()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
@@ -184,6 +183,13 @@ impl DomText {
         }
     }
 
+    pub fn hydrate(&mut self, node: web_sys::Text) {
+        // TODO: Validation
+        RefMut::map(self.0.borrow_mut(), |lazy| {
+            lazy.value_with(|_virt_text| RealText::new_from_node(node))
+        });
+    }
+
     fn real(&self) -> RefMut<RealText> {
         RefMut::map(self.0.borrow_mut(), Lazy::value)
     }
@@ -205,6 +211,21 @@ impl DomNodeData {
             }
             (DomNodeEnum::Text(text0), DomNodeEnum::Text(text1)) => Rc::ptr_eq(&text0.0, &text1.0),
             _ => false,
+        }
+    }
+
+    pub fn hydrate(&mut self, node: web_sys::Node) {
+        match &mut self.0 {
+            DomNodeEnum::Element(elem) => {
+                if let Ok(elem_node) = node.dyn_into() {
+                    elem.hydrate(elem_node);
+                }
+            }
+            DomNodeEnum::Text(text) => {
+                if let Ok(text_node) = node.dyn_into() {
+                    text.hydrate(text_node);
+                }
+            }
         }
     }
 }
@@ -316,10 +337,14 @@ impl<Value, Thunk> Lazy<Value, Thunk> {
 
 impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
     fn value(&mut self) -> &mut Value {
+        self.value_with(Thunk::into)
+    }
+
+    fn value_with(&mut self, f: impl FnOnce(Thunk) -> Value) -> &mut Value {
         *self = Self::Value(
             match self {
                 Lazy::Value(value, _) => return value,
-                Lazy::Thunk(thunk) => thunk.take().unwrap().into(),
+                Lazy::Thunk(thunk) => f(thunk.take().unwrap()),
             },
             PhantomData,
         );

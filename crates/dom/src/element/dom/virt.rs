@@ -26,19 +26,33 @@ impl VElement {
         Self::new_element(Some(namespace), tag)
     }
 
-    pub fn hydrate(&self, _node: &web_sys::Node) -> web_sys::Node {
-        todo!()
-    }
+    pub fn hydrate(self, dom_element: web_sys::Element) -> RealElement {
+        // TODO: Check namespace, element type and attributes match
+        // TODO: Ignore whitespace text nodes?
+        let existing_children = dom_element.child_nodes();
+        let mut elem = RealElement::new_from_element(dom_element);
 
-    fn new_element(namespace: Option<&str>, tag: &str) -> Self {
-        Self {
-            namespace: namespace.map(str::to_owned),
-            tag: tag.to_owned(),
-            attributes: HashMap::new(),
-            children: Vec::new(),
-            stored_children: Vec::new(),
-            hydrate_actions: Vec::new(),
+        for (mut child, index) in self.children.into_iter().zip(0..) {
+            if let Some(node) = existing_children.item(index) {
+                child.hydrate(node);
+                // TODO: If child.dom_node() is not the same as node, replace it
+                // with the new node
+            }
         }
+
+        // TODO: Remove any extra children
+
+        for event in self.hydrate_actions {
+            event(&mut elem);
+        }
+
+        for child in self.stored_children {
+            elem.store_child(&mut child.real());
+        }
+
+        elem.shrink_to_fit();
+
+        elem
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
@@ -97,6 +111,17 @@ impl VElement {
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.hydrate_actions
             .push(Box::new(move |element| element.effect(f)))
+    }
+
+    fn new_element(namespace: Option<&str>, tag: &str) -> Self {
+        Self {
+            namespace: namespace.map(str::to_owned),
+            tag: tag.to_owned(),
+            attributes: HashMap::new(),
+            children: Vec::new(),
+            stored_children: Vec::new(),
+            hydrate_actions: Vec::new(),
+        }
     }
 }
 

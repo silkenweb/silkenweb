@@ -11,11 +11,18 @@ pub struct RealElement {
 
 impl RealElement {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document::create_element(tag))
+        Self::new_from_element(document::create_element(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document::create_element_ns(namespace, tag))
+        Self::new_from_element(document::create_element_ns(namespace, tag))
+    }
+
+    pub fn new_from_element(dom_element: web_sys::Element) -> Self {
+        Self {
+            dom_element,
+            event_callbacks: Vec::new(),
+        }
     }
 
     pub fn shrink_to_fit(&mut self) {
@@ -80,13 +87,6 @@ impl RealElement {
         let dom_element = self.dom_element.clone();
         after_render(move || f(&dom_element));
     }
-
-    fn new_element(dom_element: web_sys::Element) -> Self {
-        Self {
-            dom_element,
-            event_callbacks: Vec::new(),
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -95,6 +95,10 @@ pub struct RealText(web_sys::Text);
 impl RealText {
     pub fn new(text: &str) -> Self {
         Self(document::create_text_node(text))
+    }
+
+    pub fn new_from_node(node: web_sys::Text) -> Self {
+        Self(node)
     }
 
     pub fn set_text(&mut self, text: &str) {

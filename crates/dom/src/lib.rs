@@ -5,7 +5,7 @@ use discard::DiscardOnDrop;
 use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
-use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_futures::spawn_local;
 
 mod macros;
@@ -41,13 +41,17 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
 
     let mount_point = mount_point(id);
 
+    // TODO: Ignore whitespace text nodes?
     if let Some(hydration_point) = mount_point.first_child() {
-        elem.hydrate(&hydration_point);
+        // TODO: Replace first child if it's the wrong type
+        // TODO: Remove any other children
+        elem.hydrate(hydration_point.dyn_into().expect("Unexpected node type"));
     } else {
         mount_point
             .append_child(&elem.eval_dom_element())
             .unwrap_throw();
     }
+
     insert_component(id, elem);
 }
 
