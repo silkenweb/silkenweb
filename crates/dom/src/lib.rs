@@ -29,18 +29,26 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     unmount(id);
     let elem = elem.into();
 
+    insert_into_dom(id, &elem.eval_dom_element());
+    insert_component(id, elem);
+}
+
+fn insert_into_dom(id: &str, elem: &web_sys::Element) {
     document::get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
-        .append_child(&elem.eval_dom_element())
+        .append_child(elem)
         .unwrap_throw();
-    APPS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
+}
+
+fn insert_component(id: &str, elem: Element) {
+    COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
 }
 
 /// Unmount an element.
 ///
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
-    if let Some(elem) = APPS.with(|apps| apps.borrow_mut().remove(id)) {
+    if let Some(elem) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.eval_dom_element().remove();
     }
 }
@@ -70,5 +78,5 @@ fn spawn_cancelable_future(
 }
 
 thread_local!(
-    static APPS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
+    static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
