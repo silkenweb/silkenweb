@@ -198,7 +198,17 @@ impl DomText {
 #[derive(Clone)]
 pub struct DomNodeData(DomNodeEnum);
 
-impl DomNodeData {}
+impl DomNodeData {
+    pub fn is_same(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (DomNodeEnum::Element(elem0), DomNodeEnum::Element(elem1)) => {
+                Rc::ptr_eq(&elem0.0, &elem1.0)
+            }
+            (DomNodeEnum::Text(text0), DomNodeEnum::Text(text1)) => Rc::ptr_eq(&text0.0, &text1.0),
+            _ => false,
+        }
+    }
+}
 
 #[derive(Clone)]
 enum DomNodeEnum {

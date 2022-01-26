@@ -65,15 +65,31 @@ impl VElement {
         child: &mut impl VNode,
         next_child: Option<&mut impl VNode>,
     ) {
-        todo!()
+        if let Some(next_child) = next_child {
+            let next_child = next_child.node();
+            let index = self
+                .children
+                .iter()
+                .position(|existing| existing.is_same(&next_child))
+                .expect("Child not found");
+            self.children.insert(index, child.node());
+        } else {
+            self.append_child(child);
+        }
     }
 
     pub fn replace_child(&mut self, new_child: &mut impl VNode, old_child: &mut impl VNode) {
-        todo!()
+        for child in &mut self.children {
+            if child.node().is_same(&old_child.node()) {
+                *child = new_child.node();
+            }
+        }
     }
 
     pub fn remove_child(&mut self, child: &mut impl VNode) {
-        todo!()
+        let child = child.node();
+
+        self.children.retain(|existing| !existing.is_same(&child));
     }
 
     pub fn clear_children(&mut self) {
