@@ -77,7 +77,7 @@ impl VElement {
     }
 
     pub fn clear_children(&mut self) {
-        todo!()
+        self.children.clear();
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
