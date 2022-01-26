@@ -75,8 +75,7 @@ impl DomElement {
     pub fn hydrate(&self, node: &web_sys::Node) -> web_sys::Node {
         if self.is_thunk() {
             self.virt().hydrate(node)
-        }
-        else {
+        } else {
             self.eval_dom_element().into()
         }
     }
