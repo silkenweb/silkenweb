@@ -21,14 +21,12 @@ pub struct DomElement(Rc<RefCell<LazyElement>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_value(RealElement::new(
-            tag,
-        )))))
+        Self(Rc::new(RefCell::new(Lazy::new_thunk(VElement::new(tag)))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_value(
-            RealElement::new_in_namespace(namespace, tag),
+        Self(Rc::new(RefCell::new(Lazy::new_thunk(
+            VElement::new_in_namespace(namespace, tag),
         ))))
     }
 
@@ -64,7 +62,7 @@ impl DomElement {
 
     pub fn store_child(&mut self, child: Self) {
         if all_thunks([self, &child]) {
-            self.virt().store_child(&mut child.virt());
+            self.virt().store_child(child);
         } else {
             self.real().store_child(&mut child.real());
         }
@@ -174,7 +172,7 @@ pub struct DomText(Rc<RefCell<LazyText>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_value(RealText::new(text)))))
+        Self(Rc::new(RefCell::new(Lazy::new_thunk(VText::new(text)))))
     }
 
     pub fn set_text(&mut self, text: String) {
@@ -235,7 +233,11 @@ impl RealNode for DomNodeData {
     }
 }
 
-impl VNode for DomNodeData {}
+impl VNode for DomNodeData {
+    fn node(&self) -> DomNodeData {
+        self.clone()
+    }
+}
 
 impl Thunk for DomNodeData {
     fn is_thunk(&self) -> bool {
@@ -263,7 +265,11 @@ impl RealNode for DomElement {
     }
 }
 
-impl VNode for DomElement {}
+impl VNode for DomElement {
+    fn node(&self) -> DomNodeData {
+        DomNodeData(DomNodeEnum::Element(self.clone()))
+    }
+}
 
 impl DomNode for DomElement {}
 
@@ -273,7 +279,11 @@ impl RealNode for DomText {
     }
 }
 
-impl VNode for DomText {}
+impl VNode for DomText {
+    fn node(&self) -> DomNodeData {
+        DomNodeData(DomNodeEnum::Text(self.clone()))
+    }
+}
 
 impl DomNode for DomText {}
 
@@ -285,8 +295,13 @@ enum Lazy<Value, Thunk> {
 }
 
 impl<Value, Thunk> Lazy<Value, Thunk> {
+    #[allow(dead_code)]
     fn new_value(x: Value) -> Self {
         Self::Value(x, PhantomData)
+    }
+
+    fn new_thunk(x: Thunk) -> Self {
+        Self::Thunk(Some(x))
     }
 }
 

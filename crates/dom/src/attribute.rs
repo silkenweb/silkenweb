@@ -29,6 +29,8 @@ impl AttributeValue for String {
 /// A non-reactive attribute.
 pub trait Attribute {
     fn set_attribute(self, name: &str, dom_element: &web_sys::Element);
+
+    fn text(self) -> Option<String>;
 }
 
 pub trait AsAttribute<T>: Attribute {}
@@ -36,6 +38,10 @@ pub trait AsAttribute<T>: Attribute {}
 impl<T: AttributeValue> Attribute for T {
     fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element.set_attribute(name, &self.text()).unwrap_throw();
+    }
+
+    fn text(self) -> Option<String> {
+        Some(AttributeValue::text(self))
     }
 }
 
@@ -49,6 +55,10 @@ impl<T: Attribute> Attribute for Option<T> {
             dom_element.remove_attribute(name).unwrap_throw();
         }
     }
+
+    fn text(self) -> Option<String> {
+        self.map(Attribute::text).flatten()
+    }
 }
 
 impl<U: Attribute, T: AsAttribute<U>> AsAttribute<U> for Option<T> {}
@@ -61,6 +71,10 @@ impl Attribute for bool {
             dom_element.remove_attribute(name).unwrap_throw();
         }
     }
+
+    fn text(self) -> Option<String> {
+        self.then(|| "".to_owned())
+    }
 }
 
 impl AsAttribute<bool> for bool {}
@@ -69,6 +83,10 @@ impl<'a> Attribute for &'a str {
     fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element.set_attribute(name, self).unwrap_throw();
     }
+
+    fn text(self) -> Option<String> {
+        Some(self.to_owned())
+    }
 }
 
 impl<'a> AsAttribute<String> for &'a str {}
@@ -76,6 +94,10 @@ impl<'a> AsAttribute<String> for &'a str {}
 impl<'a> Attribute for &'a String {
     fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         dom_element.set_attribute(name, self).unwrap_throw();
+    }
+
+    fn text(self) -> Option<String> {
+        Some(self.to_owned())
     }
 }
 

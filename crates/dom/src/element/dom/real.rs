@@ -30,7 +30,11 @@ impl RealElement {
     }
 
     pub fn spawn_future(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.futures.push(spawn_cancelable_future(future));
+        self.store_future(spawn_cancelable_future(future));
+    }
+
+    pub fn store_future(&mut self, future: DiscardOnDrop<CancelableFutureHandle>) {
+        self.futures.push(future);
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
