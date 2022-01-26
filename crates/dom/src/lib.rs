@@ -42,6 +42,9 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
     let mount_point = mount_point(id);
 
     // TODO: Ignore whitespace text nodes?
+    // TODO: Empty text is a problem. `b().text("")` and `b()` both render as
+    // `<b></b>', but the former contains an empty text node in the dom, whereas the
+    // latter doesn't.
     if let Some(hydration_point) = mount_point.first_child() {
         // TODO: Replace first child if it's the wrong type
         // TODO: Remove any other children
