@@ -184,7 +184,11 @@ impl DomText {
         }
     }
 
-    pub fn hydrate_child(&mut self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Text {
+    pub fn hydrate_child(
+        &mut self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+    ) -> web_sys::Text {
         // TODO: Validation
         self.0
             .borrow_mut()
@@ -217,7 +221,11 @@ impl DomNodeData {
         }
     }
 
-    pub fn hydrate_child(&mut self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Node {
+    pub fn hydrate_child(
+        &mut self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+    ) -> web_sys::Node {
         match &mut self.0 {
             DomNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
             DomNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),

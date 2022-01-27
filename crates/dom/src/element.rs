@@ -269,7 +269,11 @@ impl Element {
         self.dom_element.eval_dom_element()
     }
 
-    pub(super) fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
+    pub(super) fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+    ) -> web_sys::Element {
         self.dom_element.hydrate_child(parent, child)
     }
 
