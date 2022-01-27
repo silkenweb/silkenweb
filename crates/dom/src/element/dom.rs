@@ -30,14 +30,6 @@ impl DomElement {
         ))))
     }
 
-    fn real(&self) -> RefMut<RealElement> {
-        RefMut::map(self.0.borrow_mut(), Lazy::value)
-    }
-
-    fn virt(&self) -> RefMut<VElement> {
-        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
-    }
-
     pub fn shrink_to_fit(&mut self) {
         if !all_thunks([self]) {
             self.real().shrink_to_fit();
@@ -164,6 +156,14 @@ impl DomElement {
         } else {
             self.real().effect(f);
         }
+    }
+
+    fn real(&self) -> RefMut<RealElement> {
+        RefMut::map(self.0.borrow_mut(), Lazy::value)
+    }
+
+    fn virt(&self) -> RefMut<VElement> {
+        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
     }
 }
 
