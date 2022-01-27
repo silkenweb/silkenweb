@@ -10,6 +10,8 @@ use silkenweb_dom::global::window;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::Url;
 
+// TODO: Wrap `Url` in a struct and provide a server side implementation with a trait to define the interface
+
 /// A signal that will vary according to the current browser URL.
 ///
 /// See [module-level documentation](self) for an example.
