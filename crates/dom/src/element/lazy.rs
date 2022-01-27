@@ -102,7 +102,7 @@ pub trait IsThunk {
     fn is_thunk(&self) -> bool;
 }
 
-pub fn all_thunks<const COUNT: usize>(args: [&dyn IsThunk; COUNT]) -> bool {
+fn all_thunks<const COUNT: usize>(args: [&dyn IsThunk; COUNT]) -> bool {
     args.into_iter().all(IsThunk::is_thunk)
 }
 
