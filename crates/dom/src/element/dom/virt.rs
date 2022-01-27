@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{self, Display},
+};
 
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
@@ -156,6 +159,45 @@ impl VElement {
             hydrate_actions: Vec::new(),
         }
     }
+
+    fn requires_closing_tag(&self) -> bool {
+        ![
+            "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta",
+            "param", "source", "track", "wbr",
+        ]
+        .contains(&self.tag.as_str())
+    }
+}
+
+impl Display for VElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO: Namespace
+        // TODO: tag/attribute name validation
+        write!(f, "<{}", self.tag)?;
+
+        for (name, value) in &self.attributes {
+            // TODO: escaping of values
+            if let Some(value) = value {
+                write!(f, " {}=\"{}\"", name, value)?;
+            } else {
+                write!(f, " {}", name)?;
+            }
+        }
+
+        f.write_str(">")?;
+
+        for child in &self.children {
+            child.fmt(f)?;
+        }
+
+        let has_children = !self.children.is_empty();
+
+        if self.requires_closing_tag() || has_children {
+            write!(f, "</{}>", self.tag)?;
+        }
+
+        Ok(())
+    }
 }
 
 impl From<VElement> for RealElement {
@@ -213,6 +255,12 @@ impl VText {
 
     pub fn set_text(&mut self, text: String) {
         self.0 = text;
+    }
+}
+
+impl Display for VText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
     }
 }
 

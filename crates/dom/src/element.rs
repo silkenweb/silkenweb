@@ -4,7 +4,7 @@ use std::{
     self,
     cell::{RefCell, RefMut},
     future::Future,
-    rc::Rc,
+    rc::Rc, fmt::{Display, self},
 };
 
 use discard::DiscardOnDrop;
@@ -279,6 +279,12 @@ impl Element {
 
     fn clone_into_node(&self) -> DomNodeData {
         self.dom_element.clone().into()
+    }
+}
+
+impl Display for Element {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.dom_element.fmt(f)
     }
 }
 

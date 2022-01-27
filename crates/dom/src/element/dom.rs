@@ -1,5 +1,6 @@
 use std::{
     cell::{RefCell, RefMut},
+    fmt::{self, Display},
     marker::PhantomData,
     rc::Rc,
 };
@@ -166,6 +167,16 @@ impl DomElement {
     }
 }
 
+impl Display for DomElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_thunk() {
+            self.virt().fmt(f)
+        } else {
+            self.real().fmt(f)
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct DomText(Rc<RefCell<LazyText>>);
 
@@ -206,6 +217,16 @@ impl DomText {
     }
 }
 
+impl Display for DomText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_thunk() {
+            self.virt().fmt(f)
+        } else {
+            self.real().fmt(f)
+        }
+    }
+}
+
 /// This is for storing dom nodes without `Box<dyn DomNode>`
 #[derive(Clone)]
 pub struct DomNodeData(DomNodeEnum);
@@ -229,6 +250,15 @@ impl DomNodeData {
         match &mut self.0 {
             DomNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
             DomNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
+        }
+    }
+}
+
+impl Display for DomNodeData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            DomNodeEnum::Element(elem) => elem.fmt(f),
+            DomNodeEnum::Text(text) => text.fmt(f),
         }
     }
 }

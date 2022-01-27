@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 use crate::{
@@ -89,6 +91,12 @@ impl RealElement {
     }
 }
 
+impl Display for RealElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.dom_element.outer_html())
+    }
+}
+
 #[derive(Clone)]
 pub struct RealText(web_sys::Text);
 
@@ -110,6 +118,15 @@ impl RealText {
     }
 }
 
+impl Display for RealText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(text) = self.0.text_content() {
+            f.write_str(&text)?;
+        }
+
+        Ok(())
+    }
+}
 /// A node in the DOM
 ///
 /// This lets us pass a reference to an element or text as a node, without
