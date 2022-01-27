@@ -1,10 +1,7 @@
-use std::marker::PhantomData;
-
 pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 
 enum LazyEnum<Value, Thunk> {
-    Value(Value, PhantomData<Thunk>),
-    // TODO: feature to disable this at compile time
+    Value(Value),
     Thunk(Option<Thunk>),
 }
 
@@ -23,7 +20,7 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
         self.set_value(f);
 
         match &mut self.0 {
-            LazyEnum::Value(value, _) => value,
+            LazyEnum::Value(value) => value,
             LazyEnum::Thunk(_) => unreachable!(),
         }
     }
@@ -35,7 +32,7 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
         f_real: impl FnOnce(&mut Value, Arg) -> R,
     ) -> R {
         match &mut self.0 {
-            LazyEnum::Value(value, _) => f_real(value, arg),
+            LazyEnum::Value(value) => f_real(value, arg),
             LazyEnum::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
         }
     }
@@ -69,18 +66,15 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
 
     fn set_value(&mut self, f: impl FnOnce(Thunk) -> Value) {
         let lazy_enum = &mut self.0;
-        *lazy_enum = LazyEnum::<Value, Thunk>::Value(
-            match lazy_enum {
-                LazyEnum::Value(_, _) => return,
-                LazyEnum::Thunk(thunk) => f(thunk.take().unwrap()),
-            },
-            PhantomData,
-        );
+        *lazy_enum = LazyEnum::<Value, Thunk>::Value(match lazy_enum {
+            LazyEnum::Value(_) => return,
+            LazyEnum::Thunk(thunk) => f(thunk.take().unwrap()),
+        });
     }
 
     fn thunk(&mut self) -> &mut Thunk {
         match &mut self.0 {
-            LazyEnum::Value(_, _) => panic!("Expected a thunk"),
+            LazyEnum::Value(_) => panic!("Expected a thunk"),
             LazyEnum::Thunk(thunk) => return thunk.as_mut().unwrap(),
         }
     }
@@ -89,7 +83,7 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
 impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
     fn is_thunk(&self) -> bool {
         match &self.0 {
-            LazyEnum::Value(_, _) => false,
+            LazyEnum::Value(_) => false,
             LazyEnum::Thunk(_) => true,
         }
     }
