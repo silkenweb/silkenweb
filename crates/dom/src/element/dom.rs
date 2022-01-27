@@ -31,13 +31,12 @@ impl DomElement {
     }
 
     pub fn shrink_to_fit(&mut self) {
-        if !all_thunks([self]) {
-            self.real().shrink_to_fit();
-        }
+        self.borrow_mut()
+            .map((), |_, _| (), |elem, _| elem.shrink_to_fit());
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.map(
+        self.borrow_mut().map(
             (name, f),
             |elem, (name, f)| elem.on(name, f),
             |elem, (name, f)| elem.on(name, f),
@@ -45,7 +44,8 @@ impl DomElement {
     }
 
     pub fn store_child(&mut self, child: Self) {
-        self.map1(child, VElement::store_child, RealElement::store_child);
+        self.borrow_mut()
+            .map1(child, VElement::store_child, RealElement::store_child);
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
@@ -53,15 +53,15 @@ impl DomElement {
     }
 
     pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
-        self.0
-            .borrow_mut()
+        self.borrow_mut()
             .value_with(|virt_elem| virt_elem.hydrate_child(parent, child))
             .dom_element()
             .clone()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
-        self.map1(child, VElement::append_child, RealElement::append_child_now);
+        self.borrow_mut()
+            .map1(child, VElement::append_child, RealElement::append_child_now);
     }
 
     pub fn insert_child_before(
@@ -69,7 +69,7 @@ impl DomElement {
         child: impl DomNode + 'static,
         next_child: Option<impl DomNode + 'static>,
     ) {
-        self.map2(
+        self.borrow_mut().map2(
             child,
             next_child,
             |parent, mut child, mut next_child| {
@@ -84,7 +84,7 @@ impl DomElement {
         child: &mut impl DomNode,
         next_child: Option<&mut impl DomNode>,
     ) {
-        self.map2(
+        self.borrow_mut().map2(
             child,
             next_child,
             VElement::insert_child_before,
@@ -97,7 +97,7 @@ impl DomElement {
         mut new_child: impl DomNode + 'static,
         mut old_child: impl DomNode + 'static,
     ) {
-        self.map2(
+        self.borrow_mut().map2(
             &mut new_child,
             &mut old_child,
             VElement::replace_child,
@@ -106,15 +106,17 @@ impl DomElement {
     }
 
     pub fn remove_child(&mut self, child: &mut (impl DomNode + 'static)) {
-        self.map1(child, VElement::remove_child, RealElement::remove_child);
+        self.borrow_mut()
+            .map1(child, VElement::remove_child, RealElement::remove_child);
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
-        self.map1(child, VElement::remove_child, RealElement::remove_child_now);
+        self.borrow_mut()
+            .map1(child, VElement::remove_child, RealElement::remove_child_now);
     }
 
     pub fn clear_children(&mut self) {
-        self.map(
+        self.borrow_mut().map(
             (),
             |elem, _| elem.clear_children(),
             |elem, _| elem.clear_children(),
@@ -122,7 +124,7 @@ impl DomElement {
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        self.map(
+        self.borrow_mut().map(
             (name, value),
             |elem, (name, value)| elem.attribute(name, value),
             |elem, (name, value)| elem.attribute(name, value),
@@ -130,61 +132,23 @@ impl DomElement {
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.map(f, VElement::effect, RealElement::effect);
+        self.borrow_mut()
+            .map(f, VElement::effect, RealElement::effect);
+    }
+
+    fn borrow_mut(&self) -> RefMut<LazyElement> {
+        self.0.borrow_mut()
     }
 
     fn real(&self) -> RefMut<RealElement> {
         RefMut::map(self.0.borrow_mut(), Lazy::value)
     }
-
-    fn virt(&self) -> RefMut<VElement> {
-        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
-    }
-
-    fn map<T, R>(
-        &self,
-        arg: T,
-        f_virt: impl FnOnce(&mut VElement, T) -> R,
-        f_real: impl FnOnce(&mut RealElement, T) -> R,
-    ) -> R {
-        if all_thunks([self]) {
-            f_virt(&mut self.virt(), arg)
-        } else {
-            f_real(&mut self.real(), arg)
-        }
-    }
-
-    fn map1<T: Thunk>(
-        &self,
-        arg: T,
-        f_virt: impl FnOnce(&mut VElement, T),
-        f_real: impl FnOnce(&mut RealElement, T),
-    ) {
-        if all_thunks([self, &arg]) {
-            f_virt(&mut self.virt(), arg);
-        } else {
-            f_real(&mut self.real(), arg);
-        }
-    }
-
-    fn map2<T: Thunk, U: Thunk>(
-        &mut self,
-        arg0: T,
-        arg1: U,
-        f_virt: impl FnOnce(&mut VElement, T, U),
-        f_real: impl FnOnce(&mut RealElement, T, U),
-    ) {
-        if all_thunks([self, &arg0, &arg1]) {
-            f_virt(&mut self.virt(), arg0, arg1);
-        } else {
-            f_real(&mut self.real(), arg0, arg1);
-        }
-    }
 }
 
 impl Display for DomElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
+        self.borrow_mut()
+            .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
 
@@ -197,7 +161,8 @@ impl DomText {
     }
 
     pub fn set_text(&mut self, text: String) {
-        self.map(text, VText::set_text, RealText::set_text);
+        self.borrow_mut()
+            .map(text, VText::set_text, RealText::set_text);
     }
 
     pub fn hydrate_child(
@@ -206,38 +171,25 @@ impl DomText {
         child: &web_sys::Node,
     ) -> web_sys::Text {
         // TODO: Validation
-        self.0
-            .borrow_mut()
+        self.borrow_mut()
             .value_with(|virt_text| virt_text.hydrate_child(parent, child))
             .dom_text()
             .clone()
     }
 
+    fn borrow_mut(&self) -> RefMut<LazyText> {
+        self.0.borrow_mut()
+    }
+
     fn real(&self) -> RefMut<RealText> {
         RefMut::map(self.0.borrow_mut(), Lazy::value)
-    }
-
-    fn virt(&self) -> RefMut<VText> {
-        RefMut::map(self.0.borrow_mut(), Lazy::thunk)
-    }
-
-    fn map<T, R>(
-        &self,
-        arg: T,
-        f_virt: impl FnOnce(&mut VText, T) -> R,
-        f_real: impl FnOnce(&mut RealText, T) -> R,
-    ) -> R {
-        if all_thunks([self]) {
-            f_virt(&mut self.virt(), arg)
-        } else {
-            f_real(&mut self.real(), arg)
-        }
     }
 }
 
 impl Display for DomText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
+        self.borrow_mut()
+            .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
 
@@ -299,7 +251,7 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + RealNode + VNode + Thunk {}
+pub trait DomNode: Clone + Into<DomNodeData> + RealNode + VNode + IsThunk {}
 
 impl RealNode for DomNodeData {
     fn dom_node(&self) -> web_sys::Node {
@@ -316,7 +268,7 @@ impl VNode for DomNodeData {
     }
 }
 
-impl Thunk for DomNodeData {
+impl IsThunk for DomNodeData {
     fn is_thunk(&self) -> bool {
         match &self.0 {
             DomNodeEnum::Element(elem) => elem.is_thunk(),
@@ -408,11 +360,50 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
             Lazy::Thunk(thunk) => return thunk.as_mut().unwrap(),
         }
     }
+
+    fn map<Arg, R>(
+        &mut self,
+        arg: Arg,
+        f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
+        f_real: impl FnOnce(&mut Value, Arg) -> R,
+    ) -> R {
+        match self {
+            Lazy::Value(value, _) => f_real(value, arg),
+            Lazy::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
+        }
+    }
+
+    fn map1<T: IsThunk>(
+        &mut self,
+        arg: T,
+        f_virt: impl FnOnce(&mut Thunk, T),
+        f_real: impl FnOnce(&mut Value, T),
+    ) {
+        if all_thunks([self, &arg]) {
+            f_virt(self.thunk(), arg);
+        } else {
+            f_real(self.value(), arg);
+        }
+    }
+
+    fn map2<T: IsThunk, U: IsThunk>(
+        &mut self,
+        arg0: T,
+        arg1: U,
+        f_virt: impl FnOnce(&mut Thunk, T, U),
+        f_real: impl FnOnce(&mut Value, T, U),
+    ) {
+        if all_thunks([self, &arg0, &arg1]) {
+            f_virt(self.thunk(), arg0, arg1);
+        } else {
+            f_real(self.value(), arg0, arg1);
+        }
+    }
 }
 
-impl<V, T> Thunk for Rc<RefCell<Lazy<V, T>>> {
+impl<V, T> IsThunk for Lazy<V, T> {
     fn is_thunk(&self) -> bool {
-        match *self.borrow() {
+        match self {
             Lazy::Value(_, _) => false,
             Lazy::Thunk(_) => true,
         }
@@ -425,39 +416,39 @@ type LazyText = Lazy<RealText, VText>;
 // TODO: Typically, we'd check if `is_thunk`, `evaluate` if needed and pass the
 // arg on to a function. Each of these will borrow for Rc types. Can we find a
 // way around this? Maybe a `Borrowed` type on the `DomNode` trait?
-pub trait Thunk {
+pub trait IsThunk {
     fn is_thunk(&self) -> bool;
 }
 
-fn all_thunks<const COUNT: usize>(args: [&dyn Thunk; COUNT]) -> bool {
-    args.into_iter().all(Thunk::is_thunk)
+fn all_thunks<const COUNT: usize>(args: [&dyn IsThunk; COUNT]) -> bool {
+    args.into_iter().all(IsThunk::is_thunk)
 }
 
-impl Thunk for DomElement {
+impl IsThunk for DomElement {
     fn is_thunk(&self) -> bool {
-        self.0.is_thunk()
+        self.0.borrow().is_thunk()
     }
 }
 
-impl Thunk for DomText {
+impl IsThunk for DomText {
     fn is_thunk(&self) -> bool {
-        self.0.is_thunk()
+        self.0.borrow().is_thunk()
     }
 }
 
-impl<'a, T: Thunk> Thunk for &'a T {
-    fn is_thunk(&self) -> bool {
-        T::is_thunk(self)
-    }
-}
-
-impl<'a, T: Thunk> Thunk for &'a mut T {
+impl<'a, T: IsThunk> IsThunk for &'a T {
     fn is_thunk(&self) -> bool {
         T::is_thunk(self)
     }
 }
 
-impl<T: Thunk> Thunk for Option<T> {
+impl<'a, T: IsThunk> IsThunk for &'a mut T {
+    fn is_thunk(&self) -> bool {
+        T::is_thunk(self)
+    }
+}
+
+impl<T: IsThunk> IsThunk for Option<T> {
     fn is_thunk(&self) -> bool {
         if let Some(x) = self {
             x.is_thunk()
