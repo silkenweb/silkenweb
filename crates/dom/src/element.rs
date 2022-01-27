@@ -3,8 +3,9 @@ use std::collections::HashSet;
 use std::{
     self,
     cell::{RefCell, RefMut},
+    fmt::{self, Display},
     future::Future,
-    rc::Rc, fmt::{Display, self},
+    rc::Rc,
 };
 
 use discard::DiscardOnDrop;
