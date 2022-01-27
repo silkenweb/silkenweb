@@ -1,6 +1,8 @@
 use std::marker::PhantomData;
 
-pub enum Lazy<Value, Thunk> {
+pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
+
+enum LazyEnum<Value, Thunk> {
     Value(Value, PhantomData<Thunk>),
     // TODO: feature to disable this at compile time
     #[allow(dead_code)]
@@ -10,11 +12,11 @@ pub enum Lazy<Value, Thunk> {
 impl<Value, Thunk> Lazy<Value, Thunk> {
     #[allow(dead_code)]
     pub fn new_value(x: Value) -> Self {
-        Self::Value(x, PhantomData)
+        Self(LazyEnum::Value(x, PhantomData))
     }
 
     pub fn new_thunk(x: Thunk) -> Self {
-        Self::Thunk(Some(x))
+        Self(LazyEnum::Thunk(Some(x)))
     }
 }
 
@@ -24,17 +26,11 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
     }
 
     pub fn value_with(&mut self, f: impl FnOnce(Thunk) -> Value) -> &mut Value {
-        *self = Self::Value(
-            match self {
-                Lazy::Value(value, _) => return value,
-                Lazy::Thunk(thunk) => f(thunk.take().unwrap()),
-            },
-            PhantomData,
-        );
+        self.set_value(f);
 
-        match self {
-            Lazy::Value(value, _) => value,
-            Lazy::Thunk(_) => unreachable!(),
+        match &mut self.0 {
+            LazyEnum::Value(value, _) => value,
+            LazyEnum::Thunk(_) => unreachable!(),
         }
     }
 
@@ -44,9 +40,9 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
         f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
         f_real: impl FnOnce(&mut Value, Arg) -> R,
     ) -> R {
-        match self {
-            Lazy::Value(value, _) => f_real(value, arg),
-            Lazy::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
+        match &mut self.0 {
+            LazyEnum::Value(value, _) => f_real(value, arg),
+            LazyEnum::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
         }
     }
 
@@ -77,19 +73,30 @@ impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
         }
     }
 
+    fn set_value(&mut self, f: impl FnOnce(Thunk) -> Value) {
+        let lazy_enum = &mut self.0;
+        *lazy_enum = LazyEnum::<Value, Thunk>::Value(
+            match lazy_enum {
+                LazyEnum::Value(_, _) => return,
+                LazyEnum::Thunk(thunk) => f(thunk.take().unwrap()),
+            },
+            PhantomData,
+        );
+    }
+
     fn thunk(&mut self) -> &mut Thunk {
-        match self {
-            Lazy::Value(_, _) => panic!("Expected a thunk"),
-            Lazy::Thunk(thunk) => return thunk.as_mut().unwrap(),
+        match &mut self.0 {
+            LazyEnum::Value(_, _) => panic!("Expected a thunk"),
+            LazyEnum::Thunk(thunk) => return thunk.as_mut().unwrap(),
         }
     }
 }
 
 impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
     fn is_thunk(&self) -> bool {
-        match self {
-            Lazy::Value(_, _) => false,
-            Lazy::Thunk(_) => true,
+        match &self.0 {
+            LazyEnum::Value(_, _) => false,
+            LazyEnum::Thunk(_) => true,
         }
     }
 }
