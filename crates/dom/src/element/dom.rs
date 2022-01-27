@@ -21,12 +21,16 @@ pub struct DomElement(Rc<RefCell<LazyElement>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_thunk(VElement::new(tag)))))
+        Self(Rc::new(RefCell::new(Lazy::new(
+            || RealElement::new(tag),
+            || VElement::new(tag),
+        ))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_thunk(
-            VElement::new_in_namespace(namespace, tag),
+        Self(Rc::new(RefCell::new(Lazy::new(
+            || RealElement::new_in_namespace(namespace, tag),
+            || VElement::new_in_namespace(namespace, tag),
         ))))
     }
 
@@ -157,7 +161,10 @@ pub struct DomText(Rc<RefCell<LazyText>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new_thunk(VText::new(text)))))
+        Self(Rc::new(RefCell::new(Lazy::new(
+            || RealText::new(text),
+            || VText::new(text),
+        ))))
     }
 
     pub fn set_text(&mut self, text: String) {

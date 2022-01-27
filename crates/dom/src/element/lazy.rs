@@ -5,18 +5,12 @@ pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
 enum LazyEnum<Value, Thunk> {
     Value(Value, PhantomData<Thunk>),
     // TODO: feature to disable this at compile time
-    #[allow(dead_code)]
     Thunk(Option<Thunk>),
 }
 
 impl<Value, Thunk> Lazy<Value, Thunk> {
-    #[allow(dead_code)]
-    pub fn new_value(x: Value) -> Self {
-        Self(LazyEnum::Value(x, PhantomData))
-    }
-
-    pub fn new_thunk(x: Thunk) -> Self {
-        Self(LazyEnum::Thunk(Some(x)))
+    pub fn new(_value: impl FnOnce() -> Value, thunk: impl FnOnce() -> Thunk) -> Self {
+        Self(LazyEnum::Thunk(Some(thunk())))
     }
 }
 
