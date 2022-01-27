@@ -41,14 +41,12 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
 
     let mount_point = mount_point(id);
 
-    // TODO: Ignore whitespace text nodes?
-    // TODO: Empty text is a problem. `b().text("")` and `b()` both render as
-    // `<b></b>', but the former contains an empty text node in the dom, whereas the
-    // latter doesn't.
     if let Some(hydration_point) = mount_point.first_child() {
-        // TODO: Replace first child if it's the wrong type
-        // TODO: Remove any other children
-        elem.hydrate(hydration_point.dyn_into().expect("Unexpected node type"));
+        let node: web_sys::Node = elem
+            .hydrate(hydration_point.dyn_ref().expect("Unexpected node type"))
+            .into();
+
+        remove_following_siblings(hydration_point, node);
     } else {
         mount_point
             .append_child(&elem.eval_dom_element())
@@ -56,6 +54,18 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
     }
 
     insert_component(id, elem);
+}
+
+/// Remove all siblings after `child`
+///
+/// `child` itself is not removed, only the siblings following.
+fn remove_following_siblings(parent: web_sys::Node, child: web_sys::Node) {
+    if let Some(mut node) = child.next_sibling() {
+        while let Some(next_node) = node.next_sibling() {
+            parent.remove_child(&node).unwrap_throw();
+            node = next_node;
+        }
+    }
 }
 
 fn mount_point(id: &str) -> web_sys::Element {

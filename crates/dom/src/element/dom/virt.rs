@@ -26,15 +26,15 @@ impl VElement {
         Self::new_element(Some(namespace), tag)
     }
 
-    pub fn hydrate(self, dom_element: web_sys::Element) -> RealElement {
+    pub fn hydrate(self, dom_element: &web_sys::Element) -> RealElement {
         // TODO: Check namespace, element type and attributes match
         // TODO: Ignore whitespace text nodes?
+        let mut elem = RealElement::new_from_element(dom_element.clone());
         let existing_children = dom_element.child_nodes();
-        let mut elem = RealElement::new_from_element(dom_element);
 
         for (mut child, index) in self.children.into_iter().zip(0..) {
             if let Some(node) = existing_children.item(index) {
-                child.hydrate(node);
+                child.hydrate(&node);
                 // TODO: If child.dom_node() is not the same as node, replace it
                 // with the new node
             }
@@ -161,6 +161,10 @@ pub struct VText(String);
 impl VText {
     pub fn new(text: &str) -> Self {
         Self(text.to_owned())
+    }
+
+    pub fn hydrate(&self, dom_text: &web_sys::Text) -> RealText {
+        RealText::new_from_text(dom_text.clone())
     }
 
     pub fn set_text(&mut self, text: String) {

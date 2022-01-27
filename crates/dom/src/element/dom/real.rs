@@ -39,8 +39,8 @@ impl RealElement {
         self.event_callbacks.append(&mut child.event_callbacks);
     }
 
-    pub fn dom_element(&self) -> web_sys::Element {
-        self.dom_element.clone()
+    pub fn dom_element(&self) -> &web_sys::Element {
+        &self.dom_element
     }
 
     pub fn append_child(&mut self, child: &mut impl RealNode) {
@@ -97,8 +97,12 @@ impl RealText {
         Self(document::create_text_node(text))
     }
 
-    pub fn new_from_node(node: web_sys::Text) -> Self {
+    pub fn new_from_text(node: web_sys::Text) -> Self {
         Self(node)
+    }
+
+    pub fn dom_text(&self) -> &web_sys::Text {
+        &self.0
     }
 
     pub fn set_text(&mut self, text: &str) {

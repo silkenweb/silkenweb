@@ -60,14 +60,15 @@ impl DomElement {
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
-        self.real().dom_element()
+        self.real().dom_element().clone()
     }
 
-    pub fn hydrate(&self, element: web_sys::Element) -> web_sys::Element {
-        RefMut::map(self.0.borrow_mut(), |lazy| {
-            lazy.value_with(|virt_elem| virt_elem.hydrate(element))
-        })
-        .dom_element()
+    pub fn hydrate(&self, element: &web_sys::Element) -> web_sys::Element {
+        self.0
+            .borrow_mut()
+            .value_with(|virt_elem| virt_elem.hydrate(element))
+            .dom_element()
+            .clone()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
@@ -183,11 +184,13 @@ impl DomText {
         }
     }
 
-    pub fn hydrate(&mut self, node: web_sys::Text) {
+    pub fn hydrate(&mut self, node: &web_sys::Text) -> web_sys::Text {
         // TODO: Validation
-        RefMut::map(self.0.borrow_mut(), |lazy| {
-            lazy.value_with(|_virt_text| RealText::new_from_node(node))
-        });
+        self.0
+            .borrow_mut()
+            .value_with(|virt_text| virt_text.hydrate(node))
+            .dom_text()
+            .clone()
     }
 
     fn real(&self) -> RefMut<RealText> {
@@ -214,16 +217,20 @@ impl DomNodeData {
         }
     }
 
-    pub fn hydrate(&mut self, node: web_sys::Node) {
+    pub fn hydrate(&mut self, node: &web_sys::Node) -> web_sys::Node {
         match &mut self.0 {
             DomNodeEnum::Element(elem) => {
-                if let Ok(elem_node) = node.dyn_into() {
-                    elem.hydrate(elem_node);
+                if let Some(elem_node) = node.dyn_ref() {
+                    elem.hydrate(elem_node).into()
+                } else {
+                    elem.real().dom_element().clone().into()
                 }
             }
             DomNodeEnum::Text(text) => {
-                if let Ok(text_node) = node.dyn_into() {
-                    text.hydrate(text_node);
+                if let Some(text_node) = node.dyn_ref() {
+                    text.hydrate(text_node).into()
+                } else {
+                    text.real().dom_text().clone().into()
                 }
             }
         }
