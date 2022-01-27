@@ -60,7 +60,7 @@ impl ChildGroups {
     /// Return `true` iff there was an existing node.
     pub fn upsert_only_child(&mut self, index: usize, child: DomNodeData) -> bool {
         let existed = mem::replace(&mut self.children[index], Some(child.clone()))
-            .map(|existing| self.parent.remove_child(existing))
+            .map(|mut existing| self.parent.remove_child(&mut existing))
             .is_some();
 
         self.insert_last_child(index, child);
@@ -74,8 +74,8 @@ impl ChildGroups {
     }
 
     pub fn remove_child(&mut self, index: usize) {
-        if let Some(existing) = mem::replace(&mut self.children[index], None) {
-            self.parent.remove_child(existing);
+        if let Some(mut existing) = mem::replace(&mut self.children[index], None) {
+            self.parent.remove_child(&mut existing);
         }
     }
 

@@ -68,7 +68,7 @@ impl DomElement {
         if all_thunks([self, child]) {
             self.virt().append_child(child)
         } else {
-            self.real().append_child(child)
+            self.real().append_child_now(child)
         }
     }
 
@@ -77,11 +77,12 @@ impl DomElement {
         mut child: impl DomNode + 'static,
         mut next_child: Option<impl DomNode + 'static>,
     ) {
-        let mut parent = self.clone();
-
-        queue_update(move || {
-            parent.insert_child_before_now(&mut child, next_child.as_mut());
-        });
+        if all_thunks([self, &child, &next_child]) {
+            self.virt()
+                .insert_child_before(&mut child, next_child.as_mut());
+        } else {
+            self.real().insert_child_before(child, next_child);
+        }
     }
 
     pub fn insert_child_before_now(
@@ -89,16 +90,10 @@ impl DomElement {
         child: &mut impl DomNode,
         next_child: Option<&mut impl DomNode>,
     ) {
-        let mut is_all_thunks = all_thunks([self, child]);
-
-        if let Some(next_child) = &next_child {
-            is_all_thunks &= next_child.is_thunk();
-        };
-
-        if is_all_thunks {
+        if all_thunks([self, child, &next_child]) {
             self.virt().insert_child_before(child, next_child);
         } else {
-            self.real().insert_child_before(child, next_child);
+            self.real().insert_child_before_now(child, next_child);
         }
     }
 
@@ -110,13 +105,11 @@ impl DomElement {
         if all_thunks([self, &new_child, &old_child]) {
             self.virt().replace_child(&mut new_child, &mut old_child);
         } else {
-            let parent = self.clone();
-
-            queue_update(move || parent.real().replace_child(&mut new_child, &mut old_child));
+            self.real().replace_child(&mut new_child, &mut old_child);
         }
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
+    pub fn remove_child(&mut self, child: &mut (impl DomNode + 'static)) {
         if all_thunks([self, child]) {
             self.virt().remove_child(child);
         } else {
@@ -124,21 +117,19 @@ impl DomElement {
         }
     }
 
-    pub fn remove_child(&mut self, mut child: impl DomNode + 'static) {
-        let mut parent = self.clone();
-
-        queue_update(move || {
-            parent.remove_child_now(&mut child);
-        });
+    pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
+        if all_thunks([self, child]) {
+            self.virt().remove_child(child);
+        } else {
+            self.real().remove_child_now(child);
+        }
     }
 
     pub fn clear_children(&mut self) {
         if all_thunks([self]) {
             self.virt().clear_children();
         } else {
-            let parent = self.clone();
-
-            queue_update(move || parent.real().clear_children())
+            self.real().clear_children();
         }
     }
 
@@ -428,5 +419,27 @@ impl Thunk for DomElement {
 impl Thunk for DomText {
     fn is_thunk(&self) -> bool {
         self.0.is_thunk()
+    }
+}
+
+impl<'a, T: Thunk> Thunk for &'a T {
+    fn is_thunk(&self) -> bool {
+        T::is_thunk(self)
+    }
+}
+
+impl<'a, T: Thunk> Thunk for &'a mut T {
+    fn is_thunk(&self) -> bool {
+        T::is_thunk(self)
+    }
+}
+
+impl<T: Thunk> Thunk for Option<T> {
+    fn is_thunk(&self) -> bool {
+        if let Some(x) = self {
+            x.is_thunk()
+        } else {
+            true
+        }
     }
 }

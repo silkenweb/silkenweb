@@ -116,8 +116,8 @@ impl ChildVec {
     }
 
     pub fn remove(&mut self, index: usize) -> Element {
-        let old_child = self.children.remove(index);
-        self.parent.remove_child(old_child.dom_element.clone());
+        let mut old_child = self.children.remove(index);
+        self.parent.remove_child(&mut old_child.dom_element);
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -160,8 +160,8 @@ impl ChildVec {
                 .clear_first_child(self.group_index);
         }
 
-        if let Some(removed_child) = removed_child {
-            self.parent.remove_child(removed_child.dom_element);
+        if let Some(mut removed_child) = removed_child {
+            self.parent.remove_child(&mut removed_child.dom_element);
         }
     }
 

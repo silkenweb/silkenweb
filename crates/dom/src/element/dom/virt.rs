@@ -213,7 +213,7 @@ impl From<VElement> for RealElement {
         }
 
         for mut child in element.children {
-            elem.append_child(&mut child);
+            elem.append_child_now(&mut child);
         }
 
         for child in element.stored_children {
