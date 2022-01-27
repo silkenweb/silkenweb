@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
+use super::DomElement;
 use crate::{
     attribute::Attribute,
     element::event::EventCallback,
@@ -40,8 +41,9 @@ impl RealElement {
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: &mut Self) {
-        self.event_callbacks.append(&mut child.event_callbacks);
+    pub fn store_child(&mut self, child: DomElement) {
+        self.event_callbacks
+            .append(&mut child.real().event_callbacks);
     }
 
     pub fn dom_element(&self) -> &web_sys::Element {
@@ -138,8 +140,12 @@ impl RealText {
         &self.0
     }
 
-    pub fn set_text(&mut self, text: &str) {
-        self.0.set_text_content(Some(text));
+    pub fn set_text(&mut self, text: String) {
+        let parent = self.0.clone();
+
+        queue_update(move || {
+            parent.set_text_content(Some(&text));
+        });
     }
 }
 

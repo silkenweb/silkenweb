@@ -11,7 +11,7 @@ use self::{
     real::{RealElement, RealNode, RealText},
     virt::{VElement, VNode, VText},
 };
-use crate::{attribute::Attribute, render::queue_update};
+use crate::attribute::Attribute;
 
 mod real;
 mod virt;
@@ -37,19 +37,15 @@ impl DomElement {
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        if all_thunks([self]) {
-            self.virt().on(name, f);
-        } else {
-            self.real().on(name, f);
-        }
+        self.map(
+            (name, f),
+            |elem, (name, f)| elem.on(name, f),
+            |elem, (name, f)| elem.on(name, f),
+        );
     }
 
     pub fn store_child(&mut self, child: Self) {
-        if all_thunks([self, &child]) {
-            self.virt().store_child(child);
-        } else {
-            self.real().store_child(&mut child.real());
-        }
+        self.map1(child, VElement::store_child, RealElement::store_child);
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
@@ -65,24 +61,22 @@ impl DomElement {
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
-        if all_thunks([self, child]) {
-            self.virt().append_child(child)
-        } else {
-            self.real().append_child_now(child)
-        }
+        self.map1(child, VElement::append_child, RealElement::append_child_now);
     }
 
     pub fn insert_child_before(
         &mut self,
-        mut child: impl DomNode + 'static,
-        mut next_child: Option<impl DomNode + 'static>,
+        child: impl DomNode + 'static,
+        next_child: Option<impl DomNode + 'static>,
     ) {
-        if all_thunks([self, &child, &next_child]) {
-            self.virt()
-                .insert_child_before(&mut child, next_child.as_mut());
-        } else {
-            self.real().insert_child_before(child, next_child);
-        }
+        self.map2(
+            child,
+            next_child,
+            |parent, mut child, mut next_child| {
+                parent.insert_child_before(&mut child, next_child.as_mut())
+            },
+            RealElement::insert_child_before,
+        );
     }
 
     pub fn insert_child_before_now(
@@ -90,11 +84,12 @@ impl DomElement {
         child: &mut impl DomNode,
         next_child: Option<&mut impl DomNode>,
     ) {
-        if all_thunks([self, child, &next_child]) {
-            self.virt().insert_child_before(child, next_child);
-        } else {
-            self.real().insert_child_before_now(child, next_child);
-        }
+        self.map2(
+            child,
+            next_child,
+            VElement::insert_child_before,
+            RealElement::insert_child_before_now,
+        );
     }
 
     pub fn replace_child(
@@ -102,51 +97,40 @@ impl DomElement {
         mut new_child: impl DomNode + 'static,
         mut old_child: impl DomNode + 'static,
     ) {
-        if all_thunks([self, &new_child, &old_child]) {
-            self.virt().replace_child(&mut new_child, &mut old_child);
-        } else {
-            self.real().replace_child(&mut new_child, &mut old_child);
-        }
+        self.map2(
+            &mut new_child,
+            &mut old_child,
+            VElement::replace_child,
+            RealElement::replace_child,
+        );
     }
 
     pub fn remove_child(&mut self, child: &mut (impl DomNode + 'static)) {
-        if all_thunks([self, child]) {
-            self.virt().remove_child(child);
-        } else {
-            self.real().remove_child(child);
-        }
+        self.map1(child, VElement::remove_child, RealElement::remove_child);
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
-        if all_thunks([self, child]) {
-            self.virt().remove_child(child);
-        } else {
-            self.real().remove_child_now(child);
-        }
+        self.map1(child, VElement::remove_child, RealElement::remove_child_now);
     }
 
     pub fn clear_children(&mut self) {
-        if all_thunks([self]) {
-            self.virt().clear_children();
-        } else {
-            self.real().clear_children();
-        }
+        self.map(
+            (),
+            |elem, _| elem.clear_children(),
+            |elem, _| elem.clear_children(),
+        );
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        if all_thunks([self]) {
-            self.virt().attribute(name, value);
-        } else {
-            self.real().attribute(name, value);
-        }
+        self.map(
+            (name, value),
+            |elem, (name, value)| elem.attribute(name, value),
+            |elem, (name, value)| elem.attribute(name, value),
+        );
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        if all_thunks([self]) {
-            self.virt().effect(f);
-        } else {
-            self.real().effect(f);
-        }
+        self.map(f, VElement::effect, RealElement::effect);
     }
 
     fn real(&self) -> RefMut<RealElement> {
@@ -156,15 +140,51 @@ impl DomElement {
     fn virt(&self) -> RefMut<VElement> {
         RefMut::map(self.0.borrow_mut(), Lazy::thunk)
     }
+
+    fn map<T, R>(
+        &self,
+        arg: T,
+        f_virt: impl FnOnce(&mut VElement, T) -> R,
+        f_real: impl FnOnce(&mut RealElement, T) -> R,
+    ) -> R {
+        if all_thunks([self]) {
+            f_virt(&mut self.virt(), arg)
+        } else {
+            f_real(&mut self.real(), arg)
+        }
+    }
+
+    fn map1<T: Thunk>(
+        &self,
+        arg: T,
+        f_virt: impl FnOnce(&mut VElement, T),
+        f_real: impl FnOnce(&mut RealElement, T),
+    ) {
+        if all_thunks([self, &arg]) {
+            f_virt(&mut self.virt(), arg);
+        } else {
+            f_real(&mut self.real(), arg);
+        }
+    }
+
+    fn map2<T: Thunk, U: Thunk>(
+        &mut self,
+        arg0: T,
+        arg1: U,
+        f_virt: impl FnOnce(&mut VElement, T, U),
+        f_real: impl FnOnce(&mut RealElement, T, U),
+    ) {
+        if all_thunks([self, &arg0, &arg1]) {
+            f_virt(&mut self.virt(), arg0, arg1);
+        } else {
+            f_real(&mut self.real(), arg0, arg1);
+        }
+    }
 }
 
 impl Display for DomElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_thunk() {
-            self.virt().fmt(f)
-        } else {
-            self.real().fmt(f)
-        }
+        self.map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
 
@@ -177,13 +197,7 @@ impl DomText {
     }
 
     pub fn set_text(&mut self, text: String) {
-        if all_thunks([self]) {
-            self.virt().set_text(text);
-        } else {
-            let parent = self.clone();
-
-            queue_update(move || parent.real().set_text(&text));
-        }
+        self.map(text, VText::set_text, RealText::set_text);
     }
 
     pub fn hydrate_child(
@@ -206,15 +220,24 @@ impl DomText {
     fn virt(&self) -> RefMut<VText> {
         RefMut::map(self.0.borrow_mut(), Lazy::thunk)
     }
+
+    fn map<T, R>(
+        &self,
+        arg: T,
+        f_virt: impl FnOnce(&mut VText, T) -> R,
+        f_real: impl FnOnce(&mut RealText, T) -> R,
+    ) -> R {
+        if all_thunks([self]) {
+            f_virt(&mut self.virt(), arg)
+        } else {
+            f_real(&mut self.real(), arg)
+        }
+    }
 }
 
 impl Display for DomText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_thunk() {
-            self.virt().fmt(f)
-        } else {
-            self.real().fmt(f)
-        }
+        self.map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
 
