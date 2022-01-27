@@ -5,7 +5,7 @@ use discard::DiscardOnDrop;
 use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
 
 mod macros;
@@ -42,11 +42,9 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
     let mount_point = mount_point(id);
 
     if let Some(hydration_point) = mount_point.first_child() {
-        let node: web_sys::Node = elem
-            .hydrate(hydration_point.dyn_ref().expect("Unexpected node type"))
-            .into();
+        let node: web_sys::Node = elem.hydrate_child(&mount_point, &hydration_point).into();
 
-        remove_following_siblings(hydration_point, node);
+        remove_following_siblings(&hydration_point, &node);
     } else {
         mount_point
             .append_child(&elem.eval_dom_element())
@@ -59,7 +57,7 @@ pub fn hydrate(id: &str, elem: impl Into<Element>) {
 /// Remove all siblings after `child`
 ///
 /// `child` itself is not removed, only the siblings following.
-fn remove_following_siblings(parent: web_sys::Node, child: web_sys::Node) {
+fn remove_following_siblings(parent: &web_sys::Node, child: &web_sys::Node) {
     if let Some(mut node) = child.next_sibling() {
         while let Some(next_node) = node.next_sibling() {
             parent.remove_child(&node).unwrap_throw();

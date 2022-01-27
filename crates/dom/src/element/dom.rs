@@ -4,7 +4,7 @@ use std::{
     rc::Rc,
 };
 
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsValue;
 
 use self::{
     real::{RealElement, RealNode, RealText},
@@ -63,10 +63,10 @@ impl DomElement {
         self.real().dom_element().clone()
     }
 
-    pub fn hydrate(&self, element: &web_sys::Element) -> web_sys::Element {
+    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
         self.0
             .borrow_mut()
-            .value_with(|virt_elem| virt_elem.hydrate(element))
+            .value_with(|virt_elem| virt_elem.hydrate_child(parent, child))
             .dom_element()
             .clone()
     }
@@ -184,11 +184,11 @@ impl DomText {
         }
     }
 
-    pub fn hydrate(&mut self, node: &web_sys::Text) -> web_sys::Text {
+    pub fn hydrate_child(&mut self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Text {
         // TODO: Validation
         self.0
             .borrow_mut()
-            .value_with(|virt_text| virt_text.hydrate(node))
+            .value_with(|virt_text| virt_text.hydrate_child(parent, child))
             .dom_text()
             .clone()
     }
@@ -217,22 +217,10 @@ impl DomNodeData {
         }
     }
 
-    pub fn hydrate(&mut self, node: &web_sys::Node) -> web_sys::Node {
+    pub fn hydrate_child(&mut self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Node {
         match &mut self.0 {
-            DomNodeEnum::Element(elem) => {
-                if let Some(elem_node) = node.dyn_ref() {
-                    elem.hydrate(elem_node).into()
-                } else {
-                    elem.real().dom_element().clone().into()
-                }
-            }
-            DomNodeEnum::Text(text) => {
-                if let Some(text_node) = node.dyn_ref() {
-                    text.hydrate(text_node).into()
-                } else {
-                    text.real().dom_text().clone().into()
-                }
-            }
+            DomNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
+            DomNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
         }
     }
 }

@@ -28,7 +28,6 @@ features = [
     "Element",
     "HtmlInputElement",
     "Node",
-    "NodeList",
     "Storage",
     "Location",
     "History",

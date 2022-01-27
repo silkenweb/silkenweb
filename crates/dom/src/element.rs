@@ -269,8 +269,8 @@ impl Element {
         self.dom_element.eval_dom_element()
     }
 
-    pub(super) fn hydrate(&self, element: &web_sys::Element) -> web_sys::Element {
-        self.dom_element.hydrate(element)
+    pub(super) fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
+        self.dom_element.hydrate_child(parent, child)
     }
 
     fn clone_into_node(&self) -> DomNodeData {

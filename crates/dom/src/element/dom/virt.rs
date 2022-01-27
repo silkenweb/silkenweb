@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    real::{RealElement, RealText},
+    real::{RealElement, RealNode, RealText},
     DomElement, DomNodeData,
 };
-use crate::attribute::Attribute;
+use crate::{attribute::Attribute, remove_following_siblings};
 
 pub struct VElement {
     namespace: Option<String>,
@@ -26,21 +26,54 @@ impl VElement {
         Self::new_element(Some(namespace), tag)
     }
 
-    pub fn hydrate(self, dom_element: &web_sys::Element) -> RealElement {
-        // TODO: Check namespace, element type and attributes match
-        // TODO: Ignore whitespace text nodes?
-        let mut elem = RealElement::new_from_element(dom_element.clone());
-        let existing_children = dom_element.child_nodes();
+    pub fn hydrate_child(self, parent: &web_sys::Node, child: &web_sys::Node) -> RealElement {
+        let mut child = child.clone();
 
-        for (mut child, index) in self.children.into_iter().zip(0..) {
-            if let Some(node) = existing_children.item(index) {
-                child.hydrate(&node);
-                // TODO: If child.dom_node() is not the same as node, replace it
-                // with the new node
+        loop {
+            // TODO: Rather than 'dyn_into`, check tag type as well.
+            if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
+                return self.hydrate_elem_child(elem_child);
+            } else {
+                let next = child.next_sibling();
+                parent.remove_child(&child).unwrap_throw();
+
+                if let Some(next_child) = next {
+                    child = next_child;
+                } else {
+                    break;
+                }
             }
         }
 
-        // TODO: Remove any extra children
+        let real_child: RealElement = self.into();
+        parent.append_child(real_child.dom_element()).unwrap_throw();
+
+        real_child
+    }
+
+    pub fn hydrate_elem_child(self, child: &web_sys::Element) -> RealElement {
+        // TODO: Check namespace, element type and attributes match
+        let mut elem = RealElement::new_from_element(child.clone());
+        let mut current_child = child.first_child();
+        let mut virt_children = self.children.into_iter();
+
+        for mut virt_child in virt_children.by_ref() {
+            if let Some(node) = &current_child {
+                virt_child.hydrate_child(child, node);
+                current_child = node.next_sibling();
+            } else {
+                break;
+            }
+        }
+
+        for virt_child in virt_children {
+            child.append_child(&virt_child.dom_node()).unwrap_throw();
+        }
+
+        if let Some(node) = &current_child {
+            remove_following_siblings(child, node);
+            child.remove_child(node).unwrap_throw();
+        }
 
         for event in self.hydrate_actions {
             event(&mut elem);
@@ -163,8 +196,19 @@ impl VText {
         Self(text.to_owned())
     }
 
-    pub fn hydrate(&self, dom_text: &web_sys::Text) -> RealText {
-        RealText::new_from_text(dom_text.clone())
+    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> RealText {
+        // TODO: Handle empty text skipping/inserting
+        if let Some(dom_text) = child.dyn_ref::<web_sys::Text>() {
+            RealText::new_from_text(dom_text.clone())
+        } else {
+            let new_text = RealText::new(&self.0);
+
+            parent
+                .insert_before(new_text.dom_text(), Some(child))
+                .unwrap_throw();
+
+            new_text
+        }
     }
 
     pub fn set_text(&mut self, text: String) {
