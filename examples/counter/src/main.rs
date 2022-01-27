@@ -1,6 +1,6 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, prelude::*};
+use silkenweb::{dom::{element::Element, run_until_stalled}, elements::html::*, prelude::*};
 
 fn main() {
     let count = Mutable::new(0);
@@ -13,5 +13,6 @@ fn main() {
         .child(button().on_click(inc).text("+"))
         .child(p().text_signal(count_text));
 
-    mount("app", app);
+    run_until_stalled();
+    println!("{}", Element::from(app));
 }

@@ -3,10 +3,13 @@ use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
 use element::{Element, ElementBuilderBase};
+use futures::{
+    executor::{LocalPool, LocalSpawner},
+    task::LocalSpawnExt,
+};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
 use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen_futures::spawn_local;
 
 mod macros;
 
@@ -102,11 +105,20 @@ fn spawn_cancelable_future(
 ) -> DiscardOnDrop<CancelableFutureHandle> {
     let (handle, cancelable_future) = cancelable_future(future, || ());
 
-    spawn_local(cancelable_future);
+    SPAWNER.with(|spawner| {
+        spawner.spawn_local(cancelable_future).unwrap();
+    });
+    // spawn_local(cancelable_future);
 
     handle
 }
 
+pub fn run_until_stalled() {
+    EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
+}
+
 thread_local!(
     static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
+    static EXECUTOR: RefCell<LocalPool> = RefCell::new(LocalPool::new());
+    static SPAWNER: LocalSpawner = EXECUTOR.with(|executor| executor.borrow().spawner());
 );

@@ -1,3 +1,5 @@
+use std::iter;
+
 use silkenweb_dom::global::window;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
@@ -7,7 +9,7 @@ macro_rules! unexpected_exception {
     };
 }
 
-pub struct Storage(web_sys::Storage);
+pub struct Storage;
 
 impl Storage {
     /// Get the window's local storage.
@@ -20,7 +22,7 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
     pub fn local() -> Result<Self, JsValue> {
-        Ok(Self(window::local_storage()?))
+        Ok(Self)
     }
 
     /// Get the window's session storage.
@@ -33,16 +35,14 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     pub fn session() -> Result<Self, JsValue> {
-        Ok(Self(window::session_storage()?))
+        Ok(Self)
     }
 
     /// Get the value associated with the key.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/getItem)
     pub fn get(&self, key: &str) -> Option<String> {
-        self.0
-            .get_item(key)
-            .expect_throw(unexpected_exception!("getItem"))
+        None
     }
 
     /// Set the value associated with the key.
@@ -55,32 +55,26 @@ impl Storage {
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem
     pub fn insert(&self, key: &str, value: &str) -> Result<(), JsValue> {
-        self.0.set_item(key, value)
+        Ok(())
     }
 
     /// Remove a key/value pair.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem)
     pub fn remove(&self, key: &str) {
-        self.0
-            .remove_item(key)
-            .expect_throw(unexpected_exception!("removeItem"))
     }
 
     /// Clear the storage.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/clear)
     pub fn clear(&self) {
-        self.0.clear().expect_throw(unexpected_exception!("clear"))
     }
 
     /// The number of stored keys.
     ///
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Storage/length)
     pub fn len(&self) -> u32 {
-        self.0
-            .length()
-            .expect_throw(unexpected_exception!("length"))
+        0
     }
 
     /// Is the storage empty?
@@ -90,10 +84,7 @@ impl Storage {
 
     /// Iterate over all the stored keys.
     pub fn keys(&self) -> impl Iterator<Item = String> {
-        StorageIter {
-            container: self.0.clone(),
-            index: 0,
-        }
+        iter::empty()
     }
 }
 
