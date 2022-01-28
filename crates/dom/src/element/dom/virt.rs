@@ -6,7 +6,7 @@ use std::{
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    real::{RealElement, RealNode, RealText},
+    wet::{WetElement, WetNode, WetText},
     DomElement, DomNodeData,
 };
 use crate::{attribute::Attribute, remove_following_siblings};
@@ -17,7 +17,7 @@ pub struct VElement {
     attributes: HashMap<String, Option<String>>,
     children: Vec<DomNodeData>,
     stored_children: Vec<DomElement>,
-    hydrate_actions: Vec<Box<dyn FnOnce(&mut RealElement)>>,
+    hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
 }
 
 impl VElement {
@@ -29,7 +29,7 @@ impl VElement {
         Self::new_element(Some(namespace), tag)
     }
 
-    pub fn hydrate_child(self, parent: &web_sys::Node, child: &web_sys::Node) -> RealElement {
+    pub fn hydrate_child(self, parent: &web_sys::Node, child: &web_sys::Node) -> WetElement {
         let mut child = child.clone();
 
         loop {
@@ -48,15 +48,15 @@ impl VElement {
             }
         }
 
-        let real_child: RealElement = self.into();
-        parent.append_child(real_child.dom_element()).unwrap_throw();
+        let wet_child: WetElement = self.into();
+        parent.append_child(wet_child.dom_element()).unwrap_throw();
 
-        real_child
+        wet_child
     }
 
-    pub fn hydrate_elem_child(self, child: &web_sys::Element) -> RealElement {
+    pub fn hydrate_elem_child(self, child: &web_sys::Element) -> WetElement {
         // TODO: Check namespace, element type and attributes match
-        let mut elem = RealElement::new_from_element(child.clone());
+        let mut elem = WetElement::new_from_element(child.clone());
         let mut current_child = child.first_child();
 
         // TODO: Rename this: they're not necessarily virtual
@@ -203,12 +203,12 @@ impl Display for VElement {
     }
 }
 
-impl From<VElement> for RealElement {
+impl From<VElement> for WetElement {
     fn from(element: VElement) -> Self {
         let mut elem = if let Some(namespace) = element.namespace {
-            RealElement::new_in_namespace(&namespace, &element.tag)
+            WetElement::new_in_namespace(&namespace, &element.tag)
         } else {
-            RealElement::new(&element.tag)
+            WetElement::new(&element.tag)
         };
 
         for (name, value) in element.attributes {
@@ -241,12 +241,12 @@ impl VText {
         Self(text.to_owned())
     }
 
-    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> RealText {
+    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> WetText {
         // TODO: Handle empty text skipping/inserting
         if let Some(dom_text) = child.dyn_ref::<web_sys::Text>() {
-            RealText::new_from_text(dom_text.clone())
+            WetText::new_from_text(dom_text.clone())
         } else {
-            let new_text = RealText::new(&self.0);
+            let new_text = WetText::new(&self.0);
 
             parent
                 .insert_before(new_text.dom_text(), Some(child))
@@ -267,9 +267,9 @@ impl Display for VText {
     }
 }
 
-impl From<VText> for RealText {
+impl From<VText> for WetText {
     fn from(text: VText) -> Self {
-        RealText::new(&text.0)
+        WetText::new(&text.0)
     }
 }
 
