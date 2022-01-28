@@ -1,6 +1,12 @@
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{self, cell::RefCell, future::Future, rc::Rc};
+use std::{
+    self,
+    cell::{RefCell, RefMut},
+    fmt::{self, Display},
+    future::Future,
+    rc::Rc,
+};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -10,19 +16,18 @@ use futures_signals::{
 };
 use wasm_bindgen::{intern, JsCast, JsValue};
 
-use self::{child_groups::ChildGroups, child_vec::ChildVec, event::EventCallback};
-use crate::{
-    attribute::Attribute,
-    clone,
-    global::document,
-    render::{after_render, queue_update},
-    spawn_cancelable_future,
+use self::{
+    child_groups::ChildGroups,
+    child_vec::ChildVec,
+    dom::{DomElement, DomNodeData, DomText},
 };
+use crate::{attribute::Attribute, clone, render::queue_update, spawn_cancelable_future};
 
 mod child_groups;
 mod child_vec;
-mod dom_children;
+mod dom;
 mod event;
+mod hydration;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
@@ -34,21 +39,22 @@ pub struct ElementBuilderBase {
 
 impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(document::create_element(tag))
+        Self::new_element(DomElement::new(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(document::create_element_ns(namespace, tag))
+        Self::new_element(DomElement::new_in_namespace(namespace, tag))
     }
 
-    fn new_element(dom_element: web_sys::Element) -> Self {
+    fn new_element(dom_element: DomElement) -> Self {
+        let node = dom_element.clone();
+
         Self {
             element: Element {
-                dom_element: dom_element.clone(),
-                event_callbacks: Vec::new(),
+                dom_element,
                 futures: Vec::new(),
             },
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(dom_element))),
+            child_groups: Rc::new(RefCell::new(ChildGroups::new(node))),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -60,35 +66,34 @@ impl ElementBuilderBase {
         let _ = name;
     }
 
-    fn dom_element(&self) -> &web_sys::Element {
-        &self.element.dom_element
+    fn child_groups_mut(&self) -> RefMut<ChildGroups> {
+        self.child_groups.as_ref().borrow_mut()
     }
 }
 
 impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(mut self, child: impl Into<Element>) -> Self {
-        let child = child.into();
-        self.child_groups
-            .borrow_mut()
-            .append_new_group_sync(&child.dom_element);
-        self.element.event_callbacks.extend(child.event_callbacks);
+        let mut child = child.into();
+        self.child_groups_mut()
+            .append_new_group_sync(&mut child.dom_element);
+        self.element.dom_element.store_child(child.dom_element);
         self.element.futures.extend(child.futures);
 
         self
     }
 
     fn child_signal(self, child_signal: impl Signal<Item = impl Into<Element>> + 'static) -> Self {
-        let group_index = self.child_groups.borrow_mut().new_group();
-        let children = self.child_groups.clone();
+        let group_index = self.child_groups_mut().new_group();
+        let child_groups = self.child_groups.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
         let updater = child_signal.for_each(move |child| {
             let child = child.into();
-            children
+            child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, &child.dom_element);
+                .upsert_only_child(group_index, child.clone_into_node());
             _child_storage = Some(child);
             async {}
         });
@@ -100,20 +105,20 @@ impl ParentBuilder for ElementBuilderBase {
         self,
         child_signal: impl Signal<Item = Option<impl Into<Element>>> + 'static,
     ) -> Self {
-        let group_index = self.child_groups.borrow_mut().new_group();
-        let children = self.child_groups.clone();
+        let group_index = self.child_groups_mut().new_group();
+        let child_groups = self.child_groups.clone();
         // Store the child in here until we replace it.
         let mut _child_storage = None;
 
         let updater = child_signal.for_each(move |child| {
             if let Some(child) = child {
                 let child = child.into();
-                children
+                child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, &child.dom_element);
+                    .upsert_only_child(group_index, child.clone_into_node());
                 _child_storage = Some(child);
             } else {
-                children.borrow_mut().remove_child(group_index);
+                child_groups.borrow_mut().remove_child(group_index);
                 _child_storage = None;
             }
 
@@ -127,15 +132,15 @@ impl ParentBuilder for ElementBuilderBase {
         self,
         children: impl SignalVec<Item = impl Into<Element>> + 'static,
     ) -> Self {
-        let group_index = self.child_groups.borrow_mut().new_group();
-        let child_vec = ChildVec::new(
-            self.dom_element().clone(),
+        let group_index = self.child_groups_mut().new_group();
+        let mut child_vec = ChildVec::new(
+            self.element.dom_element.clone(),
             self.child_groups.clone(),
             group_index,
         );
 
         let updater = children.for_each(move |update| {
-            child_vec.borrow_mut().apply_update(update);
+            child_vec.apply_update(update);
             async {}
         });
 
@@ -144,28 +149,20 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let text_node = document::create_text_node(child);
-        self.child_groups
-            .borrow_mut()
-            .append_new_group_sync(&text_node);
+        let mut text_node = DomText::new(child);
+        self.child_groups_mut()
+            .append_new_group_sync(&mut text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let text_node = document::create_text_node(intern(""));
-        self.child_groups
-            .borrow_mut()
-            .append_new_group_sync(&text_node);
+        let mut text_node = DomText::new(intern(""));
+        self.child_groups_mut()
+            .append_new_group_sync(&mut text_node);
 
         let updater = child_signal.for_each({
-            clone!(text_node);
-
             move |new_value| {
-                queue_update({
-                    clone!(text_node);
-                    let new_value = new_value.into();
-                    move || text_node.set_data(&new_value)
-                });
+                text_node.set_text(new_value.into());
                 async {}
             }
         });
@@ -181,7 +178,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        value.set_attribute(name, self.dom_element());
+        self.element.dom_element.attribute(name, value);
         self
     }
 
@@ -191,15 +188,16 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let dom_element = self.dom_element().clone();
+        let element = self.element.dom_element.clone();
 
         let updater = value.for_each({
             let name = name.to_owned();
 
             move |new_value| {
-                clone!(name, dom_element);
+                clone!(name);
+                let mut element = element.clone();
 
-                queue_update(move || new_value.set_attribute(&name, &dom_element));
+                queue_update(move || element.attribute(&name, new_value));
 
                 async {}
             }
@@ -209,10 +207,8 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     /// Apply an effect after the next render.
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        let dom_element = self.dom_element().clone();
-        after_render(move || f(&dom_element));
-
+    fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+        self.element.dom_element.effect(f);
         self
     }
 
@@ -226,11 +222,11 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let dom_element = self.dom_element().clone();
+        let mut element = self.element.dom_element.clone();
 
         let future = sig.for_each(move |x| {
-            clone!(dom_element, f);
-            after_render(move || f(&dom_element, x));
+            clone!(f);
+            element.effect(move |elem| f(elem, x));
             async {}
         });
 
@@ -243,18 +239,14 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        let dom_element = self.element.dom_element.clone();
-        self.element
-            .event_callbacks
-            .push(EventCallback::new(dom_element, name, f));
-
+        self.element.dom_element.on(name, f);
         self
     }
 
     fn build(mut self) -> Self::Target {
         self.element.futures.shrink_to_fit();
-        self.element.event_callbacks.shrink_to_fit();
-        self.child_groups.borrow_mut().shrink_to_fit();
+        self.element.dom_element.shrink_to_fit();
+        self.child_groups_mut().shrink_to_fit();
         self.element
     }
 }
@@ -270,9 +262,32 @@ impl From<ElementBuilderBase> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 pub struct Element {
-    pub(super) dom_element: web_sys::Element,
-    event_callbacks: Vec<EventCallback>,
+    dom_element: DomElement,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
+}
+
+impl Element {
+    pub(super) fn eval_dom_element(&self) -> web_sys::Element {
+        self.dom_element.eval_dom_element()
+    }
+
+    pub(super) fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+    ) -> web_sys::Element {
+        self.dom_element.hydrate_child(parent, child)
+    }
+
+    fn clone_into_node(&self) -> DomNodeData {
+        self.dom_element.clone().into()
+    }
+}
+
+impl Display for Element {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.dom_element.fmt(f)
+    }
 }
 
 /// An HTML element builder.

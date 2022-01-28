@@ -9,6 +9,8 @@ members = [
     "examples/animation",
     "examples/hello-world",
     "examples/js-framework-benchmark",
+    "examples/hydration",
+    "examples/ssr",
     "crates/silkenweb",
     "crates/ui5",
     "crates/elements",

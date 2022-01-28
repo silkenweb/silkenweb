@@ -1,14 +1,17 @@
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
 pub struct EventCallback {
-    target: web_sys::Element,
+    target: web_sys::Node,
     name: &'static str,
     callback: Closure<dyn FnMut(JsValue)>,
 }
 
 impl EventCallback {
+    /// `f` must be `'static` as JS callbacks are called once the stack frame is
+    /// finished. See the [Closure::wrap] and
+    /// <https://github.com/rustwasm/wasm-bindgen/issues/1914#issuecomment-566488497>
     pub fn new(
-        target: web_sys::Element,
+        target: web_sys::Node,
         name: &'static str,
         f: impl FnMut(JsValue) + 'static,
     ) -> Self {

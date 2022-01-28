@@ -30,6 +30,10 @@ enum Commands {
         #[clap(long)]
         gui: bool,
     },
+    GithubActions {
+        #[clap(long)]
+        full: bool,
+    },
     #[clap(flatten)]
     Common(CommonCmds),
 }
@@ -60,6 +64,15 @@ fn main() {
             }
             Commands::TodomvcCypress { gui } => {
                 cypress("install", if gui { "open" } else { "run" })?;
+            }
+            Commands::GithubActions { full } => {
+                let reuse = (!full).then(|| "--reuse");
+
+                cmd!("docker build . -t silkenweb-github-actions").run()?;
+                cmd!(
+                    "act -P ubuntu-latest=silkenweb-github-actions:latest --use-gitignore {reuse...}"
+                )
+                .run()?;
             }
             Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
         }
