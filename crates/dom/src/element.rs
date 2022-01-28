@@ -16,18 +16,17 @@ use futures_signals::{
 };
 use wasm_bindgen::{intern, JsCast, JsValue};
 
-use self::{
-    child_groups::ChildGroups,
-    child_vec::ChildVec,
-    dom::{DomElement, DomNodeData, DomText},
+use self::{child_groups::ChildGroups, child_vec::ChildVec};
+use crate::{
+    attribute::Attribute,
+    clone,
+    hydration::dom::{DomElement, DomNodeData, DomText},
+    render::queue_update,
+    spawn_cancelable_future,
 };
-use crate::{attribute::Attribute, clone, render::queue_update, spawn_cancelable_future};
 
 mod child_groups;
 mod child_vec;
-mod dom;
-mod event;
-mod hydration;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {

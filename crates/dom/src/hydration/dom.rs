@@ -10,7 +10,7 @@ use self::{
     dry::{DryElement, DryNode, DryText},
     wet::{WetElement, WetNode, WetText},
 };
-use super::hydration::{Hydration, IsDry};
+use super::{Hydration, IsDry};
 use crate::attribute::Attribute;
 
 mod dry;

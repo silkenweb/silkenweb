@@ -1,3 +1,5 @@
+pub mod dom;
+
 #[cfg(any(
     feature = "hydration",
     all(feature = "client-side-render", feature = "server-side-render")

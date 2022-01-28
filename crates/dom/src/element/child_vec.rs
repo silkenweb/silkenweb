@@ -3,8 +3,8 @@ use std::{cell::RefCell, mem, rc::Rc};
 use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{child_groups::ChildGroups, dom::DomElement, Element};
-use crate::render::queue_update;
+use super::{child_groups::ChildGroups, Element};
+use crate::{hydration::dom::DomElement, render::queue_update};
 
 pub struct ChildVec {
     parent: DomElement,

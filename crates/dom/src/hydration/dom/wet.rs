@@ -5,7 +5,7 @@ use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use super::DomElement;
 use crate::{
     attribute::Attribute,
-    element::event::EventCallback,
+    event::EventCallback,
     global::document,
     render::{after_render, queue_update},
 };

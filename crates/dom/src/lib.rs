@@ -8,6 +8,8 @@ use global::document;
 use render::queue_update;
 use wasm_bindgen::UnwrapThrowExt;
 
+mod event;
+mod hydration;
 mod macros;
 
 pub mod attribute;
