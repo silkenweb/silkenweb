@@ -64,8 +64,11 @@ impl DomElement {
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
-        self.borrow_mut()
-            .map1(child, DryElement::append_child, WetElement::append_child_now);
+        self.borrow_mut().map1(
+            child,
+            DryElement::append_child,
+            WetElement::append_child_now,
+        );
     }
 
     pub fn insert_child_before(
@@ -115,8 +118,11 @@ impl DomElement {
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
-        self.borrow_mut()
-            .map1(child, DryElement::remove_child, WetElement::remove_child_now);
+        self.borrow_mut().map1(
+            child,
+            DryElement::remove_child,
+            WetElement::remove_child_now,
+        );
     }
 
     pub fn clear_children(&mut self) {
