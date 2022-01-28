@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{attribute::Attribute, remove_following_siblings};
 
-pub struct VElement {
+pub struct DryElement {
     namespace: Option<String>,
     tag: String,
     attributes: HashMap<String, Option<String>>,
@@ -20,7 +20,7 @@ pub struct VElement {
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
 }
 
-impl VElement {
+impl DryElement {
     pub fn new(tag: &str) -> Self {
         Self::new_element(None, tag)
     }
@@ -35,7 +35,7 @@ impl VElement {
         loop {
             // TODO: Rather than 'dyn_into`, check tag type as well.
             if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
-                return self.hydrate_elem_child(elem_child);
+                return self.hydrate_element(elem_child);
             } else {
                 let next = child.next_sibling();
                 parent.remove_child(&child).unwrap_throw();
@@ -54,31 +54,30 @@ impl VElement {
         wet_child
     }
 
-    pub fn hydrate_elem_child(self, child: &web_sys::Element) -> WetElement {
+    fn hydrate_element(self, dom_elem: &web_sys::Element) -> WetElement {
         // TODO: Check namespace, element type and attributes match
-        let mut elem = WetElement::new_from_element(child.clone());
-        let mut current_child = child.first_child();
+        let mut elem = WetElement::new_from_element(dom_elem.clone());
+        let mut current_child = dom_elem.first_child();
 
-        // TODO: Rename this: they're not necessarily virtual
-        let mut virt_children = self.children.into_iter();
+        let mut children = self.children.into_iter();
 
-        for mut virt_child in virt_children.by_ref() {
+        for mut child in children.by_ref() {
             if let Some(node) = &current_child {
-                let hydrated_elem = virt_child.hydrate_child(child, node);
+                let hydrated_elem = child.hydrate_child(dom_elem, node);
                 current_child = hydrated_elem.next_sibling();
             } else {
-                child.append_child(&virt_child.dom_node()).unwrap_throw();
+                dom_elem.append_child(&child.dom_node()).unwrap_throw();
                 break;
             }
         }
 
-        for virt_child in virt_children {
-            child.append_child(&virt_child.dom_node()).unwrap_throw();
+        for child in children {
+            dom_elem.append_child(&child.dom_node()).unwrap_throw();
         }
 
         if let Some(node) = &current_child {
-            remove_following_siblings(child, node);
-            child.remove_child(node).unwrap_throw();
+            remove_following_siblings(dom_elem, node);
+            dom_elem.remove_child(node).unwrap_throw();
         }
 
         for event in self.hydrate_actions {
@@ -103,14 +102,14 @@ impl VElement {
         self.stored_children.push(child);
     }
 
-    pub fn append_child(&mut self, child: &mut impl VNode) {
+    pub fn append_child(&mut self, child: &mut impl DryNode) {
         self.children.push(child.node())
     }
 
     pub fn insert_child_before(
         &mut self,
-        child: &mut impl VNode,
-        next_child: Option<&mut impl VNode>,
+        child: &mut impl DryNode,
+        next_child: Option<&mut impl DryNode>,
     ) {
         if let Some(next_child) = next_child {
             let next_child = next_child.node();
@@ -125,7 +124,7 @@ impl VElement {
         }
     }
 
-    pub fn replace_child(&mut self, new_child: &mut impl VNode, old_child: &mut impl VNode) {
+    pub fn replace_child(&mut self, new_child: &mut impl DryNode, old_child: &mut impl DryNode) {
         for child in &mut self.children {
             if child.node().is_same(&old_child.node()) {
                 *child = new_child.node();
@@ -133,7 +132,7 @@ impl VElement {
         }
     }
 
-    pub fn remove_child(&mut self, child: &mut impl VNode) {
+    pub fn remove_child(&mut self, child: &mut impl DryNode) {
         let child = child.node();
 
         self.children.retain(|existing| !existing.is_same(&child));
@@ -172,7 +171,7 @@ impl VElement {
     }
 }
 
-impl Display for VElement {
+impl Display for DryElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO: Namespace
         // TODO: tag/attribute name validation
@@ -203,8 +202,8 @@ impl Display for VElement {
     }
 }
 
-impl From<VElement> for WetElement {
-    fn from(element: VElement) -> Self {
+impl From<DryElement> for WetElement {
+    fn from(element: DryElement) -> Self {
         let mut elem = if let Some(namespace) = element.namespace {
             WetElement::new_in_namespace(&namespace, &element.tag)
         } else {
@@ -234,9 +233,9 @@ impl From<VElement> for WetElement {
 }
 
 #[derive(Clone)]
-pub struct VText(String);
+pub struct DryText(String);
 
-impl VText {
+impl DryText {
     pub fn new(text: &str) -> Self {
         Self(text.to_owned())
     }
@@ -261,14 +260,14 @@ impl VText {
     }
 }
 
-impl Display for VText {
+impl Display for DryText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
 }
 
-impl From<VText> for WetText {
-    fn from(text: VText) -> Self {
+impl From<DryText> for WetText {
+    fn from(text: DryText) -> Self {
         WetText::new(&text.0)
     }
 }
@@ -277,6 +276,6 @@ impl From<VText> for WetText {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait VNode {
+pub trait DryNode {
     fn node(&self) -> DomNodeData;
 }

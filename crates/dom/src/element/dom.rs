@@ -7,13 +7,13 @@ use std::{
 use wasm_bindgen::JsValue;
 
 use self::{
-    virt::{VElement, VNode, VText},
+    dry::{DryElement, DryNode, DryText},
     wet::{WetElement, WetNode, WetText},
 };
 use super::hydration::{Hydration, IsDry};
 use crate::attribute::Attribute;
 
-mod virt;
+mod dry;
 mod wet;
 
 #[derive(Clone)]
@@ -23,14 +23,14 @@ impl DomElement {
     pub fn new(tag: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
             || WetElement::new(tag),
-            || VElement::new(tag),
+            || DryElement::new(tag),
         ))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
             || WetElement::new_in_namespace(namespace, tag),
-            || VElement::new_in_namespace(namespace, tag),
+            || DryElement::new_in_namespace(namespace, tag),
         ))))
     }
 
@@ -49,7 +49,7 @@ impl DomElement {
 
     pub fn store_child(&mut self, child: Self) {
         self.borrow_mut()
-            .map1(child, VElement::store_child, WetElement::store_child);
+            .map1(child, DryElement::store_child, WetElement::store_child);
     }
 
     pub fn eval_dom_element(&self) -> web_sys::Element {
@@ -58,14 +58,14 @@ impl DomElement {
 
     pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
         self.borrow_mut()
-            .wet_with(|virt_elem| virt_elem.hydrate_child(parent, child))
+            .wet_with(|dry_elem| dry_elem.hydrate_child(parent, child))
             .dom_element()
             .clone()
     }
 
     pub fn append_child_now(&mut self, child: &mut impl DomNode) {
         self.borrow_mut()
-            .map1(child, VElement::append_child, WetElement::append_child_now);
+            .map1(child, DryElement::append_child, WetElement::append_child_now);
     }
 
     pub fn insert_child_before(
@@ -91,7 +91,7 @@ impl DomElement {
         self.borrow_mut().map2(
             child,
             next_child,
-            VElement::insert_child_before,
+            DryElement::insert_child_before,
             WetElement::insert_child_before_now,
         );
     }
@@ -104,19 +104,19 @@ impl DomElement {
         self.borrow_mut().map2(
             &mut new_child,
             &mut old_child,
-            VElement::replace_child,
+            DryElement::replace_child,
             WetElement::replace_child,
         );
     }
 
     pub fn remove_child(&mut self, child: &mut (impl DomNode + 'static)) {
         self.borrow_mut()
-            .map1(child, VElement::remove_child, WetElement::remove_child);
+            .map1(child, DryElement::remove_child, WetElement::remove_child);
     }
 
     pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
         self.borrow_mut()
-            .map1(child, VElement::remove_child, WetElement::remove_child_now);
+            .map1(child, DryElement::remove_child, WetElement::remove_child_now);
     }
 
     pub fn clear_children(&mut self) {
@@ -137,7 +137,7 @@ impl DomElement {
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.borrow_mut()
-            .map(f, VElement::effect, WetElement::effect);
+            .map(f, DryElement::effect, WetElement::effect);
     }
 
     fn borrow_mut(&self) -> RefMut<HydrationElement> {
@@ -163,13 +163,13 @@ impl DomText {
     pub fn new(text: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
             || WetText::new(text),
-            || VText::new(text),
+            || DryText::new(text),
         ))))
     }
 
     pub fn set_text(&mut self, text: String) {
         self.borrow_mut()
-            .map(text, VText::set_text, WetText::set_text);
+            .map(text, DryText::set_text, WetText::set_text);
     }
 
     pub fn hydrate_child(
@@ -179,7 +179,7 @@ impl DomText {
     ) -> web_sys::Text {
         // TODO: Validation
         self.borrow_mut()
-            .wet_with(|virt_text| virt_text.hydrate_child(parent, child))
+            .wet_with(|dry_text| dry_text.hydrate_child(parent, child))
             .dom_text()
             .clone()
     }
@@ -258,7 +258,7 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + WetNode + VNode + IsDry {}
+pub trait DomNode: Clone + Into<DomNodeData> + WetNode + DryNode + IsDry {}
 
 impl WetNode for DomNodeData {
     fn dom_node(&self) -> web_sys::Node {
@@ -269,7 +269,7 @@ impl WetNode for DomNodeData {
     }
 }
 
-impl VNode for DomNodeData {
+impl DryNode for DomNodeData {
     fn node(&self) -> DomNodeData {
         self.clone()
     }
@@ -301,7 +301,7 @@ impl WetNode for DomElement {
     }
 }
 
-impl VNode for DomElement {
+impl DryNode for DomElement {
     fn node(&self) -> DomNodeData {
         DomNodeData(DomNodeEnum::Element(self.clone()))
     }
@@ -315,7 +315,7 @@ impl WetNode for DomText {
     }
 }
 
-impl VNode for DomText {
+impl DryNode for DomText {
     fn node(&self) -> DomNodeData {
         DomNodeData(DomNodeEnum::Text(self.clone()))
     }
@@ -323,8 +323,8 @@ impl VNode for DomText {
 
 impl DomNode for DomText {}
 
-type HydrationElement = Hydration<WetElement, VElement>;
-type HydrationText = Hydration<WetText, VText>;
+type HydrationElement = Hydration<WetElement, DryElement>;
+type HydrationText = Hydration<WetText, DryText>;
 
 impl IsDry for DomElement {
     fn is_dry(&self) -> bool {
