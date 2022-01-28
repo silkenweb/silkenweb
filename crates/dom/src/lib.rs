@@ -6,7 +6,6 @@ use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
 use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen_futures::spawn_local;
 
 mod macros;
 
@@ -102,7 +101,7 @@ fn spawn_cancelable_future(
 ) -> DiscardOnDrop<CancelableFutureHandle> {
     let (handle, cancelable_future) = cancelable_future(future, || ());
 
-    spawn_local(cancelable_future);
+    tasks::spawn_local(cancelable_future);
 
     handle
 }
@@ -110,3 +109,43 @@ fn spawn_cancelable_future(
 thread_local!(
     static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
+
+#[cfg(feature = "server-render")]
+mod tasks {
+    use std::{cell::RefCell, future::Future};
+
+    use futures::{
+        executor::{LocalPool, LocalSpawner},
+        task::LocalSpawnExt,
+    };
+
+    thread_local!(
+        static EXECUTOR: RefCell<LocalPool> = RefCell::new(LocalPool::new());
+        static SPAWNER: LocalSpawner = EXECUTOR.with(|executor| executor.borrow().spawner());
+    );
+
+    pub fn spawn_local<F>(future: F)
+    where
+        F: Future<Output = ()> + 'static,
+    {
+        SPAWNER.with(|spawner| {
+            spawner.spawn_local(future).unwrap();
+        });
+    }
+
+    pub fn run() {
+        EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
+    }
+}
+
+#[cfg(not(feature = "server-render"))]
+mod tasks {
+    use std::future::Future;
+
+    pub fn spawn_local<F>(future: F)
+    where
+        F: Future<Output = ()> + 'static,
+    {
+        wasm_bindgen_futures::spawn_local(future)
+    }
+}

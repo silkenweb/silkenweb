@@ -2,10 +2,49 @@ use std::cell::{Cell, RefCell};
 
 use futures_signals::signal::{Mutable, Signal};
 use js_sys::Promise;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
 
-use crate::global::window;
+#[cfg(feature = "server-render")]
+mod raf {
+    pub struct Raf;
+
+    impl Raf {
+        pub fn new() -> Self {
+            Self
+        }
+
+        pub fn request_render(&self) {}
+    }
+}
+
+#[cfg(not(feature = "server-render"))]
+mod raf {
+    use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+
+    use super::RENDER;
+    use crate::global::window;
+
+    pub struct Raf {
+        on_animation_frame: Closure<dyn FnMut(JsValue)>,
+    }
+
+    impl Raf {
+        pub fn new() -> Self {
+            Self {
+                on_animation_frame: Closure::wrap(Box::new(|time_stamp: JsValue| {
+                    RENDER.with(|render| {
+                        render.on_animation_frame(time_stamp.as_f64().unwrap_throw())
+                    });
+                })),
+            }
+        }
+
+        pub fn request_render(&self) {
+            window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
+        }
+    }
+}
 
 pub(super) fn queue_update(f: impl FnOnce() + 'static) {
     RENDER.with(|r| r.queue_update(f));
@@ -32,31 +71,38 @@ pub async fn render_now() {
     RENDER.with(Render::render_updates);
 }
 
+#[cfg(feature = "server-render")]
+pub fn render_now_sync() {
+    use crate::tasks;
+
+    tasks::run();
+    RENDER.with(Render::render_updates);
+}
+
 pub fn request_render() {
     RENDER.with(Render::request_render);
 }
 
 struct Render {
+    raf: raf::Raf,
     raf_pending: Cell<bool>,
     pending_updates: RefCell<Vec<Box<dyn FnOnce()>>>,
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
-    on_animation_frame: Closure<dyn FnMut(JsValue)>,
     animation_timestamp_millis: Mutable<f64>,
 }
 
 impl Render {
     fn new() -> Self {
         Self {
+            raf: raf::Raf::new(),
             raf_pending: Cell::new(false),
             pending_updates: RefCell::new(Vec::new()),
             pending_effects: RefCell::new(Vec::new()),
-            on_animation_frame: Closure::wrap(Box::new(|time_stamp: JsValue| {
-                RENDER.with(|render| render.on_animation_frame(time_stamp.as_f64().unwrap_throw()));
-            })),
             animation_timestamp_millis: Mutable::new(0.0),
         }
     }
 
+    #[cfg(not(feature = "server-render"))]
     fn on_animation_frame(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);
@@ -92,8 +138,7 @@ impl Render {
     fn request_render(&self) {
         if !self.raf_pending.get() {
             self.raf_pending.set(true);
-
-            window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
+            self.raf.request_render();
         }
     }
 }

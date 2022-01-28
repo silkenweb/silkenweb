@@ -12,6 +12,9 @@ license = "MIT OR Apache-2.0"
 categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
+[features]
+server-render = ["silkenweb-dom/server-render"]
+
 [dependencies]
 silkenweb-elements = "0.1.1"
 silkenweb-dom = "0.1.1"
