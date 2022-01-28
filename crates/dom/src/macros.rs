@@ -22,11 +22,23 @@
 ///     move |_| do_something(x, y, z)
 /// });
 /// ```
+///
+/// If you need a mutable clone, `clone!(mut x)` will generate:
+///
+/// ```
+/// # #[macro_use] extern crate silkenweb_dom;
+/// # let x = 0;
+/// let mut x = x.clone();
+/// ```
 #[macro_export]
 macro_rules! clone{
-    ($($name:ident),* $(,)?) => {
-        $(
-            let $name = $name.clone();
-        )*
-    }
+    ($(,)?) => {};
+    ($name:ident $(, $($tail:tt)*)?) => {
+        let $name = $name.clone();
+        $($crate::clone!($($tail)*);)?
+    };
+    (mut $name:ident $(, $($tail:tt)*)?) => {
+        let mut $name = $name.clone();
+        $($crate::clone!($($tail)*);)?
+    };
 }

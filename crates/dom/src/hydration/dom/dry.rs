@@ -9,7 +9,7 @@ use super::{
     wet::{WetElement, WetNode, WetText},
     DomElement, DomNodeData,
 };
-use crate::{attribute::Attribute, remove_following_siblings};
+use crate::{attribute::Attribute, clone, remove_following_siblings};
 
 pub struct DryElement {
     namespace: Option<String>,
@@ -30,7 +30,7 @@ impl DryElement {
     }
 
     pub fn hydrate_child(self, parent: &web_sys::Node, child: &web_sys::Node) -> WetElement {
-        let mut child = child.clone();
+        clone!(mut child);
 
         loop {
             // TODO: Rather than 'dyn_into`, check tag type as well.

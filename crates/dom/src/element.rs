@@ -46,14 +46,12 @@ impl ElementBuilderBase {
     }
 
     fn new_element(dom_element: DomElement) -> Self {
-        let node = dom_element.clone();
-
         Self {
             element: Element {
-                dom_element,
+                dom_element: dom_element.clone(),
                 futures: Vec::new(),
             },
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(node))),
+            child_groups: Rc::new(RefCell::new(ChildGroups::new(dom_element))),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -193,8 +191,7 @@ impl ElementBuilder for ElementBuilderBase {
             let name = name.to_owned();
 
             move |new_value| {
-                clone!(name);
-                let mut element = element.clone();
+                clone!(name, mut element);
 
                 queue_update(move || element.attribute(&name, new_value));
 
