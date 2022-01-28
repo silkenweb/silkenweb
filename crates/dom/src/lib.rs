@@ -5,6 +5,7 @@ use discard::DiscardOnDrop;
 use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use global::document;
+use render::queue_update;
 use wasm_bindgen::UnwrapThrowExt;
 
 mod macros;
@@ -34,23 +35,27 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     insert_component(id, elem);
 }
 
-pub fn hydrate(id: &str, elem: impl Into<Element>) {
-    unmount(id);
-    let elem = elem.into();
+pub fn hydrate(id: &str, elem: impl Into<Element> + 'static) {
+    let id = id.to_owned();
 
-    let mount_point = mount_point(id);
+    queue_update(move || {
+        unmount(&id);
+        let elem = elem.into();
 
-    if let Some(hydration_point) = mount_point.first_child() {
-        let node: web_sys::Node = elem.hydrate_child(&mount_point, &hydration_point).into();
+        let mount_point = mount_point(&id);
 
-        remove_following_siblings(&hydration_point, &node);
-    } else {
-        mount_point
-            .append_child(&elem.eval_dom_element())
-            .unwrap_throw();
-    }
+        if let Some(hydration_point) = mount_point.first_child() {
+            let node: web_sys::Node = elem.hydrate_child(&mount_point, &hydration_point).into();
 
-    insert_component(id, elem);
+            remove_following_siblings(&hydration_point, &node);
+        } else {
+            mount_point
+                .append_child(&elem.eval_dom_element())
+                .unwrap_throw();
+        }
+
+        insert_component(&id, elem);
+    });
 }
 
 /// Remove all siblings after `child`

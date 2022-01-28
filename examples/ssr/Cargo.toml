@@ -1,0 +1,10 @@
+[package]
+name = "silkenweb-example-ssr"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+silkenweb = { path = "../../crates/silkenweb", features = ["server-side-render"] }
+futures-signals = "0.3"

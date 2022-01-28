@@ -1,9 +1,7 @@
-#[cfg(not(any(feature = "client-side-render", feature = "server-side-render")))]
-compile_error!(
-    r#"One of the features "client-side-render" OR "server-side-render" must be enabled"#
-);
-
-#[cfg(all(feature = "client-side-render", feature = "server-side-render"))]
+#[cfg(any(
+    feature = "hydration",
+    all(feature = "client-side-render", feature = "server-side-render")
+))]
 mod select_impl {
     use super::IsThunk;
 
@@ -103,7 +101,17 @@ mod select_impl {
     }
 }
 
-#[cfg(all(feature = "client-side-render", not(feature = "server-side-render")))]
+#[cfg(any(
+    all(
+        feature = "client-side-render",
+        not(any(feature = "server-side-render", feature = "hydration"))
+    ),
+    not(any(
+        feature = "client-side-render",
+        feature = "server-side-render",
+        feature = "hydration",
+    ))
+))]
 mod select_impl {
     use std::marker::PhantomData;
 
@@ -168,7 +176,10 @@ mod select_impl {
     }
 }
 
-#[cfg(all(not(feature = "client-side-render"), feature = "server-side-render"))]
+#[cfg(all(
+    feature = "server-side-render",
+    not(any(feature = "client-side-render", feature = "hydration")),
+))]
 mod select_impl {
     use std::marker::PhantomData;
 

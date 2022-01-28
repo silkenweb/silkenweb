@@ -58,13 +58,16 @@ impl VElement {
         // TODO: Check namespace, element type and attributes match
         let mut elem = RealElement::new_from_element(child.clone());
         let mut current_child = child.first_child();
+
+        // TODO: Rename this: they're not necessarily virtual
         let mut virt_children = self.children.into_iter();
 
         for mut virt_child in virt_children.by_ref() {
             if let Some(node) = &current_child {
-                virt_child.hydrate_child(child, node);
-                current_child = node.next_sibling();
+                let hydrated_elem = virt_child.hydrate_child(child, node);
+                current_child = hydrated_elem.next_sibling();
             } else {
+                child.append_child(&virt_child.dom_node()).unwrap_throw();
                 break;
             }
         }
