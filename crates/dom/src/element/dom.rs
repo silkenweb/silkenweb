@@ -10,7 +10,7 @@ use self::{
     real::{RealElement, RealNode, RealText},
     virt::{VElement, VNode, VText},
 };
-use super::hydration::{IsThunk, Hydration};
+use super::hydration::{Hydration, IsDry};
 use crate::attribute::Attribute;
 
 mod real;
@@ -58,7 +58,7 @@ impl DomElement {
 
     pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
         self.borrow_mut()
-            .value_with(|virt_elem| virt_elem.hydrate_child(parent, child))
+            .wet_with(|virt_elem| virt_elem.hydrate_child(parent, child))
             .dom_element()
             .clone()
     }
@@ -145,7 +145,7 @@ impl DomElement {
     }
 
     fn real(&self) -> RefMut<RealElement> {
-        RefMut::map(self.0.borrow_mut(), Hydration::value)
+        RefMut::map(self.0.borrow_mut(), Hydration::wet)
     }
 }
 
@@ -179,7 +179,7 @@ impl DomText {
     ) -> web_sys::Text {
         // TODO: Validation
         self.borrow_mut()
-            .value_with(|virt_text| virt_text.hydrate_child(parent, child))
+            .wet_with(|virt_text| virt_text.hydrate_child(parent, child))
             .dom_text()
             .clone()
     }
@@ -189,7 +189,7 @@ impl DomText {
     }
 
     fn real(&self) -> RefMut<RealText> {
-        RefMut::map(self.0.borrow_mut(), Hydration::value)
+        RefMut::map(self.0.borrow_mut(), Hydration::wet)
     }
 }
 
@@ -258,7 +258,7 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + RealNode + VNode + IsThunk {}
+pub trait DomNode: Clone + Into<DomNodeData> + RealNode + VNode + IsDry {}
 
 impl RealNode for DomNodeData {
     fn dom_node(&self) -> web_sys::Node {
@@ -275,11 +275,11 @@ impl VNode for DomNodeData {
     }
 }
 
-impl IsThunk for DomNodeData {
-    fn is_thunk(&self) -> bool {
+impl IsDry for DomNodeData {
+    fn is_dry(&self) -> bool {
         match &self.0 {
-            DomNodeEnum::Element(elem) => elem.is_thunk(),
-            DomNodeEnum::Text(text) => text.is_thunk(),
+            DomNodeEnum::Element(elem) => elem.is_dry(),
+            DomNodeEnum::Text(text) => text.is_dry(),
         }
     }
 }
@@ -326,14 +326,14 @@ impl DomNode for DomText {}
 type HydrationElement = Hydration<RealElement, VElement>;
 type HydrationText = Hydration<RealText, VText>;
 
-impl IsThunk for DomElement {
-    fn is_thunk(&self) -> bool {
-        self.0.borrow().is_thunk()
+impl IsDry for DomElement {
+    fn is_dry(&self) -> bool {
+        self.0.borrow().is_dry()
     }
 }
 
-impl IsThunk for DomText {
-    fn is_thunk(&self) -> bool {
-        self.0.borrow().is_thunk()
+impl IsDry for DomText {
+    fn is_dry(&self) -> bool {
+        self.0.borrow().is_dry()
     }
 }

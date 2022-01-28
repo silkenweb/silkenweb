@@ -3,101 +3,101 @@
     all(feature = "client-side-render", feature = "server-side-render")
 ))]
 mod select_impl {
-    use super::IsThunk;
+    use super::IsDry;
 
-    pub struct Hydration<Value, Thunk>(HydrationEnum<Value, Thunk>);
+    pub struct Hydration<Wet, Dry>(HydrationEnum<Wet, Dry>);
 
-    pub enum HydrationEnum<Value, Thunk> {
-        Value(Value),
-        Thunk(Option<Thunk>),
+    pub enum HydrationEnum<Wet, Dry> {
+        Wet(Wet),
+        Dry(Option<Dry>),
     }
 
-    impl<Value, Thunk> Hydration<Value, Thunk> {
-        pub fn new(_value: impl FnOnce() -> Value, thunk: impl FnOnce() -> Thunk) -> Self {
-            Self(HydrationEnum::Thunk(Some(thunk())))
+    impl<Wet, Dry> Hydration<Wet, Dry> {
+        pub fn new(_wet: impl FnOnce() -> Wet, dry: impl FnOnce() -> Dry) -> Self {
+            Self(HydrationEnum::Dry(Some(dry())))
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
-        pub fn value(&mut self) -> &mut Value {
-            self.value_with(Thunk::into)
+    impl<Wet, Dry: Into<Wet>> Hydration<Wet, Dry> {
+        pub fn wet(&mut self) -> &mut Wet {
+            self.wet_with(Dry::into)
         }
 
-        pub fn value_with(&mut self, f: impl FnOnce(Thunk) -> Value) -> &mut Value {
-            self.set_value(f);
+        pub fn wet_with(&mut self, f: impl FnOnce(Dry) -> Wet) -> &mut Wet {
+            self.hydrate(f);
 
             match &mut self.0 {
-                HydrationEnum::Value(value) => value,
-                HydrationEnum::Thunk(_) => unreachable!(),
+                HydrationEnum::Wet(wet) => wet,
+                HydrationEnum::Dry(_) => unreachable!(),
             }
         }
 
         pub fn map<Arg, R>(
             &mut self,
             arg: Arg,
-            f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
-            f_real: impl FnOnce(&mut Value, Arg) -> R,
+            f_dry: impl FnOnce(&mut Dry, Arg) -> R,
+            f_wet: impl FnOnce(&mut Wet, Arg) -> R,
         ) -> R {
             match &mut self.0 {
-                HydrationEnum::Value(value) => f_real(value, arg),
-                HydrationEnum::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
+                HydrationEnum::Wet(wet) => f_wet(wet, arg),
+                HydrationEnum::Dry(dry) => f_dry(dry.as_mut().unwrap(), arg),
             }
         }
 
-        pub fn map1<T: IsThunk>(
+        pub fn map1<T: IsDry>(
             &mut self,
             arg: T,
-            f_virt: impl FnOnce(&mut Thunk, T),
-            f_real: impl FnOnce(&mut Value, T),
+            f_dry: impl FnOnce(&mut Dry, T),
+            f_wet: impl FnOnce(&mut Wet, T),
         ) {
-            if all_thunks([self, &arg]) {
-                f_virt(self.thunk(), arg);
+            if all_dry([self, &arg]) {
+                f_dry(self.dry(), arg);
             } else {
-                f_real(self.value(), arg);
+                f_wet(self.wet(), arg);
             }
         }
 
-        pub fn map2<T: IsThunk, U: IsThunk>(
+        pub fn map2<T: IsDry, U: IsDry>(
             &mut self,
             arg0: T,
             arg1: U,
-            f_virt: impl FnOnce(&mut Thunk, T, U),
-            f_real: impl FnOnce(&mut Value, T, U),
+            f_dry: impl FnOnce(&mut Dry, T, U),
+            f_wet: impl FnOnce(&mut Wet, T, U),
         ) {
-            if all_thunks([self, &arg0, &arg1]) {
-                f_virt(self.thunk(), arg0, arg1);
+            if all_dry([self, &arg0, &arg1]) {
+                f_dry(self.dry(), arg0, arg1);
             } else {
-                f_real(self.value(), arg0, arg1);
+                f_wet(self.wet(), arg0, arg1);
             }
         }
 
-        fn set_value(&mut self, f: impl FnOnce(Thunk) -> Value) {
+        fn hydrate(&mut self, f: impl FnOnce(Dry) -> Wet) {
             let self_enum = &mut self.0;
-            *self_enum = HydrationEnum::<Value, Thunk>::Value(match self_enum {
-                HydrationEnum::Value(_) => return,
-                HydrationEnum::Thunk(thunk) => f(thunk.take().unwrap()),
+            *self_enum = HydrationEnum::<Wet, Dry>::Wet(match self_enum {
+                HydrationEnum::Wet(_) => return,
+                HydrationEnum::Dry(dry) => f(dry.take().unwrap()),
             });
         }
 
-        fn thunk(&mut self) -> &mut Thunk {
+        fn dry(&mut self) -> &mut Dry {
             match &mut self.0 {
-                HydrationEnum::Value(_) => panic!("Expected a thunk"),
-                HydrationEnum::Thunk(thunk) => return thunk.as_mut().unwrap(),
+                HydrationEnum::Wet(_) => panic!("Expected a dry item"),
+                HydrationEnum::Dry(dry) => return dry.as_mut().unwrap(),
             }
         }
     }
 
-    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
-        fn is_thunk(&self) -> bool {
+    impl<Wet, Dry> IsDry for Hydration<Wet, Dry> {
+        fn is_dry(&self) -> bool {
             match &self.0 {
-                HydrationEnum::Value(_) => false,
-                HydrationEnum::Thunk(_) => true,
+                HydrationEnum::Wet(_) => false,
+                HydrationEnum::Dry(_) => true,
             }
         }
     }
 
-    fn all_thunks<const COUNT: usize>(args: [&dyn IsThunk; COUNT]) -> bool {
-        args.into_iter().all(IsThunk::is_thunk)
+    fn all_dry<const COUNT: usize>(args: [&dyn IsDry; COUNT]) -> bool {
+        args.into_iter().all(IsDry::is_dry)
     }
 }
 
@@ -115,62 +115,62 @@ mod select_impl {
 mod select_impl {
     use std::marker::PhantomData;
 
-    use super::IsThunk;
+    use super::IsDry;
 
-    pub struct Hydration<Value, Thunk> {
-        value: Value,
-        phantom: PhantomData<Thunk>,
+    pub struct Hydration<Wet, Dry> {
+        wet: Wet,
+        phantom: PhantomData<Dry>,
     }
 
-    impl<Value, Thunk> Hydration<Value, Thunk> {
-        pub fn new(value: impl FnOnce() -> Value, _thunk: impl FnOnce() -> Thunk) -> Self {
+    impl<Wet, Dry> Hydration<Wet, Dry> {
+        pub fn new(wet: impl FnOnce() -> Wet, _dry: impl FnOnce() -> Dry) -> Self {
             Self {
-                value: value(),
+                wet: wet(),
                 phantom: PhantomData,
             }
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
-        pub fn value(&mut self) -> &mut Value {
-            &mut self.value
+    impl<Wet, Dry: Into<Wet>> Hydration<Wet, Dry> {
+        pub fn wet(&mut self) -> &mut Wet {
+            &mut self.wet
         }
 
-        pub fn value_with(&mut self, _f: impl FnOnce(Thunk) -> Value) -> &mut Value {
-            self.value()
+        pub fn wet_with(&mut self, _f: impl FnOnce(Dry) -> Wet) -> &mut Wet {
+            self.wet()
         }
 
         pub fn map<Arg, R>(
             &mut self,
             arg: Arg,
-            _f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
-            f_real: impl FnOnce(&mut Value, Arg) -> R,
+            _f_dry: impl FnOnce(&mut Dry, Arg) -> R,
+            f_wet: impl FnOnce(&mut Wet, Arg) -> R,
         ) -> R {
-            f_real(&mut self.value, arg)
+            f_wet(&mut self.wet, arg)
         }
 
-        pub fn map1<T: IsThunk>(
+        pub fn map1<T: IsDry>(
             &mut self,
             arg: T,
-            _f_virt: impl FnOnce(&mut Thunk, T),
-            f_real: impl FnOnce(&mut Value, T),
+            _f_dry: impl FnOnce(&mut Dry, T),
+            f_wet: impl FnOnce(&mut Wet, T),
         ) {
-            f_real(&mut self.value, arg)
+            f_wet(&mut self.wet, arg)
         }
 
-        pub fn map2<T: IsThunk, U: IsThunk>(
+        pub fn map2<T: IsDry, U: IsDry>(
             &mut self,
             arg0: T,
             arg1: U,
-            _f_virt: impl FnOnce(&mut Thunk, T, U),
-            f_real: impl FnOnce(&mut Value, T, U),
+            _f_dry: impl FnOnce(&mut Dry, T, U),
+            f_wet: impl FnOnce(&mut Wet, T, U),
         ) {
-            f_real(&mut self.value, arg0, arg1)
+            f_wet(&mut self.wet, arg0, arg1)
         }
     }
 
-    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
-        fn is_thunk(&self) -> bool {
+    impl<Wet, Dry> IsDry for Hydration<Wet, Dry> {
+        fn is_dry(&self) -> bool {
             false
         }
     }
@@ -183,62 +183,62 @@ mod select_impl {
 mod select_impl {
     use std::marker::PhantomData;
 
-    use super::IsThunk;
+    use super::IsDry;
 
-    pub struct Hydration<Value, Thunk> {
-        thunk: Thunk,
-        value: PhantomData<Value>,
+    pub struct Hydration<Wet, Dry> {
+        dry: Dry,
+        wet: PhantomData<Wet>,
     }
 
-    impl<Value, Thunk> Hydration<Value, Thunk> {
-        pub fn new(_value: impl FnOnce() -> Value, thunk: impl FnOnce() -> Thunk) -> Self {
+    impl<Wet, Dry> Hydration<Wet, Dry> {
+        pub fn new(_wet: impl FnOnce() -> Wet, dry: impl FnOnce() -> Dry) -> Self {
             Self {
-                thunk: thunk(),
-                value: PhantomData,
+                dry: dry(),
+                wet: PhantomData,
             }
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
-        pub fn value(&mut self) -> &mut Value {
-            self.value_with(Thunk::into)
+    impl<Wet, Dry: Into<Wet>> Hydration<Wet, Dry> {
+        pub fn wet(&mut self) -> &mut Wet {
+            self.wet_with(Dry::into)
         }
 
-        pub fn value_with(&mut self, _f: impl FnOnce(Thunk) -> Value) -> &mut Value {
-            panic!("Build is configured for thunks only")
+        pub fn wet_with(&mut self, _f: impl FnOnce(Dry) -> Wet) -> &mut Wet {
+            panic!("Build is configured for dry items only")
         }
 
         pub fn map<Arg, R>(
             &mut self,
             arg: Arg,
-            f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
-            _f_real: impl FnOnce(&mut Value, Arg) -> R,
+            f_dry: impl FnOnce(&mut Dry, Arg) -> R,
+            _f_wet: impl FnOnce(&mut Wet, Arg) -> R,
         ) -> R {
-            f_virt(&mut self.thunk, arg)
+            f_dry(&mut self.dry, arg)
         }
 
-        pub fn map1<T: IsThunk>(
+        pub fn map1<T: IsDry>(
             &mut self,
             arg: T,
-            f_virt: impl FnOnce(&mut Thunk, T),
-            _f_real: impl FnOnce(&mut Value, T),
+            f_dry: impl FnOnce(&mut Dry, T),
+            _f_wet: impl FnOnce(&mut Wet, T),
         ) {
-            f_virt(&mut self.thunk, arg)
+            f_dry(&mut self.dry, arg)
         }
 
-        pub fn map2<T: IsThunk, U: IsThunk>(
+        pub fn map2<T: IsDry, U: IsDry>(
             &mut self,
             arg0: T,
             arg1: U,
-            f_virt: impl FnOnce(&mut Thunk, T, U),
-            _f_real: impl FnOnce(&mut Value, T, U),
+            f_dry: impl FnOnce(&mut Dry, T, U),
+            _f_wet: impl FnOnce(&mut Wet, T, U),
         ) {
-            f_virt(&mut self.thunk, arg0, arg1)
+            f_dry(&mut self.dry, arg0, arg1)
         }
     }
 
-    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
-        fn is_thunk(&self) -> bool {
+    impl<Wet, Dry> IsDry for Hydration<Wet, Dry> {
+        fn is_dry(&self) -> bool {
             true
         }
     }
@@ -246,29 +246,29 @@ mod select_impl {
 
 pub use select_impl::Hydration;
 
-// TODO: Typically, we'd check if `is_thunk`, `evaluate` if needed and pass the
+// TODO: Typically, we'd check if `is_dry`, `evaluate` if needed and pass the
 // arg on to a function. Each of these will borrow for Rc types. Can we find a
 // way around this? Maybe a `Borrowed` type on the `DomNode` trait?
-pub trait IsThunk {
-    fn is_thunk(&self) -> bool;
+pub trait IsDry {
+    fn is_dry(&self) -> bool;
 }
 
-impl<'a, T: IsThunk> IsThunk for &'a T {
-    fn is_thunk(&self) -> bool {
-        T::is_thunk(self)
+impl<'a, T: IsDry> IsDry for &'a T {
+    fn is_dry(&self) -> bool {
+        T::is_dry(self)
     }
 }
 
-impl<'a, T: IsThunk> IsThunk for &'a mut T {
-    fn is_thunk(&self) -> bool {
-        T::is_thunk(self)
+impl<'a, T: IsDry> IsDry for &'a mut T {
+    fn is_dry(&self) -> bool {
+        T::is_dry(self)
     }
 }
 
-impl<T: IsThunk> IsThunk for Option<T> {
-    fn is_thunk(&self) -> bool {
+impl<T: IsDry> IsDry for Option<T> {
+    fn is_dry(&self) -> bool {
         if let Some(x) = self {
-            x.is_thunk()
+            x.is_dry()
         } else {
             true
         }
