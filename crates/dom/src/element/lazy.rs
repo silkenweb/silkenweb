@@ -1,4 +1,9 @@
-#[cfg(not(feature = "server-render"))]
+#[cfg(not(any(feature = "client-side-render", feature = "server-side-render")))]
+compile_error!(
+    r#"One of the features "client-side-render" OR "server-side-render" must be enabled"#
+);
+
+#[cfg(all(feature = "client-side-render", feature = "server-side-render"))]
 mod select_impl {
     use super::IsThunk;
 
@@ -98,7 +103,72 @@ mod select_impl {
     }
 }
 
-#[cfg(feature = "server-render")]
+#[cfg(all(feature = "client-side-render", not(feature = "server-side-render")))]
+mod select_impl {
+    use std::marker::PhantomData;
+
+    use super::IsThunk;
+
+    pub struct Lazy<Value, Thunk> {
+        value: Value,
+        phantom: PhantomData<Thunk>,
+    }
+
+    impl<Value, Thunk> Lazy<Value, Thunk> {
+        pub fn new(value: impl FnOnce() -> Value, _thunk: impl FnOnce() -> Thunk) -> Self {
+            Self {
+                value: value(),
+                phantom: PhantomData,
+            }
+        }
+    }
+
+    impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
+        pub fn value(&mut self) -> &mut Value {
+            &mut self.value
+        }
+
+        pub fn value_with(&mut self, _f: impl FnOnce(Thunk) -> Value) -> &mut Value {
+            self.value()
+        }
+
+        pub fn map<Arg, R>(
+            &mut self,
+            arg: Arg,
+            _f_virt: impl FnOnce(&mut Thunk, Arg) -> R,
+            f_real: impl FnOnce(&mut Value, Arg) -> R,
+        ) -> R {
+            f_real(&mut self.value, arg)
+        }
+
+        pub fn map1<T: IsThunk>(
+            &mut self,
+            arg: T,
+            _f_virt: impl FnOnce(&mut Thunk, T),
+            f_real: impl FnOnce(&mut Value, T),
+        ) {
+            f_real(&mut self.value, arg)
+        }
+
+        pub fn map2<T: IsThunk, U: IsThunk>(
+            &mut self,
+            arg0: T,
+            arg1: U,
+            _f_virt: impl FnOnce(&mut Thunk, T, U),
+            f_real: impl FnOnce(&mut Value, T, U),
+        ) {
+            f_real(&mut self.value, arg0, arg1)
+        }
+    }
+
+    impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
+        fn is_thunk(&self) -> bool {
+            false
+        }
+    }
+}
+
+#[cfg(all(not(feature = "client-side-render"), feature = "server-side-render"))]
 mod select_impl {
     use std::marker::PhantomData;
 

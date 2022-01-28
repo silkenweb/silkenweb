@@ -13,7 +13,9 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [features]
+client-side-render = ["silkenweb-dom/client-side-render"]
 server-side-render = ["silkenweb-dom/server-side-render"]
+hydration = ["silkenweb-dom/hydration"]
 
 [dependencies]
 silkenweb-elements = "0.1.1"
