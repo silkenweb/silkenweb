@@ -10,25 +10,25 @@ use self::{
     real::{RealElement, RealNode, RealText},
     virt::{VElement, VNode, VText},
 };
-use super::lazy::{IsThunk, Lazy};
+use super::hydration::{IsThunk, Hydration};
 use crate::attribute::Attribute;
 
 mod real;
 mod virt;
 
 #[derive(Clone)]
-pub struct DomElement(Rc<RefCell<LazyElement>>);
+pub struct DomElement(Rc<RefCell<HydrationElement>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new(
+        Self(Rc::new(RefCell::new(Hydration::new(
             || RealElement::new(tag),
             || VElement::new(tag),
         ))))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new(
+        Self(Rc::new(RefCell::new(Hydration::new(
             || RealElement::new_in_namespace(namespace, tag),
             || VElement::new_in_namespace(namespace, tag),
         ))))
@@ -140,12 +140,12 @@ impl DomElement {
             .map(f, VElement::effect, RealElement::effect);
     }
 
-    fn borrow_mut(&self) -> RefMut<LazyElement> {
+    fn borrow_mut(&self) -> RefMut<HydrationElement> {
         self.0.borrow_mut()
     }
 
     fn real(&self) -> RefMut<RealElement> {
-        RefMut::map(self.0.borrow_mut(), Lazy::value)
+        RefMut::map(self.0.borrow_mut(), Hydration::value)
     }
 }
 
@@ -157,11 +157,11 @@ impl Display for DomElement {
 }
 
 #[derive(Clone)]
-pub struct DomText(Rc<RefCell<LazyText>>);
+pub struct DomText(Rc<RefCell<HydrationText>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(Lazy::new(
+        Self(Rc::new(RefCell::new(Hydration::new(
             || RealText::new(text),
             || VText::new(text),
         ))))
@@ -184,12 +184,12 @@ impl DomText {
             .clone()
     }
 
-    fn borrow_mut(&self) -> RefMut<LazyText> {
+    fn borrow_mut(&self) -> RefMut<HydrationText> {
         self.0.borrow_mut()
     }
 
     fn real(&self) -> RefMut<RealText> {
-        RefMut::map(self.0.borrow_mut(), Lazy::value)
+        RefMut::map(self.0.borrow_mut(), Hydration::value)
     }
 }
 
@@ -323,8 +323,8 @@ impl VNode for DomText {
 
 impl DomNode for DomText {}
 
-type LazyElement = Lazy<RealElement, VElement>;
-type LazyText = Lazy<RealText, VText>;
+type HydrationElement = Hydration<RealElement, VElement>;
+type HydrationText = Hydration<RealText, VText>;
 
 impl IsThunk for DomElement {
     fn is_thunk(&self) -> bool {

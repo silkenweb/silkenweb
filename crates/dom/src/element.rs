@@ -27,7 +27,7 @@ mod child_groups;
 mod child_vec;
 mod dom;
 mod event;
-mod lazy;
+mod hydration;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {

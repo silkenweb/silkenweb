@@ -5,20 +5,20 @@
 mod select_impl {
     use super::IsThunk;
 
-    pub struct Lazy<Value, Thunk>(LazyEnum<Value, Thunk>);
+    pub struct Hydration<Value, Thunk>(HydrationEnum<Value, Thunk>);
 
-    pub enum LazyEnum<Value, Thunk> {
+    pub enum HydrationEnum<Value, Thunk> {
         Value(Value),
         Thunk(Option<Thunk>),
     }
 
-    impl<Value, Thunk> Lazy<Value, Thunk> {
+    impl<Value, Thunk> Hydration<Value, Thunk> {
         pub fn new(_value: impl FnOnce() -> Value, thunk: impl FnOnce() -> Thunk) -> Self {
-            Self(LazyEnum::Thunk(Some(thunk())))
+            Self(HydrationEnum::Thunk(Some(thunk())))
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
+    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
         pub fn value(&mut self) -> &mut Value {
             self.value_with(Thunk::into)
         }
@@ -27,8 +27,8 @@ mod select_impl {
             self.set_value(f);
 
             match &mut self.0 {
-                LazyEnum::Value(value) => value,
-                LazyEnum::Thunk(_) => unreachable!(),
+                HydrationEnum::Value(value) => value,
+                HydrationEnum::Thunk(_) => unreachable!(),
             }
         }
 
@@ -39,8 +39,8 @@ mod select_impl {
             f_real: impl FnOnce(&mut Value, Arg) -> R,
         ) -> R {
             match &mut self.0 {
-                LazyEnum::Value(value) => f_real(value, arg),
-                LazyEnum::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
+                HydrationEnum::Value(value) => f_real(value, arg),
+                HydrationEnum::Thunk(thunk) => f_virt(thunk.as_mut().unwrap(), arg),
             }
         }
 
@@ -72,26 +72,26 @@ mod select_impl {
         }
 
         fn set_value(&mut self, f: impl FnOnce(Thunk) -> Value) {
-            let lazy_enum = &mut self.0;
-            *lazy_enum = LazyEnum::<Value, Thunk>::Value(match lazy_enum {
-                LazyEnum::Value(_) => return,
-                LazyEnum::Thunk(thunk) => f(thunk.take().unwrap()),
+            let self_enum = &mut self.0;
+            *self_enum = HydrationEnum::<Value, Thunk>::Value(match self_enum {
+                HydrationEnum::Value(_) => return,
+                HydrationEnum::Thunk(thunk) => f(thunk.take().unwrap()),
             });
         }
 
         fn thunk(&mut self) -> &mut Thunk {
             match &mut self.0 {
-                LazyEnum::Value(_) => panic!("Expected a thunk"),
-                LazyEnum::Thunk(thunk) => return thunk.as_mut().unwrap(),
+                HydrationEnum::Value(_) => panic!("Expected a thunk"),
+                HydrationEnum::Thunk(thunk) => return thunk.as_mut().unwrap(),
             }
         }
     }
 
-    impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
+    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
         fn is_thunk(&self) -> bool {
             match &self.0 {
-                LazyEnum::Value(_) => false,
-                LazyEnum::Thunk(_) => true,
+                HydrationEnum::Value(_) => false,
+                HydrationEnum::Thunk(_) => true,
             }
         }
     }
@@ -117,12 +117,12 @@ mod select_impl {
 
     use super::IsThunk;
 
-    pub struct Lazy<Value, Thunk> {
+    pub struct Hydration<Value, Thunk> {
         value: Value,
         phantom: PhantomData<Thunk>,
     }
 
-    impl<Value, Thunk> Lazy<Value, Thunk> {
+    impl<Value, Thunk> Hydration<Value, Thunk> {
         pub fn new(value: impl FnOnce() -> Value, _thunk: impl FnOnce() -> Thunk) -> Self {
             Self {
                 value: value(),
@@ -131,7 +131,7 @@ mod select_impl {
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
+    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
         pub fn value(&mut self) -> &mut Value {
             &mut self.value
         }
@@ -169,7 +169,7 @@ mod select_impl {
         }
     }
 
-    impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
+    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
         fn is_thunk(&self) -> bool {
             false
         }
@@ -185,12 +185,12 @@ mod select_impl {
 
     use super::IsThunk;
 
-    pub struct Lazy<Value, Thunk> {
+    pub struct Hydration<Value, Thunk> {
         thunk: Thunk,
         value: PhantomData<Value>,
     }
 
-    impl<Value, Thunk> Lazy<Value, Thunk> {
+    impl<Value, Thunk> Hydration<Value, Thunk> {
         pub fn new(_value: impl FnOnce() -> Value, thunk: impl FnOnce() -> Thunk) -> Self {
             Self {
                 thunk: thunk(),
@@ -199,7 +199,7 @@ mod select_impl {
         }
     }
 
-    impl<Value, Thunk: Into<Value>> Lazy<Value, Thunk> {
+    impl<Value, Thunk: Into<Value>> Hydration<Value, Thunk> {
         pub fn value(&mut self) -> &mut Value {
             self.value_with(Thunk::into)
         }
@@ -237,14 +237,14 @@ mod select_impl {
         }
     }
 
-    impl<Value, Thunk> IsThunk for Lazy<Value, Thunk> {
+    impl<Value, Thunk> IsThunk for Hydration<Value, Thunk> {
         fn is_thunk(&self) -> bool {
             true
         }
     }
 }
 
-pub use select_impl::Lazy;
+pub use select_impl::Hydration;
 
 // TODO: Typically, we'd check if `is_thunk`, `evaluate` if needed and pass the
 // arg on to a function. Each of these will borrow for Rc types. Can we find a
