@@ -5,7 +5,7 @@ use js_sys::Promise;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::JsFuture;
 
-#[cfg(feature = "server-render")]
+#[cfg(feature = "server-side-render")]
 mod raf {
     pub struct Raf;
 
@@ -18,7 +18,7 @@ mod raf {
     }
 }
 
-#[cfg(not(feature = "server-render"))]
+#[cfg(not(feature = "server-side-render"))]
 mod raf {
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
@@ -71,7 +71,7 @@ pub async fn render_now() {
     RENDER.with(Render::render_updates);
 }
 
-#[cfg(feature = "server-render")]
+#[cfg(feature = "server-side-render")]
 pub fn render_now_sync() {
     use crate::tasks;
 
@@ -102,7 +102,7 @@ impl Render {
         }
     }
 
-    #[cfg(not(feature = "server-render"))]
+    #[cfg(not(feature = "server-side-render"))]
     fn on_animation_frame(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);
