@@ -35,8 +35,15 @@ impl DryElement {
 
         loop {
             if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
-                // TODO: Check namespace
-                if default_caseless_match_str(&elem_child.tag_name(), &self.tag) {
+                let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
+                let dry_namespace = match self.namespace.as_ref().map_or("", String::as_ref) {
+                    "" => "http://www.w3.org/1999/xhtml",
+                    ns => ns,
+                };
+
+                if default_caseless_match_str(dry_namespace, &dom_namespace)
+                    && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
+                {
                     return self.hydrate_element(elem_child);
                 }
             }
