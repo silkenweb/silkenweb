@@ -2,7 +2,10 @@ use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 
 use self::element::Element;
-use crate::hydration::node::HydrationNodeData;
+use crate::hydration::{
+    node::{DryNode, HydrationNode, HydrationNodeData, WetNode},
+    IsDry,
+};
 
 pub mod element;
 
@@ -30,6 +33,32 @@ impl Node {
     fn clone_into_hydro(&self) -> HydrationNodeData {
         match &self.0 {
             NodeEnum::Element(elem) => elem.clone_into_hydro(),
+        }
+    }
+}
+
+impl HydrationNode for Node {}
+
+impl IsDry for Node {
+    fn is_dry(&self) -> bool {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.is_dry(),
+        }
+    }
+}
+
+impl DryNode for Node {
+    fn node(&self) -> HydrationNodeData {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.node(),
+        }
+    }
+}
+
+impl WetNode for Node {
+    fn dom_node(&self) -> web_sys::Node {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.dom_node(),
         }
     }
 }

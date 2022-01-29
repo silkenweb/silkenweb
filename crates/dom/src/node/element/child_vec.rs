@@ -88,10 +88,8 @@ impl ChildVec {
 
         assert!(index < self.children.len());
 
-        self.parent.insert_child_before(
-            new_child.clone_into_hydro(),
-            Some(self.children[index].clone_into_hydro()),
-        );
+        self.parent
+            .insert_child_before(&new_child, Some(&self.children[index]));
 
         self.children.insert(index, new_child);
     }

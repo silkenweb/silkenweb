@@ -5,7 +5,7 @@ use std::{
 
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::HydrationNodeData;
+use super::{HydrationNodeData, WetNode};
 use crate::{
     attribute::Attribute,
     event::EventCallback,
@@ -164,13 +164,6 @@ impl Display for WetText {
 
         Ok(())
     }
-}
-/// A node in the DOM
-///
-/// This lets us pass a reference to an element or text as a node, without
-/// actually constructing a node
-pub trait WetNode {
-    fn dom_node(&self) -> web_sys::Node;
 }
 
 impl WetNode for WetElement {

@@ -7,8 +7,8 @@ use std::{
 use wasm_bindgen::JsValue;
 
 use self::{
-    dry::{DryElement, DryNode, DryText},
-    wet::{WetElement, WetNode, WetText},
+    dry::{DryElement, DryText},
+    wet::{WetElement, WetText},
 };
 use super::{Hydration, IsDry};
 use crate::{attribute::Attribute, event::EventCallback};
@@ -79,9 +79,7 @@ impl HydrationElement {
         self.borrow_mut().map2(
             child,
             next_child,
-            |parent, mut child, mut next_child| {
-                parent.insert_child_before(&mut child, next_child.as_mut())
-            },
+            DryElement::insert_child_before,
             WetElement::insert_child_before,
         );
     }
@@ -274,6 +272,22 @@ impl From<HydrationText> for HydrationNodeData {
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
 pub trait HydrationNode: WetNode + DryNode + IsDry {}
+
+/// A node in the DOM
+///
+/// This lets us pass a reference to an element or text as a node, without
+/// actually constructing a node
+pub trait DryNode {
+    fn node(&self) -> HydrationNodeData;
+}
+
+/// A node in the DOM
+///
+/// This lets us pass a reference to an element or text as a node, without
+/// actually constructing a node
+pub trait WetNode {
+    fn dom_node(&self) -> web_sys::Node;
+}
 
 impl<'a, T: HydrationNode> HydrationNode for &'a T {}
 

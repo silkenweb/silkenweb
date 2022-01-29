@@ -257,7 +257,7 @@ impl From<ElementBuilderBase> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 pub struct Element {
-    hydro_elem: HydrationElement,
+    pub(super) hydro_elem: HydrationElement,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 

@@ -6,8 +6,8 @@ use std::{
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    wet::{WetElement, WetNode, WetText},
-    HydrationNodeData,
+    wet::{WetElement, WetText},
+    DryNode, HydrationNodeData, WetNode,
 };
 use crate::{attribute::Attribute, clone, remove_following_siblings};
 
@@ -102,15 +102,11 @@ impl DryElement {
         self.stored_children.push(child);
     }
 
-    pub fn append_child(&mut self, child: &mut impl DryNode) {
+    pub fn append_child(&mut self, child: impl DryNode) {
         self.children.push(child.node())
     }
 
-    pub fn insert_child_before(
-        &mut self,
-        child: &mut impl DryNode,
-        next_child: Option<&mut impl DryNode>,
-    ) {
+    pub fn insert_child_before(&mut self, child: impl DryNode, next_child: Option<impl DryNode>) {
         if let Some(next_child) = next_child {
             let next_child = next_child.node();
             let index = self
@@ -270,14 +266,6 @@ impl From<DryText> for WetText {
     fn from(text: DryText) -> Self {
         WetText::new(&text.0)
     }
-}
-
-/// A node in the DOM
-///
-/// This lets us pass a reference to an element or text as a node, without
-/// actually constructing a node
-pub trait DryNode {
-    fn node(&self) -> HydrationNodeData;
 }
 
 impl<'a, T: DryNode> DryNode for &'a T {
