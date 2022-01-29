@@ -188,6 +188,10 @@ impl HydrationText {
             .clone()
     }
 
+    pub fn eval_dom_text(&self) -> web_sys::Text {
+        self.wet().dom_text().clone()
+    }
+
     fn borrow_mut(&self) -> RefMut<Hydration<WetText, DryText>> {
         self.0.borrow_mut()
     }

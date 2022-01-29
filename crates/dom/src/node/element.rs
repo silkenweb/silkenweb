@@ -22,7 +22,7 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     clone,
-    hydration::node::{HydrationElement, HydrationNodeData, HydrationText},
+    hydration::node::{DryNode, HydrationElement, HydrationText},
     render::queue_update,
     spawn_cancelable_future,
 };
@@ -276,14 +276,6 @@ impl Element {
 
     pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
         mem::take(&mut self.futures)
-    }
-
-    pub(super) fn clone_into_hydro(&self) -> HydrationNodeData {
-        self.hydro_elem.clone().into()
-    }
-
-    pub(super) fn into_hydro(self) -> HydrationNodeData {
-        self.hydro_elem.into()
     }
 }
 

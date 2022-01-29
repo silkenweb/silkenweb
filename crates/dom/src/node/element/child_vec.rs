@@ -5,7 +5,7 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::child_groups::ChildGroups;
 use crate::{
-    hydration::node::{HydrationElement, HydrationNodeData},
+    hydration::node::{DryNode, HydrationElement, HydrationNodeData},
     node::Node,
     render::queue_update,
 };
