@@ -103,18 +103,18 @@ impl DryElement {
     }
 
     pub fn append_child(&mut self, child: impl DryNode) {
-        self.children.push(child.node())
+        self.children.push(child.clone_into_hydro())
     }
 
     pub fn insert_child_before(&mut self, child: impl DryNode, next_child: Option<impl DryNode>) {
         if let Some(next_child) = next_child {
-            let next_child = next_child.node();
+            let next_child = next_child.clone_into_hydro();
             let index = self
                 .children
                 .iter()
                 .position(|existing| existing.is_same(&next_child))
                 .expect("Child not found");
-            self.children.insert(index, child.node());
+            self.children.insert(index, child.clone_into_hydro());
         } else {
             self.append_child(child);
         }
@@ -122,14 +122,14 @@ impl DryElement {
 
     pub fn replace_child(&mut self, new_child: impl DryNode, old_child: impl DryNode) {
         for child in &mut self.children {
-            if child.node().is_same(&old_child.node()) {
-                *child = new_child.node();
+            if child.clone_into_hydro().is_same(&old_child.clone_into_hydro()) {
+                *child = new_child.clone_into_hydro();
             }
         }
     }
 
     pub fn remove_child(&mut self, child: impl DryNode) {
-        let child = child.node();
+        let child = child.clone_into_hydro();
 
         self.children.retain(|existing| !existing.is_same(&child));
     }
@@ -269,13 +269,13 @@ impl From<DryText> for WetText {
 }
 
 impl<'a, T: DryNode> DryNode for &'a T {
-    fn node(&self) -> HydrationNodeData {
-        DryNode::node(*self)
+    fn clone_into_hydro(&self) -> HydrationNodeData {
+        DryNode::clone_into_hydro(*self)
     }
 }
 
 impl<'a, T: DryNode> DryNode for &'a mut T {
-    fn node(&self) -> HydrationNodeData {
-        DryNode::node(*self)
+    fn clone_into_hydro(&self) -> HydrationNodeData {
+        DryNode::clone_into_hydro(*self)
     }
 }

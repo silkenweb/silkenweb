@@ -48,9 +48,9 @@ impl IsDry for Node {
 }
 
 impl DryNode for Node {
-    fn node(&self) -> HydrationNodeData {
+    fn clone_into_hydro(&self) -> HydrationNodeData {
         match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.node(),
+            NodeEnum::Element(elem) => elem.hydro_elem.clone_into_hydro(),
         }
     }
 }
