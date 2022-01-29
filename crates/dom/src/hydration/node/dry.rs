@@ -103,33 +103,35 @@ impl DryElement {
     }
 
     pub fn append_child(&mut self, child: impl DryNode) {
-        self.children.push(child.clone_into_hydro())
+        self.children.push(child.into_hydro())
     }
 
     pub fn insert_child_before(&mut self, child: impl DryNode, next_child: Option<impl DryNode>) {
         if let Some(next_child) = next_child {
-            let next_child = next_child.clone_into_hydro();
+            let next_child = next_child.into_hydro();
             let index = self
                 .children
                 .iter()
                 .position(|existing| existing.is_same(&next_child))
                 .expect("Child not found");
-            self.children.insert(index, child.clone_into_hydro());
+            self.children.insert(index, child.into_hydro());
         } else {
             self.append_child(child);
         }
     }
 
     pub fn replace_child(&mut self, new_child: impl DryNode, old_child: impl DryNode) {
+        let old_child = old_child.into_hydro();
+
         for child in &mut self.children {
-            if child.clone_into_hydro().is_same(&old_child.clone_into_hydro()) {
+            if child.is_same(&old_child) {
                 *child = new_child.clone_into_hydro();
             }
         }
     }
 
     pub fn remove_child(&mut self, child: impl DryNode) {
-        let child = child.clone_into_hydro();
+        let child = child.into_hydro();
 
         self.children.retain(|existing| !existing.is_same(&child));
     }
@@ -269,12 +271,20 @@ impl From<DryText> for WetText {
 }
 
 impl<'a, T: DryNode> DryNode for &'a T {
+    fn into_hydro(self) -> HydrationNodeData {
+        DryNode::clone_into_hydro(self)
+    }
+
     fn clone_into_hydro(&self) -> HydrationNodeData {
         DryNode::clone_into_hydro(*self)
     }
 }
 
 impl<'a, T: DryNode> DryNode for &'a mut T {
+    fn into_hydro(self) -> HydrationNodeData {
+        DryNode::clone_into_hydro(self)
+    }
+
     fn clone_into_hydro(&self) -> HydrationNodeData {
         DryNode::clone_into_hydro(*self)
     }

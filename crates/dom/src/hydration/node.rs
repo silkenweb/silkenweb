@@ -278,6 +278,8 @@ pub trait HydrationNode: WetNode + DryNode + IsDry {}
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
 pub trait DryNode {
+    fn into_hydro(self) -> HydrationNodeData;
+
     fn clone_into_hydro(&self) -> HydrationNodeData;
 }
 
@@ -303,6 +305,10 @@ impl WetNode for HydrationNodeData {
 }
 
 impl DryNode for HydrationNodeData {
+    fn into_hydro(self) -> HydrationNodeData {
+        self
+    }
+
     fn clone_into_hydro(&self) -> HydrationNodeData {
         self.clone()
     }
@@ -336,8 +342,12 @@ impl WetNode for HydrationElement {
 }
 
 impl DryNode for HydrationElement {
+    fn into_hydro(self) -> HydrationNodeData {
+        HydrationNodeData(HydrationNodeEnum::Element(self))
+    }
+
     fn clone_into_hydro(&self) -> HydrationNodeData {
-        HydrationNodeData(HydrationNodeEnum::Element(self.clone()))
+        self.clone().into_hydro()
     }
 }
 
@@ -350,8 +360,12 @@ impl WetNode for HydrationText {
 }
 
 impl DryNode for HydrationText {
+    fn into_hydro(self) -> HydrationNodeData {
+        HydrationNodeData(HydrationNodeEnum::Text(self))
+    }
+
     fn clone_into_hydro(&self) -> HydrationNodeData {
-        HydrationNodeData(HydrationNodeEnum::Text(self.clone()))
+        self.clone().into_hydro()
     }
 }
 

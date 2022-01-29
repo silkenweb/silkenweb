@@ -53,6 +53,12 @@ impl DryNode for Node {
             NodeEnum::Element(elem) => elem.hydro_elem.clone_into_hydro(),
         }
     }
+
+    fn into_hydro(self) -> HydrationNodeData {
+        match self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.into_hydro(),
+        }
+    }
 }
 
 impl WetNode for Node {
