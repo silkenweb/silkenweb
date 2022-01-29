@@ -239,18 +239,23 @@ impl DryText {
     }
 
     pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> WetText {
-        // TODO: Handle empty text skipping/inserting
         if let Some(dom_text) = child.dyn_ref::<web_sys::Text>() {
-            WetText::new_from_text(dom_text.clone())
-        } else {
-            let new_text = WetText::new(&self.0);
+            let from_dom = || WetText::new_from_text(dom_text.clone());
 
-            parent
-                .insert_before(new_text.dom_text(), Some(child))
-                .unwrap_throw();
-
-            new_text
+            match dom_text.text_content() {
+                Some(text) if text == self.0 => return from_dom(),
+                None if self.0.is_empty() => return from_dom(),
+                _ => (),
+            }
         }
+
+        let new_text = WetText::new(&self.0);
+
+        parent
+            .insert_before(new_text.dom_text(), Some(child))
+            .unwrap_throw();
+
+        new_text
     }
 
     pub fn set_text(&mut self, text: String) {
