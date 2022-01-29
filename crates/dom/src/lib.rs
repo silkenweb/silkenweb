@@ -40,12 +40,12 @@ pub fn mount(id: &str, elem: impl Into<Element>) {
     insert_component(id, elem);
 }
 
-pub fn hydrate(id: &str, elem: impl Into<Element> + 'static) {
+pub fn hydrate(id: &str, elem: impl Into<Element>) {
     let id = id.to_owned();
+    let elem = elem.into();
 
     queue_update(move || {
         unmount(&id);
-        let elem = elem.into();
 
         let mount_point = mount_point(&id);
 
