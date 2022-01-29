@@ -262,7 +262,6 @@ pub struct Element {
 }
 
 impl Element {
-    // TODO: Once we have a Node type, these can become pub(super) again
     pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
         self.hydro_elem.eval_dom_element()
     }
