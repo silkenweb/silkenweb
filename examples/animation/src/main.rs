@@ -6,8 +6,8 @@ use num_traits::ToPrimitive;
 use silkenweb::{
     animation::infinite_animation,
     dom::{
-        element::{ElementBuilder, ParentBuilder},
         mount,
+        node::element::{ElementBuilder, ParentBuilder},
     },
     elements::svg,
 };

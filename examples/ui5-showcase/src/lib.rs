@@ -2,8 +2,8 @@ use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
 use silkenweb::{
     dom::{
-        element::{Element, ElementBuilder},
         mount,
+        node::element::{Element, ElementBuilder},
     },
     elements::{html::div, HtmlElement},
     prelude::ParentBuilder,

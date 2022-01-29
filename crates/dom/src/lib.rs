@@ -2,19 +2,22 @@
 use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
-use element::{Element, ElementBuilderBase};
 use futures_signals::{cancelable_future, CancelableFutureHandle};
-use global::document;
-use render::queue_update;
 use wasm_bindgen::UnwrapThrowExt;
+
+use crate::{
+    global::document,
+    node::element::{Element, ElementBuilderBase},
+    render::queue_update,
+};
 
 mod event;
 mod hydration;
 mod macros;
 
 pub mod attribute;
-pub mod element;
 pub mod global;
+pub mod node;
 pub mod render;
 
 /// Mount an element on the document.

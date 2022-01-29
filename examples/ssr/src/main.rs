@@ -1,7 +1,7 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{element::Element, render::render_now_sync},
+    dom::{node::element::Element, render::render_now_sync},
     elements::html::*,
     prelude::*,
 };

@@ -6,7 +6,7 @@ use futures_signals::{
 };
 use silkenweb::{
     clone,
-    dom::element::ElementBuilder,
+    dom::node::element::ElementBuilder,
     elements::{
         html::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,

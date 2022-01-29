@@ -15,7 +15,7 @@ use std::marker::PhantomData;
 
 use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
-use silkenweb_dom::element::ElementBuilder;
+use silkenweb_dom::node::element::ElementBuilder;
 use wasm_bindgen::{intern, JsCast, UnwrapThrowExt};
 
 #[doc(hidden)]

@@ -263,11 +263,12 @@ pub struct Element {
 }
 
 impl Element {
-    pub(super) fn eval_dom_element(&self) -> web_sys::Element {
+    // TODO: Once we have a Node type, these can become pub(super) again
+    pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
         self.dom_element.eval_dom_element()
     }
 
-    pub(super) fn hydrate_child(
+    pub(crate) fn hydrate_child(
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,

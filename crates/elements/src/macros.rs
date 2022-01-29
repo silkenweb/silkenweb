@@ -2,7 +2,7 @@ pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
-    element::{Element, ElementBuilder, ElementBuilderBase, ParentBuilder},
+    node::element::{Element, ElementBuilder, ElementBuilderBase, ParentBuilder},
     tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
