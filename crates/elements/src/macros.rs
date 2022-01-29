@@ -318,28 +318,28 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
-            fn child(self, c: impl Into<$crate::macros::Element>) -> Self
+            fn child(self, c: impl Into<$crate::macros::Node>) -> Self
             {
                 Self{ builder: self.builder.child(c) }
             }
 
             fn child_signal(
                 self,
-                child: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Element>> + 'static
+                child: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Node>> + 'static
             ) -> Self {
                 Self{ builder: self.builder.child_signal(child) }
             }
 
             fn children_signal(
                 self,
-                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::macros::Element>> + 'static,
+                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::macros::Node>> + 'static,
             ) -> Self {
                 Self{ builder: self.builder.children_signal(children) }
             }
 
             fn optional_child_signal(
                 self,
-                child: impl $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Element>>> + 'static
+                child: impl $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Node>>> + 'static
             ) -> Self {
                 Self{ builder: self.builder.optional_child_signal(child) }
             }

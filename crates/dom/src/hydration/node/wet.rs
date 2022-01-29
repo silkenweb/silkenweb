@@ -1,8 +1,11 @@
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    mem,
+};
 
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::HydrationElement;
+use super::HydrationNodeData;
 use crate::{
     attribute::Attribute,
     event::EventCallback,
@@ -41,9 +44,9 @@ impl WetElement {
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: HydrationElement) {
+    pub fn store_child(&mut self, mut child: HydrationNodeData) {
         self.event_callbacks
-            .append(&mut child.wet().event_callbacks);
+            .append(&mut child.take_wet_event_callbacks());
     }
 
     pub fn dom_element(&self) -> &web_sys::Element {
@@ -115,6 +118,10 @@ impl WetElement {
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let dom_element = self.dom_element.clone();
         after_render(move || f(&dom_element));
+    }
+
+    pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {
+        mem::take(&mut self.event_callbacks)
     }
 }
 

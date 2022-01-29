@@ -11,7 +11,7 @@ use self::{
     wet::{WetElement, WetNode, WetText},
 };
 use super::{Hydration, IsDry};
-use crate::attribute::Attribute;
+use crate::{attribute::Attribute, event::EventCallback};
 
 mod dry;
 mod wet;
@@ -47,7 +47,7 @@ impl HydrationElement {
         );
     }
 
-    pub fn store_child(&mut self, child: Self) {
+    pub fn store_child(&mut self, child: HydrationNodeData) {
         self.borrow_mut()
             .map1(child, DryElement::store_child, WetElement::store_child);
     }
@@ -231,6 +231,13 @@ impl HydrationNodeData {
         match &mut self.0 {
             HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
             HydrationNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
+        }
+    }
+
+    fn take_wet_event_callbacks(&mut self) -> Vec<EventCallback> {
+        match &mut self.0 {
+            HydrationNodeEnum::Element(elem) => elem.wet().take_event_callbacks(),
+            HydrationNodeEnum::Text(_) => Vec::new(),
         }
     }
 }

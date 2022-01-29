@@ -5,6 +5,7 @@ use std::{
     cell::{RefCell, RefMut},
     fmt::{self, Display},
     future::Future,
+    mem,
     rc::Rc,
 };
 
@@ -17,6 +18,7 @@ use futures_signals::{
 use wasm_bindgen::{intern, JsCast, JsValue};
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec};
+use super::Node;
 use crate::{
     attribute::Attribute,
     clone,
@@ -70,17 +72,17 @@ impl ElementBuilderBase {
 
 impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
-    fn child(mut self, child: impl Into<Element>) -> Self {
+    fn child(mut self, child: impl Into<Node>) -> Self {
         let mut child = child.into();
-        self.child_groups_mut()
-            .append_new_group_sync(&mut child.hydro_elem);
-        self.element.hydro_elem.store_child(child.hydro_elem);
-        self.element.futures.extend(child.futures);
+        self.element.futures.extend(child.take_futures());
+        let mut child = child.into_hydro();
+        self.child_groups_mut().append_new_group_sync(&mut child);
+        self.element.hydro_elem.store_child(child);
 
         self
     }
 
-    fn child_signal(self, child_signal: impl Signal<Item = impl Into<Element>> + 'static) -> Self {
+    fn child_signal(self, child_signal: impl Signal<Item = impl Into<Node>> + 'static) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_groups = self.child_groups.clone();
         // Store the child in here until we replace it.
@@ -90,7 +92,7 @@ impl ParentBuilder for ElementBuilderBase {
             let child = child.into();
             child_groups
                 .borrow_mut()
-                .upsert_only_child(group_index, child.clone_into_node());
+                .upsert_only_child(group_index, child.clone_into_hydro());
             _child_storage = Some(child);
             async {}
         });
@@ -100,7 +102,7 @@ impl ParentBuilder for ElementBuilderBase {
 
     fn optional_child_signal(
         self,
-        child_signal: impl Signal<Item = Option<impl Into<Element>>> + 'static,
+        child_signal: impl Signal<Item = Option<impl Into<Node>>> + 'static,
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let child_groups = self.child_groups.clone();
@@ -112,7 +114,7 @@ impl ParentBuilder for ElementBuilderBase {
                 let child = child.into();
                 child_groups
                     .borrow_mut()
-                    .upsert_only_child(group_index, child.clone_into_node());
+                    .upsert_only_child(group_index, child.clone_into_hydro());
                 _child_storage = Some(child);
             } else {
                 child_groups.borrow_mut().remove_child(group_index);
@@ -125,10 +127,7 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    fn children_signal(
-        self,
-        children: impl SignalVec<Item = impl Into<Element>> + 'static,
-    ) -> Self {
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let mut child_vec = ChildVec::new(
             self.element.hydro_elem.clone(),
@@ -276,8 +275,17 @@ impl Element {
         self.hydro_elem.hydrate_child(parent, child)
     }
 
-    fn clone_into_node(&self) -> HydrationNodeData {
+    pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+        mem::take(&mut self.futures)
+    }
+
+    // TODO: Rename to `clone_into_hydro`
+    pub(super) fn clone_into_hydro(&self) -> HydrationNodeData {
         self.hydro_elem.clone().into()
+    }
+
+    pub(super) fn into_hydro(self) -> HydrationNodeData {
+        self.hydro_elem.into()
     }
 }
 
@@ -328,9 +336,9 @@ pub trait ParentBuilder: Sized {
 
     fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
 
-    fn child(self, c: impl Into<Element>) -> Self;
+    fn child(self, c: impl Into<Node>) -> Self;
 
-    fn children(mut self, children: impl IntoIterator<Item = impl Into<Element>>) -> Self {
+    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node>>) -> Self {
         for child in children {
             self = self.child(child);
         }
@@ -338,13 +346,12 @@ pub trait ParentBuilder: Sized {
         self
     }
 
-    fn child_signal(self, child: impl Signal<Item = impl Into<Element>> + 'static) -> Self;
+    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
 
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Element>> + 'static)
-        -> Self;
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self;
 
     fn optional_child_signal(
         self,
-        child: impl Signal<Item = Option<impl Into<Element>>> + 'static,
+        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
     ) -> Self;
 }

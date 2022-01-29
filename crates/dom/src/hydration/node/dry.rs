@@ -7,7 +7,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetNode, WetText},
-    HydrationElement, HydrationNodeData,
+    HydrationNodeData,
 };
 use crate::{attribute::Attribute, clone, remove_following_siblings};
 
@@ -16,7 +16,7 @@ pub struct DryElement {
     tag: String,
     attributes: HashMap<String, Option<String>>,
     children: Vec<HydrationNodeData>,
-    stored_children: Vec<HydrationElement>,
+    stored_children: Vec<HydrationNodeData>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
 }
 
@@ -98,7 +98,7 @@ impl DryElement {
             .push(Box::new(move |element| element.on(name, f)))
     }
 
-    pub fn store_child(&mut self, child: HydrationElement) {
+    pub fn store_child(&mut self, child: HydrationNodeData) {
         self.stored_children.push(child);
     }
 
