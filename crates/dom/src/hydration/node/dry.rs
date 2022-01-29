@@ -120,7 +120,7 @@ impl DryElement {
         }
     }
 
-    pub fn replace_child(&mut self, new_child: &mut impl DryNode, old_child: &mut impl DryNode) {
+    pub fn replace_child(&mut self, new_child: impl DryNode, old_child: impl DryNode) {
         for child in &mut self.children {
             if child.node().is_same(&old_child.node()) {
                 *child = new_child.node();

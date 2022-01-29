@@ -63,7 +63,7 @@ impl HydrationElement {
             .clone()
     }
 
-    pub fn append_child_now(&mut self, child: &mut impl HydrationNode) {
+    pub fn append_child_now(&mut self, child: impl HydrationNode) {
         self.borrow_mut().map1(
             child,
             DryElement::append_child,
@@ -86,8 +86,8 @@ impl HydrationElement {
 
     pub fn insert_child_before_now(
         &mut self,
-        child: &mut impl HydrationNode,
-        next_child: Option<&mut impl HydrationNode>,
+        child: impl HydrationNode,
+        next_child: Option<impl HydrationNode>,
     ) {
         self.borrow_mut().map2(
             child,
@@ -115,7 +115,7 @@ impl HydrationElement {
             .map1(child, DryElement::remove_child, WetElement::remove_child);
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl HydrationNode) {
+    pub fn remove_child_now(&mut self, child: impl HydrationNode) {
         self.borrow_mut().map1(
             child,
             DryElement::remove_child,

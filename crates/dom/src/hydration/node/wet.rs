@@ -53,7 +53,7 @@ impl WetElement {
         &self.dom_element
     }
 
-    pub fn append_child_now(&mut self, child: &mut impl WetNode) {
+    pub fn append_child_now(&mut self, child: impl WetNode) {
         self.dom_element
             .append_child(&child.dom_node())
             .unwrap_throw();
@@ -73,15 +73,15 @@ impl WetElement {
 
     pub fn insert_child_before_now(
         &mut self,
-        child: &mut impl WetNode,
-        next_child: Option<&mut impl WetNode>,
+        child: impl WetNode,
+        next_child: Option<impl WetNode>,
     ) {
         self.dom_element
             .insert_before(&child.dom_node(), next_child.map(|c| c.dom_node()).as_ref())
             .unwrap_throw();
     }
 
-    pub fn replace_child(&mut self, new_child: &mut impl WetNode, old_child: &mut impl WetNode) {
+    pub fn replace_child(&mut self, new_child: impl WetNode, old_child: impl WetNode) {
         let parent = self.dom_element.clone();
         let new_child = new_child.dom_node();
         let old_child = old_child.dom_node();
@@ -99,7 +99,7 @@ impl WetElement {
         });
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl WetNode) {
+    pub fn remove_child_now(&mut self, child: impl WetNode) {
         self.dom_element
             .remove_child(&child.dom_node())
             .unwrap_throw();
