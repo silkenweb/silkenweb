@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::DomElement;
+use super::HydrationElement;
 use crate::{
     attribute::Attribute,
     event::EventCallback,
@@ -41,7 +41,7 @@ impl WetElement {
             .push(EventCallback::new(dom_element.into(), name, f));
     }
 
-    pub fn store_child(&mut self, child: DomElement) {
+    pub fn store_child(&mut self, child: HydrationElement) {
         self.event_callbacks
             .append(&mut child.wet().event_callbacks);
     }

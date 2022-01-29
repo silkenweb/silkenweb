@@ -4,10 +4,10 @@ use futures_signals::signal_vec::VecDiff;
 use wasm_bindgen::UnwrapThrowExt;
 
 use super::{child_groups::ChildGroups, Element};
-use crate::{hydration::node::DomElement, render::queue_update};
+use crate::{hydration::node::HydrationElement, render::queue_update};
 
 pub struct ChildVec {
-    parent: DomElement,
+    parent: HydrationElement,
     child_groups: Rc<RefCell<ChildGroups>>,
     group_index: usize,
     children: Vec<Element>,
@@ -15,7 +15,7 @@ pub struct ChildVec {
 
 impl ChildVec {
     pub fn new(
-        parent: DomElement,
+        parent: HydrationElement,
         child_groups: Rc<RefCell<ChildGroups>>,
         group_index: usize,
     ) -> Self {
@@ -59,7 +59,7 @@ impl ChildVec {
             return;
         }
 
-        let children = self.child_dom_elements();
+        let children = self.child_hydro_elems();
         child_groups.set_first_child(
             self.group_index,
             children.first().unwrap_throw().clone().into(),
@@ -91,8 +91,8 @@ impl ChildVec {
         assert!(index < self.children.len());
 
         self.parent.insert_child_before(
-            new_child.dom_element.clone(),
-            Some(self.children[index].dom_element.clone()),
+            new_child.hydro_elem.clone(),
+            Some(self.children[index].hydro_elem.clone()),
         );
 
         self.children.insert(index, new_child);
@@ -110,14 +110,14 @@ impl ChildVec {
         let old_child = &mut self.children[index];
 
         self.parent
-            .replace_child(new_child.dom_element.clone(), old_child.dom_element.clone());
+            .replace_child(new_child.hydro_elem.clone(), old_child.hydro_elem.clone());
 
         *old_child = new_child;
     }
 
     pub fn remove(&mut self, index: usize) -> Element {
         let mut old_child = self.children.remove(index);
-        self.parent.remove_child(&mut old_child.dom_element);
+        self.parent.remove_child(&mut old_child.hydro_elem);
 
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -161,12 +161,12 @@ impl ChildVec {
         }
 
         if let Some(mut removed_child) = removed_child {
-            self.parent.remove_child(&mut removed_child.dom_element);
+            self.parent.remove_child(&mut removed_child.hydro_elem);
         }
     }
 
     pub fn clear(&mut self) {
-        let existing_children = self.child_dom_elements();
+        let existing_children = self.child_hydro_elems();
         self.children.clear();
         let mut child_groups = self.child_groups.borrow_mut();
 
@@ -187,10 +187,10 @@ impl ChildVec {
         }
     }
 
-    fn child_dom_elements(&self) -> Vec<DomElement> {
+    fn child_hydro_elems(&self) -> Vec<HydrationElement> {
         self.children
             .iter()
-            .map(|elem| &elem.dom_element)
+            .map(|elem| &elem.hydro_elem)
             .cloned()
             .collect()
     }

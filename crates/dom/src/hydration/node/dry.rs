@@ -7,7 +7,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetNode, WetText},
-    DomElement, DomNodeData,
+    HydrationElement, HydrationNodeData,
 };
 use crate::{attribute::Attribute, clone, remove_following_siblings};
 
@@ -15,8 +15,8 @@ pub struct DryElement {
     namespace: Option<String>,
     tag: String,
     attributes: HashMap<String, Option<String>>,
-    children: Vec<DomNodeData>,
-    stored_children: Vec<DomElement>,
+    children: Vec<HydrationNodeData>,
+    stored_children: Vec<HydrationElement>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
 }
 
@@ -98,7 +98,7 @@ impl DryElement {
             .push(Box::new(move |element| element.on(name, f)))
     }
 
-    pub fn store_child(&mut self, child: DomElement) {
+    pub fn store_child(&mut self, child: HydrationElement) {
         self.stored_children.push(child);
     }
 
@@ -277,5 +277,5 @@ impl From<DryText> for WetText {
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
 pub trait DryNode {
-    fn node(&self) -> DomNodeData;
+    fn node(&self) -> HydrationNodeData;
 }

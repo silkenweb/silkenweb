@@ -1,22 +1,22 @@
 use std::mem;
 
-use crate::hydration::node::{DomElement, DomNode, DomNodeData};
+use crate::hydration::node::{HydrationElement, HydrationNode, HydrationNodeData};
 
 /// Groups of children with the same parent
 ///
 /// This manages insertion and removal of groups of children
 pub struct ChildGroups {
-    parent: DomElement,
+    parent: HydrationElement,
     // The stack size of `BTreeMap` is the same as `Vec`, but it allocs 192 bytes on the first
     // insert and cannot be shrunk to fit.
-    children: Vec<Option<DomNodeData>>,
+    children: Vec<Option<HydrationNodeData>>,
     // `true` if the last child group can change.
     last_is_dynamic: bool,
     group_count: usize,
 }
 
 impl ChildGroups {
-    pub fn new(parent: DomElement) -> Self {
+    pub fn new(parent: HydrationElement) -> Self {
         Self {
             parent,
             children: Vec::new(),
@@ -37,12 +37,12 @@ impl ChildGroups {
         index
     }
 
-    pub fn get_next_group_elem(&self, index: usize) -> Option<&DomNodeData> {
+    pub fn get_next_group_elem(&self, index: usize) -> Option<&HydrationNodeData> {
         self.children.split_at(index + 1).1.iter().flatten().next()
     }
 
     /// Append a new group. Don't wait for the next animation frame.
-    pub fn append_new_group_sync(&mut self, child: &mut impl DomNode) {
+    pub fn append_new_group_sync(&mut self, child: &mut impl HydrationNode) {
         if self.last_is_dynamic {
             self.children.push(Some(child.clone().into()));
         }
@@ -53,12 +53,12 @@ impl ChildGroups {
         self.last_is_dynamic = false;
     }
 
-    pub fn insert_only_child(&mut self, index: usize, child: DomNodeData) {
+    pub fn insert_only_child(&mut self, index: usize, child: HydrationNodeData) {
         assert!(!self.upsert_only_child(index, child));
     }
 
     /// Return `true` iff there was an existing node.
-    pub fn upsert_only_child(&mut self, index: usize, child: DomNodeData) -> bool {
+    pub fn upsert_only_child(&mut self, index: usize, child: HydrationNodeData) -> bool {
         let existed = mem::replace(&mut self.children[index], Some(child.clone()))
             .map(|mut existing| self.parent.remove_child(&mut existing))
             .is_some();
@@ -68,7 +68,7 @@ impl ChildGroups {
         existed
     }
 
-    pub fn insert_last_child(&mut self, index: usize, child: DomNodeData) {
+    pub fn insert_last_child(&mut self, index: usize, child: HydrationNodeData) {
         self.parent
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
@@ -79,7 +79,7 @@ impl ChildGroups {
         }
     }
 
-    pub fn set_first_child(&mut self, index: usize, child: DomNodeData) {
+    pub fn set_first_child(&mut self, index: usize, child: HydrationNodeData) {
         self.children[index] = Some(child);
     }
 

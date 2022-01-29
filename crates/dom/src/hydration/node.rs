@@ -17,9 +17,9 @@ mod dry;
 mod wet;
 
 #[derive(Clone)]
-pub struct DomElement(Rc<RefCell<Hydration<WetElement, DryElement>>>);
+pub struct HydrationElement(Rc<RefCell<Hydration<WetElement, DryElement>>>);
 
-impl DomElement {
+impl HydrationElement {
     pub fn new(tag: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
             || WetElement::new(tag),
@@ -63,7 +63,7 @@ impl DomElement {
             .clone()
     }
 
-    pub fn append_child_now(&mut self, child: &mut impl DomNode) {
+    pub fn append_child_now(&mut self, child: &mut impl HydrationNode) {
         self.borrow_mut().map1(
             child,
             DryElement::append_child,
@@ -73,8 +73,8 @@ impl DomElement {
 
     pub fn insert_child_before(
         &mut self,
-        child: impl DomNode + 'static,
-        next_child: Option<impl DomNode + 'static>,
+        child: impl HydrationNode + 'static,
+        next_child: Option<impl HydrationNode + 'static>,
     ) {
         self.borrow_mut().map2(
             child,
@@ -88,8 +88,8 @@ impl DomElement {
 
     pub fn insert_child_before_now(
         &mut self,
-        child: &mut impl DomNode,
-        next_child: Option<&mut impl DomNode>,
+        child: &mut impl HydrationNode,
+        next_child: Option<&mut impl HydrationNode>,
     ) {
         self.borrow_mut().map2(
             child,
@@ -101,8 +101,8 @@ impl DomElement {
 
     pub fn replace_child(
         &mut self,
-        mut new_child: impl DomNode + 'static,
-        mut old_child: impl DomNode + 'static,
+        mut new_child: impl HydrationNode + 'static,
+        mut old_child: impl HydrationNode + 'static,
     ) {
         self.borrow_mut().map2(
             &mut new_child,
@@ -112,12 +112,12 @@ impl DomElement {
         );
     }
 
-    pub fn remove_child(&mut self, child: &mut (impl DomNode + 'static)) {
+    pub fn remove_child(&mut self, child: &mut (impl HydrationNode + 'static)) {
         self.borrow_mut()
             .map1(child, DryElement::remove_child, WetElement::remove_child);
     }
 
-    pub fn remove_child_now(&mut self, child: &mut impl DomNode) {
+    pub fn remove_child_now(&mut self, child: &mut impl HydrationNode) {
         self.borrow_mut().map1(
             child,
             DryElement::remove_child,
@@ -155,7 +155,7 @@ impl DomElement {
     }
 }
 
-impl Display for DomElement {
+impl Display for HydrationElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.borrow_mut()
             .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
@@ -163,9 +163,9 @@ impl Display for DomElement {
 }
 
 #[derive(Clone)]
-pub struct DomText(Rc<RefCell<Hydration<WetText, DryText>>>);
+pub struct HydrationText(Rc<RefCell<Hydration<WetText, DryText>>>);
 
-impl DomText {
+impl HydrationText {
     pub fn new(text: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
             || WetText::new(text),
@@ -199,24 +199,26 @@ impl DomText {
     }
 }
 
-impl Display for DomText {
+impl Display for HydrationText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.borrow_mut()
             .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
 
-/// This is for storing dom nodes without `Box<dyn DomNode>`
+/// This is for storing dom nodes without `Box<dyn HydrationNode>`
 #[derive(Clone)]
-pub struct DomNodeData(DomNodeEnum);
+pub struct HydrationNodeData(HydrationNodeEnum);
 
-impl DomNodeData {
+impl HydrationNodeData {
     pub fn is_same(&self, other: &Self) -> bool {
         match (&self.0, &other.0) {
-            (DomNodeEnum::Element(elem0), DomNodeEnum::Element(elem1)) => {
+            (HydrationNodeEnum::Element(elem0), HydrationNodeEnum::Element(elem1)) => {
                 Rc::ptr_eq(&elem0.0, &elem1.0)
             }
-            (DomNodeEnum::Text(text0), DomNodeEnum::Text(text1)) => Rc::ptr_eq(&text0.0, &text1.0),
+            (HydrationNodeEnum::Text(text0), HydrationNodeEnum::Text(text1)) => {
+                Rc::ptr_eq(&text0.0, &text1.0)
+            }
             _ => false,
         }
     }
@@ -227,36 +229,36 @@ impl DomNodeData {
         child: &web_sys::Node,
     ) -> web_sys::Node {
         match &mut self.0 {
-            DomNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
-            DomNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
+            HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
+            HydrationNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
         }
     }
 }
 
-impl Display for DomNodeData {
+impl Display for HydrationNodeData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.0 {
-            DomNodeEnum::Element(elem) => elem.fmt(f),
-            DomNodeEnum::Text(text) => text.fmt(f),
+            HydrationNodeEnum::Element(elem) => elem.fmt(f),
+            HydrationNodeEnum::Text(text) => text.fmt(f),
         }
     }
 }
 
 #[derive(Clone)]
-enum DomNodeEnum {
-    Element(DomElement),
-    Text(DomText),
+enum HydrationNodeEnum {
+    Element(HydrationElement),
+    Text(HydrationText),
 }
 
-impl From<DomElement> for DomNodeData {
-    fn from(elem: DomElement) -> Self {
-        Self(DomNodeEnum::Element(elem))
+impl From<HydrationElement> for HydrationNodeData {
+    fn from(elem: HydrationElement) -> Self {
+        Self(HydrationNodeEnum::Element(elem))
     }
 }
 
-impl From<DomText> for DomNodeData {
-    fn from(text: DomText) -> Self {
-        Self(DomNodeEnum::Text(text))
+impl From<HydrationText> for HydrationNodeData {
+    fn from(text: HydrationText) -> Self {
+        Self(HydrationNodeEnum::Text(text))
     }
 }
 
@@ -264,78 +266,79 @@ impl From<DomText> for DomNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait DomNode: Clone + Into<DomNodeData> + WetNode + DryNode + IsDry {}
+pub trait HydrationNode: Clone + Into<HydrationNodeData> + WetNode + DryNode + IsDry {}
 
-impl WetNode for DomNodeData {
+impl WetNode for HydrationNodeData {
     fn dom_node(&self) -> web_sys::Node {
         match &self.0 {
-            DomNodeEnum::Element(elem) => elem.dom_node(),
-            DomNodeEnum::Text(text) => text.dom_node(),
+            HydrationNodeEnum::Element(elem) => elem.dom_node(),
+            HydrationNodeEnum::Text(text) => text.dom_node(),
         }
     }
 }
 
-impl DryNode for DomNodeData {
-    fn node(&self) -> DomNodeData {
+impl DryNode for HydrationNodeData {
+    fn node(&self) -> HydrationNodeData {
         self.clone()
     }
 }
 
-impl IsDry for DomNodeData {
+impl IsDry for HydrationNodeData {
     fn is_dry(&self) -> bool {
         match &self.0 {
-            DomNodeEnum::Element(elem) => elem.is_dry(),
-            DomNodeEnum::Text(text) => text.is_dry(),
+            HydrationNodeEnum::Element(elem) => elem.is_dry(),
+            HydrationNodeEnum::Text(text) => text.is_dry(),
         }
     }
 }
 
-impl DomNode for DomNodeData {
+impl HydrationNode for HydrationNodeData {
     // TODO: When we get GAT's maybe we can do something like this to avoid multiple
     // borrows:
     //
     // ```rust
-    // type BorrowedMut<'a> = DomNodeEnum<RefMut<'a, DomElement>, RefMut<'a, DomText>>;
+    // type BorrowedMut<'a> =
+    //     HydrationNodeEnum<RefMut<'a, HydrationElement>, RefMut<'a, HydrationText>>;
     //
     // fn borrow_mut(&'a mut self) -> Self::BorrowedMut<'a>;
     // ```
 }
 
-impl WetNode for DomElement {
+impl WetNode for HydrationElement {
     fn dom_node(&self) -> web_sys::Node {
         self.wet().dom_node()
     }
 }
 
-impl DryNode for DomElement {
-    fn node(&self) -> DomNodeData {
-        DomNodeData(DomNodeEnum::Element(self.clone()))
+impl DryNode for HydrationElement {
+    fn node(&self) -> HydrationNodeData {
+        HydrationNodeData(HydrationNodeEnum::Element(self.clone()))
     }
 }
 
-impl DomNode for DomElement {}
+impl HydrationNode for HydrationElement {}
 
-impl WetNode for DomText {
+impl WetNode for HydrationText {
     fn dom_node(&self) -> web_sys::Node {
         self.wet().dom_node()
     }
 }
 
-impl DryNode for DomText {
-    fn node(&self) -> DomNodeData {
-        DomNodeData(DomNodeEnum::Text(self.clone()))
+impl DryNode for HydrationText {
+    fn node(&self) -> HydrationNodeData {
+        HydrationNodeData(HydrationNodeEnum::Text(self.clone()))
     }
 }
 
-impl DomNode for DomText {}
+impl HydrationNode for HydrationText {}
 
-impl IsDry for DomElement {
+impl IsDry for HydrationElement {
     fn is_dry(&self) -> bool {
         self.0.borrow().is_dry()
     }
 }
 
-impl IsDry for DomText {
+impl IsDry for HydrationText {
     fn is_dry(&self) -> bool {
         self.0.borrow().is_dry()
     }

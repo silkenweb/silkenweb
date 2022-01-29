@@ -20,7 +20,7 @@ use self::{child_groups::ChildGroups, child_vec::ChildVec};
 use crate::{
     attribute::Attribute,
     clone,
-    hydration::node::{DomElement, DomNodeData, DomText},
+    hydration::node::{HydrationElement, HydrationNodeData, HydrationText},
     render::queue_update,
     spawn_cancelable_future,
 };
@@ -38,20 +38,20 @@ pub struct ElementBuilderBase {
 
 impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(DomElement::new(tag))
+        Self::new_element(HydrationElement::new(tag))
     }
 
     pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(DomElement::new_in_namespace(namespace, tag))
+        Self::new_element(HydrationElement::new_in_namespace(namespace, tag))
     }
 
-    fn new_element(dom_element: DomElement) -> Self {
+    fn new_element(hydro_elem: HydrationElement) -> Self {
         Self {
             element: Element {
-                dom_element: dom_element.clone(),
+                hydro_elem: hydro_elem.clone(),
                 futures: Vec::new(),
             },
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(dom_element))),
+            child_groups: Rc::new(RefCell::new(ChildGroups::new(hydro_elem))),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -73,8 +73,8 @@ impl ParentBuilder for ElementBuilderBase {
     fn child(mut self, child: impl Into<Element>) -> Self {
         let mut child = child.into();
         self.child_groups_mut()
-            .append_new_group_sync(&mut child.dom_element);
-        self.element.dom_element.store_child(child.dom_element);
+            .append_new_group_sync(&mut child.hydro_elem);
+        self.element.hydro_elem.store_child(child.hydro_elem);
         self.element.futures.extend(child.futures);
 
         self
@@ -131,7 +131,7 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let mut child_vec = ChildVec::new(
-            self.element.dom_element.clone(),
+            self.element.hydro_elem.clone(),
             self.child_groups.clone(),
             group_index,
         );
@@ -146,14 +146,14 @@ impl ParentBuilder for ElementBuilderBase {
 
     /// Add a text node after existing children.
     fn text(self, child: &str) -> Self {
-        let mut text_node = DomText::new(child);
+        let mut text_node = HydrationText::new(child);
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
         self
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let mut text_node = DomText::new(intern(""));
+        let mut text_node = HydrationText::new(intern(""));
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
 
@@ -175,7 +175,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.dom_element.attribute(name, value);
+        self.element.hydro_elem.attribute(name, value);
         self
     }
 
@@ -185,7 +185,7 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let element = self.element.dom_element.clone();
+        let element = self.element.hydro_elem.clone();
 
         let updater = value.for_each({
             let name = name.to_owned();
@@ -204,7 +204,7 @@ impl ElementBuilder for ElementBuilderBase {
 
     /// Apply an effect after the next render.
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.element.dom_element.effect(f);
+        self.element.hydro_elem.effect(f);
         self
     }
 
@@ -218,7 +218,7 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let mut element = self.element.dom_element.clone();
+        let mut element = self.element.hydro_elem.clone();
 
         let future = sig.for_each(move |x| {
             clone!(f);
@@ -235,13 +235,13 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        self.element.dom_element.on(name, f);
+        self.element.hydro_elem.on(name, f);
         self
     }
 
     fn build(mut self) -> Self::Target {
         self.element.futures.shrink_to_fit();
-        self.element.dom_element.shrink_to_fit();
+        self.element.hydro_elem.shrink_to_fit();
         self.child_groups_mut().shrink_to_fit();
         self.element
     }
@@ -258,14 +258,14 @@ impl From<ElementBuilderBase> for Element {
 /// Elements can only appear once in the document. If an element is added again,
 /// it will be moved.
 pub struct Element {
-    dom_element: DomElement,
+    hydro_elem: HydrationElement,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
 impl Element {
     // TODO: Once we have a Node type, these can become pub(super) again
     pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
-        self.dom_element.eval_dom_element()
+        self.hydro_elem.eval_dom_element()
     }
 
     pub(crate) fn hydrate_child(
@@ -273,17 +273,17 @@ impl Element {
         parent: &web_sys::Node,
         child: &web_sys::Node,
     ) -> web_sys::Element {
-        self.dom_element.hydrate_child(parent, child)
+        self.hydro_elem.hydrate_child(parent, child)
     }
 
-    fn clone_into_node(&self) -> DomNodeData {
-        self.dom_element.clone().into()
+    fn clone_into_node(&self) -> HydrationNodeData {
+        self.hydro_elem.clone().into()
     }
 }
 
 impl Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.dom_element.fmt(f)
+        self.hydro_elem.fmt(f)
     }
 }
 

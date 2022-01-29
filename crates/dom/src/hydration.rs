@@ -250,7 +250,7 @@ pub use select_impl::Hydration;
 
 // TODO: Typically, we'd check if `is_dry`, `evaluate` if needed and pass the
 // arg on to a function. Each of these will borrow for Rc types. Can we find a
-// way around this? Maybe a `Borrowed` type on the `DomNode` trait?
+// way around this? Maybe a `Borrowed` type on the `HydrationNode` trait?
 pub trait IsDry {
     fn is_dry(&self) -> bool;
 }

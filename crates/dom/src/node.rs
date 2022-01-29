@@ -13,7 +13,7 @@ impl Node {
 }
 
 enum NodeEnum {
-    Element(Element)
+    Element(Element),
 }
 
 impl From<Element> for Node {
