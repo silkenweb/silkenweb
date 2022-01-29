@@ -17,7 +17,7 @@ mod dry;
 mod wet;
 
 #[derive(Clone)]
-pub struct DomElement(Rc<RefCell<HydrationElement>>);
+pub struct DomElement(Rc<RefCell<Hydration<WetElement, DryElement>>>);
 
 impl DomElement {
     pub fn new(tag: &str) -> Self {
@@ -146,7 +146,7 @@ impl DomElement {
             .map(f, DryElement::effect, WetElement::effect);
     }
 
-    fn borrow_mut(&self) -> RefMut<HydrationElement> {
+    fn borrow_mut(&self) -> RefMut<Hydration<WetElement, DryElement>> {
         self.0.borrow_mut()
     }
 
@@ -163,7 +163,7 @@ impl Display for DomElement {
 }
 
 #[derive(Clone)]
-pub struct DomText(Rc<RefCell<HydrationText>>);
+pub struct DomText(Rc<RefCell<Hydration<WetText, DryText>>>);
 
 impl DomText {
     pub fn new(text: &str) -> Self {
@@ -190,7 +190,7 @@ impl DomText {
             .clone()
     }
 
-    fn borrow_mut(&self) -> RefMut<HydrationText> {
+    fn borrow_mut(&self) -> RefMut<Hydration<WetText, DryText>> {
         self.0.borrow_mut()
     }
 
@@ -328,9 +328,6 @@ impl DryNode for DomText {
 }
 
 impl DomNode for DomText {}
-
-type HydrationElement = Hydration<WetElement, DryElement>;
-type HydrationText = Hydration<WetText, DryText>;
 
 impl IsDry for DomElement {
     fn is_dry(&self) -> bool {
