@@ -1,4 +1,4 @@
-pub mod dom;
+pub mod node;
 
 #[cfg(any(
     feature = "hydration",

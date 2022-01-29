@@ -1,6 +1,6 @@
 use std::mem;
 
-use crate::hydration::dom::{DomElement, DomNode, DomNodeData};
+use crate::hydration::node::{DomElement, DomNode, DomNodeData};
 
 /// Groups of children with the same parent
 ///

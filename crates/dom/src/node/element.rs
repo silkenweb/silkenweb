@@ -20,7 +20,7 @@ use self::{child_groups::ChildGroups, child_vec::ChildVec};
 use crate::{
     attribute::Attribute,
     clone,
-    hydration::dom::{DomElement, DomNodeData, DomText},
+    hydration::node::{DomElement, DomNodeData, DomText},
     render::queue_update,
     spawn_cancelable_future,
 };
