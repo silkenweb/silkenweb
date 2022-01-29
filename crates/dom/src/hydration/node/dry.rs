@@ -279,3 +279,15 @@ impl From<DryText> for WetText {
 pub trait DryNode {
     fn node(&self) -> HydrationNodeData;
 }
+
+impl<'a, T: DryNode> DryNode for &'a T {
+    fn node(&self) -> HydrationNodeData {
+        DryNode::node(*self)
+    }
+}
+
+impl<'a, T: DryNode> DryNode for &'a mut T {
+    fn node(&self) -> HydrationNodeData {
+        DryNode::node(*self)
+    }
+}

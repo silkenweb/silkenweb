@@ -73,8 +73,8 @@ impl HydrationElement {
 
     pub fn insert_child_before(
         &mut self,
-        child: impl HydrationNode + 'static,
-        next_child: Option<impl HydrationNode + 'static>,
+        child: impl HydrationNode,
+        next_child: Option<impl HydrationNode>,
     ) {
         self.borrow_mut().map2(
             child,
@@ -273,7 +273,11 @@ impl From<HydrationText> for HydrationNodeData {
 ///
 /// This lets us pass a reference to an element or text as a node, without
 /// actually constructing a node
-pub trait HydrationNode: Clone + Into<HydrationNodeData> + WetNode + DryNode + IsDry {}
+pub trait HydrationNode: WetNode + DryNode + IsDry {}
+
+impl<'a, T: HydrationNode> HydrationNode for &'a T {}
+
+impl<'a, T: HydrationNode> HydrationNode for &'a mut T {}
 
 impl WetNode for HydrationNodeData {
     fn dom_node(&self) -> web_sys::Node {

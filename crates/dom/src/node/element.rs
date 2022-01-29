@@ -279,7 +279,6 @@ impl Element {
         mem::take(&mut self.futures)
     }
 
-    // TODO: Rename to `clone_into_hydro`
     pub(super) fn clone_into_hydro(&self) -> HydrationNodeData {
         self.hydro_elem.clone().into()
     }

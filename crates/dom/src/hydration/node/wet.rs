@@ -184,3 +184,15 @@ impl WetNode for WetText {
         self.0.clone().into()
     }
 }
+
+impl<'a, T: WetNode> WetNode for &'a T {
+    fn dom_node(&self) -> web_sys::Node {
+        WetNode::dom_node(*self)
+    }
+}
+
+impl<'a, T: WetNode> WetNode for &'a mut T {
+    fn dom_node(&self) -> web_sys::Node {
+        WetNode::dom_node(*self)
+    }
+}

@@ -44,7 +44,7 @@ impl ChildGroups {
     /// Append a new group. Don't wait for the next animation frame.
     pub fn append_new_group_sync(&mut self, child: &mut impl HydrationNode) {
         if self.last_is_dynamic {
-            self.children.push(Some(child.clone().into()));
+            self.children.push(Some(child.node()));
         }
 
         self.group_count += 1;
@@ -59,16 +59,14 @@ impl ChildGroups {
 
     /// Return `true` iff there was an existing node.
     pub fn upsert_only_child(&mut self, index: usize, child: HydrationNodeData) -> bool {
-        let existed = mem::replace(&mut self.children[index], Some(child.clone()))
+        self.insert_last_child(index, &child);
+
+        mem::replace(&mut self.children[index], Some(child))
             .map(|mut existing| self.parent.remove_child(&mut existing))
-            .is_some();
-
-        self.insert_last_child(index, child);
-
-        existed
+            .is_some()
     }
 
-    pub fn insert_last_child(&mut self, index: usize, child: HydrationNodeData) {
+    pub fn insert_last_child(&mut self, index: usize, child: impl HydrationNode) {
         self.parent
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
