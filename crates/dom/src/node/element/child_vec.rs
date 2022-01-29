@@ -105,15 +105,14 @@ impl ChildVec {
 
         let old_child = &mut self.children[index];
 
-        self.parent
-            .replace_child(new_child.clone_into_hydro(), old_child.clone_into_hydro());
+        self.parent.replace_child(&new_child, &old_child);
 
         *old_child = new_child;
     }
 
     pub fn remove(&mut self, index: usize) -> Node {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(&mut old_child.clone_into_hydro());
+        self.parent.remove_child(&old_child);
 
         let mut child_groups = self.child_groups.borrow_mut();
 

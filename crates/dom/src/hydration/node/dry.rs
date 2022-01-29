@@ -128,7 +128,7 @@ impl DryElement {
         }
     }
 
-    pub fn remove_child(&mut self, child: &mut impl DryNode) {
+    pub fn remove_child(&mut self, child: impl DryNode) {
         let child = child.node();
 
         self.children.retain(|existing| !existing.is_same(&child));

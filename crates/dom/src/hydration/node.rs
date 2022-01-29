@@ -99,8 +99,8 @@ impl HydrationElement {
 
     pub fn replace_child(
         &mut self,
-        mut new_child: impl HydrationNode + 'static,
-        mut old_child: impl HydrationNode + 'static,
+        mut new_child: impl HydrationNode,
+        mut old_child: impl HydrationNode,
     ) {
         self.borrow_mut().map2(
             &mut new_child,
@@ -110,7 +110,7 @@ impl HydrationElement {
         );
     }
 
-    pub fn remove_child(&mut self, child: &mut (impl HydrationNode + 'static)) {
+    pub fn remove_child(&mut self, child: impl HydrationNode) {
         self.borrow_mut()
             .map1(child, DryElement::remove_child, WetElement::remove_child);
     }

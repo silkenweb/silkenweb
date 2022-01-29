@@ -91,7 +91,7 @@ impl WetElement {
         });
     }
 
-    pub fn remove_child(&mut self, child: &mut impl WetNode) {
+    pub fn remove_child(&mut self, child: impl WetNode) {
         let parent = self.dom_element.clone();
         let child = child.dom_node();
         queue_update(move || {
