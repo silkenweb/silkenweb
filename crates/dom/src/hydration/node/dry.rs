@@ -3,6 +3,7 @@ use std::{
     fmt::{self, Display},
 };
 
+use caseless::default_caseless_match_str;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -33,18 +34,20 @@ impl DryElement {
         clone!(mut child);
 
         loop {
-            // TODO: Rather than 'dyn_into`, check tag type as well.
             if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
-                return self.hydrate_element(elem_child);
-            } else {
-                let next = child.next_sibling();
-                parent.remove_child(&child).unwrap_throw();
-
-                if let Some(next_child) = next {
-                    child = next_child;
-                } else {
-                    break;
+                // TODO: Check namespace
+                if default_caseless_match_str(&elem_child.tag_name(), &self.tag) {
+                    return self.hydrate_element(elem_child);
                 }
+            }
+
+            let next = child.next_sibling();
+            parent.remove_child(&child).unwrap_throw();
+
+            if let Some(next_child) = next {
+                child = next_child;
+            } else {
+                break;
             }
         }
 
