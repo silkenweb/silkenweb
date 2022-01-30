@@ -3,7 +3,6 @@ use std::{cell::RefCell, collections::HashMap, fmt, future::Future};
 
 use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
-use indoc::formatdoc;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
@@ -56,7 +55,6 @@ pub trait HydrationTracker {
 #[derive(Default)]
 pub struct HydrationStats {
     nodes_added: u64,
-    text_added: u64,
     nodes_removed: u64,
     empty_text_removed: u64,
     attributes_set: u64,
@@ -66,7 +64,6 @@ pub struct HydrationStats {
 impl HydrationStats {
     pub fn only_whitespace_diffs(&self) -> bool {
         self.nodes_added == 0
-            && self.text_added == 0
             && self.nodes_removed == 0
             && self.attributes_set == 0
             && self.attributes_removed == 0
@@ -101,33 +98,18 @@ impl HydrationTracker for HydrationStats {
     }
 
     fn finished(self) {
-        let message = formatdoc!(
-            r#"
-            Hydration stats:
-                nodes added = {}
-                nodes removed = {}
-                empty text removed = {}
-                attributes set = {}
-                attributes removed = {}
-        "#,
-            self.nodes_added,
-            self.nodes_removed,
-            self.empty_text_removed,
-            self.attributes_set,
-            self.attributes_removed
-        );
-
-        web_log::println!("{}", message);
+        web_log::println!("{}", self);
     }
 }
 
 impl fmt::Display for HydrationStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "elements_added = {}, ", self.nodes_added)?;
-        write!(f, "text_added = {}, ", self.text_added)?;
-        write!(f, "nodes_removed = {}, ", self.nodes_removed)?;
-        write!(f, "attributes_set = {}, ", self.attributes_set)?;
-        write!(f, "attributes_removed = {}", self.attributes_removed)
+        writeln!(f, "Hydration stats:")?;
+        writeln!(f, "    nodes added = {}, ", self.nodes_added)?;
+        writeln!(f, "    nodes removed = {}, ", self.nodes_removed)?;
+        writeln!(f, "    empty text removed = {}, ", self.empty_text_removed)?;
+        writeln!(f, "    attributes set = {}, ", self.attributes_set)?;
+        writeln!(f, "    attributes removed = {}", self.attributes_removed)
     }
 }
 
