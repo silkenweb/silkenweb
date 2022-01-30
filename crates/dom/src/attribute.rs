@@ -57,7 +57,7 @@ impl<T: Attribute> Attribute for Option<T> {
     }
 
     fn text(self) -> Option<String> {
-        self.map(Attribute::text).flatten()
+        self.and_then(Attribute::text)
     }
 }
 
