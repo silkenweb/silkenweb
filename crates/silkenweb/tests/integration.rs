@@ -10,6 +10,9 @@ use silkenweb_elements::HtmlElement;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
+#[cfg(feature = "server-side-render")]
+mod element;
+
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
