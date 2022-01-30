@@ -71,7 +71,7 @@ pub async fn render_now() {
     RENDER.with(Render::render_updates);
 }
 
-#[cfg(feature = "server-side-render")]
+#[cfg(not(target_arch = "wasm32"))]
 pub fn render_now_sync() {
     use crate::tasks;
 

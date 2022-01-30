@@ -120,7 +120,7 @@ thread_local!(
     static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
 
-#[cfg(feature = "server-side-render")]
+#[cfg(not(target_arch = "wasm32"))]
 mod tasks {
     use std::{cell::RefCell, future::Future};
 
@@ -148,7 +148,7 @@ mod tasks {
     }
 }
 
-#[cfg(not(feature = "server-side-render"))]
+#[cfg(target_arch = "wasm32")]
 mod tasks {
     use std::future::Future;
 
