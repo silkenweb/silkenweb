@@ -105,10 +105,10 @@ impl HydrationTracker for HydrationStats {
 impl fmt::Display for HydrationStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Hydration stats:")?;
-        writeln!(f, "    nodes added = {}, ", self.nodes_added)?;
-        writeln!(f, "    nodes removed = {}, ", self.nodes_removed)?;
-        writeln!(f, "    empty text removed = {}, ", self.empty_text_removed)?;
-        writeln!(f, "    attributes set = {}, ", self.attributes_set)?;
+        writeln!(f, "    nodes added = {}", self.nodes_added)?;
+        writeln!(f, "    nodes removed = {}", self.nodes_removed)?;
+        writeln!(f, "    empty text removed = {}", self.empty_text_removed)?;
+        writeln!(f, "    attributes set = {}", self.attributes_set)?;
         writeln!(f, "    attributes removed = {}", self.attributes_removed)
     }
 }
