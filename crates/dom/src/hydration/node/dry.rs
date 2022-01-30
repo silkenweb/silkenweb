@@ -65,7 +65,7 @@ impl DryElement {
     }
 
     fn hydrate_element(self, dom_elem: &web_sys::Element) -> WetElement {
-        // TODO: Check namespace, element type and attributes match
+        self.reconcile_attributes(dom_elem);
         let mut elem = WetElement::new_from_element(dom_elem.clone());
         let mut current_child = dom_elem.first_child();
 
@@ -101,6 +101,39 @@ impl DryElement {
         elem.shrink_to_fit();
 
         elem
+    }
+
+    fn reconcile_attributes(&self, dom_elem: &web_sys::Element) {
+        let dom_attributes = dom_elem.attributes();
+        let mut dom_attr_map = HashMap::new();
+
+        for item_index in 0.. {
+            if let Some(attr) = dom_attributes.item(item_index) {
+                dom_attr_map.insert(attr.name(), attr.value());
+            } else {
+                break;
+            }
+        }
+
+        for (name, value) in &self.attributes {
+            let value = value.as_ref().map_or("", String::as_ref);
+
+            let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
+                value != existing_value
+            } else {
+                true
+            };
+
+            if set_attr {
+                dom_elem.set_attribute(name, value).unwrap_throw();
+            }
+        }
+
+        for name in dom_attr_map.into_keys() {
+            if !name.starts_with("data-silkenweb") {
+                dom_elem.remove_attribute(&name).unwrap_throw();
+            }
+        }
     }
 
     pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {

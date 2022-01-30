@@ -40,4 +40,6 @@ features = [
     "Location",
     "History",
     "Url",
+    "Attr",
+    "NamedNodeMap",
 ]

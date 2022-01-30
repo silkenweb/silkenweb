@@ -8,8 +8,13 @@
 </head>
 
 <body>
+    <!--
+        `data-silkenweb*` attributes will be left as they are.
+        They are not necessary for hydration, but useful evidence that hydration is reusing elements.
+        Other spurious attributes will be removed.
+    -->
     <div id="app">
-        <div data-silkenweb="0">
+        <div data-silkenweb="0" data-will-be-removed="remove-me">
             <button data-silkenweb="1">+</button>
             <p data-silkenweb="2">0</p>
         </div>

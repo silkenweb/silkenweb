@@ -1,6 +1,10 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
-use silkenweb::{dom::hydrate, elements::html::*, prelude::*};
+use silkenweb::{
+    dom::hydrate,
+    elements::{html::*, macros::ElementBuilder},
+    prelude::*,
+};
 
 fn main() {
     let count = Mutable::new(0);
@@ -9,9 +13,10 @@ fn main() {
         count.replace_with(|i| *i + 1);
     };
 
-    let app = div()
-        .child(button().on_click(inc).text("+"))
-        .child(p().text_signal(count_text));
+    let app = div().child(button().on_click(inc).text("+")).child(
+        p().attribute("data-silkenweb-test", true)
+            .text_signal(count_text),
+    );
 
     hydrate("app", app);
 }
