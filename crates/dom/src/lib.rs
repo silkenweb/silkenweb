@@ -207,7 +207,7 @@ pub fn tag_in_namespace(namespace: &str, name: &str) -> ElementBuilderBase {
 #[cfg(target_arch = "wasm32")]
 pub fn intern_str(s: &str) -> &str {
     use wasm_bindgen::intern;
-    intern(s);
+    intern(s)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
