@@ -10,7 +10,7 @@ use super::{
     wet::{WetElement, WetText},
     DryNode, HydrationNodeData, WetNode,
 };
-use crate::{attribute::Attribute, clone, remove_following_siblings};
+use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTracker};
 
 pub struct DryElement {
     namespace: Option<String>,
@@ -30,7 +30,12 @@ impl DryElement {
         Self::new_element(Some(namespace), tag)
     }
 
-    pub fn hydrate_child(self, parent: &web_sys::Node, child: &web_sys::Node) -> WetElement {
+    pub fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
+    ) -> WetElement {
         clone!(mut child);
 
         loop {
@@ -44,11 +49,12 @@ impl DryElement {
                 if default_caseless_match_str(dry_namespace, &dom_namespace)
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
-                    return self.hydrate_element(elem_child);
+                    return self.hydrate_element(elem_child, tracker);
                 }
             }
 
             let next = child.next_sibling();
+            tracker.node_removed(&child);
             parent.remove_child(&child).unwrap_throw();
 
             if let Some(next_child) = next {
@@ -59,13 +65,19 @@ impl DryElement {
         }
 
         let wet_child: WetElement = self.into();
-        parent.append_child(wet_child.dom_element()).unwrap_throw();
+        let new_element = wet_child.dom_element();
+        parent.append_child(new_element).unwrap_throw();
+        tracker.node_added(new_element);
 
         wet_child
     }
 
-    fn hydrate_element(self, dom_elem: &web_sys::Element) -> WetElement {
-        self.reconcile_attributes(dom_elem);
+    fn hydrate_element(
+        self,
+        dom_elem: &web_sys::Element,
+        tracker: &mut impl HydrationTracker,
+    ) -> WetElement {
+        self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::new_from_element(dom_elem.clone());
         let mut current_child = dom_elem.first_child();
 
@@ -73,16 +85,16 @@ impl DryElement {
 
         for mut child in children.by_ref() {
             if let Some(node) = &current_child {
-                let hydrated_elem = child.hydrate_child(dom_elem, node);
+                let hydrated_elem = child.hydrate_child(dom_elem, node, tracker);
                 current_child = hydrated_elem.next_sibling();
             } else {
-                dom_elem.append_child(&child.dom_node()).unwrap_throw();
+                hydrate_with_new(dom_elem, child, tracker);
                 break;
             }
         }
 
         for child in children {
-            dom_elem.append_child(&child.dom_node()).unwrap_throw();
+            hydrate_with_new(dom_elem, child, tracker);
         }
 
         if let Some(node) = &current_child {
@@ -103,7 +115,11 @@ impl DryElement {
         elem
     }
 
-    fn reconcile_attributes(&self, dom_elem: &web_sys::Element) {
+    fn reconcile_attributes(
+        &self,
+        dom_elem: &web_sys::Element,
+        tracker: &mut impl HydrationTracker,
+    ) {
         let dom_attributes = dom_elem.attributes();
         let mut dom_attr_map = HashMap::new();
 
@@ -126,11 +142,13 @@ impl DryElement {
 
             if set_attr {
                 dom_elem.set_attribute(name, value).unwrap_throw();
+                tracker.attribute_set(dom_elem, name, value);
             }
         }
 
         for name in dom_attr_map.into_keys() {
             if !name.starts_with("data-silkenweb") {
+                tracker.attribute_removed(dom_elem, &name);
                 dom_elem.remove_attribute(&name).unwrap_throw();
             }
         }
@@ -212,6 +230,16 @@ impl DryElement {
     }
 }
 
+fn hydrate_with_new(
+    parent: &web_sys::Element,
+    child: HydrationNodeData,
+    tracker: &mut impl HydrationTracker,
+) {
+    let new_child = child.dom_node();
+    parent.append_child(&new_child).unwrap_throw();
+    tracker.node_added(&new_child);
+}
+
 impl Display for DryElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO: Namespace
@@ -281,7 +309,12 @@ impl DryText {
         Self(text.to_owned())
     }
 
-    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> WetText {
+    pub fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
+    ) -> WetText {
         if let Some(dom_text) = child.dyn_ref::<web_sys::Text>() {
             let from_dom = || WetText::new_from_text(dom_text.clone());
 
@@ -294,9 +327,9 @@ impl DryText {
 
         let new_text = WetText::new(&self.0);
 
-        parent
-            .insert_before(new_text.dom_text(), Some(child))
-            .unwrap_throw();
+        let dom_text = new_text.dom_text();
+        parent.insert_before(dom_text, Some(child)).unwrap_throw();
+        tracker.node_added(dom_text);
 
         new_text
     }

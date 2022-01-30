@@ -1,7 +1,7 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::hydrate,
+    dom::{hydrate_tracked, HydrationStats},
     elements::{html::*, macros::ElementBuilder},
     prelude::*,
 };
@@ -18,5 +18,5 @@ fn main() {
             .text_signal(count_text),
     );
 
-    hydrate("app", app);
+    hydrate_tracked("app", app, HydrationStats::default());
 }

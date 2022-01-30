@@ -11,7 +11,7 @@ use self::{
     wet::{WetElement, WetText},
 };
 use super::{Hydration, IsDry};
-use crate::{attribute::Attribute, event::EventCallback};
+use crate::{attribute::Attribute, event::EventCallback, HydrationTracker};
 
 mod dry;
 mod wet;
@@ -56,9 +56,14 @@ impl HydrationElement {
         self.wet().dom_element().clone()
     }
 
-    pub fn hydrate_child(&self, parent: &web_sys::Node, child: &web_sys::Node) -> web_sys::Element {
+    pub fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
+    ) -> web_sys::Element {
         self.borrow_mut()
-            .wet_with(|dry_elem| dry_elem.hydrate_child(parent, child))
+            .wet_with(|dry_elem| dry_elem.hydrate_child(parent, child, tracker))
             .dom_element()
             .clone()
     }
@@ -180,10 +185,11 @@ impl HydrationText {
         &mut self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
     ) -> web_sys::Text {
         // TODO: Validation
         self.borrow_mut()
-            .wet_with(|dry_text| dry_text.hydrate_child(parent, child))
+            .wet_with(|dry_text| dry_text.hydrate_child(parent, child, tracker))
             .dom_text()
             .clone()
     }
@@ -229,10 +235,11 @@ impl HydrationNodeData {
         &mut self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
     ) -> web_sys::Node {
         match &mut self.0 {
-            HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child).into(),
-            HydrationNodeEnum::Text(text) => text.hydrate_child(parent, child).into(),
+            HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child, tracker).into(),
+            HydrationNodeEnum::Text(text) => text.hydrate_child(parent, child, tracker).into(),
         }
     }
 

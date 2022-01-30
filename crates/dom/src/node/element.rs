@@ -24,7 +24,7 @@ use crate::{
     clone,
     hydration::node::{DryNode, HydrationElement, HydrationText},
     render::queue_update,
-    spawn_cancelable_future,
+    spawn_cancelable_future, HydrationTracker,
 };
 
 mod child_groups;
@@ -270,8 +270,9 @@ impl Element {
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
+        tracker: &mut impl HydrationTracker,
     ) -> web_sys::Element {
-        self.hydro_elem.hydrate_child(parent, child)
+        self.hydro_elem.hydrate_child(parent, child, tracker)
     }
 
     pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
