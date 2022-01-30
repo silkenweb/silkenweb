@@ -2,13 +2,14 @@ pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
+    intern_str,
     node::{
         element::{Element, ElementBuilder, ElementBuilderBase, ParentBuilder},
         Node,
     },
     tag, tag_in_namespace,
 };
-pub use wasm_bindgen::{intern, JsCast, JsValue, UnwrapThrowExt};
+pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
 /// Define an html element.
@@ -96,7 +97,7 @@ macro_rules! dom_element {
         }
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
-            $(namespace = $crate::macros::intern($namespace), )?
+            $(namespace = $crate::macros::intern_str($namespace), )?
             attributes = [$($attribute_trait),*],
             events = [$($event_trait),*],
             $(#[$elem_meta])*
@@ -473,7 +474,7 @@ macro_rules! text_attr {
 #[macro_export]
 macro_rules! text_name{
     ($name:ident $(- $name_tail:tt)*) => {
-        $crate::macros::intern($crate::naked_text_name!($name $( - $name_tail)*))
+        $crate::macros::intern_str($crate::naked_text_name!($name $( - $name_tail)*))
     }
 }
 

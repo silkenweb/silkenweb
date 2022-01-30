@@ -1,4 +1,6 @@
-use wasm_bindgen::{intern, UnwrapThrowExt};
+use wasm_bindgen::UnwrapThrowExt;
+
+use crate::intern_str;
 
 pub trait AttributeValue {
     fn text(self) -> String;
@@ -66,7 +68,9 @@ impl<U: Attribute, T: AsAttribute<U>> AsAttribute<U> for Option<T> {}
 impl Attribute for bool {
     fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
         if self {
-            dom_element.set_attribute(name, intern("")).unwrap_throw();
+            dom_element
+                .set_attribute(name, intern_str(""))
+                .unwrap_throw();
         } else {
             dom_element.remove_attribute(name).unwrap_throw();
         }

@@ -15,7 +15,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use wasm_bindgen::{intern, JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_groups::ChildGroups, child_vec::ChildVec};
 use super::Node;
@@ -23,6 +23,7 @@ use crate::{
     attribute::Attribute,
     clone,
     hydration::node::{DryNode, HydrationElement, HydrationText},
+    intern_str,
     render::queue_update,
     spawn_cancelable_future, HydrationTracker,
 };
@@ -152,7 +153,7 @@ impl ParentBuilder for ElementBuilderBase {
     }
 
     fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
-        let mut text_node = HydrationText::new(intern(""));
+        let mut text_node = HydrationText::new(intern_str(""));
         self.child_groups_mut()
             .append_new_group_sync(&mut text_node);
 

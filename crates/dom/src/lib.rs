@@ -204,6 +204,17 @@ pub fn tag_in_namespace(namespace: &str, name: &str) -> ElementBuilderBase {
     ElementBuilderBase::new_in_namespace(namespace, name)
 }
 
+#[cfg(target_arch = "wasm32")]
+pub fn intern_str(s: &str) -> &str {
+    use wasm_bindgen::intern;
+    intern(s);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn intern_str(s: &str) -> &str {
+    s
+}
+
 fn spawn_cancelable_future(
     future: impl Future<Output = ()> + 'static,
 ) -> DiscardOnDrop<CancelableFutureHandle> {

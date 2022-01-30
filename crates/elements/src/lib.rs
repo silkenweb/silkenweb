@@ -15,8 +15,8 @@ use std::marker::PhantomData;
 
 use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
-use silkenweb_dom::node::element::ElementBuilder;
-use wasm_bindgen::{intern, JsCast, UnwrapThrowExt};
+use silkenweb_dom::{intern_str, node::element::ElementBuilder};
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 #[doc(hidden)]
 #[macro_use]
@@ -85,7 +85,7 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
 
 pub trait HtmlElement: ElementBuilder {
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        self.attribute(intern("class"), class_attribute_text(value))
+        self.attribute(intern_str("class"), class_attribute_text(value))
     }
 
     fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
@@ -93,7 +93,7 @@ pub trait HtmlElement: ElementBuilder {
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
         self.attribute_signal(
-            intern("class"),
+            intern_str("class"),
             value.map(move |class| class_attribute_text(class)),
         )
     }
