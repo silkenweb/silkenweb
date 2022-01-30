@@ -71,16 +71,6 @@ impl WetElement {
         });
     }
 
-    pub fn insert_child_before_now(
-        &mut self,
-        child: impl WetNode,
-        next_child: Option<impl WetNode>,
-    ) {
-        self.dom_element
-            .insert_before(&child.dom_node(), next_child.map(|c| c.dom_node()).as_ref())
-            .unwrap_throw();
-    }
-
     pub fn replace_child(&mut self, new_child: impl WetNode, old_child: impl WetNode) {
         let parent = self.dom_element.clone();
         let new_child = new_child.dom_node();
@@ -97,12 +87,6 @@ impl WetElement {
         queue_update(move || {
             parent.remove_child(&child).unwrap_throw();
         });
-    }
-
-    pub fn remove_child_now(&mut self, child: impl WetNode) {
-        self.dom_element
-            .remove_child(&child.dom_node())
-            .unwrap_throw();
     }
 
     pub fn clear_children(&mut self) {

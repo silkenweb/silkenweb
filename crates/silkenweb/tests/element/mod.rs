@@ -66,10 +66,6 @@ fn check_children_signal<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize
     let children = MutableVec::<usize>::new_with_values(initial.to_vec());
     let element = div().children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
 
-    // TODO: If we don't put this here, we get changes from `f` sent before the
-    // initial values. Need to investigate.
-    render_now_sync();
-
     f(children.lock_mut());
     let mut expected_html = String::new();
 

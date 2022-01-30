@@ -7,7 +7,6 @@ use super::child_groups::ChildGroups;
 use crate::{
     hydration::node::{DryNode, HydrationElement, HydrationNodeData},
     node::Node,
-    render::queue_update,
 };
 
 pub struct ChildVec {
@@ -60,16 +59,16 @@ impl ChildVec {
             return;
         }
 
-        let children = self.child_hydro_nodes();
-        child_groups.set_first_child(self.group_index, children.first().unwrap_throw().clone());
+        child_groups.set_first_child(
+            self.group_index,
+            self.children.first().unwrap_throw().clone_into_hydro(),
+        );
         let mut next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
         let mut parent = self.parent.clone();
 
-        queue_update(move || {
-            for mut child in children {
-                parent.insert_child_before_now(&mut child, next_group_elem.as_mut());
-            }
-        });
+        for child in &self.children {
+            parent.insert_child_before(child, next_group_elem.as_mut());
+        }
     }
 
     pub fn insert(&mut self, index: usize, new_child: impl Into<Node>) {
@@ -147,6 +146,7 @@ impl ChildVec {
     }
 
     pub fn pop(&mut self) {
+        dbg!(self.children.len());
         let removed_child = self.children.pop();
 
         if self.children.is_empty() {
@@ -174,11 +174,9 @@ impl ChildVec {
         } else {
             let mut parent = self.parent.clone();
 
-            queue_update(move || {
-                for mut child in existing_children {
-                    parent.remove_child_now(&mut child);
-                }
-            });
+            for mut child in existing_children {
+                parent.remove_child(&mut child);
+            }
         }
     }
 
