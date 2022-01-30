@@ -15,7 +15,7 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 [features]
 default = []
 client-side-render = []
-server-side-render = ["futures"]
+server-side-render = []
 hydration = []
 
 [dependencies]
@@ -24,7 +24,7 @@ futures-signals = "0.3"
 discard = "1.0"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
-futures = { version = "0.3", optional = true }
+futures = "0.3"
 caseless = "0.2.1"
 
 [dependencies.web-sys]
