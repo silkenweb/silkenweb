@@ -140,9 +140,7 @@ impl WetText {
     pub fn set_text(&mut self, text: String) {
         let parent = self.0.clone();
 
-        queue_update(move || {
-            parent.set_text_content(Some(&text))
-        });
+        queue_update(move || parent.set_text_content(Some(&text)));
     }
 }
 
