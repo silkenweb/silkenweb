@@ -23,9 +23,7 @@ use crate::{
     attribute::Attribute,
     clone,
     hydration::node::{DryNode, HydrationElement, HydrationText},
-    intern_str,
-    render::queue_update,
-    spawn_cancelable_future, HydrationTracker,
+    intern_str, spawn_cancelable_future, HydrationTracker,
 };
 
 mod child_groups;
@@ -175,7 +173,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.hydro_elem.attribute(name, value);
+        self.element.hydro_elem.attribute_now(name, value);
         self
     }
 
@@ -185,15 +183,13 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let element = self.element.hydro_elem.clone();
+        let mut element = self.element.hydro_elem.clone();
 
         let updater = value.for_each({
             let name = name.to_owned();
 
             move |new_value| {
-                clone!(name, mut element);
-
-                queue_update(move || element.attribute(&name, new_value));
+                element.attribute(&name, new_value);
 
                 async {}
             }

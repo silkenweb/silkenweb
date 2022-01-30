@@ -95,8 +95,14 @@ impl WetElement {
         queue_update(move || parent.set_inner_html(""));
     }
 
-    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
+    pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
         value.set_attribute(name, &self.dom_element);
+    }
+
+    pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
+        let name = name.to_owned();
+        let dom_element = self.dom_element.clone();
+        queue_update(move || value.set_attribute(&name, &dom_element));
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -135,7 +141,7 @@ impl WetText {
         let parent = self.0.clone();
 
         queue_update(move || {
-            parent.set_text_content(Some(&text));
+            parent.set_text_content(Some(&text))
         });
     }
 }

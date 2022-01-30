@@ -115,7 +115,15 @@ impl HydrationElement {
         );
     }
 
-    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
+    pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
+        self.borrow_mut().map(
+            (name, value),
+            |elem, (name, value)| elem.attribute(name, value),
+            |elem, (name, value)| elem.attribute_now(name, value),
+        );
+    }
+
+    pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
         self.borrow_mut().map(
             (name, value),
             |elem, (name, value)| elem.attribute(name, value),
