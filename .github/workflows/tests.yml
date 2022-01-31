@@ -60,7 +60,7 @@ jobs:
       # Browser tests intermittantly hang with windows github actions.
       if: matrix.os != 'windows-latest'
       working-directory: crates/silkenweb
-      run: wasm-pack test --headless --firefox
+      run: cargo xtask wasm-pack-test
     # Make sure we build first so cypress doesn't time out
     - name: Build todomvc
       working-directory: examples/todomvc

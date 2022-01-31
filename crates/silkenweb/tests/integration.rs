@@ -12,6 +12,8 @@ use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 #[cfg(feature = "server-side-render")]
 mod element;
+#[cfg(feature = "hydration")]
+mod hydration;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
