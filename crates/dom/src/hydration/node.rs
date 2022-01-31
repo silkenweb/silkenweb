@@ -174,7 +174,6 @@ impl HydrationText {
         child: &web_sys::Node,
         tracker: &mut impl HydrationTracker,
     ) -> web_sys::Text {
-        // TODO: Validation
         self.borrow_mut()
             .wet_with(|dry_text| dry_text.hydrate_child(parent, child, tracker))
             .dom_text()
