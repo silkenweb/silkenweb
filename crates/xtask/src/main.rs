@@ -1,9 +1,7 @@
 use clap::Parser;
 use scopeguard::defer;
 use xshell::{cmd, pushd};
-use xtask_base::{
-    build_readme, ci, generate_open_source_files, run, CommonCmds, Toolchain, WorkflowResult,
-};
+use xtask_base::{build_readme, ci, generate_open_source_files, run, CommonCmds, WorkflowResult};
 
 #[derive(Parser)]
 enum Commands {
@@ -21,7 +19,7 @@ enum Commands {
         #[clap(long)]
         fast: bool,
         /// Only run tasks for the specified toolchain
-        toolchain: Option<Toolchain>,
+        toolchain: Option<String>,
     },
     /// Run TodoMVC with `trunk`
     TodomvcRun,
@@ -46,15 +44,22 @@ fn main() {
                 generate_open_source_files(2021, check)?;
             }
             Commands::Ci { fast, toolchain } => {
-                build_readme(".", true)?;
-                generate_open_source_files(2021, true)?;
-                ci(fast, toolchain)?;
+                let stable = toolchain
+                    .as_ref()
+                    .map_or(true, |tc| tc.starts_with("stable"));
 
-                if !fast {
-                    cypress("ci", "run")?;
+                if stable {
+                    build_readme(".", true)?;
+                    generate_open_source_files(2021, true)?;
                 }
 
-                if toolchain.map_or(true, |tc| tc == Toolchain::Stable) {
+                ci(fast, &toolchain)?;
+
+                if stable {
+                    if !fast {
+                        cypress("ci", "run")?;
+                    }
+
                     wasm_pack_test()?;
                 }
             }
