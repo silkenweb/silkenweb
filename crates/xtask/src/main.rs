@@ -102,7 +102,7 @@ fn test_features() -> WorkflowResult<()> {
 
         cmd!("cargo test --package silkenweb --features {features}").run()?;
     }
-    
+
     Ok(())
 }
 
