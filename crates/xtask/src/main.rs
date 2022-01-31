@@ -1,7 +1,10 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use scopeguard::defer;
 use xshell::{cmd, pushd};
-use xtask_base::{build_readme, ci, generate_open_source_files, run, CommonCmds, WorkflowResult};
+use xtask_base::{
+    build_readme, ci_nightly, generate_open_source_files, run, target_os, CommonCmds, TargetOs,
+    WorkflowResult,
+};
 
 #[derive(Parser)]
 enum Commands {
@@ -13,13 +16,8 @@ enum Commands {
     },
     /// Run CI checks
     Ci {
-        /// Leave out some of the more expensive tests
-        ///
-        /// Cypress and release build tests are excluded
-        #[clap(long)]
-        fast: bool,
-        /// Only run tasks for the specified toolchain
-        toolchain: Option<String>,
+        #[clap(subcommand)]
+        command: Option<CiCommand>,
     },
     /// Run TodoMVC with `trunk`
     TodomvcRun,
@@ -36,6 +34,19 @@ enum Commands {
     Common(CommonCmds),
 }
 
+#[derive(Subcommand, PartialEq, Eq)]
+enum CiCommand {
+    Stable {
+        #[clap(long)]
+        fast: bool,
+        toolchain: Option<String>,
+    },
+    Nightly {
+        toolchain: Option<String>,
+    },
+    Browser,
+}
+
 fn main() {
     run(|workspace| {
         match Commands::parse() {
@@ -43,24 +54,17 @@ fn main() {
                 build_readme(".", check)?;
                 generate_open_source_files(2021, check)?;
             }
-            Commands::Ci { fast, toolchain } => {
-                let stable = toolchain
-                    .as_ref()
-                    .map_or(true, |tc| tc.starts_with("stable"));
-
-                if stable {
-                    build_readme(".", true)?;
-                    generate_open_source_files(2021, true)?;
-                }
-
-                ci(fast, &toolchain)?;
-
-                if stable {
-                    if !fast {
-                        cypress("ci", "run")?;
+            Commands::Ci { command } => {
+                if let Some(command) = command {
+                    match command {
+                        CiCommand::Stable { fast, toolchain } => ci_stable(fast, toolchain)?,
+                        CiCommand::Nightly { toolchain } => ci_nightly(toolchain.as_deref())?,
+                        CiCommand::Browser => ci_browser()?,
                     }
-
-                    wasm_pack_test()?;
+                } else {
+                    ci_stable(false, None)?;
+                    ci_nightly(Some("nightly"))?;
+                    ci_browser()?;
                 }
             }
             Commands::TodomvcRun => {
@@ -68,7 +72,7 @@ fn main() {
                 cmd!("trunk serve --open").run()?;
             }
             Commands::TodomvcCypress { gui } => {
-                cypress("install", if gui { "open" } else { "run" })?;
+                cypress("install", if gui { "open" } else { "run" }, None)?;
             }
             Commands::GithubActions { full } => {
                 let reuse = (!full).then(|| "--reuse");
@@ -86,7 +90,27 @@ fn main() {
     });
 }
 
-fn cypress(npm_install_cmd: &str, cypress_cmd: &str) -> WorkflowResult<()> {
+fn ci_browser() -> WorkflowResult<()> {
+    match target_os() {
+        TargetOs::Windows => cypress("ci", "run", Some("edge"))?,
+        TargetOs::Linux => {
+            wasm_pack_test()?;
+            cypress("ci", "run", Some("firefox"))?
+        }
+        _ => (),
+    };
+
+    Ok(())
+}
+
+fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
+    build_readme(".", true)?;
+    generate_open_source_files(2021, true)?;
+    xtask_base::ci_stable(fast, toolchain.as_deref())?;
+    Ok(())
+}
+
+fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
     let _dir = pushd("examples/todomvc")?;
     cmd!("trunk build").run()?;
     let trunk = duct::cmd("trunk", ["serve", "--no-autoreload", "--ignore=."]).start()?;
@@ -94,7 +118,12 @@ fn cypress(npm_install_cmd: &str, cypress_cmd: &str) -> WorkflowResult<()> {
 
     let _dir = pushd("e2e")?;
     cmd!("npm {npm_install_cmd}").run()?;
-    cmd!("npx cypress {cypress_cmd}").run()?;
+
+    if let Some(browser) = browser {
+        cmd!("npx cypress {cypress_cmd} --browser {browser}").run()?;
+    } else {
+        cmd!("npx cypress {cypress_cmd}").run()?;
+    }
 
     Ok(())
 }
