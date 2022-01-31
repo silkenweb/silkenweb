@@ -39,8 +39,6 @@ impl DryElement {
         let namespace = self.namespace;
 
         // TODO: This needs testing.
-        // TODO: What happens if we also have an "xmlns" attribute? Should we disallow
-        // that?
         if current_ns != namespace {
             write!(
                 f,
@@ -51,6 +49,8 @@ impl DryElement {
         }
 
         for (name, value) in &self.attributes {
+            check_attr_name(name);
+
             if let Some(value) = value {
                 write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
             } else {
@@ -242,6 +242,8 @@ impl DryElement {
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
+        check_attr_name(name);
+
         self.attributes.insert(name.to_owned(), value.text());
     }
 
@@ -257,6 +259,13 @@ impl DryElement {
         ]
         .contains(&self.tag.as_str())
     }
+}
+
+fn check_attr_name(name: &str) {
+    assert_ne!(
+        name, "xmlns",
+        "\"xmlns\" must be set via a namespace at tag creation time"
+    );
 }
 
 fn hydrate_with_new(
