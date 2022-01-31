@@ -1,6 +1,7 @@
 [workspace]
 
-members = ["examples/*", "crates/*"]
+members = ["crates/*", "examples/*"]
+default-members = ["crates/*"]
 
 [profile.release]
 codegen-units = 1
