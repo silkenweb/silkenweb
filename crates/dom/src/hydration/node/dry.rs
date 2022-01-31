@@ -42,7 +42,7 @@ impl DryElement {
         loop {
             if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
                 let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
-                let dry_namespace = match self.namespace.as_ref().map_or("", String::as_ref) {
+                let dry_namespace = match self.namespace.as_deref().unwrap_or("") {
                     "" => "http://www.w3.org/1999/xhtml",
                     ns => ns,
                 };
