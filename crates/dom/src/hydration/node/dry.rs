@@ -34,6 +34,44 @@ impl DryElement {
         }
     }
 
+    pub fn fmt(&self, current_ns: Namespace, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<{}", self.tag)?;
+        let namespace = self.namespace;
+
+        // TODO: This needs testing.
+        // TODO: What happens if we also have an "xmlns" attribute? Should we disallow
+        // that?
+        if current_ns != namespace {
+            write!(
+                f,
+                " xmlns=\"{}\"",
+                encode_double_quoted_attribute(namespace.as_str())
+            )?;
+        }
+
+        for (name, value) in &self.attributes {
+            if let Some(value) = value {
+                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+            } else {
+                write!(f, " {}", name)?;
+            }
+        }
+
+        f.write_str(">")?;
+
+        for child in &self.children {
+            child.fmt(namespace, f)?;
+        }
+
+        let has_children = !self.children.is_empty();
+
+        if self.requires_closing_tag() || has_children {
+            write!(f, "</{}>", self.tag)?;
+        }
+
+        Ok(())
+    }
+
     pub fn hydrate_child(
         self,
         parent: &web_sys::Node,
@@ -47,6 +85,7 @@ impl DryElement {
                 let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
                 let dry_namespace = self.namespace.as_str();
 
+                // TODO: Are these case sensitive?
                 if default_caseless_match_str(dry_namespace, &dom_namespace)
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
@@ -228,35 +267,6 @@ fn hydrate_with_new(
     let new_child = child.dom_node();
     parent.append_child(&new_child).unwrap_throw();
     tracker.node_added(&new_child);
-}
-
-impl Display for DryElement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO: Namespace
-        write!(f, "<{}", self.tag)?;
-
-        for (name, value) in &self.attributes {
-            if let Some(value) = value {
-                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
-            } else {
-                write!(f, " {}", name)?;
-            }
-        }
-
-        f.write_str(">")?;
-
-        for child in &self.children {
-            child.fmt(f)?;
-        }
-
-        let has_children = !self.children.is_empty();
-
-        if self.requires_closing_tag() || has_children {
-            write!(f, "</{}>", self.tag)?;
-        }
-
-        Ok(())
-    }
 }
 
 impl From<DryElement> for WetElement {

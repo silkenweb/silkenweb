@@ -3,8 +3,10 @@ use std::{
     mem,
 };
 
+use caseless::default_caseless_match_str;
 use html_escape::encode_text_minimal;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
+use web_sys::XmlSerializer;
 
 use super::{HydrationNodeData, Namespace, WetNode};
 use crate::{
@@ -33,6 +35,24 @@ impl WetElement {
         Self {
             dom_element,
             event_callbacks: Vec::new(),
+        }
+    }
+
+    pub fn fmt(&self, current_ns: Namespace, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let dom_elem = self.dom_element();
+        let dom_namespace = dom_elem.namespace_uri().unwrap_or_default();
+
+        // TODO: Test this
+        // TODO: Are these case sensitive?
+        if default_caseless_match_str(current_ns.as_str(), &dom_namespace) {
+            f.write_str(&self.dom_element.outer_html())
+        } else {
+            f.write_str(
+                &XmlSerializer::new()
+                    .unwrap_throw()
+                    .serialize_to_string(dom_elem)
+                    .unwrap_throw(),
+            )
         }
     }
 
@@ -114,12 +134,6 @@ impl WetElement {
 
     pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {
         mem::take(&mut self.event_callbacks)
-    }
-}
-
-impl Display for WetElement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.dom_element.outer_html())
     }
 }
 

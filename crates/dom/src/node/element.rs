@@ -279,7 +279,7 @@ impl Element {
 
 impl Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.hydro_elem.fmt(f)
+        self.hydro_elem.fmt(Namespace::Html, f)
     }
 }
 

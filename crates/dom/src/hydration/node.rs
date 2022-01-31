@@ -27,6 +27,14 @@ impl HydrationElement {
         ))))
     }
 
+    pub fn fmt(&self, current_ns: Namespace, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.borrow_mut().map(
+            f,
+            |node, f| node.fmt(current_ns, f),
+            |node, f| node.fmt(current_ns, f),
+        )
+    }
+
     pub fn shrink_to_fit(&mut self) {
         self.borrow_mut()
             .map((), |_, _| (), |elem, _| elem.shrink_to_fit());
@@ -138,13 +146,6 @@ impl HydrationElement {
     }
 }
 
-impl Display for HydrationElement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.borrow_mut()
-            .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
-    }
-}
-
 #[derive(Clone)]
 pub struct HydrationText(Rc<RefCell<Hydration<WetText, DryText>>>);
 
@@ -198,6 +199,13 @@ impl Display for HydrationText {
 pub struct HydrationNodeData(HydrationNodeEnum);
 
 impl HydrationNodeData {
+    pub fn fmt(&self, current_ns: Namespace, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            HydrationNodeEnum::Element(elem) => elem.fmt(current_ns, f),
+            HydrationNodeEnum::Text(text) => text.fmt(f),
+        }
+    }
+
     pub fn is_same(&self, other: &Self) -> bool {
         match (&self.0, &other.0) {
             (HydrationNodeEnum::Element(elem0), HydrationNodeEnum::Element(elem1)) => {
@@ -226,15 +234,6 @@ impl HydrationNodeData {
         match &mut self.0 {
             HydrationNodeEnum::Element(elem) => elem.wet().take_event_callbacks(),
             HydrationNodeEnum::Text(_) => Vec::new(),
-        }
-    }
-}
-
-impl Display for HydrationNodeData {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.0 {
-            HydrationNodeEnum::Element(elem) => elem.fmt(f),
-            HydrationNodeEnum::Text(text) => text.fmt(f),
         }
     }
 }
@@ -373,7 +372,7 @@ impl IsDry for HydrationText {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Namespace {
     /// New elements in the `Html` namespace are created with `create_element`,
     /// thus avoiding converting the namespace to a javascript string.
