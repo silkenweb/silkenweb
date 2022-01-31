@@ -17,7 +17,11 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
       if: ${{ !env.ACT }}
-    - run: cargo xtask ci stable
+    - run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - run: cargo build --all-targets
+    - run: cargo doc
+    - run: cargo test
+    - run: cargo test --benches --tests --release
 
   browser-tests:
     strategy:
@@ -27,9 +31,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '16'
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -55,7 +56,31 @@ jobs:
         crate: wasm-bindgen-cli
         version: 0.2.78
     - name: Browser Tests
-      run: cargo xtask ci browser
+      # Browser tests intermittantly hang with windows github actions.
+      if: matrix.os != 'windows-latest'
+      working-directory: crates/silkenweb
+      run: wasm-pack test --headless --firefox
+    # Make sure we build first so cypress doesn't time out
+    - name: Build todomvc
+      working-directory: examples/todomvc
+      run: trunk build
+    # Cypress doesn't support Safari yet
+    - name: Cypress on Linux
+      if: matrix.os == 'ubuntu-latest'
+      uses: cypress-io/github-action@v2
+      with:
+        working-directory: examples/todomvc/e2e
+        start: npm start
+        wait-on: 'http://localhost:8080'
+        browser: firefox
+    - name: Cypress on Windows
+      if: matrix.os == 'windows-latest'
+      uses: cypress-io/github-action@v2
+      with:
+        working-directory: examples/todomvc/e2e
+        start: npm start
+        wait-on: 'http://localhost:8080'
+        browser: edge
     # Screenshots are only generated on failure
     - uses: actions/upload-artifact@v2
       if: failure()
@@ -88,4 +113,5 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: cargo-udeps
-    - run: cargo xtask ci nightly ${{ matrix.rust }}
+    - run: cargo fmt --all -- --check
+    - run: cargo udeps --all-targets
