@@ -57,7 +57,7 @@ macro_rules! html_element {
 macro_rules! svg_element {
     ($($t:tt)*) => {
         $crate::dom_element!(
-            namespace = "http://www.w3.org/2000/svg",
+            namespace = Some("http://www.w3.org/2000/svg"),
             // TODO: Add default attributes
             attributes = [],
             // TODO: Add default events
@@ -71,7 +71,7 @@ macro_rules! svg_element {
 #[macro_export]
 macro_rules! dom_element {
     (
-        $(namespace = $namespace:literal, )?
+        $(namespace = $namespace:expr, )?
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
         $(#[$elem_meta:meta])*
@@ -97,7 +97,7 @@ macro_rules! dom_element {
         }
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
-            $(namespace = $crate::macros::intern_str($namespace), )?
+            $(namespace = $namespace, )?
             attributes = [$($attribute_trait),*],
             events = [$($event_trait),*],
             $(#[$elem_meta])*

@@ -22,7 +22,7 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     clone,
-    hydration::node::{DryNode, HydrationElement, HydrationText},
+    hydration::node::{DryNode, HydrationElement, HydrationText, Namespace},
     intern_str, spawn_cancelable_future, HydrationTracker,
 };
 
@@ -39,11 +39,11 @@ pub struct ElementBuilderBase {
 
 impl ElementBuilderBase {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(tag))
+        Self::new_element(HydrationElement::new(Namespace::Html, tag))
     }
 
-    pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(HydrationElement::new_in_namespace(namespace, tag))
+    pub fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
+        Self::new_element(HydrationElement::new(Namespace::Other(namespace), tag))
     }
 
     fn new_element(hydro_elem: HydrationElement) -> Self {

@@ -20,17 +20,10 @@ mod wet;
 pub struct HydrationElement(Rc<RefCell<Hydration<WetElement, DryElement>>>);
 
 impl HydrationElement {
-    pub fn new(tag: &str) -> Self {
+    pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self(Rc::new(RefCell::new(Hydration::new(
-            || WetElement::new(tag),
-            || DryElement::new(tag),
-        ))))
-    }
-
-    pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Hydration::new(
-            || WetElement::new_in_namespace(namespace, tag),
-            || DryElement::new_in_namespace(namespace, tag),
+            || WetElement::new(namespace, tag),
+            || DryElement::new(namespace, tag),
         ))))
     }
 
@@ -377,5 +370,23 @@ impl IsDry for HydrationElement {
 impl IsDry for HydrationText {
     fn is_dry(&self) -> bool {
         self.0.borrow().is_dry()
+    }
+}
+
+#[derive(Copy, Clone)]
+pub enum Namespace {
+    /// New elements in the `Html` namespace are created with `create_element`,
+    /// thus avoiding converting the namespace to a javascript string.
+    Html,
+    Other(Option<&'static str>),
+}
+
+impl Namespace {
+    fn as_str(&self) -> &str {
+        match self {
+            Namespace::Html => "http://www.w3.org/1999/xhtml",
+            Namespace::Other(None) => "",
+            Namespace::Other(Some(ns)) => ns,
+        }
     }
 }

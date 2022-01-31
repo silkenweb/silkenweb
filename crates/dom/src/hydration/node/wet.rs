@@ -6,11 +6,12 @@ use std::{
 use html_escape::encode_text_minimal;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::{HydrationNodeData, WetNode};
+use super::{HydrationNodeData, Namespace, WetNode};
 use crate::{
     attribute::Attribute,
     event::EventCallback,
     global::document,
+    intern_str,
     render::{after_render, queue_update},
 };
 
@@ -20,12 +21,12 @@ pub struct WetElement {
 }
 
 impl WetElement {
-    pub fn new(tag: &str) -> Self {
-        Self::new_from_element(document::create_element(tag))
-    }
-
-    pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_from_element(document::create_element_ns(namespace, tag))
+    pub fn new(namespace: Namespace, tag: &str) -> Self {
+        let dom_element = match namespace {
+            Namespace::Html => document::create_element(tag),
+            Namespace::Other(ns) => document::create_element_ns(ns.map(intern_str), tag),
+        };
+        Self::new_from_element(dom_element)
     }
 
     pub fn new_from_element(dom_element: web_sys::Element) -> Self {

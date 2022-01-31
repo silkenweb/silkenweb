@@ -200,7 +200,7 @@ pub fn tag(name: &str) -> ElementBuilderBase {
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: &str, name: &str) -> ElementBuilderBase {
+pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> ElementBuilderBase {
     ElementBuilderBase::new_in_namespace(namespace, name)
 }
 

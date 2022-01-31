@@ -9,12 +9,12 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetText},
-    DryNode, HydrationNodeData, WetNode,
+    DryNode, HydrationNodeData, Namespace, WetNode,
 };
 use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTracker};
 
 pub struct DryElement {
-    namespace: Option<String>,
+    namespace: Namespace,
     tag: String,
     attributes: HashMap<String, Option<String>>,
     children: Vec<HydrationNodeData>,
@@ -23,12 +23,15 @@ pub struct DryElement {
 }
 
 impl DryElement {
-    pub fn new(tag: &str) -> Self {
-        Self::new_element(None, tag)
-    }
-
-    pub fn new_in_namespace(namespace: &str, tag: &str) -> Self {
-        Self::new_element(Some(namespace), tag)
+    pub fn new(namespace: Namespace, tag: &str) -> Self {
+        Self {
+            namespace,
+            tag: tag.to_owned(),
+            attributes: HashMap::new(),
+            children: Vec::new(),
+            stored_children: Vec::new(),
+            hydrate_actions: Vec::new(),
+        }
     }
 
     pub fn hydrate_child(
@@ -42,10 +45,7 @@ impl DryElement {
         loop {
             if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
                 let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
-                let dry_namespace = match self.namespace.as_deref().unwrap_or("") {
-                    "" => "http://www.w3.org/1999/xhtml",
-                    ns => ns,
-                };
+                let dry_namespace = self.namespace.as_str();
 
                 if default_caseless_match_str(dry_namespace, &dom_namespace)
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
@@ -211,17 +211,6 @@ impl DryElement {
             .push(Box::new(move |element| element.effect(f)))
     }
 
-    fn new_element(namespace: Option<&str>, tag: &str) -> Self {
-        Self {
-            namespace: namespace.map(str::to_owned),
-            tag: tag.to_owned(),
-            attributes: HashMap::new(),
-            children: Vec::new(),
-            stored_children: Vec::new(),
-            hydrate_actions: Vec::new(),
-        }
-    }
-
     fn requires_closing_tag(&self) -> bool {
         ![
             "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta",
@@ -272,11 +261,7 @@ impl Display for DryElement {
 
 impl From<DryElement> for WetElement {
     fn from(element: DryElement) -> Self {
-        let mut elem = if let Some(namespace) = element.namespace {
-            WetElement::new_in_namespace(&namespace, &element.tag)
-        } else {
-            WetElement::new(&element.tag)
-        };
+        let mut elem = WetElement::new(element.namespace, &element.tag);
 
         for (name, value) in element.attributes {
             elem.attribute(&name, value);
