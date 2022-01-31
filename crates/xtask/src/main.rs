@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use itertools::Itertools;
 use scopeguard::defer;
 use xshell::{cmd, pushd};
 use xtask_base::{
@@ -19,6 +20,7 @@ enum Commands {
         #[clap(subcommand)]
         command: Option<CiCommand>,
     },
+    TestFeatures,
     /// Run TodoMVC with `trunk`
     TodomvcRun,
     /// Run the TodoMVC Cypress tests
@@ -67,6 +69,7 @@ fn main() {
                     ci_browser()?;
                 }
             }
+            Commands::TestFeatures => test_features()?,
             Commands::TodomvcRun => {
                 let _dir = pushd("examples/todomvc")?;
                 cmd!("trunk serve --open").run()?;
@@ -90,6 +93,19 @@ fn main() {
     });
 }
 
+fn test_features() -> WorkflowResult<()> {
+    for features in ["client-side-render", "server-side-render", "hydration"]
+        .into_iter()
+        .powerset()
+    {
+        let features = features.join(",");
+
+        cmd!("cargo test --package silkenweb --features {features}").run()?;
+    }
+    
+    Ok(())
+}
+
 fn ci_browser() -> WorkflowResult<()> {
     match target_os() {
         TargetOs::Windows => cypress("ci", "run", Some("edge"))?,
@@ -107,6 +123,7 @@ fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
     xtask_base::ci_stable(fast, toolchain.as_deref())?;
+    test_features()?;
     Ok(())
 }
 
