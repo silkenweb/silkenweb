@@ -4,6 +4,7 @@ use std::{
 };
 
 use caseless::default_caseless_match_str;
+use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -243,13 +244,11 @@ fn hydrate_with_new(
 impl Display for DryElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO: Namespace
-        // TODO: tag/attribute name validation
         write!(f, "<{}", self.tag)?;
 
         for (name, value) in &self.attributes {
-            // TODO: escaping of values
             if let Some(value) = value {
-                write!(f, " {}=\"{}\"", name, value)?;
+                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
             } else {
                 write!(f, " {}", name)?;
             }
@@ -341,7 +340,7 @@ impl DryText {
 
 impl Display for DryText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
+        f.write_str(&encode_text_minimal(&self.0))
     }
 }
 

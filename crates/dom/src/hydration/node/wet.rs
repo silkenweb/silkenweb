@@ -3,6 +3,7 @@ use std::{
     mem,
 };
 
+use html_escape::encode_text_minimal;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 use super::{HydrationNodeData, WetNode};
@@ -147,7 +148,7 @@ impl WetText {
 impl Display for WetText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(text) = self.0.text_content() {
-            f.write_str(&text)?;
+            f.write_str(&encode_text_minimal(&text))?;
         }
 
         Ok(())
