@@ -45,6 +45,7 @@ impl DryElement {
             write!(
                 f,
                 " xmlns=\"{}\"",
+                // This is how firefox 96 escapes the namespace.
                 encode_double_quoted_attribute(namespace.as_str())
             )?;
         }
@@ -85,8 +86,7 @@ impl DryElement {
                 let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
                 let dry_namespace = self.namespace.as_str();
 
-                // TODO: Are these case sensitive?
-                if default_caseless_match_str(dry_namespace, &dom_namespace)
+                if dry_namespace == dom_namespace
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
                     return self.hydrate_element(elem_child, tracker);

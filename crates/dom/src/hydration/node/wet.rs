@@ -3,7 +3,6 @@ use std::{
     mem,
 };
 
-use caseless::default_caseless_match_str;
 use html_escape::encode_text_minimal;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use web_sys::XmlSerializer;
@@ -43,8 +42,7 @@ impl WetElement {
         let dom_namespace = dom_elem.namespace_uri().unwrap_or_default();
 
         // TODO: Test this
-        // TODO: Are these case sensitive?
-        if default_caseless_match_str(current_ns.as_str(), &dom_namespace) {
+        if current_ns.as_str() == dom_namespace {
             f.write_str(&self.dom_element.outer_html())
         } else {
             f.write_str(
