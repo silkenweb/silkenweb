@@ -13,7 +13,7 @@ use crate::{
     event::EventCallback,
     global::document,
     intern_str,
-    render::{after_render, queue_update},
+    render::{after_render, queue_update, RenderUpdate},
 };
 
 pub struct WetElement {
@@ -80,47 +80,39 @@ impl WetElement {
     }
 
     pub fn append_child(&mut self, child: impl WetNode) {
-        let parent = self.dom_node();
-        let child = child.dom_node();
-        queue_update(move || {
-            parent.append_child(&child).unwrap_throw();
+        queue_update(RenderUpdate::AppendChild {
+            parent: self.dom_element.clone(),
+            child: child.dom_node(),
         });
     }
 
     pub fn insert_child_before(&mut self, child: impl WetNode, next_child: Option<impl WetNode>) {
-        let parent = self.dom_node();
-        let child = child.dom_node();
-        let next_child = next_child.map(|c| c.dom_node());
-
-        queue_update(move || {
-            parent
-                .insert_before(&child, next_child.as_ref())
-                .unwrap_throw();
+        queue_update(RenderUpdate::InsertBefore {
+            parent: self.dom_element.clone(),
+            child: child.dom_node(),
+            next_child: next_child.map(|c| c.dom_node()),
         });
     }
 
     pub fn replace_child(&mut self, new_child: impl WetNode, old_child: impl WetNode) {
-        let parent = self.dom_element.clone();
-        let new_child = new_child.dom_node();
-        let old_child = old_child.dom_node();
-
-        queue_update(move || {
-            parent.replace_child(&new_child, &old_child).unwrap_throw();
+        queue_update(RenderUpdate::ReplaceChild {
+            parent: self.dom_element.clone(),
+            new_child: new_child.dom_node(),
+            old_child: old_child.dom_node(),
         });
     }
 
     pub fn remove_child(&mut self, child: impl WetNode) {
-        let parent = self.dom_element.clone();
-        let child = child.dom_node();
-        queue_update(move || {
-            parent.remove_child(&child).unwrap_throw();
+        queue_update(RenderUpdate::RemoveChild {
+            parent: self.dom_element.clone(),
+            child: child.dom_node(),
         });
     }
 
     pub fn clear_children(&mut self) {
-        let parent = self.dom_element.clone();
-
-        queue_update(move || parent.set_inner_html(""));
+        queue_update(RenderUpdate::ClearChildren {
+            parent: self.dom_element.clone(),
+        });
     }
 
     pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
@@ -130,7 +122,9 @@ impl WetElement {
     pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
         let name = name.to_owned();
         let dom_element = self.dom_element.clone();
-        queue_update(move || value.set_attribute(&name, &dom_element));
+        queue_update(RenderUpdate::Function(Box::new(move || {
+            value.set_attribute(&name, &dom_element)
+        })));
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -160,9 +154,7 @@ impl WetText {
     }
 
     pub fn set_text(&mut self, text: String) {
-        let parent = self.0.clone();
-
-        queue_update(move || parent.set_text_content(Some(&text)));
+        queue_update(RenderUpdate::SetTextContent{parent: self.0.clone(), text});
     }
 }
 

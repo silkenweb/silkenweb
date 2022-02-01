@@ -46,8 +46,37 @@ mod raf {
     }
 }
 
-pub(super) fn queue_update(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.queue_update(f));
+pub(super) enum RenderUpdate {
+    AppendChild {
+        parent: web_sys::Element,
+        child: web_sys::Node,
+    },
+    InsertBefore {
+        parent: web_sys::Element,
+        child: web_sys::Node,
+        next_child: Option<web_sys::Node>,
+    },
+    ReplaceChild {
+        parent: web_sys::Element,
+        old_child: web_sys::Node,
+        new_child: web_sys::Node,
+    },
+    RemoveChild {
+        parent: web_sys::Element,
+        child: web_sys::Node,
+    },
+    ClearChildren {
+        parent: web_sys::Element,
+    },
+    SetTextContent {
+        parent: web_sys::Text,
+        text: String,
+    },
+    Function(Box<dyn FnOnce()>),
+}
+
+pub(super) fn queue_update(update: RenderUpdate) {
+    RENDER.with(|r| r.queue_update(update));
 }
 
 /// Run a closure after the next render.
@@ -86,7 +115,7 @@ pub fn request_render() {
 struct Render {
     raf: raf::Raf,
     raf_pending: Cell<bool>,
-    pending_updates: RefCell<Vec<Box<dyn FnOnce()>>>,
+    pending_updates: RefCell<Vec<RenderUpdate>>,
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
     animation_timestamp_millis: Mutable<f64>,
 }
@@ -109,8 +138,8 @@ impl Render {
         self.render_updates();
     }
 
-    fn queue_update(&self, x: impl FnOnce() + 'static) {
-        self.pending_updates.borrow_mut().push(Box::new(x));
+    fn queue_update(&self, update: RenderUpdate) {
+        self.pending_updates.borrow_mut().push(update);
         self.request_render();
     }
 
@@ -127,7 +156,35 @@ impl Render {
 
     pub fn render_updates(&self) {
         for update in self.pending_updates.take() {
-            update();
+            match update {
+                RenderUpdate::Function(f) => f(),
+                RenderUpdate::AppendChild { parent, child } => {
+                    parent.append_child(&child).unwrap_throw();
+                }
+                RenderUpdate::InsertBefore {
+                    parent,
+                    child,
+                    next_child,
+                } => {
+                    parent
+                        .insert_before(&child, next_child.as_ref())
+                        .unwrap_throw();
+                }
+                RenderUpdate::ReplaceChild {
+                    parent,
+                    old_child,
+                    new_child,
+                } => {
+                    parent.replace_child(&old_child, &new_child).unwrap_throw();
+                }
+                RenderUpdate::RemoveChild { parent, child } => {
+                    parent.remove_child(&child).unwrap_throw();
+                }
+                RenderUpdate::ClearChildren { parent } => parent.set_inner_html(""),
+                RenderUpdate::SetTextContent { parent, text } => {
+                    parent.set_text_content(Some(&text))
+                }
+            }
         }
 
         for effect in self.pending_effects.take() {

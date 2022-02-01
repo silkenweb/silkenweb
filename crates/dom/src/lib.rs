@@ -3,6 +3,7 @@ use std::{cell::RefCell, collections::HashMap, fmt, future::Future};
 
 use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
+use render::RenderUpdate;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
@@ -121,7 +122,7 @@ pub fn hydrate_tracked(
     let id = id.to_owned();
     let elem = elem.into();
 
-    queue_update(move || {
+    queue_update(RenderUpdate::Function(Box::new(move || {
         unmount(&id);
 
         let mount_point = mount_point(&id);
@@ -140,7 +141,7 @@ pub fn hydrate_tracked(
 
         insert_component(&id, elem);
         tracker.finished();
-    });
+    })));
 }
 
 pub fn hydrate(id: &str, elem: impl Into<Element>) {
