@@ -3,12 +3,12 @@ use std::{cell::RefCell, rc::Rc};
 use discard::DiscardOnDrop;
 use futures_signals::{
     signal::{Signal, SignalExt},
-    signal_vec::MutableVec, CancelableFutureHandle,
+    signal_vec::MutableVec,
+    CancelableFutureHandle,
 };
 
-use crate::spawn_cancelable_future;
-
 use super::Element;
+use crate::spawn_cancelable_future;
 
 pub struct OptionalChildren {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,
@@ -19,7 +19,7 @@ pub struct OptionalChildren {
 type Item = Rc<RefCell<Option<Element>>>;
 
 impl OptionalChildren {
-    pub fn child(mut self, elem: impl Into<Element>) -> Self{
+    pub fn child(mut self, elem: impl Into<Element>) -> Self {
         self.push(Some(elem));
         self
     }
@@ -35,7 +35,7 @@ impl OptionalChildren {
     pub fn optional_child_signal(
         mut self,
         elem: impl Signal<Item = Option<impl Into<Element>>> + 'static,
-    ) -> Self{
+    ) -> Self {
         let index = self.push(None as Option<Element>);
         let items = self.items.clone();
 
