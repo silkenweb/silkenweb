@@ -103,7 +103,10 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self {
+    fn children_signal(
+        self,
+        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+    ) -> Self::Target {
         let group_index = self.child_groups_mut().new_group();
         let mut child_vec = ChildVec::new(
             self.element.hydro_elem.clone(),
@@ -116,7 +119,7 @@ impl ParentBuilder for ElementBuilderBase {
             async {}
         });
 
-        self.spawn_future(updater)
+        self.spawn_future(updater).build()
     }
 
     /// Add a text node after existing children.
@@ -146,17 +149,14 @@ impl ParentBuilder for ElementBuilderBase {
     // TODO: Remove all the `ChildGroup` stuff.
     // TODO: Can we find a way to remove the `Rc` in hydration nodes?
     fn optional_children(mut self, mut children: OptionalChildren) -> Self::Target {
-        self = self.children_signal(
+        self.element.futures.append(&mut children.futures);
+        self.children_signal(
             children
                 .items
                 .borrow()
                 .signal_vec_cloned()
                 .filter_map(|mut e| e.borrow_mut().take()),
-        );
-
-        self.element.futures.append(&mut children.futures);
-
-        self.build()
+        )
     }
 }
 
@@ -330,7 +330,10 @@ pub trait ParentBuilder: ElementBuilder {
 
     fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
 
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self;
+    fn children_signal(
+        self,
+        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+    ) -> Self::Target;
 
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }
