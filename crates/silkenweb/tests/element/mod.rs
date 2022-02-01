@@ -3,6 +3,8 @@ use silkenweb::{dom::node::element::Element, prelude::ParentBuilder};
 use silkenweb_dom::render::render_now_sync;
 use silkenweb_elements::html::{div, p};
 
+use crate::{namespace_elems, namespace_text};
+
 fn check(node: impl Into<Element>, expected: &str) {
     render_now_sync();
     assert_eq!(format!("{}", node.into()), expected)
@@ -24,6 +26,11 @@ fn children() {
         div().children([p().text("Hello"), p().text("World!")]),
         "<div><p>Hello</p><p>World!</p></div>",
     );
+}
+
+#[test]
+fn namespaces() {
+    check(namespace_elems(), &namespace_text());
 }
 
 #[test]

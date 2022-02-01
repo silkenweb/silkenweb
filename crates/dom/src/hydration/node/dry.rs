@@ -16,7 +16,7 @@ use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTra
 pub struct DryElement {
     namespace: Namespace,
     tag: String,
-    attributes: HashMap<String, Option<String>>,
+    attributes: Vec<(String, Option<String>)>,
     children: Vec<HydrationNodeData>,
     stored_children: Vec<HydrationNodeData>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
@@ -27,7 +27,7 @@ impl DryElement {
         Self {
             namespace,
             tag: tag.to_owned(),
-            attributes: HashMap::new(),
+            attributes: Vec::new(),
             children: Vec::new(),
             stored_children: Vec::new(),
             hydrate_actions: Vec::new(),
@@ -38,7 +38,6 @@ impl DryElement {
         write!(f, "<{}", self.tag)?;
         let namespace = self.namespace;
 
-        // TODO: This needs testing.
         if current_ns != namespace {
             write!(
                 f,
@@ -245,7 +244,7 @@ impl DryElement {
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         check_attr_name(name);
 
-        self.attributes.insert(name.to_owned(), value.text());
+        self.attributes.push((name.to_owned(), value.text()));
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {

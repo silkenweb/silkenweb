@@ -96,5 +96,6 @@ features = [
     "HtmlVideoElement",
 
     "SvgsvgElement",
-    "SvgPathElement"
+    "SvgPathElement",
+    "SvgCircleElement",
 ]

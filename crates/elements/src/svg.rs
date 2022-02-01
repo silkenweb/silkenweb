@@ -25,3 +25,19 @@ svg_element!(
         // TODO: Add events
     }
 );
+
+svg_element!(
+    circle <web_sys::SvgCircleElement> {
+        // TODO: Add all attributes
+        attributes {
+            cx: String,
+            cy: String,
+            r: String,
+            stroke: String,
+            stroke-width: String,
+            fill: String,
+        }
+
+        // TODO: Add events
+    }
+);

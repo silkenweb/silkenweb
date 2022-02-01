@@ -6,7 +6,11 @@ use silkenweb::{
         ElementEvents,
     },
 };
-use silkenweb_elements::HtmlElement;
+use silkenweb_elements::{
+    macros::Element,
+    svg::{circle, svg},
+    HtmlElement,
+};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
@@ -129,6 +133,39 @@ async fn multiple_reactive_text() {
     );
 }
 
+#[wasm_bindgen_test]
+async fn namespaces() {
+    let elem = namespace_elems();
+    render_now().await;
+    assert_eq!(format!("{}", elem), namespace_text());
+
+    let first_text = Mutable::new("{First 0}");
+    let second_text = Mutable::new("{Second 0}");
+
+    mount(
+        APP_ID,
+        p().id(TEXT_ID)
+            .text_signal(first_text.signal())
+            .text_signal(second_text.signal()),
+    );
+
+    render_now().await;
+    assert_eq!("{First 0}{Second 0}", text_content(TEXT_ID));
+    first_text.set("{First 1}");
+    render_now().await;
+    assert_eq!(
+        "{First 1}{Second 0}",
+        text_content(TEXT_ID),
+        "First is updated"
+    );
+    second_text.set("{Second 1}");
+    render_now().await;
+    assert_eq!(
+        "{First 1}{Second 1}",
+        text_content(TEXT_ID),
+        "Second is updated"
+    );
+}
 async fn verify_reactive_text(
     paragraph: PBuilder,
     text_id: &str,
@@ -149,6 +186,40 @@ async fn verify_reactive_text(
         text_content(text_id),
         "Text updated by signal after render"
     );
+}
+
+fn namespace_elems() -> Element {
+    div()
+        .child(
+            svg()
+                .child(
+                    circle()
+                        .cx("50")
+                        .cy("50")
+                        .r("40")
+                        .stroke("black")
+                        .stroke_width("3")
+                        .fill("red"),
+                )
+                .child(div().child(div().text("Hello from inside svg"))),
+        )
+        .into()
+}
+
+fn namespace_text() -> String {
+    [
+        r#"<div>"#,
+        r#"    <svg xmlns="http://www.w3.org/2000/svg">"#,
+        r#"        <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red">"#,
+        r#"        </circle>"#,
+        r#"        <div xmlns="http://www.w3.org/1999/xhtml">"#,
+        r#"            <div>Hello from inside svg</div>"#,
+        r#"        </div>"#,
+        r#"    </svg>"#,
+        r#"</div>"#,
+    ]
+    .map(str::trim)
+    .join("")
 }
 
 async fn create_app_container(app_id: &str) {
