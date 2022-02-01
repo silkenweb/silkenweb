@@ -95,14 +95,10 @@ impl HydrationElement {
         );
     }
 
-    pub fn replace_child(
-        &mut self,
-        mut new_child: impl HydrationNode,
-        mut old_child: impl HydrationNode,
-    ) {
+    pub fn replace_child(&mut self, new_child: impl HydrationNode, old_child: impl HydrationNode) {
         self.borrow_mut().map2(
-            &mut new_child,
-            &mut old_child,
+            new_child,
+            old_child,
             DryElement::replace_child,
             WetElement::replace_child,
         );
