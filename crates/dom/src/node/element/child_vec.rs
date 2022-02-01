@@ -1,32 +1,24 @@
-use std::{cell::RefCell, mem, rc::Rc};
+use std::mem;
 
 use futures_signals::signal_vec::VecDiff;
-use wasm_bindgen::UnwrapThrowExt;
 
-use super::child_groups::ChildGroups;
 use crate::{
-    hydration::node::{DryNode, HydrationElement, HydrationNodeData},
+    hydration::node::{DryNode, HydrationElement},
     node::Node,
 };
 
 pub struct ChildVec {
     parent: HydrationElement,
-    child_groups: Rc<RefCell<ChildGroups>>,
-    group_index: usize,
     children: Vec<Node>,
+    has_preceding_children: bool,
 }
 
 impl ChildVec {
-    pub fn new(
-        parent: HydrationElement,
-        child_groups: Rc<RefCell<ChildGroups>>,
-        group_index: usize,
-    ) -> Self {
+    pub fn new(parent: HydrationElement, has_preceding_children: bool) -> Self {
         Self {
             parent,
-            child_groups,
-            group_index,
             children: Vec::new(),
+            has_preceding_children,
         }
     }
 
@@ -52,22 +44,10 @@ impl ChildVec {
         self.clear();
         self.children = new_children.into_iter().map(Into::<Node>::into).collect();
 
-        let mut child_groups = self.child_groups.borrow_mut();
-
-        if self.children.is_empty() {
-            child_groups.clear_first_child(self.group_index);
-            return;
-        }
-
-        child_groups.set_first_child(
-            self.group_index,
-            self.children.first().unwrap_throw().clone_into_hydro(),
-        );
-        let mut next_group_elem = child_groups.get_next_group_elem(self.group_index).cloned();
         let mut parent = self.parent.clone();
 
         for child in &self.children {
-            parent.insert_child_before(child, next_group_elem.as_mut());
+            parent.append_child(child);
         }
     }
 
@@ -77,12 +57,6 @@ impl ChildVec {
         if index >= self.children.len() {
             self.push(new_child);
             return;
-        }
-
-        if index == 0 {
-            self.child_groups
-                .borrow_mut()
-                .set_first_child(self.group_index, new_child.clone_into_hydro());
         }
 
         assert!(index < self.children.len());
@@ -95,13 +69,6 @@ impl ChildVec {
 
     pub fn set_at(&mut self, index: usize, new_child: impl Into<Node>) {
         let new_child = new_child.into();
-
-        if index == 0 {
-            self.child_groups
-                .borrow_mut()
-                .set_first_child(self.group_index, new_child.clone_into_hydro());
-        }
-
         let old_child = &mut self.children[index];
 
         self.parent.replace_child(&new_child, &old_child);
@@ -113,17 +80,6 @@ impl ChildVec {
         let old_child = self.children.remove(index);
         self.parent.remove_child(&old_child);
 
-        let mut child_groups = self.child_groups.borrow_mut();
-
-        match self.children.first() {
-            None => child_groups.clear_first_child(self.group_index),
-            Some(first) => {
-                if index == 0 {
-                    child_groups.set_first_child(self.group_index, first.clone_into_hydro())
-                }
-            }
-        }
-
         old_child
     }
 
@@ -134,14 +90,7 @@ impl ChildVec {
 
     pub fn push(&mut self, new_child: impl Into<Node>) {
         let new_child = new_child.into();
-        let mut groups = self.child_groups.borrow_mut();
-
-        if self.children.is_empty() {
-            groups.insert_only_child(self.group_index, new_child.clone_into_hydro());
-        } else {
-            groups.insert_last_child(self.group_index, new_child.clone_into_hydro());
-        }
-
+        self.parent.append_child(&new_child);
         self.children.push(new_child);
     }
 
@@ -149,38 +98,22 @@ impl ChildVec {
         dbg!(self.children.len());
         let removed_child = self.children.pop();
 
-        if self.children.is_empty() {
-            self.child_groups
-                .borrow_mut()
-                .clear_first_child(self.group_index);
-        }
-
         if let Some(removed_child) = removed_child {
             self.parent.remove_child(&mut removed_child.into_hydro());
         }
     }
 
     pub fn clear(&mut self) {
-        let existing_children = self.child_hydro_nodes();
-        self.children.clear();
-        let mut child_groups = self.child_groups.borrow_mut();
-
-        child_groups.clear_first_child(self.group_index);
-        let is_only_group = child_groups.is_single_group();
-        mem::drop(child_groups);
-
-        if is_only_group {
-            self.parent.clear_children();
-        } else {
+        if self.has_preceding_children {
             let mut parent = self.parent.clone();
+            let children = mem::take(&mut self.children);
 
-            for mut child in existing_children {
-                parent.remove_child(&mut child);
+            for child in children {
+                parent.remove_child(child);
             }
+        } else {
+            self.children.clear();
+            self.parent.clear_children();
         }
-    }
-
-    fn child_hydro_nodes(&self) -> Vec<HydrationNodeData> {
-        self.children.iter().map(Node::clone_into_hydro).collect()
     }
 }

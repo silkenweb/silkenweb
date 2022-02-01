@@ -226,7 +226,8 @@ impl DryElement {
 
         for child in &mut self.children {
             if child.is_same(&old_child) {
-                *child = new_child.clone_into_hydro();
+                *child = new_child.into_hydro();
+                break;
             }
         }
     }

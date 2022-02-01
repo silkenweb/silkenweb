@@ -77,6 +77,11 @@ impl HydrationElement {
         );
     }
 
+    pub fn append_child(&mut self, child: impl HydrationNode) {
+        self.borrow_mut()
+            .map1(child, DryElement::append_child, WetElement::append_child);
+    }
+
     pub fn insert_child_before(
         &mut self,
         child: impl HydrationNode,

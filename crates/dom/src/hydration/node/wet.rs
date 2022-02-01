@@ -79,6 +79,14 @@ impl WetElement {
             .unwrap_throw();
     }
 
+    pub fn append_child(&mut self, child: impl WetNode) {
+        let parent = self.dom_node();
+        let child = child.dom_node();
+        queue_update(move || {
+            parent.append_child(&child).unwrap_throw();
+        });
+    }
+
     pub fn insert_child_before(&mut self, child: impl WetNode, next_child: Option<impl WetNode>) {
         let parent = self.dom_node();
         let child = child.dom_node();

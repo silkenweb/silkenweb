@@ -3,7 +3,7 @@ use parse_display::{Display, FromStr};
 use silkenweb::{
     dom::{
         mount,
-        node::element::{Element, ElementBuilder},
+        node::element::{optional_children::optional_children, Element, ElementBuilder},
     },
     elements::{html::div, HtmlElement},
     prelude::ParentBuilder,
@@ -63,15 +63,13 @@ pub fn main_js() -> Result<(), JsValue> {
             );
         });
 
-    mount(
-        "app",
-        div()
-            .child(side_bar)
-            .child_signal(selected_signal.map(move |selection| match selection {
-                Selected::Calendar => Element::from(calendar()),
-                Selected::Icon => Element::from(icon()),
-            })),
-    );
+    let children = optional_children()
+        .child(side_bar)
+        .child_signal(selected_signal.map(move |selection| match selection {
+            Selected::Calendar => Element::from(calendar()),
+            Selected::Icon => Element::from(icon()),
+        }));
+    mount("app", div().optional_children(children));
 
     Ok(())
 }

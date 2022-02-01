@@ -3,11 +3,9 @@ use std::collections::HashSet;
 use std::{
     self,
     borrow::BorrowMut,
-    cell::{RefCell, RefMut},
     fmt::{self, Display},
     future::Future,
     mem,
-    rc::Rc,
 };
 
 use discard::DiscardOnDrop;
@@ -18,7 +16,7 @@ use futures_signals::{
 };
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::{child_groups::ChildGroups, child_vec::ChildVec, optional_children::OptionalChildren};
+use self::{child_vec::ChildVec, optional_children::OptionalChildren};
 use super::Node;
 use crate::{
     attribute::Attribute,
@@ -29,13 +27,12 @@ use crate::{
 
 pub mod optional_children;
 
-mod child_groups;
 mod child_vec;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
     element: Element,
-    child_groups: Rc<RefCell<ChildGroups>>,
+    has_preceding_children: bool,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
@@ -52,10 +49,10 @@ impl ElementBuilderBase {
     fn new_element(hydro_elem: HydrationElement) -> Self {
         Self {
             element: Element {
-                hydro_elem: hydro_elem.clone(),
+                hydro_elem,
                 futures: Vec::new(),
             },
-            child_groups: Rc::new(RefCell::new(ChildGroups::new(hydro_elem))),
+            has_preceding_children: false,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -66,53 +63,28 @@ impl ElementBuilderBase {
         debug_assert!(self.attributes.insert(name.into()));
         let _ = name;
     }
-
-    fn child_groups_mut(&self) -> RefMut<ChildGroups> {
-        self.child_groups.as_ref().borrow_mut()
-    }
 }
 
 impl ParentBuilder for ElementBuilderBase {
     /// Add a child element after existing children.
     fn child(mut self, child: impl Into<Node>) -> Self {
+        self.has_preceding_children = true;
+
         let mut child = child.into();
         self.element.futures.extend(child.take_futures());
-        let mut child = child.into_hydro();
-        self.child_groups_mut().append_new_group_sync(&mut child);
-        self.element.hydro_elem.store_child(child);
+
+        self.element.hydro_elem.append_child_now(&child);
+        self.element.hydro_elem.store_child(child.into_hydro());
 
         self
-    }
-
-    fn child_signal(self, child_signal: impl Signal<Item = impl Into<Node>> + 'static) -> Self {
-        let group_index = self.child_groups_mut().new_group();
-        let child_groups = self.child_groups.clone();
-        // Store the child in here until we replace it.
-        let mut _child_storage = None;
-
-        let updater = child_signal.for_each(move |child| {
-            let child = child.into();
-            child_groups
-                .as_ref()
-                .borrow_mut()
-                .upsert_only_child(group_index, child.clone_into_hydro());
-            _child_storage = Some(child);
-            async {}
-        });
-
-        self.spawn_future(updater)
     }
 
     fn children_signal(
         self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target {
-        let group_index = self.child_groups_mut().new_group();
-        let mut child_vec = ChildVec::new(
-            self.element.hydro_elem.clone(),
-            self.child_groups.clone(),
-            group_index,
-        );
+        let mut child_vec =
+            ChildVec::new(self.element.hydro_elem.clone(), self.has_preceding_children);
 
         let updater = children.for_each(move |update| {
             child_vec.apply_update(update);
@@ -123,17 +95,22 @@ impl ParentBuilder for ElementBuilderBase {
     }
 
     /// Add a text node after existing children.
-    fn text(self, child: &str) -> Self {
-        let mut text_node = HydrationText::new(child);
-        self.child_groups_mut()
-            .append_new_group_sync(&mut text_node);
+    fn text(mut self, child: &str) -> Self {
+        self.has_preceding_children = true;
+        self.element
+            .hydro_elem
+            .append_child_now(HydrationText::new(child));
         self
     }
 
-    fn text_signal(self, child_signal: impl Signal<Item = impl Into<String>> + 'static) -> Self {
+    fn text_signal(
+        mut self,
+        child_signal: impl Signal<Item = impl Into<String>> + 'static,
+    ) -> Self {
+        self.has_preceding_children = true;
+
         let mut text_node = HydrationText::new(intern_str(""));
-        self.child_groups_mut()
-            .append_new_group_sync(&mut text_node);
+        self.element.hydro_elem.append_child_now(text_node.clone());
 
         let updater = child_signal.for_each({
             move |new_value| {
@@ -145,9 +122,6 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    // TODO: `children_signal` should return `Self::Target`
-    // TODO: Remove all the `ChildGroup` stuff.
-    // TODO: Can we find a way to remove the `Rc` in hydration nodes?
     fn optional_children(mut self, mut children: OptionalChildren) -> Self::Target {
         self.element.futures.append(&mut children.futures);
         self.children_signal(
@@ -232,7 +206,6 @@ impl ElementBuilder for ElementBuilderBase {
     fn build(mut self) -> Self::Target {
         self.element.futures.shrink_to_fit();
         self.element.hydro_elem.shrink_to_fit();
-        self.child_groups_mut().shrink_to_fit();
         self.element
     }
 }
@@ -327,8 +300,6 @@ pub trait ParentBuilder: ElementBuilder {
 
         self
     }
-
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
 
     fn children_signal(
         self,
