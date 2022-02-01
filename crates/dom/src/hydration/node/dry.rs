@@ -34,45 +34,6 @@ impl DryElement {
         }
     }
 
-    pub fn fmt(&self, current_ns: Namespace, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "<{}", self.tag)?;
-        let namespace = self.namespace;
-
-        // TODO: This needs testing.
-        if current_ns != namespace {
-            write!(
-                f,
-                " xmlns=\"{}\"",
-                // This is how firefox 96 escapes the namespace.
-                encode_double_quoted_attribute(namespace.as_str())
-            )?;
-        }
-
-        for (name, value) in &self.attributes {
-            check_attr_name(name);
-
-            if let Some(value) = value {
-                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
-            } else {
-                write!(f, " {}", name)?;
-            }
-        }
-
-        f.write_str(">")?;
-
-        for child in &self.children {
-            child.fmt(namespace, f)?;
-        }
-
-        let has_children = !self.children.is_empty();
-
-        if self.requires_closing_tag() || has_children {
-            write!(f, "</{}>", self.tag)?;
-        }
-
-        Ok(())
-    }
-
     pub fn hydrate_child(
         self,
         parent: &web_sys::Node,
@@ -243,7 +204,10 @@ impl DryElement {
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
-        check_attr_name(name);
+        assert_ne!(
+            name, "xmlns",
+            "\"xmlns\" must be set via a namespace at tag creation time"
+        );
 
         self.attributes.insert(name.to_owned(), value.text());
     }
@@ -262,11 +226,32 @@ impl DryElement {
     }
 }
 
-fn check_attr_name(name: &str) {
-    assert_ne!(
-        name, "xmlns",
-        "\"xmlns\" must be set via a namespace at tag creation time"
-    );
+impl fmt::Display for DryElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<{}", self.tag)?;
+
+        for (name, value) in &self.attributes {
+            if let Some(value) = value {
+                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+            } else {
+                write!(f, " {}", name)?;
+            }
+        }
+
+        f.write_str(">")?;
+
+        for child in &self.children {
+            child.fmt(f)?;
+        }
+
+        let has_children = !self.children.is_empty();
+
+        if self.requires_closing_tag() || has_children {
+            write!(f, "</{}>", self.tag)?;
+        }
+
+        Ok(())
+    }
 }
 
 fn hydrate_with_new(
