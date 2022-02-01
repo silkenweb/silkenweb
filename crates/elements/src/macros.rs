@@ -341,13 +341,6 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.children_signal(children) }
             }
 
-            fn optional_child_signal(
-                self,
-                child: impl $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::macros::Node>>> + 'static
-            ) -> Self {
-                Self{ builder: self.builder.optional_child_signal(child) }
-            }
-
             fn optional_children(self, children: $crate::macros::OptionalChildren) -> Self::Target {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.optional_children(children))
             }

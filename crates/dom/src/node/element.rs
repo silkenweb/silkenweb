@@ -103,34 +103,6 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    fn optional_child_signal(
-        self,
-        child_signal: impl Signal<Item = Option<impl Into<Node>>> + 'static,
-    ) -> Self {
-        let group_index = self.child_groups_mut().new_group();
-        let child_groups = self.child_groups.clone();
-        // Store the child in here until we replace it.
-        let mut _child_storage = None;
-
-        let updater = child_signal.for_each(move |child| {
-            if let Some(child) = child {
-                let child = child.into();
-                child_groups
-                    .as_ref()
-                    .borrow_mut()
-                    .upsert_only_child(group_index, child.clone_into_hydro());
-                _child_storage = Some(child);
-            } else {
-                child_groups.as_ref().borrow_mut().remove_child(group_index);
-                _child_storage = None;
-            }
-
-            async {}
-        });
-
-        self.spawn_future(updater)
-    }
-
     fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self {
         let group_index = self.child_groups_mut().new_group();
         let mut child_vec = ChildVec::new(
@@ -170,7 +142,6 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    // TODO: Remove `optional_child_signal`
     // TODO: `children_signal` should return `Self::Target`
     // TODO: Remove all the `ChildGroup` stuff.
     // TODO: Can we find a way to remove the `Rc` in hydration nodes?
@@ -360,11 +331,6 @@ pub trait ParentBuilder: ElementBuilder {
     fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
 
     fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self;
-
-    fn optional_child_signal(
-        self,
-        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
-    ) -> Self;
 
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }

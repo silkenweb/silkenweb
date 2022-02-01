@@ -19,19 +19,12 @@ pub struct OptionalChildren {
 type Item = Rc<RefCell<Option<Element>>>;
 
 impl OptionalChildren {
-    pub fn new() -> Self {
-        Self {
-            items: Rc::new(RefCell::new(MutableVec::new())),
-            futures: Vec::new(),
-            len: 0,
-        }
-    }
-
-    pub fn child(&mut self, elem: impl Into<Element>) {
+    pub fn child(mut self, elem: impl Into<Element>) -> Self{
         self.push(Some(elem));
+        self
     }
 
-    pub fn child_signal(&mut self, elem: impl Signal<Item = impl Into<Element>> + 'static) {
+    pub fn child_signal(self, elem: impl Signal<Item = impl Into<Element>> + 'static) -> Self {
         self.optional_child_signal(elem.map(|e| Some(e)))
     }
 
@@ -40,9 +33,9 @@ impl OptionalChildren {
     }
 
     pub fn optional_child_signal(
-        &mut self,
+        mut self,
         elem: impl Signal<Item = Option<impl Into<Element>>> + 'static,
-    ) {
+    ) -> Self{
         let index = self.push(None as Option<Element>);
         let items = self.items.clone();
 
@@ -54,6 +47,7 @@ impl OptionalChildren {
             async {}
         });
         self.futures.push(spawn_cancelable_future(future));
+        self
     }
 
     /// Push an item and return it's index
@@ -68,8 +62,10 @@ impl OptionalChildren {
     }
 }
 
-impl Default for OptionalChildren {
-    fn default() -> Self {
-        Self::new()
+pub fn optional_children() -> OptionalChildren {
+    OptionalChildren {
+        items: Rc::new(RefCell::new(MutableVec::new())),
+        futures: Vec::new(),
+        len: 0,
     }
 }

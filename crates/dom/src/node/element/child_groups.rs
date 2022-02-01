@@ -72,12 +72,6 @@ impl ChildGroups {
             .insert_child_before(child, self.get_next_group_elem(index).cloned());
     }
 
-    pub fn remove_child(&mut self, index: usize) {
-        if let Some(mut existing) = mem::replace(&mut self.children[index], None) {
-            self.parent.remove_child(&mut existing);
-        }
-    }
-
     pub fn set_first_child(&mut self, index: usize, child: HydrationNodeData) {
         self.children[index] = Some(child);
     }

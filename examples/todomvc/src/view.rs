@@ -6,13 +6,12 @@ use futures_signals::{
 };
 use silkenweb::{
     clone,
-    dom::node::element::ElementBuilder,
+    dom::node::element::{optional_children::optional_children, ElementBuilder},
     elements::{
         html::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,
             Button, Div, Footer, Input, Li, LiBuilder, Section, Ul,
         },
-        macros::OptionalChildren,
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
     prelude::ParentBuilder,
@@ -54,11 +53,10 @@ impl TodoAppView {
 
         let item_filter = Broadcaster::new(item_filter);
 
-        let mut children = OptionalChildren::new();
-
-        children.child(header().child(h1().text("todos")).child(input_elem));
-        children.optional_child_signal(self.render_main(item_filter.signal()));
-        children.optional_child_signal(self.render_footer(item_filter.signal()));
+        let children = optional_children()
+            .child(header().child(h1().text("todos")).child(input_elem))
+            .optional_child_signal(self.render_main(item_filter.signal()))
+            .optional_child_signal(self.render_footer(item_filter.signal()));
 
         section().class(["todoapp"]).optional_children(children)
     }
@@ -116,8 +114,7 @@ impl TodoAppView {
 
             move |is_empty| {
                 (!is_empty).then(|| {
-                    footer()
-                        .class(["footer"])
+                    let children = optional_children()
                         .child_signal(app_view.active_count().map(move |active_count| {
                             span()
                                 .class(["todo-count"])
@@ -128,8 +125,8 @@ impl TodoAppView {
                                 ))
                         }))
                         .child(app_view.render_filters(item_filter.signal()))
-                        .optional_child_signal(app_view.render_clear_completed())
-                        .build()
+                        .optional_child_signal(app_view.render_clear_completed());
+                    footer().class(["footer"]).optional_children(children)
                 })
             }
         })
