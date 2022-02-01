@@ -12,6 +12,7 @@ use silkenweb::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,
             Button, Div, Footer, Input, Li, LiBuilder, Section, Ul,
         },
+        macros::OptionalChildren,
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
     prelude::ParentBuilder,
@@ -53,12 +54,13 @@ impl TodoAppView {
 
         let item_filter = Broadcaster::new(item_filter);
 
-        section()
-            .class(["todoapp"])
-            .child(header().child(h1().text("todos")).child(input_elem))
-            .optional_child_signal(self.render_main(item_filter.signal()))
-            .optional_child_signal(self.render_footer(item_filter.signal()))
-            .build()
+        let mut children = OptionalChildren::new();
+
+        children.child(header().child(h1().text("todos")).child(input_elem));
+        children.optional_child_signal(self.render_main(item_filter.signal()));
+        children.optional_child_signal(self.render_footer(item_filter.signal()));
+
+        section().class(["todoapp"]).optional_children(children)
     }
 
     fn render_main(

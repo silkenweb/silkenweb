@@ -4,7 +4,10 @@ pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
     intern_str,
     node::{
-        element::{Element, ElementBuilder, ElementBuilderBase, ParentBuilder},
+        element::{
+            optional_children::OptionalChildren, Element, ElementBuilder, ElementBuilderBase,
+            ParentBuilder,
+        },
         Node,
     },
     tag, tag_in_namespace,
@@ -304,9 +307,9 @@ macro_rules! create_element_fn {
 /// See [`html_element`] for a complete example of defining an html element.
 #[macro_export]
 macro_rules! parent_element {
-    ($name:ident $(- $name_tail:ident)*) => {
+    ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
         impl $crate::macros::ParentBuilder for
-            $crate::camel_name!{$name $($name_tail)* Builder}
+            [< $name:camel $($name_tail:camel)* Builder >]
         {
             fn text(self, child: &str) -> Self {
                 Self{ builder: self.builder.text(child) }
@@ -344,8 +347,12 @@ macro_rules! parent_element {
             ) -> Self {
                 Self{ builder: self.builder.optional_child_signal(child) }
             }
+
+            fn optional_children(self, children: $crate::macros::OptionalChildren) -> Self::Target {
+                [< $name:camel $($name_tail:camel)* >] (self.builder.optional_children(children))
+            }
         }
-    };
+    }};
 }
 
 #[doc(hidden)]

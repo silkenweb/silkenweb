@@ -2,6 +2,7 @@
 use std::collections::HashSet;
 use std::{
     self,
+    borrow::BorrowMut,
     cell::{RefCell, RefMut},
     fmt::{self, Display},
     future::Future,
@@ -17,7 +18,7 @@ use futures_signals::{
 };
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::{child_groups::ChildGroups, child_vec::ChildVec};
+use self::{child_groups::ChildGroups, child_vec::ChildVec, optional_children::OptionalChildren};
 use super::Node;
 use crate::{
     attribute::Attribute,
@@ -25,6 +26,8 @@ use crate::{
     hydration::node::{DryNode, HydrationElement, HydrationText, Namespace},
     intern_str, spawn_cancelable_future, HydrationTracker,
 };
+
+pub mod optional_children;
 
 mod child_groups;
 mod child_vec;
@@ -90,6 +93,7 @@ impl ParentBuilder for ElementBuilderBase {
         let updater = child_signal.for_each(move |child| {
             let child = child.into();
             child_groups
+                .as_ref()
                 .borrow_mut()
                 .upsert_only_child(group_index, child.clone_into_hydro());
             _child_storage = Some(child);
@@ -112,11 +116,12 @@ impl ParentBuilder for ElementBuilderBase {
             if let Some(child) = child {
                 let child = child.into();
                 child_groups
+                    .as_ref()
                     .borrow_mut()
                     .upsert_only_child(group_index, child.clone_into_hydro());
                 _child_storage = Some(child);
             } else {
-                child_groups.borrow_mut().remove_child(group_index);
+                child_groups.as_ref().borrow_mut().remove_child(group_index);
                 _child_storage = None;
             }
 
@@ -163,6 +168,24 @@ impl ParentBuilder for ElementBuilderBase {
         });
 
         self.spawn_future(updater)
+    }
+
+    // TODO: Remove `optional_child_signal`
+    // TODO: `children_signal` should return `Self::Target`
+    // TODO: Remove all the `ChildGroup` stuff.
+    // TODO: Can we find a way to remove the `Rc` in hydration nodes?
+    fn optional_children(mut self, mut children: OptionalChildren) -> Self::Target {
+        self = self.children_signal(
+            children
+                .items
+                .borrow()
+                .signal_vec_cloned()
+                .filter_map(|mut e| e.borrow_mut().take()),
+        );
+
+        self.element.futures.append(&mut children.futures);
+
+        self.build()
     }
 }
 
@@ -319,7 +342,7 @@ pub trait ElementBuilder: Sized {
     fn build(self) -> Self::Target;
 }
 
-pub trait ParentBuilder: Sized {
+pub trait ParentBuilder: ElementBuilder {
     fn text(self, child: &str) -> Self;
 
     fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
@@ -342,4 +365,6 @@ pub trait ParentBuilder: Sized {
         self,
         child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
     ) -> Self;
+
+    fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }
