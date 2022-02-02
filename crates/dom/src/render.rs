@@ -58,9 +58,6 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
 }
 
-// TODO: This should work when a microtask creates more microtasks, but needs
-// testing. For example a `Signal::map` that updates a `Mutable` with another
-// listener.
 /// Render any pending updates.
 ///
 /// This is mostly useful for testing.

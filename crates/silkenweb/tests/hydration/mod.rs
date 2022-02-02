@@ -44,3 +44,5 @@ async fn basic_signal() {
         query_element(APP_ID).inner_html()
     );
 }
+
+// TODO: Test element reconciliation: Empty text, additional elements, missing attributes, extra attributes

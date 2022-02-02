@@ -143,6 +143,7 @@ pub fn hydrate_tracked(
     });
 }
 
+// TODO: Async hydrate?
 pub fn hydrate(id: &str, elem: impl Into<Element>) {
     hydrate_tracked(id, elem, EmptyHydrationTracker)
 }
