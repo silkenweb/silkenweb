@@ -3,8 +3,8 @@ use itertools::Itertools;
 use scopeguard::defer;
 use xshell::{cmd, pushd};
 use xtask_base::{
-    build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds, TargetOs,
-    WorkflowResult,
+    build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds,
+    TargetOs, WorkflowResult,
 };
 
 #[derive(Parser)]
@@ -101,7 +101,7 @@ fn test_features() -> WorkflowResult<()> {
         .powerset()
     {
         clippy(None, &features)?;
-        
+
         let features = features.join(",");
 
         cmd!("cargo test --package silkenweb --features {features}").run()?;
