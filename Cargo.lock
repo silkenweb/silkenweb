@@ -905,6 +905,7 @@ dependencies = [
  "html-escape",
  "js-sys",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-log",
  "web-sys",
 ]
