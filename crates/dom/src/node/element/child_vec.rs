@@ -92,7 +92,6 @@ impl ChildVec {
     }
 
     pub fn pop(&mut self) {
-        dbg!(self.children.len());
         let removed_child = self.children.pop();
 
         if let Some(removed_child) = removed_child {
