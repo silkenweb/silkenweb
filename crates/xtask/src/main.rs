@@ -3,7 +3,7 @@ use itertools::Itertools;
 use scopeguard::defer;
 use xshell::{cmd, pushd};
 use xtask_base::{
-    build_readme, ci_nightly, generate_open_source_files, run, target_os, CommonCmds, TargetOs,
+    build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds, TargetOs,
     WorkflowResult,
 };
 
@@ -100,6 +100,8 @@ fn test_features() -> WorkflowResult<()> {
         .into_iter()
         .powerset()
     {
+        clippy(None, &features)?;
+        
         let features = features.join(",");
 
         cmd!("cargo test --package silkenweb --features {features}").run()?;
@@ -124,7 +126,7 @@ fn ci_browser() -> WorkflowResult<()> {
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
-    xtask_base::ci_stable(fast, toolchain.as_deref())?;
+    xtask_base::ci_stable(fast, toolchain.as_deref(), &[])?;
     test_features()?;
     Ok(())
 }
