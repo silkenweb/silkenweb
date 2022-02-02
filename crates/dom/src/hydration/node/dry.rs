@@ -16,7 +16,7 @@ use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTra
 pub struct DryElement {
     namespace: Namespace,
     tag: String,
-    attributes: HashMap<String, Option<String>>,
+    attributes: Vec<(String, Option<String>)>,
     children: Vec<HydrationNodeData>,
     stored_children: Vec<HydrationNodeData>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
@@ -27,7 +27,7 @@ impl DryElement {
         Self {
             namespace,
             tag: tag.to_owned(),
-            attributes: HashMap::new(),
+            attributes: Vec::new(),
             children: Vec::new(),
             stored_children: Vec::new(),
             hydrate_actions: Vec::new(),
@@ -209,7 +209,7 @@ impl DryElement {
             "\"xmlns\" must be set via a namespace at tag creation time"
         );
 
-        self.attributes.insert(name.to_owned(), value.text());
+        self.attributes.push((name.to_owned(), value.text()));
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
