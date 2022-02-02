@@ -1,5 +1,8 @@
 use silkenweb::prelude::ParentBuilder;
-use silkenweb_elements::html::{div, p};
+use silkenweb_elements::{
+    html::{div, p},
+    HtmlElement,
+};
 
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
@@ -18,6 +21,17 @@ macro_rules! render_test {
 }
 
 render_test!(empty_element, div(), "<div></div>");
+render_test!(
+    single_attribute,
+    div().id("my-id"),
+    r#"<div id="my-id"></div>"#
+);
+render_test!(
+    multi_attribute,
+    div().id("my-id").class(["my-class"]),
+    r#"<div id="my-id" class="my-class"></div>"#
+);
+
 render_test!(
     child,
     div().child(p().text("Hello!")),
