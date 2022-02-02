@@ -5,6 +5,7 @@ use std::{
 
 use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
+use indexmap::IndexMap;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -16,7 +17,7 @@ use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTra
 pub struct DryElement {
     namespace: Namespace,
     tag: String,
-    attributes: Vec<(String, Option<String>)>,
+    attributes: IndexMap<String, String>,
     children: Vec<HydrationNodeData>,
     stored_children: Vec<HydrationNodeData>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
@@ -27,7 +28,7 @@ impl DryElement {
         Self {
             namespace,
             tag: tag.to_owned(),
-            attributes: Vec::new(),
+            attributes: IndexMap::new(),
             children: Vec::new(),
             stored_children: Vec::new(),
             hydrate_actions: Vec::new(),
@@ -133,7 +134,7 @@ impl DryElement {
         }
 
         for (name, value) in &self.attributes {
-            let value = value.as_ref().map_or("", String::as_ref);
+            let value = value.as_ref();
 
             let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
                 value != existing_value
@@ -209,7 +210,11 @@ impl DryElement {
             "\"xmlns\" must be set via a namespace at tag creation time"
         );
 
-        self.attributes.push((name.to_owned(), value.text()));
+        if let Some(value) = value.text() {
+            self.attributes.insert(name.to_owned(), value);
+        } else {
+            self.attributes.remove(name);
+        }
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -231,11 +236,7 @@ impl fmt::Display for DryElement {
         write!(f, "<{}", self.tag)?;
 
         for (name, value) in &self.attributes {
-            if let Some(value) = value {
-                write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
-            } else {
-                write!(f, " {}", name)?;
-            }
+            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
         }
 
         f.write_str(">")?;

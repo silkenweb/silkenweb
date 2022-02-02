@@ -47,6 +47,16 @@ render_test!(
     div().id("my-id").class(["my-class"]),
     r#"<div id="my-id" class="my-class"></div>"#
 );
+render_test!(
+    boolean_false_attribute,
+    div().hidden(false),
+    r#"<div></div>"#
+);
+render_test!(
+    boolean_true_attribute,
+    div().hidden(true),
+    r#"<div hidden=""></div>"#
+);
 
 render_test!(
     child,

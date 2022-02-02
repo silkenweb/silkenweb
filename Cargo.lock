@@ -903,6 +903,7 @@ dependencies = [
  "futures",
  "futures-signals",
  "html-escape",
+ "indexmap",
  "js-sys",
  "wasm-bindgen",
  "wasm-bindgen-futures",

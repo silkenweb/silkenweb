@@ -27,6 +27,7 @@ futures = "0.3"
 caseless = "0.2.1"
 web-log = "1.0.1"
 html-escape = "0.2.9"
+indexmap = "1.8.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4"
