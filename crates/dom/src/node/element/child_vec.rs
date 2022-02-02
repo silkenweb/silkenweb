@@ -2,10 +2,7 @@ use std::mem;
 
 use futures_signals::signal_vec::VecDiff;
 
-use crate::{
-    hydration::node::{DryNode, HydrationElement},
-    node::Node,
-};
+use crate::{hydration::node::HydrationElement, node::Node};
 
 pub struct ChildVec {
     parent: HydrationElement,
@@ -99,7 +96,7 @@ impl ChildVec {
         let removed_child = self.children.pop();
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(&mut removed_child.into_hydro());
+            self.parent.remove_child(removed_child);
         }
     }
 
