@@ -5,7 +5,7 @@ use futures_signals::{
 use silkenweb::prelude::ParentBuilder;
 use silkenweb_dom::{node::text::text, render::render_now};
 use silkenweb_elements::{
-    html::{div, p},
+    html::{div, p, DivBuilder},
     macros::ElementBuilder,
     HtmlElement,
 };
@@ -73,7 +73,7 @@ macro_rules! children_signal_test {
     ($name:ident, $initial:expr, $operations:expr, $expected:expr) => {
         isomorphic_test! {
             async fn $name() {
-                children_signal_test($initial, $operations, $expected).await;
+                children_signal_test(&$initial, $operations, &$expected).await;
             }
         }
     };
@@ -270,18 +270,35 @@ isomorphic_test! {
 }
 
 pub async fn children_signal_test(
-    expected: [usize; EXPECTED_COUNT],
+    initial: &[usize],
+    f: impl Fn(MutableVecLockMut<usize>) + Clone,
+    expected: &[usize],
 ) {
-    let children = MutableVec::<usize>::new_with_values(initial.to_vec());
-    let element = div().children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
+    async fn with_existing_children(
+        initial_elem: DivBuilder,
+        initial_child_text: &str,
+        initial: &[usize],
+        f: impl FnOnce(MutableVecLockMut<usize>),
+        expected: &[usize],
+    ) {
+        let children = MutableVec::<usize>::new_with_values(initial.to_vec());
+        let element = initial_elem
+            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
 
-    f(children.lock_mut());
-    let mut expected_html = String::new();
+        f(children.lock_mut());
+        let mut expected_html = String::new();
 
-    for i in expected {
-        expected_html.push_str(&format!("<p>{}</p>", i));
+        for i in expected {
+            expected_html.push_str(&format!("<p>{}</p>", i));
+        }
+
+        render_now().await;
+        assert_eq!(
+            element.to_string(),
+            format!("<div>{}{}</div>", initial_child_text, expected_html)
+        );
     }
 
-    render_now().await;
-    assert_eq!(element.to_string(), format!("<div>{}</div>", expected_html));
+    with_existing_children(div(), "", initial, f.clone(), expected).await;
+    with_existing_children(div().child(div()), "<div></div>", initial, f, expected).await;
 }
