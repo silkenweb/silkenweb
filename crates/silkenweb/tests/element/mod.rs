@@ -237,6 +237,30 @@ isomorphic_test! {
     }
 }
 
+isomorphic_test! {
+    async fn attribute_signal() {
+        let text = Mutable::new("Initial text");
+        let elem = div().title_signal(text.signal()).build();
+        render_now().await;
+        assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
+        text.set("Updated text");
+        render_now().await;
+        assert_eq!(elem.to_string(), r#"<div title="Updated text"></div>"#);
+    }
+}
+
+isomorphic_test! {
+    async fn optional_attribute_signal() {
+        let text = Mutable::new(Some("Initial text"));
+        let elem = div().title_signal(text.signal()).build();
+        render_now().await;
+        assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
+        text.set(None);
+        render_now().await;
+        assert_eq!(elem.to_string(), r#"<div></div>"#);
+    }
+}
+
 pub async fn children_signal_test<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize>(
     initial: [usize; INITIAL_COUNT],
     f: impl FnOnce(MutableVecLockMut<usize>),
