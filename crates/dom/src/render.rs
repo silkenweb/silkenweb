@@ -1,9 +1,8 @@
 use std::cell::{Cell, RefCell};
 
 use futures_signals::signal::{Mutable, Signal};
-use js_sys::Promise;
-use wasm_bindgen::{JsValue, UnwrapThrowExt};
-use wasm_bindgen_futures::JsFuture;
+
+use crate::tasks::wait_for_microtasks;
 
 #[cfg(feature = "server-side-render")]
 mod raf {
@@ -66,17 +65,63 @@ pub fn animation_timestamp() -> impl Signal<Item = f64> {
 ///
 /// This is mostly useful for testing.
 pub async fn render_now() {
-    let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
-    JsFuture::from(wait_for_microtasks).await.unwrap_throw();
+    wait_for_microtasks().await;
     RENDER.with(Render::render_updates);
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn render_now_sync() {
+pub mod server {
+    use std::{
+        sync::Arc,
+        task::{Context, Poll, Wake},
+        thread,
+        thread::Thread,
+    };
+
+    use futures::Future;
+
+    use super::{Render, RENDER};
     use crate::tasks;
 
-    tasks::run();
-    RENDER.with(Render::render_updates);
+    pub fn render_now_sync() {
+        tasks::run();
+        RENDER.with(Render::render_updates);
+    }
+
+    struct ThreadWaker(Thread);
+
+    impl Wake for ThreadWaker {
+        fn wake(self: Arc<Self>) {
+            self.0.unpark();
+        }
+    }
+
+    // Adapted from <https://doc.rust-lang.org/stable/std/task/trait.Wake.html>
+    /// Run a future to completion on the current thread.
+    ///
+    /// Each time the future blocks, the microtask queue will be processed
+    /// before the future is polled again. This is mostly useful for
+    /// testing.
+    pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
+        // Pin the future so it can be polled.
+        let mut fut = Box::pin(fut);
+
+        // Create a new context to be passed to the future.
+        let t = thread::current();
+        let waker = Arc::new(ThreadWaker(t)).into();
+        let mut cx = Context::from_waker(&waker);
+
+        // Run the future to completion.
+        loop {
+            match fut.as_mut().poll(&mut cx) {
+                Poll::Ready(res) => return res,
+                Poll::Pending => {
+                    tasks::run();
+                    thread::park()
+                }
+            }
+        }
+    }
 }
 
 pub fn request_render() {

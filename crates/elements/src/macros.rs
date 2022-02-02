@@ -251,6 +251,12 @@ macro_rules! dom_element {
             }
         }
 
+        impl ::std::fmt::Display for $camel_name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                self.0.fmt(f)
+            }
+        }
+
         impl From<$camel_builder_name> for $crate::macros::Element {
             fn from(builder: $camel_builder_name) -> Self {
                 $crate::macros::ElementBuilder::build(builder).into()

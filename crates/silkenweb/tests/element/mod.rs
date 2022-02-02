@@ -1,21 +1,37 @@
+use futures_signals::{
+    signal::Mutable,
+    signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
+};
 use silkenweb::prelude::ParentBuilder;
+use silkenweb_dom::render::render_now;
 use silkenweb_elements::{
     html::{div, p},
+    macros::ElementBuilder,
     HtmlElement,
 };
 
-macro_rules! render_test {
-    ($name:ident, $node:expr, $expected:expr) => {
-        #[cfg(all(not(target_arch = "wasm32"), feature = "server-side-render"))]
+macro_rules! isomorphic_test {
+    (async fn $name:ident() $body:block) => {
+        #[cfg(not(target_arch = "wasm32"))]
         #[test]
         fn $name() {
-            native::check($node, $expected);
+            ::silkenweb_dom::render::server::block_on(async { $body });
         }
 
-        #[cfg(all(target_arch = "wasm32", not(feature = "server-side-render")))]
+        #[cfg(target_arch = "wasm32")]
         #[wasm_bindgen_test::wasm_bindgen_test]
         async fn $name() {
-            browser::check($node, $expected).await;
+            $body
+        }
+    };
+}
+
+macro_rules! render_test {
+    ($name:ident, $node:expr, $expected:expr) => {
+        isomorphic_test! {
+            async fn $name() {
+                assert_eq!($node.build().to_string(), $expected)
+            }
         }
     };
 }
@@ -45,16 +61,10 @@ render_test!(
 
 macro_rules! children_signal_test {
     ($name:ident, $initial:expr, $operations:expr, $expected:expr) => {
-        #[cfg(all(not(target_arch = "wasm32"), feature = "server-side-render"))]
-        #[test]
-        fn $name() {
-            native::check_children_signal($initial, $operations, $expected);
-        }
-
-        #[cfg(all(target_arch = "wasm32", not(feature = "server-side-render")))]
-        #[wasm_bindgen_test::wasm_bindgen_test]
-        async fn $name() {
-            browser::check_children_signal($initial, $operations, $expected).await;
+        isomorphic_test! {
+            async fn $name() {
+                children_signal_test($initial, $operations, $expected).await;
+            }
         }
     };
 }
@@ -205,82 +215,33 @@ children_signal_test!(
     [0, 2, 1]
 );
 
-mod shared {
-    use futures_signals::signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt};
-    use silkenweb::prelude::ParentBuilder;
-    use silkenweb_elements::{
-        html::{div, p, Div},
-        macros::Element,
-    };
-
-    pub fn check(node: impl Into<Element>, expected: &str) {
-        assert_eq!(format!("{}", node.into()), expected)
-    }
-
-    pub fn check_children_signal(
-        initial: &[usize],
-        f: impl FnOnce(MutableVecLockMut<usize>),
-        expected: &[usize],
-    ) -> (Div, String) {
-        let children = MutableVec::<usize>::new_with_values(initial.to_vec());
-        let element =
-            div().children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
-
-        f(children.lock_mut());
-        let mut expected_html = String::new();
-
-        for i in expected {
-            expected_html.push_str(&format!("<p>{}</p>", i));
-        }
-
-        (element, format!("<div>{}</div>", expected_html))
+isomorphic_test! {
+    async fn text_signal() {
+        let text = Mutable::new("Initial text");
+        let elem = p().text_signal(text.signal()).build();
+        render_now().await;
+        assert_eq!(elem.to_string(), "<p>Initial text</p>");
+        text.set("Updated text");
+        render_now().await;
+        assert_eq!(elem.to_string(), "<p>Updated text</p>");
     }
 }
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "server-side-render"))]
-mod native {
-    use futures_signals::signal_vec::MutableVecLockMut;
-    use silkenweb_dom::render::render_now_sync;
-    use silkenweb_elements::macros::Element;
+pub async fn children_signal_test<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize>(
+    initial: [usize; INITIAL_COUNT],
+    f: impl FnOnce(MutableVecLockMut<usize>),
+    expected: [usize; EXPECTED_COUNT],
+) {
+    let children = MutableVec::<usize>::new_with_values(initial.to_vec());
+    let element = div().children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
 
-    use crate::element::shared;
+    f(children.lock_mut());
+    let mut expected_html = String::new();
 
-    pub fn check(node: impl Into<Element>, expected: &str) {
-        render_now_sync();
-        shared::check(node, expected);
+    for i in expected {
+        expected_html.push_str(&format!("<p>{}</p>", i));
     }
 
-    pub fn check_children_signal<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize>(
-        initial: [usize; INITIAL_COUNT],
-        f: impl FnOnce(MutableVecLockMut<usize>),
-        expected: [usize; EXPECTED_COUNT],
-    ) {
-        let (element, expected) = shared::check_children_signal(&initial, f, &expected);
-        render_now_sync();
-        shared::check(element, &expected);
-    }
-}
-
-#[cfg(all(target_arch = "wasm32", not(feature = "server-side-render")))]
-mod browser {
-    use futures_signals::signal_vec::MutableVecLockMut;
-    use silkenweb_dom::render::render_now;
-    use silkenweb_elements::macros::Element;
-
-    use crate::element::shared;
-
-    pub async fn check(node: impl Into<Element>, expected: &str) {
-        render_now().await;
-        shared::check(node, expected);
-    }
-
-    pub async fn check_children_signal<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize>(
-        initial: [usize; INITIAL_COUNT],
-        f: impl FnOnce(MutableVecLockMut<usize>),
-        expected: [usize; EXPECTED_COUNT],
-    ) {
-        let (element, expected) = shared::check_children_signal(&initial, f, &expected);
-        render_now().await;
-        check(element, &expected).await;
-    }
+    render_now().await;
+    assert_eq!(element.to_string(), format!("<div>{}</div>", expected_html));
 }

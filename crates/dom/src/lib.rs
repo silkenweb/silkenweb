@@ -252,6 +252,14 @@ mod tasks {
         });
     }
 
+    /// This just makes the async block yield. On the server,side, `block_on`
+    /// will actually process the microtasks.
+    pub async fn wait_for_microtasks() {
+        SPAWNER
+            .with(|spawner| spawner.spawn_local_with_handle(async {}).unwrap())
+            .await
+    }
+
     pub fn run() {
         EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
     }
@@ -261,10 +269,21 @@ mod tasks {
 mod tasks {
     use std::future::Future;
 
+    use js_sys::Promise;
+    use wasm_bindgen::{JsValue, UnwrapThrowExt};
+    use wasm_bindgen_futures::JsFuture;
+
     pub fn spawn_local<F>(future: F)
     where
         F: Future<Output = ()> + 'static,
     {
         wasm_bindgen_futures::spawn_local(future)
+    }
+
+    // Microtasks are run in the order they were queued in Javascript, so we just
+    // put a task on the queue and `await` it.
+    pub async fn wait_for_microtasks() {
+        let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
+        JsFuture::from(wait_for_microtasks).await.unwrap_throw();
     }
 }
