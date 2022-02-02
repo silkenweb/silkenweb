@@ -3,7 +3,7 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::prelude::ParentBuilder;
-use silkenweb_dom::render::render_now;
+use silkenweb_dom::{node::text::text, render::render_now};
 use silkenweb_elements::{
     html::{div, p},
     macros::ElementBuilder,
@@ -261,9 +261,15 @@ isomorphic_test! {
     }
 }
 
-pub async fn children_signal_test<const INITIAL_COUNT: usize, const EXPECTED_COUNT: usize>(
-    initial: [usize; INITIAL_COUNT],
-    f: impl FnOnce(MutableVecLockMut<usize>),
+isomorphic_test! {
+    async fn text_node() {
+        let elem = div().child(text("Hello, world!"));
+        render_now().await;
+        assert_eq!(elem.build().to_string(), r#"<div>Hello, world!</div>"#);
+    }
+}
+
+pub async fn children_signal_test(
     expected: [usize; EXPECTED_COUNT],
 ) {
     let children = MutableVec::<usize>::new_with_values(initial.to_vec());
