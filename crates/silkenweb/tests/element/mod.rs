@@ -79,6 +79,132 @@ children_signal_test!(
     [0]
 );
 
+children_signal_test!(
+    children_insert_from_empty,
+    [],
+    |mut children| {
+        children.insert(0, 0);
+    },
+    [0]
+);
+
+children_signal_test!(
+    children_insert_first,
+    [1],
+    |mut children| {
+        children.insert(0, 0);
+    },
+    [0, 1]
+);
+
+children_signal_test!(
+    children_insert_middle,
+    [0, 2],
+    |mut children| {
+        children.insert(1, 1);
+    },
+    [0, 1, 2]
+);
+
+children_signal_test!(
+    children_insert_end,
+    [0],
+    |mut children| {
+        children.insert(1, 1);
+    },
+    [0, 1]
+);
+
+children_signal_test!(
+    children_replace_empty,
+    [],
+    |mut children| {
+        children.replace(vec![0, 1]);
+    },
+    [0, 1]
+);
+
+children_signal_test!(
+    children_replace_with_empty,
+    [0, 1],
+    |mut children| {
+        children.replace(vec![]);
+    },
+    []
+);
+
+children_signal_test!(
+    children_replace,
+    [0, 1],
+    |mut children| {
+        children.replace(vec![2, 3]);
+    },
+    [2, 3]
+);
+
+children_signal_test!(
+    children_clear,
+    [0, 1],
+    |mut children| {
+        children.clear();
+    },
+    []
+);
+
+children_signal_test!(
+    children_set,
+    [0, 1],
+    |mut children| {
+        children.set(0, 1);
+    },
+    [1, 1]
+);
+
+children_signal_test!(
+    children_remove_at,
+    [0, 1, 2],
+    |mut children| {
+        children.remove(1);
+    },
+    [0, 2]
+);
+
+children_signal_test!(
+    children_move_forward,
+    [0, 1, 2, 3, 4],
+    |mut children| {
+        children.move_from_to(1, 2);
+    },
+    [0, 2, 1, 3, 4]
+);
+
+children_signal_test!(
+    children_move_backward,
+    [0, 1, 2, 3, 4],
+    |mut children| {
+        children.move_from_to(2, 1);
+    },
+    [0, 2, 1, 3, 4]
+);
+
+children_signal_test!(
+    children_move_to_end,
+    [0, 1, 2],
+    |mut children| {
+        children.move_from_to(1, 2);
+    },
+    [0, 2, 1]
+);
+
+children_signal_test!(
+    children_move_from_end,
+    [0, 1, 2],
+    |mut children| {
+        children.move_from_to(2, 1);
+    },
+    [0, 2, 1]
+);
+
 mod shared {
     use futures_signals::signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt};
     use silkenweb::prelude::ParentBuilder;
