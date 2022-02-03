@@ -36,6 +36,13 @@ macro_rules! render_test {
     };
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+#[should_panic]
+fn block_on() {
+    ::silkenweb_dom::render::server::block_on(async { panic!("Make sure the future is run") });
+}
+
 render_test!(empty_element, div(), "<div></div>");
 render_test!(
     single_attribute,
@@ -68,6 +75,14 @@ render_test!(
     div().children([p().text("Hello"), p().text("World!")]),
     "<div><p>Hello</p><p>World!</p></div>"
 );
+
+// Make sure the test is actually run
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+#[should_panic]
+fn test_children_signal_test() {
+    ::silkenweb_dom::render::server::block_on(children_signal_test(&[], |_| {}, &[0]));
+}
 
 macro_rules! children_signal_test {
     ($name:ident, $initial:expr, $operations:expr, $expected:expr) => {
