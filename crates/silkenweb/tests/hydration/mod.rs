@@ -15,7 +15,6 @@ async fn missing_text() {
 
     render_now().await;
     hydrate(APP_ID, app).await;
-    render_now().await;
 
     assert_eq!(
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
@@ -33,7 +32,6 @@ async fn basic_signal() {
 
     render_now().await;
     hydrate(APP_ID, app).await;
-    render_now().await;
 
     assert_eq!(
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
