@@ -99,10 +99,7 @@ impl DryElement {
             hydrate_with_new(dom_elem, child, tracker);
         }
 
-        if let Some(node) = &current_child {
-            remove_following_siblings(dom_elem, node);
-            dom_elem.remove_child(node).unwrap_throw();
-        }
+        remove_following_siblings(dom_elem, current_child);
 
         for event in self.hydrate_actions {
             event(&mut elem);

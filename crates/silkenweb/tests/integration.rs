@@ -24,9 +24,9 @@ async fn mount_unmount() {
     let message = "Hello, world!";
     mount(APP_ID, tag("p").text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p>{}</p>"#, message), app_html());
+    assert_eq!(format!(r#"<p>{}</p>"#, message), app_html(APP_ID));
     unmount(APP_ID);
-    assert_eq!("", app_html());
+    assert_eq!("", app_html(APP_ID));
 }
 
 #[wasm_bindgen_test]
@@ -169,8 +169,8 @@ fn query_element(id: &str) -> web_sys::HtmlElement {
         .unwrap_throw()
 }
 
-fn app_html() -> String {
-    query_element(APP_ID).inner_html()
+fn app_html(id: &str) -> String {
+    query_element(id).inner_html()
 }
 
 fn document() -> web_sys::Document {

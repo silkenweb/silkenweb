@@ -122,7 +122,7 @@ pub async fn hydrate_tracked(
             .hydrate_child(&mount_point, &hydration_point, tracker)
             .into();
 
-        remove_following_siblings(&hydration_point, &node);
+        remove_following_siblings(&mount_point, node.next_sibling());
     } else {
         let new_elem = elem.eval_dom_element();
         tracker.node_added(&new_elem);
@@ -148,15 +148,12 @@ impl HydrationTracker for EmptyHydrationTracker {
     fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {}
 }
 
-/// Remove all siblings after `child`
-///
-/// `child` itself is not removed, only the siblings following.
-fn remove_following_siblings(parent: &web_sys::Node, child: &web_sys::Node) {
-    if let Some(mut node) = child.next_sibling() {
-        while let Some(next_node) = node.next_sibling() {
-            parent.remove_child(&node).unwrap_throw();
-            node = next_node;
-        }
+/// Remove `child` and all siblings after `child`
+fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
+    while let Some(node) = child {
+        let next_child = node.next_sibling();
+        parent.remove_child(&node).unwrap_throw();
+        child = next_child;
     }
 }
 

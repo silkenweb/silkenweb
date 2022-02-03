@@ -1,49 +1,81 @@
 use futures_signals::signal::Mutable;
 use silkenweb::prelude::ParentBuilder;
 use silkenweb_dom::{hydrate, render::render_now};
-use silkenweb_elements::html::{div, p};
+use silkenweb_elements::{
+    html::{div, p},
+    macros::Element,
+};
 use wasm_bindgen_test::wasm_bindgen_test;
 
-use crate::{create_app_container, query_element, APP_ID};
+use crate::{app_html, create_app_container, query_element, APP_ID};
 
 #[wasm_bindgen_test]
 async fn missing_text() {
-    create_app_container(APP_ID).await;
-
-    query_element(APP_ID).set_inner_html(r#"<div data-silkenweb="1"><p></p></div>"#);
+    app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let app = div().child(p().text("Hello, world!"));
 
-    render_now().await;
-    hydrate(APP_ID, app).await;
-
-    assert_eq!(
+    test_hydrate(
+        APP_ID,
+        app,
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
-        query_element(APP_ID).inner_html()
-    );
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn blank_text() {
+    app_container(
+        APP_ID,
+        r#"
+            <div data-silkenweb="1">
+                <p>
+                </p>
+            </div>
+        "#,
+    )
+    .await;
+
+    let app = div().child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+    )
+    .await;
 }
 
 #[wasm_bindgen_test]
 async fn basic_signal() {
-    create_app_container(APP_ID).await;
-
-    query_element(APP_ID).set_inner_html(r#"<div data-silkenweb="1"><p></p></div>"#);
+    app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
     let app = div().child(p().text_signal(text.signal()));
 
-    render_now().await;
-    hydrate(APP_ID, app).await;
-
-    assert_eq!(
+    test_hydrate(
+        APP_ID,
+        app,
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
-        query_element(APP_ID).inner_html()
-    );
+    )
+    .await;
 
     text.set("Some more text");
     render_now().await;
     assert_eq!(
         r#"<div data-silkenweb="1"><p>Some more text</p></div>"#,
-        query_element(APP_ID).inner_html()
+        app_html(APP_ID)
     );
+}
+
+async fn app_container(id: &str, inner_html: &str) {
+    create_app_container(id).await;
+    query_element(id).set_inner_html(inner_html);
+}
+
+async fn test_hydrate(id: &str, app: impl Into<Element>, expected_html: &str) {
+    render_now().await;
+    hydrate(id, app).await;
+
+    assert_eq!(expected_html, app_html(id));
 }
 
 // TODO: Test element reconciliation: Empty text, additional elements, missing
