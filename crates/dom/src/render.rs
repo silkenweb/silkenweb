@@ -95,10 +95,6 @@ pub mod server {
 
     // Adapted from <https://doc.rust-lang.org/stable/std/task/trait.Wake.html>
     /// Run a future to completion on the current thread.
-    ///
-    /// Each time the future blocks, the microtask queue will be processed
-    /// before the future is polled again. This is mostly useful for
-    /// testing.
     pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
         // Pin the future so it can be polled.
         let mut fut = Box::pin(fut);
@@ -112,10 +108,7 @@ pub mod server {
         loop {
             match fut.as_mut().poll(&mut cx) {
                 Poll::Ready(res) => return res,
-                Poll::Pending => {
-                    tasks::run();
-                    thread::park()
-                }
+                Poll::Pending => thread::park(),
             }
         }
     }

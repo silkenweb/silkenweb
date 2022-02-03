@@ -253,12 +253,11 @@ mod tasks {
         });
     }
 
-    /// This just makes the async block yield. On the server,side, `block_on`
-    /// will actually process the microtasks.
+    /// Run futures queued with `spawn_local`, until no more progress can be
+    /// made. Don't call this from a future spawned using `spawn_local`, use
+    /// `render::block_on`
     pub async fn wait_for_microtasks() {
-        SPAWNER
-            .with(|spawner| spawner.spawn_local_with_handle(async {}).unwrap())
-            .await
+        run();
     }
 
     pub fn run() {
