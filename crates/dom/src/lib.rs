@@ -8,7 +8,6 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use crate::{
     global::document,
     node::element::{Element, ElementBuilderBase},
-    render::queue_update,
 };
 
 mod event;
@@ -48,8 +47,6 @@ pub trait HydrationTracker {
     fn attribute_set(&mut self, elem: &web_sys::Element, name: &str, value: &str);
 
     fn attribute_removed(&mut self, elem: &web_sys::Element, name: &str);
-
-    fn finished(self);
 }
 
 #[derive(Default)]
@@ -96,10 +93,6 @@ impl HydrationTracker for HydrationStats {
     fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {
         self.attributes_removed += 1;
     }
-
-    fn finished(self) {
-        web_log::println!("{}", self);
-    }
 }
 
 impl fmt::Display for HydrationStats {
@@ -113,39 +106,34 @@ impl fmt::Display for HydrationStats {
     }
 }
 
-pub fn hydrate_tracked(
+pub async fn hydrate_tracked(
     id: &str,
     elem: impl Into<Element>,
-    mut tracker: impl HydrationTracker + 'static,
+    tracker: &mut impl HydrationTracker,
 ) {
-    let id = id.to_owned();
     let elem = elem.into();
 
-    queue_update(move || {
-        unmount(&id);
+    unmount(id);
 
-        let mount_point = mount_point(&id);
+    let mount_point = mount_point(id);
 
-        if let Some(hydration_point) = mount_point.first_child() {
-            let node: web_sys::Node = elem
-                .hydrate_child(&mount_point, &hydration_point, &mut tracker)
-                .into();
+    if let Some(hydration_point) = mount_point.first_child() {
+        let node: web_sys::Node = elem
+            .hydrate_child(&mount_point, &hydration_point, tracker)
+            .into();
 
-            remove_following_siblings(&hydration_point, &node);
-        } else {
-            let new_elem = elem.eval_dom_element();
-            tracker.node_added(&new_elem);
-            mount_point.append_child(&new_elem).unwrap_throw();
-        }
+        remove_following_siblings(&hydration_point, &node);
+    } else {
+        let new_elem = elem.eval_dom_element();
+        tracker.node_added(&new_elem);
+        mount_point.append_child(&new_elem).unwrap_throw();
+    }
 
-        insert_component(&id, elem);
-        tracker.finished();
-    });
+    insert_component(id, elem);
 }
 
-// TODO: Async hydrate?
-pub fn hydrate(id: &str, elem: impl Into<Element>) {
-    hydrate_tracked(id, elem, EmptyHydrationTracker)
+pub async fn hydrate(id: &str, elem: impl Into<Element>) {
+    hydrate_tracked(id, elem, &mut EmptyHydrationTracker).await
 }
 
 struct EmptyHydrationTracker;
@@ -158,8 +146,6 @@ impl HydrationTracker for EmptyHydrationTracker {
     fn attribute_set(&mut self, _elem: &web_sys::Element, _name: &str, _value: &str) {}
 
     fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {}
-
-    fn finished(self) {}
 }
 
 /// Remove all siblings after `child`
@@ -229,6 +215,8 @@ fn spawn_cancelable_future(
 thread_local!(
     static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
+
+pub use tasks::spawn_local;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod tasks {

@@ -13,8 +13,10 @@ async fn missing_text() {
     query_element(APP_ID).set_inner_html(r#"<div data-silkenweb="1"><p></p></div>"#);
     let app = div().child(p().text("Hello, world!"));
 
-    hydrate(APP_ID, app);
     render_now().await;
+    hydrate(APP_ID, app).await;
+    render_now().await;
+
     assert_eq!(
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
         query_element(APP_ID).inner_html()
@@ -29,9 +31,10 @@ async fn basic_signal() {
     let text = Mutable::new("Hello, world!");
     let app = div().child(p().text_signal(text.signal()));
 
-    hydrate(APP_ID, app);
-
     render_now().await;
+    hydrate(APP_ID, app).await;
+    render_now().await;
+
     assert_eq!(
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
         query_element(APP_ID).inner_html()

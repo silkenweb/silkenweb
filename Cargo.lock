@@ -907,7 +907,6 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
  "wasm-bindgen-futures",
- "web-log",
  "web-sys",
 ]
 
@@ -961,6 +960,7 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "silkenweb",
+ "web-log",
 ]
 
 [[package]]
