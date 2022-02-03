@@ -2,8 +2,9 @@ use futures_signals::signal::Mutable;
 use silkenweb::prelude::ParentBuilder;
 use silkenweb_dom::{hydrate, render::render_now};
 use silkenweb_elements::{
-    html::{div, p},
+    html::{button, div, p},
     macros::Element,
+    ElementEvents, HtmlElement,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 
@@ -28,8 +29,7 @@ async fn blank_text() {
         APP_ID,
         r#"
             <div data-silkenweb="1">
-                <p>
-                </p>
+                <p>Hello, world!</p>
             </div>
         "#,
     )
@@ -43,6 +43,123 @@ async fn blank_text() {
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
     )
     .await;
+}
+
+#[wasm_bindgen_test]
+async fn extra_child() {
+    app_container(
+        APP_ID,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p><div></div></div>"#,
+    )
+    .await;
+
+    let app = div().child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn mismatched_element() {
+    app_container(
+        APP_ID,
+        r#"<div data-silkenweb="1"><div>Hello, world!</div></div>"#,
+    )
+    .await;
+
+    let app = div().child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn extra_attribute() {
+    app_container(
+        APP_ID,
+        r#"<div data-silkenweb="1" id="0"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+
+    let app = div().child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn missing_attribute() {
+    app_container(
+        APP_ID,
+        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+
+    let app = div().id("0").child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<div data-silkenweb="1" id="0"><p>Hello, world!</p></div>"#,
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn event() {
+    const BUTTON_ID: &str = "increment";
+    const COUNTER_ID: &str = "counter";
+
+    app_container(
+        APP_ID,
+        r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>0</div>"#,
+    )
+    .await;
+
+    let count = Mutable::new(0);
+    let count_text = count.signal_ref(|i| format!("{}", i));
+
+    render_now().await;
+
+    hydrate(
+        APP_ID,
+        div()
+            .id(COUNTER_ID)
+            .child(
+                button()
+                    .id(BUTTON_ID)
+                    .on_click(move |_, _| {
+                        count.replace_with(|i| *i + 1);
+                    })
+                    .text("+"),
+            )
+            .text_signal(count_text),
+    )
+    .await;
+
+    render_now().await;
+    let counter_text = || query_element(COUNTER_ID).inner_text();
+    assert_eq!("+0", counter_text(), "Counter is initially zero");
+    query_element(BUTTON_ID).click();
+    render_now().await;
+    assert_eq!("+1", counter_text(), "Counter incremented after render");
+
+    assert_eq!(
+        app_html(APP_ID),
+        r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>1</div>"#
+    );
 }
 
 #[wasm_bindgen_test]
