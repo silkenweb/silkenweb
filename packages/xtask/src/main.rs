@@ -150,7 +150,7 @@ fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> W
 }
 
 fn wasm_pack_test() -> WorkflowResult<()> {
-    let _dir = pushd("crates/silkenweb")?;
+    let _dir = pushd("packages/silkenweb")?;
     cmd!("wasm-pack test --headless --firefox").run()?;
     cmd!("wasm-pack test --headless --firefox --features hydration").run()?;
     Ok(())

@@ -1,7 +1,7 @@
 [workspace]
 
-members = ["crates/*", "examples/*"]
-default-members = ["crates/*"]
+members = ["packages/*", "examples/*"]
+default-members = ["packages/*"]
 
 [profile.release]
 codegen-units = 1
@@ -9,7 +9,7 @@ lto = true
 opt-level = "z"
 
 [patch.crates-io]
-silkenweb-elements = { path = "crates/elements" }
-silkenweb-dom = { path = "crates/dom" }
-silkenweb-signals-ext = { path = "crates/signals-ext" }
-silkenweb = { path = "crates/silkenweb" }
+silkenweb-elements = { path = "packages/elements" }
+silkenweb-dom = { path = "packages/dom" }
+silkenweb-signals-ext = { path = "packages/signals-ext" }
+silkenweb = { path = "packages/silkenweb" }
