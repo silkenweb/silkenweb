@@ -39,7 +39,7 @@
 //! DOM for our counter. `on_click` installs `inc` as an event handler to
 //! increment the counter.
 //!
-//! ```rust
+//! ```no_run
 //! # use futures_signals::signal::{Mutable, SignalExt};
 //! # use silkenweb::{elements::html::*, prelude::*};
 //! #
@@ -58,7 +58,7 @@
 //! Finally, we `mount` our app on the DOM. This will find the element with `id
 //! = "app"` and mount `app` there.
 //!
-//! ```
+//! ```no_run
 //! # use futures_signals::signal::{Mutable, SignalExt};
 //! # use silkenweb::{elements::html::*, prelude::*};
 //! #
