@@ -118,11 +118,7 @@ impl DryElement {
         elem
     }
 
-    fn reconcile_attributes(
-        &self,
-        dom_elem: &web_sys::Element,
-        tracker: &mut HydrationStats,
-    ) {
+    fn reconcile_attributes(&self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) {
         let dom_attributes = dom_elem.attributes();
         let mut dom_attr_map = HashMap::new();
 
