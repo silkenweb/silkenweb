@@ -8,7 +8,8 @@ use wasm_bindgen::JsValue;
 
 use self::{
     dry::{DryElement, DryText},
-    wet::{WetElement, WetText}, event::EventCallback,
+    event::EventCallback,
+    wet::{WetElement, WetText},
 };
 use super::{
     lazy::{IsDry, Lazy},
@@ -17,8 +18,8 @@ use super::{
 use crate::attribute::Attribute;
 
 mod dry;
-mod wet;
 mod event;
+mod wet;
 
 #[derive(Clone)]
 pub struct HydrationElement(Rc<RefCell<Lazy<WetElement, DryElement>>>);
