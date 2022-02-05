@@ -1,7 +1,10 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{hydrate_tracked, spawn_local, HydrationStats},
+    dom::{
+        hydration::{hydrate_tracked, HydrationStats},
+        spawn_local,
+    },
     elements::{html::*, macros::ElementBuilder},
     prelude::*,
 };

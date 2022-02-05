@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::prelude::ParentBuilder;
-use silkenweb_dom::{hydrate, render::render_now};
+use silkenweb_dom::{hydration::hydrate, render::render_now};
 use silkenweb_elements::{
     html::{button, div, p},
     macros::Element,

@@ -12,7 +12,11 @@ use super::{
     wet::{WetElement, WetText},
     DryNode, HydrationNodeData, Namespace, WetNode,
 };
-use crate::{attribute::Attribute, clone, remove_following_siblings, HydrationTracker};
+use crate::{
+    attribute::Attribute,
+    clone,
+    hydration::{remove_following_siblings, HydrationTracker},
+};
 
 pub struct DryElement {
     namespace: Namespace,

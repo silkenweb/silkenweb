@@ -21,8 +21,11 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     clone,
-    hydration::node::{DryNode, HydrationElement, HydrationText, Namespace},
-    intern_str, spawn_cancelable_future, HydrationTracker,
+    hydration::{
+        node::{DryNode, HydrationElement, HydrationText, Namespace},
+        HydrationTracker,
+    },
+    intern_str, spawn_cancelable_future,
 };
 
 pub mod optional_children;

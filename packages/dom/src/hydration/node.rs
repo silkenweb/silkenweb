@@ -10,8 +10,11 @@ use self::{
     dry::{DryElement, DryText},
     wet::{WetElement, WetText},
 };
-use super::lazy::{Lazy, IsDry};
-use crate::{attribute::Attribute, event::EventCallback, HydrationTracker};
+use super::{
+    lazy::{IsDry, Lazy},
+    HydrationTracker,
+};
+use crate::{attribute::Attribute, event::EventCallback};
 
 mod dry;
 mod wet;
