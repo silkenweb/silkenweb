@@ -10,18 +10,18 @@ use self::{
     dry::{DryElement, DryText},
     wet::{WetElement, WetText},
 };
-use super::{Hydration, IsDry};
+use super::lazy::{Lazy, IsDry};
 use crate::{attribute::Attribute, event::EventCallback, HydrationTracker};
 
 mod dry;
 mod wet;
 
 #[derive(Clone)]
-pub struct HydrationElement(Rc<RefCell<Hydration<WetElement, DryElement>>>);
+pub struct HydrationElement(Rc<RefCell<Lazy<WetElement, DryElement>>>);
 
 impl HydrationElement {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(Hydration::new(
+        Self(Rc::new(RefCell::new(Lazy::new(
             || WetElement::new(namespace, tag),
             || DryElement::new(namespace, tag),
         ))))
@@ -130,12 +130,12 @@ impl HydrationElement {
             .map(f, DryElement::effect, WetElement::effect);
     }
 
-    fn borrow_mut(&self) -> RefMut<Hydration<WetElement, DryElement>> {
+    fn borrow_mut(&self) -> RefMut<Lazy<WetElement, DryElement>> {
         self.0.borrow_mut()
     }
 
     fn wet(&self) -> RefMut<WetElement> {
-        RefMut::map(self.0.borrow_mut(), Hydration::wet)
+        RefMut::map(self.0.borrow_mut(), Lazy::wet)
     }
 }
 
@@ -146,11 +146,11 @@ impl fmt::Display for HydrationElement {
     }
 }
 #[derive(Clone)]
-pub struct HydrationText(Rc<RefCell<Hydration<WetText, DryText>>>);
+pub struct HydrationText(Rc<RefCell<Lazy<WetText, DryText>>>);
 
 impl HydrationText {
     pub fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(Hydration::new(
+        Self(Rc::new(RefCell::new(Lazy::new(
             || WetText::new(text),
             || DryText::new(text),
         ))))
@@ -177,12 +177,12 @@ impl HydrationText {
         self.wet().dom_text().clone()
     }
 
-    fn borrow_mut(&self) -> RefMut<Hydration<WetText, DryText>> {
+    fn borrow_mut(&self) -> RefMut<Lazy<WetText, DryText>> {
         self.0.borrow_mut()
     }
 
     fn wet(&self) -> RefMut<WetText> {
-        RefMut::map(self.0.borrow_mut(), Hydration::wet)
+        RefMut::map(self.0.borrow_mut(), Lazy::wet)
     }
 }
 

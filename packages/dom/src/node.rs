@@ -4,7 +4,7 @@ use futures_signals::CancelableFutureHandle;
 use self::{element::Element, text::Text};
 use crate::hydration::{
     node::{DryNode, HydrationNode, HydrationNodeData, WetNode},
-    IsDry,
+    lazy::IsDry,
 };
 
 pub mod element;
