@@ -106,18 +106,6 @@ pub async fn hydrate(id: &str, elem: impl Into<Element>) -> HydrationStats {
     stats
 }
 
-struct EmptyHydrationTracker;
-
-impl HydrationTracker for EmptyHydrationTracker {
-    fn node_added(&mut self, _elem: &web_sys::Node) {}
-
-    fn node_removed(&mut self, _node: &web_sys::Node) {}
-
-    fn attribute_set(&mut self, _elem: &web_sys::Element, _name: &str, _value: &str) {}
-
-    fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {}
-}
-
 /// Remove `child` and all siblings after `child`
 fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
     while let Some(node) = child {
