@@ -6,6 +6,7 @@ use std::{
 use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
 use indexmap::IndexMap;
+use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -14,7 +15,6 @@ use super::{
 };
 use crate::{
     attribute::Attribute,
-    clone,
     hydration::{remove_following_siblings, HydrationTracker},
 };
 

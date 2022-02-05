@@ -6,7 +6,7 @@
 use std::ops::DerefMut;
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
-use silkenweb_dom::global::window;
+use silkenweb_base::window;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::Url;
 

@@ -1,6 +1,5 @@
+use silkenweb_base::intern_str;
 use wasm_bindgen::UnwrapThrowExt;
-
-use crate::intern_str;
 
 pub trait AttributeValue {
     fn text(self) -> String;

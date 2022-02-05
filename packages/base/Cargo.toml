@@ -1,0 +1,17 @@
+[package]
+name = "silkenweb-base"
+version = "0.0.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Base crate for Silkenweb"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui", "web-programming"]
+keywords = ["reactive", "web", "html", "browser", "dom"]
+
+[dependencies]
+web-sys = "0.3"
+wasm-bindgen = "=0.2.78"
+js-sys = "0.3"

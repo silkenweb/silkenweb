@@ -14,18 +14,18 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
+use silkenweb_base::{clone, intern_str};
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_vec::ChildVec, optional_children::OptionalChildren};
 use super::Node;
 use crate::{
     attribute::Attribute,
-    clone,
     hydration::{
         node::{DryNode, HydrationElement, HydrationText, Namespace},
         HydrationTracker,
     },
-    intern_str, spawn_cancelable_future,
+    spawn_cancelable_future,
 };
 
 pub mod optional_children;

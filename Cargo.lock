@@ -886,11 +886,21 @@ name = "silkenweb"
 version = "0.1.1"
 dependencies = [
  "futures-signals",
+ "silkenweb-base",
  "silkenweb-dom",
  "silkenweb-elements",
  "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-test",
+ "web-sys",
+]
+
+[[package]]
+name = "silkenweb-base"
+version = "0.0.0"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
  "web-sys",
 ]
 
@@ -905,6 +915,7 @@ dependencies = [
  "html-escape",
  "indexmap",
  "js-sys",
+ "silkenweb-base",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -916,6 +927,7 @@ version = "0.1.1"
 dependencies = [
  "futures-signals",
  "paste",
+ "silkenweb-base",
  "silkenweb-dom",
  "wasm-bindgen",
  "web-sys",

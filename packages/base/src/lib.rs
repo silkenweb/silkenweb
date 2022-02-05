@@ -1,5 +1,7 @@
 use wasm_bindgen::UnwrapThrowExt;
 
+pub mod macros;
+
 pub mod window {
     use js_sys::Function;
     use wasm_bindgen::{JsValue, UnwrapThrowExt};
@@ -51,6 +53,17 @@ pub mod document {
     pub fn create_text_node(text: &str) -> web_sys::Text {
         DOCUMENT.with(|doc| doc.create_text_node(text))
     }
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn intern_str(s: &str) -> &str {
+    use wasm_bindgen::intern;
+    intern(s)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn intern_str(s: &str) -> &str {
+    s
 }
 
 thread_local!(

@@ -4,8 +4,8 @@ use std::iter;
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
-    animation::infinite_animation,
     dom::{
+        animation::infinite_animation,
         mount,
         node::element::{ElementBuilder, ParentBuilder},
     },

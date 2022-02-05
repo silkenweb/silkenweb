@@ -58,11 +58,11 @@ mod arch {
     use std::future::Future;
 
     use js_sys::Promise;
+    use silkenweb_base::window;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
     use wasm_bindgen_futures::JsFuture;
 
     use super::RENDER;
-    use crate::global::window;
 
     pub struct Raf {
         on_animation_frame: Closure<dyn FnMut(JsValue)>,
@@ -104,12 +104,16 @@ pub(super) fn queue_update(f: impl FnOnce() + 'static) {
 }
 
 /// Run a closure after the next render.
-pub fn after_animation_frame(f: impl FnOnce() + 'static) {
+pub(super) fn after_animation_frame(f: impl FnOnce() + 'static) {
     RENDER.with(|r| r.after_animation_frame(f));
 }
 
-pub fn animation_timestamp() -> impl Signal<Item = f64> {
+pub(super) fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
+}
+
+pub(super) fn request_animation_frame() {
+    RENDER.with(Render::request_animation_frame);
 }
 
 /// Render any pending updates.
@@ -165,10 +169,6 @@ pub mod server {
             }
         }
     }
-}
-
-pub fn request_animation_frame() {
-    RENDER.with(Render::request_animation_frame);
 }
 
 struct Render {

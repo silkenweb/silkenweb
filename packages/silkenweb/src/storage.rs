@@ -1,4 +1,4 @@
-use silkenweb_dom::global::window;
+use silkenweb_base::window;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 macro_rules! unexpected_exception {

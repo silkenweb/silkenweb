@@ -18,6 +18,7 @@ server-side-render = ["silkenweb-dom/server-side-render"]
 hydration = ["silkenweb-dom/hydration"]
 
 [dependencies]
+silkenweb-base = "0.0.0"
 silkenweb-elements = "0.1.1"
 silkenweb-dom = "0.1.1"
 silkenweb-signals-ext = "0.0.0"

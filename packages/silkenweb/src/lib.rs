@@ -74,16 +74,6 @@
 //! mount("app", app);
 //! ```
 //!
-//! # Features
-//!
-//! See the associated module for documentation on how to use each feature:
-//!
-//! - [animation]
-//! - [router]
-//! - [storage]
-//!
-//! For documentation on building DOM trees, see [elements].
-//!
 //! [trunk]: https://trunkrs.dev/
 //! [futures-signals tutorial]: https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
@@ -97,12 +87,12 @@ pub use silkenweb_elements as elements;
 #[doc(inline)]
 pub use silkenweb_signals_ext as signals_ext;
 
-pub mod animation;
 pub mod router;
 pub mod storage;
 
 #[doc(inline)]
-pub use crate::dom::clone;
+pub use silkenweb_base::clone;
+
 #[doc(inline)]
 pub use crate::storage::Storage;
 

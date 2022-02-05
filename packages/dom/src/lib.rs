@@ -3,15 +3,15 @@ use std::{cell::RefCell, collections::HashMap, future::Future};
 
 use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
+use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use crate::{global::document, node::element::Element};
+use crate::node::element::Element;
 
 mod event;
-mod macros;
 
+pub mod animation;
 pub mod attribute;
-pub mod global;
 pub mod hydration;
 pub mod node;
 pub mod render;
@@ -51,17 +51,6 @@ pub fn unmount(id: &str) {
     if let Some(elem) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.eval_dom_element().remove();
     }
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn intern_str(s: &str) -> &str {
-    use wasm_bindgen::intern;
-    intern(s)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn intern_str(s: &str) -> &str {
-    s
 }
 
 fn spawn_cancelable_future(

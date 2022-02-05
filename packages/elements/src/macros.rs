@@ -1,8 +1,8 @@
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
+pub use silkenweb_base::intern_str;
 pub use silkenweb_dom::{
     attribute::{AsAttribute, Attribute},
-    intern_str,
     node::{
         element::{
             optional_children::OptionalChildren, tag, tag_in_namespace, Element, ElementBuilder,
