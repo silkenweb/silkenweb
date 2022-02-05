@@ -3,13 +3,20 @@ use std::{
     future,
 };
 
+pub use arch::spawn_local;
+use arch::{wait_for_microtasks, Raf};
 use futures::StreamExt;
 use futures_signals::signal::{from_stream, Mutable, Signal, SignalExt};
 
-use crate::tasks::wait_for_microtasks;
+#[cfg(not(target_arch = "wasm32"))]
+mod arch {
+    use std::{cell::RefCell, future::Future};
 
-#[cfg(feature = "server-side-render")]
-mod raf {
+    use futures::{
+        executor::{LocalPool, LocalSpawner},
+        task::LocalSpawnExt,
+    };
+
     pub struct Raf;
 
     impl Raf {
@@ -19,11 +26,40 @@ mod raf {
 
         pub fn request_render(&self) {}
     }
+
+    thread_local!(
+        static EXECUTOR: RefCell<LocalPool> = RefCell::new(LocalPool::new());
+        static SPAWNER: LocalSpawner = EXECUTOR.with(|executor| executor.borrow().spawner());
+    );
+
+    pub fn spawn_local<F>(future: F)
+    where
+        F: Future<Output = ()> + 'static,
+    {
+        SPAWNER.with(|spawner| {
+            spawner.spawn_local(future).unwrap();
+        });
+    }
+
+    /// Run futures queued with `spawn_local`, until no more progress can be
+    /// made. Don't call this from a future spawned using `spawn_local`, use
+    /// `render::block_on`
+    pub async fn wait_for_microtasks() {
+        run();
+    }
+
+    pub fn run() {
+        EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
+    }
 }
 
-#[cfg(not(feature = "server-side-render"))]
-mod raf {
+#[cfg(target_arch = "wasm32")]
+mod arch {
+    use std::future::Future;
+
+    use js_sys::Promise;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+    use wasm_bindgen_futures::JsFuture;
 
     use super::RENDER;
     use crate::global::window;
@@ -46,6 +82,20 @@ mod raf {
         pub fn request_render(&self) {
             window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
         }
+    }
+
+    pub fn spawn_local<F>(future: F)
+    where
+        F: Future<Output = ()> + 'static,
+    {
+        wasm_bindgen_futures::spawn_local(future)
+    }
+
+    // Microtasks are run in the order they were queued in Javascript, so we just
+    // put a task on the queue and `await` it.
+    pub async fn wait_for_microtasks() {
+        let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
+        JsFuture::from(wait_for_microtasks).await.unwrap_throw();
     }
 }
 
@@ -81,11 +131,10 @@ pub mod server {
 
     use futures::Future;
 
-    use super::{Render, RENDER};
-    use crate::tasks;
+    use super::{arch, Render, RENDER};
 
     pub fn render_now_sync() {
-        tasks::run();
+        arch::run();
         RENDER.with(Render::render_updates);
     }
 
@@ -123,7 +172,7 @@ pub fn request_render() {
 }
 
 struct Render {
-    raf: raf::Raf,
+    raf: Raf,
     raf_pending: Cell<bool>,
     pending_updates: RefCell<Vec<Box<dyn FnOnce()>>>,
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
@@ -133,7 +182,7 @@ struct Render {
 impl Render {
     fn new() -> Self {
         Self {
-            raf: raf::Raf::new(),
+            raf: Raf::new(),
             raf_pending: Cell::new(false),
             pending_updates: RefCell::new(Vec::new()),
             pending_effects: RefCell::new(Vec::new()),
@@ -141,7 +190,7 @@ impl Render {
         }
     }
 
-    #[cfg(not(feature = "server-side-render"))]
+    #[cfg(target_arch = "wasm32")]
     fn on_animation_frame(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);

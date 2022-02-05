@@ -3,7 +3,7 @@ use futures_signals::signal::Mutable;
 use silkenweb::{
     dom::{
         hydration::{hydrate_tracked, HydrationStats},
-        spawn_local,
+        render::spawn_local,
     },
     elements::{html::*, macros::ElementBuilder},
     prelude::*,

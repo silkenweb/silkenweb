@@ -69,7 +69,7 @@ fn spawn_cancelable_future(
 ) -> DiscardOnDrop<CancelableFutureHandle> {
     let (handle, cancelable_future) = cancelable_future(future, || ());
 
-    tasks::spawn_local(cancelable_future);
+    render::spawn_local(cancelable_future);
 
     handle
 }
@@ -77,63 +77,3 @@ fn spawn_cancelable_future(
 thread_local!(
     static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
 );
-
-pub use tasks::spawn_local;
-
-#[cfg(not(target_arch = "wasm32"))]
-mod tasks {
-    use std::{cell::RefCell, future::Future};
-
-    use futures::{
-        executor::{LocalPool, LocalSpawner},
-        task::LocalSpawnExt,
-    };
-
-    thread_local!(
-        static EXECUTOR: RefCell<LocalPool> = RefCell::new(LocalPool::new());
-        static SPAWNER: LocalSpawner = EXECUTOR.with(|executor| executor.borrow().spawner());
-    );
-
-    pub fn spawn_local<F>(future: F)
-    where
-        F: Future<Output = ()> + 'static,
-    {
-        SPAWNER.with(|spawner| {
-            spawner.spawn_local(future).unwrap();
-        });
-    }
-
-    /// Run futures queued with `spawn_local`, until no more progress can be
-    /// made. Don't call this from a future spawned using `spawn_local`, use
-    /// `render::block_on`
-    pub async fn wait_for_microtasks() {
-        run();
-    }
-
-    pub fn run() {
-        EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-mod tasks {
-    use std::future::Future;
-
-    use js_sys::Promise;
-    use wasm_bindgen::{JsValue, UnwrapThrowExt};
-    use wasm_bindgen_futures::JsFuture;
-
-    pub fn spawn_local<F>(future: F)
-    where
-        F: Future<Output = ()> + 'static,
-    {
-        wasm_bindgen_futures::spawn_local(future)
-    }
-
-    // Microtasks are run in the order they were queued in Javascript, so we just
-    // put a task on the queue and `await` it.
-    pub async fn wait_for_microtasks() {
-        let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
-        JsFuture::from(wait_for_microtasks).await.unwrap_throw();
-    }
-}
