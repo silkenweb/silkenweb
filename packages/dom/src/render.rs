@@ -1,6 +1,10 @@
-use std::cell::{Cell, RefCell};
+use std::{
+    cell::{Cell, RefCell},
+    future,
+};
 
-use futures_signals::signal::{Mutable, Signal};
+use futures::StreamExt;
+use futures_signals::signal::{from_stream, Mutable, Signal, SignalExt};
 
 use crate::tasks::wait_for_microtasks;
 
@@ -155,9 +159,22 @@ impl Render {
     }
 
     fn animation_timestamp(&self) -> impl Signal<Item = f64> {
-        let base_timestamp = self.animation_timestamp_millis.get();
-        self.animation_timestamp_millis
-            .signal_ref(move |t| t - base_timestamp)
+        from_stream(self.animation_timestamp_millis.signal().to_stream().scan(
+            None,
+            |base, current| {
+                let ts = if let Some(start) = base {
+                    current - *start
+                } else {
+                    *base = Some(current);
+                    0.0
+                };
+
+                future::ready(Some(ts))
+            },
+        ))
+        .map(Option::unwrap)
+        // I fairly sure it's safe to call unwrap, as the stream will be
+        // infinite
     }
 
     pub fn render_updates(&self) {
