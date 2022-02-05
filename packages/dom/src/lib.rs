@@ -8,8 +8,6 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use crate::node::element::Element;
 
-mod event;
-
 pub mod animation;
 pub mod attribute;
 pub mod hydration;

@@ -7,10 +7,9 @@ use html_escape::encode_text_minimal;
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-use super::{HydrationNodeData, Namespace, WetNode};
+use super::{HydrationNodeData, Namespace, WetNode, event::EventCallback};
 use crate::{
     attribute::Attribute,
-    event::EventCallback,
     render::{after_animation_frame, queue_update},
 };
 
