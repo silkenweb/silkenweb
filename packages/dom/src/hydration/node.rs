@@ -12,7 +12,7 @@ use self::{
 };
 use super::{
     lazy::{IsDry, Lazy},
-    HydrationTracker,
+    HydrationStats,
 };
 use crate::{attribute::Attribute, event::EventCallback};
 
@@ -56,7 +56,7 @@ impl HydrationElement {
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> web_sys::Element {
         self.borrow_mut()
             .wet_with(|dry_elem| dry_elem.hydrate_child(parent, child, tracker))
@@ -168,7 +168,7 @@ impl HydrationText {
         &mut self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> web_sys::Text {
         self.borrow_mut()
             .wet_with(|dry_text| dry_text.hydrate_child(parent, child, tracker))
@@ -217,7 +217,7 @@ impl HydrationNodeData {
         &mut self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> web_sys::Node {
         match &mut self.0 {
             HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child, tracker).into(),

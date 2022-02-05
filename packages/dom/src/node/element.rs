@@ -23,7 +23,7 @@ use crate::{
     attribute::Attribute,
     hydration::{
         node::{DryNode, HydrationElement, HydrationText, Namespace},
-        HydrationTracker,
+        HydrationStats,
     },
     spawn_cancelable_future,
 };
@@ -251,7 +251,7 @@ impl Element {
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> web_sys::Element {
         self.hydro_elem.hydrate_child(parent, child, tracker)
     }

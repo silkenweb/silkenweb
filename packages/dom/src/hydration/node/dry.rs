@@ -15,7 +15,7 @@ use super::{
 };
 use crate::{
     attribute::Attribute,
-    hydration::{remove_following_siblings, HydrationTracker},
+    hydration::{remove_following_siblings, HydrationStats},
 };
 
 pub struct DryElement {
@@ -43,7 +43,7 @@ impl DryElement {
         self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> WetElement {
         clone!(mut child);
 
@@ -81,7 +81,7 @@ impl DryElement {
     fn hydrate_element(
         self,
         dom_elem: &web_sys::Element,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> WetElement {
         self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::new_from_element(dom_elem.clone());
@@ -121,7 +121,7 @@ impl DryElement {
     fn reconcile_attributes(
         &self,
         dom_elem: &web_sys::Element,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) {
         let dom_attributes = dom_elem.attributes();
         let mut dom_attr_map = HashMap::new();
@@ -259,7 +259,7 @@ impl fmt::Display for DryElement {
 fn hydrate_with_new(
     parent: &web_sys::Element,
     child: HydrationNodeData,
-    tracker: &mut impl HydrationTracker,
+    tracker: &mut HydrationStats,
 ) {
     let new_child = child.dom_node();
     parent.append_child(&new_child).unwrap_throw();
@@ -304,7 +304,7 @@ impl DryText {
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
-        tracker: &mut impl HydrationTracker,
+        tracker: &mut HydrationStats,
     ) -> WetText {
         if let Some(dom_text) = child.dyn_ref::<web_sys::Text>() {
             let from_dom = || WetText::new_from_text(dom_text.clone());
