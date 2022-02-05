@@ -5,10 +5,7 @@ use discard::DiscardOnDrop;
 use futures_signals::{cancelable_future, CancelableFutureHandle};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{
-    global::document,
-    node::element::{Element, ElementBuilderBase},
-};
+use crate::{global::document, node::element::Element};
 
 mod event;
 mod hydration;
@@ -172,20 +169,6 @@ pub fn unmount(id: &str) {
     if let Some(elem) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.eval_dom_element().remove();
     }
-}
-
-/// An HTML element tag.
-///
-/// For example: `tag("div")`
-pub fn tag(name: &str) -> ElementBuilderBase {
-    ElementBuilderBase::new(name)
-}
-
-/// An HTML element tag in a namespace.
-///
-/// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> ElementBuilderBase {
-    ElementBuilderBase::new_in_namespace(namespace, name)
 }
 
 #[cfg(target_arch = "wasm32")]

@@ -5,12 +5,11 @@ pub use silkenweb_dom::{
     intern_str,
     node::{
         element::{
-            optional_children::OptionalChildren, Element, ElementBuilder, ElementBuilderBase,
-            ParentBuilder,
+            optional_children::OptionalChildren, tag, tag_in_namespace, Element, ElementBuilder,
+            ElementBuilderBase, ParentBuilder,
         },
         Node,
     },
-    tag, tag_in_namespace,
 };
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
