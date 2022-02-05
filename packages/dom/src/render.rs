@@ -24,7 +24,7 @@ mod arch {
             Self
         }
 
-        pub fn request_render(&self) {}
+        pub fn request_animation_frame(&self) {}
     }
 
     thread_local!(
@@ -79,7 +79,7 @@ mod arch {
             }
         }
 
-        pub fn request_render(&self) {
+        pub fn request_animation_frame(&self) {
             window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
         }
     }
@@ -104,8 +104,8 @@ pub(super) fn queue_update(f: impl FnOnce() + 'static) {
 }
 
 /// Run a closure after the next render.
-pub fn after_render(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.after_render(f));
+pub fn after_animation_frame(f: impl FnOnce() + 'static) {
+    RENDER.with(|r| r.after_animation_frame(f));
 }
 
 pub fn animation_timestamp() -> impl Signal<Item = f64> {
@@ -167,8 +167,8 @@ pub mod server {
     }
 }
 
-pub fn request_render() {
-    RENDER.with(Render::request_render);
+pub fn request_animation_frame() {
+    RENDER.with(Render::request_animation_frame);
 }
 
 struct Render {
@@ -199,12 +199,12 @@ impl Render {
 
     fn queue_update(&self, x: impl FnOnce() + 'static) {
         self.pending_updates.borrow_mut().push(Box::new(x));
-        self.request_render();
+        self.request_animation_frame();
     }
 
-    fn after_render(&self, x: impl FnOnce() + 'static) {
+    fn after_animation_frame(&self, x: impl FnOnce() + 'static) {
         self.pending_effects.borrow_mut().push(Box::new(x));
-        self.request_render();
+        self.request_animation_frame();
     }
 
     fn animation_timestamp(&self) -> impl Signal<Item = f64> {
@@ -236,10 +236,10 @@ impl Render {
         }
     }
 
-    fn request_render(&self) {
+    fn request_animation_frame(&self) {
         if !self.raf_pending.get() {
             self.raf_pending.set(true);
-            self.raf.request_render();
+            self.raf.request_animation_frame();
         }
     }
 }

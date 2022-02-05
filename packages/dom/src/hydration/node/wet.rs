@@ -12,7 +12,7 @@ use crate::{
     event::EventCallback,
     global::document,
     intern_str,
-    render::{after_render, queue_update},
+    render::{after_animation_frame, queue_update},
 };
 
 pub struct WetElement {
@@ -117,7 +117,7 @@ impl WetElement {
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let dom_element = self.dom_element.clone();
-        after_render(move || f(&dom_element));
+        after_animation_frame(move || f(&dom_element));
     }
 
     pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {
