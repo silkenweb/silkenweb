@@ -100,8 +100,10 @@ pub async fn hydrate_tracked(
     insert_component(id, elem);
 }
 
-pub async fn hydrate(id: &str, elem: impl Into<Element>) {
-    hydrate_tracked(id, elem, &mut EmptyHydrationTracker).await
+pub async fn hydrate(id: &str, elem: impl Into<Element>) -> HydrationStats {
+    let mut stats = HydrationStats::default();
+    hydrate_tracked(id, elem, &mut stats).await;
+    stats
 }
 
 struct EmptyHydrationTracker;

@@ -1,10 +1,7 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{
-        hydration::{hydrate_tracked, HydrationStats},
-        render::spawn_local,
-    },
+    dom::{hydration::hydrate, render::spawn_local},
     elements::{html::*, macros::ElementBuilder},
     prelude::*,
 };
@@ -22,8 +19,7 @@ fn main() {
     );
 
     spawn_local(async {
-        let mut stats = HydrationStats::default();
-        hydrate_tracked("app", app, &mut stats).await;
+        let stats = hydrate("app", app).await;
         web_log::println!("{}", stats);
     });
 }
