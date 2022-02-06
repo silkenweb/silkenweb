@@ -91,8 +91,6 @@ pub mod storage;
 
 #[doc(inline)]
 pub use silkenweb_base::clone;
-#[doc(inline)]
-pub use silkenweb_signals_ext as signals_ext;
 
 pub mod prelude {
     pub use crate::{
