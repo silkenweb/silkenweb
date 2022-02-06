@@ -4,7 +4,7 @@ use silkenweb::{
         attribute::AttributeValue,
         node::element::{ElementBuilder, ParentBuilder},
     },
-    elements::html_element,
+    html_element,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 

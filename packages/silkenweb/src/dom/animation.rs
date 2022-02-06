@@ -5,7 +5,7 @@
 //! increasing.
 use futures_signals::signal::{Signal, SignalExt};
 
-use crate::render::{animation_timestamp, request_animation_frame};
+use crate::dom::render::{animation_timestamp, request_animation_frame};
 
 /// Provide an infinite time signal for animations.
 ///

@@ -6,7 +6,7 @@ use futures_signals::{cancelable_future, CancelableFutureHandle};
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use crate::node::element::Element;
+use crate::dom::node::element::Element;
 
 pub mod animation;
 pub mod attribute;

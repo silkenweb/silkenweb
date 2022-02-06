@@ -2,7 +2,7 @@ use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 
 use self::{element::Element, text::Text};
-use crate::hydration::{
+use crate::dom::hydration::{
     lazy::IsDry,
     node::{DryNode, HydrationNode, HydrationNodeData, WetNode},
 };

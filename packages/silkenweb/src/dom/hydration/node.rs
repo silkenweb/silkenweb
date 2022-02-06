@@ -15,7 +15,7 @@ use super::{
     lazy::{IsDry, Lazy},
     HydrationStats,
 };
-use crate::attribute::Attribute;
+use crate::dom::attribute::Attribute;
 
 mod dry;
 mod event;

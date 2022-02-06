@@ -80,13 +80,16 @@
 //! [`Mutable`]: futures_signals::signal::Mutable
 //! [`Signal`]: futures_signals::signal::Signal
 //! [`mount`]: crate::dom::mount
-#[doc(inline)]
-pub use silkenweb_dom as dom;
-#[doc(inline)]
-pub use silkenweb_elements as elements;
+#[doc(hidden)]
+#[macro_use]
+pub mod macros;
+
+
 #[doc(inline)]
 pub use silkenweb_signals_ext as signals_ext;
 
+pub mod dom;
+pub mod elements;
 pub mod router;
 pub mod storage;
 

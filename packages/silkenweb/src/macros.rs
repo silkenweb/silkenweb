@@ -1,7 +1,7 @@
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_base::intern_str;
-pub use silkenweb_dom::{
+pub use crate::dom::{
     attribute::{AsAttribute, Attribute},
     node::{
         element::{
@@ -22,8 +22,8 @@ pub use web_sys;
 /// to underscores when generating rust identifiers. For example:
 ///
 /// ```no_run
-/// # use silkenweb_elements::html_element;
-/// use silkenweb_elements::CustomEvent;
+/// # use silkenweb::html_element;
+/// use silkenweb::elements::CustomEvent;
 ///
 /// // The types of the dom element and event carry through to the event handler.
 /// html_element!(my-html-element<web_sys::HtmlDivElement> {
@@ -49,8 +49,8 @@ pub use web_sys;
 macro_rules! html_element {
     ($($t:tt)*) => {
         $crate::dom_element!(
-            attributes = [$crate::HtmlElement],
-            events = [$crate::HtmlElementEvents],
+            attributes = [$crate::elements::HtmlElement],
+            events = [$crate::elements::HtmlElementEvents],
             $($t)*
         );
     }
@@ -288,7 +288,7 @@ macro_rules! dom_element {
             }
         )*
 
-        impl $crate::ElementEvents for $camel_builder_name {
+        impl $crate::elements::ElementEvents for $camel_builder_name {
             type EventTarget = $elem_type;
         }
     };

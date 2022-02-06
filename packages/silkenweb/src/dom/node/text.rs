@@ -1,7 +1,7 @@
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 
-use crate::hydration::node::HydrationText;
+use crate::dom::hydration::node::HydrationText;
 
 pub struct Text {
     pub(super) hydro_text: HydrationText,

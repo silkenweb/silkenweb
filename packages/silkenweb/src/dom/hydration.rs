@@ -2,7 +2,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{insert_component, mount_point, node::element::Element, unmount};
+use crate::dom::{insert_component, mount_point, node::element::Element, unmount};
 
 pub(super) mod lazy;
 pub(super) mod node;

@@ -5,7 +5,7 @@
 //! attribute for that element, as well as methods for each event. For example:
 //!
 //! ```no_run
-//! # use silkenweb_elements::{html::{a, A, ABuilder}, ElementEvents};
+//! # use silkenweb::elements::{html::{a, A, ABuilder}, ElementEvents};
 //! let link: ABuilder = a()
 //!     .href("https://example.com/")
 //!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
@@ -16,12 +16,9 @@ use std::marker::PhantomData;
 use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
 use silkenweb_base::intern_str;
-use silkenweb_dom::node::element::ElementBuilder;
+use crate::dom::node::element::ElementBuilder;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-#[doc(hidden)]
-#[macro_use]
-pub mod macros;
 pub mod html;
 pub mod svg;
 
