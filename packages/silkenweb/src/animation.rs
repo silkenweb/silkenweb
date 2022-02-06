@@ -19,7 +19,7 @@ use crate::render::{animation_timestamp, request_animation_frame};
 /// # Example
 ///
 /// Slowly filling a progress bar:
-/// 
+///
 /// ```no_run
 /// # use futures_signals::signal::SignalExt;
 /// # use silkenweb::{animation::finite_animation, elements::html::progress, mount};
