@@ -894,7 +894,6 @@ dependencies = [
  "js-sys",
  "paste",
  "silkenweb-base",
- "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
