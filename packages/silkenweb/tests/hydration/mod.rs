@@ -1,9 +1,11 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{prelude::ParentBuilder, macros::Element};
-use silkenweb::dom::{hydration::hydrate, render::render_now};
-use silkenweb::elements::{
-    html::{button, div, p},
-    ElementEvents, HtmlElement,
+use silkenweb::{
+    dom::{hydration::hydrate, node::element::Element, render::render_now},
+    elements::{
+        html::{button, div, p},
+        ElementEvents, HtmlElement,
+    },
+    prelude::ParentBuilder,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 

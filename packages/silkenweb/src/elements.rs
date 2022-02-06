@@ -316,10 +316,10 @@ pub trait ElementEvents: ElementBuilder {
         touchmove: web_sys::TouchEvent,
         touchstart: web_sys::TouchEvent,
         wheel: web_sys::WheelEvent,
-        /* The events are currently marked as unstable in web_sys:
-         *
-         * copy: $crate::macros::private::web_sys::ClipboardEvent,
-         * cut: $crate::macros::private::web_sys::ClipboardEvent,
-         * paste: $crate::macros::private::web_sys::ClipboardEvent, */
+        // The events are currently marked as unstable in web_sys:
+        //
+        // copy: web_sys::ClipboardEvent,
+        // cut: web_sys::ClipboardEvent,
+        // paste: web_sys::ClipboardEvent,
     });
 }
