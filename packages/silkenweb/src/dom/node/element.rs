@@ -10,6 +10,7 @@ use std::{
 
 use discard::DiscardOnDrop;
 use futures_signals::{
+    cancelable_future,
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
@@ -25,7 +26,7 @@ use crate::dom::{
         node::{DryNode, HydrationElement, HydrationText, Namespace},
         HydrationStats,
     },
-    spawn_cancelable_future,
+    render,
 };
 
 pub mod optional_children;
@@ -324,4 +325,14 @@ pub trait ParentBuilder: ElementBuilder {
     ) -> Self::Target;
 
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
+}
+
+fn spawn_cancelable_future(
+    future: impl Future<Output = ()> + 'static,
+) -> DiscardOnDrop<CancelableFutureHandle> {
+    let (handle, cancelable_future) = cancelable_future(future, || ());
+
+    render::spawn_local(cancelable_future);
+
+    handle
 }

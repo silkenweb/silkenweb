@@ -7,8 +7,7 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 
-use super::Element;
-use crate::dom::spawn_cancelable_future;
+use super::{spawn_cancelable_future, Element};
 
 pub struct OptionalChildren {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,

@@ -1,8 +1,6 @@
 //! A reactive interface to the DOM.
-use std::{cell::RefCell, collections::HashMap, future::Future};
+use std::{cell::RefCell, collections::HashMap};
 
-use discard::DiscardOnDrop;
-use futures_signals::{cancelable_future, CancelableFutureHandle};
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
@@ -49,16 +47,6 @@ pub fn unmount(id: &str) {
     if let Some(elem) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
         elem.eval_dom_element().remove();
     }
-}
-
-fn spawn_cancelable_future(
-    future: impl Future<Output = ()> + 'static,
-) -> DiscardOnDrop<CancelableFutureHandle> {
-    let (handle, cancelable_future) = cancelable_future(future, || ());
-
-    render::spawn_local(cancelable_future);
-
-    handle
 }
 
 thread_local!(
