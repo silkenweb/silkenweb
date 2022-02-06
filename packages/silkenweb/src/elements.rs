@@ -16,8 +16,9 @@ use std::marker::PhantomData;
 use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
 use silkenweb_base::intern_str;
-use crate::dom::node::element::ElementBuilder;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
+
+use crate::dom::node::element::ElementBuilder;
 
 pub mod html;
 pub mod svg;

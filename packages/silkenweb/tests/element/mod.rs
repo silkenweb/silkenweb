@@ -3,14 +3,16 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
-    dom::node::element::ElementBuilder,
+    dom::{
+        node::{element::ElementBuilder, text::text},
+        render::render_now,
+    },
     elements::{
         html::{div, p, DivBuilder},
         HtmlElement,
     },
     prelude::ParentBuilder,
 };
-use silkenweb::dom::{node::text::text, render::render_now};
 
 macro_rules! isomorphic_test {
     (async fn $name:ident() $body:block) => {

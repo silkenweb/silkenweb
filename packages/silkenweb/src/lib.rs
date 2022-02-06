@@ -84,7 +84,6 @@
 #[macro_use]
 pub mod macros;
 
-
 #[doc(inline)]
 pub use silkenweb_signals_ext as signals_ext;
 

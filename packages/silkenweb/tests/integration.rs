@@ -9,7 +9,8 @@ use silkenweb::{
     elements::{
         html::{button, div, p, PBuilder},
         ElementEvents,
-    }, prelude::HtmlElement,
+    },
+    prelude::HtmlElement,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};

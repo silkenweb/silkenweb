@@ -1,6 +1,9 @@
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_base::intern_str;
+pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+pub use web_sys;
+
 pub use crate::dom::{
     attribute::{AsAttribute, Attribute},
     node::{
@@ -11,8 +14,6 @@ pub use crate::dom::{
         Node,
     },
 };
-pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
-pub use web_sys;
 
 /// Define an html element.
 ///
