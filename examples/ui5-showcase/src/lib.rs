@@ -1,11 +1,9 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
 use silkenweb::{
-    dom::{
-        mount,
-        node::element::{optional_children::optional_children, Element, ElementBuilder},
-    },
+    dom::node::element::{optional_children::optional_children, Element, ElementBuilder},
     elements::{html::div, HtmlElement},
+    mount,
     prelude::ParentBuilder,
 };
 use silkenweb_ui5::{

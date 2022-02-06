@@ -2,7 +2,7 @@
 extern crate derive_more;
 
 use model::{Filter, TodoApp};
-use silkenweb::{dom::mount, router::url};
+use silkenweb::{mount, router::url};
 use view::TodoAppView;
 
 mod model;

@@ -15,8 +15,8 @@ use silkenweb::{
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
     prelude::ParentBuilder,
-    signals_ext::SignalProduct,
 };
+use silkenweb_signals_ext::SignalProduct;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlInputElement;
 

@@ -7,6 +7,7 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
+silkenweb-signals-ext = { path = "../../packages/signals-ext" }
 futures-signals = "0.3"
 console_error_panic_hook = "0.1"
 js-sys = "0.3"

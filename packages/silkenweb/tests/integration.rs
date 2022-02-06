@@ -1,16 +1,16 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     dom::{
-        mount,
         node::element::{tag, ParentBuilder},
         render::render_now,
-        unmount,
     },
     elements::{
         html::{button, div, p, PBuilder},
         ElementEvents,
     },
+    mount,
     prelude::HtmlElement,
+    unmount,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};

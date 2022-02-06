@@ -980,6 +980,7 @@ dependencies = [
  "serde",
  "serde_json",
  "silkenweb",
+ "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

@@ -6,10 +6,10 @@ use num_traits::ToPrimitive;
 use silkenweb::{
     dom::{
         animation::infinite_animation,
-        mount,
         node::element::{ElementBuilder, ParentBuilder},
     },
     elements::svg,
+    mount,
 };
 use wasm_bindgen::UnwrapThrowExt;
 

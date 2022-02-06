@@ -1,10 +1,10 @@
 //! A minimal routing example
 use silkenweb::{
-    dom::mount,
     elements::{
         html::{button, div, p},
         ElementEvents,
     },
+    mount,
     prelude::ParentBuilder,
     router,
 };
