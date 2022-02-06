@@ -19,3 +19,15 @@ svg_element!(
         }
     }
 );
+
+svg_element!(
+    rect <web_sys::SvgPathElement> {
+        attributes {
+            x: String,
+            y: String,
+            width: String,
+            height: String,
+            transform: String,
+        }
+    }
+);
