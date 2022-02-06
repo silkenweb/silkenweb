@@ -3,15 +3,13 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
-    dom::{
-        node::{element::ElementBuilder, text::text},
-        render::render_now,
-    },
     elements::{
         html::{div, p, DivBuilder},
         HtmlElement,
     },
+    node::{element::ElementBuilder, text::text},
     prelude::ParentBuilder,
+    render::render_now,
 };
 
 macro_rules! isomorphic_test {
@@ -19,7 +17,7 @@ macro_rules! isomorphic_test {
         #[cfg(not(target_arch = "wasm32"))]
         #[test]
         fn $name() {
-            silkenweb::dom::render::server::block_on(async { $body });
+            silkenweb::render::server::block_on(async { $body });
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -44,7 +42,7 @@ macro_rules! render_test {
 #[test]
 #[should_panic]
 fn block_on() {
-    silkenweb::dom::render::server::block_on(async { panic!("Make sure the future is run") });
+    silkenweb::render::server::block_on(async { panic!("Make sure the future is run") });
 }
 
 render_test!(empty_element, div(), "<div></div>");
@@ -85,7 +83,7 @@ render_test!(
 #[test]
 #[should_panic]
 fn test_children_signal_test() {
-    silkenweb::dom::render::server::block_on(children_signal_test(&[], |_| {}, &[0]));
+    silkenweb::render::server::block_on(children_signal_test(&[], |_| {}, &[0]));
 }
 
 macro_rules! children_signal_test {

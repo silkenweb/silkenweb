@@ -20,7 +20,7 @@ use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_vec::ChildVec, optional_children::OptionalChildren};
 use super::Node;
-use crate::dom::{
+use crate::{
     attribute::Attribute,
     hydration::{
         node::{DryNode, HydrationElement, HydrationText, Namespace},

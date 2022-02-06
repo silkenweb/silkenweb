@@ -2,7 +2,7 @@ use std::mem;
 
 use futures_signals::signal_vec::VecDiff;
 
-use crate::dom::{hydration::node::HydrationElement, node::Node};
+use crate::{hydration::node::HydrationElement, node::Node};
 
 pub struct ChildVec {
     parent: HydrationElement,

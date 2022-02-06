@@ -4,12 +4,10 @@ use std::iter;
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
-    dom::{
-        animation::infinite_animation,
-        node::element::{ElementBuilder, ParentBuilder},
-    },
+    animation::infinite_animation,
     elements::svg,
     mount,
+    node::element::{ElementBuilder, ParentBuilder},
 };
 use wasm_bindgen::UnwrapThrowExt;
 

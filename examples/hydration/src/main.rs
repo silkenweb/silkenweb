@@ -1,9 +1,8 @@
 //! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{hydration::hydrate, node::element::ElementBuilder, render::spawn_local},
-    elements::html::*,
-    prelude::*,
+    elements::html::*, hydration::hydrate, node::element::ElementBuilder, prelude::*,
+    render::spawn_local,
 };
 
 fn main() {

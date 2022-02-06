@@ -79,10 +79,10 @@
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
 //! [`Mutable`]: futures_signals::signal::Mutable
 //! [`Signal`]: futures_signals::signal::Signal
-//! [`mount`]: crate::dom::mount
+//! [`mount`]: crate::mount
 use std::{cell::RefCell, collections::HashMap};
 
-use macros::Element;
+use node::element::Element;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document;
@@ -92,17 +92,21 @@ use wasm_bindgen::UnwrapThrowExt;
 #[macro_use]
 pub mod macros;
 
-pub mod dom;
+pub mod animation;
+pub mod attribute;
 pub mod elements;
+pub mod hydration;
+pub mod node;
+pub mod render;
 pub mod router;
 pub mod storage;
 
 pub mod prelude {
     pub use crate::{
         clone,
-        dom::node::element::ParentBuilder,
         elements::{ElementEvents, HtmlElement, HtmlElementEvents},
         mount,
+        node::element::ParentBuilder,
     };
 }
 

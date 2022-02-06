@@ -6,7 +6,6 @@ use futures_signals::{
 };
 use silkenweb::{
     clone,
-    dom::node::element::{optional_children::optional_children, ElementBuilder},
     elements::{
         html::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,
@@ -14,6 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
+    node::element::{optional_children::optional_children, ElementBuilder},
     prelude::ParentBuilder,
 };
 use silkenweb_signals_ext::SignalProduct;

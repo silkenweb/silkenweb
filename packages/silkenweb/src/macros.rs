@@ -4,7 +4,7 @@ pub use silkenweb_base::intern_str;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
-pub use crate::dom::{
+pub use crate::{
     attribute::{AsAttribute, Attribute},
     node::{
         element::{

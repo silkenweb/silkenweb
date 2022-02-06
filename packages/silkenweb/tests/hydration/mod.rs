@@ -1,11 +1,13 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{hydration::hydrate, node::element::Element, render::render_now},
     elements::{
         html::{button, div, p},
         ElementEvents, HtmlElement,
     },
+    hydration::hydrate,
+    node::element::Element,
     prelude::ParentBuilder,
+    render::render_now,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 

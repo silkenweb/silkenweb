@@ -18,7 +18,7 @@ use paste::paste;
 use silkenweb_base::intern_str;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::dom::node::element::ElementBuilder;
+use crate::node::element::ElementBuilder;
 
 pub mod html;
 pub mod svg;

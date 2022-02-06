@@ -1,15 +1,13 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{
-        node::element::{tag, ParentBuilder},
-        render::render_now,
-    },
     elements::{
         html::{button, div, p, PBuilder},
         ElementEvents,
     },
     mount,
+    node::element::{tag, ParentBuilder},
     prelude::HtmlElement,
+    render::render_now,
     unmount,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};

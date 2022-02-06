@@ -13,7 +13,7 @@ use super::{
     wet::{WetElement, WetText},
     DryNode, HydrationNodeData, Namespace, WetNode,
 };
-use crate::dom::{
+use crate::{
     attribute::Attribute,
     hydration::{remove_following_siblings, HydrationStats},
 };

@@ -1,6 +1,6 @@
 use silkenweb::{
-    dom::node::element::{ElementBuilder, ParentBuilder},
     html_element,
+    node::element::{ElementBuilder, ParentBuilder},
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
