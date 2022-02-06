@@ -84,9 +84,6 @@
 #[macro_use]
 pub mod macros;
 
-#[doc(inline)]
-pub use silkenweb_signals_ext as signals_ext;
-
 pub mod dom;
 pub mod elements;
 pub mod router;
@@ -94,9 +91,8 @@ pub mod storage;
 
 #[doc(inline)]
 pub use silkenweb_base::clone;
-
 #[doc(inline)]
-pub use crate::storage::Storage;
+pub use silkenweb_signals_ext as signals_ext;
 
 pub mod prelude {
     pub use crate::{

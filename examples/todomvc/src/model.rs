@@ -5,7 +5,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec},
 };
 use serde::{Deserialize, Serialize};
-use silkenweb::Storage;
+use silkenweb::storage::Storage;
 use wasm_bindgen::UnwrapThrowExt;
 
 #[derive(Serialize, Deserialize)]
