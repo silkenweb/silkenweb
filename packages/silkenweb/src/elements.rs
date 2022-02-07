@@ -10,15 +10,15 @@
 //!     .href("https://example.com/")
 //!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
 //! ```
-//! 
+//!
 //! The builder type implements:
-//! 
+//!
 //! - [`ElementBuilder`]
 //! - [`HtmlElement`]
 //! - [`HtmlElementEvents`]
 //! - [`ElementEvents`]
 //! - [`ParentBuilder`] (if it is a parent element)
-//! 
+//!
 //! [`ParentBuilder`]: crate::node::element::ParentBuilder
 
 use std::marker::PhantomData;
@@ -96,7 +96,7 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
 }
 
 /// An HTML element
-/// 
+///
 /// Methods for setting attributes specific to HTML elements
 pub trait HtmlElement: ElementBuilder {
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
