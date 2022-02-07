@@ -1,3 +1,5 @@
+//! SVG Elements
+
 // TODO: Add all svg elements, (element, global) * (attributes, events)
 svg_element!(
     svg <web_sys::SvgsvgElement> {

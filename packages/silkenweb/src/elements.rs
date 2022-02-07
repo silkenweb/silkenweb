@@ -10,6 +10,16 @@
 //!     .href("https://example.com/")
 //!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
 //! ```
+//! 
+//! The builder type implements:
+//! 
+//! - [`ElementBuilder`]
+//! - [`HtmlElement`]
+//! - [`HtmlElementEvents`]
+//! - [`ElementEvents`]
+//! - [`ParentBuilder`] (if it is a parent element)
+//! 
+//! [`ParentBuilder`]: crate::node::element::ParentBuilder
 
 use std::marker::PhantomData;
 
@@ -24,6 +34,9 @@ pub mod html;
 pub mod svg;
 
 /// Wrap a [`web_sys::CustomEvent`] and cast detail.
+///
+/// This is used when defining custom HTML elements to represent web components.
+/// See [`html_element`] for more details.
 #[derive(Clone)]
 pub struct CustomEvent<T>(web_sys::CustomEvent, PhantomData<T>);
 
@@ -82,6 +95,9 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
     }
 }
 
+/// An HTML element
+/// 
+/// Methods for setting attributes specific to HTML elements
 pub trait HtmlElement: ElementBuilder {
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         self.attribute(intern_str("class"), class_attribute_text(value))
@@ -259,6 +275,7 @@ pub trait HtmlElement: ElementBuilder {
     ];
 }
 
+/// Events common to all HTML elements
 pub trait HtmlElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 
@@ -283,6 +300,7 @@ pub trait HtmlElementEvents: ElementBuilder {
     });
 }
 
+/// Events common to all elements
 pub trait ElementEvents: ElementBuilder {
     type EventTarget: JsCast;
 

@@ -1,4 +1,4 @@
-//! All the HTML elements
+//! HTML elements
 //!
 //! This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on
 //! 2021-04-23
