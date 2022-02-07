@@ -104,13 +104,13 @@ impl WetElement {
     }
 
     pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
-        value.set_attribute(name, &self.dom_element);
+        Self::set_attribute(&self.dom_element, name, value);
     }
 
     pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
         let name = name.to_owned();
         let dom_element = self.dom_element.clone();
-        queue_update(move || value.set_attribute(&name, &dom_element));
+        queue_update(move || Self::set_attribute(&dom_element, &name, value));
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -120,6 +120,15 @@ impl WetElement {
 
     pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {
         mem::take(&mut self.event_callbacks)
+    }
+
+    fn set_attribute<A: Attribute>(dom_element: &web_sys::Element, name: &str, value: A) {
+        if let Some(attr) = value.text() {
+            dom_element.set_attribute(name, &attr)
+        } else {
+            dom_element.remove_attribute(name)
+        }
+        .unwrap_throw()
     }
 }
 

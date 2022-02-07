@@ -1,6 +1,8 @@
+use std::borrow::Cow;
+
 use parse_display::Display;
 use silkenweb::{
-    attribute::AttributeValue,
+    attribute::{AsAttribute, Attribute},
     html_element,
     node::element::{ElementBuilder, ParentBuilder},
 };
@@ -46,11 +48,13 @@ pub enum SelectionMode {
     Multiple,
 }
 
-impl AttributeValue for SelectionMode {
-    fn text(self) -> String {
-        self.to_string()
+impl Attribute for SelectionMode {
+    fn text(&self) -> Option<Cow<str>> {
+        Some(Cow::from(self.to_string()))
     }
 }
+
+impl AsAttribute<SelectionMode> for SelectionMode {}
 
 #[derive(Display, Copy, Clone)]
 pub enum PrimaryCalendarType {
@@ -61,9 +65,9 @@ pub enum PrimaryCalendarType {
     Persian,
 }
 
-impl AttributeValue for PrimaryCalendarType {
-    fn text(self) -> String {
-        self.to_string()
+impl Attribute for PrimaryCalendarType {
+    fn text(&self) -> Option<Cow<str>> {
+        Some(Cow::from(self.to_string()))
     }
 }
 

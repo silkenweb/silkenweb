@@ -1,18 +1,38 @@
-use silkenweb_base::intern_str;
-use wasm_bindgen::UnwrapThrowExt;
+//! Traits for defining attribute types
+//!
+//! Once you've implemented [`Attribute`] and [`AsAttribute`] for your type, you
+//! can use it with [`ElementBuilder::attribute`], or define attributes on your
+//! own html element using the [`html_element`] macro.
+//!
+//! [`ElementBuilder::attribute`]: crate::node::element::ElementBuilder::attribute
+use std::borrow::Cow;
 
-pub trait AttributeValue {
-    fn text(self) -> String;
+/// A type that can be used as the value of an attribute.
+pub trait Attribute {
+    /// The attribute value text.
+    ///
+    /// Return `Some(text)` to set the attribute, or `None` to unset the
+    /// attribute. For example, `bool` attributes set the attribute if `true`,
+    /// or unset the attribute if `false`.
+    fn text(&self) -> Option<Cow<str>>;
 }
+
+/// Define where an attribute type can be used.
+///
+/// For example, both `String` and `&str` can be used as `String` attributes
+/// because `&str` implements `AsAttribute<String>`.
+pub trait AsAttribute<T>: Attribute {}
 
 macro_rules! define_attribute_values{
     ($($typ:ty),* $(,)?) => {
         $(
-            impl AttributeValue for $typ {
-                fn text(self) -> String {
-                    format!("{}", self)
+            impl Attribute for $typ {
+                fn text(&self) -> Option<Cow<str>> {
+                    Some(Cow::from(format!("{}", self)))
                 }
             }
+
+            impl AsAttribute<$typ> for $typ {}
         )*
     }
 }
@@ -21,86 +41,45 @@ define_attribute_values!(i8, i16, i32, i64);
 define_attribute_values!(u8, u16, u32, u64);
 define_attribute_values!(f32, f64);
 
-impl AttributeValue for String {
-    fn text(self) -> String {
-        self
+impl Attribute for String {
+    fn text(&self) -> Option<Cow<str>> {
+        Some(Cow::from(self))
     }
 }
 
-/// A non-reactive attribute.
-pub trait Attribute {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element);
-
-    fn text(self) -> Option<String>;
-}
-
-pub trait AsAttribute<T>: Attribute {}
-
-impl<T: AttributeValue> Attribute for T {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
-        dom_element.set_attribute(name, &self.text()).unwrap_throw();
-    }
-
-    fn text(self) -> Option<String> {
-        Some(AttributeValue::text(self))
-    }
-}
-
-impl<T: AttributeValue> AsAttribute<T> for T {}
+impl AsAttribute<String> for String {}
 
 impl<T: Attribute> Attribute for Option<T> {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
-        if let Some(value) = self {
-            value.set_attribute(name, dom_element);
-        } else {
-            dom_element.remove_attribute(name).unwrap_throw();
-        }
-    }
-
-    fn text(self) -> Option<String> {
-        self.and_then(Attribute::text)
+    fn text(&self) -> Option<Cow<str>> {
+        self.as_ref().and_then(|attr| attr.text())
     }
 }
 
 impl<U: Attribute, T: AsAttribute<U>> AsAttribute<U> for Option<T> {}
 
 impl Attribute for bool {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
-        if self {
-            dom_element
-                .set_attribute(name, intern_str(""))
-                .unwrap_throw();
+    fn text(&self) -> Option<Cow<str>> {
+        if *self {
+            Some(Cow::from(""))
         } else {
-            dom_element.remove_attribute(name).unwrap_throw();
+            None
         }
-    }
-
-    fn text(self) -> Option<String> {
-        self.then(|| "".to_owned())
     }
 }
 
 impl AsAttribute<bool> for bool {}
 
 impl<'a> Attribute for &'a str {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
-        dom_element.set_attribute(name, self).unwrap_throw();
-    }
-
-    fn text(self) -> Option<String> {
-        Some(self.to_owned())
+    fn text(&self) -> Option<Cow<str>> {
+        Some(Cow::from(*self))
     }
 }
 
 impl<'a> AsAttribute<String> for &'a str {}
 
 impl<'a> Attribute for &'a String {
-    fn set_attribute(self, name: &str, dom_element: &web_sys::Element) {
-        dom_element.set_attribute(name, self).unwrap_throw();
-    }
-
-    fn text(self) -> Option<String> {
-        Some(self.to_owned())
+    fn text(&self) -> Option<Cow<str>> {
+        Some(Cow::from(*self))
     }
 }
 

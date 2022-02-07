@@ -208,7 +208,7 @@ impl DryElement {
         );
 
         if let Some(value) = value.text() {
-            self.attributes.insert(name.to_owned(), value);
+            self.attributes.insert(name.to_owned(), value.into_owned());
         } else {
             self.attributes.remove(name);
         }
