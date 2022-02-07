@@ -9,6 +9,7 @@ use futures_signals::{
 
 use super::{spawn_cancelable_future, Element};
 
+#[derive(Default)]
 pub struct OptionalChildren {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,
     pub(super) futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
@@ -18,6 +19,10 @@ pub struct OptionalChildren {
 type Item = Rc<RefCell<Option<Element>>>;
 
 impl OptionalChildren {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn child(mut self, elem: impl Into<Element>) -> Self {
         self.push(Some(elem));
         self
@@ -58,13 +63,5 @@ impl OptionalChildren {
             .push_cloned(Rc::new(RefCell::new(elem.map(|e| e.into()))));
         self.len += 1;
         index
-    }
-}
-
-pub fn optional_children() -> OptionalChildren {
-    OptionalChildren {
-        items: Rc::new(RefCell::new(MutableVec::new())),
-        futures: Vec::new(),
-        len: 0,
     }
 }

@@ -13,7 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{optional_children::optional_children, ElementBuilder},
+    node::element::{optional_children::OptionalChildren, ElementBuilder},
     prelude::ParentBuilder,
 };
 use silkenweb_signals_ext::SignalProduct;
@@ -53,7 +53,7 @@ impl TodoAppView {
 
         let item_filter = Broadcaster::new(item_filter);
 
-        let children = optional_children()
+        let children = OptionalChildren::new()
             .child(header().child(h1().text("todos")).child(input_elem))
             .optional_child_signal(self.render_main(item_filter.signal()))
             .optional_child_signal(self.render_footer(item_filter.signal()));
@@ -114,7 +114,7 @@ impl TodoAppView {
 
             move |is_empty| {
                 (!is_empty).then(|| {
-                    let children = optional_children()
+                    let children = OptionalChildren::new()
                         .child_signal(app_view.active_count().map(move |active_count| {
                             span()
                                 .class(["todo-count"])

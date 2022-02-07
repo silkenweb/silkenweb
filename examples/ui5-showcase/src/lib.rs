@@ -3,7 +3,7 @@ use parse_display::{Display, FromStr};
 use silkenweb::{
     elements::{html::div, HtmlElement},
     mount,
-    node::element::{optional_children::optional_children, Element, ElementBuilder},
+    node::element::{optional_children::OptionalChildren, Element, ElementBuilder},
     prelude::ParentBuilder,
 };
 use silkenweb_ui5::{
@@ -61,7 +61,7 @@ pub fn main_js() -> Result<(), JsValue> {
             );
         });
 
-    let children = optional_children()
+    let children = OptionalChildren::new()
         .child(side_bar)
         .child_signal(selected_signal.map(move |selection| match selection {
             Selected::Calendar => Element::from(calendar()),
