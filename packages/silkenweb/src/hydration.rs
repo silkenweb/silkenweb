@@ -100,7 +100,6 @@ impl fmt::Display for HydrationStats {
     }
 }
 
-// TODO: An example
 /// Hydrate an element
 ///
 /// `id` is the id of the element in the
@@ -128,6 +127,11 @@ impl fmt::Display for HydrationStats {
 /// In some cases, a node will already be created in the DOM. For example,
 /// calling [`eval_dom_node`] requires actual dom nodes to be created. In these
 /// cases, the existing HTML will be replaced with these DOM nodes.
+///
+/// # Example
+/// 
+/// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
+/// for an example.
 ///
 /// [`effect`]: crate::node::element::ElementBuilder::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
