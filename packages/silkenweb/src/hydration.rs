@@ -129,7 +129,7 @@ impl fmt::Display for HydrationStats {
 /// cases, the existing HTML will be replaced with these DOM nodes.
 ///
 /// # Example
-/// 
+///
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
 /// for an example.
 ///
