@@ -8,11 +8,11 @@ pub struct Text {
 }
 
 impl Text {
-    pub fn eval_dom_text(&self) -> web_sys::Text {
+    pub(super) fn eval_dom_text(&self) -> web_sys::Text {
         self.hydro_text.eval_dom_text()
     }
 
-    pub fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+    pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
         Vec::new()
     }
 }
