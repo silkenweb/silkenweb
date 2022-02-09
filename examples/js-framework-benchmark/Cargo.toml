@@ -12,7 +12,7 @@ wasm-opt = ['-O4']
 crate-type = ["cdylib"]
 
 [dependencies]
-silkenweb = "0.1"
+silkenweb = "0.2"
 futures-signals = "0.3"
 js-sys = "0.3"
 wasm-bindgen = {version = "=0.2.78", features = ["enable-interning"]}
