@@ -3,14 +3,13 @@
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 
-use self::{element::Element, text::Text};
+use self::element::Element;
 use crate::hydration::{
     lazy::IsDry,
-    node::{DryNode, HydrationNode, HydrationNodeData, WetNode},
+    node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
 };
 
 pub mod element;
-pub mod text;
 
 pub struct Node(NodeEnum);
 
@@ -81,4 +80,24 @@ impl From<Text> for Node {
 enum NodeEnum {
     Element(Element),
     Text(Text),
+}
+
+pub struct Text {
+    pub(super) hydro_text: HydrationText,
+}
+
+impl Text {
+    pub(super) fn eval_dom_text(&self) -> web_sys::Text {
+        self.hydro_text.eval_dom_text()
+    }
+
+    pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+        Vec::new()
+    }
+}
+
+pub fn text(text: &str) -> Text {
+    Text {
+        hydro_text: HydrationText::new(text),
+    }
 }

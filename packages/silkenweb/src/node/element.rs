@@ -418,7 +418,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// #     elements::html::div,
     /// #     node::{
     /// #         element::{OptionalChildren, ParentBuilder},
-    /// #         text::text,
+    /// #         text,
     /// #     },
     /// # };
     ///
