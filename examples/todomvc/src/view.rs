@@ -66,8 +66,7 @@ impl TodoAppView {
         item_filter: impl Signal<Item = Filter> + 'static,
     ) -> impl Signal<Item = Option<Section>> {
         let app_view = self.clone();
-        // TODO: Store this in a mutable, rather than using a Broadcaster? Where to run
-        // the future?
+        // TODO: Use Broadcaster::clone once `futures-signals` is released
         let item_filter = Broadcaster::new(item_filter);
 
         self.is_empty().map(move |is_empty| {
