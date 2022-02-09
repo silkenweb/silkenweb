@@ -884,6 +884,17 @@ dependencies = [
 [[package]]
 name = "silkenweb"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9186fa823a2d5c017a4eba2bc4cb9eb997105ff012d8478cc5ff995cae4e233b"
+dependencies = [
+ "silkenweb-dom",
+ "silkenweb-html",
+ "silkenweb-reactive",
+]
+
+[[package]]
+name = "silkenweb"
+version = "0.2.0"
 dependencies = [
  "caseless",
  "discard",
@@ -902,9 +913,21 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-base"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "js-sys",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "silkenweb-dom"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "853007653b6bad9163faa64d5bfc9a1182e9006b8f5992f2983618c2951e05c1"
+dependencies = [
+ "num-traits",
+ "silkenweb-reactive",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -915,7 +938,7 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "num-traits",
- "silkenweb",
+ "silkenweb 0.2.0",
  "wasm-bindgen",
 ]
 
@@ -924,7 +947,7 @@ name = "silkenweb-example-counter"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb",
+ "silkenweb 0.2.0",
 ]
 
 [[package]]
@@ -932,14 +955,14 @@ name = "silkenweb-example-counter-list"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb",
+ "silkenweb 0.2.0",
 ]
 
 [[package]]
 name = "silkenweb-example-hello-world"
 version = "0.1.0"
 dependencies = [
- "silkenweb",
+ "silkenweb 0.2.0",
 ]
 
 [[package]]
@@ -947,7 +970,7 @@ name = "silkenweb-example-hydration"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb",
+ "silkenweb 0.2.0",
  "web-log",
 ]
 
@@ -956,7 +979,7 @@ name = "silkenweb-example-router"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb",
+ "silkenweb 0.2.0",
 ]
 
 [[package]]
@@ -964,7 +987,7 @@ name = "silkenweb-example-ssr"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb",
+ "silkenweb 0.2.0",
 ]
 
 [[package]]
@@ -978,10 +1001,22 @@ dependencies = [
  "js-sys",
  "serde",
  "serde_json",
- "silkenweb",
+ "silkenweb 0.2.0",
  "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "silkenweb-html"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e27f522f7bb789ecaf6469451589e312fc39653c60b471a1ff38d842c53703d"
+dependencies = [
+ "paste",
+ "silkenweb-dom",
+ "wasm-bindgen",
  "web-sys",
 ]
 
@@ -993,13 +1028,22 @@ dependencies = [
  "getrandom",
  "js-sys",
  "rand",
- "silkenweb",
+ "silkenweb 0.1.1",
  "wasm-bindgen",
 ]
 
 [[package]]
+name = "silkenweb-reactive"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94ab58fdd26a5ccb7c4d3037cd1ce9a3e765bbd8d0c9e170b3c70699df26d154"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "silkenweb-signals-ext"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "futures-signals",
  "paste",
@@ -1008,11 +1052,11 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-ui5"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "js-sys",
  "parse-display",
- "silkenweb",
+ "silkenweb 0.2.0",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -1025,7 +1069,7 @@ dependencies = [
  "futures-signals",
  "js-sys",
  "parse-display",
- "silkenweb",
+ "silkenweb 0.2.0",
  "silkenweb-ui5",
  "wasm-bindgen",
  "web-log",

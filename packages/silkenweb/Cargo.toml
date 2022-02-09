@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "A library for building web apps"
@@ -24,7 +24,7 @@ futures = "0.3"
 caseless = "0.2.1"
 html-escape = "0.2.9"
 indexmap = "1.8.0"
-silkenweb-base = "0.0.0"
+silkenweb-base = "0.2.0"
 paste = "1.0"
 wasm-bindgen = "=0.2.78"
 futures-signals = "0.3"

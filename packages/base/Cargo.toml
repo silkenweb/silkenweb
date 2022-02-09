@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-base"
-version = "0.0.0"
+version = "0.2.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "Base crate for Silkenweb"
