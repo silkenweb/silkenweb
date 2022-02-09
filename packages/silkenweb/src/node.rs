@@ -7,17 +7,31 @@ use self::element::Element;
 use crate::hydration::{
     lazy::IsDry,
     node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
+    HydrationStats,
 };
 
 pub mod element;
 
+/// A DOM Node
 pub struct Node(NodeEnum);
 
 impl Node {
-    pub fn eval_dom_node(&self) -> web_sys::Node {
+    pub(super) fn eval_dom_node(&self) -> web_sys::Node {
         match &self.0 {
             NodeEnum::Element(elem) => elem.eval_dom_element().into(),
             NodeEnum::Text(text) => text.eval_dom_text().into(),
+        }
+    }
+
+    pub(super) fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> web_sys::Node {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydrate_child(parent, child, tracker).into(),
+            NodeEnum::Text(text) => text.hydrate_child(parent, child, tracker).into(),
         }
     }
 
@@ -82,20 +96,31 @@ enum NodeEnum {
     Text(Text),
 }
 
+/// A text DOM node
 pub struct Text {
     pub(super) hydro_text: HydrationText,
 }
 
 impl Text {
-    pub(super) fn eval_dom_text(&self) -> web_sys::Text {
+    pub(crate) fn hydrate_child(
+        &self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> web_sys::Text {
+        self.hydro_text.hydrate_child(parent, child, tracker)
+    }
+
+    fn eval_dom_text(&self) -> web_sys::Text {
         self.hydro_text.eval_dom_text()
     }
 
-    pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+    fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
         Vec::new()
     }
 }
 
+/// Construct a text node
 pub fn text(text: &str) -> Text {
     Text {
         hydro_text: HydrationText::new(text),

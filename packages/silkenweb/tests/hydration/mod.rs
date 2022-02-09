@@ -5,9 +5,10 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
-    node::element::Element,
+    node::Node,
     prelude::ParentBuilder,
     task::render_now,
+    unmount,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 
@@ -163,6 +164,7 @@ async fn event() {
         app_html(APP_ID),
         r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>1</div>"#
     );
+    unmount(APP_ID);
 }
 
 #[wasm_bindgen_test]
@@ -171,12 +173,12 @@ async fn basic_signal() {
     let text = Mutable::new("Hello, world!");
     let app = div().child(p().text_signal(text.signal()));
 
-    test_hydrate(
-        APP_ID,
-        app,
+    render_now().await;
+    hydrate(APP_ID, app).await;
+    assert_eq!(
         r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
-    )
-    .await;
+        app_html(APP_ID)
+    );
 
     text.set("Some more text");
     render_now().await;
@@ -184,6 +186,7 @@ async fn basic_signal() {
         r#"<div data-silkenweb="1"><p>Some more text</p></div>"#,
         app_html(APP_ID)
     );
+    unmount(APP_ID);
 }
 
 async fn app_container(id: &str, inner_html: &str) {
@@ -191,11 +194,12 @@ async fn app_container(id: &str, inner_html: &str) {
     query_element(id).set_inner_html(inner_html);
 }
 
-async fn test_hydrate(id: &str, app: impl Into<Element>, expected_html: &str) {
+async fn test_hydrate(id: &str, app: impl Into<Node>, expected_html: &str) {
     render_now().await;
     hydrate(id, app).await;
 
     assert_eq!(expected_html, app_html(id));
+    unmount(id);
 }
 
 // TODO: Test element reconciliation: Empty text, additional elements, missing

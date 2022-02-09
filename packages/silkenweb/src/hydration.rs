@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{insert_component, mount_point, node::element::Element, unmount};
+use crate::{insert_component, mount_point, node::Node};
 
 pub(super) mod lazy;
 pub(super) mod node;
@@ -124,10 +124,6 @@ impl fmt::Display for HydrationStats {
 /// Effect handlers registered with [`effect`] will be called once an element is
 /// hydrated.
 ///
-/// In some cases, a node will already be created in the DOM. For example,
-/// calling [`eval_dom_node`] requires actual dom nodes to be created. In these
-/// cases, the existing HTML will be replaced with these DOM nodes.
-///
 /// # Example
 ///
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
@@ -135,27 +131,23 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::ElementBuilder::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
-pub async fn hydrate(id: &str, elem: impl Into<Element>) -> HydrationStats {
-    let elem = elem.into();
+pub async fn hydrate(id: &str, node: impl Into<Node>) -> HydrationStats {
+    let node = node.into();
     let mut stats = HydrationStats::default();
-
-    unmount(id);
 
     let mount_point = mount_point(id);
 
     if let Some(hydration_point) = mount_point.first_child() {
-        let node: web_sys::Node = elem
-            .hydrate_child(&mount_point, &hydration_point, &mut stats)
-            .into();
+        let node: web_sys::Node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
 
         remove_following_siblings(&mount_point, node.next_sibling());
     } else {
-        let new_elem = elem.eval_dom_element();
+        let new_elem = node.eval_dom_node();
         stats.node_added(&new_elem);
         mount_point.append_child(&new_elem).unwrap_throw();
     }
 
-    insert_component(id, elem);
+    insert_component(id, mount_point.into(), node);
 
     stats
 }

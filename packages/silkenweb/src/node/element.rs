@@ -244,6 +244,12 @@ impl From<ElementBuilderBase> for Element {
     }
 }
 
+impl From<ElementBuilderBase> for Node {
+    fn from(builder: ElementBuilderBase) -> Self {
+        builder.build().into()
+    }
+}
+
 /// An HTML element.
 pub struct Element {
     pub(super) hydro_elem: HydrationElement,

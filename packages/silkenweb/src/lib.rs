@@ -82,7 +82,8 @@
 //! [`mount`]: crate::mount
 use std::{cell::RefCell, collections::HashMap};
 
-use node::element::Element;
+use hydration::node::WetNode;
+use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document;
@@ -121,33 +122,38 @@ pub mod prelude {
 /// An [`Element`] can only appear once in the document. Adding an [`Element`]
 /// to the document a second time will move it. It will still require
 /// unmounting from both places to free up any resources.
-pub fn mount(id: &str, elem: impl Into<Element>) {
-    unmount(id);
-    let elem = elem.into();
+pub fn mount(id: &str, node: impl Into<Node>) {
+    let node = node.into();
 
-    mount_point(id)
-        .append_child(&elem.eval_dom_element())
+    let mount_point = mount_point(id);
+    mount_point
+        .append_child(&node.eval_dom_node())
         .unwrap_throw();
-    insert_component(id, elem);
+    insert_component(id, mount_point.into(), node);
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
     document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
 }
 
-fn insert_component(id: &str, elem: Element) {
-    COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), elem));
+fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
+    if let Some((parent, child)) =
+        COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), (parent, child)))
+    {
+        parent.remove_child(&child.dom_node()).unwrap_throw();
+    }
 }
 
 /// Unmount an element.
 ///
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
-    if let Some(elem) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
-        elem.eval_dom_element().remove();
+    if let Some((parent, child)) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
+        parent.remove_child(&child.eval_dom_node()).unwrap_throw();
     }
 }
 
 thread_local!(
-    static COMPONENTS: RefCell<HashMap<String, Element>> = RefCell::new(HashMap::new());
+    static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node)>> =
+        RefCell::new(HashMap::new());
 );

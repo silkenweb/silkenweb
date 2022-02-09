@@ -167,7 +167,7 @@ impl HydrationText {
     }
 
     pub fn hydrate_child(
-        &mut self,
+        &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
