@@ -3,7 +3,7 @@ use parse_display::{Display, FromStr};
 use silkenweb::{
     elements::{html::div, HtmlElement},
     mount,
-    node::element::{optional_children::OptionalChildren, Element, ElementBuilder},
+    node::element::{Element, ElementBuilder, OptionalChildren},
     prelude::ParentBuilder,
 };
 use silkenweb_ui5::{

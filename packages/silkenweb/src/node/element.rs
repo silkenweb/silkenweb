@@ -1,3 +1,5 @@
+//! Element DOM types and traits for building elements.
+
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
 use std::{
@@ -18,7 +20,7 @@ use futures_signals::{
 use silkenweb_base::{clone, intern_str};
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::{child_vec::ChildVec, optional_children::OptionalChildren};
+use self::child_vec::ChildVec;
 use super::Node;
 use crate::{
     attribute::Attribute,
@@ -29,9 +31,10 @@ use crate::{
     task,
 };
 
-pub mod optional_children;
-
 mod child_vec;
+mod optional_children;
+
+pub use optional_children::OptionalChildren;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
@@ -324,6 +327,33 @@ pub trait ParentBuilder: ElementBuilder {
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
 
+    /// Add [`OptionalChildren`]
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::Mutable;
+    /// # use silkenweb::elements::html::div;
+    /// # use silkenweb::node::element::ParentBuilder;
+    /// # use silkenweb::node::element::OptionalChildren;
+    /// # use silkenweb::node::text::text;
+    /// # use futures_signals::signal::SignalExt;
+    ///
+    /// let include_child1 = Mutable::new(true);
+    /// let include_child2 = Mutable::new(true);
+    ///
+    /// div().optional_children(
+    ///     OptionalChildren::new()
+    ///         .optional_child_signal(
+    ///             include_child1
+    ///                 .signal()
+    ///                 .map(|child1| child1.then(|| text("This is child1"))),
+    ///         )
+    ///         .optional_child_signal(
+    ///             include_child2
+    ///                 .signal()
+    ///                 .map(|child1| child1.then(|| text("This is child2"))),
+    ///         ),
+    /// );
+    /// ```
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }
 

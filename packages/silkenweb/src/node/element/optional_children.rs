@@ -7,8 +7,14 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 
-use super::{spawn_cancelable_future, Element};
+use super::{spawn_cancelable_future, Node};
 
+/// Helper to build children when some are optional and dependant on signal
+/// vlaues.
+///
+/// See [`ParentBuilder::optional_children`] for an example.
+///
+/// [`ParentBuilder::optional_children`]: super::ParentBuilder::optional_children
 #[derive(Default)]
 pub struct OptionalChildren {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,
@@ -16,38 +22,38 @@ pub struct OptionalChildren {
     len: usize,
 }
 
-type Item = Rc<RefCell<Option<Element>>>;
+type Item = Rc<RefCell<Option<Node>>>;
 
 impl OptionalChildren {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn child(mut self, elem: impl Into<Element>) -> Self {
-        self.push(Some(elem));
+    pub fn child(mut self, node: impl Into<Node>) -> Self {
+        self.push(Some(node));
         self
     }
 
-    pub fn child_signal(self, elem: impl Signal<Item = impl Into<Element>> + 'static) -> Self {
-        self.optional_child_signal(elem.map(|e| Some(e)))
+    pub fn child_signal(self, node: impl Signal<Item = impl Into<Node>> + 'static) -> Self {
+        self.optional_child_signal(node.map(|e| Some(e)))
     }
 
-    pub fn optional_child(&mut self, elem: Option<impl Into<Element>>) {
-        self.push(elem);
+    pub fn optional_child(&mut self, node: Option<impl Into<Node>>) {
+        self.push(node);
     }
 
     pub fn optional_child_signal(
         mut self,
-        elem: impl Signal<Item = Option<impl Into<Element>>> + 'static,
+        node: impl Signal<Item = Option<impl Into<Node>>> + 'static,
     ) -> Self {
-        let index = self.push(None as Option<Element>);
+        let index = self.push(None as Option<Node>);
         let items = self.items.clone();
 
-        let future = elem.for_each(move |elem| {
+        let future = node.for_each(move |node| {
             items
                 .borrow_mut()
                 .lock_mut()
-                .set_cloned(index, Rc::new(RefCell::new(elem.map(|e| e.into()))));
+                .set_cloned(index, Rc::new(RefCell::new(node.map(|e| e.into()))));
             async {}
         });
         self.futures.push(spawn_cancelable_future(future));
@@ -55,12 +61,12 @@ impl OptionalChildren {
     }
 
     /// Push an item and return it's index
-    fn push(&mut self, elem: Option<impl Into<Element>>) -> usize {
+    fn push(&mut self, node: Option<impl Into<Node>>) -> usize {
         let index = self.len;
         self.items
             .borrow_mut()
             .lock_mut()
-            .push_cloned(Rc::new(RefCell::new(elem.map(|e| e.into()))));
+            .push_cloned(Rc::new(RefCell::new(node.map(|e| e.into()))));
         self.len += 1;
         index
     }

@@ -1,3 +1,5 @@
+//! Generic DOM types.
+
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 

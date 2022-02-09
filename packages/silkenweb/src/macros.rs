@@ -8,8 +8,8 @@ pub use crate::{
     attribute::{AsAttribute, Attribute},
     node::{
         element::{
-            optional_children::OptionalChildren, tag, tag_in_namespace, Element, ElementBuilder,
-            ElementBuilderBase, ParentBuilder,
+            tag, tag_in_namespace, Element, ElementBuilder, ElementBuilderBase, OptionalChildren,
+            ParentBuilder,
         },
         Node,
     },

@@ -13,7 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{optional_children::OptionalChildren, ElementBuilder},
+    node::element::{ElementBuilder, OptionalChildren},
     prelude::ParentBuilder,
 };
 use silkenweb_signals_ext::SignalProduct;
