@@ -73,13 +73,13 @@
 //! #     .child(p().text_signal(count_text));
 //! mount("app", app);
 //! ```
-//! 
+//!
 //! # Cargo Features
-//! 
+//!
 //! - `client-side-render` enables client side rendering on wasm32 targets
 //! - `server-side-render` enables server side rendering on all targets
 //! - `hydration` enables hydration on wasm32 clients
-//! 
+//!
 //! If no features are specified, `client-side-rendering` will be enabled.
 //!
 //! [trunk]: https://trunkrs.dev/
