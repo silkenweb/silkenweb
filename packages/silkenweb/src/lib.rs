@@ -73,6 +73,14 @@
 //! #     .child(p().text_signal(count_text));
 //! mount("app", app);
 //! ```
+//! 
+//! # Cargo Features
+//! 
+//! - `client-side-render` enables client side rendering on wasm32 targets
+//! - `server-side-render` enables server side rendering on all targets
+//! - `hydration` enables hydration on wasm32 clients
+//! 
+//! If no features are specified, `client-side-rendering` will be enabled.
 //!
 //! [trunk]: https://trunkrs.dev/
 //! [futures-signals tutorial]: https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html
@@ -118,10 +126,6 @@ pub mod prelude {
 /// the last child of this element.
 ///
 /// Mounting an `id` that is already mounted will remove that element.
-///
-/// An [`Element`] can only appear once in the document. Adding an [`Element`]
-/// to the document a second time will move it. It will still require
-/// unmounting from both places to free up any resources.
 pub fn mount(id: &str, node: impl Into<Node>) {
     let node = node.into();
 
