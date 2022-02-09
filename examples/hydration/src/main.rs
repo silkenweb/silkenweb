@@ -2,7 +2,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::html::*, hydration::hydrate, node::element::ElementBuilder, prelude::*,
-    render::spawn_local,
+    task::spawn_local,
 };
 
 fn main() {

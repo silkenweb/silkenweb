@@ -26,7 +26,7 @@ use crate::{
         node::{DryNode, HydrationElement, HydrationText, Namespace},
         HydrationStats,
     },
-    render,
+    task,
 };
 
 pub mod optional_children;
@@ -332,7 +332,7 @@ fn spawn_cancelable_future(
 ) -> DiscardOnDrop<CancelableFutureHandle> {
     let (handle, cancelable_future) = cancelable_future(future, || ());
 
-    render::spawn_local(cancelable_future);
+    task::spawn_local(cancelable_future);
 
     handle
 }

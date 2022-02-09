@@ -7,7 +7,7 @@ use silkenweb::{
     mount,
     node::element::{tag, ParentBuilder},
     prelude::HtmlElement,
-    render::render_now,
+    task::render_now,
     unmount,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};

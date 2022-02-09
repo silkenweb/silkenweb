@@ -9,7 +9,7 @@ use silkenweb::{
     },
     node::{element::ElementBuilder, text::text},
     prelude::ParentBuilder,
-    render::render_now,
+    task::render_now,
 };
 
 macro_rules! isomorphic_test {
@@ -17,7 +17,7 @@ macro_rules! isomorphic_test {
         #[cfg(not(target_arch = "wasm32"))]
         #[test]
         fn $name() {
-            silkenweb::render::server::block_on(async { $body });
+            silkenweb::task::server::block_on(async { $body });
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -42,7 +42,7 @@ macro_rules! render_test {
 #[test]
 #[should_panic]
 fn block_on() {
-    silkenweb::render::server::block_on(async { panic!("Make sure the future is run") });
+    silkenweb::task::server::block_on(async { panic!("Make sure the future is run") });
 }
 
 render_test!(empty_element, div(), "<div></div>");
@@ -83,7 +83,7 @@ render_test!(
 #[test]
 #[should_panic]
 fn test_children_signal_test() {
-    silkenweb::render::server::block_on(children_signal_test(&[], |_| {}, &[0]));
+    silkenweb::task::server::block_on(children_signal_test(&[], |_| {}, &[0]));
 }
 
 macro_rules! children_signal_test {

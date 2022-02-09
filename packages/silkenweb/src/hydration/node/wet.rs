@@ -10,7 +10,7 @@ use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use super::{event::EventCallback, HydrationNodeData, Namespace, WetNode};
 use crate::{
     attribute::Attribute,
-    render::{after_animation_frame, queue_update},
+    task::{after_animation_frame, queue_update},
 };
 
 pub struct WetElement {

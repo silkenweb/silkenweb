@@ -7,7 +7,7 @@ use silkenweb::{
     hydration::hydrate,
     node::element::Element,
     prelude::ParentBuilder,
-    render::render_now,
+    task::render_now,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 

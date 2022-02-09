@@ -97,9 +97,9 @@ pub mod attribute;
 pub mod elements;
 pub mod hydration;
 pub mod node;
-pub mod render;
 pub mod router;
 pub mod storage;
+pub mod task;
 
 pub mod prelude {
     pub use crate::{

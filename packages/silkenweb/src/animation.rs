@@ -8,7 +8,7 @@
 //! See [`finite_animation`] and [`infinite_animation`] for examples.
 use futures_signals::signal::{Signal, SignalExt};
 
-use crate::render::{animation_timestamp, request_animation_frame};
+use crate::task::{animation_timestamp, request_animation_frame};
 
 /// Provide a finite time signal for animations.
 ///
