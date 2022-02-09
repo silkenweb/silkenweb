@@ -201,6 +201,3 @@ async fn test_hydrate(id: &str, app: impl Into<Node>, expected_html: &str) {
     assert_eq!(expected_html, app_html(id));
     unmount(id);
 }
-
-// TODO: Test element reconciliation: Empty text, additional elements, missing
-// attributes, extra attributes
