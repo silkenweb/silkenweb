@@ -1,12 +1,29 @@
+//! Microtask and render queue tools
+//!
+//! On wasm32 targets, the microtask queue is the javascript [microtask queue].
+//! On other targets, it is simulated with a thread local executor. The render
+//! queue holds tasks to be run on an animation frame. Any updates to the DOM
+//! via silkenweb are put on the render queue. See [requestAnimationFrame on
+//! MDN] for details.
+//!
+//! [microtask queue]: <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
+//! [requestAnimationFrame on MDN]: <https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame>
 use std::{
     cell::{Cell, RefCell},
     future,
 };
 
-pub use arch::spawn_local;
 use arch::{wait_for_microtasks, Raf};
-use futures::StreamExt;
+use futures::{Future, StreamExt};
 use futures_signals::signal::{from_stream, Mutable, Signal, SignalExt};
+
+/// Spawn a future on the microtask queue.
+pub fn spawn_local<F>(future: F)
+where
+    F: Future<Output = ()> + 'static,
+{
+    arch::spawn_local(future)
+}
 
 #[cfg(not(target_arch = "wasm32"))]
 mod arch {
@@ -118,12 +135,16 @@ pub(super) fn request_animation_frame() {
 
 /// Render any pending updates.
 ///
-/// This is mostly useful for testing.
+/// Tasks on the microtask queue wil be executed first, then the render queue
+/// will be processed. This is mostly useful for testing.
 pub async fn render_now() {
     wait_for_microtasks().await;
     RENDER.with(Render::render_updates);
 }
 
+/// Server only tools.
+///
+/// Not available on wasm32 targets.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod server {
     use std::{
@@ -137,6 +158,9 @@ pub mod server {
 
     use super::{arch, Render, RENDER};
 
+    /// Synchronous version of [render_now]
+    ///
+    /// [render_now]: super::render_now
     pub fn render_now_sync() {
         arch::run();
         RENDER.with(Render::render_updates);
@@ -151,7 +175,13 @@ pub mod server {
     }
 
     // Adapted from <https://doc.rust-lang.org/stable/std/task/trait.Wake.html>
+
     /// Run a future to completion on the current thread.
+    ///
+    /// This doesn't use the microtask executor, so it's safe to call
+    /// [render_now] from within the future.
+    ///
+    /// [render_now]: super::render_now
     pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
         // Pin the future so it can be polled.
         let mut fut = Box::pin(fut);
