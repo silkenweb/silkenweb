@@ -1,3 +1,4 @@
+//! Local and session storage.
 use silkenweb_base::window;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
@@ -10,6 +11,7 @@ macro_rules! unexpected_exception {
 // TODO: Provide a server side implementation with a trait to define the
 // interface
 
+/// Local and session storage.
 pub struct Storage(web_sys::Storage);
 
 impl Storage {
