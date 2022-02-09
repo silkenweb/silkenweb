@@ -1,4 +1,4 @@
-//! Microtask and render queue tools
+//! Microtask and render queue tools.
 //!
 //! On wasm32 targets, the microtask queue is the javascript [microtask queue].
 //! On other targets, it is simulated with a thread local executor. The render
@@ -158,7 +158,7 @@ pub mod server {
 
     use super::{arch, Render, RENDER};
 
-    /// Synchronous version of [render_now]
+    /// Synchronous version of [render_now].
     ///
     /// [render_now]: super::render_now
     pub fn render_now_sync() {

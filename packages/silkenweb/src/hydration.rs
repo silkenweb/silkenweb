@@ -1,4 +1,4 @@
-//! Hydrate the document with event handlers
+//! Hydrate the document with event handlers.
 //!
 //! "Hydrating" an element will attach any event handlers to the existing
 //! document HTML. This allows you render HTML on the server and produce an
@@ -14,7 +14,7 @@ use crate::{insert_component, mount_point, node::element::Element, unmount};
 pub(super) mod lazy;
 pub(super) mod node;
 
-/// Statistics about the hydration process
+/// Statistics about the hydration process.
 #[derive(Default)]
 pub struct HydrationStats {
     nodes_added: u64,
@@ -39,29 +39,29 @@ impl HydrationStats {
         self.empty_text_removed == 0 && self.only_whitespace_diffs()
     }
 
-    /// The number of new nodes that were added during hydration
+    /// The number of new nodes that were added during hydration.
     pub fn nodes_added(&self) -> u64 {
         self.nodes_added
     }
 
     /// The number of existing (non empty text) nodes that were removed during
-    /// hydration
+    /// hydration.
     pub fn nodes_removed(&self) -> u64 {
         self.nodes_removed
     }
 
     /// The number of existing empty text nodes that were removed during
-    /// hydration
+    /// hydration.
     pub fn empty_text_removed(&self) -> u64 {
         self.empty_text_removed
     }
 
-    /// The number of new attributes that needed to be set during hydration
+    /// The number of new attributes that needed to be set during hydration.
     pub fn attributes_set(&self) -> u64 {
         self.attributes_set
     }
 
-    /// The number of existing attributes that were removed during hydration
+    /// The number of existing attributes that were removed during hydration.
     pub fn attributes_removed(&self) -> u64 {
         self.attributes_removed
     }
@@ -100,7 +100,7 @@ impl fmt::Display for HydrationStats {
     }
 }
 
-/// Hydrate an element
+/// Hydrate an element.
 ///
 /// `id` is the id of the element in the
 /// existing HTML.

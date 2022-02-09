@@ -1,4 +1,4 @@
-//! Traits for defining attribute types
+//! Traits for defining attribute types.
 //!
 //! Once you've implemented [`Attribute`] and [`AsAttribute`] for your type, you
 //! can use it with [`ElementBuilder::attribute`], or define attributes on your
