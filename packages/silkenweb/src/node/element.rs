@@ -1,4 +1,14 @@
-//! Element DOM types and traits for building elements.
+//! Element DOM types, and traits for building elements.
+//!
+//! The DOM element types are generic. Specific DOM elements from
+//! [`crate::elements::html`] should be used in preference to these, where they
+//! are available.
+//!
+//! The [`ElementBuilder`] and [`ParentBuilder`] traits are implemented by
+//! specific DOM elements as well as by [`ElementBuilderBase`]. See the [`div`]
+//! element for example.
+//!
+//! [`div`]: crate::elements::html::div
 
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
@@ -59,11 +69,11 @@ pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> ElementB
 }
 
 impl ElementBuilderBase {
-    pub fn new(tag: &str) -> Self {
+    fn new(tag: &str) -> Self {
         Self::new_element(HydrationElement::new(Namespace::Html, tag))
     }
 
-    pub fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
+    fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
         Self::new_element(HydrationElement::new(Namespace::Other(namespace), tag))
     }
 
@@ -187,14 +197,11 @@ impl ElementBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    /// Apply an effect after the next render.
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
         self.element.hydro_elem.effect(f);
         self
     }
 
-    /// Apply an effect after the next render each time a singal yields a new
-    /// value.
     fn effect_signal<T>(
         self,
         sig: impl Signal<Item = T> + 'static,
@@ -238,9 +245,6 @@ impl From<ElementBuilderBase> for Element {
 }
 
 /// An HTML element.
-///
-/// Elements can only appear once in the document. If an element is added again,
-/// it will be moved.
 pub struct Element {
     pub(super) hydro_elem: HydrationElement,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
@@ -276,22 +280,44 @@ pub trait ElementBuilder: Sized {
     type Target;
     type DomType: JsCast + 'static;
 
+    /// Set an attribute
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
 
+    /// Set an attribute based on a signal. `Option<impl Attribute>` can be used
+    /// to add/remove an attribute based on a signal.
     fn attribute_signal<T: Attribute + 'static>(
         self,
         name: &str,
         value: impl Signal<Item = T> + 'static,
     ) -> Self;
 
+    /// Apply an effect after the next render.
+    ///
+    /// Effects give you access to the underlying DOM element.
+    ///
+    /// # Example
+    ///
+    /// Set the focus to an `HTMLInputElement`.
+    ///
+    /// ```no_run
+    /// # use web_sys::HtmlInputElement;
+    /// # use silkenweb::{elements::html::input, node::element::ElementBuilder};
+    ///
+    /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    /// ```
     fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
 
+    /// Apply an effect after the next render each time a singal yields a new
+    /// value.
     fn effect_signal<T: 'static>(
         self,
         sig: impl Signal<Item = T> + 'static,
         f: impl Fn(&Self::DomType, T) + Clone + 'static,
     ) -> Self;
 
+    /// Spawn a future on the element.
+    ///
+    /// The future will be dropped when this element is dropped.
     fn spawn_future(self, future: impl Future<Output = ()> + 'static) -> Self;
 
     /// Register an event handler.
@@ -307,13 +333,61 @@ pub trait ElementBuilder: Sized {
     fn build(self) -> Self::Target;
 }
 
+/// An element that is allowed to have children.
 pub trait ParentBuilder: ElementBuilder {
+    /// Add a text child to this element
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use silkenweb::{elements::html::div, node::element::ParentBuilder};
+    /// div().text("Hello, world!");
+    /// ```
     fn text(self, child: &str) -> Self;
 
+    /// Add a text signal child to this element
+    ///
+    /// The text will update when the signal is updated.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::{Mutable, SignalExt};
+    /// # use silkenweb::{elements::html::div, node::element::ParentBuilder};
+    /// let hello = Mutable::new("Hello");
+    ///
+    /// div().text_signal(hello.signal());
+    /// ```
     fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
 
+    /// Add a child node to the element.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::{Mutable, SignalExt};
+    /// # use silkenweb::{
+    /// #     elements::html::{div, p},
+    /// #     node::element::ParentBuilder,
+    /// # };
+    ///
+    /// div().child(p().text("Hello,")).child(p().text("world!"));
+    /// ```
     fn child(self, c: impl Into<Node>) -> Self;
 
+    /// Add a children node to the element.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::{Mutable, SignalExt};
+    /// # use silkenweb::{
+    /// #     elements::html::{div, p},
+    /// #     node::element::ParentBuilder,
+    /// # };
+    ///
+    /// div().children([p().text("Hello,"), p().text("world!")]);
+    /// ```
     fn children(mut self, children: impl IntoIterator<Item = impl Into<Node>>) -> Self {
         for child in children {
             self = self.child(child);
@@ -322,6 +396,10 @@ pub trait ParentBuilder: ElementBuilder {
         self
     }
 
+    /// Add [`SignalVec`] children to the element.
+    ///
+    /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
+    /// for an example
     fn children_signal(
         self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
@@ -329,13 +407,20 @@ pub trait ParentBuilder: ElementBuilder {
 
     /// Add [`OptionalChildren`]
     ///
+    /// Sometimes element children are optional, dependant on the value of a
+    /// signal for example.
+    ///
+    /// # Example
+    ///
     /// ```no_run
-    /// # use futures_signals::signal::Mutable;
-    /// # use silkenweb::elements::html::div;
-    /// # use silkenweb::node::element::ParentBuilder;
-    /// # use silkenweb::node::element::OptionalChildren;
-    /// # use silkenweb::node::text::text;
-    /// # use futures_signals::signal::SignalExt;
+    /// # use futures_signals::signal::{Mutable, SignalExt};
+    /// # use silkenweb::{
+    /// #     elements::html::div,
+    /// #     node::{
+    /// #         element::{OptionalChildren, ParentBuilder},
+    /// #         text::text,
+    /// #     },
+    /// # };
     ///
     /// let include_child1 = Mutable::new(true);
     /// let include_child2 = Mutable::new(true);
