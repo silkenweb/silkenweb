@@ -4,6 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/silkenweb.svg)](https://crates.io/crates/silkenweb)
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
+[![Discord](https://img.shields.io/discord/881942707675729931)](https://discord.gg/usSUczZ5ua)
 
 A library for building reactive web apps.
 
@@ -77,3 +78,4 @@ There's nothing to stop a macro DSL being built on top of Silkenweb, to compleme
 - `cargo doc --open`
 - Check out the [examples](https://github.com/silkenweb/silkenweb/tree/main/examples) folder
 - [futures-signals tutorial](https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html)
+- Feel free to ask any questions on our [Discord](https://discord.gg/usSUczZ5ua) channel.
