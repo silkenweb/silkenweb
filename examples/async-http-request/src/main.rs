@@ -1,5 +1,9 @@
-// HTTP Requests using `reqwest`
+// HTTP Requests using `reqwasm`
+//
+// `reqwest` could also be used and will work server side if required, but code
+// size will be much larger.
 use futures_signals::signal::Mutable;
+use reqwasm::http::Request;
 use silkenweb::{
     clone,
     elements::html::{button, div, p},
@@ -8,8 +12,12 @@ use silkenweb::{
     task,
 };
 
-async fn get_ip() -> reqwest::Result<String> {
-    reqwest::get("https://httpbin.org/ip").await?.text().await
+async fn get_ip() -> Result<String, reqwasm::Error> {
+    Request::get("https://httpbin.org/ip")
+        .send()
+        .await?
+        .text()
+        .await
 }
 
 fn main() {

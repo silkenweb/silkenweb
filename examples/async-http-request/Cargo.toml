@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-example-request"
+name = "silkenweb-example-async-http-request"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
@@ -7,5 +7,5 @@ publish = false
 
 [dependencies]
 futures-signals = "0.3.24"
-reqwest = "0.11.9"
+reqwasm = "0.4.1"
 silkenweb = { path = "../../packages/silkenweb" }
