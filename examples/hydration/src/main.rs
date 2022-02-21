@@ -1,4 +1,3 @@
-//! A minimal interactive example
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::html::*, hydration::hydrate, node::element::ElementBuilder, prelude::*,

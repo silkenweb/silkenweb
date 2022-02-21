@@ -1,4 +1,3 @@
-//! A minimal routing example
 use silkenweb::{
     elements::{
         html::{button, div, p},

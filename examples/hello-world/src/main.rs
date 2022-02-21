@@ -1,4 +1,3 @@
-//! A minimal example
 use silkenweb::{elements::html::p, mount, prelude::ParentBuilder};
 
 fn main() {

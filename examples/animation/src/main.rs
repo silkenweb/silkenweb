@@ -1,4 +1,3 @@
-//! A minimal example
 use std::iter;
 
 use futures_signals::signal::{Broadcaster, Signal, SignalExt};
