@@ -3,6 +3,7 @@ use silkenweb::{
     elements::html::*, node::element::Element, prelude::*, task::server::render_now_sync,
 };
 
+// For a more complete example, see <https://github.com/silkenweb/ssr-example>
 fn main() {
     let count = Mutable::new(0);
     let count_text = count.signal_ref(|i| format!("{}", i));

@@ -4,6 +4,7 @@ use silkenweb::{
     task::spawn_local,
 };
 
+// For a more complete example, see <https://github.com/silkenweb/ssr-example>
 fn main() {
     let count = Mutable::new(0);
     let count_text = count.signal_ref(|i| format!("{}", i));
