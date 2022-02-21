@@ -160,7 +160,7 @@ mod arch {
 
         fn port(&self) -> String {
             self.port()
-                .map_or_else(String::new, |port| format!("{port}"))
+                .map_or_else(String::new, |port| format!("{}", port))
         }
 
         fn protocol(&self) -> String {
