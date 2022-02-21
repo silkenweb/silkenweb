@@ -35,10 +35,24 @@
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 pub trait Url {
-    // TODO: Docs
-    // TODO: Add the rest of web_sys::Url's methods
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/hash)
     fn hash(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname)
     fn pathname(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/host)
+    fn host(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/hostname)
+    fn hostname(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/href)
+    fn href(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/origin)
+    fn origin(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/password)
+    fn password(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/port)
+    fn port(&self) -> String;
+    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/protocol)
+    fn protocol(&self) -> String;
 }
 
 impl Url for web_sys::Url {
@@ -48,6 +62,34 @@ impl Url for web_sys::Url {
 
     fn pathname(&self) -> String {
         self.pathname()
+    }
+
+    fn host(&self) -> String {
+        self.host()
+    }
+
+    fn hostname(&self) -> String {
+        self.hostname()
+    }
+
+    fn href(&self) -> String {
+        self.href()
+    }
+
+    fn origin(&self) -> String {
+        self.origin()
+    }
+
+    fn password(&self) -> String {
+        self.password()
+    }
+
+    fn port(&self) -> String {
+        self.port()
+    }
+
+    fn protocol(&self) -> String {
+        self.protocol()
     }
 }
 
@@ -93,6 +135,36 @@ mod arch {
 
         fn pathname(&self) -> String {
             self.path().to_string()
+        }
+
+        fn host(&self) -> String {
+            self.host()
+                .map_or_else(String::new, |host| host.to_string())
+        }
+
+        fn hostname(&self) -> String {
+            self.domain().map_or_else(String::new, str::to_owned)
+        }
+
+        fn href(&self) -> String {
+            self.to_string()
+        }
+
+        fn origin(&self) -> String {
+            self.origin().unicode_serialization()
+        }
+
+        fn password(&self) -> String {
+            self.password().map_or_else(String::new, str::to_string)
+        }
+
+        fn port(&self) -> String {
+            self.port()
+                .map_or_else(String::new, |port| format!("{port}"))
+        }
+
+        fn protocol(&self) -> String {
+            format!("{}:", self.scheme())
         }
     }
 
