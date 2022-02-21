@@ -6,7 +6,7 @@ use silkenweb::{
     },
     mount,
     prelude::ParentBuilder,
-    router,
+    router::{self, Url},
 };
 
 fn main() {
