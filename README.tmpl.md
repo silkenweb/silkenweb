@@ -62,4 +62,4 @@ There's nothing to stop a macro DSL being built on top of Silkenweb, to compleme
 - `cargo doc --open`
 - Check out the [examples](https://github.com/silkenweb/silkenweb/tree/main/examples) folder
 - [futures-signals tutorial](https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html)
-- Feel free to ask any questions on our [Discord](https://discord.gg/usSUczZ5ua) channel
+- Feel free to ask any questions on our [Discord](https://discord.gg/usSUczZ5ua) channel.
