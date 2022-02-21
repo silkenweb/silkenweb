@@ -2,6 +2,10 @@
 
 ## Next
 
+- Server side routing
+
+## 0.2.0 -2021-02-09
+
 - Use `futures-signals` for reactivity
 - Support for server side rendering with hydration
 
