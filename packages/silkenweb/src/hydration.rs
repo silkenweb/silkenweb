@@ -124,6 +124,51 @@ impl fmt::Display for HydrationStats {
 /// Effect handlers registered with [`effect`] will be called once an element is
 /// hydrated.
 ///
+/// # Warning
+///
+/// It's a good idea to create your app outsize the `async` block that calls
+/// [`hydrate`], otherwise your signals won't be initialized before hydration.
+///
+/// ## Good
+///
+/// ```no_run
+/// # use futures_signals::signal::always;
+/// # use silkenweb::{
+/// #     elements::html::p,
+/// #     hydration::hydrate,
+/// #     node::element::{ElementBuilder, ParentBuilder},
+/// #     task::spawn_local,
+/// # };
+///
+/// let app = p().text_signal(always("Hello, world!"));
+///
+/// spawn_local(async {
+///     hydrate("app", app);
+/// });
+/// ```
+///
+/// This will hydrate to `<p>Hello, world!</p>` correctly.
+///
+/// ## Bad
+///
+/// ```no_run
+/// # use futures_signals::signal::always;
+/// # use silkenweb::{
+/// #     elements::html::p,
+/// #     hydration::hydrate,
+/// #     node::element::{ElementBuilder, ParentBuilder},
+/// #     task::spawn_local,
+/// # };
+///
+/// spawn_local(async {
+///     let app = p().text_signal(always("Hello, world!"));
+///     hydrate("app", app);
+/// });
+/// ```
+///
+/// This will hydrate to `<p></p>`, removing any existing text. Then the signal
+/// will initialize and set the text to "Hello, world!".
+///
 /// # Example
 ///
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
