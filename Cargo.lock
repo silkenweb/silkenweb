@@ -1010,6 +1010,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-hackernews-clone"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "reqwasm",
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-example-hello-world"
 version = "0.1.0"
 dependencies = [
