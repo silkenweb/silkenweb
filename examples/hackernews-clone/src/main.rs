@@ -8,7 +8,7 @@ use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
-    elements::html::{a, div, h2, li, ol, p, span, ul, Div, Li, A},
+    elements::html::{self, a, div, h2, header, li, nav, ol, p, span, ul, Div, Li, A},
     macros::{Element, ElementBuilder},
     mount,
     prelude::ParentBuilder,
@@ -17,8 +17,8 @@ use silkenweb::{
 };
 use timeago::Formatter;
 
-// TODO: Header links
 // TODO: Styling
+// TODO: Tidy code
 
 #[derive(Clone)]
 struct App(Mutable<Option<Content>>);
@@ -37,13 +37,21 @@ impl App {
     }
 
     fn render(&self) -> Div {
-        div().child_signal(self.0.signal_ref(|content| {
-            if let Some(content) = content {
-                content.render()
-            } else {
-                p().text("Loading...").into()
-            }
-        }))
+        div()
+            .child(header().child(nav().children([
+                a().href("/topstories").text("top"),
+                a().href("/newstories").text("new"),
+                a().href("/askstories").text("ask"),
+                a().href("/showstories").text("show"),
+            ])))
+            .child(html::main().child_signal(self.0.signal_ref(|content| {
+                if let Some(content) = content {
+                    content.render()
+                } else {
+                    p().text("Loading...").into()
+                }
+            })))
+            .build()
     }
 }
 
@@ -193,7 +201,10 @@ impl UserDetails {
     fn render(&self) -> Div {
         div()
             .child(h2().text(&self.user.id))
-            .child(div().text(&self.user.about))
+            .child(div().effect({
+                let about = self.user.about.clone();
+                move |elem| elem.set_inner_html(&about)
+            }))
             .child(span().text(&format!("{} karma", self.user.karma)))
             .child(ol().children(self.submitted.iter().map(Story::render)))
             .build()
@@ -209,7 +220,10 @@ impl StoryDetail {
     fn render(&self) -> Div {
         div()
             .child(self.story.render())
-            .child(div().text(&self.story.text))
+            .child(div().effect({
+                let text = self.story.text.clone();
+                move |elem| elem.set_inner_html(&text)
+            }))
             .child(ul().children(self.comments.iter().map(|comment| comment.render(0))))
             .build()
     }
@@ -246,7 +260,10 @@ impl CommentTree {
         let time_ago = time_ago(self.comment.time);
         li().child(user_link(&self.comment.by))
             .child(span().text(&format!(" {time_ago}")))
-            .child(div().text(&self.comment.text))
+            .child(div().effect({
+                let text = self.comment.text.clone();
+                move |elem| elem.set_inner_html(&text)
+            }))
             .child(
                 ul().children(
                     self.children
