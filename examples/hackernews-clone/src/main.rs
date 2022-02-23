@@ -17,6 +17,9 @@ use silkenweb::{
 };
 use timeago::Formatter;
 
+// TODO: Header links
+// TODO: Styling
+
 #[derive(Clone)]
 struct App(Mutable<Option<Content>>);
 
@@ -81,7 +84,7 @@ impl Content {
 
     async fn try_load_story(id: &str) -> Result<Self, reqwasm::Error> {
         let story: Story = query_item(id).await?;
-        let comments = CommentTree::load_vec(&story.kids).await;
+        let comments = CommentTree::load_vec(&story.kids, 3).await;
 
         Ok(Self::Story(StoryDetail { story, comments }))
     }
@@ -219,8 +222,8 @@ struct CommentTree {
 
 impl CommentTree {
     #[async_recursion(?Send)]
-    async fn load_vec(ids: &[u64]) -> Vec<Self> {
-        join_all(ids.iter().copied().map(Self::load))
+    async fn load_vec(ids: &[u64], depth: usize) -> Vec<Self> {
+        join_all(ids.iter().copied().map(|id| Self::load(id, depth)))
             .await
             .into_iter()
             .filter_map(Result::ok)
@@ -228,9 +231,13 @@ impl CommentTree {
     }
 
     #[async_recursion(?Send)]
-    async fn load(id: u64) -> Result<Self, reqwasm::Error> {
+    async fn load(id: u64, depth: usize) -> Result<Self, reqwasm::Error> {
         let comment: Comment = query_item(id).await?;
-        let children = Self::load_vec(&comment.kids).await;
+        let children = if depth > 0 {
+            Self::load_vec(&comment.kids, depth - 1).await
+        } else {
+            Vec::new()
+        };
 
         Ok(Self { comment, children })
     }
