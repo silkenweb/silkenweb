@@ -6,6 +6,10 @@ edition = "2021"
 publish = false
 
 [dependencies]
+futures = "0.3.21"
 futures-signals = "0.3.24"
 reqwasm = "0.4.1"
+serde = "1.0.136"
 silkenweb = { path = "../../packages/silkenweb" }
+chrono = { version = "0.4.19", features = ["serde", "wasmbind"] } 
+timeago = "0.3.0"
