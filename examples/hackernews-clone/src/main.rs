@@ -68,7 +68,7 @@ impl Content {
     async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
         let top_stories: Vec<u64> = query(story_type).await?;
 
-        let stories = top_stories.into_iter().take(30).map(query_item);
+        let stories = top_stories.into_iter().take(STORY_COUNT).map(query_item);
 
         Ok(Self::FrontPage(
             join_all(stories)
@@ -88,7 +88,7 @@ impl Content {
 
     async fn try_load_user(id: &str) -> Result<Self, reqwasm::Error> {
         let user = query_user(id).await?;
-        let submitted = join_all(user.submitted.iter().map(query_item))
+        let submitted = join_all(user.submitted.iter().take(STORY_COUNT).map(query_item))
             .await
             .into_iter()
             .filter_map(Result::ok)
@@ -318,3 +318,5 @@ fn main() {
 
     mount("app", app.render());
 }
+
+const STORY_COUNT: usize = 30;
