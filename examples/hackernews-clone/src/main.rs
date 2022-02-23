@@ -1,5 +1,6 @@
-use std::time::Duration;
+use std::{fmt::Display, time::Duration};
 
+use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use futures::future::join_all;
 use futures_signals::signal::{Mutable, SignalExt};
@@ -7,7 +8,7 @@ use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
-    elements::html::{a, div, p, span, table, td, tr, Div, Tr},
+    elements::html::{a, div, h2, li, ol, p, span, ul, Div, Li},
     macros::{Element, ElementBuilder},
     mount,
     prelude::ParentBuilder,
@@ -45,6 +46,7 @@ impl App {
 
 enum Content {
     FrontPage(Vec<Story>),
+    Story(StoryDetail),
     Unknown,
     Error(String),
 }
@@ -57,18 +59,26 @@ impl Content {
     async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
         let top_stories: Vec<u64> = query_api(story_type).await?;
 
-        let stories = top_stories
-            .into_iter()
-            .take(30)
-            .map(query_api_item::<Story>);
+        let stories = top_stories.into_iter().take(30).map(query_api_item);
 
         Ok(Self::FrontPage(
             join_all(stories)
                 .await
                 .into_iter()
-                .filter_map(|story| story.ok())
+                .filter_map(Result::ok)
                 .collect(),
         ))
+    }
+
+    async fn load_story(id: &str) -> Self {
+        Self::ok_or(Self::try_load_story(id).await)
+    }
+
+    async fn try_load_story(id: &str) -> Result<Self, reqwasm::Error> {
+        let story: Story = query_api_item(id).await?;
+        let comments = CommentTree::load_vec(&story.kids).await;
+
+        Ok(Self::Story(StoryDetail { story, comments }))
     }
 
     fn ok_or(result: Result<Self, reqwasm::Error>) -> Self {
@@ -80,14 +90,10 @@ impl Content {
 
     fn render(&self) -> Element {
         match self {
-            Content::FrontPage(articles) => table()
-                .children(
-                    articles
-                        .iter()
-                        .enumerate()
-                        .flat_map(|(index, article)| article.render(index + 1).into_iter()),
-                )
+            Content::FrontPage(articles) => ol()
+                .children(articles.iter().map(|article| li().child(article.render())))
                 .into(),
+            Content::Story(story) => story.render().into(),
             Content::Unknown => p().text("Unknown").into(),
             Content::Error(err) => p().text(err).into(),
         }
@@ -96,21 +102,7 @@ impl Content {
 
 #[derive(Deserialize)]
 struct Story {
-    // id 	The item's unique id.
-    // deleted 	true if the item is deleted.
-    // type 	The type of item. One of "job", "story", "comment", "poll", or "pollopt".
-    // by 	The username of the item's author.
-    // time 	Creation date of the item, in Unix Time.
-    // text 	The comment, story or poll text. HTML.
-    // dead 	true if the item is dead.
-    // parent 	The comment's parent: either another comment or the relevant story.
-    // poll 	The pollopt's associated poll.
-    // kids 	The ids of the item's comments, in ranked display order.
-    // url 	The URL of the story.
-    // score 	The story's score, or the votes for a pollopt.
-    // title 	The title of the story, poll or job. HTML.
-    // parts 	A list of related pollopts, in display order.
-    // descendants 	In the case of stories or polls, the total
+    id: u64,
     title: String,
     #[serde(default)]
     score: u64,
@@ -120,34 +112,102 @@ struct Story {
     time: DateTime<Utc>,
     #[serde(default)]
     descendants: u64,
+    #[serde(default)]
+    text: String,
+    #[serde(default)]
+    kids: Vec<u64>,
+    url: Option<String>,
 }
 
 impl Story {
-    fn render(&self, index: usize) -> [Tr; 2] {
+    fn render(&self) -> Div {
         let score = self.score;
         let descendants = self.descendants;
-        let time_ago = Formatter::new()
-            .num_items(1)
-            .convert((Utc::now() - self.time).to_std().unwrap_or(Duration::ZERO));
+        let time_ago = time_ago(self.time);
 
-        [
-            tr().child(td().text(&format!("{index}.")))
-                .child(td().text(&self.title))
-                .build(),
-            tr().child(td())
-                .child(
-                    td().child(span().text(&format!("{score} point{}", plural(score))))
-                        .text(" by ")
-                        .child(a().text(&self.by))
-                        .text(&format!(" {time_ago} | "))
-                        .child(a().text(&format!("{descendants} comment{}", plural(descendants)))),
-                )
-                .build(),
-        ]
+        div()
+            .child(h2().child(a().href(self.url.as_ref()).text(&self.title)))
+            .child(
+                span()
+                    .child(span().text(&format!("{score} point{} by ", plural(score))))
+                    .child(a().text(&self.by))
+                    .child(span().text(&format!(" {time_ago} | ")))
+                    .child(
+                        a().href(format!("/item/{}", self.id))
+                            .text(&format!("{descendants} comment{}", plural(descendants))),
+                    ),
+            )
+            .build()
     }
 }
 
-async fn query_api_item<T: DeserializeOwned>(id: u64) -> Result<T, reqwasm::Error> {
+#[derive(Deserialize)]
+struct Comment {
+    #[serde(default)]
+    by: String,
+    #[serde(with = "chrono::serde::ts_seconds")]
+    time: DateTime<Utc>,
+    #[serde(default)]
+    text: String,
+    #[serde(default)]
+    kids: Vec<u64>,
+}
+
+struct StoryDetail {
+    story: Story,
+    comments: Vec<CommentTree>,
+}
+
+impl StoryDetail {
+    fn render(&self) -> Div {
+        div()
+            .child(self.story.render())
+            .child(div().text(&self.story.text))
+            .child(ul().children(self.comments.iter().map(|comment| comment.render(0))))
+            .build()
+    }
+}
+
+struct CommentTree {
+    comment: Comment,
+    children: Vec<CommentTree>,
+}
+
+impl CommentTree {
+    #[async_recursion(?Send)]
+    async fn load_vec(ids: &[u64]) -> Vec<Self> {
+        join_all(ids.iter().copied().map(Self::load))
+            .await
+            .into_iter()
+            .filter_map(Result::ok)
+            .collect()
+    }
+
+    #[async_recursion(?Send)]
+    async fn load(id: u64) -> Result<Self, reqwasm::Error> {
+        let comment: Comment = query_api_item(id).await?;
+        let children = Self::load_vec(&comment.kids).await;
+
+        Ok(Self { comment, children })
+    }
+
+    fn render(&self, depth: usize) -> Li {
+        let time_ago = time_ago(self.comment.time);
+        li().child(a().text(&self.comment.by))
+            .child(span().text(&format!(" {time_ago}")))
+            .child(div().text(&self.comment.text))
+            .child(
+                ul().children(
+                    self.children
+                        .iter()
+                        .map(move |child| child.render(depth + 1)),
+                ),
+            )
+            .build()
+    }
+}
+
+async fn query_api_item<T: DeserializeOwned>(id: impl Display) -> Result<T, reqwasm::Error> {
     query_api(&format!("item/{id}")).await
 }
 
@@ -159,6 +219,12 @@ async fn query_api<T: DeserializeOwned>(path: &str) -> Result<T, reqwasm::Error>
     .await?
     .json()
     .await
+}
+
+fn time_ago(time: DateTime<Utc>) -> String {
+    Formatter::new()
+        .num_items(1)
+        .convert((Utc::now() - time).to_std().unwrap_or(Duration::ZERO))
 }
 
 fn plural(count: u64) -> &'static str {
@@ -184,7 +250,14 @@ fn main() {
                     "/topstories" | "/newstories" | "/askstories" | "/showstories" => {
                         Content::load_frontpage(&pathname).await
                     }
-                    _ => Content::Unknown,
+                    item => {
+                        let path_parts = item.split(['/']).collect::<Vec<_>>();
+
+                        match path_parts.as_slice() {
+                            ["", "item", id] => Content::load_story(id).await,
+                            _ => Content::Unknown,
+                        }
+                    }
                 })
             }
         }
