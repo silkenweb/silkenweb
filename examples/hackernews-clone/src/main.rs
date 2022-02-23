@@ -2,14 +2,16 @@ use std::time::Duration;
 
 use chrono::{DateTime, Utc};
 use futures::future::join_all;
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
+    clone,
     elements::html::{a, div, p, span, table, td, tr, Div, Tr},
     macros::{Element, ElementBuilder},
     mount,
     prelude::ParentBuilder,
+    router::{self, Url},
     task::spawn_local,
 };
 use timeago::Formatter;
@@ -22,28 +24,12 @@ impl App {
         Self(Mutable::new(None))
     }
 
-    async fn load_frontpage(self) {
-        let content = match self.try_load_frontpage().await {
-            Ok(articles) => Content::FrontPage(articles),
-            Err(err) => Content::Error(err.to_string()),
-        };
-
-        self.0.set(Some(content))
+    fn set_loading(&self) {
+        self.0.set(None)
     }
 
-    async fn try_load_frontpage(&self) -> Result<Vec<Story>, reqwasm::Error> {
-        let top_stories: Vec<u64> = query_api("topstories").await?;
-
-        let stories = top_stories
-            .into_iter()
-            .take(30)
-            .map(query_api_item::<Story>);
-
-        Ok(join_all(stories)
-            .await
-            .into_iter()
-            .filter_map(|story| story.ok())
-            .collect())
+    fn set_content(&self, content: Content) {
+        self.0.set(Some(content))
     }
 
     fn render(&self) -> Div {
@@ -51,7 +37,7 @@ impl App {
             if let Some(content) = content {
                 content.render()
             } else {
-                p().text("Loading...").build().into()
+                p().text("Loading...").into()
             }
         }))
     }
@@ -59,10 +45,39 @@ impl App {
 
 enum Content {
     FrontPage(Vec<Story>),
+    Unknown,
     Error(String),
 }
 
 impl Content {
+    async fn load_frontpage(story_type: &str) -> Self {
+        Self::ok_or(Self::try_load_frontpage(story_type).await)
+    }
+
+    async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
+        let top_stories: Vec<u64> = query_api(story_type).await?;
+
+        let stories = top_stories
+            .into_iter()
+            .take(30)
+            .map(query_api_item::<Story>);
+
+        Ok(Self::FrontPage(
+            join_all(stories)
+                .await
+                .into_iter()
+                .filter_map(|story| story.ok())
+                .collect(),
+        ))
+    }
+
+    fn ok_or(result: Result<Self, reqwasm::Error>) -> Self {
+        match result {
+            Ok(ok) => ok,
+            Err(err) => Self::Error(err.to_string()),
+        }
+    }
+
     fn render(&self) -> Element {
         match self {
             Content::FrontPage(articles) => table()
@@ -72,9 +87,9 @@ impl Content {
                         .enumerate()
                         .flat_map(|(index, article)| article.render(index + 1).into_iter()),
                 )
-                .build()
                 .into(),
-            Content::Error(err) => p().text(err).build().into(),
+            Content::Unknown => p().text("Unknown").into(),
+            Content::Error(err) => p().text(err).into(),
         }
     }
 }
@@ -157,6 +172,23 @@ fn plural(count: u64) -> &'static str {
 fn main() {
     let app = App::new();
 
-    spawn_local(app.clone().load_frontpage());
+    spawn_local(router::url().signal_ref(Url::pathname).for_each({
+        clone!(app);
+        move |pathname| {
+            clone!(app);
+            async move {
+                app.set_loading();
+
+                app.set_content(match pathname.as_str() {
+                    "/" => Content::load_frontpage("topstories").await,
+                    "/topstories" | "/newstories" | "/askstories" | "/showstories" => {
+                        Content::load_frontpage(&pathname).await
+                    }
+                    _ => Content::Unknown,
+                })
+            }
+        }
+    }));
+
     mount("app", app.render());
 }
