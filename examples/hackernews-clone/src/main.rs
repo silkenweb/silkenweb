@@ -8,7 +8,7 @@ use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
-    elements::html::{a, div, h2, li, ol, p, span, ul, Div, Li},
+    elements::html::{a, div, h2, li, ol, p, span, ul, Div, Li, A},
     macros::{Element, ElementBuilder},
     mount,
     prelude::ParentBuilder,
@@ -47,6 +47,7 @@ impl App {
 enum Content {
     FrontPage(Vec<Story>),
     Story(StoryDetail),
+    User(UserDetails),
     Unknown,
     Error(String),
 }
@@ -56,10 +57,18 @@ impl Content {
         Self::ok_or(Self::try_load_frontpage(story_type).await)
     }
 
-    async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
-        let top_stories: Vec<u64> = query_api(story_type).await?;
+    async fn load_story(id: &str) -> Self {
+        Self::ok_or(Self::try_load_story(id).await)
+    }
 
-        let stories = top_stories.into_iter().take(30).map(query_api_item);
+    async fn load_user(id: &str) -> Self {
+        Self::ok_or(Self::try_load_user(id).await)
+    }
+
+    async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
+        let top_stories: Vec<u64> = query(story_type).await?;
+
+        let stories = top_stories.into_iter().take(30).map(query_item);
 
         Ok(Self::FrontPage(
             join_all(stories)
@@ -70,15 +79,22 @@ impl Content {
         ))
     }
 
-    async fn load_story(id: &str) -> Self {
-        Self::ok_or(Self::try_load_story(id).await)
-    }
-
     async fn try_load_story(id: &str) -> Result<Self, reqwasm::Error> {
-        let story: Story = query_api_item(id).await?;
+        let story: Story = query_item(id).await?;
         let comments = CommentTree::load_vec(&story.kids).await;
 
         Ok(Self::Story(StoryDetail { story, comments }))
+    }
+
+    async fn try_load_user(id: &str) -> Result<Self, reqwasm::Error> {
+        let user = query_user(id).await?;
+        let submitted = join_all(user.submitted.iter().map(query_item))
+            .await
+            .into_iter()
+            .filter_map(Result::ok)
+            .collect();
+
+        Ok(Self::User(UserDetails { user, submitted }))
     }
 
     fn ok_or(result: Result<Self, reqwasm::Error>) -> Self {
@@ -94,6 +110,7 @@ impl Content {
                 .children(articles.iter().map(|article| li().child(article.render())))
                 .into(),
             Content::Story(story) => story.render().into(),
+            Content::User(user) => user.render().into(),
             Content::Unknown => p().text("Unknown").into(),
             Content::Error(err) => p().text(err).into(),
         }
@@ -130,7 +147,7 @@ impl Story {
             .child(
                 span()
                     .child(span().text(&format!("{score} point{} by ", plural(score))))
-                    .child(a().text(&self.by))
+                    .child(user_link(&self.by))
                     .child(span().text(&format!(" {time_ago} | ")))
                     .child(
                         a().href(format!("/item/{}", self.id))
@@ -151,6 +168,33 @@ struct Comment {
     text: String,
     #[serde(default)]
     kids: Vec<u64>,
+}
+
+#[derive(Deserialize)]
+struct User {
+    id: String,
+    #[serde(default)]
+    about: String,
+    #[serde(default)]
+    karma: u64,
+    #[serde(default)]
+    submitted: Vec<u64>,
+}
+
+struct UserDetails {
+    user: User,
+    submitted: Vec<Story>,
+}
+
+impl UserDetails {
+    fn render(&self) -> Div {
+        div()
+            .child(h2().text(&self.user.id))
+            .child(div().text(&self.user.about))
+            .child(span().text(&format!("{} karma", self.user.karma)))
+            .child(ol().children(self.submitted.iter().map(Story::render)))
+            .build()
+    }
 }
 
 struct StoryDetail {
@@ -185,7 +229,7 @@ impl CommentTree {
 
     #[async_recursion(?Send)]
     async fn load(id: u64) -> Result<Self, reqwasm::Error> {
-        let comment: Comment = query_api_item(id).await?;
+        let comment: Comment = query_item(id).await?;
         let children = Self::load_vec(&comment.kids).await;
 
         Ok(Self { comment, children })
@@ -193,7 +237,7 @@ impl CommentTree {
 
     fn render(&self, depth: usize) -> Li {
         let time_ago = time_ago(self.comment.time);
-        li().child(a().text(&self.comment.by))
+        li().child(user_link(&self.comment.by))
             .child(span().text(&format!(" {time_ago}")))
             .child(div().text(&self.comment.text))
             .child(
@@ -207,11 +251,19 @@ impl CommentTree {
     }
 }
 
-async fn query_api_item<T: DeserializeOwned>(id: impl Display) -> Result<T, reqwasm::Error> {
-    query_api(&format!("item/{id}")).await
+fn user_link(user: &str) -> A {
+    a().href(format!("/user/{}", user)).text(user).build()
 }
 
-async fn query_api<T: DeserializeOwned>(path: &str) -> Result<T, reqwasm::Error> {
+async fn query_item<T: DeserializeOwned>(id: impl Display) -> Result<T, reqwasm::Error> {
+    query(&format!("item/{id}")).await
+}
+
+async fn query_user(id: impl Display) -> Result<User, reqwasm::Error> {
+    query(&format!("user/{id}")).await
+}
+
+async fn query<T: DeserializeOwned>(path: &str) -> Result<T, reqwasm::Error> {
     Request::get(&format!(
         "https://hacker-news.firebaseio.com/v0/{path}.json"
     ))
@@ -255,6 +307,7 @@ fn main() {
 
                         match path_parts.as_slice() {
                             ["", "item", id] => Content::load_story(id).await,
+                            ["", "user", id] => Content::load_user(id).await,
                             _ => Content::Unknown,
                         }
                     }
