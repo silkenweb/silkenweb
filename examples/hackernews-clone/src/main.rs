@@ -11,7 +11,7 @@ use silkenweb::{
     elements::html::{self, a, div, h2, header, li, nav, ol, p, span, ul, Div, Li, A},
     macros::{Element, ElementBuilder},
     mount,
-    prelude::ParentBuilder,
+    prelude::{ElementEvents, ParentBuilder},
     router::{self, Url},
     task::spawn_local,
 };
@@ -39,10 +39,10 @@ impl App {
     fn render(&self) -> Div {
         div()
             .child(header().child(nav().children([
-                a().href("/topstories").text("top"),
-                a().href("/newstories").text("new"),
-                a().href("/askstories").text("ask"),
-                a().href("/showstories").text("show"),
+                local_link("top", "/topstories"),
+                local_link("new", "/newstories"),
+                local_link("ask", "/askstories"),
+                local_link("show", "/showstories"),
             ])))
             .child(html::main().child_signal(self.0.signal_ref(|content| {
                 if let Some(content) = content {
@@ -152,6 +152,8 @@ impl Story {
         let score = self.score;
         let descendants = self.descendants;
         let time_ago = time_ago(self.time);
+        let id = self.id;
+        let url_path = format!("/item/{}", id);
 
         div()
             .child(h2().child(a().href(self.url.as_ref()).text(&self.title)))
@@ -161,8 +163,12 @@ impl Story {
                     .child(user_link(&self.by))
                     .child(span().text(&format!(" {time_ago} | ")))
                     .child(
-                        a().href(format!("/item/{}", self.id))
-                            .text(&format!("{descendants} comment{}", plural(descendants))),
+                        a().href(&url_path)
+                            .text(&format!("{descendants} comment{}", plural(descendants)))
+                            .on_click(move |ev, _| {
+                                ev.prevent_default();
+                                router::set_url_path(&url_path)
+                            }),
                     ),
             )
             .build()
@@ -275,8 +281,20 @@ impl CommentTree {
     }
 }
 
+fn local_link(name: &str, path: impl Into<String>) -> A {
+    let name = name.to_owned();
+    let path = path.into();
+    a().href(&path)
+        .text(&name)
+        .on_click(move |ev, _| {
+            ev.prevent_default();
+            router::set_url_path(&path)
+        })
+        .build()
+}
+
 fn user_link(user: &str) -> A {
-    a().href(format!("/user/{}", user)).text(user).build()
+    local_link(user, format!("/user/{}", user))
 }
 
 async fn query_item<T: DeserializeOwned>(id: impl Display) -> Result<T, reqwasm::Error> {
