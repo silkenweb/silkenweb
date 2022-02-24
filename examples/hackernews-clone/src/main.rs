@@ -344,15 +344,11 @@ fn main() {
                     "/topstories" | "/newstories" | "/askstories" | "/showstories" => {
                         Content::load_frontpage(&pathname).await
                     }
-                    item => {
-                        let path_parts = item.split(['/']).collect::<Vec<_>>();
-
-                        match path_parts.as_slice() {
-                            ["", "item", id] => Content::load_story(id).await,
-                            ["", "user", id] => Content::load_user(id).await,
-                            _ => Content::Unknown,
-                        }
-                    }
+                    item => match *item.split(['/']).collect::<Vec<_>>() {
+                        ["", "item", id] => Content::load_story(id).await,
+                        ["", "user", id] => Content::load_user(id).await,
+                        _ => Content::Unknown,
+                    },
                 })
             }
         }
