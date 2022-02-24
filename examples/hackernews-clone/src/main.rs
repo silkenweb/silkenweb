@@ -8,17 +8,18 @@ use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
-    elements::html::{self, a, div, h2, header, li, nav, ol, p, span, ul, Div, Li, A},
-    macros::{Element, ElementBuilder},
+    elements::{
+        html::{self, a, div, h2, header, li, nav, ol, p, span, ul, Div, Li, A},
+        ElementEvents,
+    },
     mount,
-    prelude::{ElementEvents, ParentBuilder},
+    node::element::{Element, ElementBuilder, ParentBuilder},
     router::{self, Url},
     task::spawn_local,
 };
 use timeago::Formatter;
 
 // TODO: Styling
-// TODO: Tidy code
 
 type Result<T> = result::Result<T, reqwasm::Error>;
 
