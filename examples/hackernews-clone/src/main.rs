@@ -199,10 +199,7 @@ impl UserDetails {
     fn render(&self) -> Div {
         div()
             .child(h2().text(&self.user.id))
-            .child(div().effect({
-                let about = self.user.about.clone();
-                move |elem| elem.set_inner_html(&about)
-            }))
+            .child(text_as_html(&self.user.about))
             .child(span().text(&format!("{} karma", self.user.karma)))
             .child(ol().children(self.submitted.iter().map(Story::render)))
             .build()
@@ -218,10 +215,7 @@ impl StoryDetail {
     fn render(&self) -> Div {
         div()
             .child(self.story.render())
-            .child(div().effect({
-                let text = self.story.text.clone();
-                move |elem| elem.set_inner_html(&text)
-            }))
+            .child(text_as_html(&self.story.text))
             .child(ul().children(self.comments.iter().map(|comment| comment.render(0))))
             .build()
     }
@@ -254,10 +248,7 @@ impl CommentTree {
         let time_ago = time_ago(self.comment.time);
         li().child(user_link(&self.comment.by))
             .child(span().text(&format!(" {time_ago}")))
-            .child(div().effect({
-                let text = self.comment.text.clone();
-                move |elem| elem.set_inner_html(&text)
-            }))
+            .child(text_as_html(&self.comment.text))
             .child(
                 ul().children(
                     self.children
@@ -267,6 +258,11 @@ impl CommentTree {
             )
             .build()
     }
+}
+
+fn text_as_html(text: &str) -> Div {
+    let text = text.to_owned();
+    div().effect(move |elem| elem.set_inner_html(&text)).build()
 }
 
 fn local_link(name: &str, path: impl Into<String>) -> A {
