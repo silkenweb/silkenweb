@@ -304,13 +304,8 @@ async fn query_user(id: impl Display) -> Result<User> {
 }
 
 async fn query<T: DeserializeOwned>(path: &str) -> Result<T> {
-    Request::get(&format!(
-        "https://hacker-news.firebaseio.com/v0/{path}.json"
-    ))
-    .send()
-    .await?
-    .json()
-    .await
+    let url = format!("https://hacker-news.firebaseio.com/v0/{path}.json");
+    Request::get(&url).send().await?.json().await
 }
 
 fn time_ago(time: DateTime<Utc>) -> String {
