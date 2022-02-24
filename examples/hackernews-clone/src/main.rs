@@ -104,10 +104,7 @@ impl Content {
     }
 
     fn ok_or(result: Result<Self>) -> Self {
-        match result {
-            Ok(ok) => ok,
-            Err(err) => Self::Error(err.to_string()),
-        }
+        result.unwrap_or_else(|err| Self::Error(err.to_string()))
     }
 
     fn render(&self) -> Element {
