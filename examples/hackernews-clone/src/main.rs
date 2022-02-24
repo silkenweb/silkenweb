@@ -68,43 +68,39 @@ enum Content {
 
 impl Content {
     async fn load_frontpage(story_type: &str) -> Self {
-        Self::ok_or(
-            async {
-                let top_stories: Vec<u64> = query(story_type).await?;
-                let stories = top_stories.into_iter().take(STORY_COUNT).map(query_item);
+        async {
+            let top_stories: Vec<u64> = query(story_type).await?;
+            let stories = top_stories.into_iter().take(STORY_COUNT).map(query_item);
 
-                Ok(Self::FrontPage(join_ok(stories).await))
-            }
-            .await,
-        )
+            Ok(Self::FrontPage(join_ok(stories).await))
+        }
+        .await
+        .unwrap_or_else(Self::from_error)
     }
 
     async fn load_story(id: &str) -> Self {
-        Self::ok_or(
-            async {
-                let story: Story = query_item(id).await?;
-                let comments = CommentTree::load_vec(&story.kids, 3).await;
+        async {
+            let story: Story = query_item(id).await?;
+            let comments = CommentTree::load_vec(&story.kids, 3).await;
 
-                Ok(Self::Story(StoryDetail { story, comments }))
-            }
-            .await,
-        )
+            Ok(Self::Story(StoryDetail { story, comments }))
+        }
+        .await
+        .unwrap_or_else(Self::from_error)
     }
 
     async fn load_user(id: &str) -> Self {
-        Self::ok_or(
-            async {
-                let user = query_user(id).await?;
-                let submitted =
-                    join_ok(user.submitted.iter().take(STORY_COUNT).map(query_item)).await;
-                Ok(Self::User(UserDetails { user, submitted }))
-            }
-            .await,
-        )
+        async {
+            let user = query_user(id).await?;
+            let submitted = join_ok(user.submitted.iter().take(STORY_COUNT).map(query_item)).await;
+            Ok(Self::User(UserDetails { user, submitted }))
+        }
+        .await
+        .unwrap_or_else(Self::from_error)
     }
 
-    fn ok_or(result: Result<Self>) -> Self {
-        result.unwrap_or_else(|err| Self::Error(err.to_string()))
+    fn from_error(err: reqwasm::Error) -> Self {
+        Self::Error(err.to_string())
     }
 
     fn render(&self) -> Element {
