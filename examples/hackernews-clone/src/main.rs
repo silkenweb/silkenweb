@@ -1,8 +1,8 @@
-use std::{fmt::Display, time::Duration};
+use std::{fmt::Display, result, time::Duration};
 
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
-use futures::future::join_all;
+use futures::{future::join_all, Future};
 use futures_signals::signal::{Mutable, SignalExt};
 use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
@@ -19,6 +19,8 @@ use timeago::Formatter;
 
 // TODO: Styling
 // TODO: Tidy code
+
+type Result<T> = result::Result<T, reqwasm::Error>;
 
 #[derive(Clone)]
 struct App(Mutable<Option<Content>>);
@@ -65,50 +67,42 @@ enum Content {
 
 impl Content {
     async fn load_frontpage(story_type: &str) -> Self {
-        Self::ok_or(Self::try_load_frontpage(story_type).await)
+        Self::ok_or(
+            async {
+                let top_stories: Vec<u64> = query(story_type).await?;
+                let stories = top_stories.into_iter().take(STORY_COUNT).map(query_item);
+
+                Ok(Self::FrontPage(join_ok(stories).await))
+            }
+            .await,
+        )
     }
 
     async fn load_story(id: &str) -> Self {
-        Self::ok_or(Self::try_load_story(id).await)
+        Self::ok_or(
+            async {
+                let story: Story = query_item(id).await?;
+                let comments = CommentTree::load_vec(&story.kids, 3).await;
+
+                Ok(Self::Story(StoryDetail { story, comments }))
+            }
+            .await,
+        )
     }
 
     async fn load_user(id: &str) -> Self {
-        Self::ok_or(Self::try_load_user(id).await)
+        Self::ok_or(
+            async {
+                let user = query_user(id).await?;
+                let submitted =
+                    join_ok(user.submitted.iter().take(STORY_COUNT).map(query_item)).await;
+                Ok(Self::User(UserDetails { user, submitted }))
+            }
+            .await,
+        )
     }
 
-    async fn try_load_frontpage(story_type: &str) -> Result<Self, reqwasm::Error> {
-        let top_stories: Vec<u64> = query(story_type).await?;
-
-        let stories = top_stories.into_iter().take(STORY_COUNT).map(query_item);
-
-        Ok(Self::FrontPage(
-            join_all(stories)
-                .await
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect(),
-        ))
-    }
-
-    async fn try_load_story(id: &str) -> Result<Self, reqwasm::Error> {
-        let story: Story = query_item(id).await?;
-        let comments = CommentTree::load_vec(&story.kids, 3).await;
-
-        Ok(Self::Story(StoryDetail { story, comments }))
-    }
-
-    async fn try_load_user(id: &str) -> Result<Self, reqwasm::Error> {
-        let user = query_user(id).await?;
-        let submitted = join_all(user.submitted.iter().take(STORY_COUNT).map(query_item))
-            .await
-            .into_iter()
-            .filter_map(Result::ok)
-            .collect();
-
-        Ok(Self::User(UserDetails { user, submitted }))
-    }
-
-    fn ok_or(result: Result<Self, reqwasm::Error>) -> Self {
+    fn ok_or(result: Result<Self>) -> Self {
         match result {
             Ok(ok) => ok,
             Err(err) => Self::Error(err.to_string()),
@@ -243,15 +237,11 @@ struct CommentTree {
 impl CommentTree {
     #[async_recursion(?Send)]
     async fn load_vec(ids: &[u64], depth: usize) -> Vec<Self> {
-        join_all(ids.iter().copied().map(|id| Self::load(id, depth)))
-            .await
-            .into_iter()
-            .filter_map(Result::ok)
-            .collect()
+        join_ok(ids.iter().copied().map(|id| Self::load(id, depth))).await
     }
 
     #[async_recursion(?Send)]
-    async fn load(id: u64, depth: usize) -> Result<Self, reqwasm::Error> {
+    async fn load(id: u64, depth: usize) -> Result<Self> {
         let comment: Comment = query_item(id).await?;
         let children = if depth > 0 {
             Self::load_vec(&comment.kids, depth - 1).await
@@ -297,15 +287,23 @@ fn user_link(user: &str) -> A {
     local_link(user, format!("/user/{}", user))
 }
 
-async fn query_item<T: DeserializeOwned>(id: impl Display) -> Result<T, reqwasm::Error> {
+async fn join_ok<T>(items: impl IntoIterator<Item = impl Future<Output = Result<T>>>) -> Vec<T> {
+    join_all(items.into_iter())
+        .await
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect()
+}
+
+async fn query_item<T: DeserializeOwned>(id: impl Display) -> Result<T> {
     query(&format!("item/{id}")).await
 }
 
-async fn query_user(id: impl Display) -> Result<User, reqwasm::Error> {
+async fn query_user(id: impl Display) -> Result<User> {
     query(&format!("user/{id}")).await
 }
 
-async fn query<T: DeserializeOwned>(path: &str) -> Result<T, reqwasm::Error> {
+async fn query<T: DeserializeOwned>(path: &str) -> Result<T> {
     Request::get(&format!(
         "https://hacker-news.firebaseio.com/v0/{path}.json"
     ))
