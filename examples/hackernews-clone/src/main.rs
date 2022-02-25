@@ -9,17 +9,16 @@ use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
     elements::{
-        html::{self, a, div, h2, header, li, nav, ol, p, span, ul, Div, Li, A},
+        html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
         ElementEvents,
     },
     mount,
     node::element::{Element, ElementBuilder, ParentBuilder},
+    prelude::HtmlElement,
     router::{self, Url},
     task::spawn_local,
 };
 use timeago::Formatter;
-
-// TODO: Styling
 
 type Result<T> = result::Result<T, reqwasm::Error>;
 
@@ -41,19 +40,26 @@ impl App {
 
     fn render(&self) -> Div {
         div()
-            .child(header().child(nav().children([
-                local_link("top", "/topstories"),
-                local_link("new", "/newstories"),
-                local_link("ask", "/askstories"),
-                local_link("show", "/showstories"),
-            ])))
-            .child(html::main().child_signal(self.0.signal_ref(|content| {
-                if let Some(content) = content {
-                    content.render()
-                } else {
-                    p().text("Loading...").into()
-                }
-            })))
+            .class(["page"])
+            .child(
+                header().child(nav().child(h1().class(["page-banner"]).children([
+                    local_link("Top", "/topstories"),
+                    local_link("New", "/newstories"),
+                    local_link("Ask", "/askstories"),
+                    local_link("Show", "/showstories"),
+                ]))),
+            )
+            .child(
+                html::main()
+                    .class(["page-content"])
+                    .child_signal(self.0.signal_ref(|content| {
+                        if let Some(content) = content {
+                            content.render()
+                        } else {
+                            p().text("Loading...").into()
+                        }
+                    })),
+            )
             .build()
     }
 }
@@ -105,7 +111,7 @@ impl Content {
 
     fn render(&self) -> Element {
         match self {
-            Content::FrontPage(articles) => ol()
+            Content::FrontPage(articles) => ul()
                 .children(articles.iter().map(|article| li().child(article.render())))
                 .into(),
             Content::Story(story) => story.render().into(),
@@ -144,9 +150,13 @@ impl Story {
         let url_path = format!("/item/{}", id);
 
         div()
-            .child(h2().child(a().href(self.url.as_ref()).text(&self.title)))
+            .child(
+                h2().class(["story-title"])
+                    .child(a().href(self.url.as_ref()).text(&self.title)),
+            )
             .child(
                 span()
+                    .class(["de-emphasize"])
                     .child(span().text(&format!("{score} point{} by ", plural(score))))
                     .child(user_link(&self.by))
                     .child(span().text(&format!(" {time_ago} | ")))
@@ -197,7 +207,10 @@ impl UserDetails {
             .child(h2().text(&self.user.id))
             .child(text_as_html(&self.user.about))
             .child(span().text(&format!("{} karma", self.user.karma)))
-            .child(ol().children(self.submitted.iter().map(Story::render)))
+            .child(
+                ul().class(["user-submitted-stories"])
+                    .children(self.submitted.iter().map(Story::render)),
+            )
             .build()
     }
 }
@@ -242,8 +255,13 @@ impl CommentTree {
 
     fn render(&self, depth: usize) -> Li {
         let time_ago = time_ago(self.comment.time);
-        li().child(user_link(&self.comment.by))
-            .child(span().text(&format!(" {time_ago}")))
+        li().class(["comment"])
+            .child(
+                span()
+                    .class(["de-emphasize"])
+                    .child(user_link(&self.comment.by))
+                    .text(&format!(" {time_ago}")),
+            )
             .child(text_as_html(&self.comment.text))
             .child(
                 ul().children(
@@ -258,7 +276,10 @@ impl CommentTree {
 
 fn text_as_html(text: &str) -> Div {
     let text = text.to_owned();
-    div().effect(move |elem| elem.set_inner_html(&text)).build()
+    div()
+        .class(["user-content"])
+        .effect(move |elem| elem.set_inner_html(&text))
+        .build()
 }
 
 fn local_link(name: &str, path: impl Into<String>) -> A {

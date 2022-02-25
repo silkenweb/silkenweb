@@ -1,0 +1,72 @@
+$color: YellowGreen;
+$foreground-color : Black;
+$de-emphasize-color : Grey;
+$background-color : WhiteSmoke;
+$small_gap: 8px;
+$large_gap: 32px;
+
+body {
+    color: $foreground-color;
+    background-color: $background-color;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul ul {
+    padding-inline-start: $large_gap;
+}
+
+.de-emphasize {
+    color: $de-emphasize-color;
+}
+
+.page {
+    margin-inline: auto;
+    margin-block-end: $large_gap;
+    inline-size: 90%;
+}
+
+.page-banner {
+    display: flex;
+    gap: $small_gap;
+    background: $color;
+    padding: $small_gap;
+}
+
+.page-content {
+    padding-inline: $small_gap;
+}
+
+.story-title {
+    margin-bottom: 0
+}
+
+.comment,
+.user-submitted-stories {
+    border-block-start: 1px solid $de-emphasize-color;
+    margin-block-start: $small_gap;
+}
+
+.user-content {
+    padding-block: $small_gap;
+}
+
+.user-content a {
+    text-decoration: underline;
+}
+
+.user-content ul {
+    list-style-type: disc;
+}
