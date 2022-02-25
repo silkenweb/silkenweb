@@ -13,19 +13,19 @@ body {
 a {
     color: inherit;
     text-decoration: inherit;
-}
 
-a:hover {
-    text-decoration: underline;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 ul {
     list-style-type: none;
     padding-left: 0;
-}
 
-ul ul {
-    padding-inline-start: $large_gap;
+    ul {
+        padding-inline-start: $large_gap;
+    }
 }
 
 .de-emphasize {
@@ -61,12 +61,12 @@ ul ul {
 
 .user-content {
     padding-block: $small_gap;
-}
 
-.user-content a {
-    text-decoration: underline;
-}
+    a {
+        text-decoration: underline;
+    }
 
-.user-content ul {
-    list-style-type: disc;
+    ul {
+        list-style-type: disc;
+    }
 }
