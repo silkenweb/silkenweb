@@ -1,8 +1,7 @@
 //! URL based routing.
 //!
-//! Get the URL with [`url()`], and set it however you want to. For example:
-//! - with an anchor element like `<a href="/some/link">Some link</a>`
-//! - with [`set_url_path`].
+//! Get the URL path with [`url_path`], and set it with [`set_url_path`] or a
+//! link to a fragment like `<a href="#anchor" ...>`.
 //!
 //! # Example
 //!
@@ -52,6 +51,7 @@ pub fn url_path() -> ReadOnlyMutable<String> {
 /// example, the path of <http://example.com/this/is/the/path> is "/this/is/the/path".
 ///
 /// [`set_url_path`] will:
+/// - Strip any leading '/' characters
 /// - Set the browser URL
 /// - Push it onto the history stack so the forward and back buttons work
 /// - Set the [`url_path()`] signal
