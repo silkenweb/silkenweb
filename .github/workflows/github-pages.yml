@@ -31,5 +31,5 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh_pages
         force_orphan: true
-        publish_dir: target/examples
+        publish_dir: target/examples/animation
         enable_jekyll: false
