@@ -106,7 +106,7 @@ fn build_all_examples() -> WorkflowResult<()> {
 
         {
             let _dir = pushd(&example_dir);
-            cmd!("trunk build --release --public-url silkenweb/examples/{example}").run()?;
+            cmd!("trunk build --release --public-url silkenweb/").run()?;
         }
 
         cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example}").run()?;
