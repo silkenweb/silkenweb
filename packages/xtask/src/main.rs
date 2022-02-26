@@ -102,7 +102,17 @@ fn build_all_examples() -> WorkflowResult<()> {
     rm_rf("target/examples")?;
     mkdir_p(&dest_dir)?;
 
-    for example in ["animation"] {
+    for example in [
+        "animation",
+        "async-http-request",
+        "counter",
+        "counter-list",
+        "hackernews-clone",
+        "hello-world",
+        "hydration",
+        "router",
+        "todomvc",
+    ] {
         let example_dir = format!("examples/{example}");
 
         {
