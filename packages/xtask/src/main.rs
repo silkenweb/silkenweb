@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
 use scopeguard::defer;
-use xshell::{cmd, mkdir_p, pushd};
+use xshell::{cmd, mkdir_p, pushd, rm_rf};
 use xtask_base::{
     build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds,
     TargetOs, WorkflowResult,
@@ -99,6 +99,7 @@ fn main() {
 
 fn build_all_examples() -> WorkflowResult<()> {
     let dest_dir = "target/examples";
+    rm_rf("target/examples")?;
     mkdir_p(&dest_dir)?;
 
     for example in ["animation"] {
@@ -106,7 +107,7 @@ fn build_all_examples() -> WorkflowResult<()> {
 
         {
             let _dir = pushd(&example_dir);
-            cmd!("trunk build --release --public-url silkenweb/").run()?;
+            cmd!("trunk build --release --public-url silkenweb/{example}").run()?;
         }
 
         cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example}").run()?;
