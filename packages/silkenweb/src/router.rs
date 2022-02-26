@@ -34,6 +34,11 @@
 //! ```
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
+use crate::{
+    elements::html::{a, ABuilder},
+    prelude::ElementEvents,
+};
+
 pub trait Url {
     /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/hash)
     fn hash(&self) -> String;
@@ -116,6 +121,55 @@ pub fn url() -> ReadOnlyMutable<impl Url> {
 /// See [module-level documentation](self) for an example.
 pub fn set_url_path(path: &str) {
     arch::set_url_path(path)
+}
+
+/// Set up an HTML `<a>` element for routing.
+///
+/// Return an `<a>` element builder with the `href` attribute set to `path` and
+/// an `on_click` handler. Modifier keys are correctly handled.
+///
+/// # Example
+///
+/// ```no_run
+/// # use silkenweb::{
+/// #     elements::html::a, macros::ParentBuilder, prelude::ElementEvents, router::anchor,
+/// # };
+/// let link = anchor("/my-path").text("click me");
+/// ```
+pub fn anchor(path: impl Into<String>) -> ABuilder {
+    let path = path.into();
+
+    a().href(&path).on_click(link_clicked(path))
+}
+
+/// An `on_click` handler for routed `<a>` elements.
+///
+/// This will correctly deal with modifier keys. See also: [`anchor`].
+///
+/// # Example
+///
+/// ```no_run
+/// # use silkenweb::{
+/// #     elements::html::a, macros::ParentBuilder, prelude::ElementEvents, router::link_clicked,
+/// # };
+/// let path = "/my_path";
+/// let link = a()
+///     .href(path)
+///     .text("click me")
+///     .on_click(link_clicked(path));
+/// ```
+pub fn link_clicked(
+    path: impl Into<String>,
+) -> impl FnMut(web_sys::MouseEvent, web_sys::HtmlAnchorElement) + 'static {
+    let path = path.into();
+    move |ev, _| {
+        let modifier_key_pressed = ev.meta_key() || ev.ctrl_key() || ev.shift_key() || ev.alt_key();
+
+        if !modifier_key_pressed {
+            ev.prevent_default();
+            set_url_path(&path);
+        }
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]

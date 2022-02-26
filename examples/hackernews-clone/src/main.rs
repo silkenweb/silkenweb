@@ -8,10 +8,7 @@ use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone,
-    elements::{
-        html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
-        ElementEvents,
-    },
+    elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
     mount,
     node::element::{Element, ElementBuilder, ParentBuilder},
     prelude::HtmlElement,
@@ -43,10 +40,10 @@ impl App {
             .class(["page"])
             .child(
                 header().child(nav().child(h1().class(["page-banner"]).children([
-                    local_link("Top", "/topstories"),
-                    local_link("New", "/newstories"),
-                    local_link("Ask", "/askstories"),
-                    local_link("Show", "/showstories"),
+                    router::anchor("/topstories").text("Top"),
+                    router::anchor("/newstories").text("New"),
+                    router::anchor("/askstories").text("Ask"),
+                    router::anchor("/showstories").text("Show"),
                 ]))),
             )
             .child(
@@ -161,12 +158,8 @@ impl Story {
                     .child(user_link(&self.by))
                     .child(span().text(&format!(" {time_ago} | ")))
                     .child(
-                        a().href(&url_path)
-                            .text(&format!("{descendants} comment{}", plural(descendants)))
-                            .on_click(move |ev, _| {
-                                ev.prevent_default();
-                                router::set_url_path(&url_path)
-                            }),
+                        router::anchor(url_path)
+                            .text(&format!("{descendants} comment{}", plural(descendants))),
                     ),
             )
             .build()
@@ -282,20 +275,8 @@ fn text_as_html(text: &str) -> Div {
         .build()
 }
 
-fn local_link(name: &str, path: impl Into<String>) -> A {
-    let name = name.to_owned();
-    let path = path.into();
-    a().href(&path)
-        .text(&name)
-        .on_click(move |ev, _| {
-            ev.prevent_default();
-            router::set_url_path(&path)
-        })
-        .build()
-}
-
 fn user_link(user: &str) -> A {
-    local_link(user, format!("/user/{}", user))
+    router::anchor(format!("/user/{}", user)).text(user).build()
 }
 
 async fn join_ok<T>(items: impl IntoIterator<Item = impl Future<Output = Result<T>>>) -> Vec<T> {

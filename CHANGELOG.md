@@ -3,6 +3,7 @@
 ## Next
 
 - Server side routing
+- Add `router::anchor` and `router::link_clicked` convenience methods
 
 ## 0.2.0 - 2021-02-09
 
