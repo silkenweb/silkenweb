@@ -1,0 +1,32 @@
+name: github-pages
+on: [push]
+jobs:
+  deploy-examples:
+    env:
+      rust: 1.57
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ env.rust }}
+        default: true
+        components: clippy
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ env.rust }}
+        target: wasm32-unknown-unknown
+    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+    - name: Animation
+      working-directory: examples/animation
+      run: trunk build --release
+    - name: Publish to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh_pages
+        force_orphan: true
+        publish_dir: dist/
+        enable_jekyll: false
