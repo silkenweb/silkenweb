@@ -14,7 +14,7 @@
 //! #     },
 //! #     mount,
 //! #     prelude::ParentBuilder,
-//! #     router::{self, Url},
+//! #     router,
 //! # };
 //!
 //! div()
@@ -29,7 +29,7 @@
 //!             .text("Go to route 2"),
 //!     )
 //!     .child(p().text_signal(
-//!         router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
+//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {}", url_path)),
 //!     ));
 //! ```
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
@@ -39,73 +39,11 @@ use crate::{
     prelude::ElementEvents,
 };
 
-pub trait Url {
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/hash)
-    fn hash(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname)
-    fn pathname(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/host)
-    fn host(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/hostname)
-    fn hostname(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/href)
-    fn href(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/origin)
-    fn origin(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/password)
-    fn password(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/port)
-    fn port(&self) -> String;
-    /// [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/URL/protocol)
-    fn protocol(&self) -> String;
-}
-
-impl Url for web_sys::Url {
-    fn hash(&self) -> String {
-        self.hash()
-    }
-
-    fn pathname(&self) -> String {
-        self.pathname()
-    }
-
-    fn host(&self) -> String {
-        self.host()
-    }
-
-    fn hostname(&self) -> String {
-        self.hostname()
-    }
-
-    fn href(&self) -> String {
-        self.href()
-    }
-
-    fn origin(&self) -> String {
-        self.origin()
-    }
-
-    fn password(&self) -> String {
-        self.password()
-    }
-
-    fn port(&self) -> String {
-        self.port()
-    }
-
-    fn protocol(&self) -> String {
-        self.protocol()
-    }
-}
-
-// TODO: Wrap `Url` in a struct and provide a server side implementation with a
-// trait to define the interface
-
-/// A signal that will vary according to the current browser URL.
+/// The path portion of the URL.
 ///
-/// See [module-level documentation](self) for an example.
-pub fn url() -> ReadOnlyMutable<impl Url> {
-    URL.with(|url| url.read_only())
+/// The path will never start with a '/'.
+pub fn url_path() -> ReadOnlyMutable<String> {
+    URL_PATH.with(|url_path| url_path.read_only())
 }
 
 /// Set the path portion of the URL.
@@ -116,11 +54,11 @@ pub fn url() -> ReadOnlyMutable<impl Url> {
 /// [`set_url_path`] will:
 /// - Set the browser URL
 /// - Push it onto the history stack so the forward and back buttons work
-/// - Set the [`url()`] signal
+/// - Set the [`url_path()`] signal
 ///
 /// See [module-level documentation](self) for an example.
 pub fn set_url_path(path: &str) {
-    arch::set_url_path(path)
+    arch::set_url_path(path.trim_start_matches('/').to_string())
 }
 
 /// Set up an HTML `<a>` element for routing.
@@ -174,111 +112,83 @@ pub fn link_clicked(
 
 #[cfg(not(target_arch = "wasm32"))]
 mod arch {
-    // TODO: Make url dependency optional depending on arch
     use futures_signals::signal::Mutable;
 
-    use super::{Url, URL};
+    use super::URL_PATH;
 
-    pub type UrlType = url::Url;
-
-    impl Url for UrlType {
-        fn hash(&self) -> String {
-            self.fragment()
-                .map_or_else(String::new, |frag| format!("#{}", frag))
-        }
-
-        fn pathname(&self) -> String {
-            self.path().to_string()
-        }
-
-        fn host(&self) -> String {
-            self.host()
-                .map_or_else(String::new, |host| host.to_string())
-        }
-
-        fn hostname(&self) -> String {
-            self.domain().map_or_else(String::new, str::to_owned)
-        }
-
-        fn href(&self) -> String {
-            self.to_string()
-        }
-
-        fn origin(&self) -> String {
-            self.origin().unicode_serialization()
-        }
-
-        fn password(&self) -> String {
-            self.password().map_or_else(String::new, str::to_string)
-        }
-
-        fn port(&self) -> String {
-            self.port()
-                .map_or_else(String::new, |port| format!("{}", port))
-        }
-
-        fn protocol(&self) -> String {
-            format!("{}:", self.scheme())
-        }
+    pub fn new_url_path() -> Mutable<String> {
+        Mutable::new(String::new())
     }
 
-    pub fn new_url_signal() -> Mutable<UrlType> {
-        Mutable::new(UrlType::parse("http://127.0.0.1/").unwrap())
-    }
-
-    pub fn set_url_path(path: &str) {
-        URL.with(move |url| url.lock_mut().set_path(path));
+    pub fn set_url_path(path: String) {
+        URL_PATH.with(move |url_path| url_path.set(path));
     }
 }
 
 #[cfg(target_arch = "wasm32")]
 mod arch {
-    use std::ops::DerefMut;
-
     use futures_signals::signal::Mutable;
-    use silkenweb_base::window;
+    use silkenweb_base::{document, window};
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-    use super::URL;
+    use super::URL_PATH;
 
-    pub type UrlType = web_sys::Url;
-
-    pub fn new_url_signal() -> Mutable<UrlType> {
-        let url = UrlType::new(
-            &window::location()
-                .href()
-                .expect_throw("Must be able to get window 'href'"),
-        )
-        .expect_throw("URL must be valid");
-
+    pub fn new_url_path() -> Mutable<String> {
         ON_POPSTATE
             .with(|on_popstate| window::set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
 
-        Mutable::new(url)
+        Mutable::new(local_pathname())
     }
 
-    pub fn set_url_path(path: &str) {
-        URL.with(move |url| {
-            let mut url = url.lock_mut();
-            // Force a `deref_mut` to make sure `url` is marked as modified. `set_pathname`
-            // uses interior mutability, so we'll only `deref`.
-            url.deref_mut().set_pathname(path);
+    pub fn set_url_path(path: String) {
+        let mut url = BASE_URI.with(String::clone);
+        url.push_str(&path);
+
+        URL_PATH.with(move |url_path| {
             window::history()
-                .push_state_with_url(&JsValue::null(), "", Some(&url.href()))
+                .push_state_with_url(&JsValue::null(), "", Some(&url))
                 .unwrap_throw();
+            url_path.set(path);
         });
     }
 
+    fn local_pathname() -> String {
+        let url = window::location();
+
+        BASE_URI.with(|base_uri| {
+            url.href()
+                .unwrap_throw()
+                .strip_prefix(base_uri)
+                .map_or_else(
+                    || {
+                        url.pathname()
+                            .unwrap_throw()
+                            .trim_start_matches('/')
+                            .to_string()
+                    },
+                    |url| url.trim_start_matches('/').to_string(),
+                )
+        })
+    }
+
     thread_local! {
+        static BASE_URI: String = {
+            let mut base_uri = document::base_uri();
+
+            if ! base_uri.ends_with('/') {
+                base_uri.push('/');
+            }
+
+            base_uri
+        };
+
         static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
-            Closure::wrap(Box::new(move |_event: JsValue| {
-                URL.with(|url| url.set(
-                    UrlType::new(&window::location().href().expect_throw("HRef must exist")).expect_throw("URL must be valid")
-                ));
-            }));
+            Closure::wrap(Box::new(move |_event: JsValue|
+                URL_PATH.with(|url_path| url_path.set(local_pathname()))
+            ));
     }
 }
 
 thread_local! {
-    static URL: Mutable<arch::UrlType> = arch::new_url_signal();
+    static URL_PATH: Mutable<String> = arch::new_url_path();
 }

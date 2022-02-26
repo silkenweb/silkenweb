@@ -12,7 +12,7 @@ use silkenweb::{
     mount,
     node::element::{Element, ElementBuilder, ParentBuilder},
     prelude::HtmlElement,
-    router::{self, Url},
+    router,
     task::spawn_local,
 };
 use timeago::Formatter;
@@ -40,10 +40,10 @@ impl App {
             .class(["page"])
             .child(
                 header().child(nav().child(h1().class(["page-banner"]).children([
-                    router::anchor("/topstories").text("Top"),
-                    router::anchor("/newstories").text("New"),
-                    router::anchor("/askstories").text("Ask"),
-                    router::anchor("/showstories").text("Show"),
+                    router::anchor("topstories").text("Top"),
+                    router::anchor("newstories").text("New"),
+                    router::anchor("askstories").text("Ask"),
+                    router::anchor("showstories").text("Show"),
                 ]))),
             )
             .child(
@@ -317,7 +317,7 @@ fn plural(count: u64) -> &'static str {
 fn main() {
     let app = App::new();
 
-    spawn_local(router::url().signal_ref(Url::pathname).for_each({
+    spawn_local(router::url_path().signal_cloned().for_each({
         clone!(app);
         move |pathname| {
             clone!(app);
@@ -325,13 +325,13 @@ fn main() {
                 app.set_loading();
 
                 app.set_content(match pathname.as_str() {
-                    "/" => Content::load_frontpage("topstories").await,
-                    "/topstories" | "/newstories" | "/askstories" | "/showstories" => {
+                    "" => Content::load_frontpage("topstories").await,
+                    "topstories" | "newstories" | "askstories" | "showstories" => {
                         Content::load_frontpage(&pathname).await
                     }
                     item => match *item.split(['/']).collect::<Vec<_>>() {
-                        ["", "item", id] => Content::load_story(id).await,
-                        ["", "user", id] => Content::load_user(id).await,
+                        ["item", id] => Content::load_story(id).await,
+                        ["user", id] => Content::load_user(id).await,
                         _ => Content::Unknown,
                     },
                 })

@@ -53,6 +53,13 @@ pub mod document {
     pub fn create_text_node(text: &str) -> web_sys::Text {
         DOCUMENT.with(|doc| doc.create_text_node(text))
     }
+
+    pub fn base_uri() -> String {
+        DOCUMENT
+            .with(|doc| doc.base_uri())
+            .unwrap_throw()
+            .unwrap_throw()
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
