@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
 use scopeguard::defer;
-use xshell::{cmd, pushd};
+use xshell::{cmd, mkdir_p, pushd};
 use xtask_base::{
     build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds,
     TargetOs, WorkflowResult,
@@ -29,6 +29,7 @@ enum Commands {
         #[clap(long)]
         gui: bool,
     },
+    BuildAllExamples,
     GithubActions {
         #[clap(long)]
         full: bool,
@@ -79,6 +80,7 @@ fn main() {
             Commands::TodomvcCypress { gui } => {
                 cypress("install", if gui { "open" } else { "run" }, None)?;
             }
+            Commands::BuildAllExamples => build_all_examples()?,
             Commands::GithubActions { full } => {
                 let reuse = (!full).then(|| "--reuse");
 
@@ -93,6 +95,24 @@ fn main() {
 
         Ok(())
     });
+}
+
+fn build_all_examples() -> WorkflowResult<()> {
+    let dest_dir = "target/examples";
+    mkdir_p(&dest_dir)?;
+
+    for example in ["animation"] {
+        let example_dir = format!("examples/{example}");
+
+        {
+            let _dir = pushd(&example_dir);
+            cmd!("trunk build --release --public-url silkenweb/examples/{example}").run()?;
+        }
+
+        cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example}").run()?;
+    }
+
+    Ok(())
 }
 
 fn test_features() -> WorkflowResult<()> {

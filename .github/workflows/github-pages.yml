@@ -23,14 +23,13 @@ jobs:
       with:
         crate: trunk
         version: 0.14.0
-    - name: Animation
-      working-directory: examples/animation
-      run: trunk build --release
+    - name: Build Examples
+      run: cargo xtask build-all-examples
     - name: Publish to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh_pages
         force_orphan: true
-        publish_dir: dist/
+        publish_dir: target/examples
         enable_jekyll: false
