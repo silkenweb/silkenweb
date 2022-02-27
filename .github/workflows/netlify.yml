@@ -1,4 +1,4 @@
-name: github-pages
+name: netlify
 on: [push]
 jobs:
   deploy-examples:
@@ -28,7 +28,8 @@ jobs:
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v1.2
       with:
-        publish-dir: 'target/examples'
+        publish-dir: 'target/website'
+        production-deploy: true
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
