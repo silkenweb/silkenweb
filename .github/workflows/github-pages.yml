@@ -25,11 +25,10 @@ jobs:
         version: 0.14.0
     - name: Build Examples
       run: cargo xtask build-all-examples
-    - name: Publish to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v1.2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh_pages
-        force_orphan: true
-        publish_dir: target/examples
-        enable_jekyll: false
+        publish-dir: 'target/examples'
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
