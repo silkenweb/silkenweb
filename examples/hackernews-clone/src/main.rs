@@ -144,7 +144,7 @@ impl Story {
         let descendants = self.descendants;
         let time_ago = time_ago(self.time);
         let id = self.id;
-        let url_path = format!("/item/{}", id);
+        let url_path = format!("item/{}", id);
 
         div()
             .child(
@@ -276,7 +276,7 @@ fn text_as_html(text: &str) -> Div {
 }
 
 fn user_link(user: &str) -> A {
-    router::anchor(format!("/user/{}", user)).text(user).build()
+    router::anchor(format!("user/{}", user)).text(user).build()
 }
 
 async fn join_ok<T>(items: impl IntoIterator<Item = impl Future<Output = Result<T>>>) -> Vec<T> {
