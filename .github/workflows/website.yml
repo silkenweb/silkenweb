@@ -1,7 +1,7 @@
-name: netlify
+name: website
 on: [push]
 jobs:
-  deploy-examples:
+  deploy-website:
     env:
       rust: 1.58.1
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
       with:
         crate: trunk
         version: 0.14.0
-    - name: Build Examples
+    - name: Build Website
       run: cargo xtask build-website
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v1.2
