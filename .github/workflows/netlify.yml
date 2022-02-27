@@ -24,7 +24,7 @@ jobs:
         crate: trunk
         version: 0.14.0
     - name: Build Examples
-      run: cargo xtask build-all-examples
+      run: cargo xtask build-website
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v1.2
       with:
