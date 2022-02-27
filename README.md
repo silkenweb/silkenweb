@@ -10,13 +10,10 @@ A library for building reactive web apps.
 
 ## Features
 
-- Fine grained reactivity using signals to minimize DOM API calls
-- No VDOM. Calls to the DOM API and your rendering code are minimized using signals.
-- Uses plain Rust syntax rather than a macro DSL
-- Server side rendering with hydration.
-- Downcasts Js objects for you where the type is known at compile time. For example:
-  - `input().dom_element()` returns a `web_sys::HtmlInputElement`
-  - `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
+- No VDOM. Fine grained reactivity using signals to minimize DOM API calls.
+- Uses plain Rust syntax rather than a macro DSL.
+- Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
+- Downcasts Js objects for you, where the type is known at compile time. For example, `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
 
 ## Example: A Simple Counter
 
@@ -67,7 +64,7 @@ There are many advantages to using plain Rust syntax:
 - The documentation is structured in a familiar manner, courtesy of `rustdoc`.
 - Code formatting with `rustfmt`.
 - Excellent compiler errors, courtesy of `rustc`.
-- Use Rust's well thought out, composable abstractions. Need control flow in your components? Use `if`, `match`, `dyn` traits, or whatever else Rust provides.
+- Use Rust's well thought out, composable abstractions. Need control flow in your components? Use `if`, `match`, `dyn traits`, or whatever else Rust provides.
 
 Of course the downside is that syntax is unlikely to be quite as good as a dedicated macro DSL. It's also possible that a sufficiently well thought out and mature macro DSL could also provide great compiler errors and abstractions that compose well with Rust.
 
