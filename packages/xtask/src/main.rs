@@ -123,7 +123,9 @@ fn build_website() -> WorkflowResult<()> {
         }
 
         cmd!("cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}").run()?;
-        redirects.push_str(&format!("/examples/{example}/* /examples/{example}/index.html 200\n"));
+        redirects.push_str(&format!(
+            "/examples/{example}/* /examples/{example}/index.html 200\n"
+        ));
     }
 
     write_file(format!("{dest_dir}/_redirects"), redirects)?;
