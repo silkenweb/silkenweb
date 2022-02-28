@@ -17,8 +17,7 @@ proc-macro = true
 [dependencies]
 syn = { version = "1.0.86", features = ["full"] }
 grass = { git = "https://github.com/connorskees/grass" }
-cssparser = "0.28"
-selectors = "0.23"
+cssparser = "0.29"
 proc-macro-error = "1.0.4"
 quote = "1.0.15"
 proc-macro2 = "1.0.36"
