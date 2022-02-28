@@ -290,7 +290,6 @@ impl Fs for DependencyTracker {
 pub fn class_names(
     filename: &str,
 ) -> Result<(impl Iterator<Item = PathBuf>, impl Iterator<Item = String>), Box<dyn Error>> {
-    // TODO: Add import search dirs
     let dependency_tracker = DependencyTracker::new();
     let css = grass::from_path(
         filename,
