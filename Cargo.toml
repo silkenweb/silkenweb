@@ -11,4 +11,5 @@ opt-level = "z"
 [patch.crates-io]
 silkenweb-base = { path = "packages/base" }
 silkenweb-signals-ext = { path = "packages/signals-ext" }
+silkenweb-macros = { path = "packages/macros" }
 silkenweb = { path = "packages/silkenweb" }
