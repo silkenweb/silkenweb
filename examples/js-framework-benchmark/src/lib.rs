@@ -100,9 +100,7 @@ impl Row {
                         .class(["glyphicon", "glyphicon-remove"])
                         .attribute("aria-hidden", "true"),
                 )
-                .on_click(move |_, _| {
-                    app.remove_row(id);
-                }),
+                .on_click(move |_, _| app.remove_row(id)),
             ),
             td().class(["col-md-6"]),
         ])
