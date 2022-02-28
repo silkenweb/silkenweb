@@ -327,7 +327,6 @@ pub trait ElementBuilder: Sized {
     /// ```no_run
     /// # use web_sys::HtmlInputElement;
     /// # use silkenweb::{elements::html::input, node::element::ElementBuilder};
-    ///
     /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
     /// ```
     fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
@@ -395,7 +394,6 @@ pub trait ParentBuilder: ElementBuilder {
     /// #     elements::html::{div, p},
     /// #     node::element::ParentBuilder,
     /// # };
-    ///
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
     fn child(self, c: impl Into<Node>) -> Self;
@@ -422,7 +420,6 @@ pub trait ParentBuilder: ElementBuilder {
     /// #     elements::html::{div, p},
     /// #     node::element::ParentBuilder,
     /// # };
-    ///
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
     fn children(mut self, children: impl IntoIterator<Item = impl Into<Node>>) -> Self {
@@ -458,7 +455,6 @@ pub trait ParentBuilder: ElementBuilder {
     /// #         text,
     /// #     },
     /// # };
-    ///
     /// let include_child1 = Mutable::new(true);
     /// let include_child2 = Mutable::new(true);
     ///

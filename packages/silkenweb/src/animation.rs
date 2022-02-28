@@ -23,7 +23,6 @@ use crate::task::{animation_timestamp, request_animation_frame};
 /// ```no_run
 /// # use futures_signals::signal::SignalExt;
 /// # use silkenweb::{animation::finite_animation, elements::html::progress, mount};
-///
 /// const DURATION: f64 = 3000.0;
 /// progress()
 ///     .max(DURATION as f32)
@@ -60,7 +59,6 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// #     node::element::ParentBuilder,
 /// #     mount,
 /// # };
-///
 /// svg().width("200").height("200").child(
 ///     rect()
 ///         .x("25")

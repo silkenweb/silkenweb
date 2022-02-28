@@ -139,7 +139,6 @@ impl fmt::Display for HydrationStats {
 /// #     node::element::{ElementBuilder, ParentBuilder},
 /// #     task::spawn_local,
 /// # };
-///
 /// let app = p().text_signal(always("Hello, world!"));
 ///
 /// spawn_local(async {
@@ -159,7 +158,6 @@ impl fmt::Display for HydrationStats {
 /// #     node::element::{ElementBuilder, ParentBuilder},
 /// #     task::spawn_local,
 /// # };
-///
 /// spawn_local(async {
 ///     let app = p().text_signal(always("Hello, world!"));
 ///     hydrate("app", app);
