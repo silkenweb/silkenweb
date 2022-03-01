@@ -1,57 +1,9 @@
-use std::{
-    cell::RefCell,
-    collections::HashSet,
-    error::Error,
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::{collections::HashSet, fs, io};
 
 use cssparser::{Parser, ParserInput, Token};
-use grass::{Fs, OutputStyle, StdFs};
 
-#[derive(Debug)]
-struct DependencyTracker {
-    dependencies: RefCell<HashSet<PathBuf>>,
-    fs: StdFs,
-}
-
-impl DependencyTracker {
-    fn new() -> Self {
-        Self {
-            dependencies: RefCell::new(HashSet::new()),
-            fs: StdFs,
-        }
-    }
-}
-
-impl Fs for DependencyTracker {
-    fn is_dir(&self, path: &Path) -> bool {
-        self.fs.is_dir(path)
-    }
-
-    fn is_file(&self, path: &Path) -> bool {
-        self.fs.is_file(path)
-    }
-
-    fn read(&self, path: &Path) -> io::Result<Vec<u8>> {
-        self.dependencies
-            .borrow_mut()
-            .insert(fs::canonicalize(path)?);
-        self.fs.read(path)
-    }
-}
-
-pub fn class_names(
-    filename: &str,
-) -> Result<(impl Iterator<Item = PathBuf>, impl Iterator<Item = String>), Box<dyn Error>> {
-    let dependency_tracker = DependencyTracker::new();
-    let css = grass::from_path(
-        filename,
-        &grass::Options::default()
-            .style(OutputStyle::Expanded)
-            .quiet(true)
-            .fs(&dependency_tracker),
-    )?;
+pub fn class_names(filename: &str) -> Result<impl Iterator<Item = String>, io::Error> {
+    let css = fs::read_to_string(filename)?;
 
     let mut parser_input = ParserInput::new(&css);
     let mut input = Parser::new(&mut parser_input);
@@ -68,8 +20,5 @@ pub fn class_names(
         prev_dot = matches!(token, Token::Delim('.'));
     }
 
-    Ok((
-        dependency_tracker.dependencies.take().into_iter(),
-        classes.into_iter(),
-    ))
+    Ok(classes.into_iter())
 }

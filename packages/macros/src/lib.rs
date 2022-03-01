@@ -75,16 +75,8 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
         .into_string()
         .expect("Expected path to be convertible to string");
 
-    let (dependencies, classes) = parser::class_names(&css_file)
+    let classes = parser::class_names(&css_file)
         .unwrap_or_else(|e| abort_call_site!("'{}': {}", css_file, e.to_string()));
-    let dependencies = dependencies.map(|dep| {
-        let dep = dep.into_os_string().into_string().unwrap_or_else(|e| {
-            abort_call_site!("Non Utf8 chars in path: {:?}", format!("{:?}", e))
-        });
-        quote!(
-            const _: &[u8] = ::std::include_bytes!(#dep);
-        )
-    });
 
     let classes = classes.map(|class| {
         if !class.starts_with(char::is_alphabetic) {
@@ -104,7 +96,7 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
     });
 
     quote!(
-        #(#dependencies)*
+        const _: &[u8] = ::std::include_bytes!(#css_file);
         #(#classes)*
     )
     .into()
