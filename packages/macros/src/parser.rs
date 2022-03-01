@@ -10,7 +10,7 @@ pub fn class_names(filename: &str) -> Result<impl Iterator<Item = String>, io::E
     let mut classes = HashSet::new();
     let mut prev_dot = false;
 
-    while let Ok(token) = input.next() {
+    while let Ok(token) = input.next_including_whitespace_and_comments() {
         if prev_dot {
             if let Token::Ident(class) = token {
                 classes.insert(class.to_string());
