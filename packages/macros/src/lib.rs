@@ -5,8 +5,10 @@ use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
 use syn::{
+    bracketed,
     parse::{Lookahead1, Parse, ParseStream, Peek},
     parse_macro_input,
+    punctuated::Punctuated,
     token::{Colon, Comma, CustomToken},
     Ident, LitStr, Visibility,
 };
@@ -19,12 +21,14 @@ mod kw {
     custom_keyword!(path);
     custom_keyword!(visibility);
     custom_keyword!(prefix);
+    custom_keyword!(exclude_prefixes);
 }
 
 struct Input {
     path: String,
     visibility: Option<Visibility>,
     prefix: Option<String>,
+    exclude_prefixes: Vec<String>,
 }
 
 impl Input {
@@ -64,12 +68,14 @@ impl Parse for Input {
                 path: input.parse::<LitStr>()?.value(),
                 visibility: None,
                 prefix: None,
+                exclude_prefixes: Vec::new(),
             });
         }
 
         let mut path = None;
         let mut visibility = None;
         let mut prefix = None;
+        let mut exclude_prefixes = Vec::new();
         let mut trailing_comma = true;
 
         while !input.is_empty() {
@@ -85,6 +91,19 @@ impl Parse for Input {
                 visibility = Some(input.parse()?);
             } else if Self::parameter(kw::prefix, &lookahead, input, prefix.is_some())? {
                 prefix = Some(input.parse::<LitStr>()?.value());
+            } else if Self::parameter(
+                kw::exclude_prefixes,
+                &lookahead,
+                input,
+                !exclude_prefixes.is_empty(),
+            )? {
+                let list;
+
+                bracketed!(list in input);
+                exclude_prefixes = Punctuated::<LitStr, Comma>::parse_terminated(&list)?
+                    .iter()
+                    .map(|prefix| prefix.value())
+                    .collect();
             } else {
                 return Err(lookahead.error());
             }
@@ -101,6 +120,7 @@ impl Parse for Input {
                 visibility,
                 path,
                 prefix,
+                exclude_prefixes,
             })
         } else {
             abort_call_site!("Missing 'path' parameter");
@@ -126,17 +146,20 @@ impl Parse for Input {
 /// assert_eq!(MY_CLASS, "my-class");
 /// ```
 /// 
-/// Optional `visibility` and `prefix` parameters can be specified. `visibility` is any visibility
-/// modifier and controls the visibility of class constants. If `prefix` is specified, only classes
-/// starting with `prefix` will have constants defined, and their Rust names will have the prefix
-/// stripped.
+/// Optional `visibility`, `prefix`, and `exclude-prefixes` parameters can be specified.
+/// - `visibility` is any visibility modifier, and controls the visibility of class constants.
+/// - `prefix` specifies that only classes starting with `prefix` should have constants defined.
+///   Their Rust names will have the prefix stripped.
+/// - `exclude-prefixes` specifies a list of prefixes to exclude completely. No constants will be
+///   defined for a class starting with any of these prefixes.
 /// ```
 /// mod border {
 ///     # use silkenweb_macros::css_classes;
 ///     css_classes!(
 ///         visibility: pub,
 ///         path: "my-sass-file.scss",
-///         prefix:"border-"
+///         prefix:"border-",
+///         exclude_prefixes: ["border-excluded-"]
 ///     );
 /// }
 ///
@@ -149,6 +172,7 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
         visibility,
         path,
         prefix,
+        exclude_prefixes,
     } = parse_macro_input!(input);
 
     let root_dir = env::var("CARGO_MANIFEST_DIR")
@@ -160,7 +184,16 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
         .expect("Expected path to be convertible to string");
 
     let classes = parser::class_names(&path)
-        .unwrap_or_else(|e| abort_call_site!("'{}': {}", path, e.to_string()));
+        .unwrap_or_else(|e| abort_call_site!("'{}': {}", path, e.to_string()))
+        .filter(|class| {
+            for excluded_prefix in &exclude_prefixes {
+                if class.starts_with(excluded_prefix) {
+                    return false;
+                }
+            }
+
+            true
+        });
 
     if let Some(prefix) = prefix {
         code_gen(
