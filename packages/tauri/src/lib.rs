@@ -37,7 +37,6 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
         abort!(variadic, "Function can't be variadic");
     }
 
-    // TODO: Optional visibility
     let fn_name = signature.ident.to_string();
     let arg_names = signature.inputs.iter().map(|arg| match arg {
         FnArg::Receiver(self_arg) => abort!(self_arg, "self arguments are not allowed"),
