@@ -1468,6 +1468,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-tauri"
+version = "0.2.0"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "silkenweb-ui5"
 version = "0.2.0"
 dependencies = [

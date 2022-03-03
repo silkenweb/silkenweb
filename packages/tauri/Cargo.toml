@@ -1,0 +1,21 @@
+[package]
+name = "silkenweb-tauri"
+version = "0.2.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Silkenweb Tauri integration"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui"]
+keywords = ["silkenweb", "tauri"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.86", features = ["full"] }
+proc-macro-error = "1.0.4"
+quote = "1.0.15"
+proc-macro2 = "1.0.36"
