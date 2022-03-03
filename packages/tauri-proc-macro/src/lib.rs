@@ -15,8 +15,6 @@ mod kw {
     custom_keyword!(infallible);
 }
 
-// TODO: Docs
-/// Add a Tauri command signature to the client.
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
