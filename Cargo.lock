@@ -1471,6 +1471,17 @@ dependencies = [
 name = "silkenweb-tauri"
 version = "0.2.0"
 dependencies = [
+ "js-sys",
+ "silkenweb-tauri-proc-macro",
+ "static_assertions",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
+name = "silkenweb-tauri-proc-macro"
+version = "0.2.0"
+dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -1525,6 +1536,12 @@ name = "smallvec"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strsim"

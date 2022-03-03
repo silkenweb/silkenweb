@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-tauri"
+name = "silkenweb-tauri-proc-macro"
 version = "0.2.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
@@ -11,9 +11,11 @@ license = "MIT OR Apache-2.0"
 categories = ["gui"]
 keywords = ["silkenweb", "tauri"]
 
+[lib]
+proc-macro = true
+
 [dependencies]
-silkenweb-tauri-proc-macro = { version = "0.2.0", path = "../tauri-proc-macro" }
-js-sys = "0.3"
-wasm-bindgen = { version = "=0.2.78", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4"
-static_assertions = "1.1.0"
+syn = { version = "1.0.86", features = ["full"] }
+proc-macro-error = "1.0.4"
+quote = "1.0.15"
+proc-macro2 = "1.0.36"

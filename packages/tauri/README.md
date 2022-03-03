@@ -1,3 +1,3 @@
 # Silkenweb Tauri
 
-Silkenweb Tauri Integration
+Silkenweb Tauri integration
