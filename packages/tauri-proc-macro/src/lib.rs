@@ -78,7 +78,7 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
 
             let args = Object::new();
 
-            #(Reflect::set(&args, &stringify!(#arg_names).into(), &JsValue::from_serde(#arg_names).unwrap()).unwrap();)*
+            #(Reflect::set(&args, &stringify!(#arg_names).into(), &JsValue::from_serde(&#arg_names).unwrap()).unwrap();)*
 
             let result = invoke(#fn_name.to_string(), args.into())
                 .await;
