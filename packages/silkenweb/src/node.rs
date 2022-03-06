@@ -43,6 +43,14 @@ impl Node {
     }
 }
 
+/// The implmenetation type of Node.
+///
+/// For example, wet or dry, depending on hydration status.
+pub trait NodeImpl {
+    type Element;
+    type Text;
+}
+
 impl HydrationNode for Node {}
 
 impl IsDry for Node {
