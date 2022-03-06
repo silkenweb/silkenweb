@@ -70,7 +70,7 @@ pub fn set_url_path(path: &str) {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, macros::ParentBuilder, prelude::ElementEvents, router::anchor,
+/// #     elements::html::a, node::element::ParentBuilder, prelude::ElementEvents, router::anchor,
 /// # };
 /// let link = anchor("/my-path").text("click me");
 /// ```
@@ -88,13 +88,11 @@ pub fn anchor(path: impl Into<String>) -> ABuilder {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, macros::ParentBuilder, prelude::ElementEvents, router::link_clicked,
+/// #     elements::html::a, node::element::ParentBuilder, prelude::ElementEvents,
+/// #     router::link_clicked,
 /// # };
 /// let path = "/my_path";
-/// let link = a()
-///     .href(path)
-///     .text("click me")
-///     .on_click(link_clicked(path));
+/// let link = a().href(path).text("click me").on_click(link_clicked(path));
 /// ```
 pub fn link_clicked(
     path: impl Into<String>,
