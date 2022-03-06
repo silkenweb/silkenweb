@@ -322,7 +322,7 @@ describe('TodoMVC - React', function () {
       cy.get('@todos')
       .eq(1)
       .as('secondTodo')
-      // TODO: fix this, dblclick should
+      // xTODO: fix this, dblclick should
       // have been issued to label
       .find('label')
       .dblclick()
