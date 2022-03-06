@@ -320,17 +320,7 @@ impl IsDry for HydrationNodeData {
     }
 }
 
-impl HydrationNode for HydrationNodeData {
-    // TODO: When we get GAT's maybe we can do something like this to avoid multiple
-    // borrows:
-    //
-    // ```rust
-    // type BorrowedMut<'a> =
-    //     HydrationNodeEnum<RefMut<'a, HydrationElement>, RefMut<'a, HydrationText>>;
-    //
-    // fn borrow_mut(&'a mut self) -> Self::BorrowedMut<'a>;
-    // ```
-}
+impl HydrationNode for HydrationNodeData {}
 
 impl WetNode for HydrationElement {
     fn dom_node(&self) -> web_sys::Node {

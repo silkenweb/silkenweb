@@ -8,9 +8,6 @@ macro_rules! unexpected_exception {
     };
 }
 
-// TODO: Provide a server side implementation with a trait to define the
-// interface
-
 /// Local and session storage.
 pub struct Storage(web_sys::Storage);
 

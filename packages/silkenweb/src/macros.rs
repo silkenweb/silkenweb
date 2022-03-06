@@ -490,7 +490,6 @@ macro_rules! naked_text_name{
     }
 }
 
-// TODO: Tests for raw identifiers
 #[doc(hidden)]
 #[macro_export]
 macro_rules! stringify_raw {
