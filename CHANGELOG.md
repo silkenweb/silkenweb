@@ -2,6 +2,7 @@
 
 ## Next
 
+- Tauri support
 - Server side routing
 - Add `router::anchor` and `router::link_clicked` convenience methods
 - Compile time constants for CSS classes can be generated with `css_classes`
