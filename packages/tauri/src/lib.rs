@@ -3,6 +3,9 @@ pub use js_sys;
 ///
 /// See the tauri docs for an explanation of [commands](https://tauri.studio/docs/guides/command/).
 ///
+/// ⚠️ **It's the clients responsibility to ensure client and server command
+/// signatures match.** ⚠️
+///
 /// Commands can fail by returning a [`Result`], or be infallible by returning
 /// either a plain value or `()`. To specify an infallible command, use
 /// `#[silkenweb_tauri::client_command(infallible)]`. To specify a fallible
