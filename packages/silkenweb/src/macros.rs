@@ -6,12 +6,13 @@ pub use web_sys;
 
 pub use crate::{
     attribute::{AsAttribute, Attribute},
+    hydration::Wet,
     node::{
         element::{
             tag, tag_in_namespace, Element, ElementBuilder, ElementBuilderBase, OptionalChildren,
             ParentBuilder,
         },
-        Node,
+        Node, NodeImpl,
     },
 };
 
@@ -162,8 +163,8 @@ macro_rules! dom_element {
             ) }
         }
 
-        pub struct $camel_builder_name {
-            builder: $crate::macros::ElementBuilderBase
+        pub struct $camel_builder_name<Impl: $crate::macros::NodeImpl = $crate::macros::Wet> {
+            builder: $crate::macros::ElementBuilderBase<Impl>
         }
 
         impl $camel_builder_name {
@@ -190,8 +191,8 @@ macro_rules! dom_element {
             ); )?
         }
 
-        impl $crate::macros::ElementBuilder for $camel_builder_name {
-            type Target = $camel_name;
+        impl<Impl: $crate::macros::NodeImpl> $crate::macros::ElementBuilder for $camel_builder_name<Impl> {
+            type Target = $camel_name<Impl>;
             type DomType = $elem_type;
 
             fn attribute<T: $crate::macros::Attribute>(self, name: &str, value: T) -> Self {
@@ -255,36 +256,37 @@ macro_rules! dom_element {
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::Element {
-            fn from(builder: $camel_builder_name) -> Self {
+        // TODO: Macro code formatting
+        impl<Impl: $crate::macros::NodeImpl> From<$camel_builder_name<Impl>> for $crate::macros::Element<Impl> {
+            fn from(builder: $camel_builder_name<Impl>) -> Self {
                 $crate::macros::ElementBuilder::build(builder).into()
             }
         }
 
-        impl From<$camel_builder_name> for $crate::macros::Node {
-            fn from(builder: $camel_builder_name) -> Self {
+        impl<Impl: $crate::macros::NodeImpl> From<$camel_builder_name<Impl>> for $crate::macros::Node<Impl> {
+            fn from(builder: $camel_builder_name<Impl>) -> Self {
                 $crate::macros::ElementBuilder::build(builder).into()
             }
         }
 
-        pub struct $camel_name($crate::macros::Element);
+        pub struct $camel_name<Impl: $crate::macros::NodeImpl = $crate::macros::Wet>($crate::macros::Element<Impl>);
 
-        impl From<$camel_name> for $crate::macros::Element {
-            fn from(html_elem: $camel_name) -> Self {
+        impl<Impl: $crate::macros::NodeImpl> From<$camel_name<Impl>> for $crate::macros::Element<Impl> {
+            fn from(html_elem: $camel_name<Impl>) -> Self {
                 html_elem.0
             }
         }
 
-        impl From<$camel_name> for $crate::macros::Node {
-            fn from(html_elem: $camel_name) -> Self {
+        impl<Impl: $crate::macros::NodeImpl>  From<$camel_name<Impl>> for $crate::macros::Node<Impl> {
+            fn from(html_elem: $camel_name<Impl>) -> Self {
                 html_elem.0.into()
             }
         }
 
-        $(impl $attribute_trait for $camel_builder_name {})*
+        $(impl<Impl: $crate::macros::NodeImpl>  $attribute_trait for $camel_builder_name<Impl> {})*
 
         $(
-            impl $event_trait for $camel_builder_name {
+            impl<Impl: $crate::macros::NodeImpl>  $event_trait for $camel_builder_name<Impl> {
                 type EventTarget = $elem_type;
             }
         )*
@@ -312,8 +314,8 @@ macro_rules! create_element_fn {
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
-        impl $crate::macros::ParentBuilder for
-            [< $name:camel $($name_tail:camel)* Builder >]
+        impl<Impl: $crate::macros::NodeImpl> $crate::macros::ParentBuilder<Impl> for
+            [< $name:camel $($name_tail:camel)* Builder >]<Impl>
         {
             fn text(self, child: &str) -> Self {
                 Self{ builder: self.builder.text(child) }
@@ -326,26 +328,26 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text_signal(child) }
             }
 
-            fn child(self, c: impl Into<$crate::macros::Node>) -> Self
+            fn child(self, c: impl Into<$crate::macros::Node<Impl>>) -> Self
             {
                 Self{ builder: self.builder.child(c) }
             }
 
             fn child_signal(
                 self,
-                children: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Node>> + 'static,
+                children: impl $crate::macros::Signal<Item = impl Into<$crate::macros::Node<Impl>>> + 'static,
             ) -> Self::Target {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.child_signal(children))
             }
 
             fn children_signal(
                 self,
-                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::macros::Node>> + 'static,
+                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::macros::Node<Impl>>> + 'static,
             ) -> Self::Target {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.children_signal(children))
             }
 
-            fn optional_children(self, children: $crate::macros::OptionalChildren) -> Self::Target {
+            fn optional_children(self, children: $crate::macros::OptionalChildren<Impl>) -> Self::Target {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.optional_children(children))
             }
         }

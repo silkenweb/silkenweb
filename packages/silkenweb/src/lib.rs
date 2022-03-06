@@ -90,13 +90,13 @@
 //! [`mount`]: crate::mount
 use std::{cell::RefCell, collections::HashMap};
 
-use hydration::node::WetNode;
 use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document;
 pub use silkenweb_macros::css_classes;
 use wasm_bindgen::UnwrapThrowExt;
+use crate::hydration::Wet;
 
 #[doc(hidden)]
 #[macro_use]
@@ -127,12 +127,12 @@ pub mod prelude {
 /// the last child of this element.
 ///
 /// Mounting an `id` that is already mounted will remove that element.
-pub fn mount(id: &str, node: impl Into<Node>) {
+pub fn mount(id: &str, node: impl Into<Node<Wet>>) {
     let node = node.into();
 
     let mount_point = mount_point(id);
     mount_point
-        .append_child(&node.eval_dom_node())
+        .append_child(&node.dom_node())
         .unwrap_throw();
     insert_component(id, mount_point.into(), node);
 }
@@ -141,7 +141,7 @@ fn mount_point(id: &str) -> web_sys::Element {
     document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
 }
 
-fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
+fn insert_component(id: &str, parent: web_sys::Node, child: Node<Wet>) {
     if let Some((parent, child)) =
         COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), (parent, child)))
     {
@@ -154,11 +154,11 @@ fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
 /// This is mostly useful for testing and checking for memory leaks
 pub fn unmount(id: &str) {
     if let Some((parent, child)) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
-        parent.remove_child(&child.eval_dom_node()).unwrap_throw();
+        parent.remove_child(&child.dom_node()).unwrap_throw();
     }
 }
 
 thread_local!(
-    static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node)>> =
+    static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node<Wet>)>> =
         RefCell::new(HashMap::new());
 );

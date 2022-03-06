@@ -9,10 +9,33 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{insert_component, mount_point, node::Node};
+use self::node::{
+    dry::{DryElement, DryText},
+    wet::{WetElement, WetText},
+};
+use crate::{
+    insert_component, mount_point,
+    node::{private::NodeImpl, Node},
+};
 
 pub(super) mod lazy;
 pub(super) mod node;
+
+// TODO: Doc
+pub struct Wet;
+
+impl NodeImpl for Wet {
+    type Element = WetElement;
+    type Text = WetText;
+}
+
+// TODO: Doc
+pub struct Dry;
+
+impl NodeImpl for Dry {
+    type Element = DryElement;
+    type Text = DryText;
+}
 
 /// Statistics about the hydration process.
 #[derive(Default)]
@@ -174,7 +197,7 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::ElementBuilder::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
-pub async fn hydrate(id: &str, node: impl Into<Node>) -> HydrationStats {
+pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
     let node = node.into();
     let mut stats = HydrationStats::default();
 
@@ -185,12 +208,14 @@ pub async fn hydrate(id: &str, node: impl Into<Node>) -> HydrationStats {
 
         remove_following_siblings(&mount_point, node.next_sibling());
     } else {
-        let new_elem = node.eval_dom_node();
-        stats.node_added(&new_elem);
-        mount_point.append_child(&new_elem).unwrap_throw();
+        // TODO: When 1st element is missing, create it
+        // let new_elem = node.into();
+        // stats.node_added(&new_elem);
+        // mount_point.append_child(&new_elem).unwrap_throw();
     }
 
-    insert_component(id, mount_point.into(), node);
+    // TODO: Insert component
+    // insert_component(id, mount_point.into(), node);
 
     stats
 }

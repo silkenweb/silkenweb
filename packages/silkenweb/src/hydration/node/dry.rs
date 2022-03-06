@@ -11,19 +11,23 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetText},
-    DryNode, HydrationNodeData, Namespace, WetNode,
+    Namespace,
 };
 use crate::{
     attribute::Attribute,
-    hydration::{remove_following_siblings, HydrationStats},
+    hydration::{remove_following_siblings, Dry, HydrationStats},
+    node::{
+        private::{ElementImpl, TextImpl},
+        Node,
+    },
 };
 
 pub struct DryElement {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
-    children: Vec<HydrationNodeData>,
-    stored_children: Vec<HydrationNodeData>,
+    children: Vec<Node<Dry>>,
+    stored_children: Vec<Node<Dry>>,
     hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
 }
 
@@ -40,7 +44,7 @@ impl DryElement {
     }
 
     pub fn hydrate_child(
-        self,
+        &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
@@ -70,7 +74,26 @@ impl DryElement {
             }
         }
 
-        let wet_child: WetElement = self.into();
+        let mut wet_child = WetElement::new(self.namespace, &self.tag);
+
+        for (name, value) in self.attributes {
+            wet_child.attribute(&name, value);
+        }
+
+        for child in &self.children {
+            wet_child.append_child_now(child);
+        }
+
+        for child in self.stored_children {
+            wet_child.store_child(child);
+        }
+
+        for event in self.hydrate_actions {
+            event(&mut wet_child);
+        }
+
+        wet_child.shrink_to_fit();
+
         let new_element = wet_child.dom_element();
         parent.append_child(new_element).unwrap_throw();
         tracker.node_added(new_element);
@@ -158,45 +181,6 @@ impl DryElement {
             .push(Box::new(move |element| element.on(name, f)))
     }
 
-    pub fn store_child(&mut self, child: HydrationNodeData) {
-        self.stored_children.push(child);
-    }
-
-    pub fn append_child(&mut self, child: impl DryNode) {
-        self.children.push(child.into_hydro())
-    }
-
-    pub fn insert_child_before(&mut self, child: impl DryNode, next_child: Option<impl DryNode>) {
-        if let Some(next_child) = next_child {
-            let next_child = next_child.into_hydro();
-            let index = self
-                .children
-                .iter()
-                .position(|existing| existing.is_same(&next_child))
-                .expect("Child not found");
-            self.children.insert(index, child.into_hydro());
-        } else {
-            self.append_child(child);
-        }
-    }
-
-    pub fn replace_child(&mut self, new_child: impl DryNode, old_child: impl DryNode) {
-        let old_child = old_child.into_hydro();
-
-        for child in &mut self.children {
-            if child.is_same(&old_child) {
-                *child = new_child.into_hydro();
-                break;
-            }
-        }
-    }
-
-    pub fn remove_child(&mut self, child: impl DryNode) {
-        let child = child.into_hydro();
-
-        self.children.retain(|existing| !existing.is_same(&child));
-    }
-
     pub fn clear_children(&mut self) {
         self.children.clear();
     }
@@ -225,6 +209,86 @@ impl DryElement {
             "param", "source", "track", "wbr",
         ]
         .contains(&self.tag.as_str())
+    }
+}
+
+impl ElementImpl<Dry> for DryElement {
+    fn new(namespace: Namespace, name: &str) -> Self {
+        todo!()
+    }
+
+    fn shrink_to_fit(&mut self) {
+        todo!()
+    }
+
+    fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
+        todo!()
+    }
+
+    fn store_child(&mut self, child: crate::macros::Node<Dry>) {
+        self.stored_children.push(child);
+    }
+
+    fn dom_element(&self) -> web_sys::Element {
+        todo!()
+    }
+
+    fn append_child_now(&mut self, child: &crate::macros::Node<Dry>) {
+        todo!()
+    }
+
+    fn append_child(&mut self, child: &crate::macros::Node<Dry>) {
+        self.children.push(child.clone())
+    }
+
+    fn insert_child_before(
+        &mut self,
+        child: &crate::macros::Node<Dry>,
+        next_child: Option<&crate::macros::Node<Dry>>,
+    ) {
+        if let Some(next_child) = next_child {
+            let index = self
+                .children
+                .iter()
+                .position(|existing| existing.is_same(&next_child))
+                .expect("Child not found");
+            self.children.insert(index, child.clone());
+        } else {
+            self.append_child(child);
+        }
+    }
+
+    fn replace_child(
+        &mut self,
+        new_child: &crate::macros::Node<Dry>,
+        old_child: &crate::macros::Node<Dry>,
+    ) {
+        for child in &mut self.children {
+            if child.is_same(&old_child) {
+                *child = new_child.clone();
+                break;
+            }
+        }
+    }
+
+    fn remove_child(&mut self, child: &crate::macros::Node<Dry>) {
+        self.children.retain(|existing| !existing.is_same(&child));
+    }
+
+    fn clear_children(&mut self) {
+        todo!()
+    }
+
+    fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
+        todo!()
+    }
+
+    fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
+        todo!()
+    }
+
+    fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        todo!()
     }
 }
 
@@ -260,32 +324,6 @@ fn hydrate_with_new(
     let new_child = child.dom_node();
     parent.append_child(&new_child).unwrap_throw();
     tracker.node_added(&new_child);
-}
-
-impl From<DryElement> for WetElement {
-    fn from(element: DryElement) -> Self {
-        let mut elem = WetElement::new(element.namespace, &element.tag);
-
-        for (name, value) in element.attributes {
-            elem.attribute(&name, value);
-        }
-
-        for mut child in element.children {
-            elem.append_child_now(&mut child);
-        }
-
-        for child in element.stored_children {
-            elem.store_child(child);
-        }
-
-        for event in element.hydrate_actions {
-            event(&mut elem);
-        }
-
-        elem.shrink_to_fit();
-
-        elem
-    }
 }
 
 #[derive(Clone)]
@@ -326,6 +364,16 @@ impl DryText {
     }
 }
 
+impl TextImpl for DryText {
+    fn new(text: &str) -> Self {
+        todo!()
+    }
+
+    fn set_text(&mut self, text: String) {
+        todo!()
+    }
+}
+
 impl Display for DryText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&encode_text_minimal(&self.0))
@@ -335,25 +383,5 @@ impl Display for DryText {
 impl From<DryText> for WetText {
     fn from(text: DryText) -> Self {
         WetText::new(&text.0)
-    }
-}
-
-impl<'a, T: DryNode> DryNode for &'a T {
-    fn into_hydro(self) -> HydrationNodeData {
-        DryNode::clone_into_hydro(self)
-    }
-
-    fn clone_into_hydro(&self) -> HydrationNodeData {
-        DryNode::clone_into_hydro(*self)
-    }
-}
-
-impl<'a, T: DryNode> DryNode for &'a mut T {
-    fn into_hydro(self) -> HydrationNodeData {
-        DryNode::clone_into_hydro(self)
-    }
-
-    fn clone_into_hydro(&self) -> HydrationNodeData {
-        DryNode::clone_into_hydro(*self)
     }
 }

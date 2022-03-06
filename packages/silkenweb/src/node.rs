@@ -1,28 +1,89 @@
 //! Generic DOM types.
 
+use std::fmt;
+
 use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 
 use self::element::Element;
 use crate::hydration::{
-    lazy::IsDry,
-    node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
-    HydrationStats,
+    Dry, HydrationStats, Wet,
 };
 
 pub mod element;
 
-/// A DOM Node
-pub struct Node(NodeEnum);
+/// The implmenetation type of Node.
+///
+/// For example, wet or dry, depending on hydration status.
+pub trait NodeImpl: private::NodeImpl {}
 
-impl Node {
-    pub(super) fn eval_dom_node(&self) -> web_sys::Node {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.eval_dom_element().into(),
-            NodeEnum::Text(text) => text.eval_dom_text().into(),
-        }
+impl<T: private::NodeImpl> NodeImpl for T {}
+
+pub(super) mod private {
+    use std::fmt::Display;
+
+    use wasm_bindgen::JsValue;
+
+    use super::Node;
+    use crate::{hydration::node::Namespace, macros::Attribute};
+
+    pub trait NodeImpl: 'static + Sized {
+        type Element: 'static + ElementImpl<Self> + Display;
+        type Text: 'static + TextImpl + Display;
     }
 
+    pub trait ElementImpl<Impl: NodeImpl> {
+        fn new(namespace: Namespace, name: &str) -> Self;
+
+        fn shrink_to_fit(&mut self);
+
+        fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static);
+
+        fn store_child(&mut self, child: Node<Impl>);
+
+        fn dom_element(&self) -> web_sys::Element;
+
+        fn append_child_now(&mut self, child: &Node<Impl>);
+
+        fn append_child(&mut self, child: &Node<Impl>);
+
+        fn insert_child_before(&mut self, child: &Node<Impl>, next_child: Option<&Node<Impl>>);
+
+        fn replace_child(&mut self, new_child: &Node<Impl>, old_child: &Node<Impl>);
+
+        fn remove_child(&mut self, child: &Node<Impl>);
+
+        fn clear_children(&mut self);
+
+        fn attribute_now<A: Attribute>(&mut self, name: &str, value: A);
+
+        fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A);
+
+        fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
+    }
+
+    pub trait TextImpl {
+        fn new(text: &str) -> Self;
+
+        fn set_text(&mut self, text: String);
+    }
+}
+
+use private::TextImpl;
+
+// A DOM Node
+pub struct Node<Impl: NodeImpl = Wet>(NodeEnum<Impl>);
+
+impl Node<Wet> {
+    pub(super) fn dom_node(&self) -> web_sys::Node {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.dom_element().into(),
+            NodeEnum::Text(text) => text.dom_text().clone().into(),
+        }
+    }
+}
+
+impl Node<Dry> {
     pub(super) fn hydrate_child(
         &self,
         parent: &web_sys::Node,
@@ -35,6 +96,12 @@ impl Node {
         }
     }
 
+    pub(super) fn is_same(&self, other: &Self) -> bool {
+        todo!()
+    }
+}
+
+impl<Impl: NodeImpl> Node<Impl> {
     fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
         match &mut self.0 {
             NodeEnum::Element(elem) => elem.take_futures(),
@@ -43,94 +110,71 @@ impl Node {
     }
 }
 
-/// The implmenetation type of Node.
-///
-/// For example, wet or dry, depending on hydration status.
-pub trait NodeImpl {
-    type Element;
-    type Text;
-}
-
-impl HydrationNode for Node {}
-
-impl IsDry for Node {
-    fn is_dry(&self) -> bool {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.is_dry(),
-            NodeEnum::Text(text) => text.hydro_text.is_dry(),
+impl<Impl: NodeImpl> fmt::Display for Node<Impl> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &mut self.0 {
+            NodeEnum::Element(elem) => elem.fmt(f),
+            NodeEnum::Text(text) => text.fmt(f),
         }
     }
 }
 
-impl DryNode for Node {
-    fn clone_into_hydro(&self) -> HydrationNodeData {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.clone_into_hydro(),
-            NodeEnum::Text(text) => text.hydro_text.clone_into_hydro(),
-        }
-    }
-
-    fn into_hydro(self) -> HydrationNodeData {
-        match self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.into_hydro(),
-            NodeEnum::Text(text) => text.hydro_text.into_hydro(),
-        }
+impl Clone for Node<Dry> {
+    fn clone(&self) -> Self {
+        todo!()
     }
 }
 
-impl WetNode for Node {
-    fn dom_node(&self) -> web_sys::Node {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.dom_node(),
-            NodeEnum::Text(text) => text.hydro_text.dom_node(),
-        }
-    }
-}
-
-impl From<Element> for Node {
-    fn from(elem: Element) -> Self {
+impl<Impl: NodeImpl> From<Element<Impl>> for Node<Impl> {
+    fn from(elem: Element<Impl>) -> Self {
         Self(NodeEnum::Element(elem))
     }
 }
 
-impl From<Text> for Node {
-    fn from(text: Text) -> Self {
+impl<Impl: NodeImpl> From<Text<Impl>> for Node<Impl> {
+    fn from(text: Text<Impl>) -> Self {
         Self(NodeEnum::Text(text))
     }
 }
 
-enum NodeEnum {
-    Element(Element),
-    Text(Text),
+enum NodeEnum<Impl: NodeImpl> {
+    Element(Element<Impl>),
+    Text(Text<Impl>),
 }
 
 /// A text DOM node
-pub struct Text {
-    pub(super) hydro_text: HydrationText,
+pub struct Text<Impl: NodeImpl>(Impl::Text);
+
+impl<Impl: NodeImpl> Text<Impl> {
+    fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+        Vec::new()
+    }
 }
 
-impl Text {
+impl Text<Dry> {
     pub(crate) fn hydrate_child(
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> web_sys::Text {
-        self.hydro_text.hydrate_child(parent, child, tracker)
+        self.0.hydrate_child(parent, child, tracker).into()
     }
+}
 
-    fn eval_dom_text(&self) -> web_sys::Text {
-        self.hydro_text.eval_dom_text()
+impl Text<Wet> {
+    fn dom_text(&self) -> &web_sys::Text {
+        self.0.dom_text()
     }
+}
 
-    fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
-        Vec::new()
+impl<Impl: NodeImpl> fmt::Display for Text<Impl> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
     }
 }
 
 /// Construct a text node
-pub fn text(text: &str) -> Text {
-    Text {
-        hydro_text: HydrationText::new(text),
-    }
+pub fn text<Impl: NodeImpl>(text: &str) -> Text<Impl> {
+    Text(Impl::Text::new(text))
 }

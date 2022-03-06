@@ -17,7 +17,7 @@ use std::{
     borrow::BorrowMut,
     fmt::{self, Display},
     future::Future,
-    mem,
+    mem, rc::Rc, cell::{RefCell, Ref, RefMut},
 };
 
 use discard::DiscardOnDrop;
@@ -31,13 +31,11 @@ use silkenweb_base::{clone, intern_str};
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::child_vec::ChildVec;
-use super::Node;
+use super::{Node, NodeImpl, Text};
 use crate::{
     attribute::Attribute,
-    hydration::{
-        node::{DryNode, HydrationElement, HydrationText, Namespace},
-        HydrationStats,
-    },
+    hydration::{node::Namespace, Dry, HydrationStats, Wet},
+    node::private::{ElementImpl, TextImpl},
     task,
 };
 
@@ -47,8 +45,8 @@ mod optional_children;
 pub use optional_children::OptionalChildren;
 
 /// Build an HTML element.
-pub struct ElementBuilderBase {
-    element: Element,
+pub struct ElementBuilderBase<Impl: NodeImpl> {
+    element: Element<Impl>,
     has_preceding_children: bool,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -57,32 +55,32 @@ pub struct ElementBuilderBase {
 /// An HTML element tag.
 ///
 /// For example: `tag("div")`
-pub fn tag(name: &str) -> ElementBuilderBase {
+pub fn tag<Impl: NodeImpl>(name: &str) -> ElementBuilderBase<Impl> {
     ElementBuilderBase::new(name)
 }
 
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> ElementBuilderBase {
+pub fn tag_in_namespace<Impl: NodeImpl>(
+    namespace: Option<&'static str>,
+    name: &str,
+) -> ElementBuilderBase<Impl> {
     ElementBuilderBase::new_in_namespace(namespace, name)
 }
 
-impl ElementBuilderBase {
+impl<Impl: NodeImpl> ElementBuilderBase<Impl> {
     fn new(tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(Namespace::Html, tag))
+        Self::new_element(Impl::Element::new(Namespace::Html, tag))
     }
 
     fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(Namespace::Other(namespace), tag))
+        Self::new_element(Impl::Element::new(Namespace::Other(namespace), tag))
     }
 
-    fn new_element(hydro_elem: HydrationElement) -> Self {
+    fn new_element(element: Impl::Element) -> Self {
         Self {
-            element: Element {
-                hydro_elem,
-                futures: Vec::new(),
-            },
+            element: Element::new(element),
             has_preceding_children: false,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
@@ -94,14 +92,17 @@ impl ElementBuilderBase {
         debug_assert!(self.attributes.insert(name.into()));
         let _ = name;
     }
+
+    fn element_mut(&mut self) -> RefMut<Impl::Element> {
+        self.element.element.as_ref().borrow_mut()
+    }
 }
 
-impl ParentBuilder for ElementBuilderBase {
+impl<Impl: NodeImpl> ParentBuilder<Impl> for ElementBuilderBase<Impl> {
     fn text(mut self, child: &str) -> Self {
         self.has_preceding_children = true;
-        self.element
-            .hydro_elem
-            .append_child_now(HydrationText::new(child));
+        self.element_mut()
+            .append_child_now(&Text(Impl::Text::new(child)).into());
         self
     }
 
@@ -111,8 +112,8 @@ impl ParentBuilder for ElementBuilderBase {
     ) -> Self {
         self.has_preceding_children = true;
 
-        let mut text_node = HydrationText::new(intern_str(""));
-        self.element.hydro_elem.append_child_now(text_node.clone());
+        let mut text_node = Impl::Text::new(intern_str(""));
+        self.element_mut().append_child_now(&Text(text_node).into());
 
         let updater = child_signal.for_each({
             move |new_value| {
@@ -124,29 +125,33 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    fn child(mut self, child: impl Into<Node>) -> Self {
+    fn child(mut self, child: impl Into<Node<Impl>>) -> Self {
         self.has_preceding_children = true;
 
         let mut child = child.into();
         self.element.futures.extend(child.take_futures());
 
-        self.element.hydro_elem.append_child_now(&child);
-        self.element.hydro_elem.store_child(child.into_hydro());
+        self.element_mut().append_child_now(&child);
+        self.element_mut().store_child(child);
 
         self
     }
 
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self::Target {
-        let mut existing_child: Option<Node> = None;
-        let mut element = self.element.hydro_elem.clone();
+    fn child_signal(
+        self,
+        child: impl Signal<Item = impl Into<Node<Impl>>> + 'static,
+    ) -> Self::Target {
+        let mut existing_child: Option<Node<Impl>> = None;
+        let element = self.element.element.clone();
 
         let updater = child.for_each(move |child| {
             let child = child.into();
+            let mut elem_mut = element.as_ref().borrow_mut();
 
             if let Some(existing_child) = &existing_child {
-                element.replace_child(&child, existing_child);
+                elem_mut.replace_child(&child, existing_child);
             } else {
-                element.append_child(&child);
+                elem_mut.append_child(&child);
             }
 
             existing_child = Some(child);
@@ -159,10 +164,10 @@ impl ParentBuilder for ElementBuilderBase {
 
     fn children_signal(
         self,
-        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+        children: impl SignalVec<Item = impl Into<Node<Impl>>> + 'static,
     ) -> Self::Target {
         let mut child_vec =
-            ChildVec::new(self.element.hydro_elem.clone(), self.has_preceding_children);
+            ChildVec::new(self.element.element.clone(), self.has_preceding_children);
 
         let updater = children.for_each(move |update| {
             child_vec.apply_update(update);
@@ -172,7 +177,7 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater).build()
     }
 
-    fn optional_children(mut self, mut children: OptionalChildren) -> Self::Target {
+    fn optional_children(mut self, mut children: OptionalChildren<Impl>) -> Self::Target {
         self.element.futures.append(&mut children.futures);
         self.children_signal(
             children
@@ -184,14 +189,14 @@ impl ParentBuilder for ElementBuilderBase {
     }
 }
 
-impl ElementBuilder for ElementBuilderBase {
+impl<Impl: NodeImpl> ElementBuilder for ElementBuilderBase<Impl> {
     type DomType = web_sys::Element;
-    type Target = Element;
+    type Target = Element<Impl>;
 
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.hydro_elem.attribute_now(name, value);
+        self.element_mut().attribute_now(name, value);
         self
     }
 
@@ -201,13 +206,13 @@ impl ElementBuilder for ElementBuilderBase {
         value: impl Signal<Item = T> + 'static,
     ) -> Self {
         self.check_attribute_unique(name);
-        let mut element = self.element.hydro_elem.clone();
+        let mut element = self.element.element.clone();
 
         let updater = value.for_each({
             let name = name.to_owned();
 
             move |new_value| {
-                element.attribute(&name, new_value);
+                element.as_ref().borrow_mut().attribute(&name, new_value);
 
                 async {}
             }
@@ -217,7 +222,7 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.element.hydro_elem.effect(f);
+        self.element_mut().effect(f);
         self
     }
 
@@ -229,11 +234,11 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'static,
     {
-        let mut element = self.element.hydro_elem.clone();
+        let mut element = self.element.element.clone();
 
         let future = sig.for_each(move |x| {
             clone!(f);
-            element.effect(move |elem| f(elem, x));
+            element.as_ref().borrow_mut().effect(move |elem| f(elem, x));
             async {}
         });
 
@@ -246,47 +251,61 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        self.element.hydro_elem.on(name, f);
+        self.element_mut().on(name, f);
         self
     }
 
     fn build(mut self) -> Self::Target {
         self.element.futures.shrink_to_fit();
-        self.element.hydro_elem.shrink_to_fit();
+        self.element_mut().shrink_to_fit();
         self.element
     }
 }
 
-impl From<ElementBuilderBase> for Element {
-    fn from(builder: ElementBuilderBase) -> Self {
+impl<Impl: NodeImpl> From<ElementBuilderBase<Impl>> for Element<Impl> {
+    fn from(builder: ElementBuilderBase<Impl>) -> Self {
         builder.build()
     }
 }
 
-impl From<ElementBuilderBase> for Node {
-    fn from(builder: ElementBuilderBase) -> Self {
+impl<Impl: NodeImpl> From<ElementBuilderBase<Impl>> for Node<Impl> {
+    fn from(builder: ElementBuilderBase<Impl>) -> Self {
         builder.build().into()
     }
 }
 
 /// An HTML element.
-pub struct Element {
-    pub(super) hydro_elem: HydrationElement,
+pub struct Element<Impl: NodeImpl> {
+    element: Rc<RefCell<Impl::Element>>,
     futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
-impl Element {
-    pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
-        self.hydro_elem.eval_dom_element()
+impl Element<Wet> {
+    pub(crate) fn dom_element(&self) -> web_sys::Element {
+        self.element.borrow().dom_element().clone()
     }
+}
 
+impl Element<Dry> {
     pub(crate) fn hydrate_child(
         &self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> web_sys::Element {
-        self.hydro_elem.hydrate_child(parent, child, tracker)
+        self.element.borrow()
+            .hydrate_child(parent, child, tracker)
+            .dom_element()
+            .clone()
+    }
+}
+
+impl<Impl: NodeImpl> Element<Impl> {
+    pub(crate) fn new(element: Impl::Element) -> Self {
+        Self {
+            futures: Vec::new(),
+            element: Rc::new(RefCell::new(element)),
+        }
     }
 
     pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
@@ -294,9 +313,9 @@ impl Element {
     }
 }
 
-impl Display for Element {
+impl<Impl: NodeImpl> Display for Element<Impl> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.hydro_elem.fmt(f)
+        self.element.borrow().fmt(f)
     }
 }
 
@@ -358,7 +377,7 @@ pub trait ElementBuilder: Sized {
 }
 
 /// An element that is allowed to have children.
-pub trait ParentBuilder: ElementBuilder {
+pub trait ParentBuilder<Impl: NodeImpl>: ElementBuilder {
     /// Add a text child to this element
     ///
     /// # Example
@@ -396,7 +415,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// # };
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
-    fn child(self, c: impl Into<Node>) -> Self;
+    fn child(self, c: impl Into<Node<Impl>>) -> Self;
 
     /// Add a child to the element.
     ///
@@ -408,7 +427,10 @@ pub trait ParentBuilder: ElementBuilder {
     ///
     /// div().child_signal(text.signal().map(|text| div().text(text)));
     /// ```
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self::Target;
+    fn child_signal(
+        self,
+        child: impl Signal<Item = impl Into<Node<Impl>>> + 'static,
+    ) -> Self::Target;
 
     /// Add a children node to the element.
     ///
@@ -422,7 +444,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// # };
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
-    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node>>) -> Self {
+    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node<Impl>>>) -> Self {
         for child in children {
             self = self.child(child);
         }
@@ -436,7 +458,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// for an example
     fn children_signal(
         self,
-        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+        children: impl SignalVec<Item = impl Into<Node<Impl>>> + 'static,
     ) -> Self::Target;
 
     /// Add [`OptionalChildren`]
@@ -472,7 +494,7 @@ pub trait ParentBuilder: ElementBuilder {
     ///         ),
     /// );
     /// ```
-    fn optional_children(self, children: OptionalChildren) -> Self::Target;
+    fn optional_children(self, children: OptionalChildren<Impl>) -> Self::Target;
 }
 
 fn spawn_cancelable_future(
