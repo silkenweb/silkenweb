@@ -400,6 +400,7 @@ html_element!(
 );
 
 parent_element!(span);
+shadow_parent_element!(span);
 
 html_element!(
     /// The [HTML Strong Importance Element (`<strong>`)][mdn] indicates that
@@ -551,6 +552,7 @@ html_element!(
 );
 
 parent_element!(article);
+shadow_parent_element!(article);
 
 html_element!(
     /// The [HTML `<aside>` element][mdn] represents a portion of a document
@@ -562,6 +564,7 @@ html_element!(
 );
 
 parent_element!(aside);
+shadow_parent_element!(aside);
 
 html_element!(
     /// The [HTML `<footer>` element][mdn] represents a footer for its nearest
@@ -576,6 +579,7 @@ html_element!(
 );
 
 parent_element!(footer);
+shadow_parent_element!(footer);
 
 html_element!(
     /// The [HTML `<header>` element][mdn] represents introductory content,
@@ -588,6 +592,7 @@ html_element!(
 );
 
 parent_element!(header);
+shadow_parent_element!(header);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -599,6 +604,7 @@ html_element!(
 );
 
 parent_element!(h1);
+shadow_parent_element!(h1);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -610,6 +616,7 @@ html_element!(
 );
 
 parent_element!(h2);
+shadow_parent_element!(h2);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -621,6 +628,7 @@ html_element!(
 );
 
 parent_element!(h3);
+shadow_parent_element!(h3);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -632,6 +640,7 @@ html_element!(
 );
 
 parent_element!(h4);
+shadow_parent_element!(h4);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -643,6 +652,7 @@ html_element!(
 );
 
 parent_element!(h5);
+shadow_parent_element!(h5);
 
 html_element!(
     /// The [HTML `<h1>`–`<h6>` elements][mdn] represent six levels of section
@@ -654,6 +664,7 @@ html_element!(
 );
 
 parent_element!(h6);
+shadow_parent_element!(h6);
 
 html_element!(
     /// The [HTML `<hgroup>` element][mdn] represents a multi-level heading for
@@ -679,6 +690,7 @@ html_element!(
 );
 
 parent_element!(main);
+shadow_parent_element!(main);
 
 html_element!(
     /// The [HTML `<nav>` element][mdn] represents a section of a page whose
@@ -691,6 +703,7 @@ html_element!(
 );
 
 parent_element!(nav);
+shadow_parent_element!(nav);
 
 html_element!(
     /// The [HTML `<section>` element][mdn] represents a standalone section —
@@ -702,6 +715,7 @@ html_element!(
 );
 
 parent_element!(section);
+shadow_parent_element!(section);
 
 html_element!(
     /// The [HTML `<embed>` element][mdn] embeds external content at the
@@ -1845,6 +1859,7 @@ html_element!(
 );
 
 parent_element!(blockquote);
+shadow_parent_element!(blockquote);
 
 html_element!(
     /// The [HTML `<dd>` element][mdn] provides the description, definition, or
@@ -1870,6 +1885,7 @@ html_element!(
 );
 
 parent_element!(div);
+shadow_parent_element!(div);
 
 html_element!(
     /// The [HTML `<dl>` element][mdn] represents a description list. The
@@ -1989,6 +2005,7 @@ html_element!(
 );
 
 parent_element!(p);
+shadow_parent_element!(p);
 
 html_element!(
     /// The [HTML `<pre>` element][mdn] represents preformatted text which is to

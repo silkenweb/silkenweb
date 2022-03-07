@@ -341,6 +341,23 @@ macro_rules! parent_element {
     }};
 }
 
+/// Implement [`ShadowRootBuilder`] for the HTML element
+#[macro_export]
+macro_rules! shadow_parent_element {
+    ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
+        impl $crate::node::element::ShadowRootBuilder for
+            [< $name:camel $($name_tail:camel)* Builder >]
+        {
+            fn attach_shadow_children(
+                self,
+                children: impl IntoIterator<Item = impl Into<$crate::node::Node>> + 'static
+            ) -> Self::Target {
+                [< $name:camel $($name_tail:camel)* >] (self.builder.attach_shadow_children(children))
+            }
+        }
+    }};
+}
+
 #[doc(hidden)]
 #[macro_export]
 macro_rules! events {

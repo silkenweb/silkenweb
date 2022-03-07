@@ -28,7 +28,8 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, intern_str};
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use self::child_vec::ChildVec;
 use super::Node;
@@ -181,6 +182,26 @@ impl ParentBuilder for ElementBuilderBase {
                 .signal_vec_cloned()
                 .filter_map(|mut e| e.borrow_mut().take()),
         )
+    }
+}
+
+impl ShadowRootBuilder for ElementBuilderBase {
+    fn attach_shadow_children(
+        self,
+        children: impl IntoIterator<Item = impl Into<Node>> + 'static,
+    ) -> Self::Target {
+        self.effect(move |elem| {
+            let shadow_root = elem
+                .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                .unwrap_throw();
+            for child in children {
+                // TODO: Does this all play nicely with hydration and request_animation_frame?
+                shadow_root
+                    .append_child(&child.into().eval_dom_node())
+                    .unwrap_throw();
+            }
+        })
+        .build()
     }
 }
 
@@ -473,6 +494,15 @@ pub trait ParentBuilder: ElementBuilder {
     /// );
     /// ```
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
+}
+
+// TODO: Doc
+pub trait ShadowRootBuilder: ElementBuilder {
+    // TODO: Doc
+    fn attach_shadow_children(
+        self,
+        children: impl IntoIterator<Item = impl Into<Node>> + 'static,
+    ) -> Self::Target;
 }
 
 fn spawn_cancelable_future(
