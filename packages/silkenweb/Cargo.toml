@@ -105,6 +105,7 @@ features = [
     "HtmlQuoteElement",
     "HtmlScriptElement",
     "HtmlSelectElement",
+    "HtmlSlotElement",
     "HtmlSourceElement",
     "HtmlSpanElement",
     "HtmlStyleElement",

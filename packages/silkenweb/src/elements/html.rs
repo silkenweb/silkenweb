@@ -3694,3 +3694,23 @@ html_element!(
 );
 
 parent_element!(textarea);
+
+html_element!(
+    /// The (`<slot>`)[mdn] HTML element—part of the Web Components technology
+    /// suite—is a placeholder inside a web component that you can fill with
+    /// your own markup, which lets you create separate DOM trees and present
+    /// them together.
+    ///
+    /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
+    slot<web_sys::HtmlSlotElement> {
+        attributes {
+            name: String
+        }
+
+        events {
+            /// The slotchange event is fired on an HTMLSlotElement instance
+            /// (<slot> element) when the node(s) contained in that slot change.
+            slotchange: web_sys::Event,
+        }
+    }
+);
