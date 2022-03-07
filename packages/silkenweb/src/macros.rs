@@ -341,7 +341,7 @@ macro_rules! parent_element {
     }};
 }
 
-/// Implement [`ShadowRootParentBuilder`] for the HTML element
+/// Implement `ShadowRootParentBuilder` for the HTML element
 #[macro_export]
 macro_rules! shadow_parent_element {
     ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
