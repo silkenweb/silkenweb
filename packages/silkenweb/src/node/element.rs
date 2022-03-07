@@ -185,7 +185,7 @@ impl ParentBuilder for ElementBuilderBase {
     }
 }
 
-impl ShadowRootBuilder for ElementBuilderBase {
+impl ShadowRootParentBuilder for ElementBuilderBase {
     fn attach_shadow_children(
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
@@ -195,7 +195,6 @@ impl ShadowRootBuilder for ElementBuilderBase {
                 .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
                 .unwrap_throw();
             for child in children {
-                // TODO: Does this all play nicely with hydration and request_animation_frame?
                 shadow_root
                     .append_child(&child.into().eval_dom_node())
                     .unwrap_throw();
@@ -496,9 +495,11 @@ pub trait ParentBuilder: ElementBuilder {
     fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }
 
-// TODO: Doc
-pub trait ShadowRootBuilder: ElementBuilder {
-    // TODO: Doc
+/// An element that is allowed to have a shadow root
+pub trait ShadowRootParentBuilder: ElementBuilder {
+    /// Attach an open shadow root to `self` and add `children` to it.
+    ///
+    /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
     fn attach_shadow_children(
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,

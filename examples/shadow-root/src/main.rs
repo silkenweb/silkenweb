@@ -1,7 +1,7 @@
 use silkenweb::{
     elements::html::p,
     mount,
-    node::element::{ParentBuilder, ShadowRootBuilder},
+    node::element::{ParentBuilder, ShadowRootParentBuilder},
 };
 
 fn main() {
