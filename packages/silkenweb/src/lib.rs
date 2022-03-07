@@ -95,7 +95,7 @@ use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document;
-pub use silkenweb_macros::css_classes;
+pub use silkenweb_macros::{css, css_classes};
 use wasm_bindgen::UnwrapThrowExt;
 
 #[doc(hidden)]

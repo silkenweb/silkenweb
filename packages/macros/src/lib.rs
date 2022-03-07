@@ -15,6 +15,54 @@ use syn::{
 
 mod parser;
 
+// TODO: Keep an eye on <https://github.com/kaj/rsass>:
+// - It provides a parser, so classes can be extracted
+// - The repo seems to be actively developed
+// - It looks fairly complete
+
+/// Compile SCSS.
+///
+/// This takes a single string literal containing SCSS. It compiles it down to
+/// CSS, and returns a `&'static str` containing the compiled CSS. All
+/// valid CSS is also valid SCSS, so you can use this to check your CSS at
+/// compile time as well.
+///
+/// It uses the [Grass] compiler, so has the same [outstanding issues].
+///
+/// Any imports are relative to `$CARGO_MANIFEST_DIR`.
+///
+/// # Example
+///
+/// ```
+/// # use silkenweb_macros::css;
+/// let css_text: &str = css!(
+///     "
+///     .text-color {
+///         color: limegreen;
+///     }
+///     "
+/// );
+/// ```
+///
+/// [grass]: https://github.com/connorskees/grass
+/// [outstanding issues]: https://github.com/connorskees/grass/issues/19
+#[proc_macro]
+#[proc_macro_error]
+pub fn css(input: TokenStream) -> TokenStream {
+    let css_input: LitStr = parse_macro_input!(input);
+
+    let root_dir = cargo_manifest_dir();
+    let css_text = grass::from_string(
+        css_input.value(),
+        &grass::Options::default()
+            .quiet(true)
+            .load_path(&PathBuf::from(root_dir)),
+    )
+    .unwrap_or_else(|e| abort_call_site!("Error: {}", e));
+
+    quote!(#css_text).into()
+}
+
 mod kw {
     use syn::custom_keyword;
 
@@ -95,8 +143,7 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
         exclude_prefixes,
     } = parse_macro_input!(input);
 
-    let root_dir = env::var("CARGO_MANIFEST_DIR")
-        .unwrap_or_else(|_| abort_call_site!("Unable to read {}", CARGO_MANIFEST_DIR));
+    let root_dir = cargo_manifest_dir();
     let path = PathBuf::from(root_dir)
         .join(path)
         .into_os_string()
@@ -289,4 +336,10 @@ fn code_gen(
     .into()
 }
 
-const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
+fn cargo_manifest_dir() -> String {
+    const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
+
+    env::var(CARGO_MANIFEST_DIR).unwrap_or_else(|_| {
+        abort_call_site!("Unable to read {} from environment", CARGO_MANIFEST_DIR)
+    })
+}
