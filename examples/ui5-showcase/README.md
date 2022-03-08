@@ -1,10 +1,12 @@
 # Silkenweb UI5 Showcase
 
-## Quick Start
+This uses [Vite] via [NPM] to build the [UI5] web components into a single `ui5.iife.js`, before building with [trunk].
 
-```sh
-npm install
-npm start
-```
+## Running
 
-See *package.json* `scripts` section for more commands.
+You'll need NPM installed, then run `trunk serve --open`.
+
+[Vite]: https://vitejs.dev/
+[NPM]: https://www.npmjs.com/
+[UI5]: https://sap.github.io/ui5-webcomponents/
+[trunk]: https://trunkrs.dev/
