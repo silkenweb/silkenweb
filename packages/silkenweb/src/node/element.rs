@@ -14,7 +14,6 @@
 use std::collections::HashSet;
 use std::{
     self,
-    borrow::BorrowMut,
     fmt::{self, Display},
     future::Future,
     mem,
@@ -171,17 +170,6 @@ impl ParentBuilder for ElementBuilderBase {
         });
 
         self.spawn_future(updater).build()
-    }
-
-    fn optional_children(mut self, mut children: OptionalChildren) -> Self::Target {
-        self.element.futures.append(&mut children.futures);
-        self.children_signal(
-            children
-                .items
-                .borrow()
-                .signal_vec_cloned()
-                .filter_map(|mut e| e.borrow_mut().take()),
-        )
     }
 }
 
@@ -458,41 +446,6 @@ pub trait ParentBuilder: ElementBuilder {
         self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
-
-    /// Add [`OptionalChildren`]
-    ///
-    /// Sometimes element children are optional, dependant on the value of a
-    /// signal for example.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{
-    /// #     elements::html::div,
-    /// #     node::{
-    /// #         element::{OptionalChildren, ParentBuilder},
-    /// #         text,
-    /// #     },
-    /// # };
-    /// let include_child1 = Mutable::new(true);
-    /// let include_child2 = Mutable::new(true);
-    ///
-    /// div().optional_children(
-    ///     OptionalChildren::new()
-    ///         .optional_child_signal(
-    ///             include_child1
-    ///                 .signal()
-    ///                 .map(|child1| child1.then(|| text("This is child1"))),
-    ///         )
-    ///         .optional_child_signal(
-    ///             include_child2
-    ///                 .signal()
-    ///                 .map(|child1| child1.then(|| text("This is child2"))),
-    ///         ),
-    /// );
-    /// ```
-    fn optional_children(self, children: OptionalChildren) -> Self::Target;
 }
 
 /// An element that is allowed to have a shadow root

@@ -114,7 +114,9 @@ impl TodoAppView {
             }))
             .child(self.render_filters(item_filter))
             .optional_child_signal(self.render_clear_completed());
-        footer().class(["footer"]).optional_children(children)
+        footer()
+            .class(["footer"])
+            .children_signal(children.signal_vec())
     }
 
     fn render_filter_link(
