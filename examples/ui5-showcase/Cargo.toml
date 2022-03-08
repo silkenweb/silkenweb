@@ -7,9 +7,6 @@ categories = ["wasm"]
 edition = "2021"
 readme=true
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
 futures-signals = "0.3"

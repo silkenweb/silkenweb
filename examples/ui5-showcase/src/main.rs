@@ -12,13 +12,9 @@ use silkenweb_ui5::{
     icon::ui5_icon,
     side_navigation::{ui5_side_navigation, ui5_side_navigation_item},
 };
-use wasm_bindgen::{
-    prelude::{wasm_bindgen, JsValue},
-    UnwrapThrowExt,
-};
+use wasm_bindgen::{prelude::JsValue, UnwrapThrowExt};
 
-#[wasm_bindgen(start)]
-pub fn main_js() -> Result<(), JsValue> {
+pub fn main() -> Result<(), JsValue> {
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
     let icon = || ui5_icon().name("activate").build();
@@ -81,4 +77,4 @@ enum Selected {
 
 const DATA_ID: &str = "data-id";
 
-css_classes!("static/styles.css");
+css_classes!("styles.css");
