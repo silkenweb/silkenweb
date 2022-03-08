@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use discard::DiscardOnDrop;
 use futures_signals::{
     signal::{Signal, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+    signal_vec::MutableVec,
     CancelableFutureHandle,
 };
 
@@ -12,35 +12,9 @@ use super::{spawn_cancelable_future, Node};
 /// Helper to build children when some are optional and dependant on signal
 /// vlaues.
 ///
-/// # Example
+/// See [`ParentBuilder::optional_children`] for an example.
 ///
-/// ```no_run
-/// # use futures_signals::signal::{Mutable, SignalExt};
-/// # use silkenweb::{
-/// #     elements::html::div,
-/// #     node::{
-/// #         element::{OptionalChildren, ParentBuilder},
-/// #         text,
-/// #     },
-/// # };
-/// let include_child1 = Mutable::new(true);
-/// let include_child2 = Mutable::new(true);
-///
-/// div().children_signal(
-///     OptionalChildren::new()
-///         .optional_child_signal(
-///             include_child1
-///                 .signal()
-///                 .map(|child1| child1.then(|| text("This is child1"))),
-///         )
-///         .optional_child_signal(
-///             include_child2
-///                 .signal()
-///                 .map(|child1| child1.then(|| text("This is child2"))),
-///         )
-///         .signal_vec(),
-/// );
-/// ```
+/// [`ParentBuilder::optional_children`]: super::ParentBuilder::optional_children
 #[derive(Default)]
 pub struct OptionalChildren {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,
@@ -84,13 +58,6 @@ impl OptionalChildren {
         });
         self.futures.push(spawn_cancelable_future(future));
         self
-    }
-
-    pub fn signal_vec(self) -> impl SignalVec<Item = Node> {
-        self.items
-            .borrow()
-            .signal_vec_cloned()
-            .filter_map(|e| e.borrow_mut().take())
     }
 
     /// Push an item and return it's index

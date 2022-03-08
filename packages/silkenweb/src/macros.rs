@@ -333,6 +333,10 @@ macro_rules! parent_element {
             ) -> Self::Target {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.children_signal(children))
             }
+
+            fn optional_children(self, children: $crate::node::element::OptionalChildren) -> Self::Target {
+                [< $name:camel $($name_tail:camel)* >] (self.builder.optional_children(children))
+            }
         }
     }};
 }
