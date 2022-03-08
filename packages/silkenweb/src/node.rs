@@ -1,9 +1,6 @@
 //! Generic DOM types.
 
-use discard::DiscardOnDrop;
-use futures_signals::CancelableFutureHandle;
-
-use self::element::Element;
+use self::element::{Element, Resource};
 use crate::hydration::{
     lazy::IsDry,
     node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
@@ -35,10 +32,10 @@ impl Node {
         }
     }
 
-    fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+    fn take_resources(&mut self) -> Vec<Resource> {
         match &mut self.0 {
-            NodeEnum::Element(elem) => elem.take_futures(),
-            NodeEnum::Text(text) => text.take_futures(),
+            NodeEnum::Element(elem) => elem.take_resources(),
+            NodeEnum::Text(text) => text.take_resources(),
         }
     }
 }
@@ -115,7 +112,7 @@ impl Text {
         self.hydro_text.eval_dom_text()
     }
 
-    fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
+    fn take_resources(&mut self) -> Vec<Resource> {
         Vec::new()
     }
 }

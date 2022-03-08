@@ -14,9 +14,11 @@
 use std::collections::HashSet;
 use std::{
     self,
+    cell::{RefCell, RefMut},
     fmt::{self, Display},
     future::Future,
     mem,
+    rc::Rc,
 };
 
 use discard::DiscardOnDrop;
@@ -81,7 +83,7 @@ impl ElementBuilderBase {
         Self {
             element: Element {
                 hydro_elem,
-                futures: Vec::new(),
+                resources: Vec::new(),
             },
             has_preceding_children: false,
             #[cfg(debug_assertions)]
@@ -128,7 +130,7 @@ impl ParentBuilder for ElementBuilderBase {
         self.has_preceding_children = true;
 
         let mut child = child.into();
-        self.element.futures.extend(child.take_futures());
+        self.element.resources.extend(child.take_resources());
 
         self.element.hydro_elem.append_child_now(&child);
         self.element.hydro_elem.store_child(child.into_hydro());
@@ -136,20 +138,28 @@ impl ParentBuilder for ElementBuilderBase {
         self
     }
 
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self::Target {
-        let mut existing_child: Option<Node> = None;
+    fn child_signal(
+        mut self,
+        child: impl Signal<Item = impl Into<Node>> + 'static,
+    ) -> Self::Target {
+        let existing_child: Rc<RefCell<Option<Node>>> = Rc::new(RefCell::new(None));
+        self.element
+            .resources
+            .push(Resource::Child(existing_child.clone()));
         let mut element = self.element.hydro_elem.clone();
 
         let updater = child.for_each(move |child| {
             let child = child.into();
+            RefMut::map(existing_child.borrow_mut(), |existing_child| {
+                if let Some(existing_child) = existing_child {
+                    element.replace_child(&child, existing_child);
+                } else {
+                    element.append_child(&child);
+                }
 
-            if let Some(existing_child) = &existing_child {
-                element.replace_child(&child, existing_child);
-            } else {
-                element.append_child(&child);
-            }
-
-            existing_child = Some(child);
+                *existing_child = Some(child);
+                existing_child
+            });
 
             async {}
         });
@@ -158,14 +168,19 @@ impl ParentBuilder for ElementBuilderBase {
     }
 
     fn children_signal(
-        self,
+        mut self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target {
-        let mut child_vec =
-            ChildVec::new(self.element.hydro_elem.clone(), self.has_preceding_children);
+        let child_vec = Rc::new(RefCell::new(ChildVec::new(
+            self.element.hydro_elem.clone(),
+            self.has_preceding_children,
+        )));
+        self.element
+            .resources
+            .push(Resource::ChildVec(child_vec.clone()));
 
         let updater = children.for_each(move |update| {
-            child_vec.apply_update(update);
+            child_vec.borrow_mut().apply_update(update);
             async {}
         });
 
@@ -249,7 +264,9 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
-        self.element.futures.push(spawn_cancelable_future(future));
+        self.element
+            .resources
+            .push(Resource::Future(spawn_cancelable_future(future)));
         self
     }
 
@@ -259,7 +276,7 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn build(mut self) -> Self::Target {
-        self.element.futures.shrink_to_fit();
+        self.element.resources.shrink_to_fit();
         self.element.hydro_elem.shrink_to_fit();
         self.element
     }
@@ -280,7 +297,7 @@ impl From<ElementBuilderBase> for Node {
 /// An HTML element.
 pub struct Element {
     pub(super) hydro_elem: HydrationElement,
-    futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
+    resources: Vec<Resource>,
 }
 
 impl Element {
@@ -297,8 +314,8 @@ impl Element {
         self.hydro_elem.hydrate_child(parent, child, tracker)
     }
 
-    pub(super) fn take_futures(&mut self) -> Vec<DiscardOnDrop<CancelableFutureHandle>> {
-        mem::take(&mut self.futures)
+    pub(super) fn take_resources(&mut self) -> Vec<Resource> {
+        mem::take(&mut self.resources)
     }
 }
 
@@ -467,4 +484,15 @@ fn spawn_cancelable_future(
     task::spawn_local(cancelable_future);
 
     handle
+}
+
+/// A resource that needs to be held
+///
+/// The signal futures will end once they've yielded their last value, so we
+/// can't rely on the futures to hold resources via closure captures. Hence the
+/// other resource types. For example, `always` will yield a value, then finish.
+pub(super) enum Resource {
+    ChildVec(Rc<RefCell<ChildVec>>),
+    Child(Rc<RefCell<Option<Node>>>),
+    Future(DiscardOnDrop<CancelableFutureHandle>),
 }
