@@ -1,10 +1,11 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
 use silkenweb::{
-    elements::{html::div, HtmlElement},
+    css_classes,
+    elements::html::div,
     mount,
-    node::element::{Element, ElementBuilder, OptionalChildren},
-    prelude::ParentBuilder,
+    node::element::{Element, ElementBuilder},
+    prelude::{HtmlElement, ParentBuilder},
 };
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
@@ -37,37 +38,37 @@ pub fn main_js() -> Result<(), JsValue> {
     let selected = Mutable::new(Selected::Calendar);
     let selected_signal = selected.signal();
 
-    // TODO: Use "data-id" rather than "id". Can we make this more type safe?
-    // TODO: Slots
     let side_bar = ui5_side_navigation()
         .children([
             ui5_side_navigation_item()
                 .selected(true)
                 .text("Calendar")
-                .id(&Selected::Calendar.to_string()),
+                .attribute(DATA_ID, &Selected::Calendar.to_string()),
             ui5_side_navigation_item()
                 .text("Icon")
-                .id(&Selected::Icon.to_string()),
+                .attribute(DATA_ID, &Selected::Icon.to_string()),
         ])
         .on_selection_change(move |event, _target| {
             selected.set(
                 event
                     .item()
-                    .get_attribute("id")
+                    .get_attribute(DATA_ID)
                     .unwrap_throw()
-                    .as_str()
                     .parse()
                     .unwrap_throw(),
             );
         });
 
-    let children = OptionalChildren::new()
-        .child(side_bar)
-        .child_signal(selected_signal.map(move |selection| match selection {
-            Selected::Calendar => Element::from(calendar()),
-            Selected::Icon => Element::from(icon()),
-        }));
-    mount("app", div().optional_children(children));
+    mount(
+        "app",
+        div()
+            .class([FLEX])
+            .child(side_bar)
+            .child_signal(selected_signal.map(move |selection| match selection {
+                Selected::Calendar => Element::from(calendar()),
+                Selected::Icon => Element::from(icon()),
+            })),
+    );
 
     Ok(())
 }
@@ -77,3 +78,7 @@ enum Selected {
     Icon,
     Calendar,
 }
+
+const DATA_ID: &str = "data-id";
+
+css_classes!("static/styles.css");
