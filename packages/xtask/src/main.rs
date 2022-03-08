@@ -114,6 +114,7 @@ fn build_website() -> WorkflowResult<()> {
         "hydration",
         "router",
         "todomvc",
+        "ui5-showcase",
     ] {
         let examples_dir = format!("examples/{example}");
 
