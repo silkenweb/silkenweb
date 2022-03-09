@@ -1,4 +1,4 @@
 [[hooks]]
 stage = "pre_build"
-command = "bash"
-command_arguments = ["-c", "cd ui5-bundler && npm install && npm run build"]
+command = "make"
+command_arguments = ["--directory=ui5-bundler"]

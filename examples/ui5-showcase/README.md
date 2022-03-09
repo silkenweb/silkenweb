@@ -4,9 +4,10 @@ This uses [Vite] via [NPM] to build the [UI5] web components into a single `ui5.
 
 ## Running
 
-You'll need NPM installed, then run `trunk serve --open`.
+You'll need [GNU Make] and [NPM] installed, then run `trunk serve --open`.
 
 [Vite]: https://vitejs.dev/
 [NPM]: https://www.npmjs.com/
 [UI5]: https://sap.github.io/ui5-webcomponents/
 [trunk]: https://trunkrs.dev/
+[GNU Make]: https://www.gnu.org/software/make/
