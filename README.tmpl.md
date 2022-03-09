@@ -12,6 +12,7 @@ A library for building reactive web apps.
 
 - No VDOM. Fine grained reactivity using signals to minimize DOM API calls.
 - Uses plain Rust syntax rather than a macro DSL.
+- [Tauri support](https://github.com/silkenweb/tauri-example)
 - Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
 - Downcasts Js objects for you, where the type is known at compile time. For example, `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
 
