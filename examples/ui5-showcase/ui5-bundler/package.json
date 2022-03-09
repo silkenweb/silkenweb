@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ui5/webcomponents": "^1.2.1",
-    "@ui5/webcomponents-fiori": "^1.2.1"
+    "@ui5/webcomponents-fiori": "^1.2.1",
+    "@ui5/webcomponents-icons-tnt": "^1.2.1"
   }
 }
