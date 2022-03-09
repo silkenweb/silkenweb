@@ -16,9 +16,12 @@ use self::elements::{
     Ui5SideNavigationBuilder, Ui5SideNavigationItem, Ui5SideNavigationItemBuilder,
     Ui5SideNavigationSubItemBuilder,
 };
+use crate::icon::Icon;
 
 mod elements {
     use silkenweb::{html_element, parent_element};
+
+    use crate::icon::Icon;
 
     html_element!(
         ui5-side-navigation<web_sys::HtmlElement> {
@@ -38,8 +41,7 @@ mod elements {
         ui5-side-navigation-item<web_sys::HtmlElement> {
             attributes {
                 expanded: bool,
-                // TODO: enum for icons
-                icon: String,
+                icon: Icon,
                 selected: bool,
                 text: String,
                 whole-item-toggleable: bool
@@ -53,8 +55,7 @@ mod elements {
         ui5-side-navigation-sub-item<web_sys::HtmlElement> {
             attributes {
                 expanded: bool,
-                // TODO: enum for icons
-                icon: String,
+                icon: Icon,
                 selected: bool,
                 text: String,
             }
@@ -195,11 +196,11 @@ where
         Self(self.0.expanded_signal(value), PhantomData)
     }
 
-    pub fn icon(self, icon: &str) -> Self {
+    pub fn icon(self, icon: Icon) -> Self {
         Self(self.0.icon(icon), PhantomData)
     }
 
-    pub fn icon_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
+    pub fn icon_signal(self, value: impl Signal<Item = Icon> + 'static) -> Self {
         Self(self.0.icon_signal(value), PhantomData)
     }
 
@@ -323,11 +324,11 @@ where
         Self(self.0.expanded_signal(value), PhantomData)
     }
 
-    pub fn icon(self, icon: &str) -> Self {
+    pub fn icon(self, icon: Icon) -> Self {
         Self(self.0.icon(icon), PhantomData)
     }
 
-    pub fn icon_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
+    pub fn icon_signal(self, value: impl Signal<Item = Icon> + 'static) -> Self {
         Self(self.0.icon_signal(value), PhantomData)
     }
 

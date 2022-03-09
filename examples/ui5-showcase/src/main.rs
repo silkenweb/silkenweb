@@ -9,7 +9,7 @@ use silkenweb::{
 };
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
-    icon::ui5_icon,
+    icon::{ui5_icon, Icon},
     side_navigation::{self, side_navigation},
 };
 use wasm_bindgen::prelude::JsValue;
@@ -19,7 +19,7 @@ pub fn main() -> Result<(), JsValue> {
 
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
-    let icon = || ui5_icon().name("activate").build();
+    let icon = || -> silkenweb_ui5::icon::Ui5Icon { ui5_icon().name(Icon::Activate).build() };
     let calendar = || {
         ui5_calendar()
             .format_pattern("yyyy-MM-dd")
