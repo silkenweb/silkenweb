@@ -10,11 +10,13 @@ use silkenweb::{
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode},
     icon::ui5_icon,
-    side_navigation::{ui5_side_navigation, ui5_side_navigation_item},
+    side_navigation::{self, side_navigation},
 };
-use wasm_bindgen::{prelude::JsValue, UnwrapThrowExt};
+use wasm_bindgen::prelude::JsValue;
 
 pub fn main() -> Result<(), JsValue> {
+    use side_navigation::item;
+
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
     let icon = || ui5_icon().name("activate").build();
@@ -34,26 +36,12 @@ pub fn main() -> Result<(), JsValue> {
     let selected = Mutable::new(Selected::Calendar);
     let selected_signal = selected.signal();
 
-    let side_bar = ui5_side_navigation()
+    let side_bar = side_navigation()
         .children([
-            ui5_side_navigation_item()
-                .selected(true)
-                .text("Calendar")
-                .attribute(DATA_ID, &Selected::Calendar.to_string()),
-            ui5_side_navigation_item()
-                .text("Icon")
-                .attribute(DATA_ID, &Selected::Icon.to_string()),
+            item(Selected::Calendar).text("Calendar").selected(),
+            item(Selected::Icon).text("Icon"),
         ])
-        .on_selection_change(move |event, _target| {
-            selected.set(
-                event
-                    .item()
-                    .get_attribute(DATA_ID)
-                    .unwrap_throw()
-                    .parse()
-                    .unwrap_throw(),
-            );
-        });
+        .on_selection_change(move |new_selection| selected.set(new_selection));
 
     mount(
         "app",
@@ -76,7 +64,5 @@ enum Selected {
     Icon,
     Calendar,
 }
-
-const DATA_ID: &str = "data-id";
 
 css_classes!("styles.css");
