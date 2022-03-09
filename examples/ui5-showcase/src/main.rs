@@ -60,9 +60,11 @@ pub fn main() -> Result<(), JsValue> {
         div()
             .class([FLEX])
             .child(side_bar)
-            .child_signal(selected_signal.map(move |selection| match selection {
-                Selected::Calendar => Element::from(calendar()),
-                Selected::Icon => Element::from(icon()),
+            .child_signal(selected_signal.map(move |selection| -> Element {
+                match selection {
+                    Selected::Calendar => calendar().into(),
+                    Selected::Icon => icon().into(),
+                }
             })),
     );
 
