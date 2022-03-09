@@ -8,8 +8,8 @@ use silkenweb::{
     prelude::{HtmlElement, ParentBuilder},
 };
 use silkenweb_ui5::{
-    chrono::{ui5_calendar, SelectionMode},
-    icon::{ui5_icon, Icon},
+    chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
+    icon::{ui5_icon, Icon, Ui5Icon},
     side_navigation::{self, side_navigation},
 };
 use wasm_bindgen::prelude::JsValue;
@@ -19,19 +19,6 @@ pub fn main() -> Result<(), JsValue> {
 
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
-    let icon = || -> silkenweb_ui5::icon::Ui5Icon { ui5_icon().name(Icon::Activate).build() };
-    let calendar = || {
-        ui5_calendar()
-            .format_pattern("yyyy-MM-dd")
-            .selected_date("2000-01-01".to_string())
-            .selection_mode(SelectionMode::Multiple)
-            .on_selected_dates_change(|event, _target| {
-                for d in event.selected_dates() {
-                    web_log::println!("{}", d);
-                }
-            })
-            .build()
-    };
 
     let selected = Mutable::new(Selected::Calendar);
     let selected_signal = selected.signal();
@@ -57,6 +44,23 @@ pub fn main() -> Result<(), JsValue> {
     );
 
     Ok(())
+}
+
+fn calendar() -> Ui5Calendar {
+    ui5_calendar()
+        .format_pattern("yyyy-MM-dd")
+        .selected_date("2000-01-01".to_string())
+        .selection_mode(SelectionMode::Multiple)
+        .on_selected_dates_change(|event, _target| {
+            for d in event.selected_dates() {
+                web_log::println!("{}", d);
+            }
+        })
+        .build()
+}
+
+fn icon() -> Ui5Icon {
+    ui5_icon().name(Icon::Activate).build()
 }
 
 #[derive(Display, FromStr, Copy, Clone)]
