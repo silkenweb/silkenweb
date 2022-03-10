@@ -1,10 +1,10 @@
 # Silkenweb UI5 Showcase
 
-This uses [Vite] via [NPM] to build the [UI5] web components into a single `ui5.iife.js`, before building with [trunk].
+This uses [Vite] via [NPM] to build the [UI5] web components, before building with [trunk].
 
 ## Running
 
-You'll need [GNU Make] and [NPM] installed, then run `trunk serve --open`.
+You'll need [GNU Make], `sh`, `rsync` and [NPM] installed, then run `trunk serve --open`.
 
 [Vite]: https://vitejs.dev/
 [NPM]: https://www.npmjs.com/

@@ -1,3 +1,4 @@
+import "@ui5/webcomponents/dist/Assets";
 import "@ui5/webcomponents/dist/Avatar";
 import "@ui5/webcomponents/dist/AvatarGroup";
 import "@ui5/webcomponents/dist/Badge";
