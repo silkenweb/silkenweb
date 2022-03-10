@@ -95,6 +95,13 @@ use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document;
+/// Newtype derive for [`ElementBuilder`].
+///
+/// Only non empty structs are supported. The first field must implement
+/// [`ElementBuilder`].
+///
+/// [`ElementBuilder`]: crate::node::element::ElementBuilder
+pub use silkenweb_macros::ElementBuilder;
 pub use silkenweb_macros::{css, css_classes};
 use wasm_bindgen::UnwrapThrowExt;
 

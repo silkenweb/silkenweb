@@ -4,10 +4,11 @@ use std::{
     str::FromStr,
 };
 
+use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use silkenweb::{
-    macros::{Signal, SignalVec},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
@@ -67,6 +68,7 @@ pub fn side_navigation<Id>() -> SideNavigationBuilder<Id> {
     SideNavigationBuilder(ui5_side_navigation(), PhantomData)
 }
 
+#[derive(ElementBuilder)]
 pub struct SideNavigationBuilder<Id>(Ui5SideNavigationBuilder, PhantomData<Id>);
 
 impl<Id> SideNavigationBuilder<Id>
@@ -117,47 +119,6 @@ where
     }
 }
 
-impl<Id> ElementBuilder for SideNavigationBuilder<Id> {
-    type DomType = <Ui5SideNavigationBuilder as ElementBuilder>::DomType;
-    type Target = <Ui5SideNavigationBuilder as ElementBuilder>::Target;
-
-    fn attribute<T: silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
-        Self(self.0.attribute(name, value), PhantomData)
-    }
-
-    fn attribute_signal<T: silkenweb::attribute::Attribute + 'static>(
-        self,
-        name: &str,
-        value: impl Signal<Item = T> + 'static,
-    ) -> Self {
-        Self(self.0.attribute_signal(name, value), PhantomData)
-    }
-
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        Self(self.0.effect(f), PhantomData)
-    }
-
-    fn effect_signal<T: 'static>(
-        self,
-        sig: impl Signal<Item = T> + 'static,
-        f: impl Fn(&Self::DomType, T) + Clone + 'static,
-    ) -> Self {
-        Self(self.0.effect_signal(sig, f), PhantomData)
-    }
-
-    fn spawn_future(self, future: impl std::future::Future<Output = ()> + 'static) -> Self {
-        Self(self.0.spawn_future(future), PhantomData)
-    }
-
-    fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        Self(self.0.on(name, f), PhantomData)
-    }
-
-    fn build(self) -> Self::Target {
-        self.0.build()
-    }
-}
-
 impl<Id> HtmlElement for SideNavigationBuilder<Id> {}
 
 impl<Id> HtmlElementEvents for SideNavigationBuilder<Id> {}
@@ -177,6 +138,7 @@ pub fn item<Id: Display>(id: Id) -> SideNavigationItemBuilder<Id> {
     )
 }
 
+#[derive(ElementBuilder)]
 pub struct SideNavigationItemBuilder<Id>(Ui5SideNavigationItemBuilder, PhantomData<Id>);
 
 impl<Id> SideNavigationItemBuilder<Id>
@@ -241,47 +203,6 @@ where
     }
 }
 
-impl<Id> ElementBuilder for SideNavigationItemBuilder<Id> {
-    type DomType = <Ui5SideNavigationItemBuilder as ElementBuilder>::DomType;
-    type Target = <Ui5SideNavigationItemBuilder as ElementBuilder>::Target;
-
-    fn attribute<T: silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
-        Self(self.0.attribute(name, value), PhantomData)
-    }
-
-    fn attribute_signal<T: silkenweb::attribute::Attribute + 'static>(
-        self,
-        name: &str,
-        value: impl Signal<Item = T> + 'static,
-    ) -> Self {
-        Self(self.0.attribute_signal(name, value), PhantomData)
-    }
-
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        Self(self.0.effect(f), PhantomData)
-    }
-
-    fn effect_signal<T: 'static>(
-        self,
-        sig: impl Signal<Item = T> + 'static,
-        f: impl Fn(&Self::DomType, T) + Clone + 'static,
-    ) -> Self {
-        Self(self.0.effect_signal(sig, f), PhantomData)
-    }
-
-    fn spawn_future(self, future: impl std::future::Future<Output = ()> + 'static) -> Self {
-        Self(self.0.spawn_future(future), PhantomData)
-    }
-
-    fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        Self(self.0.on(name, f), PhantomData)
-    }
-
-    fn build(self) -> Self::Target {
-        self.0.build()
-    }
-}
-
 impl<Id> HtmlElement for SideNavigationItemBuilder<Id> {}
 
 impl<Id> HtmlElementEvents for SideNavigationItemBuilder<Id> {}
@@ -301,6 +222,7 @@ pub fn sub_item<Id: Display>(id: Id) -> SideNavigationSubItemBuilder<Id> {
     )
 }
 
+#[derive(ElementBuilder)]
 pub struct SideNavigationSubItemBuilder<Id>(Ui5SideNavigationSubItemBuilder, PhantomData<Id>);
 
 impl<Id> SideNavigationSubItemBuilder<Id>
@@ -338,47 +260,6 @@ where
 
     pub fn text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
         Self(self.0.text_signal(value), PhantomData)
-    }
-}
-
-impl<Id> ElementBuilder for SideNavigationSubItemBuilder<Id> {
-    type DomType = <Ui5SideNavigationSubItemBuilder as ElementBuilder>::DomType;
-    type Target = <Ui5SideNavigationSubItemBuilder as ElementBuilder>::Target;
-
-    fn attribute<T: silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
-        Self(self.0.attribute(name, value), PhantomData)
-    }
-
-    fn attribute_signal<T: silkenweb::attribute::Attribute + 'static>(
-        self,
-        name: &str,
-        value: impl Signal<Item = T> + 'static,
-    ) -> Self {
-        Self(self.0.attribute_signal(name, value), PhantomData)
-    }
-
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        Self(self.0.effect(f), PhantomData)
-    }
-
-    fn effect_signal<T: 'static>(
-        self,
-        sig: impl Signal<Item = T> + 'static,
-        f: impl Fn(&Self::DomType, T) + Clone + 'static,
-    ) -> Self {
-        Self(self.0.effect_signal(sig, f), PhantomData)
-    }
-
-    fn spawn_future(self, future: impl std::future::Future<Output = ()> + 'static) -> Self {
-        Self(self.0.spawn_future(future), PhantomData)
-    }
-
-    fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        Self(self.0.on(name, f), PhantomData)
-    }
-
-    fn build(self) -> Self::Target {
-        self.0.build()
     }
 }
 

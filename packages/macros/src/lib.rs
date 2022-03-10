@@ -10,10 +10,101 @@ use syn::{
     parse_macro_input,
     punctuated::Punctuated,
     token::{Colon, Comma, CustomToken},
-    Ident, LitStr, Visibility,
+    Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed, Ident, Index, LitStr,
+    Visibility,
 };
 
 mod parser;
+
+#[proc_macro_derive(ElementBuilder)]
+#[proc_macro_error]
+pub fn derive_element_builder(item: TokenStream) -> TokenStream {
+    let new_type: DeriveInput = parse_macro_input!(item);
+
+    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
+    let name = new_type.ident;
+
+    let fields = match new_type.data {
+        Data::Struct(DataStruct { fields, .. }) => fields,
+        _ => abort_call_site!("Only structs are supported"),
+    };
+
+    let mut fields = match fields {
+        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
+        Fields::Named(FieldsNamed { named, .. }) => named,
+        _ => abort!(fields, "There must be at least one field"),
+    }
+    .into_iter();
+
+    let Field {
+        ty: derive_from,
+        ident: derive_ident,
+        ..
+    } = fields
+        .next()
+        .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
+
+    let field_tail_names = (1..).zip(fields).map(|(index, field)| {
+        if let Some(ident) = field.ident {
+            quote!(#ident)
+        } else {
+            let index = Index::from(index);
+            quote!(#index)
+        }
+    });
+    let fields_tail = quote!(#(, #field_tail_names: self.#field_tail_names)*);
+
+    let derive_field = if let Some(derive_ident) = derive_ident {
+        quote!(#derive_ident)
+    } else {
+        quote!(0)
+    };
+
+    quote!(
+        impl #impl_generics ::silkenweb::node::element::ElementBuilder
+        for #name #ty_generics #where_clause {
+            type DomType = <#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType;
+            type Target = <#derive_from as ::silkenweb::node::element::ElementBuilder>::Target;
+
+            fn attribute<T: ::silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
+                Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
+            }
+
+            fn attribute_signal<T: ::silkenweb::attribute::Attribute + 'static>(
+                self,
+                name: &str,
+                value: impl ::silkenweb::macros::Signal<Item = T> + 'static,
+            ) -> Self {
+                Self{#derive_field: self.#derive_field.attribute_signal(name, value) #fields_tail}
+            }
+
+            fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+                Self{#derive_field: self.#derive_field.effect(f) #fields_tail}
+            }
+
+            fn effect_signal<T: 'static>(
+                self,
+                sig: impl ::silkenweb::macros::Signal<Item = T> + 'static,
+                f: impl Fn(&Self::DomType, T) + Clone + 'static,
+            ) -> Self {
+                Self{#derive_field: self.#derive_field.effect_signal(sig, f) #fields_tail}
+            }
+
+            fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
+                Self{#derive_field: self.#derive_field.spawn_future(future) #fields_tail}
+            }
+
+            fn on(self, name: &'static str, f: impl FnMut(::silkenweb::macros::JsValue) + 'static) -> Self {
+                Self{#derive_field: self.#derive_field.on(name, f) #fields_tail}
+            }
+
+            fn build(self) -> Self::Target {
+                self.#derive_field.build()
+            }
+        }
+    )
+    .into()
+}
 
 // TODO: Keep an eye on <https://github.com/kaj/rsass>:
 // - It provides a parser, so classes can be extracted
