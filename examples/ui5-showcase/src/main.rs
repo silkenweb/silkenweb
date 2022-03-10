@@ -10,7 +10,7 @@ use silkenweb::{
 use silkenweb_ui5::{
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
-    side_navigation::{self, side_navigation},
+    side_navigation::{self, side_navigation}, avatar::{Avatar, self},
 };
 use wasm_bindgen::prelude::JsValue;
 
@@ -25,6 +25,7 @@ pub fn main() -> Result<(), JsValue> {
 
     let side_bar = side_navigation()
         .children([
+            item(Selected::Avatar).text("Avatar"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
         ])
@@ -37,6 +38,7 @@ pub fn main() -> Result<(), JsValue> {
             .child(side_bar)
             .child_signal(selected_signal.map(move |selection| -> Element {
                 match selection {
+                    Selected::Avatar => avatar().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
@@ -44,6 +46,10 @@ pub fn main() -> Result<(), JsValue> {
     );
 
     Ok(())
+}
+
+fn avatar() -> Avatar {
+    avatar::avatar().initials("SB").build()
 }
 
 fn calendar() -> Ui5Calendar {
@@ -65,6 +71,7 @@ fn icon() -> Ui5Icon {
 
 #[derive(Display, FromStr, Copy, Clone)]
 enum Selected {
+    Avatar,
     Icon,
     Calendar,
 }

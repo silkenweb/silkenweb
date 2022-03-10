@@ -64,6 +64,10 @@ mod elements {
     );
 }
 
+pub type SideNavigation = elements::Ui5SideNavigation;
+pub type SideNavigationItem = elements::Ui5SideNavigationItem;
+pub type SideNavigationSubItem = elements::Ui5SideNavigationSubItem;
+
 pub fn side_navigation<Id>() -> SideNavigationBuilder<Id> {
     SideNavigationBuilder(ui5_side_navigation(), PhantomData)
 }
