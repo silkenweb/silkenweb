@@ -280,9 +280,7 @@ pub trait HtmlElement: ElementBuilder {
 
 /// Events common to all HTML elements
 pub trait HtmlElementEvents: ElementBuilder {
-    type EventTarget: JsCast;
-
-    events!(Self::EventTarget {
+    events!(Self::DomType {
         animationend: web_sys::AnimationEvent,
         animationiteration: web_sys::AnimationEvent,
         animationstart: web_sys::AnimationEvent,
@@ -305,9 +303,7 @@ pub trait HtmlElementEvents: ElementBuilder {
 
 /// Events common to all elements
 pub trait ElementEvents: ElementBuilder {
-    type EventTarget: JsCast;
-
-    events!(Self::EventTarget {
+    events!(Self::DomType {
         auxclick: web_sys::MouseEvent,
         blur: web_sys::FocusEvent,
         click: web_sys::MouseEvent,

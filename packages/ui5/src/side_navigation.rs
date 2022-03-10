@@ -160,13 +160,9 @@ impl<Id> ElementBuilder for SideNavigationBuilder<Id> {
 
 impl<Id> HtmlElement for SideNavigationBuilder<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationBuilder as HtmlElementEvents>::EventTarget;
-}
+impl<Id> HtmlElementEvents for SideNavigationBuilder<Id> {}
 
-impl<Id> ElementEvents for SideNavigationBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationBuilder as ElementEvents>::EventTarget;
-}
+impl<Id> ElementEvents for SideNavigationBuilder<Id> {}
 
 impl<T> From<SideNavigationBuilder<T>> for Node {
     fn from(builder: SideNavigationBuilder<T>) -> Self {
@@ -288,13 +284,9 @@ impl<Id> ElementBuilder for SideNavigationItemBuilder<Id> {
 
 impl<Id> HtmlElement for SideNavigationItemBuilder<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationItemBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationItemBuilder as HtmlElementEvents>::EventTarget;
-}
+impl<Id> HtmlElementEvents for SideNavigationItemBuilder<Id> {}
 
-impl<Id> ElementEvents for SideNavigationItemBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationItemBuilder as ElementEvents>::EventTarget;
-}
+impl<Id> ElementEvents for SideNavigationItemBuilder<Id> {}
 
 impl<T> From<SideNavigationItemBuilder<T>> for Node {
     fn from(builder: SideNavigationItemBuilder<T>) -> Self {
@@ -392,13 +384,9 @@ impl<Id> ElementBuilder for SideNavigationSubItemBuilder<Id> {
 
 impl<Id> HtmlElement for SideNavigationSubItemBuilder<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationSubItemBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationSubItemBuilder as HtmlElementEvents>::EventTarget;
-}
+impl<Id> HtmlElementEvents for SideNavigationSubItemBuilder<Id> {}
 
-impl<Id> ElementEvents for SideNavigationSubItemBuilder<Id> {
-    type EventTarget = <Ui5SideNavigationSubItemBuilder as ElementEvents>::EventTarget;
-}
+impl<Id> ElementEvents for SideNavigationSubItemBuilder<Id> {}
 
 impl<T> From<SideNavigationSubItemBuilder<T>> for Node {
     fn from(builder: SideNavigationSubItemBuilder<T>) -> Self {

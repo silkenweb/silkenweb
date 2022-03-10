@@ -273,14 +273,10 @@ macro_rules! dom_element {
         $(impl $attribute_trait for $camel_builder_name {})*
 
         $(
-            impl $event_trait for $camel_builder_name {
-                type EventTarget = $elem_type;
-            }
+            impl $event_trait for $camel_builder_name {}
         )*
 
-        impl $crate::elements::ElementEvents for $camel_builder_name {
-            type EventTarget = $elem_type;
-        }
+        impl $crate::elements::ElementEvents for $camel_builder_name {}
     };
 }
 
