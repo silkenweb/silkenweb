@@ -8,9 +8,8 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::icon::Icon;
-
 use self::elements::ui5_avatar;
+use crate::icon::Icon;
 
 pub enum ColorScheme {
     Accent1,
