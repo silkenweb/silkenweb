@@ -6,6 +6,7 @@ use std::{
 
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use silkenweb::{
+    elements::CustomEvent,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
@@ -20,7 +21,7 @@ use self::elements::{
 use crate::icon::Icon;
 
 mod elements {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{elements::CustomEvent, html_element, parent_element};
 
     use crate::icon::Icon;
 
@@ -31,7 +32,7 @@ mod elements {
             }
 
             custom_events {
-                selection-change: web_sys::CustomEvent,
+                selection-change: CustomEvent<web_sys::HtmlElement>,
             }
         }
     );
@@ -104,10 +105,13 @@ where
         self.0.children_signal(children)
     }
 
-    pub fn on_selection_change(self, mut f: impl FnMut(Id) + 'static) -> Self {
+    pub fn on_selection_change(
+        self,
+        mut f: impl FnMut(CustomEvent<web_sys::HtmlElement>, Id) + 'static,
+    ) -> Self {
         Self(
             self.0.on_selection_change(move |event, _target| {
-                f(event
+                let id = event
                     .detail()
                     .unchecked_into::<Item>()
                     .item()
@@ -116,7 +120,8 @@ where
                     .get_attribute(SELECTED_ID)
                     .unwrap_throw()
                     .parse()
-                    .unwrap_throw())
+                    .unwrap_throw();
+                f(event, id)
             }),
             PhantomData,
         )
