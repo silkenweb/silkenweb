@@ -9,5 +9,6 @@ import "@ui5/webcomponents-fiori/dist/SideNavigationSubItem";
 
 import "@ui5/webcomponents-icons/dist/activate";
 import "@ui5/webcomponents-icons/dist/accept";
+import "@ui5/webcomponents-icons/dist/employee";
 
 import "@ui5/webcomponents-icons-tnt/dist/antenna.js";

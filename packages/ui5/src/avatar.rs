@@ -1,15 +1,27 @@
-use std::borrow::Cow;
-
-use futures_signals::signal::{Signal, SignalExt};
-use silkenweb::{
-    attribute::{AsAttribute, Attribute},
-    elements::html::Img,
-    node::element::{ElementBuilder, ParentBuilder},
-    ElementBuilder,
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display},
+    marker::PhantomData,
+    str::FromStr,
 };
 
-use self::elements::ui5_avatar;
-use crate::icon::Icon;
+use futures_signals::{
+    signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt},
+};
+use silkenweb::{
+    attribute::{AsAttribute, Attribute},
+    elements::{html::Img, CustomEvent},
+    node::element::{ElementBuilder, ParentBuilder},
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    ElementBuilder,
+};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, UnwrapThrowExt};
+
+use self::elements::{ui5_avatar, ui5_avatar_group, Ui5AvatarGroup, Ui5AvatarGroupBuilder};
+use crate::{icon::Icon, SELECTED_ID};
+
+// TODO: Type attr and overflow slot
 
 pub enum ColorScheme {
     Accent1,
@@ -91,9 +103,9 @@ impl Attribute for Size {
 impl AsAttribute<Size> for Size {}
 
 mod elements {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{elements::CustomEvent, html_element, parent_element};
 
-    use super::{ColorScheme, Shape, Size};
+    use super::{ColorScheme, GroupClicked, Shape, Size};
     use crate::icon::Icon;
 
     html_element!(
@@ -111,6 +123,17 @@ mod elements {
     );
 
     parent_element!(ui5 - avatar);
+
+    html_element!(
+        ui5-avatar-group<web_sys::HtmlElement> {
+            custom_events {
+                click: CustomEvent<GroupClicked>,
+                overflow: web_sys::CustomEvent,
+            }
+        }
+    );
+
+    parent_element!(ui5 - avatar - group);
 }
 
 pub type Avatar = elements::Ui5Avatar;
@@ -186,4 +209,99 @@ impl AvatarBuilder {
     pub fn image_signal(self, image: impl Signal<Item = impl Into<Img>> + 'static) -> Avatar {
         self.0.child_signal(image.map(|img| img.into()))
     }
+}
+
+pub type AvatarGroup = Ui5AvatarGroup;
+
+pub fn avatar_group<Id>() -> AvatarGroupBuilder<Id> {
+    AvatarGroupBuilder(ui5_avatar_group(), PhantomData)
+}
+
+/// Warning: Don't use. This isn't working properly yet.
+#[derive(ElementBuilder)]
+pub struct AvatarGroupBuilder<Id>(Ui5AvatarGroupBuilder, PhantomData<Id>);
+
+impl<Id> AvatarGroupBuilder<Id>
+where
+    Id: Display + FromStr,
+    Id::Err: Debug,
+{
+    pub fn children(self, children: impl IntoIterator<Item = (Id, AvatarBuilder)>) -> Self {
+        Self(
+            self.0.children(
+                children
+                    .into_iter()
+                    .map(|(id, avatar)| avatar.attribute(SELECTED_ID, id.to_string()).0),
+            ),
+            PhantomData,
+        )
+    }
+
+    pub fn children_signal(
+        self,
+        children: impl SignalVec<Item = (Id, AvatarBuilder)> + 'static,
+    ) -> AvatarGroup {
+        self.0.children_signal(
+            children.map(|(id, avatar)| avatar.attribute(SELECTED_ID, id.to_string()).0),
+        )
+    }
+
+    pub fn on_click(
+        self,
+        mut f: impl FnMut(CustomEvent<GroupClicked>, <Self as ElementBuilder>::DomType, Option<Id>)
+            + 'static,
+    ) -> Self {
+        Self(
+            self.0.on_click(move |ev, target| {
+                let id = if ev.detail().overflow_button_clicked() {
+                    None
+                } else {
+                    // This doesn't work as documented. `let avatar = ev.detail().target_ref()`
+                    // should work. May be something to do with the way we
+                    // bundle UI5
+                    let avatar = ev
+                        .event()
+                        .target()
+                        .unwrap_throw()
+                        .dyn_into::<web_sys::HtmlElement>()
+                        .unwrap_throw();
+
+                    Some(
+                        avatar
+                            .get_attribute(SELECTED_ID)
+                            .unwrap_throw()
+                            .parse()
+                            .unwrap_throw(),
+                    )
+                };
+
+                f(ev, target, id)
+            }),
+            self.1,
+        )
+    }
+
+    pub fn on_overflow(
+        self,
+        f: impl FnMut(web_sys::CustomEvent, <Self as ElementBuilder>::DomType) + 'static,
+    ) -> Self {
+        Self(self.0.on_overflow(f), self.1)
+    }
+}
+
+impl<Id> HtmlElement for AvatarGroupBuilder<Id> {}
+
+impl<Id> HtmlElementEvents for AvatarGroupBuilder<Id> {}
+
+impl<Id> ElementEvents for AvatarGroupBuilder<Id> {}
+
+#[wasm_bindgen]
+extern "C" {
+    pub type GroupClicked;
+
+    #[wasm_bindgen(method, getter, js_name = "targetRef")]
+    pub fn target_ref(this: &GroupClicked) -> web_sys::HtmlElement;
+
+    #[wasm_bindgen(method, getter, js_name = "overflowButtonClicked")]
+    pub fn overflow_button_clicked(this: &GroupClicked) -> bool;
 }

@@ -8,7 +8,7 @@ use silkenweb::{
     prelude::{HtmlElement, ParentBuilder},
 };
 use silkenweb_ui5::{
-    avatar::{self, Avatar},
+    avatar::{self, Avatar, AvatarGroup},
     badge::{self, Badge},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
@@ -28,6 +28,7 @@ pub fn main() -> Result<(), JsValue> {
     let side_bar = side_navigation()
         .children([
             item(Selected::Avatar).text("Avatar"),
+            item(Selected::AvatarGroup).text("Avatar Group"),
             item(Selected::Badge).text("Badge"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
@@ -42,6 +43,7 @@ pub fn main() -> Result<(), JsValue> {
             .child_signal(selected_signal.map(move |selection| -> Element {
                 match selection {
                     Selected::Avatar => avatar().into(),
+                    Selected::AvatarGroup => avatar_group().into(),
                     Selected::Badge => badge().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
@@ -54,6 +56,28 @@ pub fn main() -> Result<(), JsValue> {
 
 fn avatar() -> Avatar {
     avatar::avatar().initials("SB").build()
+}
+
+fn avatar_group() -> AvatarGroup {
+    #[derive(Display, FromStr)]
+    enum Avatar {
+        Sb,
+        Bb,
+    }
+
+    avatar::avatar_group()
+        .children([
+            (Avatar::Sb, avatar::avatar().initials("SB").icon(Icon::Employee)),
+            (Avatar::Bb, avatar::avatar().initials("BB")),
+        ])
+        .on_overflow(|_, _| web_log::println!("Visible avatars changed"))
+        .on_click(|_, _, id| {
+            web_log::println!(
+                "Avatar clicked: {}",
+                id.map_or_else(|| "Overflow button".to_string(), |av| av.to_string())
+            )
+        })
+        .build()
 }
 
 fn calendar() -> Ui5Calendar {
@@ -80,6 +104,7 @@ fn icon() -> Ui5Icon {
 #[derive(Display, FromStr, Copy, Clone)]
 enum Selected {
     Avatar,
+    AvatarGroup,
     Badge,
     Icon,
     Calendar,

@@ -101,6 +101,6 @@ impl From<web_sys::CustomEvent> for SelectedDatesChange {
 extern "C" {
     type Values;
 
-    #[wasm_bindgen(structural, method, getter)]
+    #[wasm_bindgen(method, getter)]
     fn values(this: &Values) -> Box<[JsValue]>;
 }

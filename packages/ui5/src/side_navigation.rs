@@ -18,7 +18,7 @@ use self::elements::{
     Ui5SideNavigationBuilder, Ui5SideNavigationItem, Ui5SideNavigationItemBuilder,
     Ui5SideNavigationSubItemBuilder,
 };
-use crate::icon::Icon;
+use crate::{icon::Icon, SELECTED_ID};
 
 mod elements {
     use silkenweb::{elements::CustomEvent, html_element, parent_element};
@@ -286,8 +286,6 @@ impl<T> From<SideNavigationSubItemBuilder<T>> for Node {
 extern "C" {
     pub type SelectionChangeDetail;
 
-    #[wasm_bindgen(structural, method, getter)]
+    #[wasm_bindgen(method, getter)]
     pub fn item(this: &SelectionChangeDetail) -> web_sys::HtmlElement;
 }
-
-const SELECTED_ID: &str = "data-silkenweb-ui5-id";
