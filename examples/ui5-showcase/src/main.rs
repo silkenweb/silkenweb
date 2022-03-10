@@ -67,7 +67,10 @@ fn avatar_group() -> AvatarGroup {
 
     avatar::avatar_group()
         .children([
-            (Avatar::Sb, avatar::avatar().initials("SB").icon(Icon::Employee)),
+            (
+                Avatar::Sb,
+                avatar::avatar().initials("SB").icon(Icon::Employee),
+            ),
             (Avatar::Bb, avatar::avatar().initials("BB")),
         ])
         .on_overflow(|_, _| web_log::println!("Visible avatars changed"))
