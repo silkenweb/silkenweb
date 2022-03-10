@@ -9,6 +9,7 @@ use silkenweb::{
 };
 use silkenweb_ui5::{
     avatar::{self, Avatar},
+    badge::{self, Badge},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
     side_navigation::{self, side_navigation},
@@ -27,6 +28,7 @@ pub fn main() -> Result<(), JsValue> {
     let side_bar = side_navigation()
         .children([
             item(Selected::Avatar).text("Avatar"),
+            item(Selected::Badge).text("Badge"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
         ])
@@ -40,6 +42,7 @@ pub fn main() -> Result<(), JsValue> {
             .child_signal(selected_signal.map(move |selection| -> Element {
                 match selection {
                     Selected::Avatar => avatar().into(),
+                    Selected::Badge => badge().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
@@ -66,6 +69,10 @@ fn calendar() -> Ui5Calendar {
         .build()
 }
 
+fn badge() -> Badge {
+    badge::badge().color_scheme(2).text("Badge").icon(icon())
+}
+
 fn icon() -> Ui5Icon {
     ui5_icon().name(Icon::Activate).build()
 }
@@ -73,6 +80,7 @@ fn icon() -> Ui5Icon {
 #[derive(Display, FromStr, Copy, Clone)]
 enum Selected {
     Avatar,
+    Badge,
     Icon,
     Calendar,
 }
