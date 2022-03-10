@@ -29,7 +29,7 @@ use std::marker::PhantomData;
 use futures_signals::signal::{Signal, SignalExt};
 use paste::paste;
 use silkenweb_base::intern_str;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::JsCast;
 
 use crate::node::element::ElementBuilder;
 
@@ -51,11 +51,9 @@ impl<T: JsCast> CustomEvent<T> {
 
     /// The event detail, downcast into `T`.
     ///
-    /// # Panics
-    ///
-    /// If the downcast fails.
+    /// The downcast is unchecked.
     pub fn detail(&self) -> T {
-        self.0.detail().dyn_into().unwrap_throw()
+        self.0.detail().unchecked_into()
     }
 }
 

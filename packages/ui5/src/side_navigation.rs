@@ -11,7 +11,7 @@ use silkenweb::{
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 use self::elements::{
     ui5_side_navigation, ui5_side_navigation_item, ui5_side_navigation_sub_item, Ui5SideNavigation,
@@ -23,6 +23,7 @@ use crate::icon::Icon;
 mod elements {
     use silkenweb::{elements::CustomEvent, html_element, parent_element};
 
+    use super::SelectionChangeDetail;
     use crate::icon::Icon;
 
     html_element!(
@@ -32,7 +33,7 @@ mod elements {
             }
 
             custom_events {
-                selection-change: CustomEvent<web_sys::HtmlElement>,
+                selection-change: CustomEvent<SelectionChangeDetail>,
             }
         }
     );
@@ -107,16 +108,13 @@ where
 
     pub fn on_selection_change(
         self,
-        mut f: impl FnMut(CustomEvent<web_sys::HtmlElement>, Id) + 'static,
+        mut f: impl FnMut(CustomEvent<SelectionChangeDetail>, Id) + 'static,
     ) -> Self {
         Self(
             self.0.on_selection_change(move |event, _target| {
                 let id = event
                     .detail()
-                    .unchecked_into::<Item>()
                     .item()
-                    .dyn_into::<web_sys::HtmlElement>()
-                    .unwrap_throw()
                     .get_attribute(SELECTED_ID)
                     .unwrap_throw()
                     .parse()
@@ -286,10 +284,10 @@ impl<T> From<SideNavigationSubItemBuilder<T>> for Node {
 
 #[wasm_bindgen]
 extern "C" {
-    type Item;
+    pub type SelectionChangeDetail;
 
     #[wasm_bindgen(structural, method, getter)]
-    fn item(this: &Item) -> JsValue;
+    pub fn item(this: &SelectionChangeDetail) -> web_sys::HtmlElement;
 }
 
 const SELECTED_ID: &str = "data-silkenweb-ui5-id";
