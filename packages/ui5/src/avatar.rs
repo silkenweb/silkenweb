@@ -9,20 +9,24 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
+use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::{html::Img, CustomEvent},
-    node::element::{ElementBuilder, ParentBuilder},
+    node::{
+        element::{ElementBuilder, ParentBuilder},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, UnwrapThrowExt};
+use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 use self::elements::{ui5_avatar, ui5_avatar_group, Ui5AvatarGroup, Ui5AvatarGroupBuilder};
 use crate::{icon::Icon, SELECTED_ID};
 
-// TODO: Type attr and overflow slot
-
+#[derive(Display)]
+#[display(style = "CamelCase")]
 pub enum ColorScheme {
     Accent1,
     Accent2,
@@ -38,26 +42,14 @@ pub enum ColorScheme {
 
 impl Attribute for ColorScheme {
     fn text(&self) -> Option<Cow<str>> {
-        Some(
-            match self {
-                ColorScheme::Accent1 => "Accent1",
-                ColorScheme::Accent2 => "Accent2",
-                ColorScheme::Accent3 => "Accent3",
-                ColorScheme::Accent4 => "Accent4",
-                ColorScheme::Accent5 => "Accent5",
-                ColorScheme::Accent6 => "Accent6",
-                ColorScheme::Accent7 => "Accent7",
-                ColorScheme::Accent8 => "Accent8",
-                ColorScheme::Accent9 => "Accent9",
-                ColorScheme::Accent10 => "Accent10",
-            }
-            .into(),
-        )
+        Some(self.to_string().into())
     }
 }
 
 impl AsAttribute<ColorScheme> for ColorScheme {}
 
+#[derive(Display)]
+#[display(style = "CamelCase")]
 pub enum Shape {
     Circle,
     Square,
@@ -65,18 +57,14 @@ pub enum Shape {
 
 impl Attribute for Shape {
     fn text(&self) -> Option<Cow<str>> {
-        Some(
-            match self {
-                Shape::Circle => "Circle",
-                Shape::Square => "Square",
-            }
-            .into(),
-        )
+        Some(self.to_string().into())
     }
 }
 
 impl AsAttribute<Shape> for Shape {}
 
+#[derive(Display)]
+#[display(style = "UPPERCASE")]
 pub enum Size {
     Xs,
     S,
@@ -87,25 +75,31 @@ pub enum Size {
 
 impl Attribute for Size {
     fn text(&self) -> Option<Cow<str>> {
-        Some(
-            match self {
-                Size::Xs => "Xs",
-                Size::S => "S",
-                Size::M => "M",
-                Size::L => "L",
-                Size::Xl => "Xl",
-            }
-            .into(),
-        )
+        Some(self.to_string().into())
     }
 }
 
 impl AsAttribute<Size> for Size {}
 
+#[derive(Display)]
+#[display(style = "CamelCase")]
+pub enum GroupType {
+    Group,
+    Individual,
+}
+
+impl Attribute for GroupType {
+    fn text(&self) -> Option<Cow<str>> {
+        Some(self.to_string().into())
+    }
+}
+
+impl AsAttribute<GroupType> for GroupType {}
+
 mod elements {
     use silkenweb::{elements::CustomEvent, html_element, parent_element};
 
-    use super::{ColorScheme, GroupClicked, Shape, Size};
+    use super::{ColorScheme, GroupClicked, GroupType, Shape, Size};
     use crate::icon::Icon;
 
     html_element!(
@@ -126,6 +120,10 @@ mod elements {
 
     html_element!(
         ui5-avatar-group<web_sys::HtmlElement> {
+            attributes {
+                r#type: GroupType,
+            }
+
             custom_events {
                 click: CustomEvent<GroupClicked>,
                 overflow: web_sys::CustomEvent,
@@ -226,6 +224,19 @@ where
     Id: Display + FromStr,
     Id::Err: Debug,
 {
+    pub fn r#type(self, value: GroupType) -> Self {
+        Self(self.0.r#type(value), self.1)
+    }
+
+    pub fn r#type_signal(self, value: impl Signal<Item = GroupType> + 'static) -> Self {
+        Self(self.0.r#type_signal(value), self.1)
+    }
+
+    // TODO: Restrict these to UI5 button
+    pub fn overflow_button(self, button: impl HtmlElement + Into<Node>) -> Self {
+        Self(self.0.child(button.slot("overflowButton")), self.1)
+    }
+
     pub fn children(self, children: impl IntoIterator<Item = (Id, AvatarBuilder)>) -> Self {
         Self(
             self.0.children(
@@ -256,18 +267,9 @@ where
                 let id = if ev.detail().overflow_button_clicked() {
                     None
                 } else {
-                    // This doesn't work as documented. `let avatar = ev.detail().target_ref()`
-                    // should work. May be something to do with the way we
-                    // bundle UI5
-                    let avatar = ev
-                        .event()
-                        .target()
-                        .unwrap_throw()
-                        .dyn_into::<web_sys::HtmlElement>()
-                        .unwrap_throw();
-
                     Some(
-                        avatar
+                        ev.detail()
+                            .target_ref()
                             .get_attribute(SELECTED_ID)
                             .unwrap_throw()
                             .parse()
