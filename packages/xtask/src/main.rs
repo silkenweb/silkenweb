@@ -109,6 +109,7 @@ fn build_website() -> WorkflowResult<()> {
         "async-http-request",
         "counter",
         "counter-list",
+        "element-handle",
         "hackernews-clone",
         "hello-world",
         "hydration",
