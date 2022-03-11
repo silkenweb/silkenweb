@@ -10,6 +10,7 @@ use silkenweb::{
 use silkenweb_ui5::{
     avatar::{self, Avatar, AvatarGroup},
     badge::{self, Badge},
+    bar::{self, Bar, BarDesign},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
     side_navigation::{self, side_navigation},
@@ -30,6 +31,7 @@ pub fn main() -> Result<(), JsValue> {
             item(Selected::Avatar).text("Avatar"),
             item(Selected::AvatarGroup).text("Avatar Group"),
             item(Selected::Badge).text("Badge"),
+            item(Selected::Bar).text("Bar"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
         ])
@@ -45,6 +47,7 @@ pub fn main() -> Result<(), JsValue> {
                     Selected::Avatar => avatar().into(),
                     Selected::AvatarGroup => avatar_group().into(),
                     Selected::Badge => badge().into(),
+                    Selected::Bar => bar().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
@@ -83,6 +86,16 @@ fn avatar_group() -> AvatarGroup {
         .build()
 }
 
+fn badge() -> Badge {
+    badge::badge().color_scheme(2).text("Badge").icon(icon())
+}
+
+fn bar() -> Bar {
+    bar::bar(div().text("Start"), div().text("Middle"), div().text("End"))
+        .design(BarDesign::Header)
+        .build()
+}
+
 fn calendar() -> Ui5Calendar {
     ui5_calendar()
         .format_pattern("yyyy-MM-dd")
@@ -96,10 +109,6 @@ fn calendar() -> Ui5Calendar {
         .build()
 }
 
-fn badge() -> Badge {
-    badge::badge().color_scheme(2).text("Badge").icon(icon())
-}
-
 fn icon() -> Ui5Icon {
     ui5_icon().name(Icon::Activate).build()
 }
@@ -109,6 +118,7 @@ enum Selected {
     Avatar,
     AvatarGroup,
     Badge,
+    Bar,
     Icon,
     Calendar,
 }
