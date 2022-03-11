@@ -282,7 +282,6 @@ impl ElementBuilder for ElementBuilderBase {
         self.spawn_future(future)
     }
 
-    // TODO: Doc
     fn handle(&self) -> ElementHandle<Self::DomType> {
         ElementHandle(self.element.hydro_elem.weak(), PhantomData)
     }
@@ -388,7 +387,26 @@ pub trait ElementBuilder: Sized {
         f: impl Fn(&Self::DomType, T) + Clone + 'static,
     ) -> Self;
 
-    // TODO: Doc
+    /// Get a handle to the element.
+    ///
+    /// Handles can be cloned and used within click handlers, for example.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::Mutable;
+    /// # use silkenweb::{elements::html::*, node::element::ElementBuilder, prelude::*};
+    /// let text = Mutable::new("".to_string());
+    /// let input = input();
+    /// let input_handle = input.handle();
+    /// let app = div()
+    ///     .child(input)
+    ///     .child(button().text("Read Input").on_click({
+    ///         clone!(text);
+    ///         move |_, _| text.set(input_handle.dom_element().value())
+    ///     }))
+    ///     .text_signal(text.signal_cloned());
+    /// ```
     fn handle(&self) -> ElementHandle<Self::DomType>;
 
     /// Spawn a future on the element.
@@ -560,19 +578,29 @@ pub(super) enum Resource {
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }
 
-// TODO: Docs
+/// A handle to an element in the DOM.
+///
+/// This acts as a weak reference to the element. See [`ElementBuilder::handle`]
+/// for an example.
 #[derive(Clone)]
 pub struct ElementHandle<DomType>(WeakHydrationElement, PhantomData<DomType>);
 
 impl<DomType: JsCast> ElementHandle<DomType> {
-    // TODO: Docs
+    /// Get the associated DOM element, if the referenced element is still live.
+    ///
+    /// If the referenced element is neither in the DOM, or referenced from the
+    /// stack, this will return [`None`].
     pub fn try_dom_element(&self) -> Option<DomType> {
         self.0
             .try_eval_dom_element()
             .map(|elem| elem.dyn_into().unwrap())
     }
 
-    // TODO: Docs
+    /// Get the associated DOM element, or panic.
+    ///
+    /// # Panics
+    ///
+    /// This will panic if [`Self::try_dom_element`] would return [`None`].
     pub fn dom_element(&self) -> DomType {
         self.try_dom_element()
             .expect("Referenced element no longer exists")
@@ -580,7 +608,9 @@ impl<DomType: JsCast> ElementHandle<DomType> {
 }
 
 impl ElementHandle<web_sys::Element> {
-    // TODO: Docs
+    /// Cast the dom type of an [`ElementHandle`].
+    ///
+    /// It is the clients responsibility to ensure the new type is correct.
     pub fn cast<T: JsCast>(self) -> ElementHandle<T> {
         ElementHandle(self.0, PhantomData)
     }
