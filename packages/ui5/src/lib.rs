@@ -3,6 +3,7 @@ pub mod badge;
 pub mod bar;
 pub mod breadcrumbs;
 pub mod busy_indicator;
+pub mod button;
 pub mod chrono;
 pub mod icon;
 pub mod side_navigation;

@@ -2,7 +2,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
 use silkenweb::{
     css_classes,
-    elements::html::div,
+    elements::html::{div},
     mount,
     node::element::{Element, ElementBuilder},
     prelude::{HtmlElement, ParentBuilder},
@@ -15,7 +15,7 @@ use silkenweb_ui5::{
     busy_indicator::{self, BusyIndicator},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
-    side_navigation::{self, side_navigation},
+    side_navigation::{self, side_navigation}, button::{self, Button},
 };
 use wasm_bindgen::prelude::JsValue;
 
@@ -36,6 +36,7 @@ pub fn main() -> Result<(), JsValue> {
             item(Selected::Bar).text("Bar"),
             item(Selected::Breadcrumbs).text("Breadcrumbs"),
             item(Selected::BusyIndicator).text("BusyIndicator"),
+            item(Selected::Button).text("Button"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
         ])
@@ -54,6 +55,7 @@ pub fn main() -> Result<(), JsValue> {
                     Selected::Bar => bar().into(),
                     Selected::BusyIndicator => busy_indicator().into(),
                     Selected::Breadcrumbs => breadcrumbs().into(),
+                    Selected::Button => button().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
@@ -128,6 +130,10 @@ fn busy_indicator() -> BusyIndicator {
     busy_indicator::busy_indicator().active().build()
 }
 
+fn button() -> Button {
+    button::button().text("Press Me").on_click(|_, _| web_log::println!("Button clicked")).build()
+}
+
 fn calendar() -> Ui5Calendar {
     ui5_calendar()
         .format_pattern("yyyy-MM-dd")
@@ -153,6 +159,7 @@ enum Selected {
     Bar,
     Breadcrumbs,
     BusyIndicator,
+    Button,
     Icon,
     Calendar,
 }
