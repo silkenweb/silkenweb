@@ -2,7 +2,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use parse_display::{Display, FromStr};
 use silkenweb::{
     css_classes,
-    elements::html::{div},
+    elements::html::div,
     mount,
     node::element::{Element, ElementBuilder},
     prelude::{HtmlElement, ParentBuilder},
@@ -13,9 +13,10 @@ use silkenweb_ui5::{
     bar::{self, Bar, BarDesign},
     breadcrumbs::{self, breadcrumbs_item, Breadcrumbs},
     busy_indicator::{self, BusyIndicator},
+    button::{self, Button},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
-    side_navigation::{self, side_navigation}, button::{self, Button},
+    side_navigation::{self, side_navigation},
 };
 use wasm_bindgen::prelude::JsValue;
 
@@ -131,7 +132,10 @@ fn busy_indicator() -> BusyIndicator {
 }
 
 fn button() -> Button {
-    button::button().text("Press Me").on_click(|_, _| web_log::println!("Button clicked")).build()
+    button::button()
+        .text("Press Me")
+        .on_click(|_, _| web_log::println!("Button clicked"))
+        .build()
 }
 
 fn calendar() -> Ui5Calendar {
