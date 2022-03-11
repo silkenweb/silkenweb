@@ -1,6 +1,7 @@
 pub mod avatar;
 pub mod badge;
 pub mod bar;
+pub mod breadcrumbs;
 pub mod chrono;
 pub mod icon;
 pub mod side_navigation;

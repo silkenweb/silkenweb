@@ -11,6 +11,7 @@ use silkenweb_ui5::{
     avatar::{self, Avatar, AvatarGroup},
     badge::{self, Badge},
     bar::{self, Bar, BarDesign},
+    breadcrumbs::{self, breadcrumbs_item, Breadcrumbs},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
     side_navigation::{self, side_navigation},
@@ -32,6 +33,7 @@ pub fn main() -> Result<(), JsValue> {
             item(Selected::AvatarGroup).text("Avatar Group"),
             item(Selected::Badge).text("Badge"),
             item(Selected::Bar).text("Bar"),
+            item(Selected::Breadcrumbs).text("Breadcrumbs"),
             item(Selected::Calendar).text("Calendar").selected(),
             item(Selected::Icon).text("Icon"),
         ])
@@ -48,6 +50,7 @@ pub fn main() -> Result<(), JsValue> {
                     Selected::AvatarGroup => avatar_group().into(),
                     Selected::Badge => badge().into(),
                     Selected::Bar => bar().into(),
+                    Selected::Breadcrumbs => breadcrumbs().into(),
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
@@ -96,6 +99,28 @@ fn bar() -> Bar {
         .build()
 }
 
+fn breadcrumbs() -> Breadcrumbs {
+    #[derive(FromStr, Display)]
+    enum BreadcrumbId {
+        Item1,
+        Item2,
+        Item3,
+        Item4,
+        Item5,
+    }
+
+    breadcrumbs::breadcrumbs()
+        .children([
+            (BreadcrumbId::Item1, breadcrumbs_item().text("Item1")),
+            (BreadcrumbId::Item2, breadcrumbs_item().text("Item2")),
+            (BreadcrumbId::Item3, breadcrumbs_item().text("Item3")),
+            (BreadcrumbId::Item4, breadcrumbs_item().text("Item4")),
+            (BreadcrumbId::Item5, breadcrumbs_item().text("Item5")),
+        ])
+        .on_item_click(|_, id| web_log::println!("{} clicked", id))
+        .build()
+}
+
 fn calendar() -> Ui5Calendar {
     ui5_calendar()
         .format_pattern("yyyy-MM-dd")
@@ -119,6 +144,7 @@ enum Selected {
     AvatarGroup,
     Badge,
     Bar,
+    Breadcrumbs,
     Icon,
     Calendar,
 }
