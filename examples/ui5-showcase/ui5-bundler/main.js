@@ -6,6 +6,7 @@ import "@ui5/webcomponents/dist/Avatar";
 import "@ui5/webcomponents/dist/AvatarGroup";
 import "@ui5/webcomponents/dist/Badge";
 import "@ui5/webcomponents/dist/Breadcrumbs";
+import "@ui5/webcomponents/dist/BusyIndicator";
 import "@ui5/webcomponents/dist/Button";
 import "@ui5/webcomponents/dist/Calendar";
 import "@ui5/webcomponents/dist/Icon";
