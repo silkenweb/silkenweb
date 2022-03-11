@@ -10,6 +10,7 @@
 - Webcomponents:
   - Support for shadow root (`attach_shadow_children`)
   - Support for HTML `slot` elements
+- Element handles, so you can reference an element from elsewhere in the DOM tree. See the [Element Handle](examples/element-handle) example.
 
 ## 0.2.0 - 2021-02-09
 
