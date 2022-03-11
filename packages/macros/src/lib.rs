@@ -90,6 +90,10 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
                 Self{#derive_field: self.#derive_field.effect_signal(sig, f) #fields_tail}
             }
 
+            fn handle(&self) -> ::silkenweb::node::element::ElementHandle<Self::DomType> {
+                self.#derive_field.handle()
+            }
+
             fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
                 Self{#derive_field: self.#derive_field.spawn_future(future) #fields_tail}
             }

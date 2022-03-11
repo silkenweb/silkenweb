@@ -1517,6 +1517,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-element-handle"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "silkenweb 0.2.0",
+]
+
+[[package]]
 name = "silkenweb-example-hackernews-clone"
 version = "0.1.0"
 dependencies = [

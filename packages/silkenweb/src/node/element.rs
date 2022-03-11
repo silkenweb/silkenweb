@@ -17,6 +17,7 @@ use std::{
     cell::{RefCell, RefMut},
     fmt::{self, Display},
     future::Future,
+    marker::PhantomData,
     mem,
     rc::Rc,
 };
@@ -276,6 +277,11 @@ impl ElementBuilder for ElementBuilderBase {
         self.spawn_future(future)
     }
 
+    // TODO: Doc
+    fn handle(&self) -> ElementHandle<Self::DomType> {
+        ElementHandle(self.element.hydro_elem.clone(), PhantomData)
+    }
+
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
         self.element
             .resources
@@ -376,6 +382,9 @@ pub trait ElementBuilder: Sized {
         sig: impl Signal<Item = T> + 'static,
         f: impl Fn(&Self::DomType, T) + Clone + 'static,
     ) -> Self;
+
+    // TODO: Doc
+    fn handle(&self) -> ElementHandle<Self::DomType>;
 
     /// Spawn a future on the element.
     ///
@@ -543,4 +552,23 @@ pub(super) enum Resource {
     ChildVec(Rc<RefCell<ChildVec>>),
     Child(Rc<RefCell<Option<Node>>>),
     Future(DiscardOnDrop<CancelableFutureHandle>),
+}
+
+// TODO: Docs
+// TODO: We really want to hold a weak reference here, but we need to ensure we
+// don't discard the strong reference.
+pub struct ElementHandle<DomType>(HydrationElement, PhantomData<DomType>);
+
+impl<DomType: JsCast> ElementHandle<DomType> {
+    // TODO: Docs
+    pub fn dom_element(&self) -> DomType {
+        self.0.eval_dom_element().dyn_into().unwrap_throw()
+    }
+}
+
+impl ElementHandle<web_sys::Element> {
+    // TODO: Docs
+    pub fn cast<T: JsCast>(self) -> ElementHandle<T> {
+        ElementHandle(self.0, PhantomData)
+    }
 }

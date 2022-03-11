@@ -221,6 +221,10 @@ macro_rules! dom_element {
                 }
             }
 
+            fn handle(&self) -> $crate::node::element::ElementHandle<Self::DomType> {
+                self.builder.handle().cast()
+            }
+
             fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
                 Self{ builder: self.builder.spawn_future(future) }
             }
