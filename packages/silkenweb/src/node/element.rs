@@ -44,10 +44,10 @@ use crate::{
     task,
 };
 
+mod child_builder;
 mod child_vec;
-mod optional_children;
 
-pub use optional_children::OptionalChildren;
+pub use child_builder::ChildBuilder;
 
 /// Build an HTML element.
 pub struct ElementBuilderBase {
@@ -193,7 +193,7 @@ impl ParentBuilder for ElementBuilderBase {
         self.spawn_future(updater).build()
     }
 
-    fn optional_children(mut self, children: OptionalChildren) -> Self::Target {
+    fn child_builder(mut self, children: ChildBuilder) -> Self::Target {
         self.element
             .resources
             .extend(children.futures.into_iter().map(Resource::Future));
@@ -509,7 +509,7 @@ pub trait ParentBuilder: ElementBuilder {
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
 
-    /// Add [`OptionalChildren`]
+    /// Add [`ChildBuilder`].
     ///
     /// Sometimes element children are optional, dependant on the value of a
     /// signal for example.
@@ -521,15 +521,15 @@ pub trait ParentBuilder: ElementBuilder {
     /// # use silkenweb::{
     /// #     elements::html::div,
     /// #     node::{
-    /// #         element::{OptionalChildren, ParentBuilder},
+    /// #         element::{ChildBuilder, ParentBuilder},
     /// #         text,
     /// #     },
     /// # };
     /// let include_child1 = Mutable::new(true);
     /// let include_child2 = Mutable::new(true);
     ///
-    /// div().optional_children(
-    ///     OptionalChildren::new()
+    /// div().child_builder(
+    ///     ChildBuilder::new()
     ///         .optional_child_signal(
     ///             include_child1
     ///                 .signal()
@@ -542,7 +542,7 @@ pub trait ParentBuilder: ElementBuilder {
     ///         ),
     /// );
     /// ```
-    fn optional_children(self, children: OptionalChildren) -> Self::Target;
+    fn child_builder(self, children: ChildBuilder) -> Self::Target;
 }
 
 /// An element that is allowed to have a shadow root

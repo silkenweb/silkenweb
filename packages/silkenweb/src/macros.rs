@@ -334,8 +334,8 @@ macro_rules! parent_element {
                 [< $name:camel $($name_tail:camel)* >] (self.builder.children_signal(children))
             }
 
-            fn optional_children(self, children: $crate::node::element::OptionalChildren) -> Self::Target {
-                [< $name:camel $($name_tail:camel)* >] (self.builder.optional_children(children))
+            fn child_builder(self, children: $crate::node::element::ChildBuilder) -> Self::Target {
+                [< $name:camel $($name_tail:camel)* >] (self.builder.child_builder(children))
             }
         }
     }};

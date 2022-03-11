@@ -2,7 +2,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::element::{Element, ElementBuilder, OptionalChildren, ParentBuilder},
+    node::element::{ChildBuilder, Element, ElementBuilder, ParentBuilder},
     prelude::HtmlElement,
 };
 
@@ -42,7 +42,7 @@ mod element {
 
 pub struct BarBuilder {
     builder: Ui5BarBuilder,
-    children: OptionalChildren,
+    children: ChildBuilder,
 }
 pub type Bar = Ui5Bar;
 
@@ -51,7 +51,7 @@ pub fn bar(
     middle: impl ElementBuilder<Target = impl Into<Element>>,
     end: impl ElementBuilder<Target = impl Into<Element>> + HtmlElement,
 ) -> BarBuilder {
-    let children = OptionalChildren::new()
+    let children = ChildBuilder::new()
         .child(start.slot("startContent").build().into())
         .child(middle.build().into())
         .child(end.slot("endContent").build().into());
@@ -67,7 +67,7 @@ pub fn bar_signal(
     middle: impl Signal<Item = impl ElementBuilder<Target = impl Into<Element>>> + 'static,
     end: impl Signal<Item = impl ElementBuilder<Target = impl Into<Element>> + HtmlElement> + 'static,
 ) -> BarBuilder {
-    let children = OptionalChildren::new()
+    let children = ChildBuilder::new()
         .child_signal(start.map(|e| e.slot("startContent").build().into()))
         .child_signal(middle.map(|e| e.build().into()))
         .child_signal(end.map(|e| e.slot("endContent").build().into()));
@@ -153,6 +153,6 @@ impl ElementBuilder for BarBuilder {
     }
 
     fn build(self) -> Self::Target {
-        self.builder.optional_children(self.children)
+        self.builder.child_builder(self.children)
     }
 }

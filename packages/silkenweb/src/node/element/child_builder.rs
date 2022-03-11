@@ -9,14 +9,14 @@ use futures_signals::{
 
 use super::{spawn_cancelable_future, Node};
 
-/// Helper to build children when some are optional and dependant on signal
-/// vlaues.
+/// Helper to build more complex sets of children.
 ///
-/// See [`ParentBuilder::optional_children`] for an example.
+/// Some children may be signals and optional. See
+/// [`ParentBuilder::child_builder`] for an example.
 ///
-/// [`ParentBuilder::optional_children`]: super::ParentBuilder::optional_children
+/// [`ParentBuilder::child_builder`]: super::ParentBuilder::child_builder
 #[derive(Default)]
-pub struct OptionalChildren {
+pub struct ChildBuilder {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,
     pub(super) futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
     len: usize,
@@ -24,7 +24,7 @@ pub struct OptionalChildren {
 
 type Item = Rc<RefCell<Option<Node>>>;
 
-impl OptionalChildren {
+impl ChildBuilder {
     pub fn new() -> Self {
         Self::default()
     }
