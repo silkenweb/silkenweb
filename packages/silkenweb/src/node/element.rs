@@ -38,7 +38,7 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     hydration::{
-        node::{DryNode, HydrationElement, HydrationText, Namespace},
+        node::{DryNode, HydrationElement, HydrationText, Namespace, WeakHydrationElement},
         HydrationStats,
     },
     task,
@@ -131,10 +131,15 @@ impl ParentBuilder for ElementBuilderBase {
         self.has_preceding_children = true;
 
         let mut child = child.into();
-        self.element.resources.extend(child.take_resources());
 
         self.element.hydro_elem.append_child_now(&child);
-        self.element.hydro_elem.store_child(child.into_hydro());
+
+        if child.has_weak_refs() {
+            self.element.resources.push(Resource::Child(child));
+        } else {
+            self.element.resources.extend(child.take_resources());
+            self.element.hydro_elem.store_child(child.into_hydro());
+        }
 
         self
     }
@@ -146,7 +151,7 @@ impl ParentBuilder for ElementBuilderBase {
         let existing_child: Rc<RefCell<Option<Node>>> = Rc::new(RefCell::new(None));
         self.element
             .resources
-            .push(Resource::Child(existing_child.clone()));
+            .push(Resource::ChildRef(existing_child.clone()));
         let mut element = self.element.hydro_elem.clone();
 
         let updater = child.for_each(move |child| {
@@ -279,7 +284,7 @@ impl ElementBuilder for ElementBuilderBase {
 
     // TODO: Doc
     fn handle(&self) -> ElementHandle<Self::DomType> {
-        ElementHandle(self.element.hydro_elem.clone(), PhantomData)
+        ElementHandle(self.element.hydro_elem.weak(), PhantomData)
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
@@ -550,19 +555,27 @@ fn spawn_cancelable_future(
 /// other resource types. For example, `always` will yield a value, then finish.
 pub(super) enum Resource {
     ChildVec(Rc<RefCell<ChildVec>>),
-    Child(Rc<RefCell<Option<Node>>>),
+    ChildRef(Rc<RefCell<Option<Node>>>),
+    Child(Node),
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }
 
 // TODO: Docs
-// TODO: We really want to hold a weak reference here, but we need to ensure we
-// don't discard the strong reference.
-pub struct ElementHandle<DomType>(HydrationElement, PhantomData<DomType>);
+#[derive(Clone)]
+pub struct ElementHandle<DomType>(WeakHydrationElement, PhantomData<DomType>);
 
 impl<DomType: JsCast> ElementHandle<DomType> {
     // TODO: Docs
+    pub fn try_dom_element(&self) -> Option<DomType> {
+        self.0
+            .try_eval_dom_element()
+            .map(|elem| elem.dyn_into().unwrap())
+    }
+
+    // TODO: Docs
     pub fn dom_element(&self) -> DomType {
-        self.0.eval_dom_element().dyn_into().unwrap_throw()
+        self.try_dom_element()
+            .expect("Referenced element no longer exists")
     }
 }
 

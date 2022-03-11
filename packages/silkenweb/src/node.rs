@@ -32,6 +32,13 @@ impl Node {
         }
     }
 
+    fn has_weak_refs(&self) -> bool {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.has_weak_refs(),
+            NodeEnum::Text(text) => text.hydro_text.has_weak_refs(),
+        }
+    }
+
     fn take_resources(&mut self) -> Vec<Resource> {
         match &mut self.0 {
             NodeEnum::Element(elem) => elem.take_resources(),

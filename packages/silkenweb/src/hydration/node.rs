@@ -1,7 +1,7 @@
 use std::{
     cell::{RefCell, RefMut},
     fmt::{self, Display},
-    rc::Rc,
+    rc::{Rc, Weak},
 };
 
 use wasm_bindgen::JsValue;
@@ -135,6 +135,14 @@ impl HydrationElement {
             .map(f, DryElement::effect, WetElement::effect);
     }
 
+    pub fn has_weak_refs(&self) -> bool {
+        Rc::weak_count(&self.0) != 0
+    }
+
+    pub fn weak(&self) -> WeakHydrationElement {
+        WeakHydrationElement(Rc::downgrade(&self.0))
+    }
+
     fn borrow_mut(&self) -> RefMut<Lazy<WetElement, DryElement>> {
         self.0.borrow_mut()
     }
@@ -150,6 +158,18 @@ impl fmt::Display for HydrationElement {
             .map(f, |node, f| node.fmt(f), |node, f| node.fmt(f))
     }
 }
+
+#[derive(Clone)]
+pub struct WeakHydrationElement(Weak<RefCell<Lazy<WetElement, DryElement>>>);
+
+impl WeakHydrationElement {
+    pub fn try_eval_dom_element(&self) -> Option<web_sys::Element> {
+        self.0
+            .upgrade()
+            .map(|lazy| lazy.borrow_mut().wet().dom_element().clone())
+    }
+}
+
 #[derive(Clone)]
 pub struct HydrationText(Rc<RefCell<Lazy<WetText, DryText>>>);
 
@@ -180,6 +200,10 @@ impl HydrationText {
 
     pub fn eval_dom_text(&self) -> web_sys::Text {
         self.wet().dom_text().clone()
+    }
+
+    pub fn has_weak_refs(&self) -> bool {
+        Rc::weak_count(&self.0) != 0
     }
 
     fn borrow_mut(&self) -> RefMut<Lazy<WetText, DryText>> {
