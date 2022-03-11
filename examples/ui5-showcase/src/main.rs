@@ -12,9 +12,10 @@ use silkenweb_ui5::{
     badge::{self, Badge},
     bar::{self, Bar, BarDesign},
     breadcrumbs::{self, breadcrumbs_item, Breadcrumbs},
+    busy_indicator::{self, BusyIndicator},
     chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
     icon::{ui5_icon, Icon, Ui5Icon},
-    side_navigation::{self, side_navigation}, busy_indicator::{BusyIndicator, self},
+    side_navigation::{self, side_navigation},
 };
 use wasm_bindgen::prelude::JsValue;
 
