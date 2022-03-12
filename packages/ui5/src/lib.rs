@@ -5,6 +5,7 @@ pub mod breadcrumbs;
 pub mod busy_indicator;
 pub mod button;
 pub mod calendar;
+pub mod card;
 pub mod icon;
 pub mod side_navigation;
 
