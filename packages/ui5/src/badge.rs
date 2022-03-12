@@ -1,6 +1,7 @@
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     node::element::{ElementBuilder, ParentBuilder},
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
 
@@ -55,3 +56,9 @@ impl BadgeBuilder {
         Self(self.0.text_signal(text))
     }
 }
+
+impl HtmlElement for BadgeBuilder {}
+
+impl HtmlElementEvents for BadgeBuilder {}
+
+impl ElementEvents for BadgeBuilder {}

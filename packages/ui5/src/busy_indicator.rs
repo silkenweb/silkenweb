@@ -3,7 +3,7 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::{element::ElementBuilder, Node},
-    prelude::ParentBuilder,
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
 
@@ -96,3 +96,9 @@ impl BusyIndicatorBuilder {
         self.0.child_signal(child)
     }
 }
+
+impl HtmlElement for BusyIndicatorBuilder {}
+
+impl HtmlElementEvents for BusyIndicatorBuilder {}
+
+impl ElementEvents for BusyIndicatorBuilder {}

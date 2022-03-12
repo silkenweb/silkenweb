@@ -9,6 +9,7 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::element::ParentBuilder,
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
@@ -140,6 +141,12 @@ impl CalendarBuilder {
         Self(self.0.on_selected_dates_change(f))
     }
 }
+
+impl HtmlElement for CalendarBuilder {}
+
+impl HtmlElementEvents for CalendarBuilder {}
+
+impl ElementEvents for CalendarBuilder {}
 
 #[derive(Display, Copy, Clone)]
 pub enum SelectionMode {

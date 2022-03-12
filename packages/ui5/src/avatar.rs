@@ -209,6 +209,12 @@ impl AvatarBuilder {
     }
 }
 
+impl HtmlElement for AvatarBuilder {}
+
+impl HtmlElementEvents for AvatarBuilder {}
+
+impl ElementEvents for AvatarBuilder {}
+
 pub type AvatarGroup = Ui5AvatarGroup;
 
 pub fn avatar_group<Id>() -> AvatarGroupBuilder<Id> {
