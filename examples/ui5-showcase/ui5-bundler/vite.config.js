@@ -16,7 +16,7 @@ module.exports = defineConfig({
         lib: {
             entry: path.resolve(__dirname, 'main.js'),
             name: 'UI5',
-            fileName: (format) => `entry/ui5.${format}.js`,
+            fileName: (format) => `ui5.${format}.js`,
             formats: ['esm'],
         },
     }

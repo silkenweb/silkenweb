@@ -8,5 +8,5 @@ stage = "post_build"
 command = "sh"
 command_arguments = [
     "-c",
-    'rsync -a --exclude /entry/ ui5-bundler/dist/ "$TRUNK_STAGING_DIR/"',
+    'rsync -a --exclude /build-finished.txt --exclude /ui5.esm.js ui5-bundler/dist/ "$TRUNK_STAGING_DIR/"',
 ]
