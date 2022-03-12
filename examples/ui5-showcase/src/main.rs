@@ -14,7 +14,7 @@ use silkenweb_ui5::{
     breadcrumbs::{self, breadcrumbs_item, Breadcrumbs},
     busy_indicator::{self, BusyIndicator},
     button::{self, Button},
-    chrono::{ui5_calendar, SelectionMode, Ui5Calendar},
+    calendar::{self, Calendar, SelectionMode},
     icon::{ui5_icon, Icon, Ui5Icon},
     side_navigation::{self, side_navigation},
 };
@@ -138,13 +138,13 @@ fn button() -> Button {
         .build()
 }
 
-fn calendar() -> Ui5Calendar {
-    ui5_calendar()
+fn calendar() -> Calendar {
+    calendar::calendar()
         .format_pattern("yyyy-MM-dd")
-        .selected_date("2000-01-01".to_string())
+        .selected_dates(["2000-01-01".to_string()])
         .selection_mode(SelectionMode::Multiple)
         .on_selected_dates_change(|event, _target| {
-            for d in event.selected_dates() {
+            for d in event.dates() {
                 web_log::println!("{}", d);
             }
         })
