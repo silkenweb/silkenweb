@@ -31,13 +31,13 @@ mod elements {
 }
 
 pub use elements::{Ui5Card as Card, Ui5CardHeader as CardHeader};
-use futures_signals::signal::Signal;
 use silkenweb::{
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
 
 use self::elements::{ui5_card_header, Ui5CardHeaderBuilder};
+use crate::macros::attributes0;
 
 pub fn card_header_builder() -> CardHeaderBuilder {
     CardHeaderBuilder(ui5_card_header())
@@ -47,36 +47,11 @@ pub fn card_header_builder() -> CardHeaderBuilder {
 pub struct CardHeaderBuilder(Ui5CardHeaderBuilder);
 
 impl CardHeaderBuilder {
-    pub fn interactive(self, value: bool) -> Self {
-        Self(self.0.interactive(value))
-    }
-
-    pub fn interactive_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.interactive_signal(value))
-    }
-
-    pub fn status(self, value: &str) -> Self {
-        Self(self.0.status(value))
-    }
-
-    pub fn status_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.status_signal(value))
-    }
-
-    pub fn subtitle_text(self, value: &str) -> Self {
-        Self(self.0.subtitle_text(value))
-    }
-
-    pub fn subtitle_text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.subtitle_text_signal(value))
-    }
-
-    pub fn title_text(self, value: &str) -> Self {
-        Self(self.0.title_text(value))
-    }
-
-    pub fn title_text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.title_text_signal(value))
+    attributes0! {
+        interactive: bool,
+        status: String,
+        subtitle_text: String,
+        title_text: String,
     }
 
     pub fn on_click(self, f: impl FnMut(web_sys::CustomEvent, web_sys::Element) + 'static) -> Self {

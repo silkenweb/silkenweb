@@ -1,3 +1,5 @@
+mod macros;
+
 pub mod avatar;
 pub mod badge;
 pub mod bar;

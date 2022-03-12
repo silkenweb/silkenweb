@@ -6,7 +6,7 @@ use silkenweb::{
 };
 
 use self::elements::ui5_badge;
-use crate::icon::Ui5Icon;
+use crate::{icon::Ui5Icon, macros::attributes0};
 
 mod elements {
     use silkenweb::{html_element, parent_element};
@@ -32,13 +32,7 @@ pub fn badge() -> BadgeBuilder {
 pub struct BadgeBuilder(elements::Ui5BadgeBuilder);
 
 impl BadgeBuilder {
-    pub fn color_scheme(self, value: u8) -> Self {
-        Self(self.0.color_scheme(value))
-    }
-
-    pub fn color_scheme_signal(self, value: impl Signal<Item = u8> + 'static) -> Self {
-        Self(self.0.color_scheme_signal(value))
-    }
+    attributes0! {color_scheme: u8}
 
     pub fn icon(self, icon: impl Into<Ui5Icon>) -> Self {
         Self(self.0.child(icon.into()))

@@ -1,10 +1,7 @@
 use std::borrow::Cow;
 
 use chrono::{NaiveDate, NaiveDateTime};
-use futures_signals::{
-    signal::Signal,
-    signal_vec::{SignalVec, SignalVecExt},
-};
+use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
@@ -51,6 +48,7 @@ mod elements {
 pub use elements::Ui5Calendar as Calendar;
 
 use self::elements::{ui5_calendar, ui5_date, Ui5CalendarBuilder};
+use crate::macros::attributes0;
 
 pub fn calendar() -> CalendarBuilder {
     CalendarBuilder(ui5_calendar())
@@ -60,66 +58,14 @@ pub fn calendar() -> CalendarBuilder {
 pub struct CalendarBuilder(Ui5CalendarBuilder);
 
 impl CalendarBuilder {
-    pub fn hide_week_numbers(self, value: bool) -> Self {
-        Self(self.0.hide_week_numbers(value))
-    }
-
-    pub fn hide_week_numbers_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.hide_week_numbers_signal(value))
-    }
-
-    pub fn selection_mode(self, value: SelectionMode) -> Self {
-        Self(self.0.selection_mode(value))
-    }
-
-    pub fn selection_mode_signal(self, value: impl Signal<Item = SelectionMode> + 'static) -> Self {
-        Self(self.0.selection_mode_signal(value))
-    }
-
-    pub fn format_pattern(self, value: &str) -> Self {
-        Self(self.0.format_pattern(value))
-    }
-
-    pub fn format_pattern_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.format_pattern_signal(value))
-    }
-
-    pub fn max_date(self, value: &str) -> Self {
-        Self(self.0.max_date(value))
-    }
-
-    pub fn max_date_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.max_date_signal(value))
-    }
-
-    pub fn min_date(self, value: &str) -> Self {
-        Self(self.0.min_date(value))
-    }
-
-    pub fn min_date_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.min_date_signal(value))
-    }
-
-    pub fn primary_calendar_type(self, value: CalendarType) -> Self {
-        Self(self.0.primary_calendar_type(value))
-    }
-
-    pub fn primary_calendar_type_signal(
-        self,
-        value: impl Signal<Item = CalendarType> + 'static,
-    ) -> Self {
-        Self(self.0.primary_calendar_type_signal(value))
-    }
-
-    pub fn secondary_calendar_type(self, value: CalendarType) -> Self {
-        Self(self.0.secondary_calendar_type(value))
-    }
-
-    pub fn secondary_calendar_type_signal(
-        self,
-        value: impl Signal<Item = CalendarType> + 'static,
-    ) -> Self {
-        Self(self.0.secondary_calendar_type_signal(value))
+    attributes0! {
+        hide_week_numbers: bool,
+        selection_mode: SelectionMode,
+        format_pattern: String,
+        max_date: String,
+        min_date: String,
+        primary_calendar_type: CalendarType,
+        secondary_calendar_type: CalendarType,
     }
 
     pub fn selected_dates(self, dates: impl IntoIterator<Item = String>) -> Self {

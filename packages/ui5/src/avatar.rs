@@ -23,7 +23,11 @@ use silkenweb::{
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 use self::elements::{ui5_avatar, ui5_avatar_group, Ui5AvatarGroup, Ui5AvatarGroupBuilder};
-use crate::{icon::Icon, SELECTED_ID};
+use crate::{
+    icon::Icon,
+    macros::{attributes0, attributes1},
+    SELECTED_ID,
+};
 
 #[derive(Display)]
 #[display(style = "CamelCase")]
@@ -144,21 +148,7 @@ pub fn avatar() -> AvatarBuilder {
 pub struct AvatarBuilder(elements::Ui5AvatarBuilder);
 
 impl AvatarBuilder {
-    pub fn accessible_name(self, value: &str) -> Self {
-        Self(self.0.accessible_name(value))
-    }
-
-    pub fn accessible_name_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.accessible_name_signal(value))
-    }
-
-    pub fn color_scheme(self, value: ColorScheme) -> Self {
-        Self(self.0.color_scheme(value))
-    }
-
-    pub fn color_scheme_signal(self, value: impl Signal<Item = ColorScheme> + 'static) -> Self {
-        Self(self.0.color_scheme_signal(value))
-    }
+    attributes0! {accessible_name: String, color_scheme: ColorScheme}
 
     pub fn icon(self, value: Icon) -> Self {
         Self(self.0.icon(value))
@@ -230,13 +220,7 @@ where
     Id: Display + FromStr,
     Id::Err: Debug,
 {
-    pub fn r#type(self, value: GroupType) -> Self {
-        Self(self.0.r#type(value), self.1)
-    }
-
-    pub fn r#type_signal(self, value: impl Signal<Item = GroupType> + 'static) -> Self {
-        Self(self.0.r#type_signal(value), self.1)
-    }
+    attributes1! {1, r#type: GroupType}
 
     // TODO: Restrict these to UI5 button
     pub fn overflow_button(self, button: impl HtmlElement + Into<Node>) -> Self {

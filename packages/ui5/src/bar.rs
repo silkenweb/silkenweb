@@ -11,6 +11,7 @@ use silkenweb::{
 };
 
 use self::element::{ui5_bar, Ui5BarBuilder};
+use crate::macros::attributes0;
 
 #[derive(Copy, Clone, Eq, PartialEq, Display)]
 pub enum BarDesign {
@@ -60,13 +61,7 @@ pub fn bar() -> BarBuilder {
 }
 
 impl BarBuilder {
-    pub fn design(self, design: BarDesign) -> Self {
-        Self(self.0.design(design))
-    }
-
-    pub fn design_signal(self, design: impl Signal<Item = BarDesign> + 'static) -> Self {
-        Self(self.0.design_signal(design))
-    }
+    attributes0! {design: BarDesign}
 
     pub fn start_content(self, child: impl HtmlElement + Into<Element>) -> Self {
         Self(self.0.child(child.slot("startContent").into()))

@@ -1664,6 +1664,7 @@ dependencies = [
  "futures-signals",
  "js-sys",
  "parse-display",
+ "paste",
  "silkenweb 0.2.0",
  "wasm-bindgen",
  "web-sys",

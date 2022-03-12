@@ -4,10 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use futures_signals::{
-    signal::Signal,
-    signal_vec::{SignalVec, SignalVecExt},
-};
+use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
@@ -22,7 +19,7 @@ use self::element::{
     ui5_breadcrumbs, ui5_breadcrumbs_item, Ui5Breadcrumbs, Ui5BreadcrumbsBuilder,
     Ui5BreadcrumbsItem, Ui5BreadcrumbsItemBuilder,
 };
-use crate::SELECTED_ID;
+use crate::{macros::attributes1, SELECTED_ID};
 
 #[derive(Copy, Clone, Display, Eq, PartialEq)]
 pub enum BreadcrumbsDesign {
@@ -129,23 +126,10 @@ where
     Id: Display + FromStr,
     Id::Err: Debug,
 {
-    pub fn design(self, value: BreadcrumbsDesign) -> Self {
-        Self(self.0.design(value), self.1)
-    }
-
-    pub fn design_signal(self, value: impl Signal<Item = BreadcrumbsDesign> + 'static) -> Self {
-        Self(self.0.design_signal(value), self.1)
-    }
-
-    pub fn separator_style(self, value: BreadcrumbsSeparatorStyle) -> Self {
-        Self(self.0.separator_style(value), self.1)
-    }
-
-    pub fn separator_style_signal(
-        self,
-        value: impl Signal<Item = BreadcrumbsSeparatorStyle> + 'static,
-    ) -> Self {
-        Self(self.0.separator_style_signal(value), self.1)
+    attributes1! {
+        1,
+        design: BreadcrumbsDesign,
+        separator_style: BreadcrumbsSeparatorStyle
     }
 
     pub fn children(
