@@ -14,7 +14,7 @@
 use std::collections::HashSet;
 use std::{
     self,
-    cell::{RefCell, RefMut},
+    cell::RefCell,
     fmt::{self, Display},
     future::Future,
     marker::PhantomData,
@@ -22,11 +22,12 @@ use std::{
     rc::Rc,
 };
 
+use child_builder::ChildBuilder;
 use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future,
     signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
+    signal_vec::{MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, intern_str};
@@ -34,7 +35,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use self::child_vec::ChildVec;
-use super::Node;
+use super::{text, Node};
 use crate::{
     attribute::Attribute,
     hydration::{
@@ -47,12 +48,11 @@ use crate::{
 mod child_builder;
 mod child_vec;
 
-pub use child_builder::ChildBuilder;
-
 /// Build an HTML element.
 pub struct ElementBuilderBase {
     element: Element,
     has_preceding_children: bool,
+    child_builder: Option<Box<ChildBuilder>>,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
@@ -87,9 +87,16 @@ impl ElementBuilderBase {
                 resources: Vec::new(),
             },
             has_preceding_children: false,
+            child_builder: None,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
+    }
+
+    fn child_builder_mut(&mut self) -> &mut ChildBuilder {
+        self.has_preceding_children = true;
+        self.child_builder
+            .get_or_insert_with(|| Box::new(ChildBuilder::new()))
     }
 
     fn check_attribute_unique(&mut self, name: &str) {
@@ -97,11 +104,73 @@ impl ElementBuilderBase {
         debug_assert!(self.attributes.insert(name.into()));
         let _ = name;
     }
+
+    fn append_update(
+        items: &mut MutableVecLockMut<Rc<RefCell<Option<Node>>>>,
+        update: VecDiff<impl Into<Node>>,
+        len: usize,
+    ) {
+        fn item(value: impl Into<Node>) -> Rc<RefCell<Option<Node>>> {
+            Rc::new(RefCell::new(Some(value.into())))
+        }
+
+        match update {
+            VecDiff::Replace { values } => {
+                items.truncate(len);
+
+                for value in values {
+                    items.push_cloned(item(value));
+                }
+            }
+            VecDiff::InsertAt { index, value } => items.insert_cloned(index + len, item(value)),
+            VecDiff::UpdateAt { index, value } => items.set_cloned(index + len, item(value)),
+            VecDiff::RemoveAt { index } => {
+                items.remove(index + len);
+            }
+            VecDiff::Move {
+                old_index,
+                new_index,
+            } => items.move_from_to(old_index + len, new_index + len),
+            VecDiff::Push { value } => items.push_cloned(item(value)),
+            VecDiff::Pop {} => {
+                items.pop();
+            }
+            VecDiff::Clear {} => items.truncate(len),
+        }
+    }
+
+    fn simple_children_signal(
+        mut self,
+        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+    ) -> Element {
+        assert!(self.child_builder.is_none());
+
+        let child_vec = Rc::new(RefCell::new(ChildVec::new(
+            self.element.hydro_elem.clone(),
+            self.has_preceding_children,
+        )));
+        self.element
+            .resources
+            .push(Resource::ChildVec(child_vec.clone()));
+
+        let updater = children.for_each(move |update| {
+            child_vec.borrow_mut().apply_update(update);
+            async {}
+        });
+
+        self.spawn_future(updater).build()
+    }
 }
 
 impl ParentBuilder for ElementBuilderBase {
     fn text(mut self, child: &str) -> Self {
         self.has_preceding_children = true;
+
+        if let Some(child_builder) = self.child_builder.as_mut() {
+            child_builder.child(text(child));
+            return self;
+        }
+
         self.element
             .hydro_elem
             .append_child_now(HydrationText::new(child));
@@ -113,6 +182,11 @@ impl ParentBuilder for ElementBuilderBase {
         child_signal: impl Signal<Item = impl Into<String>> + 'static,
     ) -> Self {
         self.has_preceding_children = true;
+
+        if let Some(child_builder) = self.child_builder.as_mut() {
+            child_builder.child_signal(child_signal.map(|child| text(&child.into())));
+            return self;
+        }
 
         let mut text_node = HydrationText::new(intern_str(""));
         self.element.hydro_elem.append_child_now(text_node.clone());
@@ -130,6 +204,11 @@ impl ParentBuilder for ElementBuilderBase {
     fn child(mut self, child: impl Into<Node>) -> Self {
         self.has_preceding_children = true;
 
+        if let Some(child_builder) = self.child_builder.as_mut() {
+            child_builder.child(child);
+            return self;
+        }
+
         let mut child = child.into();
 
         self.element.hydro_elem.append_child_now(&child);
@@ -144,66 +223,53 @@ impl ParentBuilder for ElementBuilderBase {
         self
     }
 
-    fn child_signal(
+    fn child_signal(mut self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self {
+        self.child_builder_mut().child_signal(child);
+        self
+    }
+
+    fn optional_child_signal(
         mut self,
-        child: impl Signal<Item = impl Into<Node>> + 'static,
-    ) -> Self::Target {
-        let existing_child: Rc<RefCell<Option<Node>>> = Rc::new(RefCell::new(None));
-        self.element
-            .resources
-            .push(Resource::ChildRef(existing_child.clone()));
-        let mut element = self.element.hydro_elem.clone();
-
-        let updater = child.for_each(move |child| {
-            let child = child.into();
-            RefMut::map(existing_child.borrow_mut(), |existing_child| {
-                if let Some(existing_child) = existing_child {
-                    element.replace_child(&child, existing_child);
-                } else {
-                    element.append_child(&child);
-                }
-
-                *existing_child = Some(child);
-                existing_child
-            });
-
-            async {}
-        });
-
-        self.spawn_future(updater).build()
+        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
+    ) -> Self {
+        self.child_builder_mut().optional_child_signal(child);
+        self
     }
 
     fn children_signal(
         mut self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target {
-        let child_vec = Rc::new(RefCell::new(ChildVec::new(
-            self.element.hydro_elem.clone(),
-            self.has_preceding_children,
-        )));
-        self.element
-            .resources
-            .push(Resource::ChildVec(child_vec.clone()));
+        // TODO: Test this
+        if let Some(child_builder) = self.child_builder.take() {
+            self.element
+                .resources
+                .extend(child_builder.futures.into_iter().map(Resource::Future));
+            let items = child_builder.items;
+            let len = items.borrow().lock_ref().len();
 
-        let updater = children.for_each(move |update| {
-            child_vec.borrow_mut().apply_update(update);
-            async {}
-        });
+            let updater = children.for_each({
+                clone!(items);
+                move |update| {
+                    let items = items.borrow_mut();
 
-        self.spawn_future(updater).build()
-    }
+                    Self::append_update(&mut items.lock_mut(), update, len);
+                    async {}
+                }
+            });
+            self = self.spawn_future(updater);
 
-    fn child_builder(mut self, children: ChildBuilder) -> Self::Target {
-        self.element
-            .resources
-            .extend(children.futures.into_iter().map(Resource::Future));
-        self.children_signal(
-            children
-                .items
-                .borrow()
-                .signal_vec_cloned()
-                .filter_map(|e| e.borrow_mut().take()),
-        )
+            let element = self.simple_children_signal(
+                items
+                    .borrow()
+                    .signal_vec_cloned()
+                    .filter_map(|e| e.borrow_mut().take()),
+            );
+
+            element
+        } else {
+            self.simple_children_signal(children)
+        }
     }
 }
 
@@ -299,9 +365,23 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn build(mut self) -> Self::Target {
-        self.element.resources.shrink_to_fit();
-        self.element.hydro_elem.shrink_to_fit();
-        self.element
+        if let Some(child_builder) = self.child_builder.take() {
+            self.element
+                .resources
+                .extend(child_builder.futures.into_iter().map(Resource::Future));
+
+            self.simple_children_signal(
+                child_builder
+                    .items
+                    .borrow()
+                    .signal_vec_cloned()
+                    .filter_map(|e| e.borrow_mut().take()),
+            )
+        } else {
+            self.element.resources.shrink_to_fit();
+            self.element.hydro_elem.shrink_to_fit();
+            self.element
+        }
     }
 }
 
@@ -478,9 +558,32 @@ pub trait ParentBuilder: ElementBuilder {
     ///
     /// div().child_signal(text.signal().map(|text| div().text(text)));
     /// ```
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self::Target;
+    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
 
-    /// Add a children node to the element.
+    /// Add an optional child to the element.
+    ///
+    /// The child will update when the signal changes to `Some(..)`, and will be
+    /// removed when the signal changes to `None`.
+    ///
+    /// ```no_run
+    /// # use futures_signals::signal::{Mutable, SignalExt};
+    /// # use silkenweb::{elements::html::div, node::element::{ParentBuilder, ElementBuilder}};
+    /// let text = Mutable::new("hello");
+    ///
+    /// div().optional_child_signal(text.signal().map(|text| {
+    ///     if text.is_empty() {
+    ///         None
+    ///     } else {
+    ///         Some(div().text(text))
+    ///     }
+    /// }));
+    /// ```
+    fn optional_child_signal(
+        self,
+        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
+    ) -> Self;
+
+    /// Add children to the element.
     ///
     /// # Example
     ///
@@ -500,7 +603,7 @@ pub trait ParentBuilder: ElementBuilder {
         self
     }
 
-    /// Add [`SignalVec`] children to the element.
+    /// Add children from a [`SignalVec`] to the element.
     ///
     /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
     /// for an example
@@ -508,41 +611,6 @@ pub trait ParentBuilder: ElementBuilder {
         self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
-
-    /// Add [`ChildBuilder`].
-    ///
-    /// Sometimes element children are optional, dependant on the value of a
-    /// signal for example.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{
-    /// #     elements::html::div,
-    /// #     node::{
-    /// #         element::{ChildBuilder, ParentBuilder},
-    /// #         text,
-    /// #     },
-    /// # };
-    /// let include_child1 = Mutable::new(true);
-    /// let include_child2 = Mutable::new(true);
-    ///
-    /// div().child_builder(
-    ///     ChildBuilder::new()
-    ///         .optional_child_signal(
-    ///             include_child1
-    ///                 .signal()
-    ///                 .map(|child1| child1.then(|| text("This is child1"))),
-    ///         )
-    ///         .optional_child_signal(
-    ///             include_child2
-    ///                 .signal()
-    ///                 .map(|child1| child1.then(|| text("This is child2"))),
-    ///         ),
-    /// );
-    /// ```
-    fn child_builder(self, children: ChildBuilder) -> Self::Target;
 }
 
 /// An element that is allowed to have a shadow root
@@ -573,7 +641,6 @@ fn spawn_cancelable_future(
 /// other resource types. For example, `always` will yield a value, then finish.
 pub(super) enum Resource {
     ChildVec(Rc<RefCell<ChildVec>>),
-    ChildRef(Rc<RefCell<Option<Node>>>),
     Child(Node),
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }

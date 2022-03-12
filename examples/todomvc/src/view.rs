@@ -13,7 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{ChildBuilder, Element, ElementBuilder},
+    node::element::{Element, ElementBuilder},
     prelude::ParentBuilder,
 };
 use silkenweb_signals_ext::SignalProduct;
@@ -102,7 +102,8 @@ impl TodoAppView {
     }
 
     fn render_footer(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Footer {
-        let children = ChildBuilder::new()
+        footer()
+            .class(["footer"])
             .child_signal(self.active_count().map(move |active_count| {
                 span()
                     .class(["todo-count"])
@@ -113,8 +114,8 @@ impl TodoAppView {
                     ))
             }))
             .child(self.render_filters(item_filter))
-            .optional_child_signal(self.render_clear_completed());
-        footer().class(["footer"]).child_builder(children)
+            .optional_child_signal(self.render_clear_completed())
+            .build()
     }
 
     fn render_filter_link(

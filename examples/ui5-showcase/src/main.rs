@@ -96,11 +96,18 @@ fn avatar_group() -> AvatarGroup {
 }
 
 fn badge() -> Badge {
-    badge::badge().color_scheme(2).text("Badge").icon(icon())
+    badge::badge()
+        .color_scheme(2)
+        .text("Badge")
+        .icon(icon())
+        .build()
 }
 
 fn bar() -> Bar {
-    bar::bar(div().text("Start"), div().text("Middle"), div().text("End"))
+    bar::bar()
+        .start_content(div().text("Start"))
+        .middle_content(div().text("Middle"))
+        .end_content(div().text("End"))
         .design(BarDesign::Header)
         .build()
 }
@@ -128,7 +135,7 @@ fn breadcrumbs() -> Breadcrumbs {
 }
 
 fn busy_indicator() -> BusyIndicator {
-    busy_indicator::busy_indicator().active().build()
+    busy_indicator::busy_indicator().active(true).build()
 }
 
 fn button() -> Button {

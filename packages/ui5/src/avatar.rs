@@ -205,7 +205,7 @@ impl AvatarBuilder {
     }
 
     pub fn image_signal(self, image: impl Signal<Item = impl Into<Node>> + 'static) -> Avatar {
-        self.0.child_signal(image.map(|img| img.into()))
+        self.0.child_signal(image.map(|img| img.into())).build()
     }
 }
 

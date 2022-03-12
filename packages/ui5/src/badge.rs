@@ -1,6 +1,6 @@
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    node::element::{ElementBuilder, ParentBuilder},
+    node::element::ParentBuilder,
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
@@ -40,12 +40,12 @@ impl BadgeBuilder {
         Self(self.0.color_scheme_signal(value))
     }
 
-    pub fn icon(self, icon: impl Into<Ui5Icon>) -> Badge {
-        self.0.child(icon.into()).build()
+    pub fn icon(self, icon: impl Into<Ui5Icon>) -> Self {
+        Self(self.0.child(icon.into()))
     }
 
-    pub fn icon_signal(self, icon: impl Signal<Item = impl Into<Ui5Icon>> + 'static) -> Badge {
-        self.0.child_signal(icon.map(|img| img.into()))
+    pub fn icon_signal(self, icon: impl Signal<Item = impl Into<Ui5Icon>> + 'static) -> Self {
+        Self(self.0.child_signal(icon.map(|img| img.into())))
     }
 
     pub fn text(self, text: &str) -> BadgeBuilder {
