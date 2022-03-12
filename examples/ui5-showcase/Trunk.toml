@@ -6,4 +6,7 @@ command_arguments = ["--directory=ui5-bundler"]
 [[hooks]]
 stage = "post_build"
 command = "sh"
-command_arguments = ["-c", 'rsync -a ui5-bundler/dist/ "$TRUNK_STAGING_DIR/"']
+command_arguments = [
+    "-c",
+    'rsync -a --exclude /entry/ ui5-bundler/dist/ "$TRUNK_STAGING_DIR/"',
+]
