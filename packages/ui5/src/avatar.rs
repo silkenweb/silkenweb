@@ -12,7 +12,7 @@ use futures_signals::{
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    elements::{html::Img, CustomEvent},
+    elements::CustomEvent,
     node::{
         element::{ElementBuilder, ParentBuilder},
         Node,
@@ -200,11 +200,11 @@ impl AvatarBuilder {
         Self(self.0.size_signal(value))
     }
 
-    pub fn image(self, image: impl Into<Img>) -> Avatar {
+    pub fn image(self, image: impl Into<Node>) -> Avatar {
         self.0.child(image.into()).build()
     }
 
-    pub fn image_signal(self, image: impl Signal<Item = impl Into<Img>> + 'static) -> Avatar {
+    pub fn image_signal(self, image: impl Signal<Item = impl Into<Node>> + 'static) -> Avatar {
         self.0.child_signal(image.map(|img| img.into()))
     }
 }
