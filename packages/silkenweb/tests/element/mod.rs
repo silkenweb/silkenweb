@@ -286,8 +286,6 @@ isomorphic_test! {
     }
 }
 
-// TODO: Test optional children
-
 pub async fn children_signal_test(
     initial: &[usize],
     f: impl Fn(MutableVecLockMut<usize>) + Clone,

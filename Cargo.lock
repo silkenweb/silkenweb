@@ -1431,6 +1431,7 @@ dependencies = [
  "futures-signals",
  "html-escape",
  "indexmap",
+ "itertools",
  "js-sys",
  "paste",
  "silkenweb-base 0.2.0",

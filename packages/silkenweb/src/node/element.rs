@@ -240,7 +240,6 @@ impl ParentBuilder for ElementBuilderBase {
         mut self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
     ) -> Self::Target {
-        // TODO: Test this
         if let Some(child_builder) = self.child_builder.take() {
             self.element
                 .resources
