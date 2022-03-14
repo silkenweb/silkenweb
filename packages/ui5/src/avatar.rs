@@ -222,7 +222,6 @@ where
 {
     attributes1! {1, r#type: GroupType}
 
-    // TODO: Restrict these to UI5 button
     pub fn overflow_button(self, button: impl HtmlElement + Into<Node>) -> Self {
         Self(self.0.child(button.slot("overflowButton")), self.1)
     }
