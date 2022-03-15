@@ -55,16 +55,16 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// # use futures_signals::signal::SignalExt;
 /// # use silkenweb::{
 /// #     animation::infinite_animation,
-/// #     elements::svg::{rect, svg},
+/// #     elements::svg::{content_type::px, rect, svg},
 /// #     node::element::ParentBuilder,
 /// #     mount,
 /// # };
 /// svg().width("200").height("200").child(
 ///     rect()
-///         .x("25")
-///         .y("25")
-///         .width("50")
-///         .height("50")
+///         .x(px(25))
+///         .y(px(25))
+///         .width(px(50))
+///         .height(px(50))
 ///         .transform_signal(
 ///             infinite_animation().map(|time| format!("rotate({} 50 50)", time / 10.0)),
 ///         ),
