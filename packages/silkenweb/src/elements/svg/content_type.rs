@@ -38,8 +38,6 @@ impl Length {
 }
 
 impl<N: Number> AsAttribute<Length> for Quantity<N, Length> {}
-impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
-impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
 
 pub fn percentage<N: Number>(value: N) -> Quantity<N, Percentage> {
     Quantity::new(value, "%")
@@ -48,8 +46,6 @@ pub fn percentage<N: Number>(value: N) -> Quantity<N, Percentage> {
 pub struct Percentage;
 
 impl<N: Number> AsAttribute<Percentage> for Quantity<N, Percentage> {}
-impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
-impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct Auto;
 
@@ -62,7 +58,15 @@ impl Attribute for Auto {
 impl AsAttribute<AutoOrLengthOrPercentage> for Auto {}
 
 pub struct LengthOrPercentage;
+
+impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
+impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
+
 pub struct AutoOrLengthOrPercentage;
+
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Auto> {}
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct Quantity<N, T> {
     value: N,
