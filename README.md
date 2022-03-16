@@ -42,8 +42,7 @@ fn main() {
 
 ```bash
 rustup target add wasm32-unknown-unknown
-cargo install trunk wasm-pack
-cargo install wasm-bindgen-cli --version 0.2.78
+cargo install --locked trunk
 cd examples/counter
 trunk serve --open
 ```
