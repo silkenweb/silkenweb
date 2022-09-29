@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
 use scopeguard::defer;
@@ -82,7 +84,7 @@ fn main() {
             }
             Commands::BuildWebsite => build_website()?,
             Commands::GithubActions { full } => {
-                let reuse = (!full).then(|| "--reuse");
+                let reuse = (!full).then_some("--reuse");
 
                 cmd!("docker build . -t silkenweb-github-actions").run()?;
                 cmd!(
@@ -125,9 +127,10 @@ fn build_website() -> WorkflowResult<()> {
         }
 
         cmd!("cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}").run()?;
-        redirects.push_str(&format!(
-            "/examples/{example}/* /examples/{example}/index.html 200\n"
-        ));
+        writeln!(
+            &mut redirects,
+            "/examples/{example}/* /examples/{example}/index.html 200"
+        )?;
     }
 
     write_file(format!("{dest_dir}/_redirects"), redirects)?;

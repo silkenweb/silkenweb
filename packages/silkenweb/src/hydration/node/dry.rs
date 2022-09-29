@@ -24,8 +24,10 @@ pub struct DryElement {
     attributes: IndexMap<String, String>,
     children: Vec<HydrationNodeData>,
     stored_children: Vec<HydrationNodeData>,
-    hydrate_actions: Vec<Box<dyn FnOnce(&mut WetElement)>>,
+    hydrate_actions: Vec<LazyElementAction>,
 }
+
+type LazyElementAction = Box<dyn FnOnce(&mut WetElement)>;
 
 impl DryElement {
     pub fn new(namespace: Namespace, tag: &str) -> Self {

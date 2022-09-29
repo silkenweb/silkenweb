@@ -85,7 +85,7 @@ impl Row {
             app.selected_row_id
                 .signal_ref(move |selected| *selected == Some(id))
                 .dedupe()
-                .map(|selected| selected.then(|| "danger")),
+                .map(|selected| selected.then_some("danger")),
         )
         .children([
             td().class(["col-md-1"]).text(&id.to_string()),

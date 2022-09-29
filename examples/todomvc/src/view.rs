@@ -127,7 +127,7 @@ impl TodoAppView {
         let filter_name = format!("{}", filter);
 
         li().child(
-            a().class_signal(item_filter.map(move |f| (filter == f).then(|| "selected")))
+            a().class_signal(item_filter.map(move |f| (filter == f).then_some("selected")))
                 .href(&format!("#/{}", filter_name.to_lowercase()))
                 .text(&filter_name),
         )
