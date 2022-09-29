@@ -152,7 +152,9 @@ fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
     if let Some((parent, child)) =
         COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), (parent, child)))
     {
-        parent.remove_child(&child.dom_node()).unwrap_throw();
+        // We discard the result, as we may have hydrated over `child` and removed it
+        // from parent if it didn't match.
+        let _discard_result = parent.remove_child(&child.dom_node());
     }
 }
 
