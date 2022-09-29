@@ -6,9 +6,9 @@
   "author": "Simon Bourne",
   "license": "MIT",
   "devDependencies": {
-    "axe-core": "^4.3.5",
-    "cypress": "^9.2.0",
-    "cypress-axe": "^0.13.0",
+    "axe-core": "^4.4.3",
+    "cypress": "^10.9.0",
+    "cypress-axe": "^1.0.0",
     "start-server-and-test": "^1.14.0"
   },
   "scripts": {
