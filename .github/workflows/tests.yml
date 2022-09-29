@@ -68,7 +68,7 @@ jobs:
     # Cypress doesn't support Safari yet
     - name: Cypress on Linux
       if: matrix.os == 'ubuntu-latest'
-      uses: cypress-io/github-action@v4.2
+      uses: cypress-io/github-action@v4.1.0
       with:
         working-directory: examples/todomvc/e2e
         start: npm start
@@ -76,7 +76,7 @@ jobs:
         browser: firefox
     - name: Cypress on Windows
       if: matrix.os == 'windows-latest'
-      uses: cypress-io/github-action@v4.2
+      uses: cypress-io/github-action@v4.1.0
       with:
         working-directory: examples/todomvc/e2e
         start: npm start
