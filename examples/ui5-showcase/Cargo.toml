@@ -11,7 +11,7 @@ readme=true
 silkenweb = { path = "../../packages/silkenweb" }
 futures-signals = "0.3"
 silkenweb-ui5 = { path = "../../packages/ui5" }
-wasm-bindgen = "=0.2.78"
+wasm-bindgen = "=0.2.83"
 console_error_panic_hook = "0.1"
 parse-display = "0.5"
 web-log= "1.0"

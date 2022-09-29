@@ -12,9 +12,9 @@ wasm-opt = ['-O4']
 crate-type = ["cdylib"]
 
 [dependencies]
-silkenweb = "0.2"
+silkenweb = { path = "../../packages/silkenweb" }
 futures-signals = "0.3"
 js-sys = "0.3"
-wasm-bindgen = {version = "=0.2.78", features = ["enable-interning"]}
+wasm-bindgen = {version = "=0.2.83", features = ["enable-interning"]}
 rand = {version = "0.8", features = ["small_rng"]}
 getrandom = { version = "0.2", features = ["js"] }

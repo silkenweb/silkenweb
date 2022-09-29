@@ -678,9 +678,9 @@ checksum = "6c8af84674fe1f223a982c933a0ee1086ac4d4052aa0fb8060c12c6ad838e754"
 
 [[package]]
 name = "js-sys"
-version = "0.3.55"
+version = "0.3.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cc9ffccd38c451a86bf13657df244e9c3f37493cce8e5e21e940963777acc84"
+checksum = "49409df3e3bf0856b916e2ceaca09ee28e6871cf7d9ce97a692cacfdb2a25a47"
 dependencies = [
  "wasm-bindgen",
 ]
@@ -693,12 +693,6 @@ checksum = "e8647c8a01e5f7878eacb2c323c4c949fdb63773110f0686c7810769874b7e0a"
 dependencies = [
  "hashbrown 0.11.2",
 ]
-
-[[package]]
-name = "lazy_static"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
@@ -1363,7 +1357,7 @@ dependencies = [
  "js-sys",
  "num-traits",
  "paste",
- "silkenweb-base 0.2.0",
+ "silkenweb-base",
  "silkenweb-macros",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1372,39 +1366,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b0f9d04e9c12f56a1f1e6a6933ccf79442abf16a5c3b0ba4e9107daa505088f"
-dependencies = [
- "caseless",
- "discard",
- "futures",
- "futures-signals",
- "html-escape",
- "indexmap",
- "js-sys",
- "paste",
- "silkenweb-base 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
 name = "silkenweb-base"
 version = "0.2.0"
-dependencies = [
- "js-sys",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
-name = "silkenweb-base"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d6b7fee43596de3888ca777ca3c7d23c2b5f079f24a11c43a1849ae929db914"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -1417,7 +1380,7 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "num-traits",
- "silkenweb 0.2.0",
+ "silkenweb",
  "wasm-bindgen",
 ]
 
@@ -1427,7 +1390,7 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "reqwasm",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1435,7 +1398,7 @@ name = "silkenweb-example-counter"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1443,7 +1406,7 @@ name = "silkenweb-example-counter-list"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1451,7 +1414,7 @@ name = "silkenweb-example-element-handle"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1464,7 +1427,7 @@ dependencies = [
  "futures-signals",
  "reqwasm",
  "serde",
- "silkenweb 0.2.0",
+ "silkenweb",
  "timeago",
 ]
 
@@ -1472,7 +1435,7 @@ dependencies = [
 name = "silkenweb-example-hello-world"
 version = "0.1.0"
 dependencies = [
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1480,7 +1443,7 @@ name = "silkenweb-example-hydration"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
  "web-log",
 ]
 
@@ -1488,7 +1451,7 @@ dependencies = [
 name = "silkenweb-example-inline-css"
 version = "0.1.0"
 dependencies = [
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1496,14 +1459,14 @@ name = "silkenweb-example-router"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
 name = "silkenweb-example-shadow-root"
 version = "0.1.0"
 dependencies = [
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1511,7 +1474,7 @@ name = "silkenweb-example-ssr"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "silkenweb 0.2.0",
+ "silkenweb",
 ]
 
 [[package]]
@@ -1525,7 +1488,7 @@ dependencies = [
  "js-sys",
  "serde",
  "serde_json",
- "silkenweb 0.2.0",
+ "silkenweb",
  "silkenweb-signals-ext",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1540,7 +1503,7 @@ dependencies = [
  "getrandom",
  "js-sys",
  "rand 0.8.5",
- "silkenweb 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "silkenweb",
  "wasm-bindgen",
 ]
 
@@ -1595,7 +1558,7 @@ dependencies = [
  "js-sys",
  "parse-display",
  "paste",
- "silkenweb 0.2.0",
+ "silkenweb",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -1608,7 +1571,7 @@ dependencies = [
  "futures-signals",
  "js-sys",
  "parse-display",
- "silkenweb 0.2.0",
+ "silkenweb",
  "silkenweb-ui5",
  "wasm-bindgen",
  "web-log",
@@ -1832,9 +1795,9 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.78"
+version = "0.2.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "632f73e236b219150ea279196e54e610f5dbafa5d61786303d4da54f84e47fce"
+checksum = "eaf9f5aceeec8be17c128b2e93e031fb8a4d469bb9c4ae2d7dc1888b26887268"
 dependencies = [
  "cfg-if",
  "serde",
@@ -1844,13 +1807,13 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-backend"
-version = "0.2.78"
+version = "0.2.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a317bf8f9fba2476b4b2c85ef4c4af8ff39c3c7f0cdfeed4f82c34a880aa837b"
+checksum = "4c8ffb332579b0557b52d268b91feab8df3615f265d5270fec2a8c95b17c1142"
 dependencies = [
  "bumpalo",
- "lazy_static",
  "log",
+ "once_cell",
  "proc-macro2",
  "quote",
  "syn",
@@ -1859,9 +1822,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-futures"
-version = "0.4.28"
+version = "0.4.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e8d7523cb1f2a4c96c1317ca690031b714a51cc14e05f712446691f413f5d39"
+checksum = "23639446165ca5a5de86ae1d8896b737ae80319560fbaa4c2887b7da6e7ebd7d"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -1871,9 +1834,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.78"
+version = "0.2.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d56146e7c495528bf6587663bea13a8eb588d39b36b679d83972e1a2dbbdacf9"
+checksum = "052be0f94026e6cbc75cdefc9bae13fd6052cdcaf532fa6c45e7ae33a1e6c810"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -1881,9 +1844,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.78"
+version = "0.2.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7803e0eea25835f8abdc585cd3021b3deb11543c6fe226dcd30b228857c5c5ab"
+checksum = "07bc0c051dc5f23e307b13285f9d75df86bfdf816c5721e573dec1f9b8aa193c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1894,15 +1857,15 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.78"
+version = "0.2.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0237232789cf037d5480773fe568aac745bfe2afbc11a863e97901780a6b47cc"
+checksum = "1c38c045535d93ec4f0b4defec448e4291638ee608530863b1e2ba115d4fff7f"
 
 [[package]]
 name = "wasm-bindgen-test"
-version = "0.3.28"
+version = "0.3.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96f1aa7971fdf61ef0f353602102dbea75a56e225ed036c1e3740564b91e6b7e"
+checksum = "09d2fff962180c3fadf677438054b1db62bee4aa32af26a45388af07d1287e1d"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
@@ -1914,9 +1877,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-test-macro"
-version = "0.3.28"
+version = "0.3.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6006f79628dfeb96a86d4db51fbf1344cd7fd8408f06fc9aa3c84913a4789688"
+checksum = "4683da3dfc016f704c9f82cf401520c4f1cb3ee440f7f52b3d6ac29506a49ca7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1933,9 +1896,9 @@ dependencies = [
 
 [[package]]
 name = "web-sys"
-version = "0.3.55"
+version = "0.3.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38eb105f1c59d9eaa6b5cdc92b859d85b926e82cb2e0945cd0c9259faa6fe9fb"
+checksum = "bcda906d8be16e728fd5adc5b729afad4e444e106ab28cd1c7256e54fa61510f"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
