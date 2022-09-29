@@ -66,6 +66,7 @@ jobs:
       working-directory: examples/todomvc
       run: trunk build
     - name: Cypress
+      if: matrix.os != 'macos-latest'
       uses: cypress-io/github-action@v4.1.0
       with:
         working-directory: examples/todomvc/e2e
