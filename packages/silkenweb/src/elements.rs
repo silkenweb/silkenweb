@@ -339,3 +339,22 @@ pub trait ElementEvents: ElementBuilder {
         // paste: web_sys::ClipboardEvent,
     });
 }
+
+/// An SVG element
+///
+/// Methods for setting attributes specific to SVG elements
+pub trait SvgElement: ElementBuilder {
+    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
+        self.attribute(intern_str("class"), class_attribute_text(value))
+    }
+
+    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
+        self,
+        value: impl Signal<Item = Iter> + 'static,
+    ) -> Self {
+        self.attribute_signal(
+            intern_str("class"),
+            value.map(move |class| class_attribute_text(class)),
+        )
+    }
+}
