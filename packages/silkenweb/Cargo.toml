@@ -125,6 +125,7 @@ features = [
 
     "SvgsvgElement",
     "SvgPathElement",
+    "SvgUseElement",
 ]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

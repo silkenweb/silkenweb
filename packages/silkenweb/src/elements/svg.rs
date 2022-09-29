@@ -1,6 +1,6 @@
 //! SVG Elements
 
-use self::content_type::{LengthOrPercentage, Number};
+use self::content_type::{Length, LengthOrPercentage, Number};
 use crate::{attribute::AsAttribute, node::element::ElementBuilder};
 
 pub mod content_type;
@@ -37,6 +37,21 @@ svg_element!(
             rx: LengthOrPercentage,
             ry: LengthOrPercentage,
             transform: String,
+        }
+    }
+);
+
+svg_element!(
+    snake(r#use),
+    camel(Use, UseBuilder),
+    text("use")
+    <web_sys::SvgUseElement> {
+        attributes {
+            href("href"): String,
+            x("x"): Length,
+            y("x"): Length,
+            width("width"): Length,
+            height("height"): Length,
         }
     }
 );
