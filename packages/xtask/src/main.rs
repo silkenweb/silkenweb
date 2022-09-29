@@ -5,8 +5,7 @@ use itertools::Itertools;
 use scopeguard::defer;
 use xshell::{cmd, mkdir_p, pushd, rm_rf, write_file};
 use xtask_base::{
-    build_readme, ci_nightly, clippy, generate_open_source_files, run, target_os, CommonCmds,
-    TargetOs, WorkflowResult,
+    build_readme, ci_nightly, clippy, generate_open_source_files, run, CommonCmds, WorkflowResult,
 };
 
 #[derive(Parser)]
@@ -154,16 +153,7 @@ fn test_features() -> WorkflowResult<()> {
 }
 
 fn ci_browser() -> WorkflowResult<()> {
-    match target_os() {
-        TargetOs::Windows => cypress("ci", "run", Some("edge"))?,
-        TargetOs::Linux => {
-            wasm_pack_test()?;
-            cypress("ci", "run", Some("firefox"))?
-        }
-        _ => (),
-    };
-
-    Ok(())
+    cypress("ci", "run", None)
 }
 
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
