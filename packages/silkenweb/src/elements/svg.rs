@@ -1,9 +1,10 @@
 //! SVG Elements
 
-use self::content_type::{Length, LengthOrPercentage, Number};
+use self::{content_type::{Length, LengthOrPercentage, Number}, path::Data};
 use crate::{attribute::AsAttribute, node::element::ElementBuilder};
 
 pub mod content_type;
+pub mod path;
 
 // TODO: Add all svg elements, (element, global) * (attributes, events)
 svg_element!(
@@ -20,7 +21,7 @@ parent_element!(svg);
 svg_element!(
     path <web_sys::SvgPathElement> {
         attributes {
-            d: String,
+            d: Data,
             stroke: String,
             fill: String
         }

@@ -4,36 +4,28 @@ use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
     animation::infinite_animation,
-    elements::svg,
+    elements::svg::{self, path::Data},
     mount,
     node::element::{ElementBuilder, ParentBuilder},
 };
 use wasm_bindgen::UnwrapThrowExt;
 
-const WIDTH: f32 = 600.0;
-const HEIGHT: f32 = 300.0;
+const WIDTH: f64 = 600.0;
+const HEIGHT: f64 = 300.0;
 
 fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> svg::Path {
     let path = time.map(move |time| {
-        let multiplier = (time / speed).sin().to_f32().unwrap_throw();
+        let multiplier = (time / speed).sin();
         let control_point = 150.0 * multiplier + 150.0;
         let half_height = HEIGHT / 2.0;
-        let hump_width = WIDTH / humps.to_f32().unwrap_throw();
-
-        let initial_path = format!(
-            "M 0,{} Q {},{} {},{}",
-            half_height,
-            hump_width / 2.0,
-            control_point,
-            hump_width,
-            half_height,
-        );
+        let hump_width = WIDTH / humps.to_f64().unwrap_throw();
 
         assert!(humps >= 1);
 
-        iter::repeat(format!(" t {},0", hump_width))
-            .take(humps - 1)
-            .fold(initial_path, |path, hump| path + &hump)
+        Data::new()
+            .move_to(0.0, half_height)
+            .quadradic_bezier_curve_to(hump_width / 2.0, control_point, hump_width, half_height)
+            .smooth_quadradic_bezier_curves_by(iter::repeat((hump_width, 0.0)).take(humps - 1))
     });
 
     svg::path()
