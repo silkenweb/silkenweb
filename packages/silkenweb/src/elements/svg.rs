@@ -1,6 +1,9 @@
 //! SVG Elements
 
-use self::{content_type::{Length, LengthOrPercentage, Number}, path::Data};
+use self::{
+    content_type::{Length, LengthOrPercentage, Number},
+    path::Data,
+};
 use crate::{attribute::AsAttribute, node::element::ElementBuilder};
 
 pub mod content_type;
