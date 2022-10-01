@@ -24,7 +24,12 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
 
         Data::new()
             .move_to(0.0, half_height)
-            .quadradic_bezier_curve_to(hump_width / 2.0, control_point, hump_width, half_height)
+            .quadradic_bezier_curves_to([(
+                hump_width / 2.0,
+                control_point,
+                hump_width,
+                half_height,
+            )])
             .smooth_quadradic_bezier_curves_by(iter::repeat((hump_width, 0.0)).take(humps - 1))
     });
 
