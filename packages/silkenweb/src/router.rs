@@ -40,17 +40,52 @@ use crate::{
 
 // TODO: Docs
 #[derive(Clone, Eq, PartialEq)]
-pub struct UrlPath(String);
+pub struct UrlPath {
+    url: String,
+    path_end: usize,
+}
 
 impl UrlPath {
     // TODO: Docs
     // An escaped str
     pub fn new(path: &str) -> Self {
-        Self(path.trim_start_matches('/').to_string())
+        let url = path.trim_start_matches('/').to_string();
+        let path_end = url.find('?').unwrap_or(url.len());
+
+        Self { url, path_end }
+    }
+
+    pub fn path(&self) -> &str {
+        self.url.split_at(self.path_end).0
+    }
+
+    pub fn path_components(&self) -> impl Iterator<Item = &str> {
+        let path = self.path();
+        let mut components = path.split('/');
+
+        if path.is_empty() {
+            components.next();
+        }
+
+        components
+    }
+
+    pub fn query_string(&self) -> &str {
+        if self.path_end == self.url.len() {
+            ""
+        } else {
+            self.url.split_at(self.path_end + 1).1
+        }
+    }
+
+    pub fn query(&self) -> impl Iterator<Item = (&str, Option<&str>)> {
+        self.query_string()
+            .split('&')
+            .map(|kv| kv.split_once('=').map_or((kv, None), |(k, v)| (k, Some(v))))
     }
 
     pub fn as_str(&self) -> &str {
-        &self.0
+        &self.url
     }
 }
 
