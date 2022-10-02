@@ -13,19 +13,34 @@ fn main() {
         div()
             .child(
                 button()
-                    .on_click(|_, _| router::set_url_path("/route_1"))
-                    .text("Go to route 1"),
+                    .on_click(|_, _| router::set_url_path("/basic"))
+                    .text("Go to basic route"),
             )
             .child(
                 button()
-                    .on_click(|_, _| router::set_url_path("/route_2"))
-                    .text("Go to route 2"),
+                    .on_click(|_, _| router::set_url_path("/with_args/arg1/arg2"))
+                    .text("Go to route with args"),
             )
             .child(
-                p().text_signal(
-                    router::url_path()
-                        .signal_ref(|url_path| format!("URL Path is: {}", url_path.as_str())),
-                ),
+                button()
+                    .on_click(|_, _| router::set_url_path("/with_query?x=1&y=2"))
+                    .text("Go to route with query string"),
             )
+            .child(p().text_signal(router::url_path().signal_ref(|url_path| {
+                let path_components: Vec<&str> = url_path.path_components().collect();
+
+                match &path_components[..] {
+                    [] => "This is the root route!".to_string(),
+                    ["basic"] => "This is a basic route".to_string(),
+                    ["with_args", args @ ..] => format!("This is a route with args {args:?}"),
+                    ["with_query"] => {
+                        format!(
+                            "This is a route with a query string: {:?}",
+                            url_path.query().collect::<Vec<_>>()
+                        )
+                    }
+                    _ => "Unknown route".to_string(),
+                }
+            })))
     });
 }
