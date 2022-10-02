@@ -38,7 +38,7 @@ use crate::{
     prelude::ElementEvents,
 };
 
-// TODO: Docs
+/// Represent the path portion of a URL (including any query string)
 #[derive(Clone, Eq, PartialEq)]
 pub struct UrlPath {
     url: String,
@@ -46,8 +46,10 @@ pub struct UrlPath {
 }
 
 impl UrlPath {
-    // TODO: Docs
-    // An escaped str
+    /// Create a new `UrlPath`
+    ///
+    /// `path` should have any special characters percent escaped.
+    /// If the 1st character is `'/'`, it will be stripped.
     pub fn new(path: &str) -> Self {
         let url = path.trim_start_matches('/').to_string();
         let path_end = url.find('?').unwrap_or(url.len());
@@ -55,10 +57,33 @@ impl UrlPath {
         Self { url, path_end }
     }
 
+    /// Get the path portion of the `UrlPath`
+    ///
+    /// ```
+    /// # use silkenweb::router::UrlPath;
+    /// assert_eq!(UrlPath::new("path?query_string").path(), "path");
+    /// assert_eq!(UrlPath::new("?query_string").path(), "");
+    /// assert_eq!(UrlPath::new("?").path(), "");
+    /// assert_eq!(UrlPath::new("").path(), "");
+    /// ```
     pub fn path(&self) -> &str {
         self.url.split_at(self.path_end).0
     }
 
+    /// Get the path components of the `UrlPath`
+    ///
+    /// ```
+    /// # use silkenweb::router::UrlPath;
+    /// let path = UrlPath::new("path1/path2/path3");
+    /// let components: Vec<&str> = path.path_components().collect();
+    /// assert_eq!(&components, &["path1", "path2", "path3"]);
+    ///
+    /// let path = UrlPath::new("");
+    /// assert_eq!(path.path_components().next(), None);
+    ///
+    /// let path = UrlPath::new("path1//path2"); // Note the double `'/'`
+    /// let components: Vec<&str> = path.path_components().collect();
+    /// assert_eq!(&components, &["path1", "", "path2"]);
     pub fn path_components(&self) -> impl Iterator<Item = &str> {
         let path = self.path();
         let mut components = path.split('/');
@@ -70,6 +95,18 @@ impl UrlPath {
         components
     }
 
+    /// Get the query string portion of the `UrlPath`
+    ///
+    /// ```
+    /// # use silkenweb::router::UrlPath;
+    /// assert_eq!(
+    ///     UrlPath::new("path?query_string").query_string(),
+    ///     "query_string"
+    /// );
+    /// assert_eq!(UrlPath::new("?query_string").query_string(), "query_string");
+    /// assert_eq!(UrlPath::new("?").query_string(), "");
+    /// assert_eq!(UrlPath::new("").query_string(), "");
+    /// ```
     pub fn query_string(&self) -> &str {
         if self.path_end == self.url.len() {
             ""
@@ -78,12 +115,24 @@ impl UrlPath {
         }
     }
 
+    /// Split the query string into key/value pairs
+    ///
+    /// ```
+    /// # use silkenweb::router::UrlPath;
+    /// let path = UrlPath::new("path?x=1&y=2&flag");
+    /// let kv_args: Vec<(&str, Option<&str>)> = path.query().collect();
+    /// assert_eq!(
+    ///     &kv_args,
+    ///     &[("x", Some("1")), ("y", Some("2")), ("flag", None)]
+    /// );
+    /// ```
     pub fn query(&self) -> impl Iterator<Item = (&str, Option<&str>)> {
         self.query_string()
             .split('&')
             .map(|kv| kv.split_once('=').map_or((kv, None), |(k, v)| (k, Some(v))))
     }
 
+    /// Get the whole path as a `&str`
     pub fn as_str(&self) -> &str {
         &self.url
     }
