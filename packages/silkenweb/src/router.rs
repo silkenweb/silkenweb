@@ -28,10 +28,10 @@
 //!             .text("Go to route 2"),
 //!     )
 //!     .child(p().text_signal(
-//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {}", url_path.as_str())),
+//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {url_path}")),
 //!     ));
 //! ```
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
@@ -147,6 +147,12 @@ impl UrlPath {
     /// Get the whole path as a `&str`
     pub fn as_str(&self) -> &str {
         &self.url
+    }
+}
+
+impl Display for UrlPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
