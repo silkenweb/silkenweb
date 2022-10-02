@@ -19,12 +19,12 @@
 //! div()
 //!     .child(
 //!         button()
-//!             .on_click(|_, _| router::set_url_path("/route_1"))
+//!             .on_click(|_, _| router::set_url_path("route_1"))
 //!             .text("Go to route 1"),
 //!     )
 //!     .child(
 //!         button()
-//!             .on_click(|_, _| router::set_url_path("/route_2"))
+//!             .on_click(|_, _| router::set_url_path("route_2"))
 //!             .text("Go to route 2"),
 //!     )
 //!     .child(p().text_signal(
@@ -51,7 +51,7 @@ impl UrlPath {
     /// Create a new `UrlPath`
     ///
     /// `path` should have any special characters percent escaped.
-    /// If the 1st character is `'/'`, it will be stripped.
+    /// Any leading `'/'`s are removed.
     pub fn new(path: &str) -> Self {
         let url = path.trim_start_matches('/').to_string();
         let path_end = url.find('?').unwrap_or(url.len());
