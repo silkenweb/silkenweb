@@ -4,7 +4,13 @@ use futures_signals::signal::{Broadcaster, Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
     animation::infinite_animation,
-    elements::svg::{self, path::Data},
+    elements::svg::{
+        self,
+        path::{
+            Data,
+            Offset::{Abs, Rel},
+        },
+    },
     mount,
     node::element::{ElementBuilder, ParentBuilder},
 };
@@ -23,14 +29,12 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
         assert!(humps >= 1);
 
         Data::new()
-            .move_to(0.0, half_height)
-            .quadradic_bezier_curves_to([(
-                hump_width / 2.0,
-                control_point,
-                hump_width,
-                half_height,
-            )])
-            .smooth_quadradic_bezier_curves_by(iter::repeat((hump_width, 0.0)).take(humps - 1))
+            .move_to(Abs, 0.0, half_height)
+            .quadradic_bezier_curves(
+                Abs,
+                [(hump_width / 2.0, control_point, hump_width, half_height)],
+            )
+            .smooth_quadradic_bezier_curves(Rel, iter::repeat((hump_width, 0.0)).take(humps - 1))
     });
 
     svg::path()
