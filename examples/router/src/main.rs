@@ -27,7 +27,7 @@ fn main() {
                     .text("Go to route with query string"),
             )
             .child(p().text_signal(router::url_path().signal_ref(|url_path| {
-                let path_components: Vec<&str> = url_path.path_components().collect();
+                let path_components = url_path.path_components_vec();
 
                 match &path_components[..] {
                     [] => "This is the root route!".to_string(),

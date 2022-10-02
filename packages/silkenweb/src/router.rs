@@ -31,6 +31,8 @@
 //!         router::url_path().signal_ref(|url_path| format!("URL Path is: {}", url_path.as_str())),
 //!     ));
 //! ```
+use std::collections::HashMap;
+
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 use crate::{
@@ -95,6 +97,11 @@ impl UrlPath {
         components
     }
 
+    /// As [`UrlPath::path_components`] but collected into a `Vec`
+    pub fn path_components_vec(&self) -> Vec<&str> {
+        self.path_components().collect()
+    }
+
     /// Get the query string portion of the `UrlPath`
     ///
     /// ```
@@ -130,6 +137,11 @@ impl UrlPath {
         self.query_string()
             .split('&')
             .map(|kv| kv.split_once('=').map_or((kv, None), |(k, v)| (k, Some(v))))
+    }
+
+    /// As [`UrlPath::query`] but collected into a `HashMap`
+    pub fn query_map(&self) -> HashMap<&str, Option<&str>> {
+        self.query().collect()
     }
 
     /// Get the whole path as a `&str`
