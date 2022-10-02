@@ -329,7 +329,7 @@ fn main() {
                 app.set_content(match pathname.as_str() {
                     "" => Content::load_frontpage("topstories").await,
                     "topstories" | "newstories" | "askstories" | "showstories" => {
-                        Content::load_frontpage(&pathname).await
+                        Content::load_frontpage(pathname.as_str()).await
                     }
                     item => match *item.split(['/']).collect::<Vec<_>>() {
                         ["item", id] => Content::load_story(id).await,

@@ -28,7 +28,7 @@
 //!             .text("Go to route 2"),
 //!     )
 //!     .child(p().text_signal(
-//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {}", url_path)),
+//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {}", url_path.as_str())),
 //!     ));
 //! ```
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
@@ -38,10 +38,32 @@ use crate::{
     prelude::ElementEvents,
 };
 
+// TODO: Docs
+#[derive(Clone, Eq, PartialEq)]
+pub struct UrlPath(String);
+
+impl UrlPath {
+    // TODO: Docs
+    // An escaped str
+    pub fn new(path: &str) -> Self {
+        Self(path.trim_start_matches('/').to_string())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl<'a> From<&'a str> for UrlPath {
+    fn from(path: &'a str) -> Self {
+        Self::new(path)
+    }
+}
+
 /// The path portion of the URL.
 ///
 /// The path will never start with a '/'.
-pub fn url_path() -> ReadOnlyMutable<String> {
+pub fn url_path() -> ReadOnlyMutable<UrlPath> {
     URL_PATH.with(|url_path| url_path.read_only())
 }
 
@@ -57,8 +79,8 @@ pub fn url_path() -> ReadOnlyMutable<String> {
 /// - Set the [`url_path()`] signal
 ///
 /// See [module-level documentation](self) for an example.
-pub fn set_url_path(path: &str) {
-    arch::set_url_path(path.trim_start_matches('/').to_string())
+pub fn set_url_path(path: impl Into<UrlPath>) {
+    arch::set_url_path(path)
 }
 
 /// Set up an HTML `<a>` element for routing.
@@ -103,7 +125,7 @@ pub fn link_clicked(
 
         if !modifier_key_pressed {
             ev.prevent_default();
-            set_url_path(&path);
+            set_url_path(path.as_str());
         }
     }
 }
@@ -112,14 +134,14 @@ pub fn link_clicked(
 mod arch {
     use futures_signals::signal::Mutable;
 
-    use super::URL_PATH;
+    use super::{UrlPath, URL_PATH};
 
-    pub fn new_url_path() -> Mutable<String> {
-        Mutable::new(String::new())
+    pub fn new_url_path() -> Mutable<UrlPath> {
+        Mutable::new(UrlPath::new(""))
     }
 
-    pub fn set_url_path(path: String) {
-        URL_PATH.with(move |url_path| url_path.set(path));
+    pub fn set_url_path(path: impl Into<UrlPath>) {
+        URL_PATH.with(move |url_path| url_path.set(path.into()));
     }
 }
 
@@ -129,18 +151,19 @@ mod arch {
     use silkenweb_base::{document, window};
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-    use super::URL_PATH;
+    use super::{UrlPath, URL_PATH};
 
-    pub fn new_url_path() -> Mutable<String> {
+    pub fn new_url_path() -> Mutable<UrlPath> {
         ON_POPSTATE
             .with(|on_popstate| window::set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
 
         Mutable::new(local_pathname())
     }
 
-    pub fn set_url_path(path: String) {
+    pub fn set_url_path(path: impl Into<UrlPath>) {
+        let path = path.into();
         let mut url = BASE_URI.with(String::clone);
-        url.push_str(&path);
+        url.push_str(path.as_str());
 
         URL_PATH.with(move |url_path| {
             window::history()
@@ -150,7 +173,7 @@ mod arch {
         });
     }
 
-    fn local_pathname() -> String {
+    fn local_pathname() -> UrlPath {
         let url = window::location();
 
         BASE_URI.with(|base_uri| {
@@ -158,13 +181,8 @@ mod arch {
                 .unwrap_throw()
                 .strip_prefix(base_uri)
                 .map_or_else(
-                    || {
-                        url.pathname()
-                            .unwrap_throw()
-                            .trim_start_matches('/')
-                            .to_string()
-                    },
-                    |url| url.trim_start_matches('/').to_string(),
+                    || UrlPath::new(&url.pathname().unwrap_throw()),
+                    UrlPath::new,
                 )
         })
     }
@@ -188,5 +206,5 @@ mod arch {
 }
 
 thread_local! {
-    static URL_PATH: Mutable<String> = arch::new_url_path();
+    static URL_PATH: Mutable<UrlPath> = arch::new_url_path();
 }
