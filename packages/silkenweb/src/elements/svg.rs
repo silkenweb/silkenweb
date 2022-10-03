@@ -59,6 +59,26 @@ svg_element!(
     }
 );
 
+parent_element!(a);
+impl ConditionalProcessing for ABuilder {}
+impl Presentation for ABuilder {}
+
+svg_element!(
+    defs <web_sys::SvgDefsElement> {}
+);
+
+parent_element!(defs);
+impl ConditionalProcessing for DefsBuilder {}
+impl Presentation for DefsBuilder {}
+
+svg_element!(
+    g <web_sys::SvggElement> {}
+);
+
+parent_element!(g);
+impl ConditionalProcessing for GBuilder {}
+impl Presentation for GBuilder {}
+
 // TODO: Add all svg elements, (element, global) * (attributes, events)
 svg_element!(
     svg <web_sys::SvgsvgElement> {
@@ -99,8 +119,8 @@ svg_element!(
     }
 );
 
-impl Presentation for SvgBuilder {}
 impl ConditionalProcessing for SvgBuilder {}
+impl Presentation for SvgBuilder {}
 
 parent_element!(svg);
 
@@ -115,8 +135,8 @@ svg_element!(
     }
 );
 
-impl Presentation for PathBuilder {}
 impl ConditionalProcessing for PathBuilder {}
+impl Presentation for PathBuilder {}
 
 svg_element!(
     rect <web_sys::SvgPathElement> {
@@ -154,8 +174,8 @@ svg_element!(
     }
 );
 
-impl Presentation for RectBuilder {}
 impl ConditionalProcessing for RectBuilder {}
+impl Presentation for RectBuilder {}
 
 svg_element!(
     snake(r#use),
@@ -182,5 +202,5 @@ svg_element!(
     }
 );
 
-impl Presentation for UseBuilder {}
 impl ConditionalProcessing for UseBuilder {}
+impl Presentation for UseBuilder {}
