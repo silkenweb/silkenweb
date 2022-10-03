@@ -40,7 +40,6 @@ svg_element!(
             height: LengthOrPercentage,
             rx: LengthOrPercentage,
             ry: LengthOrPercentage,
-            transform: String,
             path_length("pathLength"): f64,
         }
     }
