@@ -37,6 +37,7 @@ impl Length {
     }
 }
 
+impl<N: Attribute + Amount> AsAttribute<Length> for N {}
 impl<N: Amount> AsAttribute<Length> for Quantity<N, Length> {}
 
 pub fn percentage<N: Amount>(value: N) -> Quantity<N, Percentage> {
@@ -59,16 +60,18 @@ impl AsAttribute<AutoOrLengthOrPercentage> for Auto {}
 
 pub struct NumberOrPercentage;
 
-impl<N: Amount> AsAttribute<NumberOrPercentage> for Quantity<N, f64> {}
+impl<N: Attribute + Amount> AsAttribute<NumberOrPercentage> for N {}
 impl<N: Amount> AsAttribute<NumberOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct LengthOrPercentage;
 
+impl<N: Attribute + Amount> AsAttribute<LengthOrPercentage> for N {}
 impl<N: Amount> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
 impl<N: Amount> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct AutoOrLengthOrPercentage;
 
+impl<N: Attribute + Amount> AsAttribute<AutoOrLengthOrPercentage> for N {}
 impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Auto> {}
 impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
 impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
