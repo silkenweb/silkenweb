@@ -9,14 +9,14 @@ use num_traits::Num;
 
 use crate::attribute::{AsAttribute, Attribute};
 
-pub trait Amount: Num + Display + Copy {}
+pub trait Number: Num + Display + Copy {}
 
-impl<T: Num + Display + Copy> Amount for T {}
+impl<T: Num + Display + Copy> Number for T {}
 
 macro_rules! length{
     ($($name: ident),* $(,)?) =>{
         $(
-            pub fn $name<N: Amount>(value: N) -> Quantity<N, Length> {
+            pub fn $name<N: Number>(value: N) -> Quantity<N, Length> {
                 Quantity::new(value, stringify!($name))
             }
         )*
@@ -25,7 +25,7 @@ macro_rules! length{
 
 length!(em, ex, px, cm, mm, pt, pc);
 
-pub fn inches<N: Amount>(value: N) -> Quantity<N, Length> {
+pub fn inches<N: Number>(value: N) -> Quantity<N, Length> {
     Quantity::new(value, "in")
 }
 
@@ -37,16 +37,16 @@ impl Length {
     }
 }
 
-impl<N: Attribute + Amount> AsAttribute<Length> for N {}
-impl<N: Amount> AsAttribute<Length> for Quantity<N, Length> {}
+impl<N: Attribute + Number> AsAttribute<Length> for N {}
+impl<N: Number> AsAttribute<Length> for Quantity<N, Length> {}
 
-pub fn percentage<N: Amount>(value: N) -> Quantity<N, Percentage> {
+pub fn percentage<N: Number>(value: N) -> Quantity<N, Percentage> {
     Quantity::new(value, "%")
 }
 
 pub struct Percentage;
 
-impl<N: Amount> AsAttribute<Percentage> for Quantity<N, Percentage> {}
+impl<N: Number> AsAttribute<Percentage> for Quantity<N, Percentage> {}
 
 pub struct Auto;
 
@@ -60,21 +60,21 @@ impl AsAttribute<AutoOrLengthOrPercentage> for Auto {}
 
 pub struct NumberOrPercentage;
 
-impl<N: Attribute + Amount> AsAttribute<NumberOrPercentage> for N {}
-impl<N: Amount> AsAttribute<NumberOrPercentage> for Quantity<N, Percentage> {}
+impl<N: Attribute + Number> AsAttribute<NumberOrPercentage> for N {}
+impl<N: Number> AsAttribute<NumberOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct LengthOrPercentage;
 
-impl<N: Attribute + Amount> AsAttribute<LengthOrPercentage> for N {}
-impl<N: Amount> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
-impl<N: Amount> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
+impl<N: Attribute + Number> AsAttribute<LengthOrPercentage> for N {}
+impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
+impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct AutoOrLengthOrPercentage;
 
-impl<N: Attribute + Amount> AsAttribute<AutoOrLengthOrPercentage> for N {}
-impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Auto> {}
-impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
-impl<N: Amount> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
+impl<N: Attribute + Number> AsAttribute<AutoOrLengthOrPercentage> for N {}
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Auto> {}
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
+impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
 
 pub struct Quantity<N, T> {
     value: N,
@@ -92,7 +92,7 @@ impl<N, T> Quantity<N, T> {
     }
 }
 
-impl<N: Amount, T> Attribute for Quantity<N, T> {
+impl<N: Number, T> Attribute for Quantity<N, T> {
     fn text(&self) -> Option<Cow<str>> {
         Some(format!("{}{}", self.value, self.units).into())
     }
