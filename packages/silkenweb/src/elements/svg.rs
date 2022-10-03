@@ -57,6 +57,9 @@ parent_element!(svg);
 svg_element!(
     path <web_sys::SvgPathElement> {
         attributes {
+            /// This attribute lets authors specify the total length for the
+            /// path, in user units.
+            /// Value type: <number> ; Default value: none; Animatable: yes
             path_length("pathLength"): f64,
         }
     }
@@ -68,12 +71,34 @@ impl ConditionalProcessing for PathBuilder {}
 svg_element!(
     rect <web_sys::SvgPathElement> {
         attributes {
+            /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
+            /// value: 0; Animatable: yes
             x: Length,
+
+            /// The y coordinate of the rect. Value type: <length>|<percentage> ; Default
+            /// value: 0; Animatable: yes
             y: Length,
+
+            /// The width of the rect. Value type: auto|<length>|<percentage> ; Default
+            /// value: auto; Animatable: yes
             width: Length,
+
+            /// The height of the rect. Value type: auto|<length>|<percentage> ; Default
+            /// value: auto; Animatable: yes
             height: Length,
+
+            /// The horizontal corner radius of the rect. Defaults to ry if it is specified.
+            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
             rx: Length,
+
+            /// The vertical corner radius of the rect. Defaults to rx if it is specified.
+            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
             ry: Length,
+
+            /// The total length of the rectangle's perimeter, in user units. Value type:
+            /// <number> ; Default value: none; Animatable: yes
             path_length("pathLength"): f64,
         }
     }
@@ -88,10 +113,20 @@ svg_element!(
     text("use")
     <web_sys::SvgUseElement> {
         attributes {
+            /// The URL to an element/fragment that needs to be duplicated.
+            /// Value type: <URL> ; Default value: none; Animatable: yes
             href("href"): String,
+            /// The x coordinate of the use element.
+            /// Value type: <coordinate> ; Default value: 0; Animatable: yes
             x("x"): Length,
+            /// The y coordinate of the use element.
+            /// Value type: <coordinate> ; Default value: 0; Animatable: yes
             y("x"): Length,
+            /// The width of the use element.
+            /// Value type: <length> ; Default value: 0; Animatable: yes
             width("width"): Length,
+            /// The height of the use element.
+            /// Value type: <length> ; Default value: 0; Animatable: yes
             height("height"): Length,
         }
     }
