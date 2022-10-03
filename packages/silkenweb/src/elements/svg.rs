@@ -164,7 +164,7 @@ impl Presentation for SvgBuilder {}
 parent_element!(svg);
 
 svg_element!(
-    /// The <path> SVG element is the generic element to define a shape. All the
+    /// The `path` SVG element is the generic element to define a shape. All the
     /// basic shapes can be created with a path element.
     path <web_sys::SvgPathElement> {
         attributes {

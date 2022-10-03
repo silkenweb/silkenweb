@@ -47,14 +47,28 @@ macro_rules! html_element {
 }
 
 macro_rules! svg_element {
-    ($($t:tt)*) => {
+    (
+        $(#[$elem_meta:meta])*
+        $name:ident $(- $name_tail:tt)*
+        $($t:tt)*
+    ) => { $crate::macros::paste!{
         $crate::dom_element!(
             namespace = Some("http://www.w3.org/2000/svg"),
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
+            #[doc = 
+                "SVG ["
+                $name $(- $name_tail)* 
+                "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/" 
+                $name $(- $name_tail)* 
+                ") element"
+            ]
+            #[doc = ""]
+            $(#[$elem_meta])*
+            $name $(- $name_tail)*
             $($t)*
         );
-    }
+    }}
 }
 
 #[doc(hidden)]
