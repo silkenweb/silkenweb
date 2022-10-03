@@ -1,8 +1,8 @@
 //! SVG Elements
 
 use self::{
-    attributes::{Presentation, ConditionalProcessing},
-    content_type::{Length, LengthOrPercentage},
+    attributes::{ConditionalProcessing, Presentation},
+    content_type::{AutoOrLengthOrPercentage, LengthOrPercentage},
 };
 
 pub mod attributes;
@@ -13,11 +13,44 @@ pub mod path;
 svg_element!(
     svg <web_sys::SvgsvgElement> {
         attributes {
-            width: String,
-            height: String
+
+            /// The displayed height of the rectangular viewport. (Not the
+            /// height of its coordinate system.)
+            /// Value type: <length>|<percentage> ; Default value: auto;
+            /// Animatable: yes
+            height: AutoOrLengthOrPercentage,
+
+            /// How the svg fragment must be deformed if it is displayed with a
+            /// different aspect ratio.
+            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid| xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)? ;
+            /// Default value: xMidYMid meet; Animatable: yes
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// The SVG viewport coordinates for the current SVG fragment.
+            /// Value type: <list-of-numbers> ; Default value: none;
+            /// Animatable: yes
+            view_box("viewBox"): String,
+
+            /// The displayed width of the rectangular viewport. (Not the width
+            /// of its coordinate system.) Value type: <length>|<percentage> ;
+            /// Default value: auto; Animatable: yes
+            width: AutoOrLengthOrPercentage,
+
+            /// The displayed x coordinate of the svg container. No effect on
+            /// outermost svg elements. Value type: <length>|<percentage> ;
+            /// Default value: 0; Animatable: yes
+            x: LengthOrPercentage,
+
+            /// The displayed y coordinate of the svg container. No effect on
+            /// outermost svg elements. Value type: <length>|<percentage> ;
+            /// Default value: 0; Animatable: yes
+            y: LengthOrPercentage,
         }
     }
 );
+
+impl Presentation for SvgBuilder {}
+impl ConditionalProcessing for SvgBuilder {}
 
 parent_element!(svg);
 
@@ -56,10 +89,13 @@ svg_element!(
     <web_sys::SvgUseElement> {
         attributes {
             href("href"): String,
-            x("x"): Length,
-            y("x"): Length,
-            width("width"): Length,
-            height("height"): Length,
+            x("x"): LengthOrPercentage,
+            y("x"): LengthOrPercentage,
+            width("width"): LengthOrPercentage,
+            height("height"): LengthOrPercentage,
         }
     }
 );
+
+impl Presentation for UseBuilder {}
+impl ConditionalProcessing for UseBuilder {}
