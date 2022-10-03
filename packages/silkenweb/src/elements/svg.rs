@@ -1,7 +1,7 @@
 //! SVG Elements
 
 use self::{
-    attributes::Presentation,
+    attributes::{Presentation, ConditionalProcessing},
     content_type::{Length, LengthOrPercentage},
 };
 
@@ -30,6 +30,7 @@ svg_element!(
 );
 
 impl Presentation for PathBuilder {}
+impl ConditionalProcessing for PathBuilder {}
 
 svg_element!(
     rect <web_sys::SvgPathElement> {
@@ -44,6 +45,9 @@ svg_element!(
         }
     }
 );
+
+impl Presentation for RectBuilder {}
+impl ConditionalProcessing for RectBuilder {}
 
 svg_element!(
     snake(r#use),

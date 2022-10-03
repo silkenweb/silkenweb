@@ -274,3 +274,18 @@ pub trait Presentation: ElementBuilder {
             - effect: String,
     ];
 }
+
+/// SVG Conditional Processing Attributes
+pub trait ConditionalProcessing: ElementBuilder {
+    attributes![
+        /// List all the browser specific capabilities that must be supported by
+        /// the browser to be allowed to render the associated element. Value: A
+        /// list of space-separated URI; Animatable: No
+        required_extensions("requiredExtensions"): String,
+        /// Indicates which language the user must have chosen to render the
+        /// associated element. Value: A list of comma-separated language tags
+        /// according to RFC 5646: Tags for Identifying Languages (also known as
+        /// BCP 47); Animatable: No
+        system_language("systemLanguage"): String,
+    ];
+}
