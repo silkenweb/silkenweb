@@ -122,6 +122,7 @@ features = [
     "HtmlUListElement",
     "HtmlVideoElement",
 
+    "SvgaElement",
     "SvgsvgElement",
     "SvgPathElement",
     "SvgUseElement",
