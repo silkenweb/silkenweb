@@ -71,7 +71,7 @@ macro_rules! dom_element {
             $(attributes {
                 $(
                     $(#[$attr_meta:meta])*
-                    $attr:ident $(- $attr_tail:tt)*: $typ:ty
+                    $attr:ident $(- $attr_tail:tt)* $( ($text_name:literal) )?: $typ:ty
                 ),* $(,)?
             })?
 
@@ -100,7 +100,7 @@ macro_rules! dom_element {
                     $(#[$attr_meta])*
                     // TODO: If [this](https://github.com/dtolnay/paste/issues/74#issue-1100247715) paste issue gets resolved,
                     // use `[< $attr:snake >]` and replace `text_attr!` usage with `text_name`.
-                    $attr $($attr_tail)* ( $crate::text_attr!($attr $(- $attr_tail)*) ) : $typ
+                    $attr $($attr_tail)* ( $crate::text_attr!($attr $(- $attr_tail)* $( ( $text_name ))?) ) : $typ
                 ),*})?
 
                 $(events {
@@ -475,8 +475,8 @@ macro_rules! attributes {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! text_attr {
-    (current_time) => {
-        $crate::text_name!(currentTime)
+    ($name:ident ($text_name: literal)) => {
+        $crate::macros::intern_str($text_name)
     };
     ($($name:tt)*) => {
         $crate::text_name!($($name)*)
@@ -610,12 +610,4 @@ macro_rules! stringify_raw {
     ($name:tt) => {
         stringify!($name)
     };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! camel_name{
-    ($name:ident $($name_tail:tt)*) => { $crate::macros::paste!{
-        [< $name:camel $($name_tail:camel)* >]
-    }}
 }

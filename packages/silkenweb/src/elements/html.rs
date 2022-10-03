@@ -1291,7 +1291,7 @@ html_element!(
             /// position well before the beginning of the media, and would fail. The
             /// getStartDate() method can be used to determine the beginning
             /// point of the media timeline's reference frame.
-            current_time: String,
+            current_time("currentTime"): String,
 
             /// If specified, the audio player will automatically seek back to the
             /// start upon reaching the end of the audio.
@@ -1697,7 +1697,7 @@ html_element!(
             /// currentTime to a time before that would fail. The
             /// getStartDate() method can be used to determine the beginning
             /// point of the media timeline's reference frame.
-            current_time: String,
+            current_time("currentTime"): String,
 
             /// The height of the video's display area, in CSS pixels (absolute
             /// values only; no percentages.)

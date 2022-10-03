@@ -1,10 +1,9 @@
 //! SVG Elements
 
 use self::{
-    content_type::{Length, LengthOrPercentage, Number},
+    content_type::{Length, LengthOrPercentage},
     path::Data,
 };
-use crate::{attribute::AsAttribute, node::element::ElementBuilder};
 
 pub mod attributes;
 pub mod content_type;
@@ -26,6 +25,7 @@ svg_element!(
     path <web_sys::SvgPathElement> {
         attributes {
             d: Data,
+            path_length("pathLength"): f64,
             stroke: String,
             fill: String
         }
@@ -42,6 +42,7 @@ svg_element!(
             rx: LengthOrPercentage,
             ry: LengthOrPercentage,
             transform: String,
+            path_length("pathLength"): f64,
         }
     }
 );
@@ -60,11 +61,3 @@ svg_element!(
         }
     }
 );
-
-impl RectBuilder {
-    pub fn path_length<N: Number>(self, value: impl AsAttribute<N>) -> Self {
-        Self {
-            builder: self.builder.attribute("pathLength", value),
-        }
-    }
-}
