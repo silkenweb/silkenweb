@@ -357,4 +357,22 @@ pub trait SvgElement: ElementBuilder {
             value.map(move |class| class_attribute_text(class)),
         )
     }
+
+    global_attributes![
+        /// Defines a unique identifier (ID) which must be unique in the whole
+        /// document. Its purpose is to identify the element when linking (using
+        /// a fragment identifier), scripting, or styling (with CSS). Value: Any
+        /// valid ID string; Animatable: No.
+        id: String,
+        /// Participates in defining the language of the element, the language
+        /// that non-editable elements are written in or the language that
+        /// editable elements should be written in. The tag contains one single
+        /// entry value in the format defined in
+        /// [RFC 5646: Tags for Identifying Languages (also known as BCP 47)](https://datatracker.ietf.org/doc/html/rfc5646).
+        lang: String,
+        /// The tabindex SVG attribute allows you to control whether an element
+        /// is focusable and to define the relative order of the element for the
+        /// purposes of sequential focus navigation. Animatable: No
+        tabindex: i32,
+    ];
 }
