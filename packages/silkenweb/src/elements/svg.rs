@@ -138,8 +138,10 @@ svg_element!(
 impl ConditionalProcessing for PathBuilder {}
 impl Presentation for PathBuilder {}
 
+parent_element!(path);
+
 svg_element!(
-    rect <web_sys::SvgPathElement> {
+    rect <web_sys::SvgRectElement> {
         attributes {
             /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
             /// value: 0; Animatable: yes
@@ -177,6 +179,8 @@ svg_element!(
 impl ConditionalProcessing for RectBuilder {}
 impl Presentation for RectBuilder {}
 
+parent_element!(rect);
+
 svg_element!(
     snake(r#use),
     camel(Use, UseBuilder),
@@ -204,3 +208,5 @@ svg_element!(
 
 impl ConditionalProcessing for UseBuilder {}
 impl Presentation for UseBuilder {}
+
+parent_element!(use);
