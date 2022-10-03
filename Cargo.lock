@@ -1355,7 +1355,6 @@ dependencies = [
  "indexmap",
  "itertools",
  "js-sys",
- "num-traits",
  "paste",
  "silkenweb-base",
  "silkenweb-macros",

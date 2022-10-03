@@ -2,7 +2,7 @@
 
 use self::{
     attributes::{ConditionalProcessing, Presentation},
-    content_type::{AutoOrLengthOrPercentage, LengthOrPercentage},
+    content_type::{AutoOrLength, Length},
 };
 
 pub mod attributes;
@@ -18,7 +18,7 @@ svg_element!(
             /// height of its coordinate system.)
             /// Value type: <length>|<percentage> ; Default value: auto;
             /// Animatable: yes
-            height: AutoOrLengthOrPercentage,
+            height: AutoOrLength,
 
             /// How the svg fragment must be deformed if it is displayed with a
             /// different aspect ratio.
@@ -34,17 +34,17 @@ svg_element!(
             /// The displayed width of the rectangular viewport. (Not the width
             /// of its coordinate system.) Value type: <length>|<percentage> ;
             /// Default value: auto; Animatable: yes
-            width: AutoOrLengthOrPercentage,
+            width: AutoOrLength,
 
             /// The displayed x coordinate of the svg container. No effect on
             /// outermost svg elements. Value type: <length>|<percentage> ;
             /// Default value: 0; Animatable: yes
-            x: LengthOrPercentage,
+            x: Length,
 
             /// The displayed y coordinate of the svg container. No effect on
             /// outermost svg elements. Value type: <length>|<percentage> ;
             /// Default value: 0; Animatable: yes
-            y: LengthOrPercentage,
+            y: Length,
         }
     }
 );
@@ -68,12 +68,12 @@ impl ConditionalProcessing for PathBuilder {}
 svg_element!(
     rect <web_sys::SvgPathElement> {
         attributes {
-            x: LengthOrPercentage,
-            y: LengthOrPercentage,
-            width: LengthOrPercentage,
-            height: LengthOrPercentage,
-            rx: LengthOrPercentage,
-            ry: LengthOrPercentage,
+            x: Length,
+            y: Length,
+            width: Length,
+            height: Length,
+            rx: Length,
+            ry: Length,
             path_length("pathLength"): f64,
         }
     }
@@ -89,10 +89,10 @@ svg_element!(
     <web_sys::SvgUseElement> {
         attributes {
             href("href"): String,
-            x("x"): LengthOrPercentage,
-            y("x"): LengthOrPercentage,
-            width("width"): LengthOrPercentage,
-            height("height"): LengthOrPercentage,
+            x("x"): Length,
+            y("x"): Length,
+            width("width"): Length,
+            height("height"): Length,
         }
     }
 );

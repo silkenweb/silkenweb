@@ -2,7 +2,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use silkenweb_base::intern_str;
 
 use super::{
-    content_type::{LengthOrPercentage, NumberOrPercentage},
+    content_type::{Length, NumberOrPercentage},
     path::Data,
 };
 use crate::{elements::class_attribute_text, node::element::ElementBuilder};
@@ -230,7 +230,7 @@ pub trait Presentation: ElementBuilder {
         /// Defines an offset on the rendering of the associated dash array.
         /// Value: <percentage>|<length>; Animatable: Yes
         stroke
-            - dashoffset: LengthOrPercentage,
+            - dashoffset: Length,
         /// Defines the shape to be used at the end of open subpaths when they
         /// are stroked. Value: butt|round|square; Animatable: Yes
         stroke
@@ -250,7 +250,7 @@ pub trait Presentation: ElementBuilder {
         /// Defines the width of the stroke to be applied to the shape. Value:
         /// <length>|<percentage>; Animatable: Yes
         stroke
-            - width: LengthOrPercentage,
+            - width: Length,
         /// Defines the vertical alignment a string of text. Value:
         /// start|middle|end|inherit; Animatable: Yes
         text - anchor: String,

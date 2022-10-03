@@ -2,52 +2,56 @@
 //!
 //! See [MDN SVG Content Types](https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type)
 
-// TODO: Docs
-use std::{borrow::Cow, fmt::Display, marker::PhantomData};
-
-use num_traits::Num;
+use std::borrow::Cow;
 
 use crate::attribute::{AsAttribute, Attribute};
 
-pub trait Number: Num + Display + Copy {}
+/// An SVG length with units. For percentages, use [`Percentage`] and for
+/// unitless lengths, use `f64`.
+pub enum Length {
+    Em(f64),
+    Ex(f64),
+    Px(f64),
+    Cm(f64),
+    Mm(f64),
+    In(f64),
+    Pt(f64),
+    Pc(f64),
+}
 
-impl<T: Num + Display + Copy> Number for T {}
+impl Attribute for Length {
+    fn text(&self) -> Option<Cow<str>> {
+        let (length, units) = match self {
+            Length::Em(l) => (l, "em"),
+            Length::Ex(l) => (l, "ex"),
+            Length::Px(l) => (l, "px"),
+            Length::Cm(l) => (l, "cm"),
+            Length::Mm(l) => (l, "mm"),
+            Length::In(l) => (l, "in"),
+            Length::Pt(l) => (l, "pt"),
+            Length::Pc(l) => (l, "pc"),
+        };
 
-macro_rules! length{
-    ($($name: ident),* $(,)?) =>{
-        $(
-            pub fn $name<N: Number>(value: N) -> Quantity<N, Length> {
-                Quantity::new(value, stringify!($name))
-            }
-        )*
+        Some(format!("{length}{units}").into())
     }
 }
 
-length!(em, ex, px, cm, mm, pt, pc);
+impl AsAttribute<Length> for Length {}
+impl AsAttribute<Length> for Percentage {}
+impl AsAttribute<Length> for f64 {}
 
-pub fn inches<N: Number>(value: N) -> Quantity<N, Length> {
-    Quantity::new(value, "in")
-}
+/// SVG attribute type for percentages
+pub struct Percentage(pub f64);
 
-pub struct Length;
-
-impl Length {
-    pub fn zero() -> Quantity<u32, Length> {
-        Quantity::new(0, "")
+impl Attribute for Percentage {
+    fn text(&self) -> Option<Cow<str>> {
+        Some(format!("{}%", self.0).into())
     }
 }
 
-impl<N: Attribute + Number> AsAttribute<Length> for N {}
-impl<N: Number> AsAttribute<Length> for Quantity<N, Length> {}
+impl AsAttribute<Percentage> for Percentage {}
 
-pub fn percentage<N: Number>(value: N) -> Quantity<N, Percentage> {
-    Quantity::new(value, "%")
-}
-
-pub struct Percentage;
-
-impl<N: Number> AsAttribute<Percentage> for Quantity<N, Percentage> {}
-
+/// For SVG attributes that accept "auto"
 pub struct Auto;
 
 impl Attribute for Auto {
@@ -56,44 +60,18 @@ impl Attribute for Auto {
     }
 }
 
-impl AsAttribute<AutoOrLengthOrPercentage> for Auto {}
+impl AsAttribute<Auto> for Auto {}
 
+/// Marker type for SVG attributes that can be a number or percentage
 pub struct NumberOrPercentage;
 
-impl<N: Attribute + Number> AsAttribute<NumberOrPercentage> for N {}
-impl<N: Number> AsAttribute<NumberOrPercentage> for Quantity<N, Percentage> {}
+impl AsAttribute<NumberOrPercentage> for f64 {}
+impl AsAttribute<NumberOrPercentage> for Percentage {}
 
-pub struct LengthOrPercentage;
+/// Marker type for SVG attributes that can be "auto" or a length
+pub struct AutoOrLength;
 
-impl<N: Attribute + Number> AsAttribute<LengthOrPercentage> for N {}
-impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Length> {}
-impl<N: Number> AsAttribute<LengthOrPercentage> for Quantity<N, Percentage> {}
-
-pub struct AutoOrLengthOrPercentage;
-
-impl<N: Attribute + Number> AsAttribute<AutoOrLengthOrPercentage> for N {}
-impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Auto> {}
-impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Length> {}
-impl<N: Number> AsAttribute<AutoOrLengthOrPercentage> for Quantity<N, Percentage> {}
-
-pub struct Quantity<N, T> {
-    value: N,
-    units: &'static str,
-    ty: PhantomData<T>,
-}
-
-impl<N, T> Quantity<N, T> {
-    pub fn new(value: N, units: &'static str) -> Self {
-        Self {
-            value,
-            units,
-            ty: PhantomData,
-        }
-    }
-}
-
-impl<N: Number, T> Attribute for Quantity<N, T> {
-    fn text(&self) -> Option<Cow<str>> {
-        Some(format!("{}{}", self.value, self.units).into())
-    }
-}
+impl AsAttribute<AutoOrLength> for Auto {}
+impl AsAttribute<AutoOrLength> for f64 {}
+impl AsAttribute<AutoOrLength> for Length {}
+impl AsAttribute<AutoOrLength> for Percentage {}
