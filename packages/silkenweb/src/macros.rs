@@ -56,11 +56,11 @@ macro_rules! svg_element {
             namespace = Some("http://www.w3.org/2000/svg"),
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
-            #[doc = 
+            #[doc =
                 "SVG ["
-                $name $(- $name_tail)* 
-                "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/" 
-                $name $(- $name_tail)* 
+                $name $(- $name_tail)*
+                "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/"
+                $name $(- $name_tail)*
                 ") element"
             ]
             #[doc = ""]
