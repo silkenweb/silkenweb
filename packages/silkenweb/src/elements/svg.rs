@@ -3,7 +3,6 @@
 use self::{
     attributes::Presentation,
     content_type::{Length, LengthOrPercentage},
-    path::Data,
 };
 
 pub mod attributes;
@@ -25,7 +24,6 @@ parent_element!(svg);
 svg_element!(
     path <web_sys::SvgPathElement> {
         attributes {
-            d: Data,
             path_length("pathLength"): f64,
         }
     }

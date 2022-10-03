@@ -157,7 +157,7 @@ macro_rules! dom_element {
 
         impl $camel_builder_name {
             $crate::attributes![
-                $($($(#[$attr_meta])* pub $attr $($attr_tail)* ($text_attr): $typ,)*)?
+                $($($(#[$attr_meta])* pub $attr $(- $attr_tail)* ($text_attr): $typ,)*)?
             ];
 
             $($crate::events!(
@@ -461,7 +461,7 @@ macro_rules! attributes {
     }};
     ($(
         $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $($attr_tail:ident)* ($text_attr:expr): $typ:ty
+        $visibility:vis $attr:ident $(- $attr_tail:ident)* ($text_attr:expr): $typ:ty
     ),* $(,)? ) => { $crate::macros::paste!{
         $crate::attributes!(
             $(
@@ -469,6 +469,15 @@ macro_rules! attributes {
                 $visibility [< $attr $(_ $attr_tail)* >] ($text_attr): $typ
             ),*
         );
+    }};
+    ($(
+        $(#[$attr_meta:meta])*
+        $attr:ident $(- $attr_tail:ident)*: $typ:ty
+    ),* $(,)? ) => { $crate::macros::paste!{
+        $crate::attributes![
+            $($(#[$attr_meta])*
+            $attr $(- $attr_tail)* ($crate::text_name!($attr $(- $attr_tail)*)): $typ,)*
+        ];
     }};
 }
 
