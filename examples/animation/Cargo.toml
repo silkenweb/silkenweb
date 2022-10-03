@@ -7,6 +7,6 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
-futures-signals = "0.3"
-num-traits = "0.2"
+futures-signals = "0.3.31"
+num-traits = "0.2.15"
 wasm-bindgen = "=0.2.83"

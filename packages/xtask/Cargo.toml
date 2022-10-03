@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = "4.0"
+clap = "4.0.4"
 xtask-base = { git = "https://github.com/simon-bourne/rust-xtask-base" }
 xshell = "0.1.17"
 duct = "0.13.5"

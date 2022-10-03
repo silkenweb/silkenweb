@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb", features = ["server-side-render"] }
-futures-signals = "0.3"
+futures-signals = "0.3.31"
