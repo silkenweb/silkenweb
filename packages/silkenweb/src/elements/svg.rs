@@ -1,7 +1,9 @@
 //! SVG Elements
 
 use self::{
-    attributes::{ConditionalProcessing, Presentation, AnimationTiming, AnimationValue, OtherAnimation},
+    attributes::{
+        AnimationTiming, AnimationValue, ConditionalProcessing, OtherAnimation, Presentation,
+    },
     content_type::{AutoOrLength, Length},
 };
 
@@ -10,6 +12,12 @@ pub mod content_type;
 pub mod path;
 
 svg_element!(
+    /// The <a> SVG element creates a hyperlink to other web pages, files,
+    /// locations in the same page, email addresses, or any other URL. It is
+    /// very similar to HTML's <a> element.
+    ///
+    /// SVG's <a> element is a container, which means you can create a link
+    /// around text (like in HTML) but also around any shape.
     a <web_sys::SvgaElement> {
         attributes {
             /// Instructs browsers to download a URL instead of navigating to
@@ -64,6 +72,8 @@ impl ConditionalProcessing for ABuilder {}
 impl Presentation for ABuilder {}
 
 svg_element!(
+    /// The SVG <animate> element provides a way to animate an attribute of an
+    /// element over time.
     animate <web_sys::SvgaElement> {}
 );
 
@@ -72,6 +82,15 @@ impl AnimationValue for AnimateBuilder {}
 impl OtherAnimation for AnimateBuilder {}
 
 svg_element!(
+    /// The <defs> element is used to store graphical objects that will be used
+    /// at a later time. Objects created inside a <defs> element are not
+    /// rendered directly. To display them you have to reference them (with a
+    /// <use> element for example).
+    ///
+    /// Graphical objects can be referenced from anywhere, however, defining
+    /// these objects inside of a <defs> element promotes understandability of
+    /// the SVG content and is beneficial to the overall accessibility of the
+    /// document.
     defs <web_sys::SvgDefsElement> {}
 );
 
@@ -80,6 +99,11 @@ impl ConditionalProcessing for DefsBuilder {}
 impl Presentation for DefsBuilder {}
 
 svg_element!(
+    /// The <g> SVG element is a container used to group other SVG elements.
+    ///
+    /// Transformations applied to the <g> element are performed on its child
+    /// elements, and its attributes are inherited by its children. It can also
+    /// group multiple elements to be referenced later with the <use> element.
     g <web_sys::SvggElement> {}
 );
 
@@ -89,9 +113,16 @@ impl Presentation for GBuilder {}
 
 // TODO: Add all svg elements, (element, global) * (attributes, events)
 svg_element!(
+    /// The svg element is a container that defines a new coordinate system and
+    /// viewport. It is used as the outermost element of SVG documents, but it
+    /// can also be used to embed an SVG fragment inside an SVG or HTML
+    /// document.
+    ///
+    /// Note: The xmlns attribute is only required on the outermost svg element
+    /// of SVG documents. It is unnecessary for inner svg elements or inside
+    /// HTML documents.
     svg <web_sys::SvgsvgElement> {
         attributes {
-
             /// The displayed height of the rectangular viewport. (Not the
             /// height of its coordinate system.)
             /// Value type: <length>|<percentage> ; Default value: auto;
@@ -133,6 +164,8 @@ impl Presentation for SvgBuilder {}
 parent_element!(svg);
 
 svg_element!(
+    /// The <path> SVG element is the generic element to define a shape. All the
+    /// basic shapes can be created with a path element.
     path <web_sys::SvgPathElement> {
         attributes {
             /// This attribute lets authors specify the total length for the
@@ -149,6 +182,9 @@ impl Presentation for PathBuilder {}
 parent_element!(path);
 
 svg_element!(
+    /// The <rect> element is a basic SVG shape that draws rectangles, defined
+    /// by their position, width, and height. The rectangles may have their
+    /// corners rounded.
     rect <web_sys::SvgRectElement> {
         attributes {
             /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
@@ -190,6 +226,7 @@ impl Presentation for RectBuilder {}
 parent_element!(rect);
 
 svg_element!(
+    /// The <use> element takes nodes from within the SVG document, and duplicates them somewhere else.
     snake(r#use),
     camel(Use, UseBuilder),
     text("use")
@@ -203,7 +240,7 @@ svg_element!(
             x("x"): Length,
             /// The y coordinate of the use element.
             /// Value type: <coordinate> ; Default value: 0; Animatable: yes
-            y("x"): Length,
+            y("y"): Length,
             /// The width of the use element.
             /// Value type: <length> ; Default value: 0; Animatable: yes
             width("width"): Length,
