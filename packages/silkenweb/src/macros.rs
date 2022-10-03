@@ -50,7 +50,7 @@ macro_rules! svg_element {
     ($($t:tt)*) => {
         $crate::dom_element!(
             namespace = Some("http://www.w3.org/2000/svg"),
-            attributes = [$crate::elements::SvgElement],
+            attributes = [$crate::elements::svg::attributes::Global],
             events = [],
             $($t)*
         );

@@ -6,6 +6,7 @@ use self::{
 };
 use crate::{attribute::AsAttribute, node::element::ElementBuilder};
 
+pub mod attributes;
 pub mod content_type;
 pub mod path;
 
