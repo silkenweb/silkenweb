@@ -56,3 +56,15 @@ pub trait Global: ElementBuilder {
         style: String,
     ];
 }
+
+/// SVG Presentation Attributes
+pub trait Presentation: ElementBuilder {
+    attributes![
+        /// Defines the color used to paint the outline of the shape. Value:
+        /// <paint>; Animatable: Yes
+        stroke: String,
+        /// It defines the color of the inside of the graphical element it
+        /// applies to. Value: <paint>; Animatable: Yes
+        fill: String,
+    ];
+}

@@ -6,6 +6,7 @@ use silkenweb::{
     animation::infinite_animation,
     elements::svg::{
         self,
+        attributes::Presentation,
         path::{
             Data,
             Offset::{Abs, Rel},

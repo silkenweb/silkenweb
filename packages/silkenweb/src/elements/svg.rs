@@ -1,6 +1,7 @@
 //! SVG Elements
 
 use self::{
+    attributes::Presentation,
     content_type::{Length, LengthOrPercentage},
     path::Data,
 };
@@ -26,11 +27,11 @@ svg_element!(
         attributes {
             d: Data,
             path_length("pathLength"): f64,
-            stroke: String,
-            fill: String
         }
     }
 );
+
+impl Presentation for PathBuilder {}
 
 svg_element!(
     rect <web_sys::SvgPathElement> {
