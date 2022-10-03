@@ -48,6 +48,59 @@ pub trait Global: ElementBuilder {
     ];
 }
 
+pub trait AnimationTiming: ElementBuilder {
+    attributes![
+        /// The begin attribute defines when an animation should begin or when 
+        /// an element should be discarded.
+        ///
+        /// The attribute value is a semicolon separated list of values. The 
+        /// interpretation of a list of start times is detailed in the SMIL 
+        /// specification in "Evaluation of begin and end time lists". Each 
+        /// individual value can be one of the following : 
+        ///     - <offset-value>
+        ///     - <syncbase-value>
+        ///     - <event-value>
+        ///     - <repeat-value>
+        ///     - <accessKey-value>
+        ///     - <wallclock-sync-value>
+        ///     - the keyword indefinite.
+        begin: String,
+        /// The dur attribute indicates the simple duration of an animation.
+        dur: String,
+        /// The end attribute defines an end value for the animation that can 
+        /// constrain the active duration.
+        end: String,
+        /// The min attribute specifies the minimum value of the active 
+        /// animation duration.
+        min: String,
+        /// The max attribute specifies the maximum value of the active 
+        /// animation duration.
+        max: String,
+        /// The restart attribute specifies whether or not an animation can restart.
+        restart: String,
+        // /// The repeatCount attribute indicates the number of times an animation 
+        // /// will take place.
+        // repeat_count("repeatCount"): String,
+        // /// The repeatDur attribute specifies the total duration for repeating an 
+        // /// animation.
+        // repeat_dur("repeatDur"): String,
+        /// The fill attribute has two different meanings. For shapes and text it's a presentation attribute that defines the color (or any SVG paint servers like gradients or patterns) used to paint the element; for animation it defines the final state of the animation.
+        fill: String,
+    ];
+}
+
+pub trait AnimationValue: ElementBuilder {
+    attributes![
+        // TODO: Add attributes
+    ];
+}
+
+pub trait OtherAnimation: ElementBuilder {
+    attributes![
+        // TODO: Add attributes
+    ];
+}
+
 /// SVG Presentation Attributes
 pub trait Presentation: ElementBuilder {
     attributes![

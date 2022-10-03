@@ -1,7 +1,7 @@
 //! SVG Elements
 
 use self::{
-    attributes::{ConditionalProcessing, Presentation},
+    attributes::{ConditionalProcessing, Presentation, AnimationTiming, AnimationValue, OtherAnimation},
     content_type::{AutoOrLength, Length},
 };
 
@@ -62,6 +62,14 @@ svg_element!(
 parent_element!(a);
 impl ConditionalProcessing for ABuilder {}
 impl Presentation for ABuilder {}
+
+svg_element!(
+    animate <web_sys::SvgaElement> {}
+);
+
+impl AnimationTiming for AnimateBuilder {}
+impl AnimationValue for AnimateBuilder {}
+impl OtherAnimation for AnimateBuilder {}
 
 svg_element!(
     defs <web_sys::SvgDefsElement> {}
