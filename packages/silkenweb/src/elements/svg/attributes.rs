@@ -50,13 +50,13 @@ pub trait Global: ElementBuilder {
 
 pub trait AnimationTiming: ElementBuilder {
     attributes![
-        /// The begin attribute defines when an animation should begin or when 
+        /// The begin attribute defines when an animation should begin or when
         /// an element should be discarded.
         ///
-        /// The attribute value is a semicolon separated list of values. The 
-        /// interpretation of a list of start times is detailed in the SMIL 
-        /// specification in "Evaluation of begin and end time lists". Each 
-        /// individual value can be one of the following : 
+        /// The attribute value is a semicolon separated list of values. The
+        /// interpretation of a list of start times is detailed in the SMIL
+        /// specification in "Evaluation of begin and end time lists". Each
+        /// individual value can be one of the following :
         ///     - <offset-value>
         ///     - <syncbase-value>
         ///     - <event-value>
@@ -67,37 +67,113 @@ pub trait AnimationTiming: ElementBuilder {
         begin: String,
         /// The dur attribute indicates the simple duration of an animation.
         dur: String,
-        /// The end attribute defines an end value for the animation that can 
+        /// The end attribute defines an end value for the animation that can
         /// constrain the active duration.
         end: String,
-        /// The min attribute specifies the minimum value of the active 
+        /// The min attribute specifies the minimum value of the active
         /// animation duration.
         min: String,
-        /// The max attribute specifies the maximum value of the active 
+        /// The max attribute specifies the maximum value of the active
         /// animation duration.
         max: String,
-        /// The restart attribute specifies whether or not an animation can restart.
+        /// The restart attribute specifies whether or not an animation can
+        /// restart.
         restart: String,
-        // /// The repeatCount attribute indicates the number of times an animation 
-        // /// will take place.
-        // repeat_count("repeatCount"): String,
-        // /// The repeatDur attribute specifies the total duration for repeating an 
-        // /// animation.
-        // repeat_dur("repeatDur"): String,
-        /// The fill attribute has two different meanings. For shapes and text it's a presentation attribute that defines the color (or any SVG paint servers like gradients or patterns) used to paint the element; for animation it defines the final state of the animation.
+        /// The repeatCount attribute indicates the number of times an animation
+        /// will take place.
+        repeat_count("repeatCount"): String,
+        /// The repeatDur attribute specifies the total duration for repeating
+        /// an animation.
+        repeat_dur("repeatDur"): String,
+        /// The fill attribute has two different meanings. For shapes and text
+        /// it's a presentation attribute that defines the color (or any SVG
+        /// paint servers like gradients or patterns) used to paint the element;
+        /// for animation it defines the final state of the animation.
         fill: String,
     ];
 }
 
 pub trait AnimationValue: ElementBuilder {
     attributes![
-        // TODO: Add attributes
+        /// The calcMode attribute specifies the interpolation mode for the
+        /// animation.
+        ///
+        /// The default mode is linear, however if the attribute does not
+        /// support linear interpolation (e.g. for strings), the calcMode
+        /// attribute is ignored and discrete interpolation is used.
+        calc_mode("calcMode"): String,
+        /// The values attribute has different meanings, depending upon the
+        /// context where it's used, either it defines a sequence of values used
+        /// over the course of an animation, or it's a list of numbers for a
+        /// color matrix, which is interpreted differently depending on the type
+        /// of color change to be performed.
+        values: String,
+        /// The keyTimes attribute represents a list of time values used to
+        /// control the pacing of the animation.
+        ///
+        /// Each time in the list corresponds to a value in the values attribute
+        /// list, and defines when the value is used in the animation. Each time
+        /// value in the keyTimes list is specified as a floating point value
+        /// between 0 and 1 (inclusive), representing a proportional offset into
+        /// the duration of the animation element.
+        key_times("keyTimes"): String,
+        /// The keySplines attribute defines a set of Bézier curve control
+        /// points associated with the keyTimes list, defining a cubic Bézier
+        /// function that controls interval pacing.
+        ///
+        /// This attribute is ignored unless the calcMode attribute is set to
+        /// spline.
+        ///
+        /// If there are any errors in the keySplines specification (bad values,
+        /// too many or too few values), the animation will not occur.
+        key_splines("keySplines"): String,
+        /// The from attribute indicates the initial value of the attribute that
+        /// will be modified during the animation.
+        ///
+        /// When used with the to attribute, the animation will change the
+        /// modified attribute from the from value to the to value. When used
+        /// with the by attribute, the animation will change the attribute
+        /// relatively from the from value by the value specified in by.
+        from: String,
+        /// The to attribute indicates the final value of the attribute that
+        /// will be modified during the animation.
+        ///
+        /// The value of the attribute will change between the from attribute
+        /// value and this value.
+        to: String,
+        /// The by attribute specifies a relative offset value for an attribute
+        /// that will be modified during an animation.
+        ///
+        /// The starting value for the attribute is either indicated by
+        /// specifying it as value for the attribute given in the attributeName
+        /// or the from attribute.
+        by: String,
+        /// Undocumented in MDN
+        auto_reverse("autoReverse"): String,
+        /// Undocumented in MDN
+        accelerate: String,
+        /// Undocumented in MDN
+        decelerate: String,
     ];
 }
 
 pub trait OtherAnimation: ElementBuilder {
     attributes![
-        // TODO: Add attributes
+        /// The attributeName attribute indicates the name of the CSS property
+        /// or attribute of the target element that is going to be changed
+        /// during an animation.
+        attribute_name("attributeName"): String,
+        /// The additive attribute controls whether or not an animation is
+        /// additive.
+        additive: String,
+        /// The accumulate attribute controls whether or not an animation is
+        /// cumulative.
+        ///
+        /// It is frequently useful for repeated animations to build upon the
+        /// previous results, accumulating with each iteration. This attribute
+        /// said to the animation if the value is added to the previous animated
+        /// attribute's value on each iteration.
+        accumulate: String,
     ];
 }
 

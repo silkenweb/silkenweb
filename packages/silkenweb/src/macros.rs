@@ -437,47 +437,59 @@ macro_rules! custom_events {
 macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
+        $visibility:vis $attr:ident $(- $attr_tail:ident)* $(($text_attr:expr))? : $typ:ty
     ),* $(,)? ) => { $crate::macros::paste!{
         $(
-            $(#[$attr_meta])*
-            $visibility fn $attr(self, value: impl $crate::attribute::AsAttribute<$typ>) -> Self {
-                $crate::node::element::ElementBuilder::attribute(self, $text_attr, value)
-            }
-
-            $(#[$attr_meta])*
-            #[allow(clippy::wrong_self_convention)]
-            #[allow(non_snake_case)]
-            $visibility fn [< $attr _signal >]<T>(
-                self,
-                value: impl $crate::macros::Signal<Item = T> + 'static
-            ) -> Self
-            where
-                T: $crate::attribute::AsAttribute<$typ> + 'static
-            {
-                $crate::node::element::ElementBuilder::attribute_signal(self, $text_attr, value)
-            }
+            $crate::attribute!(
+                $(#[$attr_meta])*
+                $visibility $attr $(- $attr_tail)*$(($text_attr))?: $typ
+            );
         )*
     }};
-    ($(
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! attribute {
+    (
+        $(#[$attr_meta:meta])*
+        $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
+    ) => { $crate::macros::paste!{
+        $(#[$attr_meta])*
+        $visibility fn $attr(self, value: impl $crate::attribute::AsAttribute<$typ>) -> Self {
+            $crate::node::element::ElementBuilder::attribute(self, $text_attr, value)
+        }
+
+        $(#[$attr_meta])*
+        #[allow(clippy::wrong_self_convention)]
+        #[allow(non_snake_case)]
+        $visibility fn [< $attr _signal >]<T>(
+            self,
+            value: impl $crate::macros::Signal<Item = T> + 'static
+        ) -> Self
+        where
+            T: $crate::attribute::AsAttribute<$typ> + 'static
+        {
+            $crate::node::element::ElementBuilder::attribute_signal(self, $text_attr, value)
+        }
+    }};
+    (
         $(#[$attr_meta:meta])*
         $visibility:vis $attr:ident $(- $attr_tail:ident)* ($text_attr:expr): $typ:ty
-    ),* $(,)? ) => { $crate::macros::paste!{
-        $crate::attributes!(
-            $(
-                $(#[$attr_meta])*
-                $visibility [< $attr $(_ $attr_tail)* >] ($text_attr): $typ
-            ),*
+    ) => { $crate::macros::paste!{
+        $crate::attribute!(
+            $(#[$attr_meta])*
+            $visibility [< $attr $(_ $attr_tail)* >] ($text_attr): $typ
         );
     }};
-    ($(
+    (
         $(#[$attr_meta:meta])*
-        $attr:ident $(- $attr_tail:ident)*: $typ:ty
-    ),* $(,)? ) => { $crate::macros::paste!{
-        $crate::attributes![
-            $($(#[$attr_meta])*
-            $attr $(- $attr_tail)* ($crate::text_name!($attr $(- $attr_tail)*)): $typ,)*
-        ];
+        $visibility:vis $attr:ident $(- $attr_tail:ident)*: $typ:ty
+    ) => { $crate::macros::paste!{
+        $crate::attribute!(
+            $(#[$attr_meta])*
+            $visibility $attr $(- $attr_tail)* ($crate::text_name!($attr $(- $attr_tail)*)): $typ
+        );
     }};
 }
 
