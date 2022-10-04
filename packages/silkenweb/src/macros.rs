@@ -67,6 +67,7 @@ macro_rules! svg_element {
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
             doc_macro = svg_element_doc,
+            attribute_doc_macro = svg_attribute_doc,
             doc = [$(#[$elem_meta])*],
             $($tail)*
         );
@@ -81,6 +82,18 @@ macro_rules! svg_element_doc {
             "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
             $name,
             ") element"
+        )
+    };
+}
+
+macro_rules! svg_attribute_doc {
+    ($element:expr, $name:expr) => {
+        concat!(
+            "The SVG [",
+            $name,
+            "](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/",
+            $name,
+            ") attribute"
         )
     };
 }
@@ -110,6 +123,7 @@ macro_rules! dom_element {
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
         $(doc_macro = $doc_macro:ident,)?
+        $(attribute_doc_macro = $attr_doc_macro:ident,)?
         doc = [$($docs:tt)*],
         < $elem_type:ty >
         {
@@ -149,6 +163,10 @@ macro_rules! dom_element {
 
         impl $camel_builder_name {
             $crate::attributes![
+                $([
+                        attribute_parent = $text_name,
+                        attribute_doc_macro = $attr_doc_macro
+                ])?
                 $($($(#[$attr_meta])* pub $attr $( ($text_attr) )?: $typ,)*)?
             ];
 
@@ -429,12 +447,36 @@ macro_rules! custom_events {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! attributes {
-    ($(
-        $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $(($text_attr:expr))? : $typ:ty
-    ),* $(,)? ) => {
+    (
+        [
+            attribute_parent = $element:expr,
+            attribute_doc_macro = $attr_doc_macro:ident
+        ]
+        $(
+            $(#[$attr_meta:meta])*
+            $visibility:vis $attr:ident $(($text_attr:expr))? : $typ:ty
+        ),* $(,)?
+     ) => {
         $(
             $crate::attribute!(
+                [
+                    attribute_parent = $element,
+                    attribute_doc_macro = $attr_doc_macro
+                ]
+                $(#[$attr_meta])*
+                $visibility $attr $(($text_attr))?: $typ
+            );
+        )*
+    };
+    (
+        $(
+            $(#[$attr_meta:meta])*
+            $visibility:vis $attr:ident $(($text_attr:expr))? : $typ:ty
+        ),* $(,)?
+     ) => {
+        $(
+            $crate::attribute!(
+                []
                 $(#[$attr_meta])*
                 $visibility $attr $(($text_attr))?: $typ
             );
@@ -446,26 +488,51 @@ macro_rules! attributes {
 #[macro_export]
 macro_rules! attribute {
     (
+        [
+            $(
+                attribute_parent = $element:expr,
+                attribute_doc_macro = $attr_doc_macro:ident
+            )?
+        ]
         $(#[$attr_meta:meta])*
         $visibility:vis $attr:ident $( ($text_attr:expr) )?: $typ:ty
     ) => { $crate::macros::paste!{
         $crate::attribute!(
-            $(#[$attr_meta])*
-            $visibility ( $attr, [< $attr _signal >] ) ($crate::text_name_intern!($attr $( ($text_attr) )?)): $typ
+            [
+                $(
+                    attribute_parent = $element,
+                    attribute_doc_macro = $attr_doc_macro
+                )?
+            ]
+                $(#[$attr_meta])*
+            $visibility ( $attr, [< $attr _signal >] ) ($crate::text_name!($attr $( ($text_attr) )?)): $typ
         );
     }};
     (
+        [
+            $(
+                attribute_parent = $element:expr,
+                attribute_doc_macro = $attr_doc_macro:ident
+            )?
+        ]
         $(#[$attr_meta:meta])*
         $visibility:vis ( $attr:ident, $attr_signal:ident ) ($text_attr:expr): $typ:ty
     ) => {
+        $(
+            #[doc = $attr_doc_macro!($element, $text_attr)]
+            #[doc = ""]
+        )?
         $(#[$attr_meta])*
         $visibility fn $attr(self, value: impl $crate::attribute::AsAttribute<$typ>) -> Self {
-            $crate::node::element::ElementBuilder::attribute(self, $text_attr, value)
+            $crate::node::element::ElementBuilder::attribute(self, $crate::macros::intern_str($text_attr), value)
         }
 
+        $(
+            #[doc = $attr_doc_macro!($element, $text_attr)]
+            #[doc = ""]
+        )?
         $(#[$attr_meta])*
         #[allow(clippy::wrong_self_convention)]
-        #[allow(non_snake_case)]
         $visibility fn $attr_signal<T>(
             self,
             value: impl $crate::macros::Signal<Item = T> + 'static
@@ -473,7 +540,7 @@ macro_rules! attribute {
         where
             T: $crate::attribute::AsAttribute<$typ> + 'static
         {
-            $crate::node::element::ElementBuilder::attribute_signal(self, $text_attr, value)
+            $crate::node::element::ElementBuilder::attribute_signal(self, $crate::macros::intern_str($text_attr), value)
         }
     };
 }

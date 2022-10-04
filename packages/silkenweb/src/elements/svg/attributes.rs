@@ -7,6 +7,19 @@ use super::{
 };
 use crate::{elements::class_attribute_text, node::element::ElementBuilder};
 
+macro_rules! svg_attributes {
+    ($($t:tt)*) => {
+        attributes![
+            [
+                attribute_parent = (),
+                attribute_doc_macro = svg_attribute_doc
+            ]
+
+            $($t)*
+        ];
+    };
+}
+
 /// An SVG element
 ///
 /// Methods for setting attributes specific to SVG elements
@@ -25,7 +38,7 @@ pub trait Global: ElementBuilder {
         )
     }
 
-    attributes![
+    svg_attributes![
         /// Defines a unique identifier (ID) which must be unique in the whole
         /// document. Its purpose is to identify the element when linking (using
         /// a fragment identifier), scripting, or styling (with CSS). Value: Any
@@ -49,7 +62,7 @@ pub trait Global: ElementBuilder {
 }
 
 pub trait AnimationTiming: ElementBuilder {
-    attributes![
+    svg_attributes![
         /// The begin attribute defines when an animation should begin or when
         /// an element should be discarded.
         ///
@@ -94,7 +107,7 @@ pub trait AnimationTiming: ElementBuilder {
 }
 
 pub trait AnimationValue: ElementBuilder {
-    attributes![
+    svg_attributes![
         /// The calcMode attribute specifies the interpolation mode for the
         /// animation.
         ///
@@ -158,7 +171,7 @@ pub trait AnimationValue: ElementBuilder {
 }
 
 pub trait OtherAnimation: ElementBuilder {
-    attributes![
+    svg_attributes![
         /// The attributeName attribute indicates the name of the CSS property
         /// or attribute of the target element that is going to be changed
         /// during an animation.
@@ -179,7 +192,7 @@ pub trait OtherAnimation: ElementBuilder {
 
 /// SVG Presentation Attributes
 pub trait Presentation: ElementBuilder {
-    attributes![
+    svg_attributes![
         /// It specifies how an object is aligned along the font baseline with
         /// respect to its parent. Value:
         /// auto|baseline|before-edge|text-before-edge|middle|central|after-edge|text-after-edge|ideographic|alphabetic|hanging|mathematical|inherit;
@@ -377,7 +390,7 @@ pub trait Presentation: ElementBuilder {
 
 /// SVG Conditional Processing Attributes
 pub trait ConditionalProcessing: ElementBuilder {
-    attributes![
+    svg_attributes![
         /// List all the browser specific capabilities that must be supported by
         /// the browser to be allowed to render the associated element. Value: A
         /// list of space-separated URI; Animatable: No
