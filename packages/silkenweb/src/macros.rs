@@ -119,7 +119,6 @@ macro_rules! dom_element {
         );
     }};
     (
-        // TODO: Make names/syntax better (snake_name = )
         snake_name = $snake_name:ident,
         camel_name = $camel_name:ident,
         camel_builder_name = $camel_builder_name:ident,
