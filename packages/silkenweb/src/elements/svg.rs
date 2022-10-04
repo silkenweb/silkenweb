@@ -18,7 +18,8 @@ svg_element!(
     ///
     /// SVG's <a> element is a container, which means you can create a link
     /// around text (like in HTML) but also around any shape.
-    a <web_sys::SvgaElement> {
+    a = {
+        dom_type: web_sys::SvgaElement;
         attributes {
             /// Instructs browsers to download a URL instead of navigating to
             /// it, so the user will be prompted to save it as a local file.
@@ -46,8 +47,9 @@ svg_element!(
             ping: String,
 
             /// Which referrer to send when fetching the URL.
-            /// Value type: no-referrer|no-referrer-when-downgrade|same-origin|origin|strict-origin|origin-when-cross-origin|strict-origin-when-cross-origin|unsafe-url ;
-            /// Default value: none; Animatable: no
+            /// Value type:
+            /// no-referrer|no-referrer-when-downgrade|same-origin|origin|strict-origin|origin-when-cross-origin|strict-origin-when-cross-origin|unsafe-url
+            /// ; Default value: none; Animatable: no
             referrerpolicy: String,
 
             /// The relationship of the target object to the link object.
@@ -74,7 +76,9 @@ impl Presentation for ABuilder {}
 svg_element!(
     /// The SVG <animate> element provides a way to animate an attribute of an
     /// element over time.
-    animate <web_sys::SvgaElement> {}
+    animate = {
+        dom_type: web_sys::SvgaElement;
+    }
 );
 
 impl AnimationTiming for AnimateBuilder {}
@@ -91,7 +95,9 @@ svg_element!(
     /// these objects inside of a <defs> element promotes understandability of
     /// the SVG content and is beneficial to the overall accessibility of the
     /// document.
-    defs <web_sys::SvgDefsElement> {}
+    defs = {
+        dom_type: web_sys::SvgDefsElement;
+    }
 );
 
 parent_element!(defs);
@@ -104,7 +110,9 @@ svg_element!(
     /// Transformations applied to the <g> element are performed on its child
     /// elements, and its attributes are inherited by its children. It can also
     /// group multiple elements to be referenced later with the <use> element.
-    g <web_sys::SvggElement> {}
+    g = {
+        dom_type: web_sys::SvggElement;
+    }
 );
 
 parent_element!(g);
@@ -121,7 +129,7 @@ svg_element!(
     /// Note: The xmlns attribute is only required on the outermost svg element
     /// of SVG documents. It is unnecessary for inner svg elements or inside
     /// HTML documents.
-    svg <web_sys::SvgsvgElement> {
+    svg  = { dom_type: web_sys::SvgsvgElement;
         attributes {
             /// The displayed height of the rectangular viewport. (Not the
             /// height of its coordinate system.)
@@ -166,7 +174,7 @@ parent_element!(svg);
 svg_element!(
     /// The `path` SVG element is the generic element to define a shape. All the
     /// basic shapes can be created with a path element.
-    path <web_sys::SvgPathElement> {
+    path  = { dom_type: web_sys::SvgPathElement;
         attributes {
             /// This attribute lets authors specify the total length for the
             /// path, in user units.
@@ -185,7 +193,7 @@ svg_element!(
     /// The <rect> element is a basic SVG shape that draws rectangles, defined
     /// by their position, width, and height. The rectangles may have their
     /// corners rounded.
-    rect <web_sys::SvgRectElement> {
+    rect  = { dom_type: web_sys::SvgRectElement;
         attributes {
             /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
             /// value: 0; Animatable: yes
@@ -226,8 +234,10 @@ impl Presentation for RectBuilder {}
 parent_element!(rect);
 
 svg_element!(
-    /// The <use> element takes nodes from within the SVG document, and duplicates them somewhere else.
-    r#use<web_sys::SvgUseElement> {
+    /// The <use> element takes nodes from within the SVG document, and
+    /// duplicates them somewhere else.
+    r#use = {
+        dom_type: web_sys::SvgUseElement;
         attributes {
             /// The URL to an element/fragment that needs to be duplicated.
             /// Value type: <URL> ; Default value: none; Animatable: yes

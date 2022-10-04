@@ -26,7 +26,7 @@ mod element {
     use crate::icon::Icon;
 
     html_element!(
-        ui5_button<web_sys::HtmlElement> {
+        ui5_button = { dom_type: web_sys::HtmlElement;
             attributes {
                 accessible_name: String,
                 accessible_name_ref: String,

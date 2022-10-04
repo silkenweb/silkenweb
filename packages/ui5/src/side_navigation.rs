@@ -27,7 +27,7 @@ mod elements {
     use crate::icon::Icon;
 
     html_element!(
-        ui5_side_navigation<web_sys::HtmlElement> {
+        ui5_side_navigation = { dom_type: web_sys::HtmlElement;
             attributes {
                 collapsed: bool,
             }
@@ -41,13 +41,14 @@ mod elements {
     parent_element!(ui5_side_navigation);
 
     html_element!(
-        ui5_side_navigation_item<web_sys::HtmlElement> {
+        ui5_side_navigation_item = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 expanded: bool,
                 icon: Icon,
                 selected: bool,
                 text: String,
-                whole_item_toggleable: bool
+                whole_item_toggleable: bool,
             }
         }
     );
@@ -55,7 +56,8 @@ mod elements {
     parent_element!(ui5_side_navigation_item);
 
     html_element!(
-        ui5_side_navigation_sub_item<web_sys::HtmlElement> {
+        ui5_side_navigation_sub_item = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 expanded: bool,
                 icon: Icon,

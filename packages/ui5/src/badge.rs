@@ -12,7 +12,7 @@ mod elements {
     use silkenweb::{html_element, parent_element};
 
     html_element!(
-        ui5_badge<web_sys::HtmlElement> {
+        ui5_badge = { dom_type: web_sys::HtmlElement;
             attributes {
                 color_scheme: u8
             }

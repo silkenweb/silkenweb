@@ -6,7 +6,8 @@ use silkenweb::{
 };
 
 html_element!(
-    ui5_icon<web_sys::HtmlElement> {
+    ui5_icon = {
+        dom_type: web_sys::HtmlElement;
         attributes {
             accessible_name: String,
             interactive: bool,

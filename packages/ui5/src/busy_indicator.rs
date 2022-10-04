@@ -22,7 +22,8 @@ mod element {
     use super::BusyIndicatorSize;
 
     html_element!(
-        ui5_busy_indicator<web_sys::HtmlElement> {
+        ui5_busy_indicator = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 active: bool,
                 delay: u64,

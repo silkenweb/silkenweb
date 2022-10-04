@@ -47,15 +47,17 @@ pub use web_sys;
 macro_rules! html_element {
     (
         $(#[$elem_meta:meta])*
-        $name:ident $( ($text_name: literal) )?
-        $($tail:tt)*
+        $name:ident $( ($text_name: literal) )? = {
+            $($tail:tt)*
+        }
     ) => {
         $crate::dom_element!(
-            name = $name $( ($text_name) )?,
-            attributes = [$crate::elements::HtmlElement],
-            events = [$crate::elements::HtmlElementEvents],
-            doc = [$(#[$elem_meta])*],
-            $($tail)*
+            $name $( ($text_name) )? = {
+                common_attributes = [$crate::elements::HtmlElement];
+                common_events = [$crate::elements::HtmlElementEvents];
+                doc = [$(#[$elem_meta])*];
+                $($tail)*
+            }
         );
     }
 }
@@ -63,18 +65,20 @@ macro_rules! html_element {
 macro_rules! svg_element {
     (
         $(#[$elem_meta:meta])*
-        $name:ident $( ($text_name: literal) )?
-        $($tail:tt)*
+        $name:ident $( ($text_name: literal) )? = {
+            $($tail:tt)*
+        }
     ) => {
         $crate::dom_element!(
-            name = $name $( ($text_name) )?,
-            namespace = Some("http://www.w3.org/2000/svg"),
-            attributes = [$crate::elements::svg::attributes::Global],
-            events = [],
-            doc_macro = svg_element_doc,
-            attribute_doc_macro = svg_attribute_doc,
-            doc = [$(#[$elem_meta])*],
-            $($tail)*
+            $name $( ($text_name) )? = {
+                common_attributes = [$crate::elements::svg::attributes::Global];
+                common_events = [];
+                doc_macro = svg_element_doc;
+                attribute_doc_macro = svg_attribute_doc;
+                doc = [$(#[$elem_meta])*];
+                namespace = Some("http://www.w3.org/2000/svg");
+                $($tail)*
+            }
         );
     }
 }
@@ -107,30 +111,17 @@ macro_rules! svg_attribute_doc {
 #[macro_export]
 macro_rules! dom_element {
     (
-        name = $name:ident $( ($text_name: literal) )?,
-        $($tail:tt)*
-    ) => { $crate::macros::paste!{
-        $crate::dom_element!(
-            snake_name = $name,
-            camel_name = [< $name:camel >],
-            camel_builder_name = [< $name:camel Builder >],
-            text = $crate::text_name!($name $( ($text_name) )?),
-            $($tail)*
-        );
-    }};
-    (
-        snake_name = $snake_name:ident,
-        camel_name = $camel_name:ident,
-        camel_builder_name = $camel_builder_name:ident,
-        text = $text_name:expr,
-        $(namespace = $namespace:expr, )?
-        attributes = [$($attribute_trait:ty),*],
-        events = [$($event_trait:ty),*],
-        $(doc_macro = $doc_macro:ident,)?
-        $(attribute_doc_macro = $attr_doc_macro:ident,)?
-        doc = [$($docs:tt)*],
-        < $elem_type:ty >
-        {
+        $snake_name:ident ($text_name:expr) = {
+            camel_name = $camel_name:ident;
+            camel_builder_name = $camel_builder_name:ident;
+            common_attributes = [$($attribute_trait:ty),*];
+            common_events = [$($event_trait:ty),*];
+            $(doc_macro = $doc_macro:ident;)?
+            $(attribute_doc_macro = $attr_doc_macro:ident;)?
+            doc = [$($docs:tt)*];
+            $(namespace = $namespace:expr; )?
+            dom_type: $elem_type:ty;
+            
             $(attributes { $(
                 $(#[$attr_meta:meta])*
                 $attr:ident $( ($text_attr:expr) )? : $typ:ty
@@ -296,6 +287,19 @@ macro_rules! dom_element {
 
         impl $crate::elements::ElementEvents for $camel_builder_name {}
     };
+    (
+        $name:ident $( ($text_name: literal) )? = {
+            common_attributes $($tail:tt)*
+        }
+    ) => { $crate::macros::paste!{
+        $crate::dom_element!(
+            $name($crate::text_name!($name $( ($text_name) )?)) = {
+                camel_name = [< $name:camel >];
+                camel_builder_name = [< $name:camel Builder >];
+                common_attributes $($tail)*
+            }
+        );
+    }};
 }
 
 #[doc(hidden)]

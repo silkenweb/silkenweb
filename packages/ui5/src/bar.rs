@@ -35,7 +35,7 @@ mod element {
     use super::BarDesign;
 
     html_element!(
-        ui5_bar<web_sys::HtmlElement> {
+        ui5_bar = { dom_type: web_sys::HtmlElement;
             attributes {
                 design: BarDesign
             }

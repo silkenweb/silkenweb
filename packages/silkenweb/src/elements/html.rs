@@ -11,7 +11,7 @@ html_element!(
     /// within the same page, email addresses, or any other URL.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
-    a <web_sys::HtmlAnchorElement> {
+    a  = { dom_type: web_sys::HtmlAnchorElement;
         attributes {
             /// Prompts the user to save the linked URL instead of navigating to it.
             /// Can be used with or without a value:
@@ -110,7 +110,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/abbr
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-title
-    abbr<web_sys::HtmlElement> {}
+    abbr = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(abbr);
@@ -121,7 +121,7 @@ html_element!(
     /// otherwise granted special importance.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/b
-    b<web_sys::HtmlElement> {}
+    b = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(b);
@@ -132,7 +132,7 @@ html_element!(
     /// isolation from its surrounding text.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdi
-    bdi<web_sys::HtmlElement> {}
+    bdi = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(bdi);
@@ -143,7 +143,7 @@ html_element!(
     /// rendered in a different direction.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdo
-    bdo<web_sys::HtmlElement> {
+    bdo = { dom_type: web_sys::HtmlElement;
         attributes {
             /// The direction in which text should be rendered in this element's
             /// contents. Possible values are:
@@ -165,7 +165,7 @@ html_element!(
     /// where the division of lines is significant.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br
-    br<web_sys::HtmlBrElement> {}
+    br = { dom_type: web_sys::HtmlBrElement;}
 );
 
 html_element!(
@@ -174,7 +174,7 @@ html_element!(
     /// that work.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    cite<web_sys::HtmlElement> {}
+    cite = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(cite);
@@ -185,7 +185,7 @@ html_element!(
     /// computer code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/code
-    code<web_sys::HtmlElement> {}
+    code = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(code);
@@ -197,7 +197,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/data
     /// [time]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    data<web_sys::HtmlDataElement> {
+    data = { dom_type: web_sys::HtmlDataElement;
         attributes {
             /// This attribute specifies the machine-readable translation of the
             /// content of the element.
@@ -214,7 +214,7 @@ html_element!(
     /// sentence.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn
-    dfn<web_sys::HtmlElement> {}
+    dfn = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(dfn);
@@ -225,7 +225,7 @@ html_element!(
     /// a greater degree of emphasis.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em
-    em<web_sys::HtmlElement> {}
+    em = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(em);
@@ -237,7 +237,7 @@ html_element!(
     /// thoughts. It is typically displayed in italic type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
-    i<web_sys::HtmlElement> {}
+    i = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(i);
@@ -248,7 +248,7 @@ html_element!(
     /// input, or any other text entry device.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd
-    kbd<web_sys::HtmlElement> {}
+    kbd = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(kbd);
@@ -259,7 +259,7 @@ html_element!(
     /// marked passage's relevance or importance in the enclosing context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/mark
-    mark<web_sys::HtmlElement> {}
+    mark = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(mark);
@@ -270,7 +270,7 @@ html_element!(
     /// surrounding the text in quotation marks.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q
-    q<web_sys::HtmlQuoteElement> {
+    q = { dom_type: web_sys::HtmlQuoteElement;
         attributes {
                 /// The value of this attribute is a URL that designates a source
             /// document or message for the information quoted. This
@@ -290,7 +290,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rb
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rb<web_sys::HtmlElement> {}
+    rb = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(rb);
@@ -302,7 +302,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rp
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rp<web_sys::HtmlElement> {}
+    rp = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(rp);
@@ -316,7 +316,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rt<web_sys::HtmlElement> {}
+    rt = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(rt);
@@ -333,7 +333,7 @@ html_element!(
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
     /// [rt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [rtc]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rtc
-    rtc<web_sys::HtmlElement> {}
+    rtc = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(rtc);
@@ -343,7 +343,7 @@ html_element!(
     /// annotations are for showing pronunciation of East Asian characters.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    ruby<web_sys::HtmlElement> {}
+    ruby = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(ruby);
@@ -358,7 +358,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/s
     /// [del]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
     /// [ins]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    s<web_sys::HtmlElement> {}
+    s = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(s);
@@ -368,7 +368,7 @@ html_element!(
     /// which represents sample (or quoted) output from a computer program.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/samp
-    samp<web_sys::HtmlElement> {}
+    samp = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(samp);
@@ -380,7 +380,7 @@ html_element!(
     /// small, such as from `small` to `x-small`.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/small
-    small<web_sys::HtmlElement> {}
+    small = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(small);
@@ -396,7 +396,7 @@ html_element!(
     /// [class]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-class
     /// [id]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-id
     /// [lang]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-lang
-    span<web_sys::HtmlSpanElement> {}
+    span = { dom_type: web_sys::HtmlSpanElement;}
 );
 
 parent_element!(span);
@@ -408,7 +408,7 @@ html_element!(
     /// Browsers typically render the contents in bold type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strong
-    strong<web_sys::HtmlElement> {}
+    strong = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(strong);
@@ -418,7 +418,7 @@ html_element!(
     /// should be displayed as subscript for solely typographical reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sub
-    sub<web_sys::HtmlElement> {}
+    sub = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(sub);
@@ -429,7 +429,7 @@ html_element!(
     /// reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sup
-    sup<web_sys::HtmlElement> {}
+    sup = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(sup);
@@ -438,7 +438,7 @@ html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    time<web_sys::HtmlTimeElement> {
+    time = { dom_type: web_sys::HtmlTimeElement;
         attributes {
             /// This attribute indicates the time and/or date of the element and
             /// must be in one of the formats described below.
@@ -455,7 +455,7 @@ html_element!(
     /// that it has a non-textual annotation.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/u
-    u<web_sys::HtmlElement> {}
+    u = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(u);
@@ -465,7 +465,7 @@ html_element!(
     /// variable in a mathematical expression or a programming context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/var
-    var<web_sys::HtmlElement> {}
+    var = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(var);
@@ -477,7 +477,7 @@ html_element!(
     /// that location.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr
-    wbr<web_sys::HtmlElement> {}
+    wbr = { dom_type: web_sys::HtmlElement;}
 );
 
 html_element!(
@@ -485,7 +485,7 @@ html_element!(
     /// deleted from a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
-    del<web_sys::HtmlModElement> {
+    del = { dom_type: web_sys::HtmlModElement;
         attributes {
             /// A URI for a resource that explains the change (for example, meeting
             /// minutes).
@@ -510,7 +510,7 @@ html_element!(
     /// added to a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    ins<web_sys::HtmlModElement> {
+    ins = { dom_type: web_sys::HtmlModElement;
         attributes {
             /// A URI for a resource that explains the change (for example, meeting
             /// minutes).
@@ -536,7 +536,7 @@ html_element!(
     /// organization.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/address
-    address<web_sys::HtmlElement> {}
+    address = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(address);
@@ -548,7 +548,7 @@ html_element!(
     /// (e.g., in syndication).
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article
-    article<web_sys::HtmlElement> {}
+    article = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(article);
@@ -560,7 +560,7 @@ html_element!(
     /// content.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/aside
-    aside<web_sys::HtmlElement> {}
+    aside = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(aside);
@@ -575,7 +575,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/footer
     /// [sectioning content]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Sectioning_content
     /// [sectioning root]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Sections_and_Outlines_of_an_HTML5_document#Sectioning_roots
-    footer<web_sys::HtmlElement> {}
+    footer = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(footer);
@@ -588,7 +588,7 @@ html_element!(
     /// author name, and other elements.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/header
-    header<web_sys::HtmlElement> {}
+    header = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(header);
@@ -600,7 +600,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h1
-    h1<web_sys::HtmlHeadingElement> {}
+    h1 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h1);
@@ -612,7 +612,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h2
-    h2<web_sys::HtmlHeadingElement> {}
+    h2 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h2);
@@ -624,7 +624,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h3
-    h3<web_sys::HtmlHeadingElement> {}
+    h3 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h3);
@@ -636,7 +636,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h4
-    h4<web_sys::HtmlHeadingElement> {}
+    h4 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h4);
@@ -648,7 +648,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h5
-    h5<web_sys::HtmlHeadingElement> {}
+    h5 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h5);
@@ -660,7 +660,7 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h6
-    h6<web_sys::HtmlHeadingElement> {}
+    h6 = { dom_type: web_sys::HtmlHeadingElement;}
 );
 
 parent_element!(h6);
@@ -673,7 +673,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hgroup
     /// [heading]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements
-    hgroup<web_sys::HtmlElement> {}
+    hgroup = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(hgroup);
@@ -686,7 +686,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main
     /// [body]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body
-    main<web_sys::HtmlElement> {}
+    main = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(main);
@@ -699,7 +699,7 @@ html_element!(
     /// sections are menus, tables of contents, and indexes.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav
-    nav<web_sys::HtmlElement> {}
+    nav = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(nav);
@@ -711,7 +711,7 @@ html_element!(
     /// — contained within an HTML document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/section
-    section<web_sys::HtmlElement> {}
+    section = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(section);
@@ -724,7 +724,7 @@ html_element!(
     /// a browser plug-in.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/embed
-    embed<web_sys::HtmlEmbedElement> {
+    embed = { dom_type: web_sys::HtmlEmbedElement;
         attributes {
             /// The displayed height of the resource, in [CSS pixels]. This must be
             /// an absolute value; percentages are not allowed.
@@ -756,7 +756,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
     /// [browsing context]: https://developer.mozilla.org/en-US/docs/Glossary/browsing_context
-    iframe<web_sys::HtmlIFrameElement> {
+    iframe = { dom_type: web_sys::HtmlIFrameElement;
         attributes {
             /// Specifies a feature policy for the `<iframe>`.
             allow: String,
@@ -855,7 +855,7 @@ html_element!(
     /// resource to be handled by a plugin.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    object<web_sys::HtmlObjectElement> {
+    object = { dom_type: web_sys::HtmlObjectElement;
         attributes {
             /// Specifies the URL of the resource.
             data: String,
@@ -897,7 +897,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
     /// [object]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    param<web_sys::HtmlParamElement> {
+    param = { dom_type: web_sys::HtmlParamElement;
         attributes {
             /// Name of the parameter.
             name: String,
@@ -916,7 +916,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [source]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source
     /// [img]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    picture<web_sys::HtmlPictureElement> {}
+    picture = { dom_type: web_sys::HtmlPictureElement;}
 );
 
 parent_element!(picture);
@@ -930,7 +930,7 @@ html_element!(
     /// [picture]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [audio]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-    source<web_sys::HtmlSourceElement> {
+    source = { dom_type: web_sys::HtmlSourceElement;
         attributes {
             /// Media query of the resource's intended media; this should be used
             /// only in a `<picture>` element.
@@ -989,7 +989,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas
     /// [api]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
     /// [gl]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
-    canvas<web_sys::HtmlCanvasElement> {
+    canvas = { dom_type: web_sys::HtmlCanvasElement;
         attributes {
             /// The height of the coordinate space in CSS pixels. Defaults to 150.
             height: String,
@@ -1014,7 +1014,7 @@ html_element!(
     /// is currently turned off in the browser.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noscript
-    noscript<web_sys::HtmlElement> {}
+    noscript = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(noscript);
@@ -1025,7 +1025,7 @@ html_element!(
     /// JavaScript code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
-    script<web_sys::HtmlScriptElement> {
+    script = { dom_type: web_sys::HtmlScriptElement;
         attributes {
             /// For classic scripts, if the async attribute is present, then the
             /// classic script will be fetched in parallel to parsing and
@@ -1131,7 +1131,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
     /// [hypertext link]: https://developer.mozilla.org/en-US/docs/Glossary/Hyperlink
     /// [map]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
-    area<web_sys::HtmlAreaElement> {
+    area = { dom_type: web_sys::HtmlAreaElement;
         attributes {
             /// A text string alternative to display on browsers that do not display
             /// images. The text should be phrased so that it presents the
@@ -1220,7 +1220,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
     /// [source]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source
     /// [stream]: https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
-    audio<web_sys::HtmlAudioElement> {
+    audio = { dom_type: web_sys::HtmlAudioElement;
         attributes {
             /// If specified, the audio will automatically begin playback as soon as
             /// it can do so, without waiting for the entire audio file to
@@ -1341,7 +1341,7 @@ html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    img<web_sys::HtmlImageElement> {
+    img = { dom_type: web_sys::HtmlImageElement;
         attributes {
             /// Defines an alternative text description of the image.
             ///
@@ -1530,7 +1530,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
     /// [area]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
-    map<web_sys::HtmlMapElement> {
+    map = { dom_type: web_sys::HtmlMapElement;
         attributes {
             /// The name attribute gives the map a name so that it can be
             /// referenced. The attribute must be present and must have a
@@ -1559,7 +1559,7 @@ html_element!(
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
     /// [vtt]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Video_Text_Tracks_Format
     /// [ttml]: https://w3c.github.io/ttml2/index.html
-    track<web_sys::HtmlTrackElement> {
+    track = { dom_type: web_sys::HtmlTrackElement;
         attributes {
             /// This attribute indicates that the track should be enabled unless the
             /// user's preferences indicate that another track is more
@@ -1627,7 +1627,7 @@ html_element!(
     /// supports video playback into the document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-    video<web_sys::HtmlVideoElement> {
+    video = { dom_type: web_sys::HtmlVideoElement;
         attributes {
             /// If specified, the video automatically begins to play back as soon as
             /// it can do so without stopping to finish loading the data.
@@ -1776,7 +1776,7 @@ html_element!(
     /// toggled into an "open" state.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    details<web_sys::HtmlDetailsElement> {
+    details = { dom_type: web_sys::HtmlDetailsElement;
         attributes {
             /// Indicates whether the details will be shown on page load.
             open: bool,
@@ -1795,7 +1795,7 @@ html_element!(
     /// interactive component, such as an inspector or window.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-    dialog<web_sys::HtmlDialogElement> {
+    dialog = { dom_type: web_sys::HtmlDialogElement;
         attributes {
             /// Indicates that the dialog is active and can be interacted with. When
             /// the open attribute is not set, the dialog shouldn't be shown
@@ -1820,7 +1820,7 @@ html_element!(
     /// clicked.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/menu
-    menu<web_sys::HtmlMenuElement> {}
+    menu = { dom_type: web_sys::HtmlMenuElement;}
 );
 
 parent_element!(menu);
@@ -1832,7 +1832,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/summary
     /// [details]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    summary<web_sys::HtmlElement> {}
+    summary = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(summary);
@@ -1847,7 +1847,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote
     /// [cite]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    blockquote<web_sys::HtmlQuoteElement> {
+    blockquote = { dom_type: web_sys::HtmlQuoteElement;
         attributes {
             /// A URL that designates a source document or message for the
             /// information quoted. This attribute is intended to point to
@@ -1869,7 +1869,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dd<web_sys::HtmlElement> {}
+    dd = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(dd);
@@ -1881,7 +1881,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div
     /// [CSS]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    div<web_sys::HtmlDivElement> {}
+    div = { dom_type: web_sys::HtmlDivElement;}
 );
 
 parent_element!(div);
@@ -1897,7 +1897,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dd]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
-    dl<web_sys::HtmlDListElement> {}
+    dl = { dom_type: web_sys::HtmlDListElement;}
 );
 
 parent_element!(dl);
@@ -1909,7 +1909,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dt<web_sys::HtmlElement> {}
+    dt = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(dt);
@@ -1921,7 +1921,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
     /// [figure]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
-    figcaption<web_sys::HtmlElement> {}
+    figcaption = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(figcaption);
@@ -1934,7 +1934,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
     /// [figcaption]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
-    figure<web_sys::HtmlElement> {}
+    figure = { dom_type: web_sys::HtmlElement;}
 );
 
 parent_element!(figure);
@@ -1945,14 +1945,14 @@ html_element!(
     /// or a shift of topic within a section.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr
-    hr<web_sys::HtmlHrElement> {}
+    hr = { dom_type: web_sys::HtmlHrElement;}
 );
 
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li
-    li<web_sys::HtmlLiElement> {}
+    li = { dom_type: web_sys::HtmlLiElement;}
 );
 
 parent_element!(li);
@@ -1962,7 +1962,7 @@ html_element!(
     /// typically rendered as a numbered list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ol
-    ol<web_sys::HtmlOListElement> {
+    ol = { dom_type: web_sys::HtmlOListElement;
         attributes {
             /// Specifies that the list’s items are in reverse order. Items will be
             /// numbered from high to low.
@@ -2001,7 +2001,7 @@ html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p
-    p<web_sys::HtmlParagraphElement> {}
+    p = { dom_type: web_sys::HtmlParagraphElement;}
 );
 
 parent_element!(p);
@@ -2012,7 +2012,7 @@ html_element!(
     /// be presented exactly as written in the HTML file.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre
-    pre<web_sys::HtmlPreElement> {}
+    pre = { dom_type: web_sys::HtmlPreElement;}
 );
 
 parent_element!(pre);
@@ -2022,7 +2022,7 @@ html_element!(
     /// typically rendered as a bulleted list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul
-    ul<web_sys::HtmlUListElement> {}
+    ul = { dom_type: web_sys::HtmlUListElement;}
 );
 
 parent_element!(ul);
@@ -2034,7 +2034,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/caption
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    caption<web_sys::HtmlTableCaptionElement> {}
+    caption = { dom_type: web_sys::HtmlTableCaptionElement;}
 );
 
 parent_element!(caption);
@@ -2046,7 +2046,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
     /// [cg]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    col<web_sys::HtmlTableColElement> {
+    col = { dom_type: web_sys::HtmlTableColElement;
         attributes {
             /// This attribute contains a positive integer indicating the number of
             /// consecutive columns the `<col>` element spans. If not
@@ -2061,7 +2061,7 @@ html_element!(
     /// table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    colgroup<web_sys::HtmlTableColElement> {
+    colgroup = { dom_type: web_sys::HtmlTableColElement;
         attributes {
             /// This attribute contains a positive integer indicating the number of
             /// consecutive columns the `<colgroup>` element spans. If not
@@ -2087,7 +2087,7 @@ html_element!(
     /// and columns of cells containing data.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    table<web_sys::HtmlTableElement> {}
+    table = { dom_type: web_sys::HtmlTableElement;}
 );
 
 parent_element!(table);
@@ -2100,7 +2100,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody
     /// [tr]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    tbody<web_sys::HtmlTableSectionElement> {}
+    tbody = { dom_type: web_sys::HtmlTableSectionElement;}
 );
 
 parent_element!(tbody);
@@ -2110,7 +2110,7 @@ html_element!(
     /// data. It participates in the *table model*.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
-    td<web_sys::HtmlTableCellElement> {
+    td = { dom_type: web_sys::HtmlTableCellElement;
         attributes {
             /// This attribute contains a non-negative integer value that indicates
             /// for how many columns the cell extends. Its default value is
@@ -2141,7 +2141,7 @@ html_element!(
     /// columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot
-    tfoot<web_sys::HtmlTableSectionElement> {}
+    tfoot = { dom_type: web_sys::HtmlTableSectionElement;}
 );
 
 parent_element!(tfoot);
@@ -2154,7 +2154,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
     /// [scope]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-scope
     /// [headers]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-headers
-    th<web_sys::HtmlTableCellElement> {
+    th = { dom_type: web_sys::HtmlTableCellElement;
         attributes {
             /// This attribute contains a short abbreviated description of the
             /// cell's content. Some user-agents, such as speech readers,
@@ -2209,7 +2209,7 @@ html_element!(
     /// head of the columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead
-    thead<web_sys::HtmlTableSectionElement> {}
+    thead = { dom_type: web_sys::HtmlTableSectionElement;}
 );
 
 parent_element!(thead);
@@ -2222,7 +2222,7 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [td]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
     /// [th]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
-    tr<web_sys::HtmlTableRowElement> {}
+    tr = { dom_type: web_sys::HtmlTableRowElement;}
 );
 
 parent_element!(tr);
@@ -2237,7 +2237,7 @@ html_element!(
     /// such as <link>’s href attribute.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-    base<web_sys::HtmlBaseElement> {
+    base = { dom_type: web_sys::HtmlBaseElement;
         attributes {
             /// The base URL to be used throughout the document for relative URLs.
             /// Absolute and relative URLs are allowed.
@@ -2278,7 +2278,7 @@ html_element!(
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [scripts]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [style sheets]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    head<web_sys::HtmlHeadElement> {}
+    head = { dom_type: web_sys::HtmlHeadElement;}
 );
 
 parent_element!(head);
@@ -2293,7 +2293,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
     /// [stylesheets]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    link<web_sys::HtmlLinkElement> {
+    link = { dom_type: web_sys::HtmlLinkElement;
         attributes {
             /// This attribute is only used when rel="preload" or rel="prefetch" has
             /// been set on the `<link>` element. It specifies the type of
@@ -2451,7 +2451,7 @@ html_element!(
     /// [`<script>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [`<style>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
     /// [`<title>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
-    meta<web_sys::HtmlMetaElement> {
+    meta = { dom_type: web_sys::HtmlMetaElement;
         attributes {
             /// This attribute declares the document's character encoding. If the
             /// attribute is present, its value must be an ASCII
@@ -2517,7 +2517,7 @@ html_element!(
     /// document, or part of a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    style<web_sys::HtmlStyleElement> {
+    style = { dom_type: web_sys::HtmlStyleElement;
         attributes {
             /// This attribute defines which media the style should be applied to.
             /// Its value is a media query, which defaults to all if the
@@ -2545,7 +2545,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [browser]: https://developer.mozilla.org/en-US/docs/Glossary/Browser
-    title<web_sys::HtmlTitleElement> {}
+    title = { dom_type: web_sys::HtmlTitleElement;}
 );
 
 parent_element!(title);
@@ -2557,7 +2557,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button
     /// [forms]: https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms
-    button<web_sys::HtmlButtonElement> {
+    button = { dom_type: web_sys::HtmlButtonElement;
         attributes {
             /// Specifies that the button should have input focus when the page
             /// loads. Only one element in a document can have this
@@ -2687,7 +2687,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
     /// [option]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option
-    datalist<web_sys::HtmlDataListElement> {}
+    datalist = { dom_type: web_sys::HtmlDataListElement;}
 );
 
 parent_element!(datalist);
@@ -2698,7 +2698,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
     /// [label]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    fieldset<web_sys::HtmlFieldSetElement> {
+    fieldset = { dom_type: web_sys::HtmlFieldSetElement;
         attributes {
             /// If this Boolean attribute is set, all form controls that are
             /// descendants of the `<fieldset>` are disabled, meaning they
@@ -2731,7 +2731,7 @@ html_element!(
     /// server.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form
-    form<web_sys::HtmlFormElement> {
+    form = { dom_type: web_sys::HtmlFormElement;
         attributes {
             /// Space-separated [character encodings] the server accepts. The
             /// browser uses them in the order in which they are listed. The
@@ -2834,7 +2834,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
     /// [user agent]: https://developer.mozilla.org/en-US/docs/Glossary/user_agent
-    input<web_sys::HtmlInputElement> {
+    input = { dom_type: web_sys::HtmlInputElement;
         attributes {
             /// Valid for the file input type only, the accept property defines
             /// which file types are selectable in a file upload control.
@@ -3287,7 +3287,7 @@ html_element!(
     /// user interface.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    label<web_sys::HtmlLabelElement> {
+    label = { dom_type: web_sys::HtmlLabelElement;
         attributes {
             /// The id of a labelable form-related element in the same document as
             /// the `<label>` element. The first element in the document
@@ -3320,7 +3320,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/legend
     /// [fieldset]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
-    legend<web_sys::HtmlLegendElement> {}
+    legend = { dom_type: web_sys::HtmlLegendElement;}
 );
 
 parent_element!(legend);
@@ -3330,7 +3330,7 @@ html_element!(
     /// within a known range or a fractional value.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meter
-    meter<web_sys::HtmlMeterElement> {
+    meter = { dom_type: web_sys::HtmlMeterElement;
         attributes {
             /// The current numeric value. This must be between the minimum and
             /// maximum values (min attribute and max attribute) if they are
@@ -3399,7 +3399,7 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    optgroup<web_sys::HtmlOptGroupElement> {
+    optgroup = { dom_type: web_sys::HtmlOptGroupElement;
         attributes {
             /// If set, none of the items in this option group is selectable. Often
             /// browsers grey out such control and it won't receive any
@@ -3426,7 +3426,7 @@ html_element!(
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
     /// [optgroup]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [datalist]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
-    option<web_sys::HtmlOptionElement> {
+    option = { dom_type: web_sys::HtmlOptionElement;
         attributes {
             /// If set, this option is not checkable. Often browsers grey out such
             /// control and it won't receive any browsing event, like mouse
@@ -3464,7 +3464,7 @@ html_element!(
     /// outcome of a user action.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/output
-    output<web_sys::HtmlOutputElement> {
+    output = { dom_type: web_sys::HtmlOutputElement;
         attributes {
             /// A space-separated list of other elements’ ids, indicating that those
             /// elements contributed input values to (or otherwise affected)
@@ -3496,7 +3496,7 @@ html_element!(
     /// bar.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress
-    progress<web_sys::HtmlProgressElement> {
+    progress = { dom_type: web_sys::HtmlProgressElement;
         attributes {
             /// This attribute describes how much work the task indicated by the
             /// progress element requires. The max attribute, if present,
@@ -3522,7 +3522,7 @@ html_element!(
     /// menu of options.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    select<web_sys::HtmlSelectElement> {
+    select = { dom_type: web_sys::HtmlSelectElement;
         attributes {
             /// A DOMString providing a hint for a user agent's autocomplete
             /// feature.
@@ -3583,7 +3583,7 @@ html_element!(
     /// or feedback form.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
-    textarea<web_sys::HtmlTextAreaElement> {
+    textarea = { dom_type: web_sys::HtmlTextAreaElement;
         attributes {
             /// This attribute indicates whether the value of the control can be
             /// automatically completed by the browser. Possible values are:
@@ -3702,7 +3702,7 @@ html_element!(
     /// them together.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
-    slot<web_sys::HtmlSlotElement> {
+    slot = { dom_type: web_sys::HtmlSlotElement;
         attributes {
             name: String
         }
