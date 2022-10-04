@@ -438,3 +438,16 @@ fn cargo_manifest_dir() -> String {
         abort_call_site!("Unable to read {} from environment", CARGO_MANIFEST_DIR)
     })
 }
+
+/// Convert a rust ident to an html ident by stripping any "r#" prefix and
+/// replacing '_' with '-'.
+#[doc(hidden)]
+#[proc_macro]
+#[proc_macro_error]
+pub fn rust_to_html_ident(input: TokenStream) -> TokenStream {
+    let rust_ident: Ident = parse_macro_input!(input);
+    let html_ident = rust_ident.to_string().replace('_', "-");
+    let html_ident_name = html_ident.strip_prefix("r#").unwrap_or(&html_ident);
+
+    quote!(#html_ident_name).into()
+}
