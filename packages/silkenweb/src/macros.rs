@@ -6,7 +6,6 @@ pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
 // TODO: Update docs for `_`/`-` conversion and explicit text names
-// TODO: Convert _ to - in names
 
 /// Define an html element.
 ///
@@ -99,8 +98,6 @@ macro_rules! svg_attribute_doc {
     };
 }
 
-// TODO: Text alternatives for event, custom_event
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! dom_element {
@@ -109,17 +106,19 @@ macro_rules! dom_element {
         $($tail:tt)*
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
-            snake ( $name ),
-            camel ( [< $name:camel >], [< $name:camel Builder >] ),
-            text ( $crate::text_name!($name $( ($text_name) )?) ),
+            snake_name = $name,
+            camel_name = [< $name:camel >],
+            camel_builder_name = [< $name:camel Builder >],
+            text = $crate::text_name!($name $( ($text_name) )?),
             $($tail)*
         );
     }};
     (
         // TODO: Make names/syntax better (snake_name = )
-        snake ( $snake_name:ident ),
-        camel ( $camel_name:ident, $camel_builder_name:ident ),
-        text ( $text_name:expr ),
+        snake_name = $snake_name:ident,
+        camel_name = $camel_name:ident,
+        camel_builder_name = $camel_builder_name:ident,
+        text = $text_name:expr,
         $(namespace = $namespace:expr, )?
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
