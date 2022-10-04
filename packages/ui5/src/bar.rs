@@ -35,14 +35,14 @@ mod element {
     use super::BarDesign;
 
     html_element!(
-        ui5-bar<web_sys::HtmlElement> {
+        ui5_bar<web_sys::HtmlElement> {
             attributes {
                 design: BarDesign
             }
         }
     );
 
-    parent_element!(ui5 - bar);
+    parent_element!(ui5_bar);
 }
 
 pub use element::Ui5Bar as Bar;

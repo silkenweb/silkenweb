@@ -85,31 +85,31 @@ mod element {
     use super::{BreadcrumbsDesign, BreadcrumbsSeparatorStyle, BreadcrumbsTarget, ItemClickDetail};
 
     html_element!(
-        ui5-breadcrumbs<web_sys::HtmlElement> {
+        ui5_breadcrumbs<web_sys::HtmlElement> {
             attributes {
                 design: BreadcrumbsDesign,
-                separator-style: BreadcrumbsSeparatorStyle,
+                separator_style: BreadcrumbsSeparatorStyle,
             }
 
             custom_events {
-                item-click: CustomEvent<ItemClickDetail>
+                item_click: CustomEvent<ItemClickDetail>
             }
         }
     );
 
-    parent_element!(ui5 - breadcrumbs);
+    parent_element!(ui5_breadcrumbs);
 
     html_element!(
-        ui5-breadcrumbs-item<web_sys::HtmlElement> {
+        ui5_breadcrumbs_item<web_sys::HtmlElement> {
             attributes {
-                accessible-name: String,
+                accessible_name: String,
                 href: String,
                 target: BreadcrumbsTarget,
             }
         }
     );
 
-    parent_element!(ui5 - breadcrumbs - item);
+    parent_element!(ui5_breadcrumbs_item);
 }
 
 pub type Breadcrumbs = Ui5Breadcrumbs;

@@ -1,8 +1,12 @@
+pub use doc_comment::doc_comment;
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_base::intern_str;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
+
+// TODO: Update docs for `_`/`-` conversion and explicit text names
+// TODO: Convert _ to - in names
 
 /// Define an html element.
 ///
@@ -16,17 +20,17 @@ pub use web_sys;
 /// use silkenweb::elements::CustomEvent;
 ///
 /// // The types of the dom element and event carry through to the event handler.
-/// html_element!(my-html-element<web_sys::HtmlDivElement> {
+/// html_element!(my_html_element<web_sys::HtmlDivElement> {
 ///     attributes {
-///         my-attribute: String
+///         my_attribute: String
 ///     }
 ///
 ///     events {
-///         my-event: web_sys::MouseEvent
+///         my_event: web_sys::MouseEvent
 ///     }
 ///
 ///     custom_events {
-///         my-custom-event: CustomEvent<web_sys::HtmlElement>,
+///         my_custom_event: CustomEvent<web_sys::HtmlElement>,
 ///     }
 /// });
 ///
@@ -37,11 +41,17 @@ pub use web_sys;
 /// ```
 #[macro_export]
 macro_rules! html_element {
-    ($($t:tt)*) => {
+    (
+        $(#[$elem_meta:meta])*
+        $name:ident $( ($text_name: literal) )?
+        $($tail:tt)*
+    ) => {
         $crate::dom_element!(
+            name = $name $( ($text_name) )?,
             attributes = [$crate::elements::HtmlElement],
             events = [$crate::elements::HtmlElementEvents],
-            $($t)*
+            doc = [$(#[$elem_meta])*],
+            $($tail)*
         );
     }
 }
@@ -49,116 +59,70 @@ macro_rules! html_element {
 macro_rules! svg_element {
     (
         $(#[$elem_meta:meta])*
-        $name:ident $(- $name_tail:tt)*
-        $($t:tt)*
-    ) => { $crate::macros::paste!{
+        $name:ident $( ($text_name: literal) )?
+        $($tail:tt)*
+    ) => {
         $crate::dom_element!(
+            name = $name $( ($text_name) )?,
             namespace = Some("http://www.w3.org/2000/svg"),
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
-            #[doc =
-                "SVG ["
-                $name $(- $name_tail)*
-                "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/"
-                $name $(- $name_tail)*
-                ") element"
-            ]
-            #[doc = ""]
-            $(#[$elem_meta])*
-            $name $(- $name_tail)*
-            $($t)*
+            doc = [
+                $crate::macros::doc_comment!{$crate::text_name!($name $( ($text_name) )?)}
+                #[doc = ""]
+                $(#[$elem_meta])*
+            ],
+            $($tail)*
         );
-    }}
+    }
 }
+
+// TODO: Text alternatives for event, custom_event
 
 #[doc(hidden)]
 #[macro_export]
 macro_rules! dom_element {
     (
-        $(namespace = $namespace:expr, )?
-        attributes = [$($attribute_trait:ty),*],
-        events = [$($event_trait:ty),*],
-        $(#[$elem_meta:meta])*
-        $name:ident $(- $name_tail:tt)*
-        < $elem_type:ty >
-        {
-            $(attributes {
-                $(
-                    $(#[$attr_meta:meta])*
-                    $attr:ident $(- $attr_tail:tt)* $( ($text_name:literal) )?: $typ:ty
-                ),* $(,)?
-            })?
-
-            $(events {
-                $(#[$event_meta:meta])*
-                $($event:ident $(- $event_tail:tt)*: $event_type:ty),* $(,)?
-            })?
-
-            $(custom_events {
-                $(#[$custom_event_meta:meta])*
-                $($custom_event:ident $(- $custom_event_tail:tt)*: $custom_event_type:ty),* $(,)?
-            })?
-        }
+        name = $name:ident $( ($text_name: literal) )?,
+        $($tail:tt)*
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
-            $(namespace = $namespace, )?
-            attributes = [$($attribute_trait),*],
-            events = [$($event_trait),*],
-            $(#[$elem_meta])*
-            snake ( [< $name:snake $(_ $name_tail:snake)* >] ),
-            camel ( [< $name:camel $($name_tail:camel)* >], [< $name:camel $($name_tail:camel)* Builder >] ),
-            text ( $crate::text_name!($name $(- $name_tail)*) )
-            < $elem_type >
-            {
-                $(attributes { $(
-                    $(#[$attr_meta])*
-                    // TODO: If [this](https://github.com/dtolnay/paste/issues/74#issue-1100247715) paste issue gets resolved,
-                    // use `[< $attr:snake >]` and replace `text_attr!` usage with `text_name`.
-                    $attr $($attr_tail)* ( $crate::text_attr!($attr $(- $attr_tail)* $( ( $text_name ))?) ) : $typ
-                ),*})?
-
-                $(events {
-                    $(#[$event_meta])*
-                    $($event $(- $event_tail)*: $event_type),*
-                })?
-
-                $(custom_events {
-                    $(#[$custom_event_meta])*
-                    $($custom_event $(- $custom_event_tail)*: $custom_event_type),*
-                })?
-            }
+            snake ( $name ),
+            camel ( [< $name:camel >], [< $name:camel Builder >] ),
+            text ( $crate::text_name_intern!($name $( ($text_name) )?) ),
+            $($tail)*
         );
     }};
     (
+        snake ( $snake_name:ident ),
+        camel ( $camel_name:ident, $camel_builder_name:ident ),
+        text ( $text_name:expr ),
         $(namespace = $namespace:expr, )?
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
-        $(#[$elem_meta:meta])*
-        snake ( $snake_name:ident ),
-        camel ( $camel_name:ident, $camel_builder_name:ident ),
-        text ( $text_name:expr )
+        doc = [$($docs:tt)*],
         < $elem_type:ty >
         {
             $(attributes { $(
                 $(#[$attr_meta:meta])*
-                $attr:ident $($attr_tail:ident)* ($text_attr:expr) : $typ:ty
+                $attr:ident $( ($text_attr:expr) )? : $typ:ty
             ),* $(,)? } )?
 
             $(events {
                 $(
                     $(#[$event_meta:meta])*
-                    $event:ident $(- $event_tail:tt)*: $event_type:ty
+                    $event:ident: $event_type:ty
                 ),* $(,)?
             })?
 
             $(custom_events { $(
                     $(#[$custom_event_meta:meta])*
-                    $custom_event:ident $(- $custom_event_tail:tt)*: $custom_event_type:ty
+                    $custom_event:ident: $custom_event_type:ty
                 ),* $(,)?
             })?
         }
     ) => {
-        $(#[$elem_meta])*
+        $($docs)*
         pub fn $snake_name() -> $camel_builder_name {
             $camel_builder_name { builder: $crate::create_element_fn!(
                 $($namespace, )? $text_name
@@ -171,14 +135,14 @@ macro_rules! dom_element {
 
         impl $camel_builder_name {
             $crate::attributes![
-                $($($(#[$attr_meta])* pub $attr $(- $attr_tail)* ($text_attr): $typ,)*)?
+                $($($(#[$attr_meta])* pub $attr $( ($text_attr) )?: $typ,)*)?
             ];
 
             $($crate::events!(
                 $elem_type {
                     $(
                         $(#[$event_meta])*
-                        pub $event $(- $event_tail)*: $event_type
+                        pub $event: $event_type
                     ),*
                 }
             ); )?
@@ -187,7 +151,7 @@ macro_rules! dom_element {
                 $elem_type {
                     $(
                         $(#[$custom_event_meta])*
-                        $custom_event $(- $custom_event_tail)*: $custom_event_type
+                        $custom_event: $custom_event_type
                     ),*
                 }
             ); )?
@@ -314,9 +278,9 @@ macro_rules! create_element_fn {
 /// See [`html_element`] for a complete example of defining an html element.
 #[macro_export]
 macro_rules! parent_element {
-    ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
+    ($name:ident) => {$crate::macros::paste!{
         impl $crate::node::element::ParentBuilder for
-            [< $name:camel $($name_tail:camel)* Builder >]
+            [< $name:camel Builder >]
         {
             fn text(self, child: &str) -> Self {
                 Self{ builder: self.builder.text(child) }
@@ -352,7 +316,7 @@ macro_rules! parent_element {
                 self,
                 children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node>> + 'static,
             ) -> Self::Target {
-                [< $name:camel $($name_tail:camel)* >] (self.builder.children_signal(children))
+                [< $name:camel >] (self.builder.children_signal(children))
             }
         }
     }};
@@ -361,18 +325,20 @@ macro_rules! parent_element {
 /// Implement `ShadowRootParentBuilder` for the HTML element
 #[macro_export]
 macro_rules! shadow_parent_element {
-    ($name:ident $(- $name_tail:ident)*) => {$crate::macros::paste!{
-        impl $crate::node::element::ShadowRootParentBuilder for
-            [< $name:camel $($name_tail:camel)* Builder >]
-        {
-            fn attach_shadow_children(
-                self,
-                children: impl IntoIterator<Item = impl Into<$crate::node::Node>> + 'static
-            ) -> Self::Target {
-                [< $name:camel $($name_tail:camel)* >] (self.builder.attach_shadow_children(children))
+    ($name:ident) => {
+        $crate::macros::paste! {
+            impl $crate::node::element::ShadowRootParentBuilder for
+                [< $name:camel Builder >]
+            {
+                fn attach_shadow_children(
+                    self,
+                    children: impl IntoIterator<Item = impl Into<$crate::node::Node>> + 'static
+                ) -> Self::Target {
+                    [< $name:camel >] (self.builder.attach_shadow_children(children))
+                }
             }
         }
-    }};
+    };
 }
 
 #[doc(hidden)]
@@ -381,18 +347,18 @@ macro_rules! events {
     ($elem_type:ty {
         $(
             $(#[$event_meta:meta])*
-            $visiblity:vis $name:ident $(- $name_tail:tt)*: $event_type:ty
+            $visiblity:vis $name:ident: $event_type:ty
         ),* $(,)?
     }) => { $crate::macros::paste!{
         $(
             $(#[$event_meta])*
-            $visiblity fn [<on_ $name $(_ $name_tail)* >] (
+            $visiblity fn [<on_ $name >] (
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
                 $crate::node::element::ElementBuilder::on(
                     self,
-                    $crate::text_name!($name $(- $name_tail)*),
+                    $crate::text_name_intern!($name),
                     move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* we can assume event and event.current_target aren't null
@@ -416,18 +382,18 @@ macro_rules! custom_events {
     ($elem_type:ty {
         $(
             $(#[$event_meta:meta])*
-            $name:ident $(- $name_tail:tt)*: $event_type:ty
+            $name:ident: $event_type:ty
         ),* $(,)?
     }) => { $crate::macros::paste!{
         $(
             $(#[$event_meta])*
-            pub fn [<on_ $name $(_ $name_tail)* >] (
+            pub fn [<on_ $name>] (
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
                 $crate::node::element::ElementBuilder::on(
                     self,
-                    $crate::text_name!($name $(- $name_tail)*),
+                    $crate::text_name_intern!($name),
                     move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* it's safe to assume event and event.current_target aren't null
@@ -451,15 +417,15 @@ macro_rules! custom_events {
 macro_rules! attributes {
     ($(
         $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $(- $attr_tail:ident)* $(($text_attr:expr))? : $typ:ty
-    ),* $(,)? ) => { $crate::macros::paste!{
+        $visibility:vis $attr:ident $(($text_attr:expr))? : $typ:ty
+    ),* $(,)? ) => {
         $(
             $crate::attribute!(
                 $(#[$attr_meta])*
-                $visibility $attr $(- $attr_tail)*$(($text_attr))?: $typ
+                $visibility $attr $(($text_attr))?: $typ
             );
         )*
-    }};
+    };
 }
 
 #[doc(hidden)]
@@ -467,8 +433,17 @@ macro_rules! attributes {
 macro_rules! attribute {
     (
         $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
+        $visibility:vis $attr:ident $( ($text_attr:expr) )?: $typ:ty
     ) => { $crate::macros::paste!{
+        $crate::attribute!(
+            $(#[$attr_meta])*
+            $visibility ( $attr, [< $attr _signal >] ) ($crate::text_name_intern!($attr $( ($text_attr) )?)): $typ
+        );
+    }};
+    (
+        $(#[$attr_meta:meta])*
+        $visibility:vis ( $attr:ident, $attr_signal:ident ) ($text_attr:expr): $typ:ty
+    ) => {
         $(#[$attr_meta])*
         $visibility fn $attr(self, value: impl $crate::attribute::AsAttribute<$typ>) -> Self {
             $crate::node::element::ElementBuilder::attribute(self, $text_attr, value)
@@ -477,7 +452,7 @@ macro_rules! attribute {
         $(#[$attr_meta])*
         #[allow(clippy::wrong_self_convention)]
         #[allow(non_snake_case)]
-        $visibility fn [< $attr _signal >]<T>(
+        $visibility fn $attr_signal<T>(
             self,
             value: impl $crate::macros::Signal<Item = T> + 'static
         ) -> Self
@@ -486,52 +461,26 @@ macro_rules! attribute {
         {
             $crate::node::element::ElementBuilder::attribute_signal(self, $text_attr, value)
         }
-    }};
-    (
-        $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $(- $attr_tail:ident)* ($text_attr:expr): $typ:ty
-    ) => { $crate::macros::paste!{
-        $crate::attribute!(
-            $(#[$attr_meta])*
-            $visibility [< $attr $(_ $attr_tail)* >] ($text_attr): $typ
-        );
-    }};
-    (
-        $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $(- $attr_tail:ident)*: $typ:ty
-    ) => { $crate::macros::paste!{
-        $crate::attribute!(
-            $(#[$attr_meta])*
-            $visibility $attr $(- $attr_tail)* ($crate::text_name!($attr $(- $attr_tail)*)): $typ
-        );
-    }};
+    };
 }
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! text_attr {
-    ($name:ident ($text_name: literal)) => {
-        $crate::macros::intern_str($text_name)
-    };
+macro_rules! text_name_intern {
     ($($name:tt)*) => {
-        $crate::text_name!($($name)*)
+        $crate::macros::intern_str($crate::text_name!($($name)*))
+    }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! text_name {
+    ($name:ident($text_name:literal)) => {
+        $text_name
     };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! text_name{
-    ($name:ident $(- $name_tail:tt)*) => {
-        $crate::macros::intern_str($crate::naked_text_name!($name $( - $name_tail)*))
-    }
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! naked_text_name{
-    ($name:ident $(- $name_tail:tt)*) => {
-        concat!($crate::stringify_raw!($name) $(, "-", $crate::stringify_raw!($name_tail))*)
-    }
+    ($name:ident) => {
+        $crate::stringify_raw!($name)
+    };
 }
 
 #[doc(hidden)]

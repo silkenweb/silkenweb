@@ -2,23 +2,23 @@ mod elements {
     use silkenweb::{html_element, parent_element};
 
     html_element!(
-        ui5-card<web_sys::Element> {
+        ui5_card<web_sys::Element> {
             attributes {
-                accessible-name: String,
-                accessible-name-ref: String,
+                accessible_name: String,
+                accessible_name_ref: String,
             }
         }
     );
 
-    parent_element!(ui5 - card);
+    parent_element!(ui5_card);
 
     html_element!(
-        ui5-card-header<web_sys::Element> {
+        ui5_card_header<web_sys::Element> {
             attributes {
                 interactive: bool,
                 status: String,
-                subtitle-text: String,
-                title-text: String,
+                subtitle_text: String,
+                title_text: String,
             }
 
             custom_events {
@@ -27,7 +27,7 @@ mod elements {
         }
     );
 
-    parent_element!(ui5 - card - header);
+    parent_element!(ui5_card_header);
 }
 
 pub use elements::{Ui5Card as Card, Ui5CardHeader as CardHeader};

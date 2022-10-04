@@ -107,10 +107,10 @@ mod elements {
     use crate::icon::Icon;
 
     html_element!(
-        ui5-avatar<web_sys::HtmlElement> {
+        ui5_avatar<web_sys::HtmlElement> {
             attributes {
-                accessible-name: String,
-                color-scheme: ColorScheme,
+                accessible_name: String,
+                color_scheme: ColorScheme,
                 icon: Icon,
                 initials: String,
                 interactive: bool,
@@ -120,10 +120,10 @@ mod elements {
         }
     );
 
-    parent_element!(ui5 - avatar);
+    parent_element!(ui5_avatar);
 
     html_element!(
-        ui5-avatar-group<web_sys::HtmlElement> {
+        ui5_avatar_group<web_sys::HtmlElement> {
             attributes {
                 r#type: GroupType,
             }
@@ -135,7 +135,7 @@ mod elements {
         }
     );
 
-    parent_element!(ui5 - avatar - group);
+    parent_element!(ui5_avatar_group);
 }
 
 pub type Avatar = elements::Ui5Avatar;

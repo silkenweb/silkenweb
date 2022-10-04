@@ -17,27 +17,27 @@ mod elements {
     use super::{CalendarType, SelectedDatesChange, SelectionMode};
 
     html_element!(
-        ui5-calendar<web_sys::HtmlElement> {
+        ui5_calendar<web_sys::HtmlElement> {
             attributes {
-                hide-week-numbers: bool,
-                selection-mode: SelectionMode,
-                format-pattern: String,
-                max-date: String,
-                min-date: String,
-                primary-calendar-type: CalendarType,
-                secondary-calendar-type: CalendarType,
+                hide_week_numbers: bool,
+                selection_mode: SelectionMode,
+                format_pattern: String,
+                max_date: String,
+                min_date: String,
+                primary_calendar_type: CalendarType,
+                secondary_calendar_type: CalendarType,
             }
 
             custom_events {
-                selected-dates-change: SelectedDatesChange
+                selected_dates_change: SelectedDatesChange
             }
         }
     );
 
-    parent_element!(ui5 - calendar);
+    parent_element!(ui5_calendar);
 
     html_element!(
-        ui5-date<web_sys::HtmlElement> {
+        ui5_date<web_sys::HtmlElement> {
             attributes {
                 value: String,
             }

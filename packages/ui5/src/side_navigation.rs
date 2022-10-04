@@ -27,35 +27,35 @@ mod elements {
     use crate::icon::Icon;
 
     html_element!(
-        ui5-side-navigation<web_sys::HtmlElement> {
+        ui5_side_navigation<web_sys::HtmlElement> {
             attributes {
                 collapsed: bool,
             }
 
             custom_events {
-                selection-change: CustomEvent<SelectionChangeDetail>,
+                selection_change: CustomEvent<SelectionChangeDetail>,
             }
         }
     );
 
-    parent_element!(ui5 - side - navigation);
+    parent_element!(ui5_side_navigation);
 
     html_element!(
-        ui5-side-navigation-item<web_sys::HtmlElement> {
+        ui5_side_navigation_item<web_sys::HtmlElement> {
             attributes {
                 expanded: bool,
                 icon: Icon,
                 selected: bool,
                 text: String,
-                whole-item-toggleable: bool
+                whole_item_toggleable: bool
             }
         }
     );
 
-    parent_element!(ui5 - side - navigation - item);
+    parent_element!(ui5_side_navigation_item);
 
     html_element!(
-        ui5-side-navigation-sub-item<web_sys::HtmlElement> {
+        ui5_side_navigation_sub_item<web_sys::HtmlElement> {
             attributes {
                 expanded: bool,
                 icon: Icon,

@@ -227,26 +227,23 @@ parent_element!(rect);
 
 svg_element!(
     /// The <use> element takes nodes from within the SVG document, and duplicates them somewhere else.
-    snake(r#use),
-    camel(Use, UseBuilder),
-    text("use")
-    <web_sys::SvgUseElement> {
+    r#use<web_sys::SvgUseElement> {
         attributes {
             /// The URL to an element/fragment that needs to be duplicated.
             /// Value type: <URL> ; Default value: none; Animatable: yes
-            href("href"): String,
+            href: String,
             /// The x coordinate of the use element.
             /// Value type: <coordinate> ; Default value: 0; Animatable: yes
-            x("x"): Length,
+            x: Length,
             /// The y coordinate of the use element.
             /// Value type: <coordinate> ; Default value: 0; Animatable: yes
-            y("y"): Length,
+            y: Length,
             /// The width of the use element.
             /// Value type: <length> ; Default value: 0; Animatable: yes
-            width("width"): Length,
+            width: Length,
             /// The height of the use element.
             /// Value type: <length> ; Default value: 0; Animatable: yes
-            height("height"): Length,
+            height: Length,
         }
     }
 );

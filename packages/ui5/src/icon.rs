@@ -6,12 +6,12 @@ use silkenweb::{
 };
 
 html_element!(
-    ui5-icon<web_sys::HtmlElement> {
+    ui5_icon<web_sys::HtmlElement> {
         attributes {
-            accessible-name: String,
+            accessible_name: String,
             interactive: bool,
             name: Icon,
-            show-tooltip: bool,
+            show_tooltip: bool,
         }
     }
 );

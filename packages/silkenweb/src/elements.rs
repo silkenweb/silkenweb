@@ -72,7 +72,7 @@ macro_rules! global_attributes {
             $($(#[$attr_meta])*
             #[doc = ""]
             #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-            $attr ($crate::text_name!($attr)): $typ,)*
+            $attr: $typ,)*
         ];
     }};
 }

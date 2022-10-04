@@ -12,14 +12,14 @@ mod elements {
     use silkenweb::{html_element, parent_element};
 
     html_element!(
-        ui5-badge<web_sys::HtmlElement> {
+        ui5_badge<web_sys::HtmlElement> {
             attributes {
-                color-scheme: u8
+                color_scheme: u8
             }
         }
     );
 
-    parent_element!(ui5 - badge);
+    parent_element!(ui5_badge);
 }
 
 pub type Badge = elements::Ui5Badge;
