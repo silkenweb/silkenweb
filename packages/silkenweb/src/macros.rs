@@ -5,14 +5,18 @@ pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
-// TODO: Update docs for `_`/`-` conversion and explicit text names
-
 /// Define an html element.
 ///
 /// This will define a builder struct for an html element, with a method for
-/// each attribute. It will also define a struct for the built element. Dashes
-/// are allowed in element, attribute, and event names. They will be converted
-/// to underscores when generating rust identifiers. For example:
+/// each attribute. It will also define a struct for the built element.
+/// Underscores are converted to dashes in element, attribute, and event names,
+/// and raw identifiers have their `r#` prefix stripped.
+///
+/// The html identifier can be explicitly specified in brackets after the
+/// element or attribute name. See `my_explicitly_named_attribute` in the
+/// example.
+///
+/// # Example
 ///
 /// ```no_run
 /// # use silkenweb::html_element;
@@ -21,7 +25,8 @@ pub use web_sys;
 /// // The types of the dom element and event carry through to the event handler.
 /// html_element!(my_html_element<web_sys::HtmlDivElement> {
 ///     attributes {
-///         my_attribute: String
+///         my_attribute: String,
+///         my_explicitly_named_attribute("MyExplicitlyNamedAttribute"): String
 ///     }
 ///
 ///     events {
