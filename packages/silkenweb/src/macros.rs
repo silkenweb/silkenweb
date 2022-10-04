@@ -1,4 +1,3 @@
-pub use doc_comment::doc_comment;
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
 pub use silkenweb_base::intern_str;
@@ -68,7 +67,15 @@ macro_rules! svg_element {
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
             doc = [
-                $crate::macros::doc_comment!{$crate::text_name!($name $( ($text_name) )?)}
+                #[
+                    doc = concat!(
+                        "The SVG [",
+                        $crate::text_name!($name $( ($text_name) )?),
+                        "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
+                        $crate::text_name!($name $( ($text_name) )?),
+                        ") element"
+                    )
+                ]
                 #[doc = ""]
                 $(#[$elem_meta])*
             ],
