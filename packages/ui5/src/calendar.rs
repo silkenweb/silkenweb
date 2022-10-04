@@ -26,11 +26,11 @@ mod elements {
                 min_date: String,
                 primary_calendar_type: CalendarType,
                 secondary_calendar_type: CalendarType,
-            }
+            };
 
             custom_events {
                 selected_dates_change: SelectedDatesChange
-            }
+            };
         }
     );
 
@@ -40,7 +40,7 @@ mod elements {
         ui5_date = { dom_type: web_sys::HtmlElement;
             attributes {
                 value: String,
-            }
+            };
         }
     );
 }

@@ -29,7 +29,7 @@ mod element {
                 delay: u64,
                 size: BusyIndicatorSize,
                 text: String,
-            }
+            };
         }
     );
 

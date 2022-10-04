@@ -89,11 +89,11 @@ mod element {
             attributes {
                 design: BreadcrumbsDesign,
                 separator_style: BreadcrumbsSeparatorStyle,
-            }
+            };
 
             custom_events {
                 item_click: CustomEvent<ItemClickDetail>
-            }
+            };
         }
     );
 
@@ -105,7 +105,7 @@ mod element {
                 accessible_name: String,
                 href: String,
                 target: BreadcrumbsTarget,
-            }
+            };
         }
     );
 

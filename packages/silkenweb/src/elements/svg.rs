@@ -65,7 +65,7 @@ svg_element!(
             /// A MIME type for the linked URL.
             /// Value type: <string> ; Default value: none; Animatable: yes
             r#type: String,
-        }
+        };
     }
 );
 
@@ -162,7 +162,7 @@ svg_element!(
             /// outermost svg elements. Value type: <length>|<percentage> ;
             /// Default value: 0; Animatable: yes
             y: Length,
-        }
+        };
     }
 );
 
@@ -180,7 +180,7 @@ svg_element!(
             /// path, in user units.
             /// Value type: <number> ; Default value: none; Animatable: yes
             path_length("pathLength"): f64,
-        }
+        };
     }
 );
 
@@ -224,7 +224,7 @@ svg_element!(
             /// The total length of the rectangle's perimeter, in user units. Value type:
             /// <number> ; Default value: none; Animatable: yes
             path_length("pathLength"): f64,
-        }
+        };
     }
 );
 
@@ -254,7 +254,7 @@ svg_element!(
             /// The height of the use element.
             /// Value type: <length> ; Default value: 0; Animatable: yes
             height: Length,
-        }
+        };
     }
 );
 

@@ -125,20 +125,20 @@ macro_rules! dom_element {
             $(attributes { $(
                 $(#[$attr_meta:meta])*
                 $attr:ident $( ($text_attr:expr) )? : $typ:ty
-            ),* $(,)? } )?
+            ),* $(,)? }; )?
 
             $(events {
                 $(
                     $(#[$event_meta:meta])*
                     $event:ident: $event_type:ty
                 ),* $(,)?
-            })?
+            };)?
 
             $(custom_events { $(
                     $(#[$custom_event_meta:meta])*
                     $custom_event:ident: $custom_event_type:ty
                 ),* $(,)?
-            })?
+            };)?
         }
     ) => {
         $(

@@ -15,7 +15,7 @@ mod elements {
         ui5_badge = { dom_type: web_sys::HtmlElement;
             attributes {
                 color_scheme: u8
-            }
+            };
         }
     );
 

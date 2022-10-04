@@ -116,7 +116,7 @@ mod elements {
                 interactive: bool,
                 shape: Shape,
                 size: Size,
-            }
+            };
         }
     );
 
@@ -126,12 +126,12 @@ mod elements {
         ui5_avatar_group = { dom_type: web_sys::HtmlElement;
             attributes {
                 r#type: GroupType,
-            }
+            };
 
             custom_events {
                 click: CustomEvent<GroupClicked>,
                 overflow: web_sys::CustomEvent,
-            }
+            };
         }
     );
 

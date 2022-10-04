@@ -30,11 +30,11 @@ mod elements {
         ui5_side_navigation = { dom_type: web_sys::HtmlElement;
             attributes {
                 collapsed: bool,
-            }
+            };
 
             custom_events {
                 selection_change: CustomEvent<SelectionChangeDetail>,
-            }
+            };
         }
     );
 
@@ -49,7 +49,7 @@ mod elements {
                 selected: bool,
                 text: String,
                 whole_item_toggleable: bool,
-            }
+            };
         }
     );
 
@@ -63,7 +63,7 @@ mod elements {
                 icon: Icon,
                 selected: bool,
                 text: String,
-            }
+            };
         }
     );
 }

@@ -36,11 +36,11 @@ mod element {
                 icon_end: bool,
                 submits: bool,
                 tooltop: String,
-            }
+            };
 
             custom_events {
                 click: web_sys::CustomEvent,
-            }
+            };
         }
     );
 

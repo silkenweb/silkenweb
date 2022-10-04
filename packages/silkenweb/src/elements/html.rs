@@ -91,7 +91,7 @@ html_element!(
             /// Hints at the linked URL’s format with a MIME type. No built-in
             /// functionality.
             r#type: String,
-        }
+        };
     }
 );
 
@@ -153,7 +153,7 @@ html_element!(
             /// * `rtl`: Indicates that the text should go in a right-to-left
             ///   direction.
             dir: String,
-        }
+        };
     }
 );
 
@@ -202,7 +202,7 @@ html_element!(
             /// This attribute specifies the machine-readable translation of the
             /// content of the element.
             value: String,
-        }
+        };
     }
 );
 
@@ -277,7 +277,7 @@ html_element!(
             /// attribute is intended to point to information explaining the
             /// context or the reference for the quote.
             cite: String,
-        }
+        };
     }
 );
 
@@ -443,7 +443,7 @@ html_element!(
             /// This attribute indicates the time and/or date of the element and
             /// must be in one of the formats described below.
             datetime: String,
-        }
+        };
     }
 );
 
@@ -499,7 +499,7 @@ html_element!(
             /// the string if it includes both date and time is covered in
             /// Local date and time strings.
             datetime: String,
-        }
+        };
     }
 );
 
@@ -524,7 +524,7 @@ html_element!(
             /// the string if it includes both date and time is covered in
             /// Local date and time strings.
             datetime: String,
-        }
+        };
     }
 );
 
@@ -745,7 +745,7 @@ html_element!(
             ///
             /// [CSS pixels]: https://drafts.csswg.org/css-values/#px
             width: String,
-        }
+        };
     }
 );
 
@@ -843,7 +843,7 @@ html_element!(
 
             /// The width of the frame in CSS pixels. Default is 300.
             width: String,
-        }
+        };
     }
 );
 
@@ -885,7 +885,7 @@ html_element!(
 
             /// The width of the display resource, in CSS pixels. No percentages.
             width: String,
-        }
+        };
     }
 );
 
@@ -904,7 +904,7 @@ html_element!(
 
             /// Specifies the value of the parameter.
             value: String,
-        }
+        };
     }
 );
 
@@ -978,7 +978,7 @@ html_element!(
             /// The MIME media type of the resource, optionally with a codecs
             /// parameter.
             r#type: String,
-        }
+        };
     }
 );
 
@@ -996,13 +996,13 @@ html_element!(
 
             /// The width of the coordinate space in CSS pixels. Defaults to 300.
             width: String,
-        }
+        };
 
         events {
             webglcontextcreationerror: web_sys::WebGlContextEvent,
             webglcontextlost: web_sys::WebGlContextEvent,
             webglcontextrestored: web_sys::WebGlContextEvent,
-        }
+        };
     }
 );
 
@@ -1117,7 +1117,7 @@ html_element!(
             /// is not a JavaScript MIME type to denote data blocks. The src
             /// attribute will be ignored.
             r#type: String,
-        }
+        };
     }
 );
 
@@ -1206,7 +1206,7 @@ html_element!(
             ///
             /// Use this attribute only if the `href` attribute is present.
             target: String,
-        }
+        };
     }
 );
 
@@ -1331,7 +1331,7 @@ html_element!(
             /// `<source>` element within the audio block to specify
             /// the audio to embed.
             src: String,
-        }
+        };
     }
 );
 
@@ -1520,7 +1520,7 @@ html_element!(
             /// Note: You cannot use this attribute if the `<img>` element is inside
             /// an `<a>` or `<button>` element.
             usemap: String,
-        }
+        };
     }
 );
 
@@ -1540,7 +1540,7 @@ html_element!(
             /// the same document. If the id attribute is also specified,
             /// both attributes must have the same value.
             name: String,
-        }
+        };
     }
 );
 
@@ -1614,11 +1614,11 @@ html_element!(
             /// tag. If the kind attribute is set to subtitles, then srclang
             /// must be defined.
             srclang: String,
-        }
+        };
 
         events {
             cuechange: web_sys::Event
-        }
+        };
     }
 );
 
@@ -1759,12 +1759,12 @@ html_element!(
             /// The width of the video's display area, in CSS pixels (absolute
             /// values only; no percentages).
             width: String,
-        }
+        };
 
         events {
             enterpictureinpicture: web_sys::Event,
             leavepictureinpicture: web_sys::Event,
-        }
+        };
     }
 );
 
@@ -1780,11 +1780,11 @@ html_element!(
         attributes {
             /// Indicates whether the details will be shown on page load.
             open: bool,
-        }
+        };
 
         events {
             toggle: web_sys::Event
-        }
+        };
     }
 );
 
@@ -1801,12 +1801,12 @@ html_element!(
             /// the open attribute is not set, the dialog shouldn't be shown
             /// to the user.
             open: bool,
-        }
+        };
 
         events {
             cancel: web_sys::Event,
             close: web_sys::Event,
-        }
+        };
     }
 );
 
@@ -1854,7 +1854,7 @@ html_element!(
             /// information explaining the context or the reference
             /// for the quote.
             cite: String,
-        }
+        };
     }
 );
 
@@ -1991,7 +1991,7 @@ html_element!(
             /// number/letter), use the CSS list-style-type property
             /// instead.
             r#type: String,
-        }
+        };
     }
 );
 
@@ -2052,7 +2052,7 @@ html_element!(
             /// consecutive columns the `<col>` element spans. If not
             /// present, its default value is 1.
             span: String,
-        }
+        };
     }
 );
 
@@ -2075,7 +2075,7 @@ html_element!(
             /// > The span attribute is not permitted if there are one or more
             /// `<col>` elements within > the `<colgroup>`.
             span: String,
-        }
+        };
     }
 );
 
@@ -2130,7 +2130,7 @@ html_element!(
             /// defined), that the cell belongs to. Values higher than 65534
             /// are clipped down to 65534.
             rowspan: String,
-        }
+        };
     }
 );
 
@@ -2198,7 +2198,7 @@ html_element!(
             ///
             /// The default value when this attribute is not specified is auto.
             scope: String,
-        }
+        };
     }
 );
 
@@ -2264,7 +2264,7 @@ html_element!(
             /// context that is an ancestor of the current one, and has no parent).
             /// If there is no parent, behaves the same way as _self.
             target: String,
-        }
+        };
     }
 );
 
@@ -2430,7 +2430,7 @@ html_element!(
             /// types, to make sure the browser only downloads file
             /// types that it supports.
             r#type: String,
-        }
+        };
     }
 );
 
@@ -2508,7 +2508,7 @@ html_element!(
             ///
             /// [standard metadata names]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name
             name: String,
-        }
+        };
     }
 );
 
@@ -2533,7 +2533,7 @@ html_element!(
 
             /// This attribute specifies alternative style sheet sets.
             title: String,
-        }
+        };
     }
 );
 
@@ -2674,7 +2674,7 @@ html_element!(
             /// submitted with the form data. This value is passed to the
             /// server in params when the form is submitted.
             value: String,
-        }
+        };
     }
 );
 
@@ -2719,7 +2719,7 @@ html_element!(
             /// Note: The caption for the fieldset is given by the first `<legend>`
             /// element inside it.
             name: String,
-        }
+        };
     }
 );
 
@@ -2812,7 +2812,7 @@ html_element!(
             /// `<button>`, `<input type="submit">`, or `<input
             /// type="image">` element.
             target: String,
-        }
+        };
 
         events {
             // The type should be FormDataEvent, but web_sys doesn't support it.
@@ -2820,7 +2820,7 @@ html_element!(
             reset: web_sys::Event,
             // The type should be SubmitEvent, but web_sys doesn't support it.
             submit: web_sys::Event,
-        }
+        };
     }
 );
 
@@ -3274,11 +3274,11 @@ html_element!(
             /// image file to display to represent the graphical submit
             /// button. See the image input type.
             width: String,
-        }
+        };
 
         events {
             invalid: web_sys::Event
-        }
+        };
     }
 );
 
@@ -3308,7 +3308,7 @@ html_element!(
             /// lets you place label elements anywhere within a document, not just
             /// as descendants of their form elements.
             form: String,
-        }
+        };
     }
 );
 
@@ -3387,7 +3387,7 @@ html_element!(
             /// attribute and the low attribute, then the lower
             /// range is considered preferred.
             optimum: u32,
-        }
+        };
     }
 );
 
@@ -3410,7 +3410,7 @@ html_element!(
             /// labeling the options in the user interface. This attribute
             /// is mandatory if this element is used.
             label: String,
-        }
+        };
     }
 );
 
@@ -3452,7 +3452,7 @@ html_element!(
             /// attribute is omitted, the value is taken from the text
             /// content of the option element.
             value: String,
-        }
+        };
     }
 );
 
@@ -3484,7 +3484,7 @@ html_element!(
 
             /// The element's name. Used in the form.elements API.
             name: String,
-        }
+        };
     }
 );
 
@@ -3511,7 +3511,7 @@ html_element!(
             /// indicates that an activity is ongoing with no indication of
             /// how long it is expected to take.
             value: f32,
-        }
+        };
     }
 );
 
@@ -3570,7 +3570,7 @@ html_element!(
             /// time. Browsers are not required to present a select element as a
             /// scrolled list box. The default value is 0.
             size: String,
-        }
+        };
     }
 );
 
@@ -3689,7 +3689,7 @@ html_element!(
             ///
             /// If this attribute is not specified, soft is its default value.
             wrap: String,
-        }
+        };
     }
 );
 
@@ -3705,12 +3705,12 @@ html_element!(
     slot = { dom_type: web_sys::HtmlSlotElement;
         attributes {
             name: String
-        }
+        };
 
         events {
             /// The slotchange event is fired on an HTMLSlotElement instance
             /// (<slot> element) when the node(s) contained in that slot change.
             slotchange: web_sys::Event,
-        }
+        };
     }
 );

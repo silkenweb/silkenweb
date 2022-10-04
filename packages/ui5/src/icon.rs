@@ -13,7 +13,7 @@ html_element!(
             interactive: bool,
             name: Icon,
             show_tooltip: bool,
-        }
+        };
     }
 );
 

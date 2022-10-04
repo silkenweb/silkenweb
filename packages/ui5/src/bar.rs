@@ -38,7 +38,7 @@ mod element {
         ui5_bar = { dom_type: web_sys::HtmlElement;
             attributes {
                 design: BarDesign
-            }
+            };
         }
     );
 

@@ -7,7 +7,7 @@ mod elements {
             attributes {
                 accessible_name: String,
                 accessible_name_ref: String,
-            }
+            };
         }
     );
 
@@ -20,11 +20,11 @@ mod elements {
                 status: String,
                 subtitle_text: String,
                 title_text: String,
-            }
+            };
 
             custom_events {
                 click: web_sys::CustomEvent,
-            }
+            };
         }
     );
 
