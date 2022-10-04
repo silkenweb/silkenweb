@@ -66,22 +66,23 @@ macro_rules! svg_element {
             namespace = Some("http://www.w3.org/2000/svg"),
             attributes = [$crate::elements::svg::attributes::Global],
             events = [],
-            doc = [
-                #[
-                    doc = concat!(
-                        "The SVG [",
-                        $crate::text_name!($name $( ($text_name) )?),
-                        "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
-                        $crate::text_name!($name $( ($text_name) )?),
-                        ") element"
-                    )
-                ]
-                #[doc = ""]
-                $(#[$elem_meta])*
-            ],
+            doc_macro = svg_element_doc,
+            doc = [$(#[$elem_meta])*],
             $($tail)*
         );
     }
+}
+
+macro_rules! svg_element_doc {
+    ($name:expr) => {
+        concat!(
+            "The SVG [",
+            $name,
+            "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
+            $name,
+            ") element"
+        )
+    };
 }
 
 // TODO: Text alternatives for event, custom_event
@@ -96,17 +97,19 @@ macro_rules! dom_element {
         $crate::dom_element!(
             snake ( $name ),
             camel ( [< $name:camel >], [< $name:camel Builder >] ),
-            text ( $crate::text_name_intern!($name $( ($text_name) )?) ),
+            text ( $crate::text_name!($name $( ($text_name) )?) ),
             $($tail)*
         );
     }};
     (
+        // TODO: Make names/syntax better (snake_name = )
         snake ( $snake_name:ident ),
         camel ( $camel_name:ident, $camel_builder_name:ident ),
         text ( $text_name:expr ),
         $(namespace = $namespace:expr, )?
         attributes = [$($attribute_trait:ty),*],
         events = [$($event_trait:ty),*],
+        $(doc_macro = $doc_macro:ident,)?
         doc = [$($docs:tt)*],
         < $elem_type:ty >
         {
@@ -129,10 +132,14 @@ macro_rules! dom_element {
             })?
         }
     ) => {
+        $(
+            #[doc = $doc_macro!($text_name)]
+            #[doc = ""]
+        )?
         $($docs)*
         pub fn $snake_name() -> $camel_builder_name {
             $camel_builder_name { builder: $crate::create_element_fn!(
-                $($namespace, )? $text_name
+                $($namespace, )? $crate::macros::intern_str($text_name)
             ) }
         }
 
