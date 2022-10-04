@@ -17,7 +17,8 @@ mod elements {
     use super::{CalendarType, SelectedDatesChange, SelectionMode};
 
     html_element!(
-        ui5_calendar = { dom_type: web_sys::HtmlElement;
+        ui5_calendar = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 hide_week_numbers: bool,
                 selection_mode: SelectionMode,
@@ -29,7 +30,7 @@ mod elements {
             };
 
             custom_events {
-                selected_dates_change: SelectedDatesChange
+                selected_dates_change: SelectedDatesChange,
             };
         }
     );
@@ -37,10 +38,9 @@ mod elements {
     parent_element!(ui5_calendar);
 
     html_element!(
-        ui5_date = { dom_type: web_sys::HtmlElement;
-            attributes {
-                value: String,
-            };
+        ui5_date = {
+            dom_type: web_sys::HtmlElement;
+            attributes { value: String };
         }
     );
 }

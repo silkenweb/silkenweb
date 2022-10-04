@@ -121,7 +121,7 @@ macro_rules! dom_element {
             doc = [$($docs:tt)*];
             $(namespace = $namespace:expr; )?
             dom_type: $elem_type:ty;
-            
+
             $(attributes { $(
                 $(#[$attr_meta:meta])*
                 $attr:ident $( ($text_attr:expr) )? : $typ:ty

@@ -11,7 +11,8 @@ html_element!(
     /// within the same page, email addresses, or any other URL.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
-    a  = { dom_type: web_sys::HtmlAnchorElement;
+    a = {
+        dom_type: web_sys::HtmlAnchorElement;
         attributes {
             /// Prompts the user to save the linked URL instead of navigating to it.
             /// Can be used with or without a value:
@@ -110,7 +111,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/abbr
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-title
-    abbr = { dom_type: web_sys::HtmlElement;}
+    abbr = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(abbr);
@@ -121,7 +124,9 @@ html_element!(
     /// otherwise granted special importance.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/b
-    b = { dom_type: web_sys::HtmlElement;}
+    b = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(b);
@@ -132,7 +137,9 @@ html_element!(
     /// isolation from its surrounding text.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdi
-    bdi = { dom_type: web_sys::HtmlElement;}
+    bdi = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(bdi);
@@ -143,7 +150,8 @@ html_element!(
     /// rendered in a different direction.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdo
-    bdo = { dom_type: web_sys::HtmlElement;
+    bdo = {
+        dom_type: web_sys::HtmlElement;
         attributes {
             /// The direction in which text should be rendered in this element's
             /// contents. Possible values are:
@@ -165,7 +173,9 @@ html_element!(
     /// where the division of lines is significant.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br
-    br = { dom_type: web_sys::HtmlBrElement;}
+    br = {
+        dom_type: web_sys::HtmlBrElement;
+    }
 );
 
 html_element!(
@@ -174,7 +184,9 @@ html_element!(
     /// that work.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    cite = { dom_type: web_sys::HtmlElement;}
+    cite = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(cite);
@@ -185,7 +197,9 @@ html_element!(
     /// computer code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/code
-    code = { dom_type: web_sys::HtmlElement;}
+    code = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(code);
@@ -197,7 +211,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/data
     /// [time]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    data = { dom_type: web_sys::HtmlDataElement;
+    data = {
+        dom_type: web_sys::HtmlDataElement;
         attributes {
             /// This attribute specifies the machine-readable translation of the
             /// content of the element.
@@ -214,7 +229,9 @@ html_element!(
     /// sentence.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn
-    dfn = { dom_type: web_sys::HtmlElement;}
+    dfn = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(dfn);
@@ -225,7 +242,9 @@ html_element!(
     /// a greater degree of emphasis.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em
-    em = { dom_type: web_sys::HtmlElement;}
+    em = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(em);
@@ -237,7 +256,9 @@ html_element!(
     /// thoughts. It is typically displayed in italic type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
-    i = { dom_type: web_sys::HtmlElement;}
+    i = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(i);
@@ -248,7 +269,9 @@ html_element!(
     /// input, or any other text entry device.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd
-    kbd = { dom_type: web_sys::HtmlElement;}
+    kbd = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(kbd);
@@ -259,7 +282,9 @@ html_element!(
     /// marked passage's relevance or importance in the enclosing context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/mark
-    mark = { dom_type: web_sys::HtmlElement;}
+    mark = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(mark);
@@ -270,9 +295,10 @@ html_element!(
     /// surrounding the text in quotation marks.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q
-    q = { dom_type: web_sys::HtmlQuoteElement;
+    q = {
+        dom_type: web_sys::HtmlQuoteElement;
         attributes {
-                /// The value of this attribute is a URL that designates a source
+            /// The value of this attribute is a URL that designates a source
             /// document or message for the information quoted. This
             /// attribute is intended to point to information explaining the
             /// context or the reference for the quote.
@@ -290,7 +316,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rb
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rb = { dom_type: web_sys::HtmlElement;}
+    rb = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(rb);
@@ -302,7 +330,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rp
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rp = { dom_type: web_sys::HtmlElement;}
+    rp = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(rp);
@@ -316,7 +346,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    rt = { dom_type: web_sys::HtmlElement;}
+    rt = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(rt);
@@ -333,7 +365,9 @@ html_element!(
     /// [ruby]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
     /// [rt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rt
     /// [rtc]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/rtc
-    rtc = { dom_type: web_sys::HtmlElement;}
+    rtc = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(rtc);
@@ -343,7 +377,9 @@ html_element!(
     /// annotations are for showing pronunciation of East Asian characters.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-    ruby = { dom_type: web_sys::HtmlElement;}
+    ruby = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(ruby);
@@ -358,7 +394,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/s
     /// [del]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
     /// [ins]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    s = { dom_type: web_sys::HtmlElement;}
+    s = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(s);
@@ -368,7 +406,9 @@ html_element!(
     /// which represents sample (or quoted) output from a computer program.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/samp
-    samp = { dom_type: web_sys::HtmlElement;}
+    samp = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(samp);
@@ -380,7 +420,9 @@ html_element!(
     /// small, such as from `small` to `x-small`.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/small
-    small = { dom_type: web_sys::HtmlElement;}
+    small = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(small);
@@ -396,7 +438,9 @@ html_element!(
     /// [class]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-class
     /// [id]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-id
     /// [lang]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-lang
-    span = { dom_type: web_sys::HtmlSpanElement;}
+    span = {
+        dom_type: web_sys::HtmlSpanElement;
+    }
 );
 
 parent_element!(span);
@@ -408,7 +452,9 @@ html_element!(
     /// Browsers typically render the contents in bold type.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strong
-    strong = { dom_type: web_sys::HtmlElement;}
+    strong = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(strong);
@@ -418,7 +464,9 @@ html_element!(
     /// should be displayed as subscript for solely typographical reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sub
-    sub = { dom_type: web_sys::HtmlElement;}
+    sub = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(sub);
@@ -429,7 +477,9 @@ html_element!(
     /// reasons.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/sup
-    sup = { dom_type: web_sys::HtmlElement;}
+    sup = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(sup);
@@ -438,7 +488,8 @@ html_element!(
     /// The [HTML `<time>` element][mdn] represents a specific period in time.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
-    time = { dom_type: web_sys::HtmlTimeElement;
+    time = {
+        dom_type: web_sys::HtmlTimeElement;
         attributes {
             /// This attribute indicates the time and/or date of the element and
             /// must be in one of the formats described below.
@@ -455,7 +506,9 @@ html_element!(
     /// that it has a non-textual annotation.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/u
-    u = { dom_type: web_sys::HtmlElement;}
+    u = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(u);
@@ -465,7 +518,9 @@ html_element!(
     /// variable in a mathematical expression or a programming context.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/var
-    var = { dom_type: web_sys::HtmlElement;}
+    var = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(var);
@@ -477,7 +532,9 @@ html_element!(
     /// that location.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr
-    wbr = { dom_type: web_sys::HtmlElement;}
+    wbr = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 html_element!(
@@ -485,17 +542,19 @@ html_element!(
     /// deleted from a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
-    del = { dom_type: web_sys::HtmlModElement;
+    del = {
+        dom_type: web_sys::HtmlModElement;
         attributes {
-            /// A URI for a resource that explains the change (for example, meeting
-            /// minutes).
+            /// A URI for a resource that explains the change (for example,
+            /// meeting minutes).
             cite: String,
 
-            /// This attribute indicates the time and date of the change and must be
-            /// a valid date string with an optional time. If the value
-            /// cannot be parsed as a date with an optional time string, the
-            /// element does not have an associated time stamp. For the format of
-            /// the string without a time, see Date strings. The format of
+            /// This attribute indicates the time and date of the change and
+            /// must be a valid date string with an optional time.
+            /// If the value cannot be parsed as a date with an
+            /// optional time string, the element does not have an
+            /// associated time stamp. For the format of the string
+            /// without a time, see Date strings. The format of
             /// the string if it includes both date and time is covered in
             /// Local date and time strings.
             datetime: String,
@@ -510,17 +569,19 @@ html_element!(
     /// added to a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
-    ins = { dom_type: web_sys::HtmlModElement;
+    ins = {
+        dom_type: web_sys::HtmlModElement;
         attributes {
-            /// A URI for a resource that explains the change (for example, meeting
-            /// minutes).
+            /// A URI for a resource that explains the change (for example,
+            /// meeting minutes).
             cite: String,
 
-            /// This attribute indicates the time and date of the change and must be
-            /// a valid date string with an optional time. If the value
-            /// cannot be parsed as a date with an optional time string, the
-            /// element does not have an associated time stamp. For the format of
-            /// the string without a time, see Date strings. The format of
+            /// This attribute indicates the time and date of the change and
+            /// must be a valid date string with an optional time.
+            /// If the value cannot be parsed as a date with an
+            /// optional time string, the element does not have an
+            /// associated time stamp. For the format of the string
+            /// without a time, see Date strings. The format of
             /// the string if it includes both date and time is covered in
             /// Local date and time strings.
             datetime: String,
@@ -536,7 +597,9 @@ html_element!(
     /// organization.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/address
-    address = { dom_type: web_sys::HtmlElement;}
+    address = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(address);
@@ -548,7 +611,9 @@ html_element!(
     /// (e.g., in syndication).
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article
-    article = { dom_type: web_sys::HtmlElement;}
+    article = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(article);
@@ -560,7 +625,9 @@ html_element!(
     /// content.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/aside
-    aside = { dom_type: web_sys::HtmlElement;}
+    aside = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(aside);
@@ -575,7 +642,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/footer
     /// [sectioning content]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Sectioning_content
     /// [sectioning root]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Sections_and_Outlines_of_an_HTML5_document#Sectioning_roots
-    footer = { dom_type: web_sys::HtmlElement;}
+    footer = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(footer);
@@ -588,7 +657,9 @@ html_element!(
     /// author name, and other elements.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/header
-    header = { dom_type: web_sys::HtmlElement;}
+    header = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(header);
@@ -600,7 +671,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h1
-    h1 = { dom_type: web_sys::HtmlHeadingElement;}
+    h1 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h1);
@@ -612,7 +685,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h2
-    h2 = { dom_type: web_sys::HtmlHeadingElement;}
+    h2 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h2);
@@ -624,7 +699,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h3
-    h3 = { dom_type: web_sys::HtmlHeadingElement;}
+    h3 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h3);
@@ -636,7 +713,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h4
-    h4 = { dom_type: web_sys::HtmlHeadingElement;}
+    h4 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h4);
@@ -648,7 +727,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h5
-    h5 = { dom_type: web_sys::HtmlHeadingElement;}
+    h5 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h5);
@@ -660,7 +741,9 @@ html_element!(
     /// lowest.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/h6
-    h6 = { dom_type: web_sys::HtmlHeadingElement;}
+    h6 = {
+        dom_type: web_sys::HtmlHeadingElement;
+    }
 );
 
 parent_element!(h6);
@@ -673,7 +756,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hgroup
     /// [heading]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements
-    hgroup = { dom_type: web_sys::HtmlElement;}
+    hgroup = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(hgroup);
@@ -686,7 +771,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main
     /// [body]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body
-    main = { dom_type: web_sys::HtmlElement;}
+    main = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(main);
@@ -699,7 +786,9 @@ html_element!(
     /// sections are menus, tables of contents, and indexes.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav
-    nav = { dom_type: web_sys::HtmlElement;}
+    nav = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(nav);
@@ -711,7 +800,9 @@ html_element!(
     /// — contained within an HTML document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/section
-    section = { dom_type: web_sys::HtmlElement;}
+    section = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(section);
@@ -724,10 +815,11 @@ html_element!(
     /// a browser plug-in.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/embed
-    embed = { dom_type: web_sys::HtmlEmbedElement;
+    embed = {
+        dom_type: web_sys::HtmlEmbedElement;
         attributes {
-            /// The displayed height of the resource, in [CSS pixels]. This must be
-            /// an absolute value; percentages are not allowed.
+            /// The displayed height of the resource, in [CSS pixels]. This must
+            /// be an absolute value; percentages are not allowed.
             ///
             /// [CSS pixels]: https://drafts.csswg.org/css-values/#px
             height: String,
@@ -740,8 +832,8 @@ html_element!(
             /// [MIME type]: https://developer.mozilla.org/en-US/docs/Glossary/MIME_type
             r#type: String,
 
-            /// The displayed width of the resource, in [CSS pixels]. This must be
-            /// an absolute value; percentages are not allowed.
+            /// The displayed width of the resource, in [CSS pixels]. This must
+            /// be an absolute value; percentages are not allowed.
             ///
             /// [CSS pixels]: https://drafts.csswg.org/css-values/#px
             width: String,
@@ -756,7 +848,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe
     /// [browsing context]: https://developer.mozilla.org/en-US/docs/Glossary/browsing_context
-    iframe = { dom_type: web_sys::HtmlIFrameElement;
+    iframe = {
+        dom_type: web_sys::HtmlIFrameElement;
         attributes {
             /// Specifies a feature policy for the `<iframe>`.
             allow: String,
@@ -771,29 +864,32 @@ html_element!(
             /// window.open() method.
             name: String,
 
-            /// Indicates which referrer to send when fetching the frame's resource.
+            /// Indicates which referrer to send when fetching the frame's
+            /// resource.
             referrerpolicy: String,
 
-            /// Applies extra restrictions to the content in the frame. The value of
-            /// the attribute can either be empty to apply all restrictions,
-            /// or space-separated tokens to lift particular restrictions:
+            /// Applies extra restrictions to the content in the frame. The
+            /// value of the attribute can either be empty to apply
+            /// all restrictions, or space-separated tokens to lift
+            /// particular restrictions:
             ///
-            /// * allow-downloads-without-user-activation: Allows for downloads to
-            ///   occur without a
+            /// * allow-downloads-without-user-activation: Allows for downloads
+            ///   to occur without a
             /// gesture from the user.
-            /// * allow-forms: Allows the resource to submit forms. If this keyword
-            ///   is not used, form
+            /// * allow-forms: Allows the resource to submit forms. If this
+            ///   keyword is not used, form
             /// submission is blocked.
             /// * allow-modals: Lets the resource open modal windows.
             /// * allow-orientation-lock: Lets the resource lock the screen
             ///   orientation.
-            /// * allow-pointer-lock: Lets the resource use the Pointer Lock API.
+            /// * allow-pointer-lock: Lets the resource use the Pointer Lock
+            ///   API.
             /// * allow-popups: Allows popups (such as window.open(),
             ///   target="_blank", or
             /// showModalDialog()). If this keyword is not used, the popup will
             /// silently fail to open.
-            /// * allow-popups-to-escape-sandbox: Lets the sandboxed document open
-            ///   new windows without
+            /// * allow-popups-to-escape-sandbox: Lets the sandboxed document
+            ///   open new windows without
             /// those windows inheriting the sandboxing. For example, this can
             /// safely sandbox an advertisement without forcing the same
             /// restrictions upon the page the ad links to.
@@ -802,8 +898,8 @@ html_element!(
             /// * allow-same-origin: If this token is not used, the resource is
             ///   treated as being from a
             /// special origin that always fails the same-origin policy.
-            /// * allow-scripts: Lets the resource run scripts (but not create popup
-            ///   windows).
+            /// * allow-scripts: Lets the resource run scripts (but not create
+            ///   popup windows).
             /// * allow-storage-access-by-user-activation : Lets the resource
             ///   request access to the
             /// parent's storage capabilities with the Storage Access API.
@@ -822,16 +918,18 @@ html_element!(
             /// document remove the sandbox attribute — making it no more secure
             /// than not using the sandbox attribute at all.
             ///
-            /// Sandboxing is useless if the attacker can display content outside a
-            /// sandboxed iframe — such as if the viewer opens the frame in
-            /// a new tab. Such content should be also served
-            /// from a separate origin to limit potential damage.
+            /// Sandboxing is useless if the attacker can display content
+            /// outside a sandboxed iframe — such as if the viewer
+            /// opens the frame in a new tab. Such content should be
+            /// also served from a separate origin to limit
+            /// potential damage.
             sandbox: String,
 
-            /// The URL of the page to embed. Use a value of about:blank to embed an
-            /// empty page that conforms to the same-origin policy. Also
-            /// note that programatically removing an `<iframe>`'s src
-            /// attribute (e.g. via Element.removeAttribute()) causes about:blank to
+            /// The URL of the page to embed. Use a value of about:blank to
+            /// embed an empty page that conforms to the same-origin
+            /// policy. Also note that programatically removing an
+            /// `<iframe>`'s src attribute (e.g. via
+            /// Element.removeAttribute()) causes about:blank to
             /// be loaded in the frame in Firefox (from version 65),
             /// Chromium-based browsers, and Safari/iOS.
             src: String,
@@ -855,35 +953,39 @@ html_element!(
     /// resource to be handled by a plugin.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    object = { dom_type: web_sys::HtmlObjectElement;
+    object = {
+        dom_type: web_sys::HtmlObjectElement;
         attributes {
             /// Specifies the URL of the resource.
             data: String,
 
-            /// The form element, if any, that the object element is associated with
-            /// (its form owner). The value of the attribute must be an ID
-            /// of a `<form>` element in the same document.
+            /// The form element, if any, that the object element is associated
+            /// with (its form owner). The value of the attribute
+            /// must be an ID of a `<form>` element in the same
+            /// document.
             form: String,
 
-            /// The height of the displayed resource, in CSS pixels. No percentages.
+            /// The height of the displayed resource, in CSS pixels. No
+            /// percentages.
             height: String,
 
             /// The name of valid browsing context.
             name: String,
 
-            /// The content type of the resource specified by data. At least one of
-            /// data and type must be defined.
+            /// The content type of the resource specified by data. At least one
+            /// of data and type must be defined.
             r#type: String,
 
-            /// Indicates if the type attribute and the actual content type of the
-            /// resource must match to be used.
+            /// Indicates if the type attribute and the actual content type of
+            /// the resource must match to be used.
             typemustmatch: bool,
 
-            /// A hash-name reference to a `<map>` element; that is a '#' followed
-            /// by the value of a name of a map element.
+            /// A hash-name reference to a `<map>` element; that is a '#'
+            /// followed by the value of a name of a map element.
             usemap: String,
 
-            /// The width of the display resource, in CSS pixels. No percentages.
+            /// The width of the display resource, in CSS pixels. No
+            /// percentages.
             width: String,
         };
     }
@@ -897,7 +999,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
     /// [object]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
-    param = { dom_type: web_sys::HtmlParamElement;
+    param = {
+        dom_type: web_sys::HtmlParamElement;
         attributes {
             /// Name of the parameter.
             name: String,
@@ -916,7 +1019,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [source]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source
     /// [img]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    picture = { dom_type: web_sys::HtmlPictureElement;}
+    picture = {
+        dom_type: web_sys::HtmlPictureElement;
+    }
 );
 
 parent_element!(picture);
@@ -930,33 +1035,37 @@ html_element!(
     /// [picture]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture
     /// [audio]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
-    source = { dom_type: web_sys::HtmlSourceElement;
+    source = {
+        dom_type: web_sys::HtmlSourceElement;
         attributes {
-            /// Media query of the resource's intended media; this should be used
-            /// only in a `<picture>` element.
+            /// Media query of the resource's intended media; this should be
+            /// used only in a `<picture>` element.
             media: String,
 
-            /// Is a list of source sizes that describes the final rendered width of
-            /// the image represented by the source. Each source size
-            /// consists of a comma-separated list of media condition-length
-            /// pairs. This information is used by the browser to determine, before
-            /// laying the page out, which image defined in srcset to use. Please
+            /// Is a list of source sizes that describes the final rendered
+            /// width of the image represented by the source. Each
+            /// source size consists of a comma-separated list of
+            /// media condition-length pairs. This information is
+            /// used by the browser to determine, before laying the
+            /// page out, which image defined in srcset to use. Please
             /// note that sizes will have its effect only if width dimension
             /// descriptors are provided with srcset instead of pixel ratio
             /// values (200w instead of 2x for example).
             ///
-            /// The sizes attribute has an effect only when the `<source>` element
-            /// is the direct child of a `<picture>` element.
+            /// The sizes attribute has an effect only when the `<source>`
+            /// element is the direct child of a `<picture>`
+            /// element.
             sizes: String,
 
-            /// Required for `<audio>` and `<video>`, address of the media resource.
-            /// The value of this attribute is ignored when the `<source>`
-            /// element is placed inside a `<picture>` element.
+            /// Required for `<audio>` and `<video>`, address of the media
+            /// resource. The value of this attribute is ignored
+            /// when the `<source>` element is placed inside a
+            /// `<picture>` element.
             src: String,
 
-            /// A list of one or more strings separated by commas indicating a set
-            /// of possible images represented by the source for the browser
-            /// to use. Each string is composed of:
+            /// A list of one or more strings separated by commas indicating a
+            /// set of possible images represented by the source for
+            /// the browser to use. Each string is composed of:
             ///
             /// 1. One URL specifying an image.
             /// 2. A width descriptor, which consists of a string containing a
@@ -965,14 +1074,16 @@ html_element!(
             /// density descriptor, that is a positive floating number directly
             /// followed by "x". The default value, if missing, is 1x.
             ///
-            /// Each string in the list must have at least a width descriptor or a
-            /// pixel density descriptor to be valid. Among the list, there
-            /// must be only one string containing the same tuple of width
-            /// descriptor and pixel density descriptor. The browser chooses the
-            /// most adequate image to display at a given point of time.
+            /// Each string in the list must have at least a width descriptor or
+            /// a pixel density descriptor to be valid. Among the
+            /// list, there must be only one string containing the
+            /// same tuple of width descriptor and pixel density
+            /// descriptor. The browser chooses the most adequate
+            /// image to display at a given point of time.
             ///
-            /// The srcset attribute has an effect only when the `<source>` element
-            /// is the direct child of a `<picture>` element.
+            /// The srcset attribute has an effect only when the `<source>`
+            /// element is the direct child of a `<picture>`
+            /// element.
             srcset: String,
 
             /// The MIME media type of the resource, optionally with a codecs
@@ -989,12 +1100,15 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas
     /// [api]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
     /// [gl]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
-    canvas = { dom_type: web_sys::HtmlCanvasElement;
+    canvas = {
+        dom_type: web_sys::HtmlCanvasElement;
         attributes {
-            /// The height of the coordinate space in CSS pixels. Defaults to 150.
+            /// The height of the coordinate space in CSS pixels. Defaults to
+            /// 150.
             height: String,
 
-            /// The width of the coordinate space in CSS pixels. Defaults to 300.
+            /// The width of the coordinate space in CSS pixels. Defaults to
+            /// 300.
             width: String,
         };
 
@@ -1014,7 +1128,9 @@ html_element!(
     /// is currently turned off in the browser.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noscript
-    noscript = { dom_type: web_sys::HtmlElement;}
+    noscript = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(noscript);
@@ -1025,7 +1141,8 @@ html_element!(
     /// JavaScript code.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
-    script = { dom_type: web_sys::HtmlScriptElement;
+    script = {
+        dom_type: web_sys::HtmlScriptElement;
         attributes {
             /// For classic scripts, if the async attribute is present, then the
             /// classic script will be fetched in parallel to parsing and
@@ -1036,10 +1153,10 @@ html_element!(
             /// defer queue, therefore they will get fetched in parallel to
             /// parsing and evaluated as soon as they are available.
             ///
-            /// This attribute allows the elimination of parser-blocking JavaScript
-            /// where the browser would have to load and evaluate scripts
-            /// before continuing to parse. defer has a similar
-            /// effect in this case.
+            /// This attribute allows the elimination of parser-blocking
+            /// JavaScript where the browser would have to load and
+            /// evaluate scripts before continuing to parse. defer
+            /// has a similar effect in this case.
             r#async: bool,
 
             /// Normal script elements pass minimal information to the
@@ -1048,74 +1165,77 @@ html_element!(
             /// separate domain for static media, use this attribute.
             crossorigin: String,
 
-            /// Indicates to a browser that the script is meant to be executed after
-            /// the document has been parsed, but before firing
-            /// DOMContentLoaded.
+            /// Indicates to a browser that the script is meant to be executed
+            /// after the document has been parsed, but before
+            /// firing DOMContentLoaded.
             ///
-            /// Scripts with the defer attribute will prevent the DOMContentLoaded
-            /// event from firing until the script has loaded and finished
-            /// evaluating.
+            /// Scripts with the defer attribute will prevent the
+            /// DOMContentLoaded event from firing until the script
+            /// has loaded and finished evaluating.
             ///
-            /// This attribute must not be used if the src attribute is absent (i.e.
-            /// for inline scripts), in this case it would have no effect.
+            /// This attribute must not be used if the src attribute is absent
+            /// (i.e. for inline scripts), in this case it would
+            /// have no effect.
             ///
-            /// The defer attribute has no effect on module scripts — they defer by
-            /// default.
+            /// The defer attribute has no effect on module scripts — they defer
+            /// by default.
             ///
-            /// Scripts with the defer attribute will execute in the order in which
-            /// they appear in the document.
+            /// Scripts with the defer attribute will execute in the order in
+            /// which they appear in the document.
             ///
-            /// This attribute allows the elimination of parser-blocking JavaScript
-            /// where the browser would have to load and evaluate scripts
-            /// before continuing to parse. async has a similar
-            /// effect in this case.
+            /// This attribute allows the elimination of parser-blocking
+            /// JavaScript where the browser would have to load and
+            /// evaluate scripts before continuing to parse. async
+            /// has a similar effect in this case.
             defer: bool,
 
-            /// This attribute contains inline metadata that a user agent can use to
-            /// verify that a fetched resource has been delivered free of
-            /// unexpected manipulation.
+            /// This attribute contains inline metadata that a user agent can
+            /// use to verify that a fetched resource has been
+            /// delivered free of unexpected manipulation.
             integrity: String,
 
-            /// Indicates that the script should not be executed in browsers that
-            /// support ES2015 modules — in effect, this can be used to
-            /// serve fallback scripts to older browsers that do not support
-            /// modular JavaScript code.
+            /// Indicates that the script should not be executed in browsers
+            /// that support ES2015 modules — in effect, this can be
+            /// used to serve fallback scripts to older browsers
+            /// that do not support modular JavaScript code.
             nomodule: bool,
 
-            /// A cryptographic nonce (number used once) to whitelist scripts in a
-            /// script-src Content-Security-Policy. The server must generate
-            /// a unique nonce value each time it transmits a policy. It is
-            /// critical to provide a nonce that cannot be guessed as
-            /// bypassing a resource's policy is otherwise trivial.
+            /// A cryptographic nonce (number used once) to whitelist scripts in
+            /// a script-src Content-Security-Policy. The server
+            /// must generate a unique nonce value each time it
+            /// transmits a policy. It is critical to provide a
+            /// nonce that cannot be guessed as bypassing a
+            /// resource's policy is otherwise trivial.
             nonce: String,
 
             /// Indicates which referrer to send when fetching the script, or
             /// resources fetched by the script.
             referrerpolicy: String,
 
-            /// This attribute specifies the URI of an external script; this can be
-            /// used as an alternative to embedding a script directly within
-            /// a document.
+            /// This attribute specifies the URI of an external script; this can
+            /// be used as an alternative to embedding a script
+            /// directly within a document.
             src: String,
 
-            /// This attribute indicates the type of script represented. The value
-            /// of this attribute will be in one of the following
-            /// categories:
+            /// This attribute indicates the type of script represented. The
+            /// value of this attribute will be in one of the
+            /// following categories:
             ///
-            /// * Omitted or a JavaScript MIME type: This indicates the script is
-            ///   JavaScript. The HTML5
+            /// * Omitted or a JavaScript MIME type: This indicates the script
+            ///   is JavaScript. The HTML5
             /// specification urges authors to omit the attribute rather than
             /// provide a redundant MIME type.
-            /// * `module`: Causes the code to be treated as a JavaScript module.
-            ///   The processing of the
-            /// script contents is not affected by the charset and defer attributes.
-            /// Unlike classic scripts, module scripts require the use of
-            /// the CORS protocol for cross-origin fetching.
-            /// * Any other value: The embedded content is treated as a data block
-            ///   which won't be
-            /// processed by the browser. Developers must use a valid MIME type that
-            /// is not a JavaScript MIME type to denote data blocks. The src
-            /// attribute will be ignored.
+            /// * `module`: Causes the code to be treated as a JavaScript
+            ///   module. The processing of the
+            /// script contents is not affected by the charset and defer
+            /// attributes. Unlike classic scripts, module scripts
+            /// require the use of the CORS protocol for
+            /// cross-origin fetching.
+            /// * Any other value: The embedded content is treated as a data
+            ///   block which won't be
+            /// processed by the browser. Developers must use a valid MIME type
+            /// that is not a JavaScript MIME type to denote data
+            /// blocks. The src attribute will be ignored.
             r#type: String,
         };
     }
@@ -1131,78 +1251,82 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
     /// [hypertext link]: https://developer.mozilla.org/en-US/docs/Glossary/Hyperlink
     /// [map]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
-    area = { dom_type: web_sys::HtmlAreaElement;
+    area = {
+        dom_type: web_sys::HtmlAreaElement;
         attributes {
-            /// A text string alternative to display on browsers that do not display
-            /// images. The text should be phrased so that it presents the
-            /// user with the same kind of choice as the image would offer
-            /// when displayed without the alternative text. This attribute is
-            /// required only if the href attribute is used.
+            /// A text string alternative to display on browsers that do not
+            /// display images. The text should be phrased so that
+            /// it presents the user with the same kind of choice as
+            /// the image would offer when displayed without the
+            /// alternative text. This attribute is required only if
+            /// the href attribute is used.
             alt: String,
 
-            /// A set of values specifying the coordinates of the hot-spot region.
-            /// The number and meaning of the values depend upon the value
-            /// specified for the shape attribute.
+            /// A set of values specifying the coordinates of the hot-spot
+            /// region. The number and meaning of the values depend
+            /// upon the value specified for the shape attribute.
             ///
-            /// * rect or rectangle: the coords value is two x,y pairs: left, top,
-            ///   right, bottom.
+            /// * rect or rectangle: the coords value is two x,y pairs: left,
+            ///   top, right, bottom.
             /// * circle: the value is x,y,r where x,y is a pair specifying the
             ///   center of the circle and
             /// r is a value for the radius.
-            /// * poly or polygon: the value is a set of x,y pairs for each point in
-            ///   the polygon:
+            /// * poly or polygon: the value is a set of x,y pairs for each
+            ///   point in the polygon:
             /// x1,y1,x2,y2,x3,y3, and so on.
             ///
             /// The values are numbers of CSS pixels.
             coords: String,
 
-            /// This attribute, if present, indicates that the author intends the
-            /// hyperlink to be used for downloading a resource. See `<a>`
-            /// for a full description of the download attribute.
+            /// This attribute, if present, indicates that the author intends
+            /// the hyperlink to be used for downloading a resource.
+            /// See `<a>` for a full description of the download
+            /// attribute.
             download: bool,
 
-            /// The hyperlink target for the area. Its value is a valid URL. This
-            /// attribute may be omitted; if so, the area element does not
-            /// represent a hyperlink.
+            /// The hyperlink target for the area. Its value is a valid URL.
+            /// This attribute may be omitted; if so, the area
+            /// element does not represent a hyperlink.
             href: String,
 
-            /// Indicates the language of the linked resource. Allowed values are
-            /// determined by BCP47. Use this attribute only if the href
-            /// attribute is present.
+            /// Indicates the language of the linked resource. Allowed values
+            /// are determined by BCP47. Use this attribute only if
+            /// the href attribute is present.
             hreflang: String,
 
-            /// Contains a space-separated list of URLs to which, when the hyperlink
-            /// is followed, POST requests with the body PING will be sent
-            /// by the browser (in the background). Typically
-            /// used for tracking.
+            /// Contains a space-separated list of URLs to which, when the
+            /// hyperlink is followed, POST requests with the body
+            /// PING will be sent by the browser (in the
+            /// background). Typically used for tracking.
             ping: String,
 
-            /// For anchors containing the href attribute, this attribute specifies
-            /// the relationship of the target object to the link object.
-            /// The value is a space-separated list of link types
-            /// values. The values and their semantics will be registered by some
-            /// authority that might have meaning to the document author.
-            /// The default relationship, if no other is given, is void. Use
+            /// For anchors containing the href attribute, this attribute
+            /// specifies the relationship of the target object to
+            /// the link object. The value is a space-separated list
+            /// of link types values. The values and their semantics
+            /// will be registered by some authority that might have
+            /// meaning to the document author. The default
+            /// relationship, if no other is given, is void. Use
             /// this attribute only if the href attribute is present.
             rel: String,
 
-            /// This attribute specifies where to display the linked resource. It is
-            /// a name of, or keyword for, a browsing context (for example,
-            /// tab, window, or inline frame). The following keywords have
-            /// special meanings:
+            /// This attribute specifies where to display the linked resource.
+            /// It is a name of, or keyword for, a browsing context
+            /// (for example, tab, window, or inline frame). The
+            /// following keywords have special meanings:
             ///
             /// * _self: Load the response into the same browsing context as the
             ///   current one. This value
             /// is the default if the attribute is not specified.
             /// * _blank: Load the response into a new unnamed browsing context.
-            /// * _parent: Load the response into the parent browsing context of the
-            ///   current one. If
+            /// * _parent: Load the response into the parent browsing context of
+            ///   the current one. If
             /// there is no parent, this option behaves the same way as _self.
-            /// * _top: Load the response into the top-level browsing context (that
-            ///   is, the browsing
-            /// context that is an ancestor of the current one, and has no parent).
-            /// If there is no parent, this option behaves the same way as
-            /// _self.
+            /// * _top: Load the response into the top-level browsing context
+            ///   (that is, the browsing
+            /// context that is an ancestor of the current one, and has no
+            /// parent). If there is no parent, this option behaves
+            /// the same way as _self.
             ///
             /// Use this attribute only if the `href` attribute is present.
             target: String,
@@ -1341,7 +1465,8 @@ html_element!(
     /// The [HTML `<img>` element][mdn] embeds an image into the document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-    img = { dom_type: web_sys::HtmlImageElement;
+    img = {
+        dom_type: web_sys::HtmlImageElement;
         attributes {
             /// Defines an alternative text description of the image.
             ///
@@ -1530,15 +1655,17 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
     /// [area]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
-    map = { dom_type: web_sys::HtmlMapElement;
+    map = {
+        dom_type: web_sys::HtmlMapElement;
         attributes {
             /// The name attribute gives the map a name so that it can be
             /// referenced. The attribute must be present and must have a
             /// non-empty value with no space characters. The value of the
-            /// name attribute must not be a compatibility-caseless match for the
-            /// value of the name attribute of another `<map>` element in
-            /// the same document. If the id attribute is also specified,
-            /// both attributes must have the same value.
+            /// name attribute must not be a compatibility-caseless match for
+            /// the value of the name attribute of another `<map>`
+            /// element in the same document. If the id attribute is
+            /// also specified, both attributes must have the same
+            /// value.
             name: String,
         };
     }
@@ -1559,33 +1686,36 @@ html_element!(
     /// [video]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
     /// [vtt]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Video_Text_Tracks_Format
     /// [ttml]: https://w3c.github.io/ttml2/index.html
-    track = { dom_type: web_sys::HtmlTrackElement;
+    track = {
+        dom_type: web_sys::HtmlTrackElement;
         attributes {
-            /// This attribute indicates that the track should be enabled unless the
-            /// user's preferences indicate that another track is more
-            /// appropriate. This may only be used on one track element per
-            /// media element.
+            /// This attribute indicates that the track should be enabled unless
+            /// the user's preferences indicate that another track
+            /// is more appropriate. This may only be used on one
+            /// track element per media element.
             default: bool,
 
-            /// How the text track is meant to be used. If omitted the default kind
-            /// is subtitles. If the attribute is not present, it will use
-            /// the subtitles. If the attribute contains an invalid value,
-            /// it will use metadata. The following keywords are allowed:
-            /// Subtitles provide translation of content that cannot be understood
+            /// How the text track is meant to be used. If omitted the default
+            /// kind is subtitles. If the attribute is not present,
+            /// it will use the subtitles. If the attribute contains
+            /// an invalid value, it will use metadata. The
+            /// following keywords are allowed: Subtitles provide
+            /// translation of content that cannot be understood
             /// by the viewer. For example dialogue or text that is not
             /// English in an English language film.
             ///
-            /// Subtitles may contain additional content, usually extra background
-            /// information. For example the text at the beginning of the
-            /// Star Wars films, or the date, time, and location of a scene.
+            /// Subtitles may contain additional content, usually extra
+            /// background information. For example the text at the
+            /// beginning of the Star Wars films, or the date, time,
+            /// and location of a scene.
             subtitles: String,
 
-            /// Closed captions provide a transcription and possibly a translation
-            /// of audio.
+            /// Closed captions provide a transcription and possibly a
+            /// translation of audio.
             ///
-            /// It may include important non-verbal information such as music cues
-            /// or sound effects. It may indicate the cue's source (e.g.
-            /// music, text, character).
+            /// It may include important non-verbal information such as music
+            /// cues or sound effects. It may indicate the cue's
+            /// source (e.g. music, text, character).
             ///
             /// Suitable for users who are deaf or when the sound is muted.
             captions: String,
@@ -1594,12 +1724,12 @@ html_element!(
             ///
             /// * `descriptions`: Suitable for users who are blind or where the
             ///   video cannot be seen.
-            /// * `chapters`: Chapter titles are intended to be used when the user
-            ///   is navigating the
+            /// * `chapters`: Chapter titles are intended to be used when the
+            ///   user is navigating the
             /// media resource.
             /// * `metadata`: Tracks used by scripts. Not visible to the user.
-            /// * `label`: A user-readable title of the text track which is used by
-            ///   the browser when
+            /// * `label`: A user-readable title of the text track which is used
+            ///   by the browser when
             /// listing available text tracks.
             kind: String,
 
@@ -1610,14 +1740,14 @@ html_element!(
             /// attribute.
             src: String,
 
-            /// Language of the track text data. It must be a valid BCP 47 language
-            /// tag. If the kind attribute is set to subtitles, then srclang
-            /// must be defined.
+            /// Language of the track text data. It must be a valid BCP 47
+            /// language tag. If the kind attribute is set to
+            /// subtitles, then srclang must be defined.
             srclang: String,
         };
 
         events {
-            cuechange: web_sys::Event
+            cuechange: web_sys::Event,
         };
     }
 );
@@ -1776,14 +1906,15 @@ html_element!(
     /// toggled into an "open" state.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    details = { dom_type: web_sys::HtmlDetailsElement;
+    details = {
+        dom_type: web_sys::HtmlDetailsElement;
         attributes {
             /// Indicates whether the details will be shown on page load.
             open: bool,
         };
 
         events {
-            toggle: web_sys::Event
+            toggle: web_sys::Event,
         };
     }
 );
@@ -1795,11 +1926,12 @@ html_element!(
     /// interactive component, such as an inspector or window.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-    dialog = { dom_type: web_sys::HtmlDialogElement;
+    dialog = {
+        dom_type: web_sys::HtmlDialogElement;
         attributes {
-            /// Indicates that the dialog is active and can be interacted with. When
-            /// the open attribute is not set, the dialog shouldn't be shown
-            /// to the user.
+            /// Indicates that the dialog is active and can be interacted with.
+            /// When the open attribute is not set, the dialog
+            /// shouldn't be shown to the user.
             open: bool,
         };
 
@@ -1820,7 +1952,9 @@ html_element!(
     /// clicked.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/menu
-    menu = { dom_type: web_sys::HtmlMenuElement;}
+    menu = {
+        dom_type: web_sys::HtmlMenuElement;
+    }
 );
 
 parent_element!(menu);
@@ -1832,7 +1966,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/summary
     /// [details]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details
-    summary = { dom_type: web_sys::HtmlElement;}
+    summary = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(summary);
@@ -1847,7 +1983,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote
     /// [cite]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite
-    blockquote = { dom_type: web_sys::HtmlQuoteElement;
+    blockquote = {
+        dom_type: web_sys::HtmlQuoteElement;
         attributes {
             /// A URL that designates a source document or message for the
             /// information quoted. This attribute is intended to point to
@@ -1869,7 +2006,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dd = { dom_type: web_sys::HtmlElement;}
+    dd = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(dd);
@@ -1881,7 +2020,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div
     /// [CSS]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    div = { dom_type: web_sys::HtmlDivElement;}
+    div = {
+        dom_type: web_sys::HtmlDivElement;
+    }
 );
 
 parent_element!(div);
@@ -1897,7 +2038,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
     /// [dt]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dd]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
-    dl = { dom_type: web_sys::HtmlDListElement;}
+    dl = {
+        dom_type: web_sys::HtmlDListElement;
+    }
 );
 
 parent_element!(dl);
@@ -1909,7 +2052,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dt
     /// [dl]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl
-    dt = { dom_type: web_sys::HtmlElement;}
+    dt = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(dt);
@@ -1921,7 +2066,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
     /// [figure]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
-    figcaption = { dom_type: web_sys::HtmlElement;}
+    figcaption = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(figcaption);
@@ -1934,7 +2081,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figure
     /// [figcaption]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/figcaption
-    figure = { dom_type: web_sys::HtmlElement;}
+    figure = {
+        dom_type: web_sys::HtmlElement;
+    }
 );
 
 parent_element!(figure);
@@ -1945,14 +2094,18 @@ html_element!(
     /// or a shift of topic within a section.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr
-    hr = { dom_type: web_sys::HtmlHrElement;}
+    hr = {
+        dom_type: web_sys::HtmlHrElement;
+    }
 );
 
 html_element!(
     /// The [HTML `<li>` element][mdn] is used to represent an item in a list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li
-    li = { dom_type: web_sys::HtmlLiElement;}
+    li = {
+        dom_type: web_sys::HtmlLiElement;
+    }
 );
 
 parent_element!(li);
@@ -1962,7 +2115,8 @@ html_element!(
     /// typically rendered as a numbered list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ol
-    ol = { dom_type: web_sys::HtmlOListElement;
+    ol = {
+        dom_type: web_sys::HtmlOListElement;
         attributes {
             /// Specifies that the list’s items are in reverse order. Items will be
             /// numbered from high to low.
@@ -2001,7 +2155,9 @@ html_element!(
     /// The [HTML `<p>` element][mdn] represents a paragraph.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p
-    p = { dom_type: web_sys::HtmlParagraphElement;}
+    p = {
+        dom_type: web_sys::HtmlParagraphElement;
+    }
 );
 
 parent_element!(p);
@@ -2012,7 +2168,9 @@ html_element!(
     /// be presented exactly as written in the HTML file.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre
-    pre = { dom_type: web_sys::HtmlPreElement;}
+    pre = {
+        dom_type: web_sys::HtmlPreElement;
+    }
 );
 
 parent_element!(pre);
@@ -2022,7 +2180,9 @@ html_element!(
     /// typically rendered as a bulleted list.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul
-    ul = { dom_type: web_sys::HtmlUListElement;}
+    ul = {
+        dom_type: web_sys::HtmlUListElement;
+    }
 );
 
 parent_element!(ul);
@@ -2034,7 +2194,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/caption
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    caption = { dom_type: web_sys::HtmlTableCaptionElement;}
+    caption = {
+        dom_type: web_sys::HtmlTableCaptionElement;
+    }
 );
 
 parent_element!(caption);
@@ -2046,11 +2208,12 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
     /// [cg]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    col = { dom_type: web_sys::HtmlTableColElement;
+    col = {
+        dom_type: web_sys::HtmlTableColElement;
         attributes {
-            /// This attribute contains a positive integer indicating the number of
-            /// consecutive columns the `<col>` element spans. If not
-            /// present, its default value is 1.
+            /// This attribute contains a positive integer indicating the number
+            /// of consecutive columns the `<col>` element spans. If
+            /// not present, its default value is 1.
             span: String,
         };
     }
@@ -2061,7 +2224,8 @@ html_element!(
     /// table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
-    colgroup = { dom_type: web_sys::HtmlTableColElement;
+    colgroup = {
+        dom_type: web_sys::HtmlTableColElement;
         attributes {
             /// This attribute contains a positive integer indicating the number of
             /// consecutive columns the `<colgroup>` element spans. If not
@@ -2087,7 +2251,9 @@ html_element!(
     /// and columns of cells containing data.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    table = { dom_type: web_sys::HtmlTableElement;}
+    table = {
+        dom_type: web_sys::HtmlTableElement;
+    }
 );
 
 parent_element!(table);
@@ -2100,7 +2266,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody
     /// [tr]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [table]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
-    tbody = { dom_type: web_sys::HtmlTableSectionElement;}
+    tbody = {
+        dom_type: web_sys::HtmlTableSectionElement;
+    }
 );
 
 parent_element!(tbody);
@@ -2110,12 +2278,14 @@ html_element!(
     /// data. It participates in the *table model*.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
-    td = { dom_type: web_sys::HtmlTableCellElement;
+    td = {
+        dom_type: web_sys::HtmlTableCellElement;
         attributes {
-            /// This attribute contains a non-negative integer value that indicates
-            /// for how many columns the cell extends. Its default value is
-            /// 1. Values higher than 1000 will be considered as
-            /// incorrect and will be set to the default value (1).
+            /// This attribute contains a non-negative integer value that
+            /// indicates for how many columns the cell extends. Its
+            /// default value is 1. Values higher than 1000 will be
+            /// considered as incorrect and will be set to the
+            /// default value (1).
             colspan: String,
 
             /// This attribute contains a list of space-separated strings, each
@@ -2123,10 +2293,11 @@ html_element!(
             /// that apply to this element.
             headers: String,
 
-            /// This attribute contains a non-negative integer value that indicates
-            /// for how many rows the cell extends. Its default value is 1;
-            /// if its value is set to 0, it extends until the end of the
-            /// table section (`<thead>`, `<tbody>`, `<tfoot>`, even if implicitly
+            /// This attribute contains a non-negative integer value that
+            /// indicates for how many rows the cell extends. Its
+            /// default value is 1; if its value is set to 0, it
+            /// extends until the end of the table section
+            /// (`<thead>`, `<tbody>`, `<tfoot>`, even if implicitly
             /// defined), that the cell belongs to. Values higher than 65534
             /// are clipped down to 65534.
             rowspan: String,
@@ -2141,7 +2312,9 @@ html_element!(
     /// columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot
-    tfoot = { dom_type: web_sys::HtmlTableSectionElement;}
+    tfoot = {
+        dom_type: web_sys::HtmlTableSectionElement;
+    }
 );
 
 parent_element!(tfoot);
@@ -2154,17 +2327,19 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
     /// [scope]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-scope
     /// [headers]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#attr-headers
-    th = { dom_type: web_sys::HtmlTableCellElement;
+    th = {
+        dom_type: web_sys::HtmlTableCellElement;
         attributes {
             /// This attribute contains a short abbreviated description of the
             /// cell's content. Some user-agents, such as speech readers,
             /// may present this description before the content itself.
             abbr: String,
 
-            /// This attribute contains a non-negative integer value that indicates
-            /// for how many columns the cell extends. Its default value is
-            /// 1. Values higher than 1000 will be considered as
-            /// incorrect and will be set to the default value (1).
+            /// This attribute contains a non-negative integer value that
+            /// indicates for how many columns the cell extends. Its
+            /// default value is 1. Values higher than 1000 will be
+            /// considered as incorrect and will be set to the
+            /// default value (1).
             colspan: String,
 
             /// This attribute contains a list of space-separated strings, each
@@ -2172,28 +2347,30 @@ html_element!(
             /// that apply to this element.
             headers: String,
 
-            /// This attribute contains a non-negative integer value that indicates
-            /// for how many rows the cell extends. Its default value is 1;
-            /// if its value is set to 0, it extends until the end of the
-            /// table section (`<thead>`, `<tbody>`, `<tfoot>`, even if implicitly
+            /// This attribute contains a non-negative integer value that
+            /// indicates for how many rows the cell extends. Its
+            /// default value is 1; if its value is set to 0, it
+            /// extends until the end of the table section
+            /// (`<thead>`, `<tbody>`, `<tfoot>`, even if implicitly
             /// defined), that the cell belongs to. Values higher than 65534
             /// are clipped down to 65534.
             rowspan: String,
 
-            /// This enumerated attribute defines the cells that the header (defined
-            /// in the `<th>`) element relates to. It may have the following
-            /// values:
+            /// This enumerated attribute defines the cells that the header
+            /// (defined in the `<th>`) element relates to. It may
+            /// have the following values:
             ///
-            /// * `row`: The header relates to all cells of the row it belongs to.
-            /// * `col`: The header relates to all cells of the column it belongs
+            /// * `row`: The header relates to all cells of the row it belongs
             ///   to.
-            /// * `rowgroup`: The header belongs to a rowgroup and relates to all of
-            ///   its cells. These
+            /// * `col`: The header relates to all cells of the column it
+            ///   belongs to.
+            /// * `rowgroup`: The header belongs to a rowgroup and relates to
+            ///   all of its cells. These
             /// cells can be placed to the right or the left of the header,
             /// depending on the value of the dir attribute in the `<table>`
             /// element.
-            /// * `colgroup`: The header belongs to a colgroup and relates to all of
-            ///   its cells.
+            /// * `colgroup`: The header belongs to a colgroup and relates to
+            ///   all of its cells.
             /// * `auto`
             ///
             /// The default value when this attribute is not specified is auto.
@@ -2209,7 +2386,9 @@ html_element!(
     /// head of the columns of the table.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead
-    thead = { dom_type: web_sys::HtmlTableSectionElement;}
+    thead = {
+        dom_type: web_sys::HtmlTableSectionElement;
+    }
 );
 
 parent_element!(thead);
@@ -2222,7 +2401,9 @@ html_element!(
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr
     /// [td]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
     /// [th]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
-    tr = { dom_type: web_sys::HtmlTableRowElement;}
+    tr = {
+        dom_type: web_sys::HtmlTableRowElement;
+    }
 );
 
 parent_element!(tr);
@@ -2237,32 +2418,36 @@ html_element!(
     /// such as <link>’s href attribute.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-    base = { dom_type: web_sys::HtmlBaseElement;
+    base = {
+        dom_type: web_sys::HtmlBaseElement;
         attributes {
-            /// The base URL to be used throughout the document for relative URLs.
-            /// Absolute and relative URLs are allowed.
+            /// The base URL to be used throughout the document for relative
+            /// URLs. Absolute and relative URLs are allowed.
             href: String,
 
-            /// A keyword or author-defined name of the default browsing context to
-            /// display the result when links or forms cause navigation, for
-            /// `<a>` or `<form>` elements without an explicit
-            /// target attribute. The attribute value targets a browsing context
-            /// (such as a tab, window, or `<iframe>`).
+            /// A keyword or author-defined name of the default browsing context
+            /// to display the result when links or forms cause
+            /// navigation, for `<a>` or `<form>` elements without
+            /// an explicit target attribute. The attribute value
+            /// targets a browsing context (such as a tab, window,
+            /// or `<iframe>`).
             ///
             /// The following keywords have special meanings:
             ///
             /// * `_self`: Load the result into the same browsing context as the
             ///   current one. (This is
             /// the default.)
-            /// * `_blank`: Load the result into a new, unnamed browsing context.
-            /// * `_parent`: Load the result into the parent browsing context of the
-            ///   current one. (If
-            /// the current page is inside a frame.) If there is no parent, behaves
-            /// the same way as _self.
-            /// * `_top`: Load the result into the topmost browsing context (that
-            ///   is, the browsing
-            /// context that is an ancestor of the current one, and has no parent).
-            /// If there is no parent, behaves the same way as _self.
+            /// * `_blank`: Load the result into a new, unnamed browsing
+            ///   context.
+            /// * `_parent`: Load the result into the parent browsing context of
+            ///   the current one. (If
+            /// the current page is inside a frame.) If there is no parent,
+            /// behaves the same way as _self.
+            /// * `_top`: Load the result into the topmost browsing context
+            ///   (that is, the browsing
+            /// context that is an ancestor of the current one, and has no
+            /// parent). If there is no parent, behaves the same way
+            /// as _self.
             target: String,
         };
     }
@@ -2278,7 +2463,9 @@ html_element!(
     /// [title]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [scripts]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [style sheets]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    head = { dom_type: web_sys::HtmlHeadElement;}
+    head = {
+        dom_type: web_sys::HtmlHeadElement;
+    }
 );
 
 parent_element!(head);
@@ -2293,13 +2480,15 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
     /// [stylesheets]: https://developer.mozilla.org/en-US/docs/Glossary/CSS
-    link = { dom_type: web_sys::HtmlLinkElement;
+    link = {
+        dom_type: web_sys::HtmlLinkElement;
         attributes {
-            /// This attribute is only used when rel="preload" or rel="prefetch" has
-            /// been set on the `<link>` element. It specifies the type of
-            /// content being loaded by the `<link>`, which is necessary for
-            /// request matching, application of correct content security policy,
-            /// and setting of correct Accept request header. Furthermore,
+            /// This attribute is only used when rel="preload" or rel="prefetch"
+            /// has been set on the `<link>` element. It specifies
+            /// the type of content being loaded by the `<link>`,
+            /// which is necessary for request matching, application
+            /// of correct content security policy, and setting of
+            /// correct Accept request header. Furthermore,
             /// rel="preload" uses this as a signal for request
             /// prioritization. The table below lists the valid values for this
             /// attribute and the elements or resources they apply to.
@@ -2324,10 +2513,10 @@ html_element!(
             /// |
             r#as: String,
 
-            /// This enumerated attribute indicates whether CORS must be used when
-            /// fetching the resource. CORS-enabled images can be reused in
-            /// the `<canvas>` element without being tainted. The allowed
-            /// values are:
+            /// This enumerated attribute indicates whether CORS must be used
+            /// when fetching the resource. CORS-enabled images can
+            /// be reused in the `<canvas>` element without being
+            /// tainted. The allowed values are:
             ///
             /// * `anonymous`: A cross-origin request (i.e. with an Origin HTTP
             ///   header) is performed,
@@ -2338,32 +2527,35 @@ html_element!(
             /// tainted and its usage restricted.
             /// * `use-credentials`: A cross-origin request (i.e. with an Origin
             ///   HTTP header) is
-            /// performed along with a credential sent (i.e. a cookie, certificate,
-            /// and/or HTTP Basic authentication is performed). If the
-            /// server does not give credentials to the origin site (through
-            /// Access-Control-Allow-Credentials HTTP header), the resource will be
-            /// tainted and its usage restricted.
+            /// performed along with a credential sent (i.e. a cookie,
+            /// certificate, and/or HTTP Basic authentication is
+            /// performed). If the server does not give credentials
+            /// to the origin site (through
+            /// Access-Control-Allow-Credentials HTTP header), the resource will
+            /// be tainted and its usage restricted.
             ///
-            /// If the attribute is not present, the resource is fetched without a
-            /// CORS request (i.e. without sending the Origin HTTP header),
-            /// preventing its non-tainted usage. If invalid, it is handled
-            /// as if the enumerated keyword anonymous was used.
+            /// If the attribute is not present, the resource is fetched without
+            /// a CORS request (i.e. without sending the Origin HTTP
+            /// header), preventing its non-tainted usage. If
+            /// invalid, it is handled as if the enumerated keyword
+            /// anonymous was used.
             crossorigin: String,
 
-            /// For rel="stylesheet" only, the disabled Boolean attribute indicates
-            /// whether or not the described stylesheet should be loaded and
-            /// applied to the document. If disabled is specified in the
-            /// HTML when it is loaded, the stylesheet will not be loaded during
-            /// page load. Instead, the stylesheet will be loaded on-demand,
-            /// if and when the disabled attribute is changed to false or
+            /// For rel="stylesheet" only, the disabled Boolean attribute
+            /// indicates whether or not the described stylesheet
+            /// should be loaded and applied to the document. If
+            /// disabled is specified in the HTML when it is loaded,
+            /// the stylesheet will not be loaded during page load.
+            /// Instead, the stylesheet will be loaded on-demand, if
+            /// and when the disabled attribute is changed to false or
             /// removed.
             ///
-            /// Once the stylesheet has been loaded, however, changes made to the
-            /// value of the disabled property no longer have any
-            /// relationship to the value of the StyleSheet.disabled
-            /// property. Changing the value of this property instead simply enables
-            /// and disables the stylesheet form being applied to the
-            /// document.
+            /// Once the stylesheet has been loaded, however, changes made to
+            /// the value of the disabled property no longer have
+            /// any relationship to the value of the
+            /// StyleSheet.disabled property. Changing the value of
+            /// this property instead simply enables and disables
+            /// the stylesheet form being applied to the document.
             ///
             /// This differs from StyleSheet's disabled property; changing it to
             /// true removes the stylesheet from the document's
@@ -2371,25 +2563,27 @@ html_element!(
             /// reload the stylesheet when it's toggled back to false.
             disabled: String,
 
-            /// This attribute specifies the URL of the linked resource. A URL can
-            /// be absolute or relative.
+            /// This attribute specifies the URL of the linked resource. A URL
+            /// can be absolute or relative.
             href: String,
 
-            /// This attribute indicates the language of the linked resource. It is
-            /// purely advisory. Allowed values are determined by BCP47. Use
-            /// this attribute only if the href attribute is present.
+            /// This attribute indicates the language of the linked resource. It
+            /// is purely advisory. Allowed values are determined by
+            /// BCP47. Use this attribute only if the href attribute
+            /// is present.
             hreflang: String,
 
-            /// This attribute specifies the media that the linked resource applies
-            /// to. Its value must be a media type / media query. This
-            /// attribute is mainly useful when linking to external
-            /// stylesheets — it allows the user agent to pick the best adapted one
-            /// for the device it runs on.
+            /// This attribute specifies the media that the linked resource
+            /// applies to. Its value must be a media type / media
+            /// query. This attribute is mainly useful when linking
+            /// to external stylesheets — it allows the user agent
+            /// to pick the best adapted one for the device it runs
+            /// on.
             media: String,
 
-            /// This attribute names a relationship of the linked document to the
-            /// current document. The attribute must be a space-separated
-            /// list of link type values.
+            /// This attribute names a relationship of the linked document to
+            /// the current document. The attribute must be a
+            /// space-separated list of link type values.
             rel: String,
 
             /// This attribute defines the sizes of the icons for visual media
@@ -2397,13 +2591,13 @@ html_element!(
             /// rel contains a value of icon or a non-standard type such as
             /// Apple's apple-touch-icon. It may have the following values:
             ///
-            /// * `any`, meaning that the icon can be scaled to any size as it is in
-            ///   a vector format,
+            /// * `any`, meaning that the icon can be scaled to any size as it
+            ///   is in a vector format,
             /// like image/svg+xml.
-            /// * a white-space separated list of sizes, each in the format <width
-            ///   in pixels>x<height in
-            /// pixels> or <width in pixels>X<height in pixels>. Each of these sizes
-            /// must be contained in the resource.
+            /// * a white-space separated list of sizes, each in the format
+            ///   <width in pixels>x<height in
+            /// pixels> or <width in pixels>X<height in pixels>. Each of these
+            /// sizes must be contained in the resource.
             ///
             /// Note: Most icon formats are only able to store one single icon;
             /// therefore most of the time the sizes attribute contains only
@@ -2413,22 +2607,24 @@ html_element!(
             /// versions).
             sizes: String,
 
-            /// The title attribute has special semantics on the `<link>` element.
-            /// When used on a `<link rel="stylesheet">` it defines a
-            /// preferred or an alternate stylesheet. Incorrectly
-            /// using it may cause the stylesheet to be ignored.
+            /// The title attribute has special semantics on the `<link>`
+            /// element. When used on a `<link rel="stylesheet">` it
+            /// defines a preferred or an alternate stylesheet.
+            /// Incorrectly using it may cause the stylesheet to be
+            /// ignored.
             title: String,
 
-            /// This attribute is used to define the type of the content linked to.
-            /// The value of the attribute should be a MIME type such as
-            /// text/html, text/css, and so on. The common use
-            /// of this attribute is to define the type of stylesheet being
-            /// referenced (such as text/css), but given that CSS is the
-            /// only stylesheet language used on the web, not only
-            /// is it possible to omit the type attribute, but is actually now
-            /// recommended practice. It is also used on rel="preload" link
-            /// types, to make sure the browser only downloads file
-            /// types that it supports.
+            /// This attribute is used to define the type of the content linked
+            /// to. The value of the attribute should be a MIME type
+            /// such as text/html, text/css, and so on. The common
+            /// use of this attribute is to define the type of
+            /// stylesheet being referenced (such as text/css), but
+            /// given that CSS is the only stylesheet language used
+            /// on the web, not only is it possible to omit the type
+            /// attribute, but is actually now recommended practice.
+            /// It is also used on rel="preload" link types, to make
+            /// sure the browser only downloads file types that it
+            /// supports.
             r#type: String,
         };
     }
@@ -2451,10 +2647,11 @@ html_element!(
     /// [`<script>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
     /// [`<style>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
     /// [`<title>`]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
-    meta = { dom_type: web_sys::HtmlMetaElement;
+    meta = {
+        dom_type: web_sys::HtmlMetaElement;
         attributes {
-            /// This attribute declares the document's character encoding. If the
-            /// attribute is present, its value must be an ASCII
+            /// This attribute declares the document's character encoding. If
+            /// the attribute is present, its value must be an ASCII
             /// case-insensitive match for the string "utf-8".
             charset: String,
 
@@ -2462,32 +2659,33 @@ html_element!(
             /// attribute, depending on which is used.
             content: String,
 
-            /// Defines a pragma directive. The attribute is named http-equiv(alent)
-            /// because all the allowed values are names of particular HTTP
-            /// headers:
+            /// Defines a pragma directive. The attribute is named
+            /// http-equiv(alent) because all the allowed values are
+            /// names of particular HTTP headers:
             ///
-            /// * `content-security-policy`: Allows page authors to define a content
-            ///   policy for the
-            /// current page. Content policies mostly specify allowed server origins
-            /// and script endpoints which help guard against cross-site
-            /// scripting attacks.
-            /// * `content-type`: If specified, the content attribute must have the
-            ///   value
+            /// * `content-security-policy`: Allows page authors to define a
+            ///   content policy for the
+            /// current page. Content policies mostly specify allowed server
+            /// origins and script endpoints which help guard
+            /// against cross-site scripting attacks.
+            /// * `content-type`: If specified, the content attribute must have
+            ///   the value
             /// `text/html; charset=utf-8`. Note: Can only be used in documents
             /// served with a text/html MIME type — not in documents served
             /// with an XML MIME type.
-            /// * `default-style`: Sets the name of the default CSS style sheet set.
-            /// * `x-ua-compatible`: If specified, the content attribute must have
-            ///   the value "IE=edge".
+            /// * `default-style`: Sets the name of the default CSS style sheet
+            ///   set.
+            /// * `x-ua-compatible`: If specified, the content attribute must
+            ///   have the value "IE=edge".
             /// User agents are required to ignore this pragma.
             /// * `refresh`: This instruction specifies:
-            /// * The number of seconds until the page should be reloaded - only if
-            ///   the content
+            /// * The number of seconds until the page should be reloaded - only
+            ///   if the content
             /// attribute contains a positive integer.
-            /// * The number of seconds until the page should redirect to another -
-            ///   only if the
-            /// content attribute contains a positive integer followed by the string
-            /// ';url=', and a valid URL.
+            /// * The number of seconds until the page should redirect to
+            ///   another - only if the
+            /// content attribute contains a positive integer followed by the
+            /// string ';url=', and a valid URL.
             /// * Accessibility concerns: Pages set with a refresh value run the
             ///   risk of having the
             /// time interval being too short. People navigating with the aid of
@@ -2503,8 +2701,9 @@ html_element!(
             /// name attribute giving the metadata name, and the
             /// content attribute giving the value.
             ///
-            /// See [standard metadata names] for details about the set of standard
-            /// metadata names defined in the HTML specification.
+            /// See [standard metadata names] for details about the set of
+            /// standard metadata names defined in the HTML
+            /// specification.
             ///
             /// [standard metadata names]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name
             name: String,
@@ -2517,18 +2716,21 @@ html_element!(
     /// document, or part of a document.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style
-    style = { dom_type: web_sys::HtmlStyleElement;
+    style = {
+        dom_type: web_sys::HtmlStyleElement;
         attributes {
-            /// This attribute defines which media the style should be applied to.
-            /// Its value is a media query, which defaults to all if the
-            /// attribute is missing.
+            /// This attribute defines which media the style should be applied
+            /// to. Its value is a media query, which defaults to
+            /// all if the attribute is missing.
             media: String,
 
-            /// A cryptographic nonce (number used once) used to whitelist inline
-            /// styles in a style-src Content-Security-Policy. The server
-            /// must generate a unique nonce value each time it transmits a
-            /// policy. It is critical to provide a nonce that cannot be guessed as
-            /// bypassing a resource’s policy is otherwise trivial.
+            /// A cryptographic nonce (number used once) used to whitelist
+            /// inline styles in a style-src
+            /// Content-Security-Policy. The server must generate a
+            /// unique nonce value each time it transmits a
+            /// policy. It is critical to provide a nonce that cannot be guessed
+            /// as bypassing a resource’s policy is otherwise
+            /// trivial.
             nonce: String,
 
             /// This attribute specifies alternative style sheet sets.
@@ -2545,7 +2747,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title
     /// [browser]: https://developer.mozilla.org/en-US/docs/Glossary/Browser
-    title = { dom_type: web_sys::HtmlTitleElement;}
+    title = {
+        dom_type: web_sys::HtmlTitleElement;
+    }
 );
 
 parent_element!(title);
@@ -2557,7 +2761,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button
     /// [forms]: https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms
-    button = { dom_type: web_sys::HtmlButtonElement;
+    button = {
+        dom_type: web_sys::HtmlButtonElement;
         attributes {
             /// Specifies that the button should have input focus when the page
             /// loads. Only one element in a document can have this
@@ -2568,15 +2773,16 @@ html_element!(
             /// pressed or focused.
             disabled: bool,
 
-            /// The `<form>` element to associate the button with (its form owner).
-            /// The value of this attribute must be the id of a `<form>` in
-            /// the same document. (If this attribute is not
-            /// set, the `<button>` is associated with its ancestor `<form>`
-            /// element, if any.)
+            /// The `<form>` element to associate the button with (its form
+            /// owner). The value of this attribute must be the id
+            /// of a `<form>` in the same document. (If this
+            /// attribute is not set, the `<button>` is associated
+            /// with its ancestor `<form>` element, if any.)
             ///
-            /// This attribute lets you associate `<button>` elements to `<form>`s
-            /// anywhere in the document, not just inside a `<form>`. It can
-            /// also override an ancestor `<form>` element.
+            /// This attribute lets you associate `<button>` elements to
+            /// `<form>`s anywhere in the document, not just inside
+            /// a `<form>`. It can also override an ancestor
+            /// `<form>` element.
             form: String,
 
             /// The URL that processes the information submitted by the button.
@@ -2588,16 +2794,16 @@ html_element!(
             /// `<form>` and doesn't have type="button"), specifies how to
             /// encode the form data that is submitted. Possible values:
             ///
-            /// * application/x-www-form-urlencoded: The default if the attribute is
-            ///   not used.
-            /// * multipart/form-data: Use to submit `<input>` elements with their
-            ///   type attributes set
+            /// * application/x-www-form-urlencoded: The default if the
+            ///   attribute is not used.
+            /// * multipart/form-data: Use to submit `<input>` elements with
+            ///   their type attributes set
             /// to file.
-            /// * text/plain: Specified as a debugging aid; shouldn’t be used for
-            ///   real form submission.
+            /// * text/plain: Specified as a debugging aid; shouldn’t be used
+            ///   for real form submission.
             ///
-            /// If this attribute is specified, it overrides the enctype attribute
-            /// of the button's form owner.
+            /// If this attribute is specified, it overrides the enctype
+            /// attribute of the button's form owner.
             formenctype: String,
 
             /// If the button is a submit button (it's inside/associated with a
@@ -2605,67 +2811,69 @@ html_element!(
             /// specifies the HTTP method used to submit the form.
             /// Possible values:
             ///
-            /// * post: The data from the form are included in the body of the HTTP
-            ///   request when sent to
-            /// the server. Use when the form contains information that shouldn’t be
-            /// public, like login credentials.
-            /// * get: The form data are appended to the form's action URL, with a ?
-            ///   as a separator, and
-            /// the resulting URL is sent to the server. Use this method when the
-            /// form has no side effects, like search forms.
+            /// * post: The data from the form are included in the body of the
+            ///   HTTP request when sent to
+            /// the server. Use when the form contains information that
+            /// shouldn’t be public, like login credentials.
+            /// * get: The form data are appended to the form's action URL, with
+            ///   a ? as a separator, and
+            /// the resulting URL is sent to the server. Use this method when
+            /// the form has no side effects, like search forms.
             ///
-            /// If specified, this attribute overrides the method attribute of the
-            /// button's form owner.
+            /// If specified, this attribute overrides the method attribute of
+            /// the button's form owner.
             formmethod: String,
 
-            /// If the button is a submit button, specifies that the form is not to
-            /// be validated when it is submitted. If this attribute is
-            /// specified, it overrides the novalidate attribute of
-            /// the button's form owner.
+            /// If the button is a submit button, specifies that the form is not
+            /// to be validated when it is submitted. If this
+            /// attribute is specified, it overrides the novalidate
+            /// attribute of the button's form owner.
             ///
             /// This attribute is also available on `<input type="image">` and
             /// `<input type="submit">` elements.
             formnovalidate: bool,
 
-            /// If the button is a submit button, this attribute is a author-defined
-            /// name or standardized, underscore-prefixed keyword indicating
+            /// If the button is a submit button, this attribute is a
+            /// author-defined name or standardized,
+            /// underscore-prefixed keyword indicating
             /// where to display the response from submitting the form. This
             /// is the name of, or keyword for, a browsing context (a tab,
-            /// window, or `<iframe>`). If this attribute is specified, it overrides
-            /// the target attribute of the button's form owner. The
-            /// following keywords have special meanings:
+            /// window, or `<iframe>`). If this attribute is specified, it
+            /// overrides the target attribute of the button's form
+            /// owner. The following keywords have special meanings:
             ///
             /// * _self: Load the response into the same browsing context as the
             ///   current one.
             /// This is the default if the attribute is not specified.
-            /// * _blank: Load the response into a new unnamed browsing context —
-            ///   usually a new tab or
+            /// * _blank: Load the response into a new unnamed browsing context
+            ///   — usually a new tab or
             /// window, depending on the user’s browser settings.
-            /// * _parent: Load the response into the parent browsing context of the
-            ///   current one. If
+            /// * _parent: Load the response into the parent browsing context of
+            ///   the current one. If
             /// there is no parent, this option behaves the same way as _self.
-            /// * _top: Load the response into the top-level browsing context (that
-            ///   is, the browsing
-            /// context that is an ancestor of the current one, and has no parent).
-            /// If there is no parent, this option behaves the same way as
-            /// _self.
+            /// * _top: Load the response into the top-level browsing context
+            ///   (that is, the browsing
+            /// context that is an ancestor of the current one, and has no
+            /// parent). If there is no parent, this option behaves
+            /// the same way as _self.
             formtarget: String,
 
-            /// The name of the button, submitted as a pair with the button’s value
-            /// as part of the form data.
+            /// The name of the button, submitted as a pair with the button’s
+            /// value as part of the form data.
             name: String,
 
             /// The default behavior of the button. Possible values are:
             ///
-            /// * submit: The button submits the form data to the server. This is
-            ///   the default if the
-            /// attribute is not specified for buttons associated with a `<form>`,
-            /// or if the attribute is an empty or invalid value.
-            /// * reset: The button resets all the controls to their initial values,
-            ///   like
+            /// * submit: The button submits the form data to the server. This
+            ///   is the default if the
+            /// attribute is not specified for buttons associated with a
+            /// `<form>`, or if the attribute is an empty or invalid
+            /// value.
+            /// * reset: The button resets all the controls to their initial
+            ///   values, like
             /// `<input type="reset">`. (This behavior tends to annoy users.)
-            /// * button: The button has no default behavior, and does nothing when
-            ///   pressed by default.
+            /// * button: The button has no default behavior, and does nothing
+            ///   when pressed by default.
             /// It can have client-side scripts listen to the element's events,
             /// which are triggered when the events occur.
             r#type: String,
@@ -2687,7 +2895,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
     /// [option]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option
-    datalist = { dom_type: web_sys::HtmlDataListElement;}
+    datalist = {
+        dom_type: web_sys::HtmlDataListElement;
+    }
 );
 
 parent_element!(datalist);
@@ -2698,7 +2908,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
     /// [label]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    fieldset = { dom_type: web_sys::HtmlFieldSetElement;
+    fieldset = {
+        dom_type: web_sys::HtmlFieldSetElement;
         attributes {
             /// If this Boolean attribute is set, all form controls that are
             /// descendants of the `<fieldset>` are disabled, meaning they
@@ -2716,8 +2927,8 @@ html_element!(
 
             /// The name associated with the group.
             ///
-            /// Note: The caption for the fieldset is given by the first `<legend>`
-            /// element inside it.
+            /// Note: The caption for the fieldset is given by the first
+            /// `<legend>` element inside it.
             name: String,
         };
     }
@@ -2731,7 +2942,8 @@ html_element!(
     /// server.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form
-    form = { dom_type: web_sys::HtmlFormElement;
+    form = {
+        dom_type: web_sys::HtmlFormElement;
         attributes {
             /// Space-separated [character encodings] the server accepts. The
             /// browser uses them in the order in which they are listed. The
@@ -2740,24 +2952,24 @@ html_element!(
             /// [character encodings]: https://developer.mozilla.org/en-US/docs/Web/Guide/Localizations_and_character_encodings
             accept_charset: String,
 
-            /// The URI of a program that processes the information submitted via
-            /// the form.
+            /// The URI of a program that processes the information submitted
+            /// via the form.
             action: String,
 
-            /// Indicates whether input elements can by default have their values
-            /// automatically completed by the browser. autocomplete
-            /// attributes on form elements override it on
-            /// `<form>`. Possible values:
+            /// Indicates whether input elements can by default have their
+            /// values automatically completed by the browser.
+            /// autocomplete attributes on form elements override it
+            /// on `<form>`. Possible values:
             ///
-            /// * off: The browser may not automatically complete entries. (Browsers
-            ///   tend to ignore this
-            /// for suspected login forms; see The autocomplete attribute and login
-            /// fields.)
+            /// * off: The browser may not automatically complete entries.
+            ///   (Browsers tend to ignore this
+            /// for suspected login forms; see The autocomplete attribute and
+            /// login fields.)
             /// * on: The browser may automatically complete entries.
             autocomplete: String,
 
-            /// If the value of the method attribute is post, enctype is the MIME
-            /// type of the form submission. Possible values:
+            /// If the value of the method attribute is post, enctype is the
+            /// MIME type of the form submission. Possible values:
             ///
             /// * application/x-www-form-urlencoded: The default value.
             /// * multipart/form-data: Use this if the form contains `<input>`
@@ -2772,39 +2984,40 @@ html_element!(
             /// The HTTP method to submit the form with. Possible values:
             ///
             /// * post: The POST method; form data sent as the request body.
-            /// * get: The GET method; form data appended to the action URL with a ?
-            ///   separator. Use this
+            /// * get: The GET method; form data appended to the action URL with
+            ///   a ? separator. Use this
             /// method when the form has no side-effects.
-            /// * dialog: When the form is inside a `<dialog>`, closes the dialog on
-            ///   submission.
+            /// * dialog: When the form is inside a `<dialog>`, closes the
+            ///   dialog on submission.
             ///
             /// This value is overridden by formmethod attributes on `<button>`,
             /// `<input type="submit">`, or `<input type="image">` elements.
             method: String,
 
-            /// Indicates that the form shouldn't be validated when submitted. If
-            /// this attribute is not set (and therefore the form is
-            /// validated), it can be overridden by a formnovalidate
-            /// attribute on a `<button>`, `<input type="submit">`, or `<input
-            /// type="image">` element belonging to the form.
+            /// Indicates that the form shouldn't be validated when submitted.
+            /// If this attribute is not set (and therefore the form
+            /// is validated), it can be overridden by a
+            /// formnovalidate attribute on a `<button>`, `<input
+            /// type="submit">`, or `<input type="image">` element
+            /// belonging to the form.
             novalidate: bool,
 
             /// Creates a hyperlink or annotation depending on the value.
             rel: String,
 
-            /// Indicates where to display the response after submitting the form.
-            /// It is a name/keyword for a browsing context (for example,
-            /// tab, window, or iframe). The following keywords have special
-            /// meanings:
+            /// Indicates where to display the response after submitting the
+            /// form. It is a name/keyword for a browsing context
+            /// (for example, tab, window, or iframe). The following
+            /// keywords have special meanings:
             ///
             /// * _self (default): Load into the same browsing context as the
             ///   current one.
             /// * _blank: Load into a new unnamed browsing context.
-            /// * _parent: Load into the parent browsing context of the current one.
-            ///   If no parent,
+            /// * _parent: Load into the parent browsing context of the current
+            ///   one. If no parent,
             /// behaves the same as _self.
-            /// * _top: Load into the top-level browsing context (i.e., the browsing
-            ///   context that is an
+            /// * _top: Load into the top-level browsing context (i.e., the
+            ///   browsing context that is an
             /// ancestor of the current one and has no parent). If no parent,
             /// behaves the same as _self.
             ///
@@ -2834,7 +3047,8 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
     /// [user agent]: https://developer.mozilla.org/en-US/docs/Glossary/user_agent
-    input = { dom_type: web_sys::HtmlInputElement;
+    input = {
+        dom_type: web_sys::HtmlInputElement;
         attributes {
             /// Valid for the file input type only, the accept property defines
             /// which file types are selectable in a file upload control.
@@ -2857,11 +3071,12 @@ html_element!(
             /// addresses in an email input field. See Values in The HTML
             /// autocomplete attribute for permitted values.
             ///
-            /// The autocomplete attribute is valid on hidden, text, search, url,
-            /// tel, email, date, month, week, time, datetime-local, number,
-            /// range, color, and password. This attribute has no effect on
-            /// input types that do not return numeric or text data, being valid for
-            /// all input types except checkbox, radio, file, or any of the button
+            /// The autocomplete attribute is valid on hidden, text, search,
+            /// url, tel, email, date, month, week, time,
+            /// datetime-local, number, range, color, and password.
+            /// This attribute has no effect on input types that do
+            /// not return numeric or text data, being valid for all
+            /// input types except checkbox, radio, file, or any of the button
             /// types.
             ///
             /// See The HTML autocomplete attribute for additional information,
@@ -2870,40 +3085,43 @@ html_element!(
             /// input types.
             autocomplete: String,
 
-            /// Indicates if present that the input should automatically have focus
-            /// when the page has finished loading (or when the `<dialog>`
-            /// containing the element has been displayed).
+            /// Indicates if present that the input should automatically have
+            /// focus when the page has finished loading (or when
+            /// the `<dialog>` containing the element has been
+            /// displayed).
             ///
-            /// Note: An element with the autofocus attribute may gain focus before
-            /// the DOMContentLoaded event is fired.
+            /// Note: An element with the autofocus attribute may gain focus
+            /// before the DOMContentLoaded event is fired.
             ///
             /// No more than one element in the document may have the autofocus
             /// attribute. The autofocus attribute cannot be used on inputs
             /// of type hidden, since hidden inputs cannot be focused.
             ///
-            /// If put on more than one element, the first one with the attribute
-            /// receives focus.
+            /// If put on more than one element, the first one with the
+            /// attribute receives focus.
             ///
             /// Warning: Automatically focusing a form control can confuse
             /// visually-impaired people using screen-reading technology and
             /// people with cognitive impairments. When autofocus is
-            /// assigned, screen-readers "teleport" their user to the form control
-            /// without warning them beforehand.
+            /// assigned, screen-readers "teleport" their user to the form
+            /// control without warning them beforehand.
             ///
-            /// For better usability, avoid using autofocus. Automatically focusing
-            /// on a form control can cause the page to scroll on load. The
-            /// focus can also cause dynamic keyboards to display on some
-            /// touch devices. While a screen reader will announce the label of the
+            /// For better usability, avoid using autofocus. Automatically
+            /// focusing on a form control can cause the page to
+            /// scroll on load. The focus can also cause dynamic
+            /// keyboards to display on some touch devices. While a
+            /// screen reader will announce the label of the
             /// form control receiving focus, the screen reader  will not
             /// announce anything before the label, and the sighted user on
             /// a small device will equally miss the context created by the
             /// preceding content.
             autofocus: bool,
 
-            /// Introduced in the HTML Media Capture specification and valid for the
-            /// file input type only, the capture attribute defines which
-            /// media—microphone, video, or camera—should be used to capture
-            /// a new file for upload with file upload control in supporting
+            /// Introduced in the HTML Media Capture specification and valid for
+            /// the file input type only, the capture attribute
+            /// defines which media—microphone, video, or
+            /// camera—should be used to capture a new file for
+            /// upload with file upload control in supporting
             /// scenarios. See the file input type.
             capture: String,
 
@@ -2913,14 +3131,16 @@ html_element!(
             /// of same-named radio buttons. If present on a checkbox type, it
             /// indicates that the checkbox is checked by default (when the
             /// page loads). It does not indicate whether this checkbox is
-            /// currently checked: if the checkbox’s state is changed, this content
-            /// attribute does not reflect the change. (Only the HTMLInputElement’s
-            /// checked IDL attribute is updated.)
+            /// currently checked: if the checkbox’s state is changed, this
+            /// content attribute does not reflect the change. (Only
+            /// the HTMLInputElement’s checked IDL attribute is
+            /// updated.)
             ///
-            /// Note: Unlike other input controls, a checkboxes and radio buttons
-            /// value are only included in the submitted data if they are
-            /// currently checked. If they are, the name and the value(s) of
-            /// the checked controls are submitted.
+            /// Note: Unlike other input controls, a checkboxes and radio
+            /// buttons value are only included in the submitted
+            /// data if they are currently checked. If they are, the
+            /// name and the value(s) of the checked controls are
+            /// submitted.
             ///
             /// For example, if a checkbox whose name is fruit has a value of
             /// cherry, and the checkbox is checked, the form data submitted
@@ -2929,21 +3149,23 @@ html_element!(
             /// checkboxes and radio buttons is on.
             checked: bool,
 
-            /// Valid for text and search input types only, the dirname attribute
-            /// enables the submission of the directionality of the element.
-            /// When included, the form control will submit with
-            /// two name/value pairs: the first being the name and value, the second
-            /// being the value of the dirname as the name with the value of
+            /// Valid for text and search input types only, the dirname
+            /// attribute enables the submission of the
+            /// directionality of the element. When included, the
+            /// form control will submit with two name/value pairs:
+            /// the first being the name and value, the second being
+            /// the value of the dirname as the name with the value of
             /// ltr or rtl being set by the browser.
             dirname: String,
 
-            /// If present indicates that the user should not be able to interact
-            /// with the input. Disabled inputs are typically rendered with
-            /// a dimmer color or using some other form of indication that
-            /// the field is not available for use.
+            /// If present indicates that the user should not be able to
+            /// interact with the input. Disabled inputs are
+            /// typically rendered with a dimmer color or using some
+            /// other form of indication that the field is not
+            /// available for use.
             ///
-            /// Specifically, disabled inputs do not receive the click event, and
-            /// disabled inputs are not submitted with the form.
+            /// Specifically, disabled inputs do not receive the click event,
+            /// and disabled inputs are not submitted with the form.
             disabled: bool,
 
             /// A string specifying the `<form>` element with which the input is
@@ -2953,8 +3175,9 @@ html_element!(
             /// element is associated with the nearest containing form, if
             /// any.
             ///
-            /// The form attribute lets you place an input anywhere in the document
-            /// but have it included with a form elsewhere in the document.
+            /// The form attribute lets you place an input anywhere in the
+            /// document but have it included with a form elsewhere
+            /// in the document.
             ///
             /// Note: An input can only be associated with one form.
             form: String,
@@ -2979,36 +3202,39 @@ html_element!(
             /// input type for more information.
             formtarget: String,
 
-            /// Valid for the image input button only, the height is the height of
-            /// the image file to display to represent the graphical submit
-            /// button. See the image input type.
+            /// Valid for the image input button only, the height is the height
+            /// of the image file to display to represent the
+            /// graphical submit button. See the image input type.
             height: String,
 
-            /// Global value valid for all elements, it provides a hint to browsers
-            /// as to the type of virtual keyboard configuration to use when
-            /// editing this element or its contents. Values include none,
-            /// text, tel, url, email, numeric, decimal, and search.
+            /// Global value valid for all elements, it provides a hint to
+            /// browsers as to the type of virtual keyboard
+            /// configuration to use when editing this element or
+            /// its contents. Values include none, text, tel, url,
+            /// email, numeric, decimal, and search.
             inputmode: String,
 
-            /// The values of the list attribute is the id of a `<datalist>` element
-            /// located in the same document. The `<datalist>`  provides a
-            /// list of predefined values to suggest to the user
-            /// for this input. Any values in the list that are not compatible with
-            /// the type are not included in the suggested options.  The
+            /// The values of the list attribute is the id of a `<datalist>`
+            /// element located in the same document. The
+            /// `<datalist>`  provides a list of predefined values
+            /// to suggest to the user for this input. Any values in
+            /// the list that are not compatible with the type are
+            /// not included in the suggested options.  The
             /// values provided are suggestions, not requirements: users can
             /// select from this predefined list or provide a different value.
             ///
             /// It is valid on text, search, url, tel, email, date, month, week,
             /// time, datetime-local, number, range, and color.
             ///
-            /// Per the specifications, the list attribute is not supported by the
-            /// hidden, password, checkbox, radio, file, or any of the
-            /// button types.
+            /// Per the specifications, the list attribute is not supported by
+            /// the hidden, password, checkbox, radio, file, or any
+            /// of the button types.
             ///
-            /// Depending on the browser, the user may see a custom color palette
-            /// suggested, tic marks along a range, or even a input that
-            /// opens like a select but allows for non-listed values. Check
-            /// out the browser compatibility table for the other input types.
+            /// Depending on the browser, the user may see a custom color
+            /// palette suggested, tic marks along a range, or even
+            /// a input that opens like a select but allows for
+            /// non-listed values. Check out the browser
+            /// compatibility table for the other input types.
             ///
             /// See the `<datalist>` element.
             list: String,
@@ -3016,66 +3242,70 @@ html_element!(
             /// Valid for date, month, week, time, datetime-local, number, and
             /// range, it defines the greatest value in the range of
             /// permitted values. If the value entered into the element
-            /// exceeds this, the element fails constraint validation. If the value
-            /// of the max attribute isn't a number, then the element has no
-            /// maximum value.
+            /// exceeds this, the element fails constraint validation. If the
+            /// value of the max attribute isn't a number, then the
+            /// element has no maximum value.
             ///
-            /// There is a special case: if the data type is periodic (such as for
-            /// dates or times), the value of max may be lower than the
-            /// value of min, which indicates that the range may wrap
-            /// around; for example, this allows you to specify a time range from 10
-            /// PM to 4 AM.
+            /// There is a special case: if the data type is periodic (such as
+            /// for dates or times), the value of max may be lower
+            /// than the value of min, which indicates that the
+            /// range may wrap around; for example, this allows you
+            /// to specify a time range from 10 PM to 4 AM.
             max: String,
 
-            /// Valid for text, search, url, tel, email, and password, it defines
-            /// the maximum number of characters (as UTF-16 code units) the
-            /// user can enter into the field. This must be an integer value
-            /// 0 or higher. If no maxlength is specified, or an invalid value is
-            /// specified, the field has no maximum length. This value must also be
-            /// greater than or equal to the value of minlength.
+            /// Valid for text, search, url, tel, email, and password, it
+            /// defines the maximum number of characters (as UTF-16
+            /// code units) the user can enter into the field. This
+            /// must be an integer value 0 or higher. If no
+            /// maxlength is specified, or an invalid value is
+            /// specified, the field has no maximum length. This value must also
+            /// be greater than or equal to the value of minlength.
             ///
-            /// The input will fail constraint validation if the length of the text
-            /// entered into the field is greater than maxlength UTF-16 code
-            /// units long. By default, browsers prevent users from entering
-            /// more characters than allowed by the maxlength attribute.
+            /// The input will fail constraint validation if the length of the
+            /// text entered into the field is greater than
+            /// maxlength UTF-16 code units long. By default,
+            /// browsers prevent users from entering more characters
+            /// than allowed by the maxlength attribute.
             maxlength: String,
 
             /// Valid for date, month, week, time, datetime-local, number, and
             /// range, it defines the most negative value in the range of
             /// permitted values. If the value entered into the element is
-            /// less than this this, the element fails constraint validation. If the
-            /// value of the min attribute isn't a number, then the element
-            /// has no minimum value.
+            /// less than this this, the element fails constraint validation. If
+            /// the value of the min attribute isn't a number, then
+            /// the element has no minimum value.
             ///
             /// This value must be less than or equal to the value of the max
             /// attribute. If the min attribute is present but is not
             /// specified or is invalid, no min value is applied. If the min
-            /// attribute is valid and a non-empty value is less than the minimum
-            /// allowed by the min attribute, constraint validation will
-            /// prevent form submission.
+            /// attribute is valid and a non-empty value is less than the
+            /// minimum allowed by the min attribute, constraint
+            /// validation will prevent form submission.
             ///
-            /// There is a special case: if the data type is periodic (such as for
-            /// dates or times), the value of max may be lower than the
-            /// value of min, which indicates that the range may wrap
-            /// around; for example, this allows you to specify a time range from 10
-            /// PM to 4 AM.
+            /// There is a special case: if the data type is periodic (such as
+            /// for dates or times), the value of max may be lower
+            /// than the value of min, which indicates that the
+            /// range may wrap around; for example, this allows you
+            /// to specify a time range from 10 PM to 4 AM.
             min: String,
 
-            /// Valid for text, search, url, tel, email, and password, it defines
-            /// the minimum number of characters (as UTF-16 code units) the
-            /// user can enter into the entry field. This must be
-            /// an non-negative integer value smaller than or equal to the value
-            /// specified by maxlength. If no minlength is specified, or an
-            /// invalid value is specified, the input has no minimum length.
+            /// Valid for text, search, url, tel, email, and password, it
+            /// defines the minimum number of characters (as UTF-16
+            /// code units) the user can enter into the entry field.
+            /// This must be an non-negative integer value smaller
+            /// than or equal to the value specified by maxlength.
+            /// If no minlength is specified, or an invalid value is
+            /// specified, the input has no minimum length.
             ///
-            /// The input will fail constraint validation if the length of the text
-            /// entered into the field is fewer than minlength UTF-16 code
-            /// units long, preventing form submission.
+            /// The input will fail constraint validation if the length of the
+            /// text entered into the field is fewer than minlength
+            /// UTF-16 code units long, preventing form submission.
             minlength: String,
 
-            /// If set, means the user can enter comma separated email addresses in
-            /// the email widget or can choose more than one file with the
-            /// file input. See the email and file input type.
+            /// If set, means the user can enter comma separated email addresses
+            /// in the email widget or can choose more than one file
+            /// with the file input. See the email and file input
+            /// type.
             multiple: bool,
 
             /// A string specifying a name for the input control. This name is
@@ -3084,16 +3314,17 @@ html_element!(
             ///
             /// # What's in a name
             ///
-            /// Consider the name a required attribute (even though it's not). If an
-            /// input has no name specified, or name is empty, the input's
-            /// value is not submitted with the form! (Disabled
-            /// controls, unchecked radio buttons, unchecked checkboxes, and reset
-            /// buttons are also not sent.)
+            /// Consider the name a required attribute (even though it's not).
+            /// If an input has no name specified, or name is empty,
+            /// the input's value is not submitted with the form!
+            /// (Disabled controls, unchecked radio buttons,
+            /// unchecked checkboxes, and reset buttons are also not
+            /// sent.)
             ///
             /// There are two special cases:
             ///
-            /// * `_charset_`: If used as the name of an `<input>` element of type
-            ///   hidden, the input's
+            /// * `_charset_`: If used as the name of an `<input>` element of
+            ///   type hidden, the input's
             /// value is automatically set by the user agent to the character
             /// encoding being used to submit the form.
             /// * `isindex`: For historical reasons, the name isindex is not
@@ -3103,32 +3334,34 @@ html_element!(
             ///
             /// The name attribute creates a unique behavior for radio buttons.
             ///
-            /// Only one radio button in a same-named group of radio buttons can be
-            /// checked at a time. Selecting any radio button in that group
-            /// automatically deselects any currently-selected radio button
-            /// in the same group. The value of that one checked radio button is
+            /// Only one radio button in a same-named group of radio buttons can
+            /// be checked at a time. Selecting any radio button in
+            /// that group automatically deselects any
+            /// currently-selected radio button in the same group.
+            /// The value of that one checked radio button is
             /// sent along with the name if the form is submitted.
             ///
-            /// When tabbing into a series of same-named group of radio buttons, if
-            /// one is checked, that one will receive focus. If they aren't
-            /// grouped together in source order, if one of the
-            /// group is checked, tabbing into the group starts when the first one
-            /// in the group is encountered, skipping all those that aren't
-            /// checked. In other words, if one is checked, tabbing skips
-            /// the unchecked radio buttons in the group. If none are checked, the
+            /// When tabbing into a series of same-named group of radio buttons,
+            /// if one is checked, that one will receive focus. If
+            /// they aren't grouped together in source order, if one
+            /// of the group is checked, tabbing into the group
+            /// starts when the first one in the group is
+            /// encountered, skipping all those that aren't checked.
+            /// In other words, if one is checked, tabbing skips the
+            /// unchecked radio buttons in the group. If none are checked, the
             /// radio button group receives focus when the first button in
             /// the same name group is reached.
             ///
-            /// Once one of the radio buttons in a group has focus, using the arrow
-            /// keys will navigate through all the radio buttons of the same
-            /// name, even if the radio buttons are not grouped together in
-            /// the source order.
+            /// Once one of the radio buttons in a group has focus, using the
+            /// arrow keys will navigate through all the radio
+            /// buttons of the same name, even if the radio buttons
+            /// are not grouped together in the source order.
             ///
             /// # HTMLFormElement.elements
             ///
-            /// When an input element is given a name, that name becomes a property
-            /// of the owning form element's HTMLFormElement.elements
-            /// property.
+            /// When an input element is given a name, that name becomes a
+            /// property of the owning form element's
+            /// HTMLFormElement.elements property.
             ///
             /// Warning: Avoid giving form elements a name that corresponds to a
             /// built-in property of the form, since you would then override
@@ -3136,10 +3369,11 @@ html_element!(
             /// corresponding input.
             name: String,
 
-            /// The pattern attribute, when specified, is a regular expression that
-            /// the input's value must match in order for the value to pass
-            /// constraint validation. It must be a valid JavaScript regular
-            /// expression, as used by the RegExp type, and as documented in our
+            /// The pattern attribute, when specified, is a regular expression
+            /// that the input's value must match in order for the
+            /// value to pass constraint validation. It must be a
+            /// valid JavaScript regular expression, as used by the
+            /// RegExp type, and as documented in our
             /// guide on regular expressions; the 'u' flag is specified when
             /// compiling the regular expression, so that the pattern is
             /// treated as a sequence of Unicode code points, instead
@@ -3149,21 +3383,23 @@ html_element!(
             /// If the pattern attribute is present but is not specified or is
             /// invalid, no regular expression is applied and this attribute
             /// is ignored completely. If the pattern attribute is valid and
-            /// a non-empty value does not match the pattern, constraint validation
-            /// will prevent form submission.
+            /// a non-empty value does not match the pattern, constraint
+            /// validation will prevent form submission.
             ///
             /// Tip: If using the pattern attribute, inform the user about the
             /// expected format by including explanatory text nearby. You
             /// can also include a title attribute to explain
-            /// what the requirements are to match the pattern; most browsers will
-            /// display this title as a tooltip. The visible explanation is
-            /// required for accessibility. The tooltip is an enhancement.
+            /// what the requirements are to match the pattern; most browsers
+            /// will display this title as a tooltip. The visible
+            /// explanation is required for accessibility. The
+            /// tooltip is an enhancement.
             pattern: String,
 
-            /// The placeholder attribute is a string that provides a brief hint to
-            /// the user as to what kind of information is expected in the
-            /// field. It should be a word or short phrase that demonstrates
-            /// the expected type of data, rather than an explanatory message. The
+            /// The placeholder attribute is a string that provides a brief hint
+            /// to the user as to what kind of information is
+            /// expected in the field. It should be a word or short
+            /// phrase that demonstrates the expected type of data,
+            /// rather than an explanatory message. The
             /// text must not include carriage returns or line feeds.
             ///
             /// Note: The placeholder attribute is not as semantically useful as
@@ -3171,10 +3407,11 @@ html_element!(
             /// technical issues with your content.
             placeholder: String,
 
-            /// If present, indicates that the user should not be able to edit the
-            /// value of the input. The readonly attribute is supported
-            /// text, search, url, tel, email, date, month, week,
-            /// time, datetime-local, number, and password input types.
+            /// If present, indicates that the user should not be able to edit
+            /// the value of the input. The readonly attribute is
+            /// supported text, search, url, tel, email, date,
+            /// month, week, time, datetime-local, number, and
+            /// password input types.
             readonly: bool,
 
             /// If present, indicates that the user must specify a value for the
@@ -3184,43 +3421,49 @@ html_element!(
             /// radio, and file.
             required: bool,
 
-            /// Valid for email, password, tel, and text input types only. Specifies
-            /// how much of the input is shown. Basically creates same
-            /// result as setting CSS width property with a few
-            /// specialities. The actual unit of the value depends on the input
-            /// type. For password and text it's number of characters (or em
-            /// units) and pixels for others. CSS width takes precedence
+            /// Valid for email, password, tel, and text input types only.
+            /// Specifies how much of the input is shown. Basically
+            /// creates same result as setting CSS width property
+            /// with a few specialities. The actual unit of the
+            /// value depends on the input type. For password and
+            /// text it's number of characters (or em units) and
+            /// pixels for others. CSS width takes precedence
             /// over size attribute.
             size: String,
 
-            /// Valid for the image input button only, the src is string specifying
-            /// the URL of the image file to display to represent the
-            /// graphical submit button. See the image input type.
+            /// Valid for the image input button only, the src is string
+            /// specifying the URL of the image file to display to
+            /// represent the graphical submit button. See the image
+            /// input type.
             src: String,
 
-            /// Valid for the numeric input types, including number, date/time input
-            /// types, and range, the step attribute is a number that
-            /// specifies the granularity that the value must adhere to.
+            /// Valid for the numeric input types, including number, date/time
+            /// input types, and range, the step attribute is a
+            /// number that specifies the granularity that the value
+            /// must adhere to.
             ///
-            /// If not explicitly included, step defaults to 1 for number and range,
-            /// and 1 unit type (second, week, month, day) for the date/time
-            /// input types. The value can must be a positive number—integer
-            /// or float—or the special value any, which means no stepping is
-            /// implied, and any value is allowed (barring other constraints, such
+            /// If not explicitly included, step defaults to 1 for number and
+            /// range, and 1 unit type (second, week, month, day)
+            /// for the date/time input types. The value can must be
+            /// a positive number—integer or float—or the special
+            /// value any, which means no stepping is implied, and
+            /// any value is allowed (barring other constraints, such
             /// as min and max).
             ///
-            /// If any is not explicity set, valid values for the number, date/time
-            /// input types, and range input types are equal to the basis
-            /// for stepping - the min value and increments of
-            /// the step value, up to the max value, if specified.
+            /// If any is not explicity set, valid values for the number,
+            /// date/time input types, and range input types are
+            /// equal to the basis for stepping - the min value and
+            /// increments of the step value, up to the max value,
+            /// if specified.
             ///
-            /// For example, if you have `<input type="number" min="10" step="2">`,
-            /// then any even integer, 10 or greater, is valid. If omitted,
-            /// `<input type="number">`, any integer is valid, but floats
-            /// (like 4.2) are not valid, because step defaults to 1. For 4.2 to be
-            /// valid, step would have had to be set to any, 0.1, 0.2, or any the
-            /// min value would have had to be a number ending in .2, such
-            /// as `<input type="number" min="-5.2">`.
+            /// For example, if you have `<input type="number" min="10"
+            /// step="2">`, then any even integer, 10 or greater, is
+            /// valid. If omitted, `<input type="number">`, any
+            /// integer is valid, but floats (like 4.2) are not
+            /// valid, because step defaults to 1. For 4.2 to be
+            /// valid, step would have had to be set to any, 0.1, 0.2, or any
+            /// the min value would have had to be a number ending
+            /// in .2, such as `<input type="number" min="-5.2">`.
             ///
             /// Note: When the data entered by the user doesn't adhere to the
             /// stepping configuration, the value is considered invalid in
@@ -3236,48 +3479,52 @@ html_element!(
             /// Global attribute valid for all elements, including all the input
             /// types, an integer attribute indicating if the element can
             /// take input focus (is focusable), if it should participate to
-            /// sequential keyboard navigation. As all input types except for input
-            /// of type hidden are focusable, this attribute should not be
-            /// used on form controls, because doing so would require the
-            /// management of the focus order for all elements within the
-            /// document with the risk of harming usability and accessibility if
+            /// sequential keyboard navigation. As all input types except for
+            /// input of type hidden are focusable, this attribute
+            /// should not be used on form controls, because doing
+            /// so would require the management of the focus order
+            /// for all elements within the document with the risk
+            /// of harming usability and accessibility if
             /// done incorrectly.
             tabindex: String,
 
-            /// Global attribute valid for all elements, including all input types,
-            /// containing a text representing advisory information related
-            /// to the element it belongs to. Such information
-            /// can typically, but not necessarily, be presented to the user as a
-            /// tooltip. The title should NOT be used as the primary
-            /// explanation of the purpose of the form control. Instead, use
-            /// the `<label>` element with a for attribute set to the form control's
-            /// id attribute.
+            /// Global attribute valid for all elements, including all input
+            /// types, containing a text representing advisory
+            /// information related to the element it belongs to.
+            /// Such information can typically, but not necessarily,
+            /// be presented to the user as a tooltip. The title
+            /// should NOT be used as the primary explanation of the
+            /// purpose of the form control. Instead, use
+            /// the `<label>` element with a for attribute set to the form
+            /// control's id attribute.
             title: String,
 
-            /// A string specifying the type of control to render. For example, to
-            /// create a checkbox, a value of checkbox is used. If omitted
-            /// (or an unknown value is specified), the input type
-            /// text is used, creating a plaintext input field.
+            /// A string specifying the type of control to render. For example,
+            /// to create a checkbox, a value of checkbox is used.
+            /// If omitted (or an unknown value is specified), the
+            /// input type text is used, creating a plaintext input
+            /// field.
             ///
             /// Permitted values are listed in `<input>` types above.
             r#type: String,
 
-            /// The input control's value. When specified in the HTML, this is the
-            /// initial value, and from then on it can be altered or
-            /// retrieved at any time using JavaScript to access the
-            /// respective HTMLInputElement object's value property. The value
-            /// attribute is always optional, though should be considered
-            /// mandatory for checkbox, radio, and hidden.
+            /// The input control's value. When specified in the HTML, this is
+            /// the initial value, and from then on it can be
+            /// altered or retrieved at any time using JavaScript to
+            /// access the respective HTMLInputElement object's
+            /// value property. The value attribute is always
+            /// optional, though should be considered mandatory for
+            /// checkbox, radio, and hidden.
             value: String,
 
-            /// Valid for the image input button only, the width is the width of the
-            /// image file to display to represent the graphical submit
-            /// button. See the image input type.
+            /// Valid for the image input button only, the width is the width of
+            /// the image file to display to represent the graphical
+            /// submit button. See the image input type.
             width: String,
         };
 
         events {
-            invalid: web_sys::Event
+            invalid: web_sys::Event,
         };
     }
 );
@@ -3287,14 +3534,16 @@ html_element!(
     /// user interface.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/label
-    label = { dom_type: web_sys::HtmlLabelElement;
+    label = {
+        dom_type: web_sys::HtmlLabelElement;
         attributes {
-            /// The id of a labelable form-related element in the same document as
-            /// the `<label>` element. The first element in the document
-            /// with an id matching the value of the for attribute is the
-            /// labeled control for this label element, if it is a labelable
-            /// element. If it is not labelable then the for attribute has
-            /// no effect. If there are other elements which also match the
+            /// The id of a labelable form-related element in the same document
+            /// as the `<label>` element. The first element in the
+            /// document with an id matching the value of the for
+            /// attribute is the labeled control for this label
+            /// element, if it is a labelable element. If it is not
+            /// labelable then the for attribute has no effect. If
+            /// there are other elements which also match the
             /// id value, later in the document, they are not considered.
             ///
             /// Note: A `<label>` element can have both a for attribute and a
@@ -3302,11 +3551,12 @@ html_element!(
             /// points to the contained control element.
             r#for: String,
 
-            /// The `<form>` element with which the label is associated (its form
-            /// owner). If specified, the value of the attribute is the id
-            /// of a `<form>` element in the same document. This
-            /// lets you place label elements anywhere within a document, not just
-            /// as descendants of their form elements.
+            /// The `<form>` element with which the label is associated (its
+            /// form owner). If specified, the value of the
+            /// attribute is the id of a `<form>` element in the
+            /// same document. This lets you place label elements
+            /// anywhere within a document, not just as descendants
+            /// of their form elements.
             form: String,
         };
     }
@@ -3320,7 +3570,9 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/legend
     /// [fieldset]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset
-    legend = { dom_type: web_sys::HtmlLegendElement;}
+    legend = {
+        dom_type: web_sys::HtmlLegendElement;
+    }
 );
 
 parent_element!(legend);
@@ -3330,18 +3582,19 @@ html_element!(
     /// within a known range or a fractional value.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meter
-    meter = { dom_type: web_sys::HtmlMeterElement;
+    meter = {
+        dom_type: web_sys::HtmlMeterElement;
         attributes {
             /// The current numeric value. This must be between the minimum and
             /// maximum values (min attribute and max attribute) if they are
             /// specified. If unspecified or malformed, the value is 0. If
-            /// specified, but not within the range given by the min attribute and
-            /// max attribute, the value is equal to the nearest end of the
-            /// range.
+            /// specified, but not within the range given by the min attribute
+            /// and max attribute, the value is equal to the nearest
+            /// end of the range.
             ///
-            /// Note: Unless the value attribute is between 0 and 1 (inclusive), the
-            /// min and max attributes should define the range so that the
-            /// value attribute's value is within it.
+            /// Note: Unless the value attribute is between 0 and 1 (inclusive),
+            /// the min and max attributes should define the range
+            /// so that the value attribute's value is within it.
             value: String,
 
             /// The lower numeric bound of the measured range. This must be less
@@ -3349,33 +3602,36 @@ html_element!(
             /// unspecified, the minimum value is 0.
             min: String,
 
-            /// The upper numeric bound of the measured range. This must be greater
-            /// than the minimum value (min attribute), if specified. If
-            /// unspecified, the maximum value is 1.
+            /// The upper numeric bound of the measured range. This must be
+            /// greater than the minimum value (min attribute), if
+            /// specified. If unspecified, the maximum value is 1.
             max: String,
 
-            /// The `<form>` element to associate the `<meter>` element with (its
-            /// form owner). The value of this attribute must be the id of a
-            /// `<form>` in the same document. If this attribute is not set,
-            /// the `<button>` is associated with its ancestor `<form>` element, if
+            /// The `<form>` element to associate the `<meter>` element with
+            /// (its form owner). The value of this attribute must
+            /// be the id of a `<form>` in the same document. If
+            /// this attribute is not set, the `<button>` is
+            /// associated with its ancestor `<form>` element, if
             /// any. This attribute is only used if the `<meter>` element is
             /// being used as a form-associated element, such as one
             /// displaying a range corresponding to an `<input type="number">`.
             form: String,
 
-            /// The upper numeric bound of the low end of the measured range. This
-            /// must be greater than the minimum value (min attribute), and
-            /// it also must be less than the high value and maximum value
-            /// (high attribute and max attribute, respectively), if any are
-            /// specified. If unspecified, or if less than the minimum
-            /// value, the low value is equal to the minimum value.
+            /// The upper numeric bound of the low end of the measured range.
+            /// This must be greater than the minimum value (min
+            /// attribute), and it also must be less than the high
+            /// value and maximum value (high attribute and max
+            /// attribute, respectively), if any are specified. If
+            /// unspecified, or if less than the minimum value, the
+            /// low value is equal to the minimum value.
             high: u32,
 
-            /// The lower numeric bound of the high end of the measured range. This
-            /// must be less than the maximum value (max attribute), and it
-            /// also must be greater than the low value and minimum value
-            /// (low attribute and min attribute, respectively), if any are
-            /// specified. If unspecified, or if greater than the maximum
+            /// The lower numeric bound of the high end of the measured range.
+            /// This must be less than the maximum value (max
+            /// attribute), and it also must be greater than the low
+            /// value and minimum value (low attribute and min
+            /// attribute, respectively), if any are specified. If
+            /// unspecified, or if greater than the maximum
             /// value, the high value is equal to the maximum value.
             low: u32,
 
@@ -3399,11 +3655,13 @@ html_element!(
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    optgroup = { dom_type: web_sys::HtmlOptGroupElement;
+    optgroup = {
+        dom_type: web_sys::HtmlOptGroupElement;
         attributes {
-            /// If set, none of the items in this option group is selectable. Often
-            /// browsers grey out such control and it won't receive any
-            /// browsing events, like mouse clicks or focus-related ones.
+            /// If set, none of the items in this option group is selectable.
+            /// Often browsers grey out such control and it won't
+            /// receive any browsing events, like mouse clicks or
+            /// focus-related ones.
             disabled: bool,
 
             /// The name of the group of options, which the browser can use when
@@ -3426,31 +3684,33 @@ html_element!(
     /// [select]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
     /// [optgroup]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup
     /// [datalist]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist
-    option = { dom_type: web_sys::HtmlOptionElement;
+    option = {
+        dom_type: web_sys::HtmlOptionElement;
         attributes {
-            /// If set, this option is not checkable. Often browsers grey out such
-            /// control and it won't receive any browsing event, like mouse
-            /// clicks or focus-related ones. If this attribute is not set,
-            /// the element can still be disabled if one of its ancestors is a
+            /// If set, this option is not checkable. Often browsers grey out
+            /// such control and it won't receive any browsing
+            /// event, like mouse clicks or focus-related ones. If
+            /// this attribute is not set, the element can still be
+            /// disabled if one of its ancestors is a
             /// disabled `<optgroup>` element.
             disabled: bool,
 
-            /// This attribute is text for the label indicating the meaning of the
-            /// option. If the label attribute isn't defined, its value is
-            /// that of the element text content.
+            /// This attribute is text for the label indicating the meaning of
+            /// the option. If the label attribute isn't defined,
+            /// its value is that of the element text content.
             label: String,
 
-            /// If present, indicates that the option is initially selected. If the
-            /// `<option>` element is the descendant of a `<select>` element
-            /// whose multiple attribute is not set, only one
-            /// single `<option>` of this `<select>` element may have the selected
-            /// attribute.
+            /// If present, indicates that the option is initially selected. If
+            /// the `<option>` element is the descendant of a
+            /// `<select>` element whose multiple attribute is not
+            /// set, only one single `<option>` of this `<select>`
+            /// element may have the selected attribute.
             selected: bool,
 
-            /// The content of this attribute represents the value to be submitted
-            /// with the form, should this option be selected. If this
-            /// attribute is omitted, the value is taken from the text
-            /// content of the option element.
+            /// The content of this attribute represents the value to be
+            /// submitted with the form, should this option be
+            /// selected. If this attribute is omitted, the value is
+            /// taken from the text content of the option element.
             value: String,
         };
     }
@@ -3464,22 +3724,24 @@ html_element!(
     /// outcome of a user action.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/output
-    output = { dom_type: web_sys::HtmlOutputElement;
+    output = {
+        dom_type: web_sys::HtmlOutputElement;
         attributes {
-            /// A space-separated list of other elements’ ids, indicating that those
-            /// elements contributed input values to (or otherwise affected)
-            /// the calculation.
+            /// A space-separated list of other elements’ ids, indicating that
+            /// those elements contributed input values to (or
+            /// otherwise affected) the calculation.
             r#for: String,
 
-            /// The `<form>` element to associate the output with (its form owner).
-            /// The value of this attribute must be the id of a `<form>` in
-            /// the same document. (If this attribute is not
-            /// set, the `<output>` is associated with its ancestor `<form>`
-            /// element, if any.)
+            /// The `<form>` element to associate the output with (its form
+            /// owner). The value of this attribute must be the id
+            /// of a `<form>` in the same document. (If this
+            /// attribute is not set, the `<output>` is associated
+            /// with its ancestor `<form>` element, if any.)
             ///
-            /// This attribute lets you associate `<output>` elements to `<form>`s
-            /// anywhere in the document, not just inside a `<form>`. It can
-            /// also override an ancestor `<form>` element.
+            /// This attribute lets you associate `<output>` elements to
+            /// `<form>`s anywhere in the document, not just inside
+            /// a `<form>`. It can also override an ancestor
+            /// `<form>` element.
             form: String,
 
             /// The element's name. Used in the form.elements API.
@@ -3496,7 +3758,8 @@ html_element!(
     /// bar.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress
-    progress = { dom_type: web_sys::HtmlProgressElement;
+    progress = {
+        dom_type: web_sys::HtmlProgressElement;
         attributes {
             /// This attribute describes how much work the task indicated by the
             /// progress element requires. The max attribute, if present,
@@ -3522,21 +3785,23 @@ html_element!(
     /// menu of options.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
-    select = { dom_type: web_sys::HtmlSelectElement;
+    select = {
+        dom_type: web_sys::HtmlSelectElement;
         attributes {
             /// A DOMString providing a hint for a user agent's autocomplete
             /// feature.
             autocomplete: String,
 
-            /// Lets you specify that a form control should have input focus when
-            /// the page loads. Only one form element in a document can have
-            /// the autofocus attribute.
+            /// Lets you specify that a form control should have input focus
+            /// when the page loads. Only one form element in a
+            /// document can have the autofocus attribute.
             autofocus: bool,
 
-            /// Indicates that the user cannot interact with the control. If this
-            /// attribute is not specified, the control inherits its setting
-            /// from the containing element, for example `<fieldset>`; if
-            /// there is no containing element with the disabled attribute set, then
+            /// Indicates that the user cannot interact with the control. If
+            /// this attribute is not specified, the control
+            /// inherits its setting from the containing element,
+            /// for example `<fieldset>`; if there is no containing
+            /// element with the disabled attribute set, then
             /// the control is enabled.
             disabled: bool,
 
@@ -3546,15 +3811,17 @@ html_element!(
             /// not set, the `<select>` is associated with its ancestor `<form>`
             /// element, if any.)
             ///
-            /// This attribute lets you associate `<select>` elements to `<form>`s
-            /// anywhere in the document, not just inside a `<form>`. It can
-            /// also override an ancestor `<form>` element.
+            /// This attribute lets you associate `<select>` elements to
+            /// `<form>`s anywhere in the document, not just inside
+            /// a `<form>`. It can also override an ancestor
+            /// `<form>` element.
             form: String,
 
-            /// Indicates that multiple options can be selected in the list. If it
-            /// is not specified, then only one option can be selected at a
-            /// time. When multiple is specified, most browsers will show a
-            /// scrolling list box instead of a single line dropdown.
+            /// Indicates that multiple options can be selected in the list. If
+            /// it is not specified, then only one option can be
+            /// selected at a time. When multiple is specified, most
+            /// browsers will show a scrolling list box instead of a
+            /// single line dropdown.
             multiple: bool,
 
             /// This attribute is used to specify the name of the control.
@@ -3583,15 +3850,16 @@ html_element!(
     /// or feedback form.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
-    textarea = { dom_type: web_sys::HtmlTextAreaElement;
+    textarea = {
+        dom_type: web_sys::HtmlTextAreaElement;
         attributes {
             /// This attribute indicates whether the value of the control can be
             /// automatically completed by the browser. Possible values are:
             ///
-            /// * off: The user must explicitly enter a value into this field for
-            ///   every use, or the
-            /// document provides its own auto-completion method; the browser does
-            /// not automatically complete the entry.
+            /// * off: The user must explicitly enter a value into this field
+            ///   for every use, or the
+            /// document provides its own auto-completion method; the browser
+            /// does not automatically complete the entry.
             /// * on: The browser can automatically complete the value based on
             ///   values that the user has
             /// entered during previous uses.
@@ -3599,52 +3867,58 @@ html_element!(
             /// If the autocomplete attribute is not specified on a `<textarea>`
             /// element, then the browser uses the autocomplete attribute
             /// value of the `<textarea>` element's form owner.
-            /// The form owner is either the `<form>` element that this `<textarea>`
-            /// element is a descendant of or the form element whose id is
-            /// specified by the form attribute of the input element. For
-            /// more information, see the autocomplete attribute in `<form>`.
+            /// The form owner is either the `<form>` element that this
+            /// `<textarea>` element is a descendant of or the form
+            /// element whose id is specified by the form attribute
+            /// of the input element. For more information, see the
+            /// autocomplete attribute in `<form>`.
             autocomplete: String,
 
-            /// Lets you specify that a form control should have input focus when
-            /// the page loads. Only one form-associated element in a
-            /// document can have this attribute specified.
+            /// Lets you specify that a form control should have input focus
+            /// when the page loads. Only one form-associated
+            /// element in a document can have this attribute
+            /// specified.
             autofocus: bool,
 
-            /// The visible width of the text control, in average character widths.
-            /// If it is not specified, the default value is 20.
+            /// The visible width of the text control, in average character
+            /// widths. If it is not specified, the default value is
+            /// 20.
             cols: u32,
 
-            /// Indicates that the user cannot interact with the control. If this
-            /// attribute is not specified, the control inherits its setting
-            /// from the containing element, for example `<fieldset>`; if
-            /// there is no containing element when the disabled attribute is set,
+            /// Indicates that the user cannot interact with the control. If
+            /// this attribute is not specified, the control
+            /// inherits its setting from the containing element,
+            /// for example `<fieldset>`; if there is no containing
+            /// element when the disabled attribute is set,
             /// the control is enabled.
             disabled: bool,
 
-            /// The form element that the `<textarea>` element is associated with
-            /// (its "form owner"). The value of the attribute must be the
-            /// id of a form element in the same document. If this attribute
-            /// is not specified, the `<textarea>` element must be a descendant of a
+            /// The form element that the `<textarea>` element is associated
+            /// with (its "form owner"). The value of the attribute
+            /// must be the id of a form element in the same
+            /// document. If this attribute is not specified, the
+            /// `<textarea>` element must be a descendant of a
             /// form element. This attribute enables you to place
             /// `<textarea>` elements anywhere within a document, not just
             /// as descendants of form elements.
             form: String,
 
-            /// The maximum number of characters (UTF-16 code units) that the user
-            /// can enter. If this value isn't specified, the user can enter
-            /// an unlimited number of characters.
+            /// The maximum number of characters (UTF-16 code units) that the
+            /// user can enter. If this value isn't specified, the
+            /// user can enter an unlimited number of characters.
             maxlength: u32,
 
-            /// The minimum number of characters (UTF-16 code units) required that
-            /// the user should enter.
+            /// The minimum number of characters (UTF-16 code units) required
+            /// that the user should enter.
             minlength: u32,
 
             /// The name of the control.
             name: String,
 
-            /// A hint to the user of what can be entered in the control. Carriage
-            /// returns or line-feeds within the placeholder text must be
-            /// treated as line breaks when rendering the hint.
+            /// A hint to the user of what can be entered in the control.
+            /// Carriage returns or line-feeds within the
+            /// placeholder text must be treated as line breaks when
+            /// rendering the hint.
             ///
             /// Note: Placeholders should only be used to show an example of the
             /// type of data that should be entered into a form; they are
@@ -3655,34 +3929,35 @@ html_element!(
             /// Indicates that the user cannot modify the value of the control.
             /// Unlike the disabled attribute, the readonly attribute does
             /// not prevent the user from clicking or selecting
-            /// in the control. The value of a read-only control is still submitted
-            /// with the form.
+            /// in the control. The value of a read-only control is still
+            /// submitted with the form.
             readonly: bool,
 
-            /// This attribute specifies that the user must fill in a value before
-            /// submitting a form.
+            /// This attribute specifies that the user must fill in a value
+            /// before submitting a form.
             required: String,
 
             /// The number of visible text lines for the control.
             rows: String,
 
-            /// Specifies whether the `<textarea>` is subject to spell checking by
-            /// the underlying browser/OS. the value can be:
+            /// Specifies whether the `<textarea>` is subject to spell checking
+            /// by the underlying browser/OS. the value can be:
             ///
-            /// * true: Indicates that the element needs to have its spelling and
-            ///   grammar checked.
+            /// * true: Indicates that the element needs to have its spelling
+            ///   and grammar checked.
             /// * default : Indicates that the element is to act according to a
             ///   default behavior,
             /// possibly based on the parent element's own spellcheck value.
-            /// * false : Indicates that the element should not be spell checked.
+            /// * false : Indicates that the element should not be spell
+            ///   checked.
             spellcheck: String,
 
             /// Indicates how the control wraps text. Possible values are:
             ///
             /// * hard: The browser automatically inserts line breaks (CR+LF) so
             ///   that each line has no
-            /// more than the width of the control; the cols attribute must also be
-            /// specified for this to take effect.
+            /// more than the width of the control; the cols attribute must also
+            /// be specified for this to take effect.
             /// * soft: The browser ensures that all line breaks in the value
             ///   consist of a CR+LF pair,
             /// but does not insert any additional line breaks.
@@ -3702,10 +3977,9 @@ html_element!(
     /// them together.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
-    slot = { dom_type: web_sys::HtmlSlotElement;
-        attributes {
-            name: String
-        };
+    slot = {
+        dom_type: web_sys::HtmlSlotElement;
+        attributes { name: String };
 
         events {
             /// The slotchange event is fired on an HTMLSlotElement instance

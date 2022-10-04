@@ -14,7 +14,8 @@ mod elements {
     parent_element!(ui5_card);
 
     html_element!(
-        ui5_card_header = { dom_type: web_sys::Element;
+        ui5_card_header = {
+            dom_type: web_sys::Element;
             attributes {
                 interactive: bool,
                 status: String,

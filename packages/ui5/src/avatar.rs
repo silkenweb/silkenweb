@@ -107,7 +107,8 @@ mod elements {
     use crate::icon::Icon;
 
     html_element!(
-        ui5_avatar = { dom_type: web_sys::HtmlElement;
+        ui5_avatar = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 accessible_name: String,
                 color_scheme: ColorScheme,

@@ -100,7 +100,8 @@ mod element {
     parent_element!(ui5_breadcrumbs);
 
     html_element!(
-        ui5_breadcrumbs_item = { dom_type: web_sys::HtmlElement;
+        ui5_breadcrumbs_item = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 accessible_name: String,
                 href: String,

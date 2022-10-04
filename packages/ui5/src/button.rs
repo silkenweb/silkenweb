@@ -26,13 +26,14 @@ mod element {
     use crate::icon::Icon;
 
     html_element!(
-        ui5_button = { dom_type: web_sys::HtmlElement;
+        ui5_button = {
+            dom_type: web_sys::HtmlElement;
             attributes {
                 accessible_name: String,
                 accessible_name_ref: String,
                 design: ButtonDesign,
-                disabled:bool,
-                icon : Icon,
+                disabled: bool,
+                icon: Icon,
                 icon_end: bool,
                 submits: bool,
                 tooltop: String,
