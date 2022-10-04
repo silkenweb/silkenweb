@@ -23,19 +23,20 @@ pub use web_sys;
 /// use silkenweb::elements::CustomEvent;
 ///
 /// // The types of the dom element and event carry through to the event handler.
-/// html_element!(my_html_element<web_sys::HtmlDivElement> {
+/// html_element!(my_html_element = {
+///     dom_type: web_sys::HtmlDivElement;
 ///     attributes {
 ///         my_attribute: String,
 ///         my_explicitly_named_attribute("MyExplicitlyNamedAttribute"): String
-///     }
+///     };
 ///
 ///     events {
 ///         my_event: web_sys::MouseEvent
-///     }
+///     };
 ///
 ///     custom_events {
 ///         my_custom_event: CustomEvent<web_sys::HtmlElement>,
-///     }
+///     };
 /// });
 ///
 /// let elem = my_html_element()
