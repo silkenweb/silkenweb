@@ -27,7 +27,6 @@
 use std::marker::PhantomData;
 
 use futures_signals::signal::{Signal, SignalExt};
-use paste::paste;
 use silkenweb_base::intern_str;
 use wasm_bindgen::JsCast;
 
@@ -64,17 +63,28 @@ impl<T> From<web_sys::CustomEvent> for CustomEvent<T> {
 }
 
 macro_rules! global_attributes {
-    ($(
-        $(#[$attr_meta:meta])*
-        $attr:ident: $typ:ty
-    ),* $(,)? ) => { paste!{
-        $crate::attributes![
-            $($(#[$attr_meta])*
-            #[doc = ""]
-            #[doc = "[MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-" $attr ")"]
-            $attr: $typ,)*
+    ($($t:tt)*) => {
+        attributes![
+            [
+                attribute_parent = (),
+                attribute_doc_macro = global_attribute_doc
+            ]
+
+            $($t)*
         ];
-    }};
+    };
+}
+
+macro_rules! global_attribute_doc {
+    ($element:expr, $name:expr) => {
+        concat!(
+            "The Global [",
+            $name,
+            "](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-",
+            $name,
+            ") Attribute"
+        )
+    };
 }
 
 fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> Option<String> {
@@ -338,4 +348,219 @@ pub trait ElementEvents: ElementBuilder {
         // cut: web_sys::ClipboardEvent,
         // paste: web_sys::ClipboardEvent,
     });
+}
+
+macro_rules! aria_attributes {
+    ($($t:tt)*) => {
+        attributes![
+            [
+                attribute_parent = (),
+                attribute_doc_macro = aria_attribute_doc
+            ]
+
+            $($t)*
+        ];
+    };
+}
+
+macro_rules! aria_attribute_doc {
+    ($element:expr, $name:expr) => {
+        concat!(
+            "The ARIA [",
+            $name,
+            "](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/",
+            $name,
+            ") Attribute"
+        )
+    };
+}
+
+pub trait AriaElement: ElementBuilder {
+    attributes![
+        /// The ARIA [role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
+        /// attribute
+        role: String,
+    ];
+    aria_attributes![
+        /// The aria-activedescendant attribute identifies the currently active
+        /// element when focus is on a composite widget, combobox, textbox,
+        /// group, or application.
+        aria_activedescendant: String,
+        /// In ARIA live regions, the global aria-atomic attribute indicates
+        /// whether assistive technologies such as a screen reader will present
+        /// all, or only parts of, the changed region based on the change
+        /// notifications defined by the aria-relevant attribute.
+        aria_atomic: String,
+        /// The aria-autocomplete attribute indicates whether inputting text
+        /// could trigger display of one or more predictions of the user's
+        /// intended value for a combobox, searchbox, or textbox and specifies
+        /// how predictions will be presented if they are made.
+        aria_autocomplete: String,
+        /// The global aria-braillelabel property defines a string value that
+        /// labels the current element, which is intended to be converted into
+        /// Braille.
+        aria_braillelabel: String,
+        /// The global aria-brailleroledescription attribute defines a
+        /// human-readable, author-localized abbreviated description for the
+        /// role of an element intended to be converted into Braille.
+        aria_brailleroledescription: String,
+        /// Used in ARIA live regions, the global aria-busy state indicates an
+        /// element is being modified and that assistive technologies may want
+        /// to wait until the changes are complete before informing the user
+        /// about the update.
+        aria_busy: String,
+        /// The aria-checked attribute indicates the current "checked" state of
+        /// checkboxes, radio buttons, and other widgets.
+        aria_checked: String,
+        /// The aria-colcount attribute defines the total number of columns in a
+        /// table, grid, or treegrid when not all columns are present in the
+        /// DOM.
+        aria_colcount: i64,
+        /// The aria-colindex attribute defines an element's column index or
+        /// position with respect to the total number of columns within a table,
+        /// grid, or treegrid.
+        aria_colindex: u64,
+        /// The aria-colindextext attribute defines a human readable text
+        /// alternative of the numeric aria-colindex.
+        aria_colindextext: String,
+        /// The aria-colspan attribute defines the number of columns spanned by
+        /// a cell or gridcell within a table, grid, or treegrid.
+        aria_colspan: u64,
+        /// The global aria-controls property identifies the element (or
+        /// elements) whose contents or presence are controlled by the element
+        /// on which this attribute is set.
+        aria_controls: String,
+        /// A non-null aria-current state on an element indicates that this
+        /// element represents the current item within a container or set of
+        /// related elements.
+        aria_current: String,
+        /// The global aria-describedby attribute identifies the element (or
+        /// elements) that describes the element on which the attribute is set.
+        aria_describedby: String,
+        /// The global aria-description attribute defines a string value that
+        /// describes or annotates the current element.
+        aria_description: String,
+        /// The global aria-details attribute identifies the element (or
+        /// elements) that provide additional information related to the object.
+        aria_details: String,
+        /// The aria-disabled state indicates that the element is perceivable
+        /// but disabled, so it is not editable or otherwise operable.
+        aria_disabled: String,
+        /// The aria-errormessage attribute on an object identifies the element
+        /// that provides an error message for that object.
+        aria_errormessage: String,
+        /// The aria-expanded attribute is set on an element to indicate if a
+        /// control is expanded or collapsed, and whether or not its child
+        /// elements are displayed or hidden.
+        aria_expanded: String,
+        /// The global aria-flowto attribute identifies the next element (or
+        /// elements) in an alternate reading order of content. This allows
+        /// assistive technology to override the general default of reading in
+        /// document source order at the user's discretion.
+        aria_flowto: String,
+        /// The aria-haspopup attribute indicates the availability and type of
+        /// interactive popup element that can be triggered by the element on
+        /// which the attribute is set.
+        aria_haspopup: String,
+        /// The aria-hidden state indicates whether the element is exposed to an
+        /// accessibility API.
+        aria_hidden: String,
+        /// The aria-invalid state indicates the entered value does not conform
+        /// to the format expected by the application.
+        aria_invalid: String,
+        /// The global aria-keyshortcuts attribute indicates keyboard shortcuts
+        /// that an author has implemented to activate or give focus to an
+        /// element.
+        aria_keyshortcuts: String,
+        /// The aria-label attribute defines a string value that labels an
+        /// interactive element.
+        aria_label: String,
+        /// The aria-labelledby attribute identifies the element (or elements)
+        /// that labels the element it is applied to.
+        aria_labelledby: String,
+        /// The aria-level attribute defines the hierarchical level of an
+        /// element within a structure.
+        aria_level: u64,
+        /// The global aria-live attribute indicates that an element will be
+        /// updated, and describes the types of updates the user agents,
+        /// assistive technologies, and user can expect from the live region.
+        aria_live: String,
+        /// The aria-modal attribute indicates whether an element is modal when
+        /// displayed.
+        aria_modal: String,
+        /// The aria-multiline attribute indicates whether a textbox accepts
+        /// multiple lines of input or only a single line.
+        aria_multiline: String,
+        /// The aria-multiselectable attribute indicates that the user may
+        /// select more than one item from the current selectable descendants.
+        aria_multiselectable: String,
+        /// The aria-orientation attribute indicates whether the element's
+        /// orientation is horizontal, vertical, or unknown/ambiguous.
+        aria_orientation: String,
+        /// The aria-owns attribute identifies an element (or elements) in order
+        /// to define a visual, functional, or contextual relationship between a
+        /// parent and its child elements when the DOM hierarchy cannot be used
+        /// to represent the relationship.
+        aria_owns: String,
+        /// The aria-placeholder attribute defines a short hint (a word or short
+        /// phrase) intended to help the user with data entry when a form
+        /// control has no value. The hint can be a sample value or a brief
+        /// description of the expected format.
+        aria_placeholder: String,
+        /// The aria-posinset attribute defines an element's number or position
+        /// in the current set of listitems or treeitems when not all items are
+        /// present in the DOM.
+        aria_posinset: u64,
+        /// The aria-pressed attribute indicates the current "pressed" state of
+        /// a toggle button.
+        aria_pressed: String,
+        /// The aria-readonly attribute indicates that the element is not
+        /// editable, but is otherwise operable.
+        aria_readonly: String,
+        /// Used in ARIA live regions, the global aria-relevant attribute
+        /// indicates what notifications the user agent will trigger when the
+        /// accessibility tree within a live region is modified.
+        aria_relevant: String,
+        /// The aria-required attribute indicates that user input is required on
+        /// the element before a form may be submitted.
+        aria_required: String,
+        /// The aria-roledescription attribute defines a human-readable,
+        /// author-localized description for the role of an element.
+        aria_roledescription: String,
+        /// The aria-rowcount attribute defines the total number of rows in a
+        /// table, grid, or treegrid.
+        aria_rowcount: i64,
+        /// The aria-rowindex attribute defines an element's position with
+        /// respect to the total number of rows within a table, grid, or
+        /// treegrid.
+        aria_rowindex: u64,
+        /// The aria-rowindextext attribute defines a human-readable text
+        /// alternative of aria-rowindex.
+        aria_rowindextext: String,
+        /// The aria-rowspan attribute defines the number of rows spanned by a
+        /// cell or gridcell within a table, grid, or treegrid.
+        aria_rowspan: u64,
+        /// The aria-selected attribute indicates the current "selected" state
+        /// of various widgets.
+        aria_selected: String,
+        /// The aria-setsize attribute defines the number of items in the
+        /// current set of listitems or treeitems when not all items in the set
+        /// are present in the DOM.
+        aria_setsize: i64,
+        /// The aria-sort attribute indicates if items in a table or grid are
+        /// sorted in ascending or descending order.
+        aria_sort: String,
+        /// The aria-valuemax attribute defines the maximum allowed value for a
+        /// range widget.
+        aria_valuemax: f64,
+        /// The aria-valuemin attribute defines the minimum allowed value for a
+        /// range widget.
+        aria_valuemin: f64,
+        /// The aria-valuenow attribute defines the current value for a range
+        /// widget.
+        aria_valuenow: f64,
+        /// The aria-valuetext attribute defines the human readable text
+        /// alternative of aria-valuenow for a range widget.
+        aria_valuetext: String,
+    ];
 }

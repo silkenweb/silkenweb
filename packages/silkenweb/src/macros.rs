@@ -54,7 +54,7 @@ macro_rules! html_element {
     ) => {
         $crate::dom_element!(
             $name $( ($text_name) )? = {
-                common_attributes = [$crate::elements::HtmlElement];
+                common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
                 doc = [$(#[$elem_meta])*];
                 $($tail)*
@@ -72,7 +72,7 @@ macro_rules! svg_element {
     ) => {
         $crate::dom_element!(
             $name $( ($text_name) )? = {
-                common_attributes = [$crate::elements::svg::attributes::Global];
+                common_attributes = [$crate::elements::svg::attributes::Global, $crate::elements::AriaElement];
                 common_events = [];
                 doc_macro = svg_element_doc;
                 attribute_doc_macro = svg_attribute_doc;
