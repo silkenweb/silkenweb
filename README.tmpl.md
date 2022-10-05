@@ -12,6 +12,7 @@ A library for building reactive web apps.
 
 - No VDOM. Fine grained reactivity using signals to minimize DOM API calls.
 - Uses plain Rust syntax rather than a macro DSL.
+- Routing.
 - [Tauri support](https://github.com/silkenweb/tauri-example)
 - Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
 - Downcasts Js objects for you, where the type is known at compile time. For example, `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
@@ -50,9 +51,9 @@ There are many advantages to using plain Rust syntax:
 - Excellent compiler errors, courtesy of `rustc`.
 - Use Rust's well thought out, composable abstractions. Need control flow in your components? Use `if`, `match`, `dyn traits`, or whatever else Rust provides.
 
-Of course the downside is that syntax is unlikely to be quite as good as a dedicated macro DSL. It's also possible that a sufficiently well thought out and mature macro DSL could also provide great compiler errors and abstractions that compose well with Rust.
-
 There's nothing to stop a macro DSL being built on top of Silkenweb, to complement the builder APIs.
+
+The advantage of using a macro DSL is that syntax is tailored to defining document structure. Rust syntax is fairly well suited to this, so it's not much of a benefit in reality.
 
 ## Learning
 
@@ -60,3 +61,17 @@ There's nothing to stop a macro DSL being built on top of Silkenweb, to compleme
 - Check out the [examples](https://github.com/silkenweb/silkenweb/tree/main/examples) folder
 - [futures-signals tutorial](https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html)
 - Feel free to ask any questions on our [Discord](https://discord.gg/usSUczZ5ua) channel.
+
+## Pre Built Examples
+
+[animation](https://silkenweb.netlify.app/examples/animation)
+[async-http-request](https://silkenweb.netlify.app/examples/async-http-request)
+[counter](https://silkenweb.netlify.app/examples/counter)
+[counter-list](https://silkenweb.netlify.app/examples/counter-list)
+[element-handle](https://silkenweb.netlify.app/examples/element-handle)
+[hackernews-clone](https://silkenweb.netlify.app/examples/hackernews-clone)
+[hello-world](https://silkenweb.netlify.app/examples/hello-world)
+[hydration](https://silkenweb.netlify.app/examples/hydration)
+[router](https://silkenweb.netlify.app/examples/router)
+[todomvc](https://silkenweb.netlify.app/examples/todomvc)
+[ui5-showcase](https://silkenweb.netlify.app/examples/ui5-showcase)
