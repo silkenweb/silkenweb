@@ -7,6 +7,7 @@ use self::{
     },
     content_type::{AutoOrLength, Length},
 };
+use crate::elements::svg::content_type::NumberOrPercentage;
 
 pub mod attributes;
 pub mod content_type;
@@ -215,7 +216,11 @@ svg_element!(
     fe_blend("feBlend") = {
         dom_type: web_sys::SvgfeBlendElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            in2: String,
+            mode: String,
+        };
     }
 );
 
@@ -229,7 +234,11 @@ svg_element!(
     fe_color_matrix("feColorMatrix") = {
         dom_type: web_sys::SvgfeColorMatrixElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            r#type: String,
+            values: String,
+        };
     }
 );
 
@@ -243,7 +252,7 @@ svg_element!(
     fe_component_transfer("feComponentTransfer") = {
         dom_type: web_sys::SvgfeComponentTransferElement;
 
-        attributes {};
+        attributes { r#in: String };
     }
 );
 
@@ -257,7 +266,15 @@ svg_element!(
     fe_composite("feComposite") = {
         dom_type: web_sys::SvgfeCompositeElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            in2: String,
+            operator: String,
+            k1: f64,
+            k2: f64,
+            k3: f64,
+            k4: f64,
+        };
     }
 );
 
@@ -271,7 +288,17 @@ svg_element!(
     fe_convolve_matrix("feConvolveMatrix") = {
         dom_type: web_sys::SvgfeConvolveMatrixElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            order: String,
+            kernel_matrix("kernelMatrix"): String,
+            divisor: f64,
+            bias: f64,
+            target_x("targetX"): u64,
+            target_y("targetY"): u64,
+            edge_mode("edgeMode"): String,
+            preserve_alpha("preserveAlpha"): bool,
+        };
     }
 );
 
@@ -285,7 +312,11 @@ svg_element!(
     fe_diffuse_lighting("feDiffuseLighting") = {
         dom_type: web_sys::SvgfeDiffuseLightingElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            surface_scale("surfaceScale"): f64,
+            diffuse_constant("diffuseConstant"): f64,
+        };
     }
 );
 
@@ -299,7 +330,13 @@ svg_element!(
     fe_displacement_map("feDisplacementMap") = {
         dom_type: web_sys::SvgfeDisplacementMapElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            in2: String,
+            scale: f64,
+            x_channel_selector("xChannelSelector"): String,
+            y_channel_selector("yChannelSelector"): String,
+        };
     }
 );
 
@@ -313,7 +350,10 @@ svg_element!(
     fe_distant_light("feDistantLight") = {
         dom_type: web_sys::SvgfeDistantLightElement;
 
-        attributes {};
+        attributes {
+            azimuth: f64,
+            elevation: f64,
+        };
     }
 );
 
@@ -323,7 +363,10 @@ svg_element!(
     fe_flood("feFlood") = {
         dom_type: web_sys::SvgfeFloodElement;
 
-        attributes {};
+        attributes {
+            flood_color: String,
+            flood_opacity: NumberOrPercentage,
+        };
     }
 );
 
@@ -385,7 +428,11 @@ svg_element!(
     fe_gaussian_blur("feGaussianBlur") = {
         dom_type: web_sys::SvgfeGaussianBlurElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            std_deviation("stdDeviation"): String,
+            edge_mode("edgeMode"): String,
+        };
     }
 );
 
@@ -399,7 +446,9 @@ svg_element!(
     fe_image("feImage") = {
         dom_type: web_sys::SvgfeImageElement;
 
-        attributes {};
+        attributes {
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+        };
     }
 );
 
@@ -427,7 +476,7 @@ svg_element!(
     fe_merge_node("feMergeNode") = {
         dom_type: web_sys::SvgfeMergeNodeElement;
 
-        attributes {};
+        attributes { r#in: String };
     }
 );
 
@@ -437,7 +486,11 @@ svg_element!(
     fe_morphology("feMorphology") = {
         dom_type: web_sys::SvgfeMorphologyElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            operator: String,
+            radius: String,
+        };
     }
 );
 
@@ -451,7 +504,11 @@ svg_element!(
     fe_offset("feOffset") = {
         dom_type: web_sys::SvgfeOffsetElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            dx: f64,
+            dy: f64,
+        };
     }
 );
 
@@ -465,7 +522,11 @@ svg_element!(
     fe_point_light("fePointLight") = {
         dom_type: web_sys::SvgfePointLightElement;
 
-        attributes {};
+        attributes {
+            x: f64,
+            y: f64,
+            z: f64,
+        };
     }
 );
 
@@ -475,7 +536,12 @@ svg_element!(
     fe_specular_lighting("feSpecularLighting") = {
         dom_type: web_sys::SvgfeSpecularLightingElement;
 
-        attributes {};
+        attributes {
+            r#in: String,
+            surface_scale("surfaceScale"): f64,
+            specular_constant("specularConstant"): f64,
+            specular_exponent("specularExponent"): f64,
+        };
     }
 );
 
@@ -489,7 +555,16 @@ svg_element!(
     fe_spot_light("feSpotLight") = {
         dom_type: web_sys::SvgfeSpotLightElement;
 
-        attributes {};
+        attributes {
+            x: f64,
+            y: f64,
+            z: f64,
+            points_at_x("pointsAtX"): f64,
+            points_at_y("pointsAtY"): f64,
+            points_at_z("pointsAtZ"): f64,
+            specular_exponent("specularExponent"): f64,
+            limiting_cone_angle("limitingConeAngle"): f64,
+        };
     }
 );
 
@@ -503,7 +578,7 @@ svg_element!(
     fe_tile("feTile") = {
         dom_type: web_sys::SvgfeTileElement;
 
-        attributes {};
+        attributes { r#in: String };
     }
 );
 
@@ -517,7 +592,13 @@ svg_element!(
     fe_turbulence("feTurbulence") = {
         dom_type: web_sys::SvgfeTurbulenceElement;
 
-        attributes {};
+        attributes {
+            base_frequency("baseFrequency"): String,
+            num_octaves("numOctaves"): u64,
+            seed: f64,
+            stitch_tiles("stitchTiles"): String,
+            r#type: String,
+        };
     }
 );
 
