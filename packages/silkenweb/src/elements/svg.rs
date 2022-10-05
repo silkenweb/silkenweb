@@ -86,6 +86,52 @@ impl AnimationValue for AnimateBuilder {}
 impl OtherAnimation for AnimateBuilder {}
 
 svg_element!(
+    circle = {
+        dom_type: web_sys::SvgCircleElement;
+        attributes {
+            /// The x-axis coordinate of the center of the circle. Value type:
+            /// <length>|<percentage> ; Default value: 0; Animatable: yes
+            cx: Length,
+
+            /// The y-axis coordinate of the center of the circle. Value type:
+            /// <length>|<percentage> ; Default value: 0; Animatable: yes
+            cy: Length,
+
+            /// The radius of the circle. A value lower or equal to zero
+            /// disables rendering of the circle. Value type:
+            /// <length>|<percentage> ; Default value: 0; Animatable: yes
+            r: Length,
+
+            /// The total length for the circle's circumference, in user units.
+            /// Value type: <number> ; Default value: none; Animatable: yes
+            path_length("pathLength"): f64,
+        };
+    }
+);
+
+impl ConditionalProcessing for CircleBuilder {}
+impl Presentation for CircleBuilder {}
+
+parent_element!(circle);
+
+svg_element!(
+    clip_path("clipPath") = {
+        dom_type: web_sys::SvgClipPathElement;
+        attributes {
+            /// Defines the coordinate system for the contents of the <clipPath>
+            /// element. Value type: userSpaceOnUse|objectBoundingBox ; Default
+            /// value: userSpaceOnUse; Animatable: yes
+            clip_path_units("clipPathUnits"): String,
+        };
+    }
+);
+
+impl ConditionalProcessing for ClipPathBuilder {}
+impl Presentation for ClipPathBuilder {}
+
+parent_element!(clip_path);
+
+svg_element!(
     /// The <defs> element is used to store graphical objects that will be used
     /// at a later time. Objects created inside a <defs> element are not
     /// rendered directly. To display them you have to reference them (with a
