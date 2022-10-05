@@ -648,7 +648,31 @@ svg_element!(
     line = {
         dom_type: web_sys::SvgLineElement;
 
-        attributes {};
+        attributes {
+            /// Defines the x-axis coordinate of the line starting point. Value
+            /// type: <length>|<percentage>|<number> ; Default value: 0;
+            /// Animatable: yes
+            x1: f64,
+
+            /// Defines the x-axis coordinate of the line ending point. Value
+            /// type: <length>|<percentage>|<number> ; Default value: 0;
+            /// Animatable: yes
+            x2: f64,
+
+            /// Defines the y-axis coordinate of the line starting point. Value
+            /// type: <length>|<percentage>|<number> ; Default value: 0;
+            /// Animatable: yes
+            y1: f64,
+
+            /// Defines the y-axis coordinate of the line ending point. Value
+            /// type: <length>|<percentage>|<number> ; Default value: 0;
+            /// Animatable: yes
+            y2: f64,
+
+            /// Defines the total path length in user units. Value type:
+            /// <number> ; Default value: none; Animatable: yes
+            path_length("pathLength"): f64,
+        };
     }
 );
 
@@ -658,22 +682,52 @@ impl ConditionalProcessing for LineBuilder {}
 impl Presentation for LineBuilder {}
 
 svg_element!(
-    linear_gradient("linearGradient") = {
-        dom_type: web_sys::SvgLinearGradientElement;
-
-        attributes {};
-    }
-);
-
-parent_element!(linear_gradient);
-
-impl Presentation for LinearGradientBuilder {}
-
-svg_element!(
     marker = {
         dom_type: web_sys::SvgMarkerElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines the height of the marker viewport. Value
+            /// type: <length> ; Default value: 3; Animatable: yes
+            marker_height("markerHeight"): Length,
+
+            /// This attribute defines the coordinate system for the attributes
+            /// markerWidth, markerHeight and the contents of the <marker>.
+            /// Value type: userSpaceOnUse|strokeWidth ; Default value:
+            /// strokeWidth; Animatable: yes
+            marker_units("markerUnits"): String,
+
+            /// This attribute defines the width of the marker viewport. Value
+            /// type: <length> ; Default value: 3; Animatable: yes
+            marker_width("markerWidth"): Length,
+
+            /// This attribute defines the orientation of the marker relative to
+            /// the shape it is attached to. Value type:
+            /// auto|auto-start-reverse|<angle> ; Default value: 0; Animatable:
+            /// yes
+            orient: String,
+
+            /// This attribute defines how the svg fragment must be deformed if
+            /// it is embedded in a container with a different aspect ratio.
+            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid|
+            /// xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)?
+            /// ; Default value: xMidYMid meet; Animatable: yes
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// This attribute defines the x coordinate for the reference point
+            /// of the marker. Value type: left|center|right|<coordinate> ;
+            /// Default value: 0; Animatable: yes
+            ref_x("refX"): String,
+
+            /// This attribute defines the y coordinate for the reference point
+            /// of the marker. Value type: top|center|bottom|<coordinate> ;
+            /// Default value: 0; Animatable: yes
+            ref_y("refY"): String,
+
+            /// This attribute defines the bound of the SVG viewport for the
+            /// current SVG fragment. Value type: <list-of-numbers> ; Default
+            /// value: none; Animatable: yes
+            view_box("viewBox"): String,
+        };
     }
 );
 
@@ -686,7 +740,36 @@ svg_element!(
     mask = {
         dom_type: web_sys::SvgMaskElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines the height of the masking area. Value
+            /// type: <length> ; Default value: 120%; Animatable: yes
+            height: Length,
+
+            /// This attribute defines the coordinate system for the contents of
+            /// the <mask>. Value type: userSpaceOnUse|objectBoundingBox ;
+            /// Default value: userSpaceOnUse; Animatable: yes
+            mask_content_units("maskContentUnits"): String,
+
+            /// This attribute defines the coordinate system for attributes x,
+            /// y, width and height on the <mask>. Value type:
+            /// userSpaceOnUse|objectBoundingBox ; Default value:
+            /// objectBoundingBox; Animatable: yes
+            mask_units("maskUnits"): String,
+
+            /// This attribute defines the x-axis coordinate of the top-left
+            /// corner of the masking area. Value type: <coordinate> ; Default
+            /// value: -10%; Animatable: yes
+            x: Length,
+
+            /// This attribute defines the y-axis coordinate of the top-left
+            /// corner of the masking area. Value type: <coordinate> ; Default
+            /// value: -10%; Animatable: yes
+            y: Length,
+
+            /// This attribute defines the width of the masking area. Value
+            /// type: <length> ; Default value: 120%; Animatable: yes
+            width: Length,
+        };
     }
 );
 
@@ -719,7 +802,61 @@ svg_element!(
     pattern = {
         dom_type: web_sys::SvgPatternElement;
 
-        attributes {};
+        attributes {
+            /// This attribute determines the height of the pattern tile. Value
+            /// type: <length>|<percentage>; Default value: 0; Animatable: yes
+            height: Length,
+
+            /// This attribute reference a template pattern that provides
+            /// default values for the <pattern> attributes. Value type: <URL>;
+            /// Default value: none; Animatable: yes
+            href: String,
+
+            /// This attribute defines the coordinate system for the contents of
+            /// the <pattern>. Value type: userSpaceOnUse|objectBoundingBox;
+            /// Default value: userSpaceOnUse; Animatable: yes Note:
+            /// This attribute has no effect if a viewBox attribute is specified
+            /// on the <pattern> element.
+            pattern_content_units("patternContentUnits"): String,
+
+            /// This attribute contains the definition of an optional additional
+            /// transformation from the pattern coordinate system onto the
+            /// target coordinate system. Value type: <transform-list>; Default
+            /// value: none; Animatable: yes
+            pattern_transform("patternTransform"): String,
+
+            /// This attribute defines the coordinate system for attributes x,
+            /// y, width, and height. Value type:
+            /// userSpaceOnUse|objectBoundingBox; Default value:
+            /// objectBoundingBox; Animatable: yes
+            pattern_units("patternUnits"): String,
+
+            /// This attribute defines how the SVG fragment must be deformed if
+            /// it is embedded in a container with a different aspect ratio.
+            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid|
+            /// xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)?
+            /// ; Default value: xMidYMid meet; Animatable: yes
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// This attribute defines the bound of the SVG viewport for the
+            /// pattern fragment. Value type: <list-of-numbers> ; Default value:
+            /// none; Animatable: yes
+            view_box("viewBox"): String,
+
+            /// This attribute determines the width of the pattern tile. Value
+            /// type: <length>|<percentage> ; Default value: 0; Animatable: yes
+            width: Length,
+
+            /// This attribute determines the x coordinate shift of the pattern
+            /// tile. Value type: <length>|<percentage> ; Default value: 0;
+            /// Animatable: yes
+            x: Length,
+
+            /// This attribute determines the y coordinate shift of the pattern
+            /// tile. Value type: <length>|<percentage> ; Default value: 0;
+            /// Animatable: yes
+            y: Length,
+        };
     }
 );
 
@@ -732,7 +869,17 @@ svg_element!(
     polygon = {
         dom_type: web_sys::SvgPolygonElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines the list of points (pairs of x,y absolute
+            /// coordinates) required to draw the polygon. Value type: <number>+
+            /// ; Default value: ""; Animatable: yes
+            points: String,
+
+            /// This attribute lets specify the total length for the path, in
+            /// user units. Value type: <number> ; Default value: none;
+            /// Animatable: yes
+            path_length("pathLength"): f64,
+        };
     }
 );
 
@@ -745,7 +892,17 @@ svg_element!(
     polyline = {
         dom_type: web_sys::SvgPolylineElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines the list of points (pairs of x,y absolute
+            /// coordinates) required to draw the polyline Value type: <number>+
+            /// ; Default value: ""; Animatable: yes
+            points: String,
+
+            /// This attribute lets specify the total length for the path, in
+            /// user units. Value type: <number> ; Default value: none;
+            /// Animatable: yes
+            path_length("pathLength"): f64,
+        };
     }
 );
 
@@ -758,7 +915,21 @@ svg_element!(
     script = {
         dom_type: web_sys::SvgScriptElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines CORS settings as define for the HTML
+            /// <script> element. Value type: <string>; Default value: ?;
+            /// Animatable: yes
+            crossorigin: String,
+
+            /// The URL to the script to load. Value type: <URL> ; Default
+            /// value: none; Animatable: no
+            href: String,
+
+            /// This attribute defines type of the script language to use. Value
+            /// type: <string>; Default value: application/ecmascript;
+            /// Animatable: no
+            r#type: String,
+        };
     }
 );
 
@@ -768,7 +939,13 @@ svg_element!(
     set = {
         dom_type: web_sys::SvgSetElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines the value to be applied to the target
+            /// attribute for the duration of the animation. The value must
+            /// match the requirements of the target attribute. Value type:
+            /// <anything>; Default value: none; Animatable: no
+            to: String,
+        };
     }
 );
 
@@ -781,7 +958,23 @@ svg_element!(
     stop = {
         dom_type: web_sys::SvgStopElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines where the gradient stop is placed along
+            /// the gradient vector. Value type: <number>|<percentage>; Default
+            /// value: 0; Animatable: yes
+            offset: Length,
+
+            /// This attribute defines the color of the gradient stop. It can be
+            /// used as a CSS property. Value type:
+            /// currentcolor|<color>|<icccolor>; Default value: black;
+            /// Animatable: yes
+            stop_color: String,
+
+            /// This attribute defines the opacity of the gradient stop. It can
+            /// be used as a CSS property. Value type: <opacity>; Default value:
+            /// 1; Animatable: yes
+            stop_opacity: f64,
+        };
     }
 );
 
@@ -793,7 +986,21 @@ svg_element!(
     style = {
         dom_type: web_sys::SvgStyleElement;
 
-        attributes {};
+        attributes {
+            /// This attribute defines type of the style sheet language to use
+            /// as a media type string. Value type: <string>; Default value:
+            /// text/css; Animatable: no
+            r#type: String,
+
+            /// This attribute defines to which media the style applies. Value
+            /// type: <string>; Default value: all; Animatable: no
+            media: String,
+
+            /// This attribute the title of the style sheet which can be used to
+            /// switch between alternate style sheets. Value type: <string>;
+            /// Default value: none; Animatable: no
+            title: String,
+        };
     }
 );
 
@@ -816,7 +1023,47 @@ svg_element!(
     symbol = {
         dom_type: web_sys::SvgSymbolElement;
 
-        attributes {};
+        attributes {
+            /// This attribute determines the height of the symbol. Value type:
+            /// <length>|<percentage> ; Default value: auto; Animatable: yes
+            height: Length,
+
+            /// This attribute defines how the svg fragment must be deformed if
+            /// it is embedded in a container with a different aspect ratio.
+            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid|
+            /// xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)?
+            /// ; Default value: xMidYMid meet; Animatable: yes
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// This attribute determines the x coordinate of the reference
+            /// point of the symbol. Value type:
+            /// <length>|<percentage>|left|center|right ; Default value: None;
+            /// Animatable: yes
+            ref_x("refX"): String,
+
+            /// This attribute determines the y coordinate of the reference
+            /// point of the symbol. Value type:
+            /// <length>|<percentage>|top|center|bottom ; Default value: None;
+            /// Animatable: yes
+            ref_y("refY"): String,
+
+            /// This attribute defines the bound of the SVG viewport for the
+            /// current symbol. Value type: <list-of-numbers> ; Default value:
+            /// none; Animatable: yes
+            view_box("viewBox"): String,
+
+            /// This attribute determines the width of the symbol. Value type:
+            /// <length>|<percentage> ; Default value: auto; Animatable: yes
+            width: Length,
+
+            /// This attribute determines the x coordinate of the symbol. Value
+            /// type: <length>|<percentage> ; Default value: 0; Animatable: yes
+            x: Length,
+
+            /// This attribute determines the y coordinate of the symbol. Value
+            /// type: <length>|<percentage> ; Default value: 0; Animatable: yes
+            y: Length,
+        };
     }
 );
 
@@ -828,7 +1075,42 @@ svg_element!(
     text = {
         dom_type: web_sys::SvgTextElement;
 
-        attributes {};
+        attributes {
+            /// The x coordinate of the starting point of the text baseline.
+            /// Value type: <length>|<percentage> ; Default value: 0;
+            /// Animatable: yes
+            x: Length,
+
+            /// The y coordinate of the starting point of the text baseline.
+            /// Value type: <length>|<percentage> ; Default value: 0;
+            /// Animatable: yes
+            y: Length,
+
+            /// Shifts the text position horizontally from a previous text
+            /// element. Value type: <length>|<percentage> ; Default value:
+            /// none; Animatable: yes
+            dx: Length,
+
+            /// Shifts the text position vertically from a previous text
+            /// element. Value type: <length>|<percentage> ; Default value:
+            /// none; Animatable: yes
+            dy: Length,
+
+            /// Rotates orientation of each individual glyph. Can rotate glyphs
+            /// individually. Value type: <list-of-number> ; Default value:
+            /// none; Animatable: yes
+            rotate: String,
+
+            /// How the text is stretched or compressed to fit the width defined
+            /// by the textLength attribute. Value type:
+            /// spacing|spacingAndGlyphs; Default value: spacing; Animatable:
+            /// yes
+            length_adjust("lengthAdjust"): String,
+
+            /// A width that the text should be scaled to fit. Value type:
+            /// <length>|<percentage> ; Default value: none; Animatable: yes
+            text_length("textLength"): Length,
+        };
     }
 );
 
@@ -841,7 +1123,45 @@ svg_element!(
     text_path("textPath") = {
         dom_type: web_sys::SvgTextPathElement;
 
-        attributes {};
+        attributes {
+            /// The URL to the path or basic shape on which to render the text.
+            /// If the path attribute is set, href has no effect. Value type:
+            /// <URL> ; Default value: none; Animatable: yes
+            href: String,
+
+            /// Where length adjustment should be applied to the text: the space
+            /// between glyphs, or both the space and the glyphs themselves.
+            /// Value type: spacing|spacingAndGlyphs; Default value: spacing;
+            /// Animatable: yes
+            length_adjust("lengthAdjust"): String,
+
+            /// Which method to render individual glyphs along the path. Value
+            /// type: align|stretch ; Default value: align; Animatable: yes
+            method: String,
+
+            /// The path on which the text should be rendered. Value type:
+            /// <path_data> ; Default value: none; Animatable: yes
+            path: String,
+
+            /// Which side of the path the text should be rendered. Value type:
+            /// left|right ; Default value: left; Animatable: yes
+            side: String,
+
+            /// How space between glyphs should be handled. Value type:
+            /// auto|exact ; Default value: exact; Animatable: yes
+            spacing: String,
+
+            /// How far the beginning of the text should be offset from the
+            /// beginning of the path. Value type:
+            /// <length>|<percentage>|<number> ; Default value: 0; Animatable:
+            /// yes
+            start_offset("startOffset"): Length,
+
+            /// The width of the space into which the text will render. Value
+            /// type: <length>|<percentage>|<number> ; Default value: auto;
+            /// Animatable: yes
+            text_length("textLength"): Length,
+        };
     }
 );
 
@@ -864,7 +1184,42 @@ svg_element!(
     tspan = {
         dom_type: web_sys::SvgtSpanElement;
 
-        attributes {};
+        attributes {
+            /// The x coordinate of the starting point of the text baseline.
+            /// Value type: <length>|<percentage> ; Default value: none;
+            /// Animatable: yes
+            x: Length,
+
+            /// The y coordinate of the starting point of the text baseline.
+            /// Value type: <length>|<percentage> ; Default value: none;
+            /// Animatable: yes
+            y: Length,
+
+            /// Shifts the text position horizontally from a previous text
+            /// element. Value type: <length>|<percentage> ; Default value:
+            /// none; Animatable: yes
+            dx: Length,
+
+            /// Shifts the text position vertically from a previous text
+            /// element. Value type: <length>|<percentage> ; Default value:
+            /// none; Animatable: yes
+            dy: Length,
+
+            /// Rotates orientation of each individual glyph. Can rotate glyphs
+            /// individually. Value type: <list-of-number> ; Default value:
+            /// none; Animatable: yes
+            rotate: String,
+
+            /// How the text is stretched or compressed to fit the width defined
+            /// by the textLength attribute. Value type:
+            /// spacing|spacingAndGlyphs; Default value: spacing; Animatable:
+            /// yes
+            length_adjust("lengthAdjust"): String,
+
+            /// A width that the text should be scaled to fit. Value type:
+            /// <length>|<percentage> ; Default value: none; Animatable: yes
+            text_length("textLength"): Length,
+        };
     }
 );
 
@@ -877,7 +1232,10 @@ svg_element!(
     view = {
         dom_type: web_sys::SvgViewElement;
 
-        attributes {};
+        attributes {
+            view_box("viewBox"): String,
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+        };
     }
 );
 
