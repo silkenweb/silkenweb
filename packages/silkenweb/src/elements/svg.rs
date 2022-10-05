@@ -645,6 +645,21 @@ parent_element!(foreign_object);
 impl ConditionalProcessing for ForeignObjectBuilder {}
 
 svg_element!(
+    /// The <g> SVG element is a container used to group other SVG elements.
+    ///
+    /// Transformations applied to the <g> element are performed on its child
+    /// elements, and its attributes are inherited by its children. It can also
+    /// group multiple elements to be referenced later with the <use> element.
+    g = {
+        dom_type: web_sys::SvggElement;
+    }
+);
+
+parent_element!(g);
+impl ConditionalProcessing for GBuilder {}
+impl Presentation for GBuilder {}
+
+svg_element!(
     line = {
         dom_type: web_sys::SvgLineElement;
 
@@ -799,6 +814,24 @@ svg_element!(
 parent_element!(mpath);
 
 svg_element!(
+    /// The `path` SVG element is the generic element to define a shape. All the
+    /// basic shapes can be created with a path element.
+    path  = { dom_type: web_sys::SvgPathElement;
+        attributes {
+            /// This attribute lets authors specify the total length for the
+            /// path, in user units.
+            /// Value type: <number> ; Default value: none; Animatable: yes
+            path_length("pathLength"): f64,
+        };
+    }
+);
+
+impl ConditionalProcessing for PathBuilder {}
+impl Presentation for PathBuilder {}
+
+parent_element!(path);
+
+svg_element!(
     pattern = {
         dom_type: web_sys::SvgPatternElement;
 
@@ -912,6 +945,50 @@ impl ConditionalProcessing for PolylineBuilder {}
 impl Presentation for PolylineBuilder {}
 
 svg_element!(
+    /// The <rect> element is a basic SVG shape that draws rectangles, defined
+    /// by their position, width, and height. The rectangles may have their
+    /// corners rounded.
+    rect  = { dom_type: web_sys::SvgRectElement;
+        attributes {
+            /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
+            /// value: 0; Animatable: yes
+            x: Length,
+
+            /// The y coordinate of the rect. Value type: <length>|<percentage> ; Default
+            /// value: 0; Animatable: yes
+            y: Length,
+
+            /// The width of the rect. Value type: auto|<length>|<percentage> ; Default
+            /// value: auto; Animatable: yes
+            width: Length,
+
+            /// The height of the rect. Value type: auto|<length>|<percentage> ; Default
+            /// value: auto; Animatable: yes
+            height: Length,
+
+            /// The horizontal corner radius of the rect. Defaults to ry if it is specified.
+            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
+            rx: Length,
+
+            /// The vertical corner radius of the rect. Defaults to rx if it is specified.
+            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
+            ry: Length,
+
+            /// The total length of the rectangle's perimeter, in user units. Value type:
+            /// <number> ; Default value: none; Animatable: yes
+            path_length("pathLength"): f64,
+        };
+    }
+);
+
+impl ConditionalProcessing for RectBuilder {}
+impl Presentation for RectBuilder {}
+
+parent_element!(rect);
+
+svg_element!(
     script = {
         dom_type: web_sys::SvgScriptElement;
 
@@ -1005,6 +1082,57 @@ svg_element!(
 );
 
 parent_element!(style);
+
+svg_element!(
+    /// The svg element is a container that defines a new coordinate system and
+    /// viewport. It is used as the outermost element of SVG documents, but it
+    /// can also be used to embed an SVG fragment inside an SVG or HTML
+    /// document.
+    ///
+    /// Note: The xmlns attribute is only required on the outermost svg element
+    /// of SVG documents. It is unnecessary for inner svg elements or inside
+    /// HTML documents.
+    svg  = { dom_type: web_sys::SvgsvgElement;
+        attributes {
+            /// The displayed height of the rectangular viewport. (Not the
+            /// height of its coordinate system.)
+            /// Value type: <length>|<percentage> ; Default value: auto;
+            /// Animatable: yes
+            height: AutoOrLength,
+
+            /// How the svg fragment must be deformed if it is displayed with a
+            /// different aspect ratio.
+            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid| xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)? ;
+            /// Default value: xMidYMid meet; Animatable: yes
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// The SVG viewport coordinates for the current SVG fragment.
+            /// Value type: <list-of-numbers> ; Default value: none;
+            /// Animatable: yes
+            view_box("viewBox"): String,
+
+            /// The displayed width of the rectangular viewport. (Not the width
+            /// of its coordinate system.) Value type: <length>|<percentage> ;
+            /// Default value: auto; Animatable: yes
+            width: AutoOrLength,
+
+            /// The displayed x coordinate of the svg container. No effect on
+            /// outermost svg elements. Value type: <length>|<percentage> ;
+            /// Default value: 0; Animatable: yes
+            x: Length,
+
+            /// The displayed y coordinate of the svg container. No effect on
+            /// outermost svg elements. Value type: <length>|<percentage> ;
+            /// Default value: 0; Animatable: yes
+            y: Length,
+        };
+    }
+);
+
+impl ConditionalProcessing for SvgBuilder {}
+impl Presentation for SvgBuilder {}
+
+parent_element!(svg);
 
 svg_element!(
     switch = {
@@ -1229,148 +1357,6 @@ impl ConditionalProcessing for TspanBuilder {}
 impl Presentation for TspanBuilder {}
 
 svg_element!(
-    view = {
-        dom_type: web_sys::SvgViewElement;
-
-        attributes {
-            view_box("viewBox"): String,
-            preserve_aspect_ratio("preserveAspectRatio"): String,
-        };
-    }
-);
-
-parent_element!(view);
-
-svg_element!(
-    /// The <g> SVG element is a container used to group other SVG elements.
-    ///
-    /// Transformations applied to the <g> element are performed on its child
-    /// elements, and its attributes are inherited by its children. It can also
-    /// group multiple elements to be referenced later with the <use> element.
-    g = {
-        dom_type: web_sys::SvggElement;
-    }
-);
-
-parent_element!(g);
-impl ConditionalProcessing for GBuilder {}
-impl Presentation for GBuilder {}
-
-// TODO: Add all svg elements, (element, global) * (attributes, events)
-svg_element!(
-    /// The svg element is a container that defines a new coordinate system and
-    /// viewport. It is used as the outermost element of SVG documents, but it
-    /// can also be used to embed an SVG fragment inside an SVG or HTML
-    /// document.
-    ///
-    /// Note: The xmlns attribute is only required on the outermost svg element
-    /// of SVG documents. It is unnecessary for inner svg elements or inside
-    /// HTML documents.
-    svg  = { dom_type: web_sys::SvgsvgElement;
-        attributes {
-            /// The displayed height of the rectangular viewport. (Not the
-            /// height of its coordinate system.)
-            /// Value type: <length>|<percentage> ; Default value: auto;
-            /// Animatable: yes
-            height: AutoOrLength,
-
-            /// How the svg fragment must be deformed if it is displayed with a
-            /// different aspect ratio.
-            /// Value type: (none| xMinYMin| xMidYMin| xMaxYMin| xMinYMid| xMidYMid| xMaxYMid| xMinYMax| xMidYMax| xMaxYMax) (meet|slice)? ;
-            /// Default value: xMidYMid meet; Animatable: yes
-            preserve_aspect_ratio("preserveAspectRatio"): String,
-
-            /// The SVG viewport coordinates for the current SVG fragment.
-            /// Value type: <list-of-numbers> ; Default value: none;
-            /// Animatable: yes
-            view_box("viewBox"): String,
-
-            /// The displayed width of the rectangular viewport. (Not the width
-            /// of its coordinate system.) Value type: <length>|<percentage> ;
-            /// Default value: auto; Animatable: yes
-            width: AutoOrLength,
-
-            /// The displayed x coordinate of the svg container. No effect on
-            /// outermost svg elements. Value type: <length>|<percentage> ;
-            /// Default value: 0; Animatable: yes
-            x: Length,
-
-            /// The displayed y coordinate of the svg container. No effect on
-            /// outermost svg elements. Value type: <length>|<percentage> ;
-            /// Default value: 0; Animatable: yes
-            y: Length,
-        };
-    }
-);
-
-impl ConditionalProcessing for SvgBuilder {}
-impl Presentation for SvgBuilder {}
-
-parent_element!(svg);
-
-svg_element!(
-    /// The `path` SVG element is the generic element to define a shape. All the
-    /// basic shapes can be created with a path element.
-    path  = { dom_type: web_sys::SvgPathElement;
-        attributes {
-            /// This attribute lets authors specify the total length for the
-            /// path, in user units.
-            /// Value type: <number> ; Default value: none; Animatable: yes
-            path_length("pathLength"): f64,
-        };
-    }
-);
-
-impl ConditionalProcessing for PathBuilder {}
-impl Presentation for PathBuilder {}
-
-parent_element!(path);
-
-svg_element!(
-    /// The <rect> element is a basic SVG shape that draws rectangles, defined
-    /// by their position, width, and height. The rectangles may have their
-    /// corners rounded.
-    rect  = { dom_type: web_sys::SvgRectElement;
-        attributes {
-            /// The x coordinate of the rect. Value type: <length>|<percentage> ; Default
-            /// value: 0; Animatable: yes
-            x: Length,
-
-            /// The y coordinate of the rect. Value type: <length>|<percentage> ; Default
-            /// value: 0; Animatable: yes
-            y: Length,
-
-            /// The width of the rect. Value type: auto|<length>|<percentage> ; Default
-            /// value: auto; Animatable: yes
-            width: Length,
-
-            /// The height of the rect. Value type: auto|<length>|<percentage> ; Default
-            /// value: auto; Animatable: yes
-            height: Length,
-
-            /// The horizontal corner radius of the rect. Defaults to ry if it is specified.
-            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
-            /// yes
-            rx: Length,
-
-            /// The vertical corner radius of the rect. Defaults to rx if it is specified.
-            /// Value type: auto|<length>|<percentage> ; Default value: auto; Animatable:
-            /// yes
-            ry: Length,
-
-            /// The total length of the rectangle's perimeter, in user units. Value type:
-            /// <number> ; Default value: none; Animatable: yes
-            path_length("pathLength"): f64,
-        };
-    }
-);
-
-impl ConditionalProcessing for RectBuilder {}
-impl Presentation for RectBuilder {}
-
-parent_element!(rect);
-
-svg_element!(
     /// The <use> element takes nodes from within the SVG document, and
     /// duplicates them somewhere else.
     r#use = {
@@ -1399,3 +1385,16 @@ impl ConditionalProcessing for UseBuilder {}
 impl Presentation for UseBuilder {}
 
 parent_element!(use);
+
+svg_element!(
+    view = {
+        dom_type: web_sys::SvgViewElement;
+
+        attributes {
+            view_box("viewBox"): String,
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+        };
+    }
+);
+
+parent_element!(view);
