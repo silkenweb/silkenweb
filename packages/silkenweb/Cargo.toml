@@ -152,6 +152,7 @@ features = [
     "SvgfeSpotLightElement",
     "SvgfeTileElement",
     "SvgfeTurbulenceElement",
+    "SvgFilterElement",
     "SvggElement",
     "SvgsvgElement",
     "SvgPathElement",

@@ -609,6 +609,42 @@ impl FilterPrimitives for FeTurbulenceBuilder {}
 parent_element!(fe_turbulence);
 
 svg_element!(
+    filter = {
+        dom_type: web_sys::SvgFilterElement;
+
+        attributes {
+            x: Length,
+            y: Length,
+            width: Length,
+            height: Length,
+            filter_units("filterUnits"): String,
+            primitive_units("primitiveUnits"): String,
+        };
+    }
+);
+
+parent_element!(filter);
+
+impl Presentation for FilterBuilder {}
+
+svg_element!(
+    foreign_object("foreignObject") = {
+        dom_type: web_sys::SvgFilterElement;
+
+        attributes {
+            width: AutoOrLength,
+            height: AutoOrLength,
+            x: Length,
+            y: Length,
+        };
+    }
+);
+
+parent_element!(foreign_object);
+
+impl ConditionalProcessing for ForeignObjectBuilder {}
+
+svg_element!(
     /// The <g> SVG element is a container used to group other SVG elements.
     ///
     /// Transformations applied to the <g> element are performed on its child
