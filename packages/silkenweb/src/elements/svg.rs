@@ -179,6 +179,38 @@ svg_element!(
 parent_element!(desc);
 
 svg_element!(
+    /// The <ellipse> element is an SVG basic shape, used to create ellipses
+    /// based on a center coordinate, and both their x and y radius.
+    ellipse = {
+        dom_type: web_sys::SvgEllipseElement;
+
+        attributes {
+            /// The x position of the ellipse. Value type: <length>|<percentage>
+            /// ; Default value: 0; Animatable: yes
+            cx: Length,
+
+            /// The y position of the ellipse. Value type: <length>|<percentage>
+            /// ; Default value: 0; Animatable: yes
+            cy: Length,
+
+            /// The radius of the ellipse on the x axis. Value type:
+            /// auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
+            rx: AutoOrLength,
+
+            /// The radius of the ellipse on the y axis. Value type:
+            /// auto|<length>|<percentage> ; Default value: auto; Animatable:
+            /// yes
+            ry: AutoOrLength,
+        };
+    }
+);
+
+parent_element!(ellipse);
+impl ConditionalProcessing for EllipseBuilder {}
+impl Presentation for EllipseBuilder {}
+
+svg_element!(
     /// The <g> SVG element is a container used to group other SVG elements.
     ///
     /// Transformations applied to the <g> element are performed on its child
