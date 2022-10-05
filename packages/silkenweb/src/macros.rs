@@ -53,10 +53,10 @@ macro_rules! custom_html_element {
         }
     ) => {
         $crate::dom_element!(
+            $(#[$elem_meta])*
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
-                doc = [$(#[$elem_meta])*];
                 $($tail)*
             }
         );
@@ -71,12 +71,12 @@ macro_rules! html_element {
         }
     ) => {
         $crate::dom_element!(
+            $(#[$elem_meta])*
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
                 doc_macro = html_element_doc;
                 attribute_doc_macro = html_attribute_doc;
-                doc = [$(#[$elem_meta])*];
                 $($tail)*
             }
         );
@@ -117,12 +117,12 @@ macro_rules! svg_element {
         }
     ) => {
         $crate::dom_element!(
+            $(#[$elem_meta])*
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::svg::attributes::Global, $crate::elements::AriaElement];
                 common_events = [];
                 doc_macro = svg_element_doc;
                 attribute_doc_macro = svg_attribute_doc;
-                doc = [$(#[$elem_meta])*];
                 namespace = Some("http://www.w3.org/2000/svg");
                 $($tail)*
             }
@@ -158,6 +158,7 @@ macro_rules! svg_attribute_doc {
 #[macro_export]
 macro_rules! dom_element {
     (
+        $(#[$elem_meta:meta])*
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
             camel_builder_name = $camel_builder_name:ident;
@@ -165,7 +166,6 @@ macro_rules! dom_element {
             common_events = [$($event_trait:ty),*];
             $(doc_macro = $doc_macro:ident;)?
             $(attribute_doc_macro = $attr_doc_macro:ident;)?
-            doc = [$($docs:tt)*];
             $(namespace = $namespace:expr; )?
             dom_type: $elem_type:ty;
 
@@ -192,7 +192,7 @@ macro_rules! dom_element {
             #[doc = $doc_macro!($text_name)]
             #[doc = ""]
         )?
-        $($docs)*
+        $(#[$elem_meta])*
         pub fn $snake_name() -> $camel_builder_name {
             $camel_builder_name { builder: $crate::create_element_fn!(
                 $($namespace, )? $crate::macros::intern_str($text_name)
@@ -335,11 +335,13 @@ macro_rules! dom_element {
         impl $crate::elements::ElementEvents for $camel_builder_name {}
     };
     (
+        $(#[$elem_meta:meta])*
         $name:ident $( ($text_name: literal) )? = {
             common_attributes $($tail:tt)*
         }
     ) => { $crate::macros::paste!{
         $crate::dom_element!(
+            $(#[$elem_meta])*
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
                 camel_builder_name = [< $name:camel Builder >];
