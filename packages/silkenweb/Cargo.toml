@@ -126,6 +126,7 @@ features = [
     "SvgCircleElement",
     "SvgClipPathElement",
     "SvgDefsElement",
+    "SvgDescElement",
     "SvggElement",
     "SvgsvgElement",
     "SvgPathElement",

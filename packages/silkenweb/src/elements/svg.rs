@@ -86,6 +86,8 @@ impl AnimationValue for AnimateBuilder {}
 impl OtherAnimation for AnimateBuilder {}
 
 svg_element!(
+    /// The <circle> SVG element is an SVG basic shape, used to draw circles
+    /// based on a center point and a radius.
     circle = {
         dom_type: web_sys::SvgCircleElement;
         attributes {
@@ -115,6 +117,12 @@ impl Presentation for CircleBuilder {}
 parent_element!(circle);
 
 svg_element!(
+    /// The <clipPath> SVG element defines a clipping path, to be used by the
+    /// clip-path property.
+    ///
+    /// A clipping path restricts the region to which paint can be applied.
+    /// Conceptually, parts of the drawing that lie outside of the region
+    /// bounded by the clipping path are not drawn.
     clip_path("clipPath") = {
         dom_type: web_sys::SvgClipPathElement;
         attributes {
@@ -149,6 +157,26 @@ svg_element!(
 parent_element!(defs);
 impl ConditionalProcessing for DefsBuilder {}
 impl Presentation for DefsBuilder {}
+
+svg_element!(
+    /// The <desc> element provides an accessible, long-text description of any
+    /// SVG container element or graphics element.
+    ///
+    /// Text in a <desc> element is not rendered as part of the graphic. If the
+    /// element can be described by visible text, it is possible to reference
+    /// that text with the aria-describedby attribute. If aria-describedby is
+    /// used, it will take precedence over <desc>.
+    ///
+    /// The hidden text of a <desc> element can also be concatenated with the
+    /// visible text of other elements using multiple IDs in an aria-describedby
+    /// value. In that case, the <desc> element must provide an ID for
+    /// reference.
+    desc = {
+        dom_type: web_sys::SvgDescElement;
+    }
+);
+
+parent_element!(desc);
 
 svg_element!(
     /// The <g> SVG element is a container used to group other SVG elements.
