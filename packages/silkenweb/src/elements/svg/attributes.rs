@@ -402,3 +402,50 @@ pub trait ConditionalProcessing: ElementBuilder {
         system_language("systemLanguage"): String,
     ];
 }
+
+/// SVG Filter Primitve Attributes
+pub trait FilterPrimitives: ElementBuilder {
+    svg_attributes![
+        /// The height attribute defines the vertical length of an element in
+        /// the user coordinate system.
+        height: Length,
+        /// The result attribute defines the assigned name for this filter
+        /// primitive. If supplied, then graphics that result from processing
+        /// this filter primitive can be referenced by an in attribute on a
+        /// subsequent filter primitive within the same <filter> element. If no
+        /// value is provided, the output will only be available for re-use as
+        /// the implicit input into the next filter primitive if that filter
+        /// primitive provides no value for its in attribute.
+        result: String,
+        /// The width attribute defines the horizontal length of an element in
+        /// the user coordinate system.
+        width: Length,
+        /// The x attribute defines an x-axis coordinate in the user coordinate
+        /// system.
+        x: Length,
+        /// The y attribute defines a y-axis coordinate in the user coordinate
+        /// system.
+        y: Length,
+    ];
+}
+
+/// SVG Transfer Function Attributes
+pub trait TransferFunction: ElementBuilder {
+    svg_attributes![
+        /// The type attribute is a generic attribute and it has different
+        /// meaning based on the context in which it's used.
+        r#type: String,
+        /// The tableValues attribute defines a list of numbers defining a
+        /// lookup table of values for a color component transfer function.
+        table_values("tableValues"): String,
+        /// The intercept attribute defines the intercept of the linear function
+        /// of color component transfers when the type attribute is set to
+        /// linear.
+        intercept: f64,
+        /// The amplitude attribute controls the amplitude of the gamma function
+        /// of a component transfer element when its type attribute is gamma.
+        amplitude: f64,
+        /// The exponent attribute defines the exponent of the gamma function.
+        exponent: f64,
+    ];
+}
