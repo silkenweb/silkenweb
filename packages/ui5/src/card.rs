@@ -1,7 +1,7 @@
 mod elements {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
-    html_element!(
+    custom_html_element!(
         ui5_card = {
             dom_type: web_sys::Element;
             attributes {
@@ -13,7 +13,7 @@ mod elements {
 
     parent_element!(ui5_card);
 
-    html_element!(
+    custom_html_element!(
         ui5_card_header = {
             dom_type: web_sys::Element;
             attributes {

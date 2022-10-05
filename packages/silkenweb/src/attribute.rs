@@ -2,7 +2,7 @@
 //!
 //! Once you've implemented [`Attribute`] and [`AsAttribute`] for your type, you
 //! can use it with [`ElementBuilder::attribute`], or define attributes on your
-//! own html element using the [`html_element`] macro.
+//! own html element using the [`custom_html_element`] macro.
 //!
 //! [`ElementBuilder::attribute`]: crate::node::element::ElementBuilder::attribute
 use std::borrow::Cow;

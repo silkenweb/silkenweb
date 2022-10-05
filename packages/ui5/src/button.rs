@@ -20,12 +20,12 @@ impl Attribute for ButtonDesign {
 impl AsAttribute<ButtonDesign> for ButtonDesign {}
 
 mod element {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
     use super::ButtonDesign;
     use crate::icon::Icon;
 
-    html_element!(
+    custom_html_element!(
         ui5_button = {
             dom_type: web_sys::HtmlElement;
             attributes {

@@ -80,11 +80,11 @@ impl Attribute for BreadcrumbsTarget {
 impl AsAttribute<BreadcrumbsTarget> for BreadcrumbsTarget {}
 
 mod element {
-    use silkenweb::{elements::CustomEvent, html_element, parent_element};
+    use silkenweb::{custom_html_element, elements::CustomEvent, parent_element};
 
     use super::{BreadcrumbsDesign, BreadcrumbsSeparatorStyle, BreadcrumbsTarget, ItemClickDetail};
 
-    html_element!(
+    custom_html_element!(
         ui5_breadcrumbs = { dom_type: web_sys::HtmlElement;
             attributes {
                 design: BreadcrumbsDesign,
@@ -99,7 +99,7 @@ mod element {
 
     parent_element!(ui5_breadcrumbs);
 
-    html_element!(
+    custom_html_element!(
         ui5_breadcrumbs_item = {
             dom_type: web_sys::HtmlElement;
             attributes {

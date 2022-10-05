@@ -30,11 +30,11 @@ impl Attribute for BarDesign {
 impl AsAttribute<BarDesign> for BarDesign {}
 
 mod element {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
     use super::BarDesign;
 
-    html_element!(
+    custom_html_element!(
         ui5_bar = {
             dom_type: web_sys::HtmlElement;
             attributes { design: BarDesign };

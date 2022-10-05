@@ -101,12 +101,12 @@ impl Attribute for GroupType {
 impl AsAttribute<GroupType> for GroupType {}
 
 mod elements {
-    use silkenweb::{elements::CustomEvent, html_element, parent_element};
+    use silkenweb::{custom_html_element, elements::CustomEvent, parent_element};
 
     use super::{ColorScheme, GroupClicked, GroupType, Shape, Size};
     use crate::icon::Icon;
 
-    html_element!(
+    custom_html_element!(
         ui5_avatar = {
             dom_type: web_sys::HtmlElement;
             attributes {
@@ -123,7 +123,7 @@ mod elements {
 
     parent_element!(ui5_avatar);
 
-    html_element!(
+    custom_html_element!(
         ui5_avatar_group = { dom_type: web_sys::HtmlElement;
             attributes {
                 r#type: GroupType,

@@ -12,11 +12,11 @@ use silkenweb::{
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
 mod elements {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
     use super::{CalendarType, SelectedDatesChange, SelectionMode};
 
-    html_element!(
+    custom_html_element!(
         ui5_calendar = {
             dom_type: web_sys::HtmlElement;
             attributes {
@@ -37,7 +37,7 @@ mod elements {
 
     parent_element!(ui5_calendar);
 
-    html_element!(
+    custom_html_element!(
         ui5_date = {
             dom_type: web_sys::HtmlElement;
             attributes { value: String };

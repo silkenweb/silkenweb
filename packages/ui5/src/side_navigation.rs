@@ -21,12 +21,12 @@ use self::elements::{
 use crate::{icon::Icon, SELECTED_ID};
 
 mod elements {
-    use silkenweb::{elements::CustomEvent, html_element, parent_element};
+    use silkenweb::{custom_html_element, elements::CustomEvent, parent_element};
 
     use super::SelectionChangeDetail;
     use crate::icon::Icon;
 
-    html_element!(
+    custom_html_element!(
         ui5_side_navigation = { dom_type: web_sys::HtmlElement;
             attributes {
                 collapsed: bool,
@@ -40,7 +40,7 @@ mod elements {
 
     parent_element!(ui5_side_navigation);
 
-    html_element!(
+    custom_html_element!(
         ui5_side_navigation_item = {
             dom_type: web_sys::HtmlElement;
             attributes {
@@ -55,7 +55,7 @@ mod elements {
 
     parent_element!(ui5_side_navigation_item);
 
-    html_element!(
+    custom_html_element!(
         ui5_side_navigation_sub_item = {
             dom_type: web_sys::HtmlElement;
             attributes {

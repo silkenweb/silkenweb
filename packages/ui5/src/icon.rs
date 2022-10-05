@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    html_element,
+    custom_html_element,
 };
 
-html_element!(
+custom_html_element!(
     ui5_icon = {
         dom_type: web_sys::HtmlElement;
         attributes {

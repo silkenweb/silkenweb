@@ -17,11 +17,11 @@ impl Attribute for BusyIndicatorSize {
 impl AsAttribute<BusyIndicatorSize> for BusyIndicatorSize {}
 
 mod element {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
     use super::BusyIndicatorSize;
 
-    html_element!(
+    custom_html_element!(
         ui5_busy_indicator = {
             dom_type: web_sys::HtmlElement;
             attributes {

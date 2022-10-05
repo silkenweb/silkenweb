@@ -1,9 +1,9 @@
 //! HTML elements
-//!
-//! This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on
-//! 2021-04-23
-//!
-//! [Moxie DOM]: https://github.com/anp/moxie
+
+// This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on
+// 2021-04-23
+//
+// [Moxie DOM]: https://github.com/anp/moxie
 
 html_element!(
     /// The [HTML `<a>` element (or *anchor* element)][mdn], along with its href

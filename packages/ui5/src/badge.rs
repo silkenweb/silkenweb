@@ -9,9 +9,9 @@ use self::elements::ui5_badge;
 use crate::{icon::Ui5Icon, macros::attributes0};
 
 mod elements {
-    use silkenweb::{html_element, parent_element};
+    use silkenweb::{custom_html_element, parent_element};
 
-    html_element!(
+    custom_html_element!(
         ui5_badge = {
             dom_type: web_sys::HtmlElement;
             attributes { color_scheme: u8 };

@@ -5,7 +5,7 @@ pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
-/// Define an html element.
+/// Define a custom html element.
 ///
 /// This will define a builder struct for an html element, with a method for
 /// each attribute. It will also define a struct for the built element.
@@ -19,11 +19,11 @@ pub use web_sys;
 /// # Example
 ///
 /// ```no_run
-/// # use silkenweb::html_element;
+/// # use silkenweb::custom_html_element;
 /// use silkenweb::elements::CustomEvent;
 ///
 /// // The types of the dom element and event carry through to the event handler.
-/// html_element!(my_html_element = {
+/// custom_html_element!(my_html_element = {
 ///     dom_type: web_sys::HtmlDivElement;
 ///     attributes {
 ///         my_attribute: String,
@@ -45,7 +45,7 @@ pub use web_sys;
 ///     .on_my_custom_event(|event: CustomEvent<web_sys::HtmlElement>, target: web_sys::HtmlDivElement| {});
 /// ```
 #[macro_export]
-macro_rules! html_element {
+macro_rules! custom_html_element {
     (
         $(#[$elem_meta:meta])*
         $name:ident $( ($text_name: literal) )? = {
@@ -61,6 +61,52 @@ macro_rules! html_element {
             }
         );
     }
+}
+
+macro_rules! html_element {
+    (
+        $(#[$elem_meta:meta])*
+        $name:ident $( ($text_name: literal) )? = {
+            $($tail:tt)*
+        }
+    ) => {
+        $crate::dom_element!(
+            $name $( ($text_name) )? = {
+                common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
+                common_events = [$crate::elements::HtmlElementEvents];
+                doc_macro = html_element_doc;
+                attribute_doc_macro = html_attribute_doc;
+                doc = [$(#[$elem_meta])*];
+                $($tail)*
+            }
+        );
+    }
+}
+
+macro_rules! html_element_doc {
+    ($name:expr) => {
+        concat!(
+            "The HTML [",
+            $name,
+            "](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",
+            $name,
+            ") element"
+        )
+    };
+}
+
+macro_rules! html_attribute_doc {
+    ($element:expr, $name:expr) => {
+        concat!(
+            "The [`",
+            $name,
+            "`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",
+            $element,
+            "#attr-",
+            $name,
+            ") attribute"
+        )
+    };
 }
 
 macro_rules! svg_element {
@@ -87,9 +133,9 @@ macro_rules! svg_element {
 macro_rules! svg_element_doc {
     ($name:expr) => {
         concat!(
-            "The SVG [",
+            "The SVG [`",
             $name,
-            "](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
+            "`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
             $name,
             ") element"
         )
@@ -99,9 +145,9 @@ macro_rules! svg_element_doc {
 macro_rules! svg_attribute_doc {
     ($element:expr, $name:expr) => {
         concat!(
-            "The SVG [",
+            "The SVG [`",
             $name,
-            "](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/",
+            "`](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/",
             $name,
             ") attribute"
         )
@@ -316,7 +362,8 @@ macro_rules! create_element_fn {
 
 /// Add `child` and `text` methods to an html element builder.
 ///
-/// See [`html_element`] for a complete example of defining an html element.
+/// See [`custom_html_element`] for a complete example of defining an html
+/// element.
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{

@@ -38,7 +38,7 @@ pub mod svg;
 /// Wrap a [`web_sys::CustomEvent`] and cast detail.
 ///
 /// This is used when defining custom HTML elements to represent web components.
-/// See [`html_element`] for more details.
+/// See [`custom_html_element`] for more details.
 #[derive(Clone)]
 pub struct CustomEvent<T>(web_sys::CustomEvent, PhantomData<T>);
 
