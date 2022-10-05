@@ -17,3 +17,4 @@ js-sys = "0.3.60"
 wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.33"
 static_assertions = "1.1.0"
+serde-wasm-bindgen = "0.4.5"

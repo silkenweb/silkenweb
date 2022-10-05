@@ -47,10 +47,10 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let result_handler = if fallible {
         quote!(result
-            .map(|ok| ok.into_serde().unwrap())
-            .map_err(|e| e.into_serde().unwrap()))
+            .map(|ok| serde_wasm_bindgen::from_value(ok).unwrap())
+            .map_err(|e| serde_wasm_bindgen::from_value(e).unwrap()))
     } else {
-        quote!(result.unwrap().into_serde().unwrap())
+        quote!(serde_wasm_bindgen::from_value(result.unwrap()).unwrap())
     };
 
     quote!(
@@ -61,6 +61,7 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
                 js_sys::{self, Object, Reflect},
                 wasm_bindgen::{self, prelude::wasm_bindgen, JsValue},
                 wasm_bindgen_futures,
+                serde_wasm_bindgen,
             };
 
             #[wasm_bindgen(inline_js = r#"
@@ -76,7 +77,7 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
 
             let args = Object::new();
 
-            #(Reflect::set(&args, &stringify!(#arg_names).into(), &JsValue::from_serde(&#arg_names).unwrap()).unwrap();)*
+            #(Reflect::set(&args, &stringify!(#arg_names).into(), &serde_wasm_bindgen::to_value(&#arg_names).unwrap()).unwrap();)*
 
             let result = invoke(#fn_name.to_string(), args.into())
                 .await;

@@ -1301,6 +1301,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-wasm-bindgen"
+version = "0.4.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3b4c031cd0d9014307d82b8abf653c0290fbdaeb4c02d00c63cf52f728628bf"
+dependencies = [
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1345,7 +1356,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "caseless",
  "discard",
@@ -1366,7 +1377,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-base"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -1508,7 +1519,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-macros"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cssparser",
  "grass",
@@ -1520,7 +1531,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-signals-ext"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "futures-signals",
  "paste",
@@ -1529,9 +1540,10 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-tauri"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "js-sys",
+ "serde-wasm-bindgen",
  "silkenweb-tauri-proc-macro",
  "static_assertions",
  "wasm-bindgen",
@@ -1540,7 +1552,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-tauri-proc-macro"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1550,7 +1562,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-ui5"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "futures-signals",
