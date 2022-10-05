@@ -645,6 +645,245 @@ parent_element!(foreign_object);
 impl ConditionalProcessing for ForeignObjectBuilder {}
 
 svg_element!(
+    line = {
+        dom_type: web_sys::SvgLineElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(line);
+
+impl ConditionalProcessing for LineBuilder {}
+impl Presentation for LineBuilder {}
+
+svg_element!(
+    linear_gradient("linearGradient") = {
+        dom_type: web_sys::SvgLinearGradientElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(linear_gradient);
+
+impl Presentation for LinearGradientBuilder {}
+
+svg_element!(
+    marker = {
+        dom_type: web_sys::SvgMarkerElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(marker);
+
+impl ConditionalProcessing for MarkerBuilder {}
+impl Presentation for MarkerBuilder {}
+
+svg_element!(
+    mask = {
+        dom_type: web_sys::SvgMaskElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(mask);
+
+impl ConditionalProcessing for MaskBuilder {}
+impl Presentation for MaskBuilder {}
+
+svg_element!(
+    metadata = {
+        dom_type: web_sys::SvgMetadataElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(metadata);
+
+svg_element!(
+    mpath = {
+        dom_type: web_sys::SvgmPathElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(mpath);
+
+svg_element!(
+    pattern = {
+        dom_type: web_sys::SvgPatternElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(pattern);
+
+impl ConditionalProcessing for PatternBuilder {}
+impl Presentation for PatternBuilder {}
+
+svg_element!(
+    polygon = {
+        dom_type: web_sys::SvgPolygonElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(polygon);
+
+impl ConditionalProcessing for PolygonBuilder {}
+impl Presentation for PolygonBuilder {}
+
+svg_element!(
+    polyline = {
+        dom_type: web_sys::SvgPolylineElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(polyline);
+
+impl ConditionalProcessing for PolylineBuilder {}
+impl Presentation for PolylineBuilder {}
+
+svg_element!(
+    script = {
+        dom_type: web_sys::SvgScriptElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(script);
+
+svg_element!(
+    set = {
+        dom_type: web_sys::SvgSetElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(set);
+
+impl AnimationTiming for SetBuilder {}
+impl OtherAnimation for SetBuilder {}
+
+svg_element!(
+    stop = {
+        dom_type: web_sys::SvgStopElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(stop);
+
+impl Presentation for StopBuilder {}
+
+svg_element!(
+    style = {
+        dom_type: web_sys::SvgStyleElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(style);
+
+svg_element!(
+    switch = {
+        dom_type: web_sys::SvgSwitchElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(switch);
+
+impl ConditionalProcessing for SwitchBuilder {}
+impl Presentation for SwitchBuilder {}
+
+svg_element!(
+    symbol = {
+        dom_type: web_sys::SvgSymbolElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(symbol);
+
+impl Presentation for SymbolBuilder {}
+
+svg_element!(
+    text = {
+        dom_type: web_sys::SvgTextElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(text);
+
+impl ConditionalProcessing for TextBuilder {}
+impl Presentation for TextBuilder {}
+
+svg_element!(
+    text_path("textPath") = {
+        dom_type: web_sys::SvgTextPathElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(text_path);
+
+impl ConditionalProcessing for TextPathBuilder {}
+impl Presentation for TextPathBuilder {}
+
+svg_element!(
+    title = {
+        dom_type: web_sys::SvgTitleElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(title);
+
+svg_element!(
+    tspan = {
+        dom_type: web_sys::SvgtSpanElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(tspan);
+
+impl ConditionalProcessing for TspanBuilder {}
+impl Presentation for TspanBuilder {}
+
+svg_element!(
+    view = {
+        dom_type: web_sys::SvgViewElement;
+
+        attributes {};
+    }
+);
+
+parent_element!(view);
+
+svg_element!(
     /// The <g> SVG element is a container used to group other SVG elements.
     ///
     /// Transformations applied to the <g> element are performed on its child
