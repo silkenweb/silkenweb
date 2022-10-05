@@ -2,7 +2,8 @@
 
 use self::{
     attributes::{
-        AnimationTiming, AnimationValue, ConditionalProcessing, OtherAnimation, Presentation,
+        AnimationTiming, AnimationValue, ConditionalProcessing, FilterPrimitives, OtherAnimation,
+        Presentation,
     },
     content_type::{AutoOrLength, Length},
 };
@@ -209,6 +210,342 @@ svg_element!(
 parent_element!(ellipse);
 impl ConditionalProcessing for EllipseBuilder {}
 impl Presentation for EllipseBuilder {}
+
+svg_element!(
+    fe_blend("feBlend") = {
+        dom_type: web_sys::SvgfeBlendElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeBlendBuilder {}
+impl Presentation for FeBlendBuilder {}
+impl FilterPrimitives for FeBlendBuilder {}
+
+parent_element!(fe_blend);
+
+svg_element!(
+    fe_color_matrix("feColorMatrix") = {
+        dom_type: web_sys::SvgfeColorMatrixElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeColorMatrixBuilder {}
+impl Presentation for FeColorMatrixBuilder {}
+impl FilterPrimitives for FeColorMatrixBuilder {}
+
+parent_element!(fe_color_matrix);
+
+svg_element!(
+    fe_component_transfer("feComponentTransfer") = {
+        dom_type: web_sys::SvgfeComponentTransferElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeComponentTransferBuilder {}
+impl Presentation for FeComponentTransferBuilder {}
+impl FilterPrimitives for FeComponentTransferBuilder {}
+
+parent_element!(fe_component_transfer);
+
+svg_element!(
+    fe_composite("feComposite") = {
+        dom_type: web_sys::SvgfeCompositeElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeCompositeBuilder {}
+impl Presentation for FeCompositeBuilder {}
+impl FilterPrimitives for FeCompositeBuilder {}
+
+parent_element!(fe_composite);
+
+svg_element!(
+    fe_convolve_matrix("feConvolveMatrix") = {
+        dom_type: web_sys::SvgfeConvolveMatrixElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeConvolveMatrixBuilder {}
+impl Presentation for FeConvolveMatrixBuilder {}
+impl FilterPrimitives for FeConvolveMatrixBuilder {}
+
+parent_element!(fe_convolve_matrix);
+
+svg_element!(
+    fe_diffuse_lighting("feDiffuseLighting") = {
+        dom_type: web_sys::SvgfeDiffuseLightingElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeDiffuseLightingBuilder {}
+impl Presentation for FeDiffuseLightingBuilder {}
+impl FilterPrimitives for FeDiffuseLightingBuilder {}
+
+parent_element!(fe_diffuse_lighting);
+
+svg_element!(
+    fe_displacement_map("feDisplacementMap") = {
+        dom_type: web_sys::SvgfeDisplacementMapElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeDisplacementMapBuilder {}
+impl Presentation for FeDisplacementMapBuilder {}
+impl FilterPrimitives for FeDisplacementMapBuilder {}
+
+parent_element!(fe_displacement_map);
+
+svg_element!(
+    fe_distant_light("feDistantLight") = {
+        dom_type: web_sys::SvgfeDistantLightElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeDistantLightBuilder {}
+impl Presentation for FeDistantLightBuilder {}
+impl FilterPrimitives for FeDistantLightBuilder {}
+
+parent_element!(fe_distant_light);
+
+svg_element!(
+    fe_flood("feFlood") = {
+        dom_type: web_sys::SvgfeFloodElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeFloodBuilder {}
+impl Presentation for FeFloodBuilder {}
+impl FilterPrimitives for FeFloodBuilder {}
+
+parent_element!(fe_flood);
+
+svg_element!(
+    fe_func_a("feFuncA") = {
+        dom_type: web_sys::SvgfeFuncAElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeFuncABuilder {}
+impl Presentation for FeFuncABuilder {}
+impl FilterPrimitives for FeFuncABuilder {}
+
+parent_element!(fe_func_a);
+
+svg_element!(
+    fe_func_b("feFuncB") = {
+        dom_type: web_sys::SvgfeFuncBElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeFuncBBuilder {}
+impl Presentation for FeFuncBBuilder {}
+impl FilterPrimitives for FeFuncBBuilder {}
+
+parent_element!(fe_func_b);
+
+svg_element!(
+    fe_func_g("feFuncG") = {
+        dom_type: web_sys::SvgfeFuncGElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeFuncGBuilder {}
+impl Presentation for FeFuncGBuilder {}
+impl FilterPrimitives for FeFuncGBuilder {}
+
+parent_element!(fe_func_g);
+
+svg_element!(
+    fe_func_r("feFuncR") = {
+        dom_type: web_sys::SvgfeFuncRElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeFuncRBuilder {}
+impl Presentation for FeFuncRBuilder {}
+impl FilterPrimitives for FeFuncRBuilder {}
+
+parent_element!(fe_func_r);
+
+svg_element!(
+    fe_gaussian_blur("feGaussianBlur") = {
+        dom_type: web_sys::SvgfeGaussianBlurElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeGaussianBlurBuilder {}
+impl Presentation for FeGaussianBlurBuilder {}
+impl FilterPrimitives for FeGaussianBlurBuilder {}
+
+parent_element!(fe_gaussian_blur);
+
+svg_element!(
+    fe_image("feImage") = {
+        dom_type: web_sys::SvgfeImageElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeImageBuilder {}
+impl Presentation for FeImageBuilder {}
+impl FilterPrimitives for FeImageBuilder {}
+
+parent_element!(fe_image);
+
+svg_element!(
+    fe_merge("feMerge") = {
+        dom_type: web_sys::SvgfeMergeElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeMergeBuilder {}
+impl Presentation for FeMergeBuilder {}
+impl FilterPrimitives for FeMergeBuilder {}
+
+parent_element!(fe_merge);
+
+svg_element!(
+    fe_merge_node("feMergeNode") = {
+        dom_type: web_sys::SvgfeMergeNodeElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeMergeNodeBuilder {}
+impl Presentation for FeMergeNodeBuilder {}
+impl FilterPrimitives for FeMergeNodeBuilder {}
+
+parent_element!(fe_merge_node);
+
+svg_element!(
+    fe_morphology("feMorphology") = {
+        dom_type: web_sys::SvgfeMorphologyElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeMorphologyBuilder {}
+impl Presentation for FeMorphologyBuilder {}
+impl FilterPrimitives for FeMorphologyBuilder {}
+
+parent_element!(fe_morphology);
+
+svg_element!(
+    fe_offset("feOffset") = {
+        dom_type: web_sys::SvgfeOffsetElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeOffsetBuilder {}
+impl Presentation for FeOffsetBuilder {}
+impl FilterPrimitives for FeOffsetBuilder {}
+
+parent_element!(fe_offset);
+
+svg_element!(
+    fe_point_light("fePointLight") = {
+        dom_type: web_sys::SvgfePointLightElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FePointLightBuilder {}
+impl Presentation for FePointLightBuilder {}
+impl FilterPrimitives for FePointLightBuilder {}
+
+parent_element!(fe_point_light);
+
+svg_element!(
+    fe_specular_lighting("feSpecularLighting") = {
+        dom_type: web_sys::SvgfeSpecularLightingElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeSpecularLightingBuilder {}
+impl Presentation for FeSpecularLightingBuilder {}
+impl FilterPrimitives for FeSpecularLightingBuilder {}
+
+parent_element!(fe_specular_lighting);
+
+svg_element!(
+    fe_spot_light("feSpotLight") = {
+        dom_type: web_sys::SvgfeSpotLightElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeSpotLightBuilder {}
+impl Presentation for FeSpotLightBuilder {}
+impl FilterPrimitives for FeSpotLightBuilder {}
+
+parent_element!(fe_spot_light);
+
+svg_element!(
+    fe_tile("feTile") = {
+        dom_type: web_sys::SvgfeTileElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeTileBuilder {}
+impl Presentation for FeTileBuilder {}
+impl FilterPrimitives for FeTileBuilder {}
+
+parent_element!(fe_tile);
+
+svg_element!(
+    fe_turbulence("feTurbulence") = {
+        dom_type: web_sys::SvgfeTurbulenceElement;
+
+        attributes {};
+    }
+);
+
+impl ConditionalProcessing for FeTurbulenceBuilder {}
+impl Presentation for FeTurbulenceBuilder {}
+impl FilterPrimitives for FeTurbulenceBuilder {}
+
+parent_element!(fe_turbulence);
 
 svg_element!(
     /// The <g> SVG element is a container used to group other SVG elements.
