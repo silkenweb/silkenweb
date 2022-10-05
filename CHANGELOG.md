@@ -1,5 +1,10 @@
 # Changelog
 
+## Next
+
+- `impl From<String> for UrlPath`
+- Use `serde_wasm_bindgen` for Tauri serialization to fix warnings about serde_json.
+
 ## 0.3.0 - 2022-10-05
 
 - [Tauri support](https://github.com/silkenweb/tauri-example)
