@@ -162,6 +162,12 @@ impl<'a> From<&'a str> for UrlPath {
     }
 }
 
+impl From<String> for UrlPath {
+    fn from(path: String) -> Self {
+        Self::new(&path)
+    }
+}
+
 /// The path portion of the URL.
 ///
 /// The path will never start with a '/'.
