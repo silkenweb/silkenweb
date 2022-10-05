@@ -3,7 +3,7 @@
 use self::{
     attributes::{
         AnimationTiming, AnimationValue, ConditionalProcessing, FilterPrimitives, OtherAnimation,
-        Presentation,
+        Presentation, TransferFunction,
     },
     content_type::{AutoOrLength, Length},
 };
@@ -317,10 +317,6 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeDistantLightBuilder {}
-impl Presentation for FeDistantLightBuilder {}
-impl FilterPrimitives for FeDistantLightBuilder {}
-
 parent_element!(fe_distant_light);
 
 svg_element!(
@@ -345,9 +341,7 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeFuncABuilder {}
-impl Presentation for FeFuncABuilder {}
-impl FilterPrimitives for FeFuncABuilder {}
+impl TransferFunction for FeFuncABuilder {}
 
 parent_element!(fe_func_a);
 
@@ -359,9 +353,7 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeFuncBBuilder {}
-impl Presentation for FeFuncBBuilder {}
-impl FilterPrimitives for FeFuncBBuilder {}
+impl TransferFunction for FeFuncBBuilder {}
 
 parent_element!(fe_func_b);
 
@@ -373,9 +365,7 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeFuncGBuilder {}
-impl Presentation for FeFuncGBuilder {}
-impl FilterPrimitives for FeFuncGBuilder {}
+impl TransferFunction for FeFuncGBuilder {}
 
 parent_element!(fe_func_g);
 
@@ -387,9 +377,7 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeFuncRBuilder {}
-impl Presentation for FeFuncRBuilder {}
-impl FilterPrimitives for FeFuncRBuilder {}
+impl TransferFunction for FeFuncRBuilder {}
 
 parent_element!(fe_func_r);
 
@@ -443,10 +431,6 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeMergeNodeBuilder {}
-impl Presentation for FeMergeNodeBuilder {}
-impl FilterPrimitives for FeMergeNodeBuilder {}
-
 parent_element!(fe_merge_node);
 
 svg_element!(
@@ -484,10 +468,6 @@ svg_element!(
         attributes {};
     }
 );
-
-impl ConditionalProcessing for FePointLightBuilder {}
-impl Presentation for FePointLightBuilder {}
-impl FilterPrimitives for FePointLightBuilder {}
 
 parent_element!(fe_point_light);
 
