@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-ui5"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "UI5 bindings for Silkenweb"
@@ -13,7 +13,7 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [dependencies]
-silkenweb = { path = "../silkenweb", version = "0.2.0" }
+silkenweb = { path = "../silkenweb", version = "0.3.0" }
 web-sys = "0.3.60"
 wasm-bindgen = "=0.2.83"
 js-sys = "0.3.60"

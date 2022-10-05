@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.3.0 - 2022-10-05
 
 - [Tauri support](https://github.com/silkenweb/tauri-example)
 - [Server side routing and pre-rendering](https://github.com/silkenweb/ssr-example)
