@@ -1,4 +1,5 @@
 pub use js_sys;
+pub use serde_wasm_bindgen;
 /// Add a Tauri command signature to the client.
 ///
 /// See the tauri docs for an explanation of [commands](https://tauri.studio/docs/guides/command/).
@@ -59,4 +60,3 @@ pub use silkenweb_tauri_proc_macro::client_command;
 pub use static_assertions;
 pub use wasm_bindgen;
 pub use wasm_bindgen_futures;
-pub use serde_wasm_bindgen;
