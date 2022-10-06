@@ -669,22 +669,22 @@ svg_element!(
             /// Defines the x-axis coordinate of the line starting point. Value
             /// type: `<length>`|`<percentage>`|`<number>` ; Default value: 0;
             /// Animatable: yes
-            x1: f64,
+            x1: Length,
 
             /// Defines the x-axis coordinate of the line ending point. Value
             /// type: `<length>`|`<percentage>`|`<number>` ; Default value: 0;
             /// Animatable: yes
-            x2: f64,
+            x2: Length,
 
             /// Defines the y-axis coordinate of the line starting point. Value
             /// type: `<length>`|`<percentage>`|`<number>` ; Default value: 0;
             /// Animatable: yes
-            y1: f64,
+            y1: Length,
 
             /// Defines the y-axis coordinate of the line ending point. Value
             /// type: `<length>`|`<percentage>`|`<number>` ; Default value: 0;
             /// Animatable: yes
-            y2: f64,
+            y2: Length,
 
             /// Defines the total path length in user units. Value type:
             /// `<number>` ; Default value: none; Animatable: yes
