@@ -80,22 +80,20 @@ mod arch {
     use super::RENDER;
 
     pub struct Raf {
-        on_animation_frame: Closure<dyn FnMut(JsValue)>,
+        on_raf: Closure<dyn FnMut(JsValue)>,
     }
 
     impl Raf {
         pub fn new() -> Self {
             Self {
-                on_animation_frame: Closure::wrap(Box::new(|time_stamp: JsValue| {
-                    RENDER.with(|render| {
-                        render.on_animation_frame(time_stamp.as_f64().unwrap_throw())
-                    });
+                on_raf: Closure::wrap(Box::new(|time_stamp: JsValue| {
+                    RENDER.with(|render| render.on_raf(time_stamp.as_f64().unwrap_throw()));
                 })),
             }
         }
 
         pub fn request_animation_frame(&self) {
-            window::request_animation_frame(self.on_animation_frame.as_ref().unchecked_ref());
+            window::request_animation_frame(self.on_raf.as_ref().unchecked_ref());
         }
     }
 
@@ -221,7 +219,7 @@ impl Render {
     }
 
     #[cfg(target_arch = "wasm32")]
-    fn on_animation_frame(&self, time_stamp: f64) {
+    fn on_raf(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);
         self.render_updates();
