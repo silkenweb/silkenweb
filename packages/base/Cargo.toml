@@ -17,4 +17,13 @@ js-sys = "0.3.60"
 
 [dependencies.web-sys]
 version = "0.3.60"
-features = ["Document", "Element", "History", "Location", "Storage", "Text", "Window"]
+features = [
+    "Document",
+    "Element",
+    "History",
+    "Location",
+    "Performance",
+    "Storage",
+    "Text",
+    "Window",
+]

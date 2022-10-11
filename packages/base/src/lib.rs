@@ -31,6 +31,10 @@ pub mod window {
     pub fn session_storage() -> Result<web_sys::Storage, JsValue> {
         WINDOW.with(|w| w.session_storage().map(|w| w.unwrap_throw()))
     }
+
+    pub fn performance() -> Option<web_sys::Performance> {
+        WINDOW.with(|w| w.performance())
+    }
 }
 
 pub mod document {

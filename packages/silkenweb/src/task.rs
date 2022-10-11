@@ -8,14 +8,12 @@
 //!
 //! [microtask queue]: <https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide>
 //! [requestAnimationFrame on MDN]: <https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame>
-use std::{
-    cell::{Cell, RefCell},
-    future,
-};
+use std::cell::{Cell, RefCell};
 
 use arch::{wait_for_microtasks, Raf};
-use futures::{Future, StreamExt};
-use futures_signals::signal::{from_stream, Mutable, Signal, SignalExt};
+use futures::Future;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use silkenweb_base::window;
 
 /// Spawn a future on the microtask queue.
 pub fn spawn_local<F>(future: F)
@@ -238,22 +236,20 @@ impl Render {
     }
 
     fn animation_timestamp(&self) -> impl Signal<Item = f64> {
-        from_stream(self.animation_timestamp_millis.signal().to_stream().scan(
-            None,
-            |base, current| {
-                let ts = if let Some(start) = base {
-                    current - *start
-                } else {
-                    *base = Some(current);
-                    0.0
-                };
+        // The first timestamp will be from the previous animation or 0.0,
+        // `animation_timestamp_millis` will yield 1 timestamp before `base` and the
+        // next timestamp after `base`.
+        let base = window::performance().unwrap().now();
 
-                future::ready(Some(ts))
-            },
-        ))
-        .map(Option::unwrap)
-        // I fairly sure it's safe to call unwrap, as the stream will be
-        // infinite
+        self.animation_timestamp_millis.signal().map(move |ts| {
+            let relative_ts = ts - base;
+
+            if relative_ts > 0.0 {
+                relative_ts
+            } else {
+                0.0
+            }
+        })
     }
 
     pub fn render_updates(&self) {
