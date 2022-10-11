@@ -6,6 +6,7 @@
 - Use `serde_wasm_bindgen` for Tauri serialization to fix warnings about serde_json.
 - Rename `html_element` to `custom_html_element`
 - Fix animation timestamps
+- Add `on_animation_frame`
 
 ## 0.3.0 - 2022-10-05
 

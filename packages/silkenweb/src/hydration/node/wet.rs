@@ -10,7 +10,7 @@ use wasm_bindgen::{JsValue, UnwrapThrowExt};
 use super::{event::EventCallback, HydrationNodeData, Namespace, WetNode};
 use crate::{
     attribute::Attribute,
-    task::{after_animation_frame, queue_update},
+    task::{on_animation_frame, queue_update},
 };
 
 pub struct WetElement {
@@ -115,7 +115,7 @@ impl WetElement {
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let dom_element = self.dom_element.clone();
-        after_animation_frame(move || f(&dom_element));
+        on_animation_frame(move || f(&dom_element));
     }
 
     pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {

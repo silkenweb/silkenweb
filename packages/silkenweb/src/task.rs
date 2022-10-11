@@ -114,13 +114,15 @@ mod arch {
     }
 }
 
-pub(super) fn queue_update(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.queue_update(f));
+/// Run a closure on the next animation frame.
+///
+/// An animation frame will be requested with `requestAnimationFrame`.
+pub fn on_animation_frame(f: impl FnOnce() + 'static) {
+    RENDER.with(|r| r.on_animation_frame(f));
 }
 
-/// Run a closure after the next render.
-pub(super) fn after_animation_frame(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.after_animation_frame(f));
+pub(super) fn queue_update(f: impl FnOnce() + 'static) {
+    RENDER.with(|r| r.queue_update(f));
 }
 
 pub(super) fn animation_timestamp() -> impl Signal<Item = f64> {
@@ -230,7 +232,7 @@ impl Render {
         self.request_animation_frame();
     }
 
-    fn after_animation_frame(&self, x: impl FnOnce() + 'static) {
+    fn on_animation_frame(&self, x: impl FnOnce() + 'static) {
         self.pending_effects.borrow_mut().push(Box::new(x));
         self.request_animation_frame();
     }
