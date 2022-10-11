@@ -8,10 +8,7 @@ use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 use super::{event::EventCallback, HydrationNodeData, Namespace, WetNode};
-use crate::{
-    attribute::Attribute,
-    task::{on_animation_frame, queue_update},
-};
+use crate::{attribute::Attribute, task::on_animation_frame};
 
 pub struct WetElement {
     dom_element: web_sys::Element,
@@ -60,47 +57,33 @@ impl WetElement {
     }
 
     pub fn append_child(&mut self, child: impl WetNode) {
-        let parent = self.dom_node();
-        let child = child.dom_node();
-        queue_update(move || {
-            parent.append_child(&child).unwrap_throw();
-        });
+        self.dom_node()
+            .append_child(&child.dom_node())
+            .unwrap_throw();
     }
 
     pub fn insert_child_before(&mut self, child: impl WetNode, next_child: Option<impl WetNode>) {
-        let parent = self.dom_node();
-        let child = child.dom_node();
         let next_child = next_child.map(|c| c.dom_node());
 
-        queue_update(move || {
-            parent
-                .insert_before(&child, next_child.as_ref())
-                .unwrap_throw();
-        });
+        self.dom_node()
+            .insert_before(&child.dom_node(), next_child.as_ref())
+            .unwrap_throw();
     }
 
     pub fn replace_child(&mut self, new_child: impl WetNode, old_child: impl WetNode) {
-        let parent = self.dom_element.clone();
-        let new_child = new_child.dom_node();
-        let old_child = old_child.dom_node();
-
-        queue_update(move || {
-            parent.replace_child(&new_child, &old_child).unwrap_throw();
-        });
+        self.dom_element
+            .replace_child(&new_child.dom_node(), &old_child.dom_node())
+            .unwrap_throw();
     }
 
     pub fn remove_child(&mut self, child: impl WetNode) {
-        let parent = self.dom_element.clone();
-        let child = child.dom_node();
-        queue_update(move || {
-            parent.remove_child(&child).unwrap_throw();
-        });
+        self.dom_element
+            .remove_child(&child.dom_node())
+            .unwrap_throw();
     }
 
     pub fn clear_children(&mut self) {
-        let parent = self.dom_element.clone();
-
-        queue_update(move || parent.set_inner_html(""));
+        self.dom_element.set_inner_html("")
     }
 
     pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
@@ -108,9 +91,7 @@ impl WetElement {
     }
 
     pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
-        let name = name.to_owned();
-        let dom_element = self.dom_element.clone();
-        queue_update(move || Self::set_attribute(&dom_element, &name, value));
+        Self::set_attribute(&self.dom_element, name, value);
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -155,9 +136,7 @@ impl WetText {
     }
 
     pub fn set_text(&mut self, text: String) {
-        let parent = self.0.clone();
-
-        queue_update(move || parent.set_text_content(Some(&text)));
+        self.0.set_text_content(Some(&text));
     }
 }
 

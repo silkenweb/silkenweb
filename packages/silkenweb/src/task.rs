@@ -119,10 +119,6 @@ pub fn on_animation_frame(f: impl FnOnce() + 'static) {
     RENDER.with(|r| r.on_animation_frame(f));
 }
 
-pub(super) fn queue_update(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.queue_update(f));
-}
-
 pub(super) fn animation_timestamp() -> impl Signal<Item = f64> {
     RENDER.with(Render::animation_timestamp)
 }
@@ -133,11 +129,11 @@ pub(super) fn request_animation_frame() {
 
 /// Render any pending updates.
 ///
-/// Tasks on the microtask queue wil be executed first, then the render queue
+/// Tasks on the microtask queue wil be executed first, then the effect queue
 /// will be processed. This is mostly useful for testing.
 pub async fn render_now() {
     wait_for_microtasks().await;
-    RENDER.with(Render::render_updates);
+    RENDER.with(Render::render_effects);
 }
 
 /// Server only tools.
@@ -161,7 +157,7 @@ pub mod server {
     /// [render_now]: super::render_now
     pub fn render_now_sync() {
         arch::run();
-        RENDER.with(Render::render_updates);
+        RENDER.with(Render::render_effects);
     }
 
     struct ThreadWaker(Thread);
@@ -202,7 +198,6 @@ pub mod server {
 struct Render {
     raf: Raf,
     raf_pending: Cell<bool>,
-    pending_updates: RefCell<Vec<Box<dyn FnOnce()>>>,
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
     animation_timestamp_millis: Mutable<f64>,
 }
@@ -212,7 +207,6 @@ impl Render {
         Self {
             raf: Raf::new(),
             raf_pending: Cell::new(false),
-            pending_updates: RefCell::new(Vec::new()),
             pending_effects: RefCell::new(Vec::new()),
             animation_timestamp_millis: Mutable::new(0.0),
         }
@@ -222,12 +216,7 @@ impl Render {
     fn on_raf(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);
-        self.render_updates();
-    }
-
-    fn queue_update(&self, x: impl FnOnce() + 'static) {
-        self.pending_updates.borrow_mut().push(Box::new(x));
-        self.request_animation_frame();
+        self.render_effects();
     }
 
     fn on_animation_frame(&self, x: impl FnOnce() + 'static) {
@@ -252,11 +241,7 @@ impl Render {
         })
     }
 
-    pub fn render_updates(&self) {
-        for update in self.pending_updates.take() {
-            update();
-        }
-
+    pub fn render_effects(&self) {
         for effect in self.pending_effects.take() {
             effect();
         }
