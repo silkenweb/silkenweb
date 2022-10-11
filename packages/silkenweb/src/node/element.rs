@@ -403,6 +403,11 @@ pub struct Element {
 }
 
 impl Element {
+    /// See [`ElementBuilder::handle`]
+    pub fn handle(&self) -> ElementHandle<web_sys::Element> {
+        ElementHandle(self.hydro_elem.weak(), PhantomData)
+    }
+
     pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
         self.hydro_elem.eval_dom_element()
     }

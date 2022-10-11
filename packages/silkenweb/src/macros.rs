@@ -314,6 +314,12 @@ macro_rules! dom_element {
 
         pub struct $camel_name($crate::node::element::Element);
 
+        impl $camel_name {
+            pub fn handle(&self) -> $crate::node::element::ElementHandle<$elem_type> {
+                self.0.handle().cast()
+            }
+        }
+
         impl From<$camel_name> for $crate::node::element::Element {
             fn from(html_elem: $camel_name) -> Self {
                 html_elem.0

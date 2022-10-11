@@ -7,6 +7,7 @@
 - Rename `html_element` to `custom_html_element`
 - Fix animation timestamps
 - Add `on_animation_frame`
+- Add `handle` method to `Element`
 
 ## 0.3.0 - 2022-10-05
 
