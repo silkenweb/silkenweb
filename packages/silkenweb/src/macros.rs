@@ -235,6 +235,10 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
+            fn optional_class_signal(self, name: &str, included: impl $crate::macros::Signal<Item = bool> + 'static) -> Self {
+                Self { builder: self.builder.optional_class_signal(name, included) }
+            }
+
             fn attribute<T: $crate::attribute::Attribute>(self, name: &str, value: T) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
             }

@@ -295,6 +295,29 @@ impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
+    fn optional_class_signal(
+        self,
+        name: &str,
+        included: impl Signal<Item = bool> + 'static,
+    ) -> Self {
+        let name = name.to_owned();
+        let mut element = self.element.hydro_elem.clone();
+
+        let updater = included.for_each({
+            move |included| {
+                if included {
+                    element.add_class(&name);
+                } else {
+                    element.remove_class(&name);
+                }
+
+                async {}
+            }
+        });
+
+        self.spawn_future(updater)
+    }
+
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
@@ -452,6 +475,13 @@ pub trait ElementBuilder: Sized {
             value.map(move |class| class_attribute_text(class)),
         )
     }
+
+    // TODO: Doc
+    fn optional_class_signal(
+        self,
+        name: &str,
+        included: impl Signal<Item = bool> + 'static,
+    ) -> Self;
 
     /// Set an attribute
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;

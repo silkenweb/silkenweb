@@ -106,6 +106,22 @@ impl HydrationElement {
         );
     }
 
+    pub fn add_class(&mut self, name: &str) {
+        self.borrow_mut().map(
+            name,
+            |elem, name| elem.add_class(name),
+            |elem, name| elem.add_class(name),
+        );
+    }
+
+    pub fn remove_class(&mut self, name: &str) {
+        self.borrow_mut().map(
+            name,
+            |elem, name| elem.remove_class(name),
+            |elem, name| elem.remove_class(name),
+        );
+    }
+
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         self.borrow_mut().map(
             (name, value),

@@ -66,6 +66,14 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             type DomType = <#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType;
             type Target = <#derive_from as ::silkenweb::node::element::ElementBuilder>::Target;
 
+            fn optional_class_signal(
+                self,
+                name: &str,
+                included: impl ::silkenweb::macros::Signal<Item = bool> + 'static,
+            ) -> Self {
+                Self{#derive_field: self.#derive_field.optional_class_signal(name, included) #fields_tail}
+            }
+
             fn attribute<T: ::silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
                 Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
             }

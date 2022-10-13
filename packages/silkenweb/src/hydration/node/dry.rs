@@ -6,6 +6,7 @@ use std::{
 use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
 use indexmap::IndexMap;
+use itertools::Itertools;
 use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
@@ -201,6 +202,30 @@ impl DryElement {
 
     pub fn clear_children(&mut self) {
         self.children.clear();
+    }
+
+    pub fn add_class(&mut self, name: &str) {
+        self.attributes
+            .entry("class".to_owned())
+            .and_modify(|class| {
+                if !class.split_ascii_whitespace().any(|c| c == name) {
+                    if !class.is_empty() {
+                        class.push(' ');
+                    }
+
+                    class.push_str(name);
+                }
+            })
+            .or_insert_with(|| name.to_owned());
+    }
+
+    pub fn remove_class(&mut self, name: &str) {
+        if let Some(class) = self.attributes.get_mut("class") {
+            *class = class
+                .split_ascii_whitespace()
+                .filter(|&c| c != name)
+                .join(" ");
+        }
     }
 
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {

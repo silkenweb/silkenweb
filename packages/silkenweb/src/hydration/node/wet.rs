@@ -80,6 +80,14 @@ impl WetElement {
         self.dom_element.set_inner_html("")
     }
 
+    pub fn add_class(&mut self, name: &str) {
+        self.dom_element.class_list().add_1(name).unwrap_throw()
+    }
+
+    pub fn remove_class(&mut self, name: &str) {
+        self.dom_element.class_list().remove_1(name).unwrap_throw()
+    }
+
     pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         Self::set_attribute(&self.dom_element, name, value);
     }
