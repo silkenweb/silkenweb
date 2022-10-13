@@ -173,7 +173,7 @@ impl ParentBuilder for ElementBuilderBase {
 
         self.element
             .hydro_elem
-            .append_child_now(HydrationText::new(child));
+            .append_child(HydrationText::new(child));
         self
     }
 
@@ -189,7 +189,7 @@ impl ParentBuilder for ElementBuilderBase {
         }
 
         let mut text_node = HydrationText::new(intern_str(""));
-        self.element.hydro_elem.append_child_now(text_node.clone());
+        self.element.hydro_elem.append_child(text_node.clone());
 
         let updater = child_signal.for_each({
             move |new_value| {
@@ -211,7 +211,7 @@ impl ParentBuilder for ElementBuilderBase {
 
         let mut child = child.into();
 
-        self.element.hydro_elem.append_child_now(&child);
+        self.element.hydro_elem.append_child(&child);
 
         if child.has_weak_refs() {
             self.element.resources.push(Resource::Child(child));
@@ -298,7 +298,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.hydro_elem.attribute_now(name, value);
+        self.element.hydro_elem.attribute(name, value);
         self
     }
 

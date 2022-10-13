@@ -50,14 +50,8 @@ impl WetElement {
         &self.dom_element
     }
 
-    pub fn append_child_now(&mut self, child: impl WetNode) {
-        self.dom_element
-            .append_child(&child.dom_node())
-            .unwrap_throw();
-    }
-
     pub fn append_child(&mut self, child: impl WetNode) {
-        self.dom_node()
+        self.dom_element
             .append_child(&child.dom_node())
             .unwrap_throw();
     }
@@ -86,11 +80,7 @@ impl WetElement {
         self.dom_element.set_inner_html("")
     }
 
-    pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
-        Self::set_attribute(&self.dom_element, name, value);
-    }
-
-    pub fn attribute<A: Attribute + 'static>(&mut self, name: &str, value: A) {
+    pub fn attribute<A: Attribute>(&mut self, name: &str, value: A) {
         Self::set_attribute(&self.dom_element, name, value);
     }
 
