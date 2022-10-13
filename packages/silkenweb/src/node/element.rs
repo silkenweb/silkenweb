@@ -483,8 +483,8 @@ pub trait ElementBuilder: Sized {
 
     /// Adds or removes class names on the element
     ///
-    /// Each time the signal updates, the classes will be added to the element.
-    /// The previous values classes will be removed.
+    /// Each time the signal updates, the previous value's classes will be
+    /// removed and the current classes will be added to the element.
     ///
     /// # Panics
     ///
