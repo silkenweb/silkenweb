@@ -70,12 +70,11 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
                 Self {#derive_field: self.#derive_field.class(value) #fields_tail}
             }
 
-            fn optional_class_signal(
+            fn class_signal<T: ::std::convert::AsRef<str> + 'static>(
                 self,
-                name: &str,
-                included: impl ::silkenweb::macros::Signal<Item = bool> + 'static,
+                class: impl ::silkenweb::macros::Signal<Item = impl ::std::iter::IntoIterator<Item = T>> + 'static,
             ) -> Self {
-                Self{#derive_field: self.#derive_field.optional_class_signal(name, included) #fields_tail}
+                Self{#derive_field: self.#derive_field.class_signal(class) #fields_tail}
             }
 
             fn attribute<T: ::silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {

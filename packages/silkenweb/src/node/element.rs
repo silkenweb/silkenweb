@@ -14,7 +14,7 @@
 use std::collections::HashSet;
 use std::{
     self,
-    cell::RefCell,
+    cell::{Cell, RefCell},
     fmt::{self, Display},
     future::Future,
     marker::PhantomData,
@@ -303,24 +303,30 @@ impl ElementBuilder for ElementBuilderBase {
         self
     }
 
-    fn optional_class_signal(
+    fn class_signal<T: AsRef<str> + 'static>(
         self,
-        name: &str,
-        included: impl Signal<Item = bool> + 'static,
+        class: impl Signal<Item = impl IntoIterator<Item = T>> + 'static,
     ) -> Self {
-        let name = name.to_owned();
         let mut element = self.element.hydro_elem.clone();
+        let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
 
-        let updater = included.for_each({
-            move |included| {
-                if included {
-                    element.add_class(&name);
-                } else {
-                    element.remove_class(&name);
-                }
+        let updater = class.for_each(move |classes| {
+            let mut previous = previous_value.replace(Vec::new());
 
-                async {}
+            for to_remove in &previous {
+                element.remove_class(to_remove.as_ref());
             }
+
+            previous.clear();
+
+            for to_add in classes {
+                element.add_class(to_add.as_ref());
+                previous.push(to_add);
+            }
+
+            previous_value.set(previous);
+
+            async {}
         });
 
         self.spawn_future(updater)
@@ -478,34 +484,17 @@ pub trait ElementBuilder: Sized {
     /// Panics if any of the items in `value` contain whitespace.
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self;
 
-    /// Set the classes on an element when a signal updates
+    /// Adds or removes class names on the element
     ///
-    /// This overwrites the entire "class" attribute each time the signal
-    /// updates, so be careful if you use it with [`class`] or
-    /// [`optional_class_signal`]
+    /// Each time the signal updates, the classes will be added to the element.
+    /// The previous values classes will be removed.
     ///
     /// # Panics
     ///
-    /// This will only panic if the iterator panics
-    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
+    /// If a value contains whitespace, this will panic.
+    fn class_signal<T: AsRef<str> + 'static>(
         self,
-        value: impl Signal<Item = Iter> + 'static,
-    ) -> Self {
-        self.attribute_signal(
-            intern_str("class"),
-            value.map(move |class| class_attribute_text(class)),
-        )
-    }
-
-    /// Adds or removes a class name from the element
-    ///
-    /// If the signal value yields `true`, `name` will be added to the class
-    /// list. If the signal value yields `false`, `name` will be removed from
-    /// the class list.
-    fn optional_class_signal(
-        self,
-        name: &str,
-        included: impl Signal<Item = bool> + 'static,
+        class: impl Signal<Item = impl IntoIterator<Item = T>> + 'static,
     ) -> Self;
 
     /// Set an attribute
@@ -697,25 +686,6 @@ pub trait ShadowRootParentBuilder: ElementBuilder {
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
-}
-
-fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> Option<String> {
-    let mut classes = classes.into_iter();
-
-    if let Some(first) = classes.next() {
-        let mut text = first.as_ref().to_owned();
-
-        for class in classes {
-            let class = class.as_ref();
-            text.reserve(1 + class.len());
-            text.push(' ');
-            text.push_str(class);
-        }
-
-        Some(text)
-    } else {
-        None
-    }
 }
 
 fn spawn_cancelable_future(

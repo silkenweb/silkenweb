@@ -256,26 +256,26 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn class_signal() {
-        let test_class1 = Mutable::new(true);
-        let test_class2 = Mutable::new(true);
+        let test_class1 = Mutable::new(Some("test-class-1"));
+        let test_class2 = Mutable::new(Some("test-class-2"));
         let elem =
             div()
-                .optional_class_signal("test-class-1", test_class1.signal())
-                .optional_class_signal("test-class-2", test_class2.signal()).build();
+                .class_signal(test_class1.signal())
+                .class_signal(test_class2.signal()).build();
 
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="test-class-1 test-class-2"></div>"#);
 
-        test_class1.set(false);
+        test_class1.set(None);
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="test-class-2"></div>"#);
 
-        test_class2.set(false);
+        test_class2.set(None);
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class=""></div>"#);
 
-        test_class1.set(true);
-        test_class2.set(true);
+        test_class1.set(Some("test-class-1"));
+        test_class2.set(Some("test-class-2"));
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="test-class-1 test-class-2"></div>"#);
     }

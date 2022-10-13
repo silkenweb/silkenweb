@@ -239,8 +239,11 @@ macro_rules! dom_element {
                 Self { builder: self.builder.class(value) }
             }
 
-            fn optional_class_signal(self, name: &str, included: impl $crate::macros::Signal<Item = bool> + 'static) -> Self {
-                Self { builder: self.builder.optional_class_signal(name, included) }
+            fn class_signal<T: ::std::convert::AsRef<str> + 'static>(
+                self,
+                class: impl $crate::macros::Signal<Item = impl ::std::iter::IntoIterator<Item = T>> + 'static,
+            ) -> Self {
+                Self { builder: self.builder.class_signal(class) }
             }
 
             fn attribute<T: $crate::attribute::Attribute>(self, name: &str, value: T) -> Self {
