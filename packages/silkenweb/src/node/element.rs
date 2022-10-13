@@ -346,15 +346,12 @@ impl ElementBuilder for ElementBuilderBase {
     ) -> Self {
         self.check_attribute_unique(name);
         let mut element = self.element.hydro_elem.clone();
+        let name = name.to_owned();
 
-        let updater = value.for_each({
-            let name = name.to_owned();
+        let updater = value.for_each(move |new_value| {
+            element.attribute(&name, new_value);
 
-            move |new_value| {
-                element.attribute(&name, new_value);
-
-                async {}
-            }
+            async {}
         });
 
         self.spawn_future(updater)
