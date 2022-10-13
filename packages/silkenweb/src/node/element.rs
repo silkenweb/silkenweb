@@ -296,7 +296,6 @@ impl ElementBuilder for ElementBuilderBase {
     type Target = Element;
 
     fn class(mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        // TODO: Test performance of this
         for class in classes {
             self.element.hydro_elem.add_class(class.as_ref());
         }
@@ -469,10 +468,25 @@ pub trait ElementBuilder: Sized {
     type Target;
     type DomType: JsCast + 'static;
 
-    // TODO: Doc
+    /// Set the classes on an element
+    ///
+    /// All items in `value` must not contain spaces. This method can be called
+    /// multiple times and will add to existing classes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if any of the items in `value` contain whitespace.
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self;
 
-    // TODO: Doc
+    /// Set the classes on an element when a signal updates
+    ///
+    /// This overwrites the entire "class" attribute each time the signal
+    /// updates, so be careful if you use it with [`class`] or
+    /// [`optional_class_signal`]
+    ///
+    /// # Panics
+    ///
+    /// This will only panic if the iterator panics
     fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
         self,
         value: impl Signal<Item = Iter> + 'static,
@@ -483,7 +497,11 @@ pub trait ElementBuilder: Sized {
         )
     }
 
-    // TODO: Doc
+    /// Adds or removes a class name from the element
+    ///
+    /// If the signal value yields `true`, `name` will be added to the class
+    /// list. If the signal value yields `false`, `name` will be removed from
+    /// the class list.
     fn optional_class_signal(
         self,
         name: &str,
