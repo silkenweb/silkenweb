@@ -295,6 +295,15 @@ impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
+    fn class(mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
+        // TODO: Test performance of this
+        for class in classes {
+            self.element.hydro_elem.add_class(class.as_ref());
+        }
+
+        self
+    }
+
     fn optional_class_signal(
         self,
         name: &str,
@@ -461,9 +470,7 @@ pub trait ElementBuilder: Sized {
     type DomType: JsCast + 'static;
 
     // TODO: Doc
-    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        self.attribute(intern_str("class"), class_attribute_text(value))
-    }
+    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self;
 
     // TODO: Doc
     fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(

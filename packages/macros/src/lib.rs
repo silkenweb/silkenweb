@@ -66,6 +66,10 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             type DomType = <#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType;
             type Target = <#derive_from as ::silkenweb::node::element::ElementBuilder>::Target;
 
+            fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
+                Self {#derive_field: self.#derive_field.class(value) #fields_tail}
+            }
+
             fn optional_class_signal(
                 self,
                 name: &str,

@@ -235,6 +235,10 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
+            fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
+                Self { builder: self.builder.class(value) }
+            }
+
             fn optional_class_signal(self, name: &str, included: impl $crate::macros::Signal<Item = bool> + 'static) -> Self {
                 Self { builder: self.builder.optional_class_signal(name, included) }
             }
