@@ -26,8 +26,6 @@
 
 use std::marker::PhantomData;
 
-use futures_signals::signal::{Signal, SignalExt};
-use silkenweb_base::intern_str;
 use wasm_bindgen::JsCast;
 
 use crate::node::element::ElementBuilder;
@@ -87,43 +85,10 @@ macro_rules! global_attribute_doc {
     };
 }
 
-fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> Option<String> {
-    let mut classes = classes.into_iter();
-
-    if let Some(first) = classes.next() {
-        let mut text = first.as_ref().to_owned();
-
-        for class in classes {
-            let class = class.as_ref();
-            text.reserve(1 + class.len());
-            text.push(' ');
-            text.push_str(class);
-        }
-
-        Some(text)
-    } else {
-        None
-    }
-}
-
 /// An HTML element
 ///
 /// Methods for setting attributes specific to HTML elements
 pub trait HtmlElement: ElementBuilder {
-    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        self.attribute(intern_str("class"), class_attribute_text(value))
-    }
-
-    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
-        self,
-        value: impl Signal<Item = Iter> + 'static,
-    ) -> Self {
-        self.attribute_signal(
-            intern_str("class"),
-            value.map(move |class| class_attribute_text(class)),
-        )
-    }
-
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
         /// element. This attribute consists of a space-separated list of

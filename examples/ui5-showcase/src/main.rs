@@ -5,7 +5,7 @@ use silkenweb::{
     elements::html::div,
     mount,
     node::element::{Element, ElementBuilder},
-    prelude::{HtmlElement, ParentBuilder},
+    prelude::ParentBuilder,
 };
 use silkenweb_ui5::{
     avatar::{self, Avatar, AvatarGroup},

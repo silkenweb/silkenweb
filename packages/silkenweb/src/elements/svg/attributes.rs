@@ -1,11 +1,8 @@
-use futures_signals::signal::{Signal, SignalExt};
-use silkenweb_base::intern_str;
-
 use super::{
     content_type::{Length, NumberOrPercentage},
     path::Data,
 };
-use crate::{elements::class_attribute_text, node::element::ElementBuilder};
+use crate::node::element::ElementBuilder;
 
 macro_rules! svg_attributes {
     ($($t:tt)*) => {
@@ -24,20 +21,6 @@ macro_rules! svg_attributes {
 ///
 /// Methods for setting attributes specific to SVG elements
 pub trait Global: ElementBuilder {
-    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        self.attribute(intern_str("class"), class_attribute_text(value))
-    }
-
-    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
-        self,
-        value: impl Signal<Item = Iter> + 'static,
-    ) -> Self {
-        self.attribute_signal(
-            intern_str("class"),
-            value.map(move |class| class_attribute_text(class)),
-        )
-    }
-
     svg_attributes![
         /// Defines a unique identifier (ID) which must be unique in the whole
         /// document. Its purpose is to identify the element when linking (using

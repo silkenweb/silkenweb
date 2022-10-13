@@ -11,7 +11,6 @@ use silkenweb::{
     elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
     mount,
     node::element::{Element, ElementBuilder, ParentBuilder},
-    prelude::HtmlElement,
     router,
     task::spawn_local,
 };

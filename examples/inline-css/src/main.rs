@@ -2,7 +2,8 @@ use silkenweb::{
     css,
     elements::html::{div, p, style},
     mount,
-    prelude::{HtmlElement, ParentBuilder},
+    node::element::ElementBuilder,
+    prelude::ParentBuilder,
 };
 
 fn main() {

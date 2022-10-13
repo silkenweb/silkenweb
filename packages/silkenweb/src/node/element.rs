@@ -437,6 +437,22 @@ pub trait ElementBuilder: Sized {
     type Target;
     type DomType: JsCast + 'static;
 
+    // TODO: Doc
+    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
+        self.attribute(intern_str("class"), class_attribute_text(value))
+    }
+
+    // TODO: Doc
+    fn class_signal<Iter: IntoIterator<Item = impl AsRef<str>>>(
+        self,
+        value: impl Signal<Item = Iter> + 'static,
+    ) -> Self {
+        self.attribute_signal(
+            intern_str("class"),
+            value.map(move |class| class_attribute_text(class)),
+        )
+    }
+
     /// Set an attribute
     fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
 
@@ -626,6 +642,25 @@ pub trait ShadowRootParentBuilder: ElementBuilder {
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
     ) -> Self::Target;
+}
+
+fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> Option<String> {
+    let mut classes = classes.into_iter();
+
+    if let Some(first) = classes.next() {
+        let mut text = first.as_ref().to_owned();
+
+        for class in classes {
+            let class = class.as_ref();
+            text.reserve(1 + class.len());
+            text.push(' ');
+            text.push_str(class);
+        }
+
+        Some(text)
+    } else {
+        None
+    }
 }
 
 fn spawn_cancelable_future(

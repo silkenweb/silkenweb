@@ -8,6 +8,7 @@
 - Fix animation timestamps
 - Add `on_animation_frame`
 - Add `handle` method to `Element`
+- `class` and `class_signal` methods moved from `HtmlElement`/`SvgElement` to `ElementBuilder`
 
 ## 0.3.0 - 2022-10-05
 
