@@ -13,7 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{Element, ElementBuilder},
+    node::element::{Element, ElementBuilder, Sig},
     prelude::ParentBuilder,
 };
 use silkenweb_signals_ext::SignalProduct;
@@ -227,7 +227,7 @@ impl TodoItemView {
         input()
             .class(["edit"])
             .r#type("text")
-            .value_signal(todo.text())
+            .value(Sig(todo.text()))
             .on_focusout({
                 clone!(todo, app);
                 move |_, input| todo.save_edits(&app, input.value())
@@ -260,7 +260,7 @@ impl TodoItemView {
                 clone!(todo, app);
                 move |_, elem| app.set_completed(&todo, elem.checked())
             })
-            .checked_signal(todo.completed())
+            .checked(Sig(todo.completed()))
             .effect_signal(todo.completed(), |elem, completed| {
                 elem.set_checked(completed)
             });

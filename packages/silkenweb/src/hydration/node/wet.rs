@@ -86,6 +86,7 @@ impl WetElement {
         self.dom_element.set_inner_html("")
     }
 
+    // TODO: Can we get rid of this?
     pub fn attribute_now<A: Attribute>(&mut self, name: &str, value: A) {
         Self::set_attribute(&self.dom_element, name, value);
     }

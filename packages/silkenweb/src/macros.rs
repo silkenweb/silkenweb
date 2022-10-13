@@ -235,16 +235,8 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
-            fn attribute<T: $crate::attribute::Attribute>(self, name: &str, value: T) -> Self {
+            fn attribute<T: $crate::node::element::SetAttribute>(self, name: &str, value: T) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
-            }
-
-            fn attribute_signal<T: $crate::attribute::Attribute + 'static>(
-                self,
-                name: &str,
-                value: impl $crate::macros::Signal<Item = T> + 'static,
-            ) -> Self {
-                Self{ builder: $crate::node::element::ElementBuilder::attribute_signal(self.builder, name, value) }
             }
 
             fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
@@ -559,8 +551,8 @@ macro_rules! attribute {
             )?
         ]
         $(#[$attr_meta:meta])*
-        $visibility:vis $attr:ident $( ($text_attr:expr) )?: $typ:ty
-    ) => { $crate::macros::paste!{
+        $visibility:vis $attr:ident : $typ:ty
+    ) => {
         $crate::attribute!(
             [
                 $(
@@ -569,9 +561,9 @@ macro_rules! attribute {
                 )?
             ]
                 $(#[$attr_meta])*
-            $visibility ( $attr, [< $attr _signal >] ) ($crate::text_name!($attr $( ($text_attr) )?)): $typ
+            $visibility $attr ($crate::macros::rust_to_html_ident!($attr)): $typ
         );
-    }};
+    };
     (
         [
             $(
@@ -580,31 +572,19 @@ macro_rules! attribute {
             )?
         ]
         $(#[$attr_meta:meta])*
-        $visibility:vis ( $attr:ident, $attr_signal:ident ) ($text_attr:expr): $typ:ty
+        $visibility:vis $attr:ident ($text_attr:expr): $typ:ty
     ) => {
         $(
             #[doc = $attr_doc_macro!($element, $text_attr)]
             #[doc = ""]
         )?
         $(#[$attr_meta])*
-        $visibility fn $attr(self, value: impl $crate::attribute::AsAttribute<$typ>) -> Self {
-            $crate::node::element::ElementBuilder::attribute(self, $crate::macros::intern_str($text_attr), value)
-        }
-
-        $(
-            #[doc = $attr_doc_macro!($element, $text_attr)]
-            #[doc = ""]
-        )?
-        $(#[$attr_meta])*
-        #[allow(clippy::wrong_self_convention)]
-        $visibility fn $attr_signal<T>(
-            self,
-            value: impl $crate::macros::Signal<Item = T> + 'static
-        ) -> Self
+        $visibility fn $attr<T>(self, value: T) -> Self
         where
-            T: $crate::attribute::AsAttribute<$typ> + 'static
+            T: $crate::node::element::SetAttribute,
+            T::Type: $crate::attribute::AsAttribute<$typ>
         {
-            $crate::node::element::ElementBuilder::attribute_signal(self, $crate::macros::intern_str($text_attr), value)
+            $crate::node::element::ElementBuilder::attribute(self, $crate::macros::intern_str($text_attr), value)
         }
     };
 }

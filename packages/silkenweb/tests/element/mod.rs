@@ -7,7 +7,10 @@ use silkenweb::{
         html::{div, p, DivBuilder},
         HtmlElement,
     },
-    node::{element::ElementBuilder, text},
+    node::{
+        element::{ElementBuilder, Sig},
+        text,
+    },
     prelude::ParentBuilder,
     task::render_now,
 };
@@ -257,7 +260,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn attribute_signal() {
         let text = Mutable::new("Initial text");
-        let elem = div().title_signal(text.signal()).build();
+        let elem = div().title(Sig(text.signal())).build();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set("Updated text");
@@ -269,7 +272,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn optional_attribute_signal() {
         let text = Mutable::new(Some("Initial text"));
-        let elem = div().title_signal(text.signal()).build();
+        let elem = div().title(Sig(text.signal())).build();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set(None);

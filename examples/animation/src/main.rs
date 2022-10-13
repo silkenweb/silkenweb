@@ -13,7 +13,7 @@ use silkenweb::{
         },
     },
     mount,
-    node::element::{ElementBuilder, ParentBuilder},
+    node::element::{ElementBuilder, ParentBuilder, Sig},
 };
 use wasm_bindgen::UnwrapThrowExt;
 
@@ -39,7 +39,7 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
     });
 
     svg::path()
-        .d_signal(path)
+        .d(Sig(path))
         .stroke("black")
         .fill("transparent")
         .build()

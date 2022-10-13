@@ -30,7 +30,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use silkenweb_base::intern_str;
 use wasm_bindgen::JsCast;
 
-use crate::node::element::ElementBuilder;
+use crate::node::element::{ElementBuilder, Sig};
 
 pub mod html;
 pub mod svg;
@@ -110,6 +110,7 @@ fn class_attribute_text<T: AsRef<str>>(classes: impl IntoIterator<Item = T>) -> 
 ///
 /// Methods for setting attributes specific to HTML elements
 pub trait HtmlElement: ElementBuilder {
+    // TODO: Use a `Sig` newtype and get rid of `class_signal`
     fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         self.attribute(intern_str("class"), class_attribute_text(value))
     }
@@ -118,9 +119,9 @@ pub trait HtmlElement: ElementBuilder {
         self,
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
-        self.attribute_signal(
+        self.attribute(
             intern_str("class"),
-            value.map(move |class| class_attribute_text(class)),
+            Sig(value.map(move |class| class_attribute_text(class))),
         )
     }
 

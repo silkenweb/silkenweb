@@ -38,7 +38,7 @@ pub fn main() -> Result<(), JsValue> {
             item(Selected::Breadcrumbs).text("Breadcrumbs"),
             item(Selected::BusyIndicator).text("BusyIndicator"),
             item(Selected::Button).text("Button"),
-            item(Selected::Calendar).text("Calendar").selected(),
+            item(Selected::Calendar).text("Calendar").selected(true),
             item(Selected::Icon).text("Icon"),
         ])
         .on_selection_change(move |_, new_selection| selected.set(new_selection));

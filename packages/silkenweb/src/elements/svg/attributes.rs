@@ -5,7 +5,10 @@ use super::{
     content_type::{Length, NumberOrPercentage},
     path::Data,
 };
-use crate::{elements::class_attribute_text, node::element::ElementBuilder};
+use crate::{
+    elements::class_attribute_text,
+    node::element::{ElementBuilder, Sig},
+};
 
 macro_rules! svg_attributes {
     ($($t:tt)*) => {
@@ -32,9 +35,9 @@ pub trait Global: ElementBuilder {
         self,
         value: impl Signal<Item = Iter> + 'static,
     ) -> Self {
-        self.attribute_signal(
+        self.attribute(
             intern_str("class"),
-            value.map(move |class| class_attribute_text(class)),
+            Sig(value.map(move |class| class_attribute_text(class))),
         )
     }
 
