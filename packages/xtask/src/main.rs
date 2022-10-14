@@ -108,6 +108,7 @@ fn build_website() -> WorkflowResult<()> {
     for example in [
         "animation",
         "async-http-request",
+        "bootstrap",
         "counter",
         "counter-list",
         "element-handle",

@@ -66,6 +66,7 @@ The advantage of using a macro DSL is that syntax is tailored to defining docume
 
 - [animation](https://silkenweb.netlify.app/examples/animation)
 - [async-http-request](https://silkenweb.netlify.app/examples/async-http-request)
+- [bootstrap](https://silkenweb.netlify.app/examples/bootstrap)
 - [counter](https://silkenweb.netlify.app/examples/counter)
 - [counter-list](https://silkenweb.netlify.app/examples/counter-list)
 - [element-handle](https://silkenweb.netlify.app/examples/element-handle)
