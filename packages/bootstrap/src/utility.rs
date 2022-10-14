@@ -161,6 +161,44 @@ impl Opacity {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum Shadow {
+    None,
+    Small,
+    Medium,
+    Large,
+}
+
+impl Shadow {
+    pub fn class(self) -> Class {
+        match self {
+            Shadow::None => css::SHADOW_NONE,
+            Shadow::Small => css::SHADOW_SM,
+            Shadow::Medium => css::SHADOW,
+            Shadow::Large => css::SHADOW_LG,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum Overflow {
+    Auto,
+    Hidden,
+    Visible,
+    Scroll,
+}
+
+impl Overflow {
+    pub fn class(self) -> Class {
+        match self {
+            Overflow::Auto => css::OVERFLOW_AUTO,
+            Overflow::Hidden => css::OVERFLOW_HIDDEN,
+            Overflow::Visible => css::OVERFLOW_VISIBLE,
+            Overflow::Scroll => css::OVERFLOW_SCROLL,
+        }
+    }
+}
+
 pub trait Margin {
     fn margin(self) -> Class;
 }
@@ -320,17 +358,14 @@ pub trait Spacing: ElementBuilder {
         self.class([(size, axis).margin()])
     }
 
-    /// Set the padding
     fn padding(self, size: Size) -> Self {
         self.class([size.padding()])
     }
 
-    /// Set the padding on `side`
     fn padding_on(self, size: Size, side: Side) -> Self {
         self.class([(size, side).padding()])
     }
 
-    /// Set the padding on `axis`
     fn padding_on_axis(self, size: Size, axis: Axis) -> Self {
         self.class([(size, axis).padding()])
     }
@@ -344,38 +379,45 @@ pub trait Spacing: ElementBuilder {
         self.class([colour.border()])
     }
 
-    /// Set the border width
     fn border_width(self, size: Size) -> Self {
         self.class([size.border_width()])
     }
 
-    /// Set a border with rounded corners
-    fn border_rounded(self) -> Self {
+    fn rounded_border(self) -> Self {
         self.class([css::ROUNDED])
     }
 
-    /// Set a border with rounded edges, with the radius of `size`
-    fn border_rounded_size(self, size: Size) -> Self {
+    fn rounded_border_of_size(self, size: Size) -> Self {
         self.class([size.rounded()])
     }
 
-    /// Set a pill shaped border
-    fn border_pill(self) -> Self {
+    fn rounded_pill_border(self) -> Self {
         self.class([css::ROUNDED_PILL])
     }
 
-    /// Set a circular/elliptical border
-    fn border_circle(self) -> Self {
+    fn rounded_circular_border(self) -> Self {
         self.class([css::ROUNDED_CIRCLE])
     }
 
-    /// Set a border with rounded edges on a particular `side`
-    fn border_rounded_on_side(self, side: Side) -> Self {
+    fn rounded_border_on(self, side: Side) -> Self {
         self.class([side.rounded()])
     }
 
     fn border_opacity(self, opacity: Opacity) -> Self {
         self.class([opacity.border()])
+    }
+
+    /// Set a medium drop shadow
+    fn shadow(self) -> Self {
+        self.shadow_of_size(Shadow::Medium)
+    }
+
+    fn shadow_of_size(self, shadow: Shadow) -> Self {
+        self.class([shadow.class()])
+    }
+
+    fn overflow(self, overflow: Overflow) -> Self {
+        self.class([overflow.class()])
     }
 }
 
