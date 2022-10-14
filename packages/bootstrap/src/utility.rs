@@ -29,6 +29,32 @@ impl Colour {
         }
     }
 
+    pub fn background(self) -> Class {
+        match self {
+            Self::Primary => css::BG_PRIMARY,
+            Self::Secondary => css::BG_SECONDARY,
+            Self::Success => css::BG_SUCCESS,
+            Self::Danger => css::BG_DANGER,
+            Self::Warning => css::BG_WARNING,
+            Self::Info => css::BG_INFO,
+            Self::Light => css::BG_LIGHT,
+            Self::Dark => css::BG_DARK,
+        }
+    }
+
+    pub fn text(self) -> Class {
+        match self {
+            Self::Primary => css::TEXT_PRIMARY,
+            Self::Secondary => css::TEXT_SECONDARY,
+            Self::Success => css::TEXT_SUCCESS,
+            Self::Danger => css::TEXT_DANGER,
+            Self::Warning => css::TEXT_WARNING,
+            Self::Info => css::TEXT_INFO,
+            Self::Light => css::TEXT_LIGHT,
+            Self::Dark => css::TEXT_DARK,
+        }
+    }
+
     pub fn border(self) -> Class {
         match self {
             Colour::Primary => css::BORDER_PRIMARY,
@@ -511,6 +537,22 @@ pub trait Spacing: ElementBuilder {
 
     fn overflow_signal(self, overflow: impl Signal<Item = Overflow> + 'static) -> Self {
         self.class_signal(overflow.map(|overflow| [overflow.class()]))
+    }
+
+    fn background_colour(self, colour: Colour) -> Self {
+        self.class([colour.background()])
+    }
+
+    fn background_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
+        self.class_signal(colour.map(|colour| [colour.background()]))
+    }
+
+    fn text_colour(self, colour: Colour) -> Self {
+        self.class([colour.text()])
+    }
+
+    fn text_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
+        self.class_signal(colour.map(|colour| [colour.text()]))
     }
 }
 
