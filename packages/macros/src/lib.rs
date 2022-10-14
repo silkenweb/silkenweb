@@ -16,6 +16,7 @@ use syn::{
 
 mod parser;
 
+// TODO: Docs
 #[proc_macro_derive(ElementBuilder)]
 #[proc_macro_error]
 pub fn derive_element_builder(item: TokenStream) -> TokenStream {
