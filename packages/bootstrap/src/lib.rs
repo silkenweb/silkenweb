@@ -1,5 +1,6 @@
 pub mod badge;
 pub mod colour;
+pub mod utility;
 
 pub mod css {
     // TODO: Should `css_classes!` be able to make a trait to apply the class to an
