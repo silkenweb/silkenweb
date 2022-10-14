@@ -1,3 +1,4 @@
+use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::node::element::ElementBuilder;
 
 use crate::{css, Class};
@@ -60,7 +61,7 @@ impl Side {
         }
     }
 
-    pub fn rounded(self) -> Class {
+    pub fn rounded_border(self) -> Class {
         match self {
             Side::Top => css::ROUNDED_TOP,
             Side::Bottom => css::ROUNDED_BOTTOM,
@@ -70,6 +71,7 @@ impl Side {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Axis {
     X,
     Y,
@@ -80,6 +82,21 @@ impl Axis {
         match self {
             Axis::X => css::MX_AUTO,
             Axis::Y => css::MY_AUTO,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum SideOrAxis {
+    Side(Side),
+    Axis(Axis),
+}
+
+impl SideOrAxis {
+    fn margin(self) -> Class {
+        match self {
+            SideOrAxis::Side(side) => side.margin(),
+            SideOrAxis::Axis(axis) => axis.margin(),
         }
     }
 }
@@ -117,7 +134,7 @@ impl Size {
         }
     }
 
-    pub fn border_width(self) -> Class {
+    pub fn border(self) -> Class {
         match self {
             Size::Size0 => css::BORDER_0,
             Size::Size1 => css::BORDER_1,
@@ -128,7 +145,7 @@ impl Size {
         }
     }
 
-    pub fn rounded(self) -> Class {
+    pub fn rounded_border(self) -> Class {
         match self {
             Size::Size0 => css::ROUNDED_0,
             Size::Size1 => css::ROUNDED_1,
@@ -245,9 +262,11 @@ impl Margin for (Size, Side) {
 
 impl Margin for (Option<Size>, Side) {
     fn margin(self) -> Class {
-        match self {
-            (None, side) => side.margin(),
-            (Some(size), side) => (size, side).margin(),
+        let (size, side) = self;
+
+        match size {
+            None => side.margin(),
+            Some(size) => (size, side).margin(),
         }
     }
 }
@@ -273,9 +292,33 @@ impl Margin for (Size, Axis) {
 
 impl Margin for (Option<Size>, Axis) {
     fn margin(self) -> Class {
+        let (size, axis) = self;
+
+        match size {
+            None => axis.margin(),
+            Some(size) => (size, axis).margin(),
+        }
+    }
+}
+
+impl Margin for (Size, SideOrAxis) {
+    fn margin(self) -> Class {
+        let (size, side_or_axis) = self;
+
+        match side_or_axis {
+            SideOrAxis::Side(side) => (size, side).margin(),
+            SideOrAxis::Axis(axis) => (size, axis).margin(),
+        }
+    }
+}
+
+impl Margin for (Option<Size>, Option<SideOrAxis>) {
+    fn margin(self) -> Class {
         match self {
-            (None, axis) => axis.margin(),
-            (Some(size), axis) => (size, axis).margin(),
+            (None, None) => css::M_AUTO,
+            (None, Some(side_or_axis)) => side_or_axis.margin(),
+            (Some(size), None) => size.margin(),
+            (Some(size), Some(side_or_axis)) => (size, side_or_axis).margin(),
         }
     }
 }
@@ -334,6 +377,17 @@ impl Padding for (Size, Axis) {
     }
 }
 
+impl Padding for (Size, SideOrAxis) {
+    fn padding(self) -> Class {
+        let (size, side_or_axis) = self;
+
+        match side_or_axis {
+            SideOrAxis::Side(side) => (size, side).padding(),
+            SideOrAxis::Axis(side) => (size, side).padding(),
+        }
+    }
+}
+
 pub trait Spacing: ElementBuilder {
     // TODO: signal equivalent functions
 
@@ -358,6 +412,13 @@ pub trait Spacing: ElementBuilder {
         self.class([(size, axis).margin()])
     }
 
+    fn margin_signal(
+        self,
+        margin: impl Signal<Item = (Option<Size>, Option<SideOrAxis>)> + 'static,
+    ) -> Self {
+        self.class_signal(margin.map(move |m| [m.margin()]))
+    }
+
     fn padding(self, size: Size) -> Self {
         self.class([size.padding()])
     }
@@ -370,6 +431,10 @@ pub trait Spacing: ElementBuilder {
         self.class([(size, axis).padding()])
     }
 
+    fn padding_signal(self, size: Size, side_or_axis: SideOrAxis) -> Self {
+        self.class([(size, side_or_axis).padding()])
+    }
+
     /// Use a border
     fn border(self) -> Self {
         self.class([css::BORDER])
@@ -379,8 +444,16 @@ pub trait Spacing: ElementBuilder {
         self.class([colour.border()])
     }
 
+    fn border_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
+        self.class_signal(colour.map(|colour| [colour.border()]))
+    }
+
     fn border_width(self, size: Size) -> Self {
-        self.class([size.border_width()])
+        self.class([size.border()])
+    }
+
+    fn border_width_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
+        self.class_signal(size.map(|size| [size.border()]))
     }
 
     fn rounded_border(self) -> Self {
@@ -388,7 +461,11 @@ pub trait Spacing: ElementBuilder {
     }
 
     fn rounded_border_of_size(self, size: Size) -> Self {
-        self.class([size.rounded()])
+        self.class([size.rounded_border()])
+    }
+
+    fn rounded_border_of_size_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
+        self.class_signal(size.map(|size| [size.rounded_border()]))
     }
 
     fn rounded_pill_border(self) -> Self {
@@ -400,11 +477,19 @@ pub trait Spacing: ElementBuilder {
     }
 
     fn rounded_border_on(self, side: Side) -> Self {
-        self.class([side.rounded()])
+        self.class([side.rounded_border()])
+    }
+
+    fn rounded_border_on_signal(self, side: impl Signal<Item = Side> + 'static) -> Self {
+        self.class_signal(side.map(|side| [side.rounded_border()]))
     }
 
     fn border_opacity(self, opacity: Opacity) -> Self {
         self.class([opacity.border()])
+    }
+
+    fn border_opacity_signal(self, opacity: impl Signal<Item = Opacity> + 'static) -> Self {
+        self.class_signal(opacity.map(|opacity| [opacity.border()]))
     }
 
     /// Set a medium drop shadow
@@ -416,8 +501,16 @@ pub trait Spacing: ElementBuilder {
         self.class([shadow.class()])
     }
 
+    fn shadow_of_size_signal(self, shadow: impl Signal<Item = Shadow> + 'static) -> Self {
+        self.class_signal(shadow.map(|shadow| [shadow.class()]))
+    }
+
     fn overflow(self, overflow: Overflow) -> Self {
         self.class([overflow.class()])
+    }
+
+    fn overflow_signal(self, overflow: impl Signal<Item = Overflow> + 'static) -> Self {
+        self.class_signal(overflow.map(|overflow| [overflow.class()]))
     }
 }
 
