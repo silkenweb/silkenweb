@@ -10,7 +10,7 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::{colour::Colour, css};
+use crate::{css, utility::Colour};
 
 #[derive(ElementBuilder)]
 pub struct Badge(SpanBuilder);
@@ -19,7 +19,7 @@ impl Badge {
     pub fn new(text: &str, background_colour: Colour) -> Self {
         Self(
             span()
-                .class([css::BADGE, background_colour.text_background_class()])
+                .class([css::BADGE, background_colour.text_background()])
                 .text(text),
         )
     }
@@ -33,7 +33,7 @@ impl Badge {
                 // TODO: `class [_signal]` should be renamed to `classes [_signal]` and `class
                 // [_signal]` should take a single class
                 .class([css::BADGE])
-                .class_signal(background_colour.map(|colour| [colour.text_background_class()]))
+                .class_signal(background_colour.map(|colour| [colour.text_background()]))
                 .text_signal(text),
         )
     }

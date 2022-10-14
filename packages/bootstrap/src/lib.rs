@@ -1,5 +1,4 @@
 pub mod badge;
-pub mod colour;
 pub mod utility;
 
 pub mod css {
@@ -11,3 +10,5 @@ pub mod css {
 pub mod icon {
     silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
+
+pub type Class = &'static str;

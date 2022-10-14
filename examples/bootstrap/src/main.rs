@@ -1,8 +1,7 @@
 use silkenweb::{elements::html::div, mount, prelude::ParentBuilder};
 use silkenweb_bootstrap::{
     badge::Badge,
-    colour::Colour,
-    utility::{Size::Size1, Spacing},
+    utility::{Colour, Size::Size1, Spacing},
 };
 
 fn main() {
