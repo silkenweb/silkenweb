@@ -10,18 +10,18 @@ use syn::{
     parse_macro_input,
     punctuated::Punctuated,
     token::{Colon, Comma, CustomToken},
-    Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed, Ident, Index, LitStr,
-    Visibility,
+    Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed, Ident,
+    Index, LitStr, Meta, NestedMeta, Path, Visibility,
 };
 
 mod parser;
 
 // TODO: Docs
-#[proc_macro_derive(ElementBuilder)]
+#[proc_macro_derive(ElementBuilder, attributes(element_target))]
 #[proc_macro_error]
 pub fn derive_element_builder(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
-
+    let target = extract_target_type(&new_type.attrs);
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
@@ -61,11 +61,19 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
         quote!(0)
     };
 
+    let (target, build_fn_body) = match target {
+        None => (
+            quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::Target),
+            quote!(self.#derive_field.build()),
+        ),
+        Some(target) => (quote!(#target), quote!(#target(self.#derive_field.build()))),
+    };
+
     quote!(
         impl #impl_generics ::silkenweb::node::element::ElementBuilder
         for #name #ty_generics #where_clause {
             type DomType = <#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType;
-            type Target = <#derive_from as ::silkenweb::node::element::ElementBuilder>::Target;
+            type Target = #target;
 
             fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
                 Self {#derive_field: self.#derive_field.class(value) #fields_tail}
@@ -115,11 +123,35 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             }
 
             fn build(self) -> Self::Target {
-                self.#derive_field.build()
+                #build_fn_body
             }
         }
     )
     .into()
+}
+
+fn extract_target_type(attrs: &[Attribute]) -> Option<Path> {
+    for attr in attrs {
+        if attr.path.is_ident("element_target") {
+            if let Meta::List(list) = attr.parse_meta().unwrap() {
+                let mut target_list = list.nested.into_iter();
+
+                if let Some(NestedMeta::Meta(Meta::Path(target_path))) = target_list.next() {
+                    if target_list.next().is_some() {
+                        abort_call_site!("Only one target type must be specified");
+                    }
+
+                    return Some(target_path);
+                } else {
+                    abort_call_site!("A target type must be specified");
+                }
+            } else {
+                abort_call_site!("Use `element_target(TargetType)`")
+            }
+        }
+    }
+
+    None
 }
 
 // TODO: Keep an eye on <https://github.com/kaj/rsass>:

@@ -1,16 +1,6 @@
-use silkenweb::{elements::html::div, mount, prelude::ParentBuilder};
-use silkenweb_bootstrap::{
-    badge::Badge,
-    utility::{Colour, Size::Size1, Spacing},
-};
+use silkenweb::mount;
+use silkenweb_bootstrap::{badge::badge, utility::Colour};
 
 fn main() {
-    let app = div().children([
-        Badge::new("Normal badge", Colour::Primary).margin(Some(Size1)),
-        Badge::new("Rounded pill badge", Colour::Primary)
-            .rounded_pill()
-            .margin(Some(Size1)),
-    ]);
-
-    mount("app", app);
+    mount("app", badge("Badge", Colour::Primary));
 }

@@ -1,6 +1,6 @@
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    elements::html::{span, SpanBuilder},
+    elements::html::{span, Span, SpanBuilder},
     extend_html_element,
     node::{
         element::{Element, ElementBuilder},
@@ -13,34 +13,37 @@ use silkenweb::{
 use crate::{css, utility::Colour};
 
 #[derive(ElementBuilder)]
-pub struct Badge(SpanBuilder);
+#[element_target(Badge)]
+pub struct BadgeBuilder(SpanBuilder);
 
-impl Badge {
-    pub fn new(text: &str, background_colour: Colour) -> Self {
-        Self(
-            span()
-                .class([css::BADGE, background_colour.text_background()])
-                .text(text),
-        )
-    }
-
-    pub fn new_signal(
-        text: impl Signal<Item = impl Into<String>> + 'static,
-        background_colour: impl Signal<Item = Colour> + 'static,
-    ) -> Self {
-        Self(
-            span()
-                // TODO: `class [_signal]` should be renamed to `classes [_signal]` and `class
-                // [_signal]` should take a single class
-                .class([css::BADGE])
-                .class_signal(background_colour.map(|colour| [colour.text_background()]))
-                .text_signal(text),
-        )
-    }
-
-    pub fn rounded_pill(self) -> Self {
-        Self(self.0.class([css::ROUNDED_PILL]))
-    }
+pub fn badge(text: &str, background_colour: Colour) -> BadgeBuilder {
+    BadgeBuilder(
+        span()
+            .class([css::BADGE, background_colour.text_background()])
+            .text(text),
+    )
 }
 
-extend_html_element!(Badge {0});
+pub fn badge_signal(
+    text: impl Signal<Item = impl Into<String>> + 'static,
+    background_colour: impl Signal<Item = Colour> + 'static,
+) -> BadgeBuilder {
+    BadgeBuilder(
+        span()
+            // TODO: `class [_signal]` should be renamed to `classes [_signal]` and `class
+            // [_signal]` should take a single class
+            .class([css::BADGE])
+            .class_signal(background_colour.map(|colour| [colour.text_background()]))
+            .text_signal(text),
+    )
+}
+
+extend_html_element!(BadgeBuilder {0});
+
+pub struct Badge(Span);
+
+impl From<Badge> for Node {
+    fn from(badge: Badge) -> Self {
+        badge.0.into()
+    }
+}
