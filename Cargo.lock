@@ -1385,6 +1385,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-bootstrap"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "silkenweb",
+]
+
+[[package]]
+name = "silkenweb-bootstrap-example"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+ "silkenweb-bootstrap",
+]
+
+[[package]]
 name = "silkenweb-example-animation"
 version = "0.1.0"
 dependencies = [
