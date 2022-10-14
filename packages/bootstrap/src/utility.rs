@@ -466,6 +466,10 @@ pub trait Spacing: ElementBuilder {
         self.class([css::BORDER])
     }
 
+    fn border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
+        self.class_signal(active.map(|active| active.then_some(css::BORDER)))
+    }
+
     fn border_colour(self, colour: Colour) -> Self {
         self.class([colour.border()])
     }
@@ -486,6 +490,10 @@ pub trait Spacing: ElementBuilder {
         self.class([css::ROUNDED])
     }
 
+    fn rounded_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
+        self.class_signal(active.map(|active| active.then_some(css::ROUNDED)))
+    }
+
     fn rounded_border_of_size(self, size: Size) -> Self {
         self.class([size.rounded_border()])
     }
@@ -498,8 +506,16 @@ pub trait Spacing: ElementBuilder {
         self.class([css::ROUNDED_PILL])
     }
 
+    fn rounded_pill_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
+        self.class_signal(active.map(|active| active.then_some(css::ROUNDED_PILL)))
+    }
+
     fn rounded_circular_border(self) -> Self {
         self.class([css::ROUNDED_CIRCLE])
+    }
+
+    fn rounded_circular_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
+        self.class_signal(active.map(|active| active.then_some(css::ROUNDED_CIRCLE)))
     }
 
     fn rounded_border_on(self, side: Side) -> Self {
