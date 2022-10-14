@@ -1,10 +1,8 @@
-use silkenweb::{
-    elements::html::span, mount, node::element::ElementBuilder, prelude::ParentBuilder,
-};
-use silkenweb_bootstrap::css;
+use silkenweb::mount;
+use silkenweb_bootstrap::{badge::Badge, colour::Colour};
 
 fn main() {
-    let app = span().class([css::BADGE, css::TEXT_BG_PRIMARY]).text("Hello, world!");
+    let app = Badge::new("Hello, world!", Colour::Primary).rounded_pill();
 
     mount("app", app);
 }
