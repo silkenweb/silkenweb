@@ -414,6 +414,25 @@ impl Padding for (Size, SideOrAxis) {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum FlexDirection {
+    Row,
+    RowReverse,
+    Column,
+    ColumnReverse,
+}
+
+impl FlexDirection {
+    pub fn class(self) -> Class {
+        match self {
+            FlexDirection::Row => css::FLEX_ROW,
+            FlexDirection::RowReverse => css::FLEX_ROW_REVERSE,
+            FlexDirection::Column => css::FLEX_COLUMN,
+            FlexDirection::ColumnReverse => css::FLEX_COLUMN_REVERSE,
+        }
+    }
+}
+
 pub trait Spacing: ElementBuilder {
     // TODO: signal equivalent functions
 
@@ -569,6 +588,27 @@ pub trait Spacing: ElementBuilder {
 
     fn text_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
         self.class_signal(colour.map(|colour| [colour.text()]))
+    }
+
+    /// Add `d-flex` and `flex-column` classes
+    fn flex_column(self) -> Self {
+        self.flex(FlexDirection::Column)
+    }
+
+    /// Add `d-flex` and `flex-row` classes
+    fn flex_row(self) -> Self {
+        self.flex(FlexDirection::Row)
+    }
+
+    /// Add `display: flex` and `flex-direction: <direction>` classes
+    fn flex(self, direction: FlexDirection) -> Self {
+        self.class([css::D_FLEX, direction.class()])
+    }
+
+    /// Add `display: flex` and `flex-direction: <direction>` classes
+    fn flex_signal(self, direction: impl Signal<Item = FlexDirection> + 'static) -> Self {
+        self.class([css::D_FLEX])
+            .class_signal(direction.map(|d| [d.class()]))
     }
 }
 
