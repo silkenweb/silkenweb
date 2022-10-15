@@ -9,7 +9,7 @@ use silkenweb::{
 
 use crate::{
     css,
-    utility::{Colour, SetBorder},
+    utility::{Colour, SetBorder, SetSpacing},
 };
 
 #[derive(ElementBuilder, Into)]
@@ -46,6 +46,7 @@ impl BadgeBuilder {
 
 impl ElementEvents for BadgeBuilder {}
 impl HtmlElementEvents for BadgeBuilder {}
+impl SetSpacing for BadgeBuilder {}
 
 impl From<BadgeBuilder> for Node {
     fn from(badge: BadgeBuilder) -> Self {
