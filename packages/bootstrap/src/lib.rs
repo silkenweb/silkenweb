@@ -1,12 +1,13 @@
 use silkenweb::{
     elements::html::{div, DivBuilder},
     node::{element::ElementBuilderBase, Node},
-    prelude::HtmlElement,
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
 use utility::SetFlex;
 
 pub mod badge;
+pub mod button;
 pub mod utility;
 
 pub mod css {
@@ -28,6 +29,8 @@ pub type Class = &'static str;
 pub struct HtmlElementBuilder(ElementBuilderBase);
 
 impl HtmlElement for HtmlElementBuilder {}
+impl HtmlElementEvents for HtmlElementBuilder {}
+impl ElementEvents for HtmlElementBuilder {}
 
 impl From<HtmlElementBuilder> for Node {
     fn from(builder: HtmlElementBuilder) -> Self {

@@ -70,6 +70,27 @@ impl Colour {
             Colour::Dark => css::BORDER_DARK,
         }
     }
+
+    pub fn button(self, outline: bool) -> Class {
+        match (outline, self) {
+            (false, Colour::Primary) => css::BTN_PRIMARY,
+            (false, Colour::Secondary) => css::BTN_SECONDARY,
+            (false, Colour::Success) => css::BTN_SUCCESS,
+            (false, Colour::Danger) => css::BTN_DANGER,
+            (false, Colour::Warning) => css::BTN_WARNING,
+            (false, Colour::Info) => css::BTN_INFO,
+            (false, Colour::Light) => css::BTN_LIGHT,
+            (false, Colour::Dark) => css::BTN_DARK,
+            (true, Colour::Primary) => css::BTN_OUTLINE_PRIMARY,
+            (true, Colour::Secondary) => css::BTN_OUTLINE_SECONDARY,
+            (true, Colour::Success) => css::BTN_OUTLINE_SUCCESS,
+            (true, Colour::Danger) => css::BTN_OUTLINE_DANGER,
+            (true, Colour::Warning) => css::BTN_OUTLINE_WARNING,
+            (true, Colour::Info) => css::BTN_OUTLINE_INFO,
+            (true, Colour::Light) => css::BTN_OUTLINE_LIGHT,
+            (true, Colour::Dark) => css::BTN_OUTLINE_DARK,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -436,6 +457,37 @@ impl FlexDirection {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum FlexAlign {
+    Start,
+    End,
+    Center,
+    Baseline,
+    Stretch,
+}
+
+impl FlexAlign {
+    pub fn align_items(self) -> Class {
+        match self {
+            FlexAlign::Start => css::ALIGN_ITEMS_START,
+            FlexAlign::End => css::ALIGN_ITEMS_END,
+            FlexAlign::Center => css::ALIGN_ITEMS_CENTER,
+            FlexAlign::Baseline => css::ALIGN_ITEMS_BASELINE,
+            FlexAlign::Stretch => css::ALIGN_ITEMS_STRETCH,
+        }
+    }
+
+    pub fn align_self(self) -> Class {
+        match self {
+            FlexAlign::Start => css::ALIGN_SELF_START,
+            FlexAlign::End => css::ALIGN_SELF_END,
+            FlexAlign::Center => css::ALIGN_SELF_CENTER,
+            FlexAlign::Baseline => css::ALIGN_SELF_BASELINE,
+            FlexAlign::Stretch => css::ALIGN_SELF_STRETCH,
+        }
+    }
+}
+
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
@@ -618,6 +670,22 @@ pub trait SetFlex: ElementBuilder {
     fn flex_signal(self, direction: impl Signal<Item = FlexDirection> + 'static) -> Self {
         self.class([css::D_FLEX])
             .class_signal(direction.map(|d| [d.class()]))
+    }
+
+    fn align_items(self, align: FlexAlign) -> Self {
+        self.class([align.align_items()])
+    }
+
+    fn align_items_signal(self, align: impl Signal<Item = FlexAlign> + 'static) -> Self {
+        self.class_signal(align.map(|align| [align.align_items()]))
+    }
+
+    fn align_self(self, align: FlexAlign) -> Self {
+        self.class([align.align_self()])
+    }
+
+    fn align_self_signal(self, align: impl Signal<Item = FlexAlign> + 'static) -> Self {
+        self.class_signal(align.map(|align| [align.align_self()]))
     }
 }
 
