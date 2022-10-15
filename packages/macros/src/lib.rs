@@ -66,7 +66,7 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::Target),
             quote!(self.#derive_field.build()),
         ),
-        Some(target) => (quote!(#target), quote!(#target(self.#derive_field.build()))),
+        Some(target) => (quote!(#target), quote!(#target(self.#derive_field.build().into()))),
     };
 
     quote!(
