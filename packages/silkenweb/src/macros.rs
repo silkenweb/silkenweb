@@ -311,6 +311,12 @@ macro_rules! dom_element {
             }
         }
 
+        impl From<$camel_builder_name> for $crate::node::element::ElementBuilderBase {
+            fn from(builder: $camel_builder_name) -> Self {
+                builder.builder
+            }
+        }
+
         impl From<$camel_builder_name> for $crate::node::element::Element {
             fn from(builder: $camel_builder_name) -> Self {
                 $crate::node::element::ElementBuilder::build(builder).into()
