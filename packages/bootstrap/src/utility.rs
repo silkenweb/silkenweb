@@ -458,7 +458,7 @@ impl FlexDirection {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub enum FlexAlign {
+pub enum Align {
     Start,
     End,
     Center,
@@ -466,24 +466,24 @@ pub enum FlexAlign {
     Stretch,
 }
 
-impl FlexAlign {
+impl Align {
     pub fn align_items(self) -> Class {
         match self {
-            FlexAlign::Start => css::ALIGN_ITEMS_START,
-            FlexAlign::End => css::ALIGN_ITEMS_END,
-            FlexAlign::Center => css::ALIGN_ITEMS_CENTER,
-            FlexAlign::Baseline => css::ALIGN_ITEMS_BASELINE,
-            FlexAlign::Stretch => css::ALIGN_ITEMS_STRETCH,
+            Align::Start => css::ALIGN_ITEMS_START,
+            Align::End => css::ALIGN_ITEMS_END,
+            Align::Center => css::ALIGN_ITEMS_CENTER,
+            Align::Baseline => css::ALIGN_ITEMS_BASELINE,
+            Align::Stretch => css::ALIGN_ITEMS_STRETCH,
         }
     }
 
     pub fn align_self(self) -> Class {
         match self {
-            FlexAlign::Start => css::ALIGN_SELF_START,
-            FlexAlign::End => css::ALIGN_SELF_END,
-            FlexAlign::Center => css::ALIGN_SELF_CENTER,
-            FlexAlign::Baseline => css::ALIGN_SELF_BASELINE,
-            FlexAlign::Stretch => css::ALIGN_SELF_STRETCH,
+            Align::Start => css::ALIGN_SELF_START,
+            Align::End => css::ALIGN_SELF_END,
+            Align::Center => css::ALIGN_SELF_CENTER,
+            Align::Baseline => css::ALIGN_SELF_BASELINE,
+            Align::Stretch => css::ALIGN_SELF_STRETCH,
         }
     }
 }
@@ -672,19 +672,21 @@ pub trait SetFlex: ElementBuilder {
             .class_signal(direction.map(|d| [d.class()]))
     }
 
-    fn align_items(self, align: FlexAlign) -> Self {
+    fn align_items(self, align: Align) -> Self {
         self.class([align.align_items()])
     }
 
-    fn align_items_signal(self, align: impl Signal<Item = FlexAlign> + 'static) -> Self {
+    fn align_items_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {
         self.class_signal(align.map(|align| [align.align_items()]))
     }
+}
 
-    fn align_self(self, align: FlexAlign) -> Self {
+pub trait SetAlign: ElementBuilder {
+    fn align_self(self, align: Align) -> Self {
         self.class([align.align_self()])
     }
 
-    fn align_self_signal(self, align: impl Signal<Item = FlexAlign> + 'static) -> Self {
+    fn align_self_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {
         self.class_signal(align.map(|align| [align.align_self()]))
     }
 }
@@ -693,4 +695,5 @@ impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
+impl<T: HtmlElement> SetAlign for T {}
 impl<T: ParentBuilder> SetFlex for T {}

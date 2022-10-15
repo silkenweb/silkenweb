@@ -3,13 +3,13 @@ use silkenweb_bootstrap::{
     badge::badge,
     button::{button, ButtonStyle},
     column,
-    utility::{Colour, FlexAlign, SetFlex, SetSpacing, Size},
+    utility::{Align, Colour, SetFlex, SetSpacing, Size},
 };
 
 fn main() {
     let margin = Some(Size::Size3);
     let app = column()
-        .align_items(FlexAlign::Start)
+        .align_items(Align::Start)
         .margin(margin)
         .child(
             button()
