@@ -19,6 +19,6 @@ fn main() {
                 .margin(margin),
         )
         .child(badge("Badge", Colour::Primary).margin(margin))
-        .child(div().margin(margin).child(Icon::circle()));
+        .child(div().margin(margin).child(Icon::circle().colour(Colour::Danger)));
     mount("app", app);
 }

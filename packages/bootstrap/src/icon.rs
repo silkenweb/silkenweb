@@ -7,14 +7,14 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::{utility::SetSpacing, Class};
+use crate::{
+    utility::{Colour, SetSpacing},
+    Class,
+};
 
 pub mod css {
     silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
-
-#[derive(ElementBuilder, Into)]
-pub struct IconBuilder(IBuilder);
 
 pub fn icon(icon: IconType) -> IconBuilder {
     IconBuilder(i().class([icon.class()]))
@@ -22,6 +22,19 @@ pub fn icon(icon: IconType) -> IconBuilder {
 
 pub fn icon_signal(icon: impl Signal<Item = IconType> + 'static) -> IconBuilder {
     IconBuilder(i().class_signal(icon.map(|icon| [icon.class()])))
+}
+
+#[derive(ElementBuilder, Into)]
+pub struct IconBuilder(IBuilder);
+
+impl IconBuilder {
+    pub fn colour(self, colour: Colour) -> Self {
+        self.class([colour.text()])
+    }
+
+    pub fn colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
+        self.class_signal(colour.map(|colour| [colour.text()]))
+    }
 }
 
 impl ElementEvents for IconBuilder {}
