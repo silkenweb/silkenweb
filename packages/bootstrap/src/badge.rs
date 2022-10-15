@@ -1,7 +1,7 @@
 use derive_more::Into;
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    elements::html::{span, ABuilder},
+    elements::html::{span, SpanBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
@@ -10,53 +10,32 @@ use silkenweb::{
 use crate::{
     css,
     utility::{Colour, SetBorder},
-    HtmlElementBuilder,
 };
 
 #[derive(ElementBuilder, Into)]
 #[element_target(Badge)]
-pub struct BadgeBuilder(HtmlElementBuilder);
+pub struct BadgeBuilder(SpanBuilder);
 
 pub fn badge(text: &str, background_colour: Colour) -> BadgeBuilder {
-    BadgeBuilder(HtmlElementBuilder(
+    BadgeBuilder(
         span()
             .class([css::BADGE, background_colour.text_background()])
-            .text(text)
-            .into(),
-    ))
+            .text(text),
+    )
 }
 
 pub fn badge_signal(
     text: impl Signal<Item = impl Into<String>> + 'static,
     background_colour: impl Signal<Item = Colour> + 'static,
 ) -> BadgeBuilder {
-    BadgeBuilder(HtmlElementBuilder(
+    BadgeBuilder(
         span()
             // TODO: `class [_signal]` should be renamed to `classes [_signal]` and `class
             // [_signal]` should take a single class
             .class([css::BADGE])
             .class_signal(background_colour.map(|colour| [colour.text_background()]))
-            .text_signal(text)
-            .into(),
-    ))
-}
-
-pub fn link_badge(link: ABuilder, background_colour: Colour) -> BadgeBuilder {
-    BadgeBuilder(HtmlElementBuilder(
-        link.class([css::BADGE, background_colour.text_background()])
-            .into(),
-    ))
-}
-
-pub fn link_badge_signal(
-    link: ABuilder,
-    background_colour: impl Signal<Item = Colour> + 'static,
-) -> BadgeBuilder {
-    BadgeBuilder(HtmlElementBuilder(
-        link.class([css::BADGE])
-            .class_signal(background_colour.map(|colour| [colour.text_background()]))
-            .into(),
-    ))
+            .text_signal(text),
+    )
 }
 
 impl BadgeBuilder {
@@ -77,8 +56,8 @@ impl From<BadgeBuilder> for Node {
 #[derive(Into)]
 pub struct Badge(Node);
 
-impl From<HtmlElementBuilder> for Badge {
-    fn from(builder: HtmlElementBuilder) -> Self {
-        Self(builder.0.into())
+impl From<SpanBuilder> for Badge {
+    fn from(builder: SpanBuilder) -> Self {
+        Self(builder.into())
     }
 }

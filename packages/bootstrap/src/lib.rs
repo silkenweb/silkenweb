@@ -19,6 +19,7 @@ pub mod icon {
 
 pub type Class = &'static str;
 
+// TODO: Does anything need to use this?
 /// A generic HTML element builder
 ///
 /// Some bootstrap types, like [`Badge`](badge::Badge) will convert into this as
