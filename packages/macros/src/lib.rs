@@ -17,11 +17,16 @@ use syn::{
 mod parser;
 
 // TODO: Docs
-#[proc_macro_derive(ElementBuilder, attributes(element_target))]
+#[proc_macro_derive(ElementBuilder, attributes(element_target, element_dom_type))]
 #[proc_macro_error]
 pub fn derive_element_builder(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
-    let target = extract_target_type(&new_type.attrs);
+    let target = extract_attr_type(&new_type.attrs, "element_target", || {
+        abort_call_site!("Use `element_target(TargetType)`")
+    });
+    let dom_type = extract_attr_type(&new_type.attrs, "element_dom_type", || {
+        abort_call_site!("Use `element_dom_type(DomType)`")
+    });
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
@@ -61,18 +66,25 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
         quote!(0)
     };
 
+    let dom_type = match dom_type {
+        None => quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType),
+        Some(dom_type) => quote!(#dom_type),
+    };
     let (target, build_fn_body) = match target {
         None => (
             quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::Target),
             quote!(self.#derive_field.build()),
         ),
-        Some(target) => (quote!(#target), quote!(#target(self.#derive_field.build().into()))),
+        Some(target) => (
+            quote!(#target),
+            quote!(#target(self.#derive_field.build().into())),
+        ),
     };
 
     quote!(
         impl #impl_generics ::silkenweb::node::element::ElementBuilder
         for #name #ty_generics #where_clause {
-            type DomType = <#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType;
+            type DomType = #dom_type;
             type Target = #target;
 
             fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
@@ -130,23 +142,23 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
     .into()
 }
 
-fn extract_target_type(attrs: &[Attribute]) -> Option<Path> {
+fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -> Option<Path> {
     for attr in attrs {
-        if attr.path.is_ident("element_target") {
+        if attr.path.is_ident(name) {
             if let Meta::List(list) = attr.parse_meta().unwrap() {
                 let mut target_list = list.nested.into_iter();
 
                 if let Some(NestedMeta::Meta(Meta::Path(target_path))) = target_list.next() {
                     if target_list.next().is_some() {
-                        abort_call_site!("Only one target type must be specified");
+                        syntax_error();
                     }
 
                     return Some(target_path);
                 } else {
-                    abort_call_site!("A target type must be specified");
+                    syntax_error();
                 }
             } else {
-                abort_call_site!("Use `element_target(TargetType)`")
+                syntax_error();
             }
         }
     }
