@@ -9,7 +9,7 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::{css, utility::Colour, Class, HtmlElementBuilder};
+use crate::{css, icon::Icon, utility::Colour, Class, HtmlElementBuilder};
 
 // TODO: Doc
 pub struct Set;
@@ -28,9 +28,9 @@ pub struct ButtonBuilder<Style, Content>(
 // TODO: Construct different types of button:
 // (<button> | <a> | <input>)
 // TODO: <a> and <input> buttons
-pub fn button() -> ButtonBuilder<Unset, Unset> {
+pub fn button(button_type: &str) -> ButtonBuilder<Unset, Unset> {
     ButtonBuilder(
-        HtmlElementBuilder(html::button().class([css::BTN]).into()),
+        HtmlElementBuilder(html::button().r#type(button_type).class([css::BTN]).into()),
         PhantomData,
         PhantomData,
     )
@@ -74,11 +74,22 @@ impl<Style, Content> ButtonBuilder<Style, Content> {
     pub fn text_signal(
         self,
         text: impl Signal<Item = String> + 'static,
-    ) -> ButtonBuilder<Set, Content> {
+    ) -> ButtonBuilder<Style, Set> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text_signal(text)))
     }
 
-    // TODO: Icon children
+    pub fn icon(self, icon: impl Into<Icon>) -> ButtonBuilder<Style, Set> {
+        ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.child(icon.into())))
+    }
+
+    pub fn icon_signal(
+        self,
+        icon: impl Signal<Item = impl Into<Icon>> + 'static,
+    ) -> ButtonBuilder<Style, Set> {
+        ButtonBuilder::chain(HtmlElementBuilder(
+            self.0 .0.child_signal(icon.map(|icon| icon.into())),
+        ))
+    }
 }
 
 impl<Style, Content> ButtonBuilder<Style, Content> {

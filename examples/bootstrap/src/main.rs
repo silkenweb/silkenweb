@@ -13,12 +13,17 @@ fn main() {
         .align_items(Align::Start)
         .margin(margin)
         .child(
-            button()
+            button("button")
                 .appearance(ButtonStyle::Outline(Colour::Secondary))
+                .icon(Icon::check_circle_fill())
                 .text("Button")
                 .margin(margin),
         )
         .child(badge("Badge", Colour::Primary).margin(margin))
-        .child(div().margin(margin).child(Icon::circle().colour(Colour::Danger)));
+        .child(
+            div()
+                .margin(margin)
+                .child(Icon::circle().colour(Colour::Danger)),
+        );
     mount("app", app);
 }

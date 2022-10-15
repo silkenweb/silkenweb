@@ -42,13 +42,19 @@ impl HtmlElementEvents for IconBuilder {}
 impl SetSpacing for IconBuilder {}
 
 impl From<IconBuilder> for Node {
-    fn from(badge: IconBuilder) -> Self {
-        badge.0.into()
+    fn from(icon: IconBuilder) -> Self {
+        icon.0.into()
     }
 }
 
 #[derive(Into)]
 pub struct Icon(Node);
+
+impl From<IconBuilder> for Icon {
+    fn from(icon: IconBuilder) -> Self {
+        icon.0.into()
+    }
+}
 
 impl From<IBuilder> for Icon {
     fn from(builder: IBuilder) -> Self {
@@ -73,6 +79,14 @@ impl Icon {
     pub fn exclamation_triangle_fill() -> IconBuilder {
         icon(IconType::ExclamationTriangleFill)
     }
+
+    pub fn zoom_out() -> IconBuilder {
+        icon(IconType::ZoomOut)
+    }
+
+    pub fn zoom_in() -> IconBuilder {
+        icon(IconType::ZoomIn)
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -81,6 +95,8 @@ pub enum IconType {
     PlayCircleFill,
     CheckCircleFill,
     ExclamationTriangleFill,
+    ZoomOut,
+    ZoomIn,
 }
 
 impl IconType {
@@ -90,6 +106,8 @@ impl IconType {
             Self::PlayCircleFill => css::BI_PLAY_CIRCLE_FILL,
             Self::CheckCircleFill => css::BI_CHECK_CIRCLE_FILL,
             Self::ExclamationTriangleFill => css::BI_EXCLAMATION_TRIANGLE_FILL,
+            Self::ZoomOut => css::BI_ZOOM_OUT,
+            Self::ZoomIn => css::BI_ZOOM_IN,
         }
     }
 }
