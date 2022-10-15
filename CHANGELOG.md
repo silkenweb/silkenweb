@@ -10,7 +10,6 @@
 - Add `handle` method to `Element`
 - `class` and `class_signal` methods moved from `HtmlElement`/`SvgElement` to `ElementBuilder`
 - Change `class_signal` to update the classes rather than overwrite them
-- Add `extend_html_element!` macro
 - `#[derive(ElementBuilder)]` allows custom `Target` types
 
 ## 0.3.0 - 2022-10-05

@@ -63,49 +63,6 @@ macro_rules! custom_html_element {
     }
 }
 
-/// Generate `impl`s appropriate for an HTML element
-///
-/// `struct_name` should implement [`ElementBuilder`] and `field_name` should
-/// implement [`Element`] and [`Node`].
-///
-/// This will generate `impl`s for:
-///
-/// - [`HtmlElement`]
-/// - [`HtmlElementEvents`]
-/// - [`ElementEvents`]
-///
-/// and [`From`] `impl`s for:
-///
-/// - [`Element`]
-/// - [`Node`]
-///
-/// [`ElementBuilder`]: crate::node::element::ElementBuilder
-/// [`Element`]: crate::node::element::Element
-/// [`Node`]: crate::node::Node
-/// [`HtmlElement`]: crate::elements::HtmlElement
-/// [`HtmlElementEvents`]: crate::elements::HtmlElementEvents
-/// [`ElementEvents`]: crate::elements::ElementEvents
-#[macro_export]
-macro_rules! extend_html_element {
-    ($struct_name:ty { $field_name:tt }) => {
-        impl HtmlElement for $struct_name {}
-        impl HtmlElementEvents for $struct_name {}
-        impl ElementEvents for $struct_name {}
-
-        impl From<$struct_name> for Element {
-            fn from(elem: $struct_name) -> Self {
-                elem.$field_name.into()
-            }
-        }
-
-        impl From<$struct_name> for Node {
-            fn from(elem: $struct_name) -> Self {
-                elem.$field_name.into()
-            }
-        }
-    };
-}
-
 macro_rules! html_element {
     (
         $(#[$elem_meta:meta])*
