@@ -8,14 +8,11 @@ use utility::SetFlex;
 
 pub mod badge;
 pub mod button;
+pub mod icon;
 pub mod utility;
 
 pub mod css {
     silkenweb::css_classes!(visibility: pub, path: "bootstrap-5.2.2/css/bootstrap.min.css");
-}
-
-pub mod icon {
-    silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
 
 pub type Class = &'static str;
