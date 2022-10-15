@@ -1,18 +1,15 @@
+use derive_more::{From, Into};
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html::{span, Span, SpanBuilder},
-    extend_html_element,
-    node::{
-        element::{Element, ElementBuilder},
-        Node,
-    },
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    node::{element::ElementBuilder, Node},
+    prelude::ParentBuilder,
     ElementBuilder,
 };
 
-use crate::{css, utility::Colour};
+use crate::{css, utility::{Colour, Spacing}};
 
-#[derive(ElementBuilder)]
+#[derive(ElementBuilder, Into)]
 #[element_target(Badge)]
 pub struct BadgeBuilder(SpanBuilder);
 
@@ -38,9 +35,20 @@ pub fn badge_signal(
     )
 }
 
-extend_html_element!(BadgeBuilder {0});
+impl BadgeBuilder {
+    pub fn rounded_pill_border(self) -> Self {
+        Self(self.0.rounded_pill_border())
+    }
+}
 
+#[derive(From)]
 pub struct Badge(Span);
+
+impl From<BadgeBuilder> for Node {
+    fn from(badge: BadgeBuilder) -> Self {
+        badge.0.into()
+    }
+}
 
 impl From<Badge> for Node {
     fn from(badge: Badge) -> Self {
