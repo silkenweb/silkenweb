@@ -1,5 +1,8 @@
 use futures_signals::signal::{Signal, SignalExt};
-use silkenweb::node::element::ElementBuilder;
+use silkenweb::{
+    node::element::ElementBuilder,
+    prelude::{HtmlElement, ParentBuilder},
+};
 
 use crate::{css, Class};
 
@@ -433,9 +436,7 @@ impl FlexDirection {
     }
 }
 
-pub trait Spacing: ElementBuilder {
-    // TODO: signal equivalent functions
-
+pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
     /// A `size` of `None` will set the margin to `auto`
@@ -479,7 +480,9 @@ pub trait Spacing: ElementBuilder {
     fn padding_signal(self, size: Size, side_or_axis: SideOrAxis) -> Self {
         self.class([(size, side_or_axis).padding()])
     }
+}
 
+pub trait SetBorder: ElementBuilder {
     /// Use a border
     fn border(self) -> Self {
         self.class([css::BORDER])
@@ -565,7 +568,9 @@ pub trait Spacing: ElementBuilder {
     fn shadow_of_size_signal(self, shadow: impl Signal<Item = Shadow> + 'static) -> Self {
         self.class_signal(shadow.map(|shadow| [shadow.class()]))
     }
+}
 
+pub trait SetOverflow: ElementBuilder {
     fn overflow(self, overflow: Overflow) -> Self {
         self.class([overflow.class()])
     }
@@ -573,7 +578,9 @@ pub trait Spacing: ElementBuilder {
     fn overflow_signal(self, overflow: impl Signal<Item = Overflow> + 'static) -> Self {
         self.class_signal(overflow.map(|overflow| [overflow.class()]))
     }
+}
 
+pub trait SetColour: ElementBuilder {
     fn background_colour(self, colour: Colour) -> Self {
         self.class([colour.background()])
     }
@@ -589,7 +596,9 @@ pub trait Spacing: ElementBuilder {
     fn text_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
         self.class_signal(colour.map(|colour| [colour.text()]))
     }
+}
 
+pub trait SetFlex: ElementBuilder {
     /// Add `d-flex` and `flex-column` classes
     fn flex_column(self) -> Self {
         self.flex(FlexDirection::Column)
@@ -612,4 +621,8 @@ pub trait Spacing: ElementBuilder {
     }
 }
 
-impl<T: ElementBuilder> Spacing for T {}
+impl<T: HtmlElement> SetSpacing for T {}
+impl<T: HtmlElement> SetBorder for T {}
+impl<T: ParentBuilder> SetOverflow for T {}
+impl<T: HtmlElement> SetColour for T {}
+impl<T: ParentBuilder> SetFlex for T {}

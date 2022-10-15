@@ -7,7 +7,10 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::{css, utility::{Colour, Spacing}};
+use crate::{
+    css,
+    utility::{Colour, SetBorder},
+};
 
 #[derive(ElementBuilder, Into)]
 #[element_target(Badge)]
