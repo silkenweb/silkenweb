@@ -19,19 +19,29 @@ pub struct Unset;
 pub enum State {}
 #[derive(ElementBuilder, Into)]
 #[element_target(Button)]
-pub struct ButtonBuilder<Style, Content>(
-    HtmlElementBuilder,
-    PhantomData<Style>,
-    PhantomData<Content>,
-);
+pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
 
 // TODO: Construct different types of button:
 // (<button> | <a> | <input>)
 // TODO: <a> and <input> buttons
-pub fn button(button_type: &str) -> ButtonBuilder<Unset, Unset> {
+pub fn button(button_type: &str, style: ButtonStyle) -> ButtonBuilder<Unset> {
+    ButtonBuilder::chain(base_button(button_type).0.class([style.class()]))
+}
+
+pub fn button_signal(
+    button_type: &str,
+    style: impl Signal<Item = ButtonStyle> + 'static,
+) -> ButtonBuilder<Unset> {
+    ButtonBuilder::chain(
+        base_button(button_type)
+            .0
+            .class_signal(style.map(|style| [style.class()])),
+    )
+}
+
+fn base_button(button_type: &str) -> ButtonBuilder<Unset> {
     ButtonBuilder(
         HtmlElementBuilder(html::button().r#type(button_type).class([css::BTN]).into()),
-        PhantomData,
         PhantomData,
     )
 }
@@ -53,57 +63,41 @@ impl ButtonStyle {
     }
 }
 
-impl<Content> ButtonBuilder<Unset, Content> {
-    pub fn appearance(self, style: ButtonStyle) -> ButtonBuilder<Set, Content> {
-        ButtonBuilder::chain(self.0.class([style.class()]))
-    }
-
-    pub fn appearance_signal(
-        self,
-        style: impl Signal<Item = ButtonStyle> + 'static,
-    ) -> ButtonBuilder<Set, Content> {
-        ButtonBuilder::chain(self.0.class_signal(style.map(|style| [style.class()])))
-    }
-}
-
-impl<Style, Content> ButtonBuilder<Style, Content> {
-    pub fn text(self, text: &str) -> ButtonBuilder<Style, Set> {
+impl<Content> ButtonBuilder<Content> {
+    pub fn text(self, text: &str) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text(text)))
     }
 
-    pub fn text_signal(
-        self,
-        text: impl Signal<Item = String> + 'static,
-    ) -> ButtonBuilder<Style, Set> {
+    pub fn text_signal(self, text: impl Signal<Item = String> + 'static) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text_signal(text)))
     }
 
-    pub fn icon(self, icon: impl Into<Icon>) -> ButtonBuilder<Style, Set> {
+    pub fn icon(self, icon: impl Into<Icon>) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.child(icon.into())))
     }
 
     pub fn icon_signal(
         self,
         icon: impl Signal<Item = impl Into<Icon>> + 'static,
-    ) -> ButtonBuilder<Style, Set> {
+    ) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(
             self.0 .0.child_signal(icon.map(|icon| icon.into())),
         ))
     }
 }
 
-impl<Style, Content> ButtonBuilder<Style, Content> {
+impl<Content> ButtonBuilder<Content> {
     fn chain(elem: HtmlElementBuilder) -> Self {
-        Self(elem, PhantomData, PhantomData)
+        Self(elem, PhantomData)
     }
 }
 
-impl<Style, Content> HtmlElement for ButtonBuilder<Style, Content> {}
-impl<Style, Content> ElementEvents for ButtonBuilder<Style, Content> {}
-impl<Style, Content> HtmlElementEvents for ButtonBuilder<Style, Content> {}
+impl<Content> HtmlElement for ButtonBuilder<Content> {}
+impl<Content> ElementEvents for ButtonBuilder<Content> {}
+impl<Content> HtmlElementEvents for ButtonBuilder<Content> {}
 
-impl From<ButtonBuilder<Set, Set>> for Node {
-    fn from(builder: ButtonBuilder<Set, Set>) -> Self {
+impl From<ButtonBuilder<Set>> for Node {
+    fn from(builder: ButtonBuilder<Set>) -> Self {
         builder.0.into()
     }
 }

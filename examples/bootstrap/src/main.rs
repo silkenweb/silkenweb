@@ -13,8 +13,7 @@ fn main() {
         .align_items(Align::Start)
         .margin(margin)
         .child(
-            button("button")
-                .appearance(ButtonStyle::Outline(Colour::Secondary))
+            button("button", ButtonStyle::Outline(Colour::Secondary))
                 .icon(Icon::check_circle_fill())
                 .text("Button")
                 .margin(margin),
