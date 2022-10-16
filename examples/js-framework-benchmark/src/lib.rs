@@ -19,7 +19,7 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     mount,
-    node::element::{ElementBuilder, ParentBuilder},
+    node::element::{ElementBuilder, ParentBuilder, Sig},
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -81,30 +81,30 @@ impl Row {
     fn render(&self, app: Rc<App>) -> Tr {
         let id = self.id;
 
-        tr().class_signal(
-            app.selected_row_id
-                .signal_ref(move |selected| *selected == Some(id))
-                .dedupe()
-                .map(|selected| selected.then_some("danger")),
-        )
-        .children([
-            td().class(["col-md-1"]).text(&id.to_string()),
-            td().class(["col-md-4"])
-                .child(a().text_signal(self.label.signal_cloned()).on_click({
-                    clone!(app);
-                    move |_, _| app.select_row(id)
-                })),
-            td().class(["col-md-1"]).child(
-                a().child(
-                    span()
-                        .class(["glyphicon", "glyphicon-remove"])
-                        .attribute("aria-hidden", "true"),
-                )
-                .on_click(move |_, _| app.remove_row(id)),
-            ),
-            td().class(["col-md-6"]),
-        ])
-        .build()
+        tr().classes(Sig(app
+            .selected_row_id
+            .signal_ref(move |selected| *selected == Some(id))
+            .dedupe()
+            .map(|selected| selected.then_some("danger"))))
+            .children([
+                td().classes(["col-md-1"]).text(&id.to_string()),
+                td().classes(["col-md-4"]).child(
+                    a().text_signal(self.label.signal_cloned()).on_click({
+                        clone!(app);
+                        move |_, _| app.select_row(id)
+                    }),
+                ),
+                td().classes(["col-md-1"]).child(
+                    a().child(
+                        span()
+                            .classes(["glyphicon", "glyphicon-remove"])
+                            .attribute("aria-hidden", "true"),
+                    )
+                    .on_click(move |_, _| app.remove_row(id)),
+                ),
+                td().classes(["col-md-6"]),
+            ])
+            .build()
     }
 }
 
@@ -169,12 +169,12 @@ impl App {
 
     fn render(self: Rc<Self>) -> Div {
         div()
-            .class(["container"])
+            .classes(["container"])
             .child(self.clone().render_jumbotron())
             .child(self.render_table())
             .child(
                 span()
-                    .class(["preloadicon", "glyphicon", "glyphicon-remove"])
+                    .classes(["preloadicon", "glyphicon", "glyphicon-remove"])
                     .attribute("aria-hidden", "true"),
             )
             .build()
@@ -182,14 +182,14 @@ impl App {
 
     fn render_jumbotron(self: Rc<Self>) -> Div {
         div()
-            .class(["jumbotron"])
+            .classes(["jumbotron"])
             .child(
-                div().class(["row"]).children([
+                div().classes(["row"]).children([
                     div()
-                        .class(["col-md-6"])
+                        .classes(["col-md-6"])
                         .child(h1().text("Silkenweb keyed")),
                     div()
-                        .class(["col-md-6"])
+                        .classes(["col-md-6"])
                         .child(self.render_action_buttons()),
                 ]),
             )
@@ -198,7 +198,7 @@ impl App {
 
     fn render_action_buttons(self: &Rc<Self>) -> Div {
         div()
-            .class(["row"])
+            .classes(["row"])
             .children([
                 self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)),
                 self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)),
@@ -217,10 +217,10 @@ impl App {
         let app = self.clone();
 
         div()
-            .class(["col-sm-6", "smallpad"])
+            .classes(["col-sm-6", "smallpad"])
             .child(
                 button()
-                    .class(["btn", "btn-primary", "btn-block"])
+                    .classes(["btn", "btn-primary", "btn-block"])
                     .r#type("button")
                     .id(id)
                     .text(title)
@@ -231,7 +231,7 @@ impl App {
 
     fn render_table(self: Rc<Self>) -> Table {
         table()
-            .class(["table", "table-hover", "table-striped", "test-data"])
+            .classes(["table", "table-hover", "table-striped", "test-data"])
             .child(
                 tbody().children_signal(
                     self.data

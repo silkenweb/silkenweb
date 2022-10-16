@@ -87,15 +87,12 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             type DomType = #dom_type;
             type Target = #target;
 
-            fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
+            fn class(self, value: impl ::silkenweb::node::element::UpdateClass) -> Self {
                 Self {#derive_field: self.#derive_field.class(value) #fields_tail}
             }
 
-            fn class_signal<T: ::std::convert::AsRef<str> + 'static>(
-                self,
-                class: impl ::silkenweb::macros::Signal<Item = impl ::std::iter::IntoIterator<Item = T>> + 'static,
-            ) -> Self {
-                Self{#derive_field: self.#derive_field.class_signal(class) #fields_tail}
+            fn classes(self, value: impl ::silkenweb::node::element::UpdateClasses) -> Self {
+                    Self {#derive_field: self.#derive_field.classes(value) #fields_tail}
             }
 
             fn attribute<T: ::silkenweb::node::element::SetAttribute>(self, name: &str, value: T) -> Self {

@@ -4,7 +4,10 @@ use derive_more::Into;
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html,
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{ElementBuilder, Sig},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
@@ -25,7 +28,7 @@ pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
 // (<button> | <a> | <input>)
 // TODO: <a> and <input> buttons
 pub fn button(button_type: &str, style: ButtonStyle) -> ButtonBuilder<Unset> {
-    ButtonBuilder::chain(base_button(button_type).0.class([style.class()]))
+    ButtonBuilder::chain(base_button(button_type).0.classes([style.class()]))
 }
 
 pub fn button_signal(
@@ -35,13 +38,18 @@ pub fn button_signal(
     ButtonBuilder::chain(
         base_button(button_type)
             .0
-            .class_signal(style.map(|style| [style.class()])),
+            .class(Sig(style.map(ButtonStyle::class))),
     )
 }
 
 fn base_button(button_type: &str) -> ButtonBuilder<Unset> {
     ButtonBuilder(
-        HtmlElementBuilder(html::button().r#type(button_type).class([css::BTN]).into()),
+        HtmlElementBuilder(
+            html::button()
+                .r#type(button_type)
+                .classes([css::BTN])
+                .into(),
+        ),
         PhantomData,
     )
 }

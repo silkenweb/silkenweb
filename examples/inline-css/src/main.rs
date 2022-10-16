@@ -17,6 +17,6 @@ fn main() {
                 }
             "
             )))
-            .child(p().class(["text-color"]).text("Hello, world!")),
+            .child(p().classes(["text-color"]).text("Hello, world!")),
     );
 }

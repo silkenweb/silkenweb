@@ -2,7 +2,10 @@ use derive_more::Into;
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html::{span, SpanBuilder},
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{ElementBuilder, Sig},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
@@ -19,7 +22,7 @@ pub struct BadgeBuilder(SpanBuilder);
 pub fn badge(text: &str, background_colour: Colour) -> BadgeBuilder {
     BadgeBuilder(
         span()
-            .class([css::BADGE, background_colour.text_background()])
+            .classes([css::BADGE, background_colour.text_background()])
             .text(text),
     )
 }
@@ -30,10 +33,8 @@ pub fn badge_signal(
 ) -> BadgeBuilder {
     BadgeBuilder(
         span()
-            // TODO: `class [_signal]` should be renamed to `classes [_signal]` and `class
-            // [_signal]` should take a single class
-            .class([css::BADGE])
-            .class_signal(background_colour.map(|colour| [colour.text_background()]))
+            .class(css::BADGE)
+            .class(Sig(background_colour.map(Colour::text_background)))
             .text_signal(text),
     )
 }

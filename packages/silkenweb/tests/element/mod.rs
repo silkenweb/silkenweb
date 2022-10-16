@@ -56,7 +56,7 @@ render_test!(
 );
 render_test!(
     multi_attribute,
-    div().id("my-id").class(["my-class"]),
+    div().id("my-id").classes(["my-class"]),
     r#"<div id="my-id" class="my-class"></div>"#
 );
 render_test!(
@@ -258,13 +258,13 @@ isomorphic_test! {
 }
 
 isomorphic_test! {
-    async fn class_signal() {
+    async fn classes_signal() {
         let test_class1 = Mutable::new(Some("test-class-1"));
         let test_class2 = Mutable::new(Some("test-class-2"));
         let elem =
             div()
-                .class_signal(test_class1.signal())
-                .class_signal(test_class2.signal()).build();
+                .classes(Sig(test_class1.signal()))
+                .classes(Sig(test_class2.signal())).build();
 
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="test-class-1 test-class-2"></div>"#);

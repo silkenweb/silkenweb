@@ -291,26 +291,77 @@ impl ShadowRootParentBuilder for ElementBuilderBase {
     }
 }
 
-impl ElementBuilder for ElementBuilderBase {
-    type DomType = web_sys::Element;
-    type Target = Element;
+pub trait UpdateClass {
+    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase;
+}
 
-    fn class(mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
-        for class in classes {
-            self.element.hydro_elem.add_class(class.as_ref());
+impl<'a> UpdateClass for &'a str {
+    fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
+        builder.element.hydro_elem.add_class(self);
+        builder
+    }
+}
+
+impl UpdateClass for String {
+    fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
+        builder.element.hydro_elem.add_class(&self);
+        builder
+    }
+}
+
+impl<T, S> UpdateClass for Sig<S>
+where
+    T: AsRef<str> + 'static,
+    S: Signal<Item = T> + 'static,
+{
+    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase {
+        let mut element = builder.element.hydro_elem.clone();
+        let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
+
+        let updater = self.0.for_each(move |class| {
+            if let Some(previous) = previous_value.replace(None) {
+                element.remove_class(previous.as_ref());
+            }
+
+            element.add_class(class.as_ref());
+            previous_value.set(Some(class));
+
+            async {}
+        });
+
+        builder.spawn_future(updater)
+    }
+}
+
+pub trait UpdateClasses {
+    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase;
+}
+
+impl<T, I> UpdateClasses for I
+where
+    T: AsRef<str> + 'static,
+    I: IntoIterator<Item = T>,
+{
+    fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
+        for class in self {
+            builder.element.hydro_elem.add_class(class.as_ref());
         }
 
-        self
+        builder
     }
+}
 
-    fn class_signal<T: AsRef<str> + 'static>(
-        self,
-        class: impl Signal<Item = impl IntoIterator<Item = T>> + 'static,
-    ) -> Self {
-        let mut element = self.element.hydro_elem.clone();
+impl<T, S, I> UpdateClasses for Sig<S>
+where
+    T: AsRef<str> + 'static,
+    I: IntoIterator<Item = T>,
+    S: Signal<Item = I> + 'static,
+{
+    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase {
+        let mut element = builder.element.hydro_elem.clone();
         let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
 
-        let updater = class.for_each(move |classes| {
+        let updater = self.0.for_each(move |classes| {
             let mut previous = previous_value.replace(Vec::new());
 
             for to_remove in &previous {
@@ -329,7 +380,20 @@ impl ElementBuilder for ElementBuilderBase {
             async {}
         });
 
-        self.spawn_future(updater)
+        builder.spawn_future(updater)
+    }
+}
+
+impl ElementBuilder for ElementBuilderBase {
+    type DomType = web_sys::Element;
+    type Target = Element;
+
+    fn class(self, class: impl UpdateClass) -> Self {
+        class.add(self)
+    }
+
+    fn classes(self, classes: impl UpdateClasses) -> Self {
+        classes.add(self)
     }
 
     fn attribute<T: SetAttribute>(mut self, name: &str, value: T) -> Self {
@@ -499,6 +563,19 @@ pub trait ElementBuilder: Sized {
     type Target;
     type DomType: JsCast + 'static;
 
+    // TODO: Doc
+    fn class(self, value: impl UpdateClass) -> Self;
+
+    // TODO: Doc
+    // Adds or removes class names on the element
+    //
+    // Each time the signal updates, the previous value's classes will be
+    // removed and the current classes will be added to the element.
+    //
+    // # Panics
+    //
+    // If a value contains whitespace, this will panic.
+
     /// Set the classes on an element
     ///
     /// All items in `value` must not contain spaces. This method can be called
@@ -507,20 +584,7 @@ pub trait ElementBuilder: Sized {
     /// # Panics
     ///
     /// Panics if any of the items in `value` contain whitespace.
-    fn class(self, value: impl IntoIterator<Item = impl AsRef<str>>) -> Self;
-
-    /// Adds or removes class names on the element
-    ///
-    /// Each time the signal updates, the previous value's classes will be
-    /// removed and the current classes will be added to the element.
-    ///
-    /// # Panics
-    ///
-    /// If a value contains whitespace, this will panic.
-    fn class_signal<T: AsRef<str> + 'static>(
-        self,
-        class: impl Signal<Item = impl IntoIterator<Item = T>> + 'static,
-    ) -> Self;
+    fn classes(self, value: impl UpdateClasses) -> Self;
 
     /// Set an attribute
     ///

@@ -235,15 +235,12 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
-            fn class(self, value: impl ::std::iter::IntoIterator<Item = impl ::std::convert::AsRef<str>>) -> Self {
-                Self { builder: self.builder.class(value) }
+            fn class(self, class: impl $crate::node::element::UpdateClass) -> Self {
+                Self { builder: self.builder.class(class) }
             }
 
-            fn class_signal<T: ::std::convert::AsRef<str> + 'static>(
-                self,
-                class: impl $crate::macros::Signal<Item = impl ::std::iter::IntoIterator<Item = T>> + 'static,
-            ) -> Self {
-                Self { builder: self.builder.class_signal(class) }
+            fn classes(self, value: impl $crate::node::element::UpdateClasses) -> Self {
+                Self { builder: self.builder.classes(value) }
             }
 
             fn attribute<T: $crate::node::element::SetAttribute>(self, name: &str, value: T) -> Self {
