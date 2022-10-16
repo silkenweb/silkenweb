@@ -56,7 +56,7 @@ render_test!(
 );
 render_test!(
     multi_attribute,
-    div().id("my-id").classes(["my-class"]),
+    div().id("my-id").class("my-class"),
     r#"<div id="my-id" class="my-class"></div>"#
 );
 render_test!(

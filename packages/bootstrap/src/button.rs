@@ -28,7 +28,7 @@ pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
 // (<button> | <a> | <input>)
 // TODO: <a> and <input> buttons
 pub fn button(button_type: &str, style: ButtonStyle) -> ButtonBuilder<Unset> {
-    ButtonBuilder::chain(base_button(button_type).0.classes([style.class()]))
+    ButtonBuilder::chain(base_button(button_type).0.class(style.class()))
 }
 
 pub fn button_signal(
@@ -44,12 +44,7 @@ pub fn button_signal(
 
 fn base_button(button_type: &str) -> ButtonBuilder<Unset> {
     ButtonBuilder(
-        HtmlElementBuilder(
-            html::button()
-                .r#type(button_type)
-                .classes([css::BTN])
-                .into(),
-        ),
+        HtmlElementBuilder(html::button().r#type(button_type).class(css::BTN).into()),
         PhantomData,
     )
 }

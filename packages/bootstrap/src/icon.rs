@@ -20,7 +20,7 @@ pub mod css {
 }
 
 pub fn icon(icon: IconType) -> IconBuilder {
-    IconBuilder(i().classes([icon.class()]))
+    IconBuilder(i().class(icon.class()))
 }
 
 pub fn icon_signal(icon: impl Signal<Item = IconType> + 'static) -> IconBuilder {
@@ -32,7 +32,7 @@ pub struct IconBuilder(IBuilder);
 
 impl IconBuilder {
     pub fn colour(self, colour: Colour) -> Self {
-        self.classes([colour.text()])
+        self.class(colour.text())
     }
 
     pub fn colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {

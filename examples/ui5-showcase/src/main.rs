@@ -46,7 +46,7 @@ pub fn main() -> Result<(), JsValue> {
     mount(
         "app",
         div()
-            .classes([FLEX])
+            .class(FLEX)
             .child(side_bar)
             .child_signal(selected_signal.map(move |selection| -> Element {
                 match selection {

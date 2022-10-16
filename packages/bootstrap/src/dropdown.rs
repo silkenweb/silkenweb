@@ -16,7 +16,7 @@ use crate::css;
 pub struct MenuBuilder(UlBuilder);
 
 pub fn menu() -> MenuBuilder {
-    MenuBuilder(ul().classes([css::DROPDOWN_MENU]))
+    MenuBuilder(ul().class(css::DROPDOWN_MENU))
 }
 
 impl MenuBuilder {
@@ -74,7 +74,7 @@ macro_rules! menu_items{
         $(
             impl From<$elem> for MenuItem {
                 fn from(item: $elem) -> Self {
-                    Self(li().child(item.classes([css::DROPDOWN_ITEM])).into())
+                    Self(li().child(item.class(css::DROPDOWN_ITEM)).into())
                 }
             }
         )*

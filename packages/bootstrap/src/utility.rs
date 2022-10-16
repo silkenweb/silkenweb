@@ -493,21 +493,21 @@ pub trait SetSpacing: ElementBuilder {
     ///
     /// A `size` of `None` will set the margin to `auto`
     fn margin(self, size: Option<Size>) -> Self {
-        self.classes([size.margin()])
+        self.class(size.margin())
     }
 
     /// Set the margin on `side`
     ///
     /// A `size` of `None` will set the margin to `auto`
     fn margin_on(self, size: Option<Size>, side: Side) -> Self {
-        self.classes([(size, side).margin()])
+        self.class((size, side).margin())
     }
 
     /// Set the margin on `axis`
     ///
     /// A `size` of `None` will set the margin to `auto`
     fn margin_on_axis(self, size: Option<Size>, axis: Axis) -> Self {
-        self.classes([(size, axis).margin()])
+        self.class((size, axis).margin())
     }
 
     fn margin_signal(
@@ -518,26 +518,26 @@ pub trait SetSpacing: ElementBuilder {
     }
 
     fn padding(self, size: Size) -> Self {
-        self.classes([size.padding()])
+        self.class(size.padding())
     }
 
     fn padding_on(self, size: Size, side: Side) -> Self {
-        self.classes([(size, side).padding()])
+        self.class((size, side).padding())
     }
 
     fn padding_on_axis(self, size: Size, axis: Axis) -> Self {
-        self.classes([(size, axis).padding()])
+        self.class((size, axis).padding())
     }
 
     fn padding_signal(self, size: Size, side_or_axis: SideOrAxis) -> Self {
-        self.classes([(size, side_or_axis).padding()])
+        self.class((size, side_or_axis).padding())
     }
 }
 
 pub trait SetBorder: ElementBuilder {
     /// Use a border
     fn border(self) -> Self {
-        self.classes([css::BORDER])
+        self.class(css::BORDER)
     }
 
     fn border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
@@ -545,7 +545,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn border_colour(self, colour: Colour) -> Self {
-        self.classes([colour.border()])
+        self.class(colour.border())
     }
 
     fn border_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
@@ -553,7 +553,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn border_width(self, size: Size) -> Self {
-        self.classes([size.border()])
+        self.class(size.border())
     }
 
     fn border_width_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
@@ -561,7 +561,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn rounded_border(self) -> Self {
-        self.classes([css::ROUNDED])
+        self.class(css::ROUNDED)
     }
 
     fn rounded_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
@@ -569,7 +569,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn rounded_border_of_size(self, size: Size) -> Self {
-        self.classes([size.rounded_border()])
+        self.class(size.rounded_border())
     }
 
     fn rounded_border_of_size_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
@@ -577,7 +577,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn rounded_pill_border(self) -> Self {
-        self.classes([css::ROUNDED_PILL])
+        self.class(css::ROUNDED_PILL)
     }
 
     fn rounded_pill_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
@@ -585,7 +585,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn rounded_circular_border(self) -> Self {
-        self.classes([css::ROUNDED_CIRCLE])
+        self.class(css::ROUNDED_CIRCLE)
     }
 
     // TODO: Get rid of `_signal` variants
@@ -596,7 +596,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn rounded_border_on(self, side: Side) -> Self {
-        self.classes([side.rounded_border()])
+        self.class(side.rounded_border())
     }
 
     fn rounded_border_on_signal(self, side: impl Signal<Item = Side> + 'static) -> Self {
@@ -604,7 +604,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn border_opacity(self, opacity: Opacity) -> Self {
-        self.classes([opacity.border()])
+        self.class(opacity.border())
     }
 
     fn border_opacity_signal(self, opacity: impl Signal<Item = Opacity> + 'static) -> Self {
@@ -617,7 +617,7 @@ pub trait SetBorder: ElementBuilder {
     }
 
     fn shadow_of_size(self, shadow: Shadow) -> Self {
-        self.classes([shadow.class()])
+        self.class(shadow.class())
     }
 
     fn shadow_of_size_signal(self, shadow: impl Signal<Item = Shadow> + 'static) -> Self {
@@ -627,7 +627,7 @@ pub trait SetBorder: ElementBuilder {
 
 pub trait SetOverflow: ElementBuilder {
     fn overflow(self, overflow: Overflow) -> Self {
-        self.classes([overflow.class()])
+        self.class(overflow.class())
     }
 
     fn overflow_signal(self, overflow: impl Signal<Item = Overflow> + 'static) -> Self {
@@ -637,7 +637,7 @@ pub trait SetOverflow: ElementBuilder {
 
 pub trait SetColour: ElementBuilder {
     fn background_colour(self, colour: Colour) -> Self {
-        self.classes([colour.background()])
+        self.class(colour.background())
     }
 
     fn background_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
@@ -645,7 +645,7 @@ pub trait SetColour: ElementBuilder {
     }
 
     fn text_colour(self, colour: Colour) -> Self {
-        self.classes([colour.text()])
+        self.class(colour.text())
     }
 
     fn text_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
@@ -671,12 +671,12 @@ pub trait SetFlex: ElementBuilder {
 
     /// Add `display: flex` and `flex-direction: <direction>` classes
     fn flex_signal(self, direction: impl Signal<Item = FlexDirection> + 'static) -> Self {
-        self.classes([css::D_FLEX])
+        self.class(css::D_FLEX)
             .class(Sig(direction.map(|d| d.class())))
     }
 
     fn align_items(self, align: Align) -> Self {
-        self.classes([align.align_items()])
+        self.class(align.align_items())
     }
 
     fn align_items_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {
@@ -686,7 +686,7 @@ pub trait SetFlex: ElementBuilder {
 
 pub trait SetAlign: ElementBuilder {
     fn align_self(self, align: Align) -> Self {
-        self.classes([align.align_self()])
+        self.class(align.align_self())
     }
 
     fn align_self_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {

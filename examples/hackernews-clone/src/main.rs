@@ -38,9 +38,9 @@ impl App {
 
     fn render(&self) -> Div {
         div()
-            .classes([PAGE])
+            .class(PAGE)
             .child(
-                header().child(nav().child(h1().classes([PAGE_BANNER]).children([
+                header().child(nav().child(h1().class(PAGE_BANNER).children([
                     router::anchor("topstories").text("Top"),
                     router::anchor("newstories").text("New"),
                     router::anchor("askstories").text("Ask"),
@@ -49,7 +49,7 @@ impl App {
             )
             .child(
                 html::main()
-                    .classes([PAGE_CONTENT])
+                    .class(PAGE_CONTENT)
                     .child_signal(self.0.signal_ref(|content| {
                         if let Some(content) = content {
                             content.render()
@@ -149,12 +149,12 @@ impl Story {
 
         div()
             .child(
-                h2().classes([STORY_TITLE])
+                h2().class(STORY_TITLE)
                     .child(a().href(self.url.as_ref()).text(&self.title)),
             )
             .child(
                 span()
-                    .classes([DE_EMPHASIZE])
+                    .class(DE_EMPHASIZE)
                     .child(span().text(&format!("{score} point{} by ", plural(score))))
                     .child(user_link(&self.by))
                     .child(span().text(&format!(" {time_ago} | ")))
@@ -202,7 +202,7 @@ impl UserDetails {
             .child(text_as_html(&self.user.about))
             .child(span().text(&format!("{} karma", self.user.karma)))
             .child(
-                ul().classes([USER_SUBMITTED_STORIES])
+                ul().class(USER_SUBMITTED_STORIES)
                     .children(self.submitted.iter().map(Story::render)),
             )
             .build()
@@ -249,10 +249,10 @@ impl CommentTree {
 
     fn render(&self, depth: usize) -> Li {
         let time_ago = time_ago(self.comment.time);
-        li().classes([COMMENT])
+        li().class(COMMENT)
             .child(
                 span()
-                    .classes([DE_EMPHASIZE])
+                    .class(DE_EMPHASIZE)
                     .child(user_link(&self.comment.by))
                     .text(&format!(" {time_ago}")),
             )
@@ -271,7 +271,7 @@ impl CommentTree {
 fn text_as_html(text: &str) -> Div {
     let text = text.to_owned();
     div()
-        .classes([USER_CONTENT])
+        .class(USER_CONTENT)
         .effect(move |elem| elem.set_inner_html(&text))
         .build()
 }
