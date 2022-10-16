@@ -332,29 +332,10 @@ impl ElementBuilder for ElementBuilderBase {
         self.spawn_future(updater)
     }
 
-    fn attribute<T: Attribute>(mut self, name: &str, value: T) -> Self {
+    fn attribute<T: SetAttribute>(mut self, name: &str, value: T) -> Self {
         self.check_attribute_unique(name);
 
-        self.element.hydro_elem.attribute(name, value);
-        self
-    }
-
-    fn attribute_signal<T: Attribute + 'static>(
-        mut self,
-        name: &str,
-        value: impl Signal<Item = T> + 'static,
-    ) -> Self {
-        self.check_attribute_unique(name);
-        let mut element = self.element.hydro_elem.clone();
-        let name = name.to_owned();
-
-        let updater = value.for_each(move |new_value| {
-            element.attribute(&name, new_value);
-
-            async {}
-        });
-
-        self.spawn_future(updater)
+        value.set_attribute(name, self)
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
@@ -466,6 +447,53 @@ impl Display for Element {
     }
 }
 
+// TODO: Doc
+// TODO: Do there items belong in this module?
+pub trait SetAttribute {
+    // TODO: Rename to Item to be consistent with signal/iter etc
+    type Type;
+
+    fn set_attribute(self, name: &str, builder: ElementBuilderBase) -> ElementBuilderBase;
+}
+
+impl<T: Attribute> SetAttribute for T {
+    type Type = T;
+
+    fn set_attribute(self, name: &str, mut builder: ElementBuilderBase) -> ElementBuilderBase {
+        builder.element.hydro_elem.attribute(name, self);
+        builder
+    }
+}
+
+// TODO: Doc
+pub struct Sig<T>(pub T);
+
+impl<T: Attribute + 'static, S: Signal<Item = T> + 'static> SetAttribute for Sig<S> {
+    type Type = T;
+
+    // TODO:
+    // Problems we run into if we try and make a generic select:
+    // Closures for value and signal both want to own builder
+    // Closure for signal needs signal type, which needs to be static, which then
+    // requires value type to be static, which rules out passing references tp
+    // `attribute`
+    fn set_attribute(self, name: &str, builder: ElementBuilderBase) -> ElementBuilderBase {
+        let mut element = builder.element.hydro_elem.clone();
+
+        let updater = self.0.for_each({
+            let name = name.to_owned();
+
+            move |new_value| {
+                element.attribute(&name, new_value);
+
+                async {}
+            }
+        });
+
+        builder.spawn_future(updater)
+    }
+}
+
 /// An HTML element builder.
 pub trait ElementBuilder: Sized {
     type Target;
@@ -495,15 +523,11 @@ pub trait ElementBuilder: Sized {
     ) -> Self;
 
     /// Set an attribute
-    fn attribute<T: Attribute>(self, name: &str, value: T) -> Self;
-
-    /// Set an attribute based on a signal. `Option<impl Attribute>` can be used
-    /// to add/remove an attribute based on a signal.
-    fn attribute_signal<T: Attribute + 'static>(
-        self,
-        name: &str,
-        value: impl Signal<Item = T> + 'static,
-    ) -> Self;
+    ///
+    /// The attribute can either be a value or a signal. Signals should be
+    /// wrapped in the [`Sig`] newtype.`Option<impl Attribute>` can be used to
+    /// add/remove an attribute based on a signal.
+    fn attribute<T: SetAttribute>(self, name: &str, value: T) -> Self;
 
     /// Apply an effect after the next render.
     ///

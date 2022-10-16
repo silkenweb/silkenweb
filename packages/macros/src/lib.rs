@@ -98,16 +98,8 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
                 Self{#derive_field: self.#derive_field.class_signal(class) #fields_tail}
             }
 
-            fn attribute<T: ::silkenweb::attribute::Attribute>(self, name: &str, value: T) -> Self {
+            fn attribute<T: ::silkenweb::node::element::SetAttribute>(self, name: &str, value: T) -> Self {
                 Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
-            }
-
-            fn attribute_signal<T: ::silkenweb::attribute::Attribute + 'static>(
-                self,
-                name: &str,
-                value: impl ::silkenweb::macros::Signal<Item = T> + 'static,
-            ) -> Self {
-                Self{#derive_field: self.#derive_field.attribute_signal(name, value) #fields_tail}
             }
 
             fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {

@@ -14,7 +14,7 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, ParentBuilder},
+        element::{ElementBuilder, ParentBuilder, SetAttribute},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
@@ -151,44 +151,24 @@ pub struct AvatarBuilder(elements::Ui5AvatarBuilder);
 impl AvatarBuilder {
     attributes0! {accessible_name: String, color_scheme: ColorScheme}
 
-    pub fn icon(self, value: Icon) -> Self {
+    pub fn icon(self, value: impl SetAttribute<Type = Icon>) -> Self {
         Self(self.0.icon(value))
     }
 
-    pub fn icon_signal(self, value: impl Signal<Item = Icon> + 'static) -> Self {
-        Self(self.0.icon_signal(value))
-    }
-
-    pub fn initials(self, value: &str) -> Self {
+    pub fn initials(self, value: impl SetAttribute<Type = impl AsAttribute<String>>) -> Self {
         Self(self.0.initials(value))
     }
 
-    pub fn initials_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.initials_signal(value))
-    }
-
-    pub fn interactive(self, value: bool) -> Self {
+    pub fn interactive(self, value: impl SetAttribute<Type = impl AsAttribute<bool>>) -> Self {
         Self(self.0.interactive(value))
     }
 
-    pub fn interactive_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.interactive_signal(value))
-    }
-
-    pub fn shape(self, value: Shape) -> Self {
+    pub fn shape(self, value: impl SetAttribute<Type = impl AsAttribute<Shape>>) -> Self {
         Self(self.0.shape(value))
     }
 
-    pub fn shape_signal(self, value: impl Signal<Item = Shape> + 'static) -> Self {
-        Self(self.0.shape_signal(value))
-    }
-
-    pub fn size(self, value: Size) -> Self {
+    pub fn size(self, value: impl SetAttribute<Type = impl AsAttribute<Size>>) -> Self {
         Self(self.0.size(value))
-    }
-
-    pub fn size_signal(self, value: impl Signal<Item = Size> + 'static) -> Self {
-        Self(self.0.size_signal(value))
     }
 
     pub fn image(self, image: impl Into<Node>) -> Avatar {

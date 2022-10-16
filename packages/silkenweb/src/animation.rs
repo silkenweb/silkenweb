@@ -22,11 +22,16 @@ use crate::task::{animation_timestamp, request_animation_frame};
 ///
 /// ```no_run
 /// # use futures_signals::signal::SignalExt;
-/// # use silkenweb::{animation::finite_animation, elements::html::progress, mount};
+/// # use silkenweb::{
+/// #   animation::finite_animation,
+/// #   elements::html::progress,
+/// #   node::element::Sig,
+/// #   mount,
+/// # };
 /// const DURATION: f64 = 3000.0;
-/// progress()
-///     .max(DURATION as f32)
-///     .value_signal(finite_animation(DURATION).map(|time| time.unwrap_or(DURATION) as f32));
+/// progress().max(DURATION as f32).value(Sig(
+///     finite_animation(DURATION).map(|time| time.unwrap_or(DURATION) as f32)
+/// ));
 /// ```
 ///
 /// See [module-level documentation](self) for more details.
@@ -56,7 +61,7 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// # use silkenweb::{
 /// #     animation::infinite_animation,
 /// #     elements::svg::{attributes::Presentation, content_type::Length::Px, rect, svg},
-/// #     node::element::ParentBuilder,
+/// #     node::element::{Sig, ParentBuilder},
 /// #     mount,
 /// # };
 /// svg().width(200.0).height(200.0).child(
@@ -65,9 +70,9 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 ///         .y(Px(25.0))
 ///         .width(Px(50.0))
 ///         .height(Px(50.0))
-///         .transform_signal(
-///             infinite_animation().map(|time| format!("rotate({} 50 50)", time / 10.0)),
-///         ),
+///         .transform(Sig(
+///             infinite_animation().map(|time| format!("rotate({} 50 50)", time / 10.0))
+///         )),
 /// );
 /// ```
 ///

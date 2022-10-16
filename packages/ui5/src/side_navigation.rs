@@ -7,7 +7,10 @@ use std::{
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use silkenweb::{
     elements::CustomEvent,
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{ElementBuilder, SetAttribute},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
@@ -84,12 +87,8 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn collapsed(self) -> Self {
-        Self(self.0.collapsed(true), PhantomData)
-    }
-
-    pub fn collapsed_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.collapsed_signal(value), PhantomData)
+    pub fn collapsed(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.collapsed(value), PhantomData)
     }
 
     // We don't include `child` and `child_signal` methods as they're not so useful
@@ -155,28 +154,20 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn expanded(self) -> Self {
-        Self(self.0.expanded(true), PhantomData)
+    pub fn expanded(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.expanded(value), PhantomData)
     }
 
-    pub fn expanded_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.expanded_signal(value), PhantomData)
+    pub fn icon(self, value: impl SetAttribute<Type = Icon> + 'static) -> Self {
+        Self(self.0.icon(value), PhantomData)
     }
 
-    pub fn icon(self, icon: Icon) -> Self {
-        Self(self.0.icon(icon), PhantomData)
+    pub fn selected(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.selected(value), PhantomData)
     }
 
-    pub fn icon_signal(self, value: impl Signal<Item = Icon> + 'static) -> Self {
-        Self(self.0.icon_signal(value), PhantomData)
-    }
-
-    pub fn selected(self) -> Self {
-        Self(self.0.selected(true), PhantomData)
-    }
-
-    pub fn selected_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.selected_signal(value), PhantomData)
+    pub fn whole_item_toggleable(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.whole_item_toggleable(value), PhantomData)
     }
 
     pub fn text(self, text: &str) -> Self {
@@ -185,14 +176,6 @@ where
 
     pub fn text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
         Self(self.0.text_signal(value), PhantomData)
-    }
-
-    pub fn whole_item_toggleable(self) -> Self {
-        Self(self.0.whole_item_toggleable(true), PhantomData)
-    }
-
-    pub fn whole_item_toggleable_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.whole_item_toggleable_signal(value), PhantomData)
     }
 
     // We don't include `child` and `child_signal` methods as they're not so useful
@@ -239,36 +222,20 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn expanded(self) -> Self {
-        Self(self.0.expanded(true), PhantomData)
+    pub fn expanded(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.expanded(value), PhantomData)
     }
 
-    pub fn expanded_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.expanded_signal(value), PhantomData)
+    pub fn icon(self, value: impl SetAttribute<Type = Icon> + 'static) -> Self {
+        Self(self.0.icon(value), PhantomData)
     }
 
-    pub fn icon(self, icon: Icon) -> Self {
-        Self(self.0.icon(icon), PhantomData)
+    pub fn selected(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+        Self(self.0.selected(value), PhantomData)
     }
 
-    pub fn icon_signal(self, value: impl Signal<Item = Icon> + 'static) -> Self {
-        Self(self.0.icon_signal(value), PhantomData)
-    }
-
-    pub fn selected(self) -> Self {
-        Self(self.0.selected(true), PhantomData)
-    }
-
-    pub fn selected_signal(self, value: impl Signal<Item = bool> + 'static) -> Self {
-        Self(self.0.selected_signal(value), PhantomData)
-    }
-
-    pub fn text(self, text: &str) -> Self {
-        Self(self.0.text(text), PhantomData)
-    }
-
-    pub fn text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.text_signal(value), PhantomData)
+    pub fn text(self, value: impl SetAttribute<Type = String> + 'static) -> Self {
+        Self(self.0.text(value), PhantomData)
     }
 }
 
