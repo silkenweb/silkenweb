@@ -14,6 +14,7 @@
 use std::collections::HashSet;
 use std::{
     self,
+    borrow::Cow,
     cell::{Cell, RefCell},
     fmt::{self, Display},
     future::Future,
@@ -291,39 +292,54 @@ impl ShadowRootParentBuilder for ElementBuilderBase {
     }
 }
 
-pub trait UpdateClass {
-    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase;
+pub trait Class {
+    fn text(&self) -> Cow<str>;
 }
 
-impl<'a> UpdateClass for &'a str {
-    fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
-        builder.element.hydro_elem.add_class(self);
-        builder
+impl<'a> Class for &'a str {
+    fn text(&self) -> Cow<str> {
+        (*self).into()
     }
 }
 
-impl UpdateClass for String {
+impl Class for String {
+    fn text(&self) -> Cow<str> {
+        self.into()
+    }
+}
+
+pub trait UpdateClass {
+    type Item;
+
+    fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase;
+}
+
+impl<T: Class> UpdateClass for T {
+    type Item = Self;
+
     fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
-        builder.element.hydro_elem.add_class(&self);
+        builder.element.hydro_elem.add_class(&self.text());
         builder
     }
 }
 
 impl<T, S> UpdateClass for Sig<S>
 where
-    T: AsRef<str> + 'static,
+    T: Class + 'static,
     S: Signal<Item = T> + 'static,
 {
+    type Item = S::Item;
+
     fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase {
         let mut element = builder.element.hydro_elem.clone();
         let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
 
         let updater = self.0.for_each(move |class| {
             if let Some(previous) = previous_value.replace(None) {
-                element.remove_class(previous.as_ref());
+                element.remove_class(&previous.text());
             }
 
-            element.add_class(class.as_ref());
+            element.add_class(&class.text());
             previous_value.set(Some(class));
 
             async {}
@@ -334,17 +350,21 @@ where
 }
 
 pub trait UpdateClasses {
+    type Item;
+
     fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase;
 }
 
 impl<T, I> UpdateClasses for I
 where
-    T: AsRef<str> + 'static,
+    T: Class + 'static,
     I: IntoIterator<Item = T>,
 {
+    type Item = T;
+
     fn add(self, mut builder: ElementBuilderBase) -> ElementBuilderBase {
         for class in self {
-            builder.element.hydro_elem.add_class(class.as_ref());
+            builder.element.hydro_elem.add_class(&class.text());
         }
 
         builder
@@ -353,10 +373,12 @@ where
 
 impl<T, S, I> UpdateClasses for Sig<S>
 where
-    T: AsRef<str> + 'static,
+    T: Class + 'static,
     I: IntoIterator<Item = T>,
     S: Signal<Item = I> + 'static,
 {
+    type Item = T;
+
     fn add(self, builder: ElementBuilderBase) -> ElementBuilderBase {
         let mut element = builder.element.hydro_elem.clone();
         let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
@@ -365,13 +387,13 @@ where
             let mut previous = previous_value.replace(Vec::new());
 
             for to_remove in &previous {
-                element.remove_class(to_remove.as_ref());
+                element.remove_class(&to_remove.text());
             }
 
             previous.clear();
 
             for to_add in classes {
-                element.add_class(to_add.as_ref());
+                element.add_class(&to_add.text());
                 previous.push(to_add);
             }
 
