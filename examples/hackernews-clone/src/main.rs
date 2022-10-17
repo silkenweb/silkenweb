@@ -219,7 +219,7 @@ impl StoryDetail {
         div()
             .child(self.story.render())
             .child(text_as_html(&self.story.text))
-            .child(ul().children(self.comments.iter().map(|comment| comment.render(0))))
+            .child(ul().children(self.comments.iter().map(|comment| comment.render())))
             .build()
     }
 }
@@ -247,7 +247,7 @@ impl CommentTree {
         Ok(Self { comment, children })
     }
 
-    fn render(&self, depth: usize) -> Li {
+    fn render(&self) -> Li {
         let time_ago = time_ago(self.comment.time);
         li().class(COMMENT)
             .child(
@@ -257,13 +257,7 @@ impl CommentTree {
                     .text(&format!(" {time_ago}")),
             )
             .child(text_as_html(&self.comment.text))
-            .child(
-                ul().children(
-                    self.children
-                        .iter()
-                        .map(move |child| child.render(depth + 1)),
-                ),
-            )
+            .child(ul().children(self.children.iter().map(move |child| child.render())))
             .build()
     }
 }
