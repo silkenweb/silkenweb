@@ -634,6 +634,13 @@ impl Display for Element {
     }
 }
 
+// TODO: `Val` wrapper for values
+
+// TODO: Is there any way to have the default SignalOrValue lifetime as 'static?
+
+// TODO: Use `SignalOrValue` for `text_signal`, `child_signal`,
+// `optional_child_signal`, but not `children_signal`.
+
 // TODO: Doc
 pub struct Sig<T>(pub T);
 
