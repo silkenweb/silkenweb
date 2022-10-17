@@ -314,35 +314,69 @@ pub trait SignalOrValue {
     type Item;
     type Map<F, R>;
 
-    fn map<A, B>(self, callback: B) -> Self::Map<B, A>
+    fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        B: FnMut(Self::Item) -> A,
+        F: FnMut(Self::Item) -> R,
         Self: Sized;
+
+    fn for_each<F, Executor>(self, callback: F, executor: Executor) -> Executor
+    where
+        F: FnMut(Self::Item) + 'static,
+        Self: Sized,
+        Executor: ElementBuilder;
 }
 
 impl SignalOrValue for String {
     type Item = String;
     type Map<F, R> = R;
 
-    fn map<A, B>(self, mut callback: B) -> Self::Map<B, A>
+    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
-        B: FnMut(Self::Item) -> A,
+        F: FnMut(Self::Item) -> R,
         Self: Sized,
     {
         callback(self)
     }
+
+    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    where
+        F: FnMut(Self::Item) + 'static,
+        Self: Sized,
+        Executor: ElementBuilder,
+    {
+        callback(self);
+        executor
+    }
 }
 
-impl<T, S: Signal<Item = T>> SignalOrValue for Sig<S> {
+impl<T, S> SignalOrValue for Sig<S>
+where
+    T: 'static,
+    S: Signal<Item = T> + 'static,
+{
     type Item = T;
     type Map<F, R> = Sig<signal::Map<S, F>>;
 
-    fn map<A, B>(self, callback: B) -> Self::Map<B, A>
+    fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        B: FnMut(Self::Item) -> A,
+        F: FnMut(Self::Item) -> R,
         Self: Sized,
     {
         Sig(self.0.map(callback))
+    }
+
+    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    where
+        F: FnMut(Self::Item) + 'static,
+        Self: Sized,
+        Executor: ElementBuilder,
+    {
+        let updater = self.0.for_each(move |v| {
+            callback(v);
+            async {}
+        });
+
+        executor.spawn_future(updater)
     }
 }
 
