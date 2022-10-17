@@ -312,10 +312,10 @@ impl Class for String {
 // TODO: Move this somewhere else
 pub trait SignalOrValue<'a> {
     type Item: 'a;
-    type Map<F: FnMut(Self::Item) -> R + 'a, R: SignalOrValue<'a, Item = R> + 'a>: SignalOrValue<
-        'a,
-        Item = R,
-    >;
+    type Map<F, R>: SignalOrValue<'a, Item = R>
+    where
+        F: FnMut(Self::Item) -> R + 'a,
+        R: SignalOrValue<'a, Item = R> + 'a;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
@@ -334,7 +334,10 @@ pub trait SignalOrValue<'a> {
 
 impl<'a> SignalOrValue<'a> for &'a str {
     type Item = Self;
-    type Map<F: FnMut(Self::Item) -> R + 'a, R: SignalOrValue<'a, Item = R> + 'a> = R;
+    type Map<F, R> = R
+    where
+        F: FnMut(Self::Item) -> R + 'a,
+        R: SignalOrValue<'a, Item = R> + 'a;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
@@ -358,8 +361,10 @@ impl<'a> SignalOrValue<'a> for &'a str {
 
 impl SignalOrValue<'static> for String {
     type Item = Self;
-    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
-        R;
+    type Map<F, R> = R
+    where
+        F: FnMut(Self::Item) -> R + 'static,
+        R: SignalOrValue<'static, Item = R> + 'static;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
@@ -387,8 +392,10 @@ where
     S: Signal<Item = T> + 'static,
 {
     type Item = T;
-    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
-        Sig<signal::Map<S, F>>;
+    type Map<F, R> = Sig<signal::Map<S, F>>
+        where
+            F: FnMut(Self::Item) -> R + 'static,
+            R: SignalOrValue<'static, Item = R> + 'static;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
