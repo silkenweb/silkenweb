@@ -332,7 +332,15 @@ pub trait SignalOrValue<'a> {
         Executor: ElementBuilder;
 }
 
-impl<'a> SignalOrValue<'a> for &'a str {
+pub trait Value<'a> {}
+
+impl<'a> Value<'a> for &'a str {}
+impl Value<'static> for String {}
+impl<'a, T: 'a> Value<'a> for Option<T> {}
+impl<'a, T: 'a> Value<'a> for [T] {}
+impl<'a, const COUNT: usize, T: 'a> Value<'a> for [T; COUNT] {}
+
+impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
     type Item = Self;
     type Map<F, R> = R
     where
@@ -343,33 +351,6 @@ impl<'a> SignalOrValue<'a> for &'a str {
     where
         R: SignalOrValue<'a, Item = R> + 'a,
         F: FnMut(Self::Item) -> R + 'a,
-        Self: Sized,
-    {
-        callback(self)
-    }
-
-    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
-    where
-        F: FnMut(Self::Item),
-        Self: Sized,
-        Executor: ElementBuilder,
-    {
-        callback(self);
-        executor
-    }
-}
-
-impl SignalOrValue<'static> for String {
-    type Item = Self;
-    type Map<F, R> = R
-    where
-        F: FnMut(Self::Item) -> R + 'static,
-        R: SignalOrValue<'static, Item = R> + 'static;
-
-    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
-    where
-        R: SignalOrValue<'static, Item = R> + 'static,
-        F: FnMut(Self::Item) -> R + 'static,
         Self: Sized,
     {
         callback(self)
