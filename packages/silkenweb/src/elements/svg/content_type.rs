@@ -4,7 +4,10 @@
 
 use std::borrow::Cow;
 
-use crate::attribute::{AsAttribute, Attribute};
+use crate::{
+    attribute::{AsAttribute, Attribute},
+    node::element::Value,
+};
 
 /// An SVG length with units. For percentages, use [`Percentage`] and for
 /// unitless lengths, use `f64`.
@@ -36,6 +39,8 @@ impl Attribute for Length {
     }
 }
 
+impl Value<'static> for Length {}
+
 impl AsAttribute<Length> for Length {}
 impl AsAttribute<Length> for Percentage {}
 impl AsAttribute<Length> for f64 {}
@@ -50,6 +55,7 @@ impl Attribute for Percentage {
 }
 
 impl AsAttribute<Percentage> for Percentage {}
+impl Value<'static> for Percentage {}
 
 /// For SVG attributes that accept "auto"
 pub struct Auto;
@@ -61,6 +67,8 @@ impl Attribute for Auto {
 }
 
 impl AsAttribute<Auto> for Auto {}
+
+impl Value<'static> for Auto {}
 
 /// Marker type for SVG attributes that can be a number or percentage
 pub struct NumberOrPercentage;
