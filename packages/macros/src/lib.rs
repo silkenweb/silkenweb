@@ -87,8 +87,11 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             type DomType = #dom_type;
             type Target = #target;
 
-            fn class(self, value: impl ::silkenweb::node::element::UpdateClass) -> Self {
-                Self {#derive_field: self.#derive_field.class(value) #fields_tail}
+            fn class<'a, T>(self, class: impl ::silkenweb::node::element::SignalOrValue<'a, Item = T>) -> Self
+            where
+                T: 'a + AsRef<str>
+            {
+                Self {#derive_field: self.#derive_field.class(class) #fields_tail}
             }
 
             fn classes(self, value: impl ::silkenweb::node::element::UpdateClasses) -> Self {

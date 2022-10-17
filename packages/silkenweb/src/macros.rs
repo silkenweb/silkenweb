@@ -235,8 +235,10 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
-            fn class(self, class: impl $crate::node::element::UpdateClass) -> Self {
-                Self { builder: self.builder.class(class) }
+            fn class<'a, T>(self, class: impl $crate::node::element::SignalOrValue<'a, Item = T>) -> Self
+            where
+                T: 'a + AsRef<str> {
+                        Self { builder: self.builder.class(class) }
             }
 
             fn classes(self, value: impl $crate::node::element::UpdateClasses) -> Self {

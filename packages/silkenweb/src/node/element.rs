@@ -312,29 +312,34 @@ impl Class for String {
 // TODO: Move this somewhere else
 pub trait SignalOrValue<'a> {
     type Item: 'a;
-    type Map<F, R>;
+    type Map<F: FnMut(Self::Item) -> R + 'a, R: SignalOrValue<'a, Item = R> + 'a>: SignalOrValue<
+        'a,
+        Item = R,
+    >;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        F: FnMut(Self::Item) -> R,
+        R: SignalOrValue<'a, Item = R> + 'a,
+        F: FnMut(Self::Item) -> R + 'a,
         Self: Sized;
 
     // TODO: Use a more general constraint for `Executor` and take an `&mut
     // Executor` rather than returning it.
     fn for_each<F, Executor>(self, callback: F, executor: Executor) -> Executor
     where
-        F: FnMut(Self::Item) + 'static,
+        F: FnMut(Self::Item) + 'a,
         Self: Sized,
         Executor: ElementBuilder;
 }
 
 impl<'a> SignalOrValue<'a> for &'a str {
     type Item = Self;
-    type Map<F, R> = R;
+    type Map<F: FnMut(Self::Item) -> R + 'a, R: SignalOrValue<'a, Item = R> + 'a> = R;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
-        F: FnMut(Self::Item) -> R,
+        R: SignalOrValue<'a, Item = R> + 'a,
+        F: FnMut(Self::Item) -> R + 'a,
         Self: Sized,
     {
         callback(self)
@@ -342,7 +347,7 @@ impl<'a> SignalOrValue<'a> for &'a str {
 
     fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
     where
-        F: FnMut(Self::Item) + 'static,
+        F: FnMut(Self::Item),
         Self: Sized,
         Executor: ElementBuilder,
     {
@@ -353,11 +358,13 @@ impl<'a> SignalOrValue<'a> for &'a str {
 
 impl SignalOrValue<'static> for String {
     type Item = Self;
-    type Map<F, R> = R;
+    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
+        R;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
-        F: FnMut(Self::Item) -> R,
+        R: SignalOrValue<'static, Item = R> + 'static,
+        F: FnMut(Self::Item) -> R + 'static,
         Self: Sized,
     {
         callback(self)
@@ -365,7 +372,7 @@ impl SignalOrValue<'static> for String {
 
     fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
     where
-        F: FnMut(Self::Item) + 'static,
+        F: FnMut(Self::Item),
         Self: Sized,
         Executor: ElementBuilder,
     {
@@ -380,11 +387,13 @@ where
     S: Signal<Item = T> + 'static,
 {
     type Item = T;
-    type Map<F, R> = Sig<signal::Map<S, F>>;
+    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
+        Sig<signal::Map<S, F>>;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        F: FnMut(Self::Item) -> R,
+        R: SignalOrValue<'static, Item = R> + 'static,
+        F: FnMut(Self::Item) -> R + 'static,
         Self: Sized,
     {
         Sig(self.0.map(callback))
@@ -507,8 +516,24 @@ impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
-    fn class(self, class: impl UpdateClass) -> Self {
-        class.add(self)
+    fn class<'a, T>(self, class: impl SignalOrValue<'a, Item = T>) -> Self
+    where
+        T: 'a + AsRef<str>,
+    {
+        let mut element = self.element.hydro_elem.clone();
+        let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
+
+        class.for_each(
+            move |class| {
+                if let Some(previous) = previous_value.replace(None) {
+                    element.remove_class(previous.as_ref());
+                }
+
+                element.add_class(class.as_ref());
+                previous_value.set(Some(class));
+            },
+            self,
+        )
     }
 
     fn classes(self, classes: impl UpdateClasses) -> Self {
@@ -683,7 +708,9 @@ pub trait ElementBuilder: Sized {
     type DomType: JsCast + 'static;
 
     // TODO: Doc
-    fn class(self, value: impl UpdateClass) -> Self;
+    fn class<'a, T>(self, class: impl SignalOrValue<'a, Item = T>) -> Self
+    where
+        T: 'a + AsRef<str>;
 
     // TODO: Doc
     // Adds or removes class names on the element

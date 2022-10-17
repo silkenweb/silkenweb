@@ -1,8 +1,6 @@
-use std::borrow::Cow;
-
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    node::element::{self, ElementBuilder, Sig, UpdateClass},
+    node::element::{ElementBuilder, Sig, SignalOrValue},
     prelude::{HtmlElement, ParentBuilder},
 };
 
@@ -448,15 +446,39 @@ pub enum FlexDirection {
     ColumnReverse,
 }
 
-impl element::Class for FlexDirection {
-    fn text(&self) -> Cow<str> {
+impl FlexDirection {
+    fn class(self) -> Class {
         match self {
             FlexDirection::Row => css::FLEX_ROW,
             FlexDirection::RowReverse => css::FLEX_ROW_REVERSE,
             FlexDirection::Column => css::FLEX_COLUMN,
             FlexDirection::ColumnReverse => css::FLEX_COLUMN_REVERSE,
         }
-        .into()
+    }
+}
+
+impl SignalOrValue<'static> for FlexDirection {
+    type Item = Self;
+    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
+        R;
+
+    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
+    where
+        R: SignalOrValue<'static, Item = R> + 'static,
+        F: FnMut(Self::Item) -> R + 'static,
+        Self: Sized,
+    {
+        callback(self)
+    }
+
+    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    where
+        F: FnMut(Self::Item),
+        Self: Sized,
+        Executor: ElementBuilder,
+    {
+        callback(self);
+        executor
     }
 }
 
@@ -668,8 +690,9 @@ pub trait SetFlex: ElementBuilder {
     }
 
     /// Add `display: flex` and `flex-direction: <direction>` classes
-    fn flex(self, direction: impl UpdateClass<Item = FlexDirection>) -> Self {
-        self.class(css::D_FLEX).class(direction)
+    fn flex(self, direction: impl SignalOrValue<'static, Item = FlexDirection>) -> Self {
+        self.class(css::D_FLEX)
+            .class(direction.map(FlexDirection::class))
     }
 
     fn align_items(self, align: Align) -> Self {
