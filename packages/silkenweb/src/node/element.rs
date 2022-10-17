@@ -323,18 +323,16 @@ pub trait SignalOrValue<'a> {
         F: FnMut(Self::Item) -> R + 'a,
         Self: Sized;
 
-    // TODO: Use a more general constraint for `Executor` and take an `&mut
-    // Executor` rather than returning it.
-    fn for_each<FVal, FInitSig, FSig, Data>(
+    fn for_each<FVal, FInitSig, FSig, Builder>(
         self,
         callback_val: FVal,
         callback_sig: FInitSig,
-        data: Data,
-    ) -> Data
+        builder: Builder,
+    ) -> Builder
     where
-        Data: ElementBuilder,
-        FVal: FnOnce(&mut Data, Self::Item) + 'a,
-        FInitSig: FnOnce(&mut Data) -> FSig,
+        Builder: ElementBuilder,
+        FVal: FnOnce(&mut Builder, Self::Item) + 'a,
+        FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized;
 }
@@ -363,21 +361,21 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
         callback(self)
     }
 
-    fn for_each<FVal, FInitSig, FSig, Data>(
+    fn for_each<FVal, FInitSig, FSig, Builder>(
         self,
         callback_val: FVal,
         _callback_sig: FInitSig,
-        mut data: Data,
-    ) -> Data
+        mut builder: Builder,
+    ) -> Builder
     where
-        Data: ElementBuilder,
-        FVal: FnOnce(&mut Data, Self::Item) + 'a,
-        FInitSig: FnOnce(&mut Data) -> FSig,
+        Builder: ElementBuilder,
+        FVal: FnOnce(&mut Builder, Self::Item) + 'a,
+        FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized,
     {
-        callback_val(&mut data, self);
-        data
+        callback_val(&mut builder, self);
+        builder
     }
 }
 
@@ -401,26 +399,26 @@ where
         Sig(self.0.map(callback))
     }
 
-    fn for_each<FVal, FInitSig, FSig, Data>(
+    fn for_each<FVal, FInitSig, FSig, Builder>(
         self,
         _callback_val: FVal,
         callback_sig: FInitSig,
-        mut data: Data,
-    ) -> Data
+        mut builder: Builder,
+    ) -> Builder
     where
-        Data: ElementBuilder,
-        FVal: FnOnce(&mut Data, Self::Item) + 'static,
-        FInitSig: FnOnce(&mut Data) -> FSig,
+        Builder: ElementBuilder,
+        FVal: FnOnce(&mut Builder, Self::Item) + 'static,
+        FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'static,
         Self: Sized,
     {
-        let mut callback = callback_sig(&mut data);
+        let mut callback = callback_sig(&mut builder);
         let updater = self.0.for_each(move |v| {
             callback(v);
             async {}
         });
 
-        data.spawn_future(updater)
+        builder.spawn_future(updater)
     }
 }
 
