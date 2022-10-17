@@ -308,17 +308,8 @@ impl Class for String {
     }
 }
 
-// Once we get GAT's it'll be worth investigating if we can write a trait to
-// allow us to `map` over values and signals (wrapped in `Sig`). We'll still
-// need `UpdateClass` as the `Sig` implementation requires `Item: 'static`,
-// whereas the value implementation is required to work with shorter lifetimes.
-// But a `map` trait will be useful for writing client code that wants to
-// transform values before sending them on to a class or attribute.
-//
-// The alternative is to investigate the overhead of using `signal::Always`.
-// It's just an `Option<T>` underneath with a very efficient implementation. If
-// we could avoid queuing the future in the microtask queue if it's ready
-// immediately, that could be an option.
+// TODO: Doc
+// TODO: Move this somewhere else
 pub trait SignalOrValue {
     type Item;
     type Map<F, R>;
