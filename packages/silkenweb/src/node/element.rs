@@ -334,7 +334,7 @@ pub trait SignalOrValue<'a> {
     where
         Data: ElementBuilder,
         FVal: FnOnce(&mut Data, Self::Item) + 'a,
-        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FInitSig: FnOnce(&mut Data) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized;
 }
@@ -372,7 +372,7 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
     where
         Data: ElementBuilder,
         FVal: FnOnce(&mut Data, Self::Item) + 'a,
-        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FInitSig: FnOnce(&mut Data) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized,
     {
@@ -405,16 +405,16 @@ where
         self,
         _callback_val: FVal,
         callback_sig: FInitSig,
-        data: Data,
+        mut data: Data,
     ) -> Data
     where
         Data: ElementBuilder,
         FVal: FnOnce(&mut Data, Self::Item) + 'static,
-        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FInitSig: FnOnce(&mut Data) -> FSig,
         FSig: FnMut(Self::Item) + 'static,
         Self: Sized,
     {
-        let (mut callback, data) = callback_sig(data);
+        let mut callback = callback_sig(&mut data);
         let updater = self.0.for_each(move |v| {
             callback(v);
             async {}
@@ -536,17 +536,14 @@ impl ElementBuilder for ElementBuilderBase {
                 let mut element = builder.element.hydro_elem.clone();
                 let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
 
-                (
-                    move |class: T| {
-                        if let Some(previous) = previous_value.replace(None) {
-                            element.remove_class(previous.as_ref());
-                        }
+                move |class: T| {
+                    if let Some(previous) = previous_value.replace(None) {
+                        element.remove_class(previous.as_ref());
+                    }
 
-                        element.add_class(class.as_ref());
-                        previous_value.set(Some(class));
-                    },
-                    builder,
-                )
+                    element.add_class(class.as_ref());
+                    previous_value.set(Some(class));
+                }
             },
             self,
         )
@@ -571,25 +568,22 @@ impl ElementBuilder for ElementBuilderBase {
                 let mut element = builder.element.hydro_elem.clone();
                 let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
 
-                (
-                    move |classes| {
-                        let mut previous = previous_value.replace(Vec::new());
+                move |classes| {
+                    let mut previous = previous_value.replace(Vec::new());
 
-                        for to_remove in &previous {
-                            element.remove_class(to_remove.as_ref());
-                        }
+                    for to_remove in &previous {
+                        element.remove_class(to_remove.as_ref());
+                    }
 
-                        previous.clear();
+                    previous.clear();
 
-                        for to_add in classes {
-                            element.add_class(to_add.as_ref());
-                            previous.push(to_add);
-                        }
+                    for to_add in classes {
+                        element.add_class(to_add.as_ref());
+                        previous.push(to_add);
+                    }
 
-                        previous_value.set(previous);
-                    },
-                    builder,
-                )
+                    previous_value.set(previous);
+                }
             },
             self,
         )
