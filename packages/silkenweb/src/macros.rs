@@ -241,8 +241,14 @@ macro_rules! dom_element {
                         Self { builder: self.builder.class(class) }
             }
 
-            fn classes(self, value: impl $crate::node::element::UpdateClasses) -> Self {
-                Self { builder: self.builder.classes(value) }
+            fn classes<'a, T>(
+                self,
+                classes: impl $crate::node::element::SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+            ) -> Self
+            where
+                T: 'a + AsRef<str>
+            {
+                Self { builder: self.builder.classes(classes) }
             }
 
             fn attribute<T: $crate::node::element::SetAttribute>(self, name: &str, value: T) -> Self {

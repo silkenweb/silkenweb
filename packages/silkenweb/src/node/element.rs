@@ -524,8 +524,35 @@ impl ElementBuilder for ElementBuilderBase {
         )
     }
 
-    fn classes(self, classes: impl UpdateClasses) -> Self {
-        classes.add(self)
+    fn classes<'a, T>(
+        self,
+        classes: impl SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+    ) -> Self
+    where
+        T: 'a + AsRef<str>,
+    {
+        let mut element = self.element.hydro_elem.clone();
+        let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
+
+        classes.for_each(
+            move |classes| {
+                let mut previous = previous_value.replace(Vec::new());
+
+                for to_remove in &previous {
+                    element.remove_class(to_remove.as_ref());
+                }
+
+                previous.clear();
+
+                for to_add in classes {
+                    element.add_class(to_add.as_ref());
+                    previous.push(to_add);
+                }
+
+                previous_value.set(previous);
+            },
+            self,
+        )
     }
 
     fn attribute<T: SetAttribute>(mut self, name: &str, value: T) -> Self {
@@ -718,7 +745,12 @@ pub trait ElementBuilder: Sized {
     /// # Panics
     ///
     /// Panics if any of the items in `value` contain whitespace.
-    fn classes(self, value: impl UpdateClasses) -> Self;
+    fn classes<'a, T>(
+        self,
+        classes: impl SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+    ) -> Self
+    where
+        T: 'a + AsRef<str>;
 
     /// Set an attribute
     ///
