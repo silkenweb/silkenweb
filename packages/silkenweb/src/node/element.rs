@@ -27,7 +27,7 @@ use child_builder::ChildBuilder;
 use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future,
-    signal::{Signal, SignalExt},
+    signal::{self, Signal, SignalExt},
     signal_vec::{MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
     CancelableFutureHandle,
 };
@@ -319,6 +319,42 @@ impl Class for String {
 // It's just an `Option<T>` underneath with a very efficient implementation. If
 // we could avoid queuing the future in the microtask queue if it's ready
 // immediately, that could be an option.
+pub trait SignalOrValue {
+    type Item;
+    type Map<F, R>;
+
+    fn map<A, B>(self, callback: B) -> Self::Map<B, A>
+    where
+        B: FnMut(Self::Item) -> A,
+        Self: Sized;
+}
+
+impl SignalOrValue for String {
+    type Item = String;
+    type Map<F, R> = R;
+
+    fn map<A, B>(self, mut callback: B) -> Self::Map<B, A>
+    where
+        B: FnMut(Self::Item) -> A,
+        Self: Sized,
+    {
+        callback(self)
+    }
+}
+
+impl<T, S: Signal<Item = T>> SignalOrValue for Sig<S> {
+    type Item = T;
+    type Map<F, R> = Sig<signal::Map<S, F>>;
+
+    fn map<A, B>(self, callback: B) -> Self::Map<B, A>
+    where
+        B: FnMut(Self::Item) -> A,
+        Self: Sized,
+    {
+        Sig(self.0.map(callback))
+    }
+}
+
 pub trait UpdateClass {
     type Item;
 
