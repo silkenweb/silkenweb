@@ -8,7 +8,7 @@ use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use silkenweb::{
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, SetAttribute},
+        element::{ElementBuilder, SignalOrValue},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
@@ -87,7 +87,7 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn collapsed(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn collapsed(self, value: impl SignalOrValue<'static, Item = bool> + 'static) -> Self {
         Self(self.0.collapsed(value), PhantomData)
     }
 
@@ -154,19 +154,22 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn expanded(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn expanded(self, value: impl SignalOrValue<'static, Item = bool> + 'static) -> Self {
         Self(self.0.expanded(value), PhantomData)
     }
 
-    pub fn icon(self, value: impl SetAttribute<Type = Icon> + 'static) -> Self {
+    pub fn icon(self, value: impl SignalOrValue<'static, Item = Icon> + 'static) -> Self {
         Self(self.0.icon(value), PhantomData)
     }
 
-    pub fn selected(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn selected(self, value: impl SignalOrValue<'static, Item = bool> + 'static) -> Self {
         Self(self.0.selected(value), PhantomData)
     }
 
-    pub fn whole_item_toggleable(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn whole_item_toggleable(
+        self,
+        value: impl SignalOrValue<'static, Item = bool> + 'static,
+    ) -> Self {
         Self(self.0.whole_item_toggleable(value), PhantomData)
     }
 
@@ -222,19 +225,19 @@ where
     Id: FromStr,
     Id::Err: Debug,
 {
-    pub fn expanded(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn expanded(self, value: impl SignalOrValue<'static, Item = bool> + 'static) -> Self {
         Self(self.0.expanded(value), PhantomData)
     }
 
-    pub fn icon(self, value: impl SetAttribute<Type = Icon> + 'static) -> Self {
+    pub fn icon(self, value: impl SignalOrValue<'static, Item = Icon> + 'static) -> Self {
         Self(self.0.icon(value), PhantomData)
     }
 
-    pub fn selected(self, value: impl SetAttribute<Type = bool> + 'static) -> Self {
+    pub fn selected(self, value: impl SignalOrValue<'static, Item = bool> + 'static) -> Self {
         Self(self.0.selected(value), PhantomData)
     }
 
-    pub fn text(self, value: impl SetAttribute<Type = String> + 'static) -> Self {
+    pub fn text(self, value: impl SignalOrValue<'static, Item = String> + 'static) -> Self {
         Self(self.0.text(value), PhantomData)
     }
 }

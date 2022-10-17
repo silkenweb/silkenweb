@@ -331,7 +331,7 @@ pub trait SignalOrValue<'a> {
     ) -> Builder
     where
         Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item) + 'a,
+        FVal: FnOnce(&mut Builder, Self::Item),
         FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized;
@@ -339,8 +339,21 @@ pub trait SignalOrValue<'a> {
 
 pub trait Value<'a> {}
 
+macro_rules! static_values{
+    ($($t:ty),*) => {
+        $(
+            impl Value<'static> for $t {}
+        )*
+    }
+}
+
+static_values!(i8, i16, i32, i64);
+static_values!(u8, u16, u32, u64);
+static_values!(f32, f64);
+static_values!(bool, String);
+
 impl<'a> Value<'a> for &'a str {}
-impl Value<'static> for String {}
+impl<'a> Value<'a> for &'a String {}
 impl<'a, T: 'a> Value<'a> for Option<T> {}
 impl<'a, T: 'a> Value<'a> for [T] {}
 impl<'a, const COUNT: usize, T: 'a> Value<'a> for [T; COUNT] {}
@@ -369,7 +382,7 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
     ) -> Builder
     where
         Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item) + 'a,
+        FVal: FnOnce(&mut Builder, Self::Item),
         FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'a,
         Self: Sized,
@@ -407,7 +420,7 @@ where
     ) -> Builder
     where
         Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item) + 'static,
+        FVal: FnOnce(&mut Builder, Self::Item),
         FInitSig: FnOnce(&mut Builder) -> FSig,
         FSig: FnMut(Self::Item) + 'static,
         Self: Sized,
@@ -431,7 +444,7 @@ impl ElementBuilder for ElementBuilderBase {
         T: 'a + AsRef<str>,
     {
         class.for_each(
-            |builder, class: T| builder.element.hydro_elem.add_class(class.as_ref()),
+            |builder, class| builder.element.hydro_elem.add_class(class.as_ref()),
             |builder| {
                 let mut element = builder.element.hydro_elem.clone();
                 let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
@@ -489,10 +502,27 @@ impl ElementBuilder for ElementBuilderBase {
         )
     }
 
-    fn attribute<T: SetAttribute>(mut self, name: &str, value: T) -> Self {
+    fn attribute<'a>(
+        mut self,
+        name: &str,
+        value: impl SignalOrValue<'a, Item = impl Attribute>,
+    ) -> Self {
         self.check_attribute_unique(name);
 
-        value.set_attribute(name, self)
+        value.for_each(
+            |builder, value| {
+                builder.element.hydro_elem.attribute(name, value);
+            },
+            |builder| {
+                let name = name.to_owned();
+                let mut element = builder.element.hydro_elem.clone();
+
+                move |new_value| {
+                    element.attribute(&name, new_value);
+                }
+            },
+            self,
+        )
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
@@ -605,51 +635,7 @@ impl Display for Element {
 }
 
 // TODO: Doc
-// TODO: Do there items belong in this module?
-pub trait SetAttribute {
-    // TODO: Rename to Item to be consistent with signal/iter etc
-    type Type;
-
-    fn set_attribute(self, name: &str, builder: ElementBuilderBase) -> ElementBuilderBase;
-}
-
-impl<T: Attribute> SetAttribute for T {
-    type Type = T;
-
-    fn set_attribute(self, name: &str, mut builder: ElementBuilderBase) -> ElementBuilderBase {
-        builder.element.hydro_elem.attribute(name, self);
-        builder
-    }
-}
-
-// TODO: Doc
 pub struct Sig<T>(pub T);
-
-impl<T: Attribute + 'static, S: Signal<Item = T> + 'static> SetAttribute for Sig<S> {
-    type Type = T;
-
-    // TODO:
-    // Problems we run into if we try and make a generic select:
-    // Closures for value and signal both want to own builder
-    // Closure for signal needs signal type, which needs to be static, which then
-    // requires value type to be static, which rules out passing references tp
-    // `attribute`
-    fn set_attribute(self, name: &str, builder: ElementBuilderBase) -> ElementBuilderBase {
-        let mut element = builder.element.hydro_elem.clone();
-
-        let updater = self.0.for_each({
-            let name = name.to_owned();
-
-            move |new_value| {
-                element.attribute(&name, new_value);
-
-                async {}
-            }
-        });
-
-        builder.spawn_future(updater)
-    }
-}
 
 /// An HTML element builder.
 pub trait ElementBuilder: Sized {
@@ -691,7 +677,11 @@ pub trait ElementBuilder: Sized {
     /// The attribute can either be a value or a signal. Signals should be
     /// wrapped in the [`Sig`] newtype.`Option<impl Attribute>` can be used to
     /// add/remove an attribute based on a signal.
-    fn attribute<T: SetAttribute>(self, name: &str, value: T) -> Self;
+    fn attribute<'a>(
+        self,
+        name: &str,
+        value: impl SignalOrValue<'a, Item = impl Attribute>,
+    ) -> Self;
 
     /// Apply an effect after the next render.
     ///

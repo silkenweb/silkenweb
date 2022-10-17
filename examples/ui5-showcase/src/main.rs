@@ -147,7 +147,7 @@ fn button() -> Button {
 
 fn calendar() -> Calendar {
     calendar::calendar()
-        .format_pattern("yyyy-MM-dd")
+        .format_pattern("yyyy-MM-dd".to_string())
         .selected_dates(["2000-01-01".to_string()])
         .selection_mode(SelectionMode::Multiple)
         .on_selected_dates_change(|event, _target| {

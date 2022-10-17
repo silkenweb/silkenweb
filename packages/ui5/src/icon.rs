@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     custom_html_element,
+    node::element::Value,
 };
 
 custom_html_element!(
@@ -1378,6 +1379,8 @@ impl Attribute for Icon {
 }
 
 impl AsAttribute<Icon> for Icon {}
+
+impl Value<'static> for Icon {}
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum FioriIcon {

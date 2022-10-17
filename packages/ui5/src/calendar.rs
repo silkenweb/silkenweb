@@ -5,7 +5,7 @@ use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::element::ParentBuilder,
+    node::element::{ParentBuilder, Value},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     ElementBuilder,
 };
@@ -108,6 +108,8 @@ impl Attribute for SelectionMode {
 }
 
 impl AsAttribute<SelectionMode> for SelectionMode {}
+
+impl Value<'static> for SelectionMode {}
 
 #[derive(Display, Copy, Clone)]
 pub enum CalendarType {

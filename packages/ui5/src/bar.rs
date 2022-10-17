@@ -3,7 +3,7 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::{
-        element::{Element, ParentBuilder},
+        element::{Element, ParentBuilder, Value},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
@@ -26,6 +26,8 @@ impl Attribute for BarDesign {
         Some(self.to_string().into())
     }
 }
+
+impl Value<'static> for BarDesign {}
 
 impl AsAttribute<BarDesign> for BarDesign {}
 

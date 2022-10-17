@@ -251,7 +251,11 @@ macro_rules! dom_element {
                 Self { builder: self.builder.classes(classes) }
             }
 
-            fn attribute<T: $crate::node::element::SetAttribute>(self, name: &str, value: T) -> Self {
+            fn attribute<'a>(
+                self,
+                name: &str,
+                value: impl $crate::node::element::SignalOrValue<'a, Item = impl $crate::attribute::Attribute>
+            ) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
             }
 
@@ -601,10 +605,12 @@ macro_rules! attribute {
             #[doc = ""]
         )?
         $(#[$attr_meta])*
-        $visibility fn $attr<T>(self, value: T) -> Self
+        $visibility fn $attr<'a, T>(
+            self,
+            value: impl $crate::node::element::SignalOrValue<'a, Item = T>
+        ) -> Self
         where
-            T: $crate::node::element::SetAttribute,
-            T::Type: $crate::attribute::AsAttribute<$typ>
+            T: $crate::attribute::AsAttribute<$typ>
         {
             $crate::node::element::ElementBuilder::attribute(self, $crate::macros::intern_str($text_attr), value)
         }

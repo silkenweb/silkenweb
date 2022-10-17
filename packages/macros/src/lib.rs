@@ -104,7 +104,11 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
                     Self {#derive_field: self.#derive_field.classes(classes) #fields_tail}
             }
 
-            fn attribute<T: ::silkenweb::node::element::SetAttribute>(self, name: &str, value: T) -> Self {
+            fn attribute<'a>(
+                mut self,
+                name: &str,
+                value: impl ::silkenweb::node::element::SignalOrValue<'a, Item = impl ::silkenweb::attribute::Attribute>,
+            ) -> Self {
                 Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
             }
 
