@@ -325,11 +325,18 @@ pub trait SignalOrValue<'a> {
 
     // TODO: Use a more general constraint for `Executor` and take an `&mut
     // Executor` rather than returning it.
-    fn for_each<F, Executor>(self, callback: F, executor: Executor) -> Executor
+    fn for_each<FVal, FInitSig, FSig, Data>(
+        self,
+        callback_val: FVal,
+        callback_sig: FInitSig,
+        data: Data,
+    ) -> Data
     where
-        F: FnMut(Self::Item) + 'a,
-        Self: Sized,
-        Executor: ElementBuilder;
+        Data: ElementBuilder,
+        FVal: FnOnce(&mut Data, Self::Item) + 'a,
+        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FSig: FnMut(Self::Item) + 'a,
+        Self: Sized;
 }
 
 pub trait Value<'a> {}
@@ -356,14 +363,21 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
         callback(self)
     }
 
-    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    fn for_each<FVal, FInitSig, FSig, Data>(
+        self,
+        callback_val: FVal,
+        _callback_sig: FInitSig,
+        mut data: Data,
+    ) -> Data
     where
-        F: FnMut(Self::Item),
+        Data: ElementBuilder,
+        FVal: FnOnce(&mut Data, Self::Item) + 'a,
+        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FSig: FnMut(Self::Item) + 'a,
         Self: Sized,
-        Executor: ElementBuilder,
     {
-        callback(self);
-        executor
+        callback_val(&mut data, self);
+        data
     }
 }
 
@@ -387,18 +401,26 @@ where
         Sig(self.0.map(callback))
     }
 
-    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    fn for_each<FVal, FInitSig, FSig, Data>(
+        self,
+        _callback_val: FVal,
+        callback_sig: FInitSig,
+        data: Data,
+    ) -> Data
     where
-        F: FnMut(Self::Item) + 'static,
+        Data: ElementBuilder,
+        FVal: FnOnce(&mut Data, Self::Item) + 'static,
+        FInitSig: FnOnce(Data) -> (FSig, Data),
+        FSig: FnMut(Self::Item) + 'static,
         Self: Sized,
-        Executor: ElementBuilder,
     {
+        let (mut callback, data) = callback_sig(data);
         let updater = self.0.for_each(move |v| {
             callback(v);
             async {}
         });
 
-        executor.spawn_future(updater)
+        data.spawn_future(updater)
     }
 }
 
@@ -508,17 +530,23 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'a + AsRef<str>,
     {
-        let mut element = self.element.hydro_elem.clone();
-        let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
-
         class.for_each(
-            move |class| {
-                if let Some(previous) = previous_value.replace(None) {
-                    element.remove_class(previous.as_ref());
-                }
+            |builder, class: T| builder.element.hydro_elem.add_class(class.as_ref()),
+            |builder| {
+                let mut element = builder.element.hydro_elem.clone();
+                let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
 
-                element.add_class(class.as_ref());
-                previous_value.set(Some(class));
+                (
+                    move |class: T| {
+                        if let Some(previous) = previous_value.replace(None) {
+                            element.remove_class(previous.as_ref());
+                        }
+
+                        element.add_class(class.as_ref());
+                        previous_value.set(Some(class));
+                    },
+                    builder,
+                )
             },
             self,
         )
@@ -531,25 +559,37 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'a + AsRef<str>,
     {
-        let mut element = self.element.hydro_elem.clone();
-        let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
-
         classes.for_each(
-            move |classes| {
-                let mut previous = previous_value.replace(Vec::new());
+            |builder, classes| {
+                let element = &mut builder.element.hydro_elem;
 
-                for to_remove in &previous {
-                    element.remove_class(to_remove.as_ref());
+                for class in classes {
+                    element.add_class(class.as_ref());
                 }
+            },
+            |builder| {
+                let mut element = builder.element.hydro_elem.clone();
+                let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
 
-                previous.clear();
+                (
+                    move |classes| {
+                        let mut previous = previous_value.replace(Vec::new());
 
-                for to_add in classes {
-                    element.add_class(to_add.as_ref());
-                    previous.push(to_add);
-                }
+                        for to_remove in &previous {
+                            element.remove_class(to_remove.as_ref());
+                        }
 
-                previous_value.set(previous);
+                        previous.clear();
+
+                        for to_add in classes {
+                            element.add_class(to_add.as_ref());
+                            previous.push(to_add);
+                        }
+
+                        previous_value.set(previous);
+                    },
+                    builder,
+                )
             },
             self,
         )
