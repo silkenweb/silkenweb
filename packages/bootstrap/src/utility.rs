@@ -1,6 +1,6 @@
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    node::element::{ElementBuilder, Sig, SignalOrValue},
+    node::element::{ElementBuilder, Sig, SignalOrValue, Value},
     prelude::{HtmlElement, ParentBuilder},
 };
 
@@ -457,30 +457,7 @@ impl FlexDirection {
     }
 }
 
-impl SignalOrValue<'static> for FlexDirection {
-    type Item = Self;
-    type Map<F: FnMut(Self::Item) -> R + 'static, R: SignalOrValue<'static, Item = R> + 'static> =
-        R;
-
-    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
-    where
-        R: SignalOrValue<'static, Item = R> + 'static,
-        F: FnMut(Self::Item) -> R + 'static,
-        Self: Sized,
-    {
-        callback(self)
-    }
-
-    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
-    where
-        F: FnMut(Self::Item),
-        Self: Sized,
-        Executor: ElementBuilder,
-    {
-        callback(self);
-        executor
-    }
-}
+impl Value<'static> for FlexDirection {}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Align {
