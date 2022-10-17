@@ -310,8 +310,8 @@ impl Class for String {
 
 // TODO: Doc
 // TODO: Move this somewhere else
-pub trait SignalOrValue {
-    type Item;
+pub trait SignalOrValue<'a> {
+    type Item: 'a;
     type Map<F, R>;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
@@ -319,6 +319,8 @@ pub trait SignalOrValue {
         F: FnMut(Self::Item) -> R,
         Self: Sized;
 
+    // TODO: Use a more general constraint for `Executor` and take an `&mut
+    // Executor` rather than returning it.
     fn for_each<F, Executor>(self, callback: F, executor: Executor) -> Executor
     where
         F: FnMut(Self::Item) + 'static,
@@ -326,8 +328,8 @@ pub trait SignalOrValue {
         Executor: ElementBuilder;
 }
 
-impl SignalOrValue for String {
-    type Item = String;
+impl<'a> SignalOrValue<'a> for &'a str {
+    type Item = Self;
     type Map<F, R> = R;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
@@ -349,7 +351,30 @@ impl SignalOrValue for String {
     }
 }
 
-impl<T, S> SignalOrValue for Sig<S>
+impl SignalOrValue<'static> for String {
+    type Item = Self;
+    type Map<F, R> = R;
+
+    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
+    where
+        F: FnMut(Self::Item) -> R,
+        Self: Sized,
+    {
+        callback(self)
+    }
+
+    fn for_each<F, Executor>(self, mut callback: F, executor: Executor) -> Executor
+    where
+        F: FnMut(Self::Item) + 'static,
+        Self: Sized,
+        Executor: ElementBuilder,
+    {
+        callback(self);
+        executor
+    }
+}
+
+impl<T, S> SignalOrValue<'static> for Sig<S>
 where
     T: 'static,
     S: Signal<Item = T> + 'static,
