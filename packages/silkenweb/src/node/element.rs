@@ -692,7 +692,6 @@ pub trait ParentBuilder: ElementBuilder {
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
     fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node> + 'static>) -> Self {
-        // TODO: Benchmark
         self.optional_child(child.map(|child| Some(child)))
     }
 
