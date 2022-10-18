@@ -14,10 +14,11 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, ParentBuilder, SignalOrValue, Value},
+        element::{ElementBuilder, ParentBuilder},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    value::{SignalOrValue, Value},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};

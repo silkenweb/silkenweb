@@ -5,8 +5,9 @@ use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::element::{ParentBuilder, Value},
+    node::element::ParentBuilder,
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    value::Value,
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};

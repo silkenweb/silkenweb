@@ -4,11 +4,9 @@ use derive_more::Into;
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html,
-    node::{
-        element::{ElementBuilder, Sig},
-        Node,
-    },
+    node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    value::Sig,
     ElementBuilder,
 };
 

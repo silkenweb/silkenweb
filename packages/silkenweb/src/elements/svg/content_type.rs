@@ -4,10 +4,9 @@
 
 use std::borrow::Cow;
 
-use crate::{
-    attribute::{AsAttribute, Attribute},
-    node::element::Value,
-};
+use silkenweb_signals_ext::value::Value;
+
+use crate::attribute::{AsAttribute, Attribute};
 
 /// An SVG length with units. For percentages, use [`Percentage`] and for
 /// unitless lengths, use `f64`.

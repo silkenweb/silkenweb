@@ -13,8 +13,9 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{Element, ElementBuilder, Sig},
+    node::element::{Element, ElementBuilder},
     prelude::ParentBuilder,
+    value::Sig,
 };
 use silkenweb_signals_ext::SignalProduct;
 use wasm_bindgen::UnwrapThrowExt;

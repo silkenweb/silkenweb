@@ -7,12 +7,10 @@ use silkenweb::{
         html::{div, p, DivBuilder},
         HtmlElement,
     },
-    node::{
-        element::{ElementBuilder, Sig},
-        text,
-    },
+    node::{element::ElementBuilder, text},
     prelude::ParentBuilder,
     task::render_now,
+    value::Sig,
 };
 
 macro_rules! isomorphic_test {

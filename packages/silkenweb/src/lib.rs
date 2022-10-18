@@ -128,6 +128,8 @@ pub mod prelude {
     };
 }
 
+pub use silkenweb_signals_ext::value;
+
 /// Mount an element on the document.
 ///
 /// `id` is the html element id of the parent element. The element is added as

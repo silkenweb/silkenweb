@@ -3,10 +3,11 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::{
-        element::{Element, ParentBuilder, Value},
+        element::{Element, ParentBuilder},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    value::Value,
     ElementBuilder,
 };
 

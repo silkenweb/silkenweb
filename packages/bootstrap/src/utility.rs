@@ -1,7 +1,8 @@
 use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
-    node::element::{ElementBuilder, Sig, SignalOrValue, Value},
+    node::element::ElementBuilder,
     prelude::{HtmlElement, ParentBuilder},
+    value::{Sig, SignalOrValue, Value},
 };
 
 use crate::{css, Class};

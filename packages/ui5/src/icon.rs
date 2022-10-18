@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     custom_html_element,
-    node::element::Value,
+    value::Value,
 };
 
 custom_html_element!(

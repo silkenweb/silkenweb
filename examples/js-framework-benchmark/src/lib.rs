@@ -19,7 +19,8 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     mount,
-    node::element::{ElementBuilder, ParentBuilder, Sig},
+    node::element::{ElementBuilder, ParentBuilder},
+    value::Sig,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 

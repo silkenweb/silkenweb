@@ -7,11 +7,9 @@ use std::{
 use futures_signals::{signal::Signal, signal_vec::SignalVec};
 use silkenweb::{
     elements::CustomEvent,
-    node::{
-        element::{ElementBuilder, SignalOrValue},
-        Node,
-    },
+    node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    value::SignalOrValue,
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};

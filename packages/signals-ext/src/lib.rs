@@ -7,6 +7,8 @@ use futures_signals::signal::Signal;
 use paste::paste;
 use pin_project::pin_project;
 
+pub mod value;
+
 pub trait SignalProduct<Tuple, F> {
     type Output;
     fn signal_ref(self, f: F) -> Self::Output;

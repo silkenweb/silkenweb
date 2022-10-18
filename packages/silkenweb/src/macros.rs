@@ -235,7 +235,7 @@ macro_rules! dom_element {
             type Target = $camel_name;
             type DomType = $elem_type;
 
-            fn class<'a, T>(self, class: impl $crate::node::element::RefSignalOrValue<'a, Item = T>) -> Self
+            fn class<'a, T>(self, class: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
                 T: 'a + AsRef<str> {
                         Self { builder: self.builder.class(class) }
@@ -243,7 +243,7 @@ macro_rules! dom_element {
 
         fn classes<'a, T, Iter>(
             self,
-            classes: impl $crate::node::element::RefSignalOrValue<'a, Item = Iter>,
+            classes: impl $crate::value::RefSignalOrValue<'a, Item = Iter>,
         ) -> Self
             where
                 T: 'a + AsRef<str>,
@@ -255,7 +255,7 @@ macro_rules! dom_element {
             fn attribute<'a>(
                 self,
                 name: &str,
-                value: impl $crate::node::element::RefSignalOrValue<'a, Item = impl $crate::attribute::Attribute>
+                value: impl $crate::value::RefSignalOrValue<'a, Item = impl $crate::attribute::Attribute>
             ) -> Self {
                 Self{ builder: self.builder.attribute(name, value) }
             }
@@ -608,7 +608,7 @@ macro_rules! attribute {
         $(#[$attr_meta])*
         $visibility fn $attr<'a, T>(
             self,
-            value: impl $crate::node::element::RefSignalOrValue<'a, Item = T>
+            value: impl $crate::value::RefSignalOrValue<'a, Item = T>
         ) -> Self
         where
             T: $crate::attribute::AsAttribute<$typ>
