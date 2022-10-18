@@ -370,7 +370,10 @@ impl<'a, T: 'a> RefValue<'a> for Option<T> {}
 impl<'a, T: 'a> RefValue<'a> for [T] {}
 impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
 
-impl<'a, T: RefValue<'a> + 'a> RefSignalOrValue<'a> for T {
+impl<'a, T> RefSignalOrValue<'a> for T
+where
+    T: RefValue<'a> + 'a,
+{
     type Item = Self;
     type Map<F, R> = R
     where
