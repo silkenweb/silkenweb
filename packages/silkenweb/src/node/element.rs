@@ -14,7 +14,6 @@
 use std::collections::HashSet;
 use std::{
     self,
-    borrow::Cow,
     cell::{Cell, RefCell},
     fmt::{self, Display},
     future::Future,
@@ -292,21 +291,8 @@ impl ShadowRootParentBuilder for ElementBuilderBase {
     }
 }
 
-pub trait Class {
-    fn text(&self) -> Cow<str>;
-}
-
-impl<'a> Class for &'a str {
-    fn text(&self) -> Cow<str> {
-        (*self).into()
-    }
-}
-
-impl Class for String {
-    fn text(&self) -> Cow<str> {
-        self.into()
-    }
-}
+// TODO: Doc
+pub struct Sig<T>(pub T);
 
 // TODO: Doc
 // TODO: Move this somewhere else
@@ -691,9 +677,6 @@ impl Display for Element {
 
 // TODO: Use `SignalOrValue` for `text_signal`, `child_signal`,
 // `optional_child_signal`, but not `children_signal`.
-
-// TODO: Doc
-pub struct Sig<T>(pub T);
 
 /// An HTML element builder.
 pub trait ElementBuilder: Sized {
