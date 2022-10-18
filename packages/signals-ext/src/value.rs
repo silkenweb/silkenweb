@@ -6,7 +6,6 @@ use futures_signals::signal::{self, Signal, SignalExt};
 pub struct Sig<T>(pub T);
 
 // TODO: Doc
-// TODO: Move this somewhere else
 pub trait RefSignalOrValue<'a> {
     type Item: 'a;
     type Map<F, R>: RefSignalOrValue<'a, Item = R>
