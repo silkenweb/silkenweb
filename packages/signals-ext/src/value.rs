@@ -134,7 +134,7 @@ where
         F: FnMut(Self::Item) -> R + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
 
-    fn map<'b: 'static, F, R>(self, callback: F) -> Self::Map<'b, F, R>
+    fn map<'b, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
         'b: 'static,
         R: RefSignalOrValue<'b, Item = R> + 'b,
