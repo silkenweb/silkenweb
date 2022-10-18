@@ -308,6 +308,10 @@ impl Class for String {
     }
 }
 
+// TODO: Rename SignalOrValue to RefSignalOrValue and:
+// pub trait SignalOrValue: RefSignalOrValue<'static> {}
+// impl<T: RefSignalOrValue<'static>> SignalOrValue for T {}
+
 // TODO: Doc
 // TODO: Move this somewhere else
 pub trait SignalOrValue<'a> {
@@ -323,18 +327,22 @@ pub trait SignalOrValue<'a> {
         F: FnMut(Self::Item) -> R + 'a,
         Self: Sized;
 
-    fn for_each<FVal, FInitSig, FSig, Builder>(
+    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
-        callback_val: FVal,
-        callback_sig: FInitSig,
-        builder: Builder,
-    ) -> Builder
-    where
-        Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item),
-        FInitSig: FnOnce(&mut Builder) -> FSig,
-        FSig: FnMut(Self::Item) + 'a,
+        fn_val: FVal,
+        fn_init_sig: FInitSig,
+        executor: &mut Exec,
+    ) where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FInitSig: FnOnce(&mut Exec) -> FSig,
+        FSig: FnMut(Self::Item) -> Task + 'a,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor,
         Self: Sized;
+}
+
+pub trait Executor {
+    fn spawn(&mut self, future: impl Future<Output = ()> + 'static);
 }
 
 pub trait Value<'a> {}
@@ -374,21 +382,20 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
         callback(self)
     }
 
-    fn for_each<FVal, FInitSig, FSig, Builder>(
+    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
-        callback_val: FVal,
-        _callback_sig: FInitSig,
-        mut builder: Builder,
-    ) -> Builder
-    where
-        Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item),
-        FInitSig: FnOnce(&mut Builder) -> FSig,
-        FSig: FnMut(Self::Item) + 'a,
+        fn_val: FVal,
+        _fn_init_sig: FInitSig,
+        executor: &mut Exec,
+    ) where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FInitSig: FnOnce(&mut Exec) -> FSig,
+        FSig: FnMut(Self::Item) -> Task + 'a,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor,
         Self: Sized,
     {
-        callback_val(&mut builder, self);
-        builder
+        fn_val(executor, self);
     }
 }
 
@@ -412,26 +419,21 @@ where
         Sig(self.0.map(callback))
     }
 
-    fn for_each<FVal, FInitSig, FSig, Builder>(
+    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
-        _callback_val: FVal,
-        callback_sig: FInitSig,
-        mut builder: Builder,
-    ) -> Builder
-    where
-        Builder: ElementBuilder,
-        FVal: FnOnce(&mut Builder, Self::Item),
-        FInitSig: FnOnce(&mut Builder) -> FSig,
-        FSig: FnMut(Self::Item) + 'static,
+        _fn_val: FVal,
+        fn_init_sig: FInitSig,
+        executor: &mut Exec,
+    ) where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FInitSig: FnOnce(&mut Exec) -> FSig,
+        FSig: FnMut(Self::Item) -> Task + 'static,
+        Task: Future<Output = ()> + 'static,
+        Exec: Executor,
         Self: Sized,
     {
-        let mut callback = callback_sig(&mut builder);
-        let updater = self.0.for_each(move |v| {
-            callback(v);
-            async {}
-        });
-
-        builder.spawn_future(updater)
+        let fn_sig = fn_init_sig(executor);
+        executor.spawn(self.0.for_each(fn_sig));
     }
 }
 
@@ -439,10 +441,11 @@ impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
-    fn class<'a, T>(self, class: impl SignalOrValue<'a, Item = T>) -> Self
+    fn class<'a, T>(mut self, class: impl SignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str>,
     {
+        // TODO: Tidy
         class.for_each(
             |builder, class| builder.element.hydro_elem.add_class(class.as_ref()),
             |builder| {
@@ -456,19 +459,24 @@ impl ElementBuilder for ElementBuilderBase {
 
                     element.add_class(class.as_ref());
                     previous_value.set(Some(class));
+
+                    async {}
                 }
             },
-            self,
-        )
+            &mut self,
+        );
+
+        self
     }
 
     fn classes<'a, T>(
-        self,
+        mut self,
         classes: impl SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
     ) -> Self
     where
         T: 'a + AsRef<str>,
     {
+        // TODO: Tidy
         classes.for_each(
             |builder, classes| {
                 let element = &mut builder.element.hydro_elem;
@@ -496,10 +504,14 @@ impl ElementBuilder for ElementBuilderBase {
                     }
 
                     previous_value.set(previous);
+
+                    async {}
                 }
             },
-            self,
-        )
+            &mut self,
+        );
+
+        self
     }
 
     fn attribute<'a>(
@@ -519,10 +531,14 @@ impl ElementBuilder for ElementBuilderBase {
 
                 move |new_value| {
                     element.attribute(&name, new_value);
+
+                    async {}
                 }
             },
-            self,
-        )
+            &mut self,
+        );
+
+        self
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
@@ -554,9 +570,7 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
-        self.element
-            .resources
-            .push(Resource::Future(spawn_cancelable_future(future)));
+        self.spawn(future);
         self
     }
 
@@ -583,6 +597,14 @@ impl ElementBuilder for ElementBuilderBase {
             self.element.hydro_elem.shrink_to_fit();
             self.element
         }
+    }
+}
+
+impl Executor for ElementBuilderBase {
+    fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
+        self.element
+            .resources
+            .push(Resource::Future(spawn_cancelable_future(future)));
     }
 }
 
