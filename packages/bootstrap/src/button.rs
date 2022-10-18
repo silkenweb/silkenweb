@@ -1,12 +1,11 @@
 use std::marker::PhantomData;
 
 use derive_more::Into;
-use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{RefSignalOrValue, Sig, SignalOrValue, Value},
+    value::{RefSignalOrValue, SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -24,27 +23,13 @@ pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
 
 impl Value for ButtonBuilder<Set> {}
 
-// TODO: Construct different types of button:
-// (<button> | <a> | <input>)
-// TODO: <a> and <input> buttons
-pub fn button(button_type: &str, style: ButtonStyle) -> ButtonBuilder<Unset> {
-    ButtonBuilder::chain(base_button(button_type).0.class(style.class()))
-}
-
-pub fn button_signal(
+pub fn button(
     button_type: &str,
-    style: impl Signal<Item = ButtonStyle> + 'static,
+    style: impl SignalOrValue<Item = ButtonStyle>,
 ) -> ButtonBuilder<Unset> {
-    ButtonBuilder::chain(
-        base_button(button_type)
-            .0
-            .class(Sig(style.map(ButtonStyle::class))),
-    )
-}
-
-fn base_button(button_type: &str) -> ButtonBuilder<Unset> {
     ButtonBuilder(
-        HtmlElementBuilder(html::button().r#type(button_type).class(css::BTN).into()),
+        HtmlElementBuilder(html::button().r#type(button_type).class(css::BTN).into())
+            .class(style.map(ButtonStyle::class)),
         PhantomData,
     )
 }
@@ -65,6 +50,8 @@ impl ButtonStyle {
         }
     }
 }
+
+impl Value for ButtonStyle {}
 
 impl<Content> ButtonBuilder<Content> {
     pub fn text<'a>(

@@ -231,6 +231,8 @@ impl Opacity {
     }
 }
 
+impl Value for Opacity {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Shadow {
     None,
@@ -250,6 +252,8 @@ impl Shadow {
     }
 }
 
+impl Value for Shadow {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Overflow {
     Auto,
@@ -268,6 +272,8 @@ impl Overflow {
         }
     }
 }
+
+impl Value for Overflow {}
 
 pub trait Margin {
     fn margin(self) -> Class;
@@ -493,6 +499,8 @@ impl Align {
     }
 }
 
+impl Value for Align {}
+
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
@@ -608,53 +616,28 @@ pub trait SetBorder: ElementBuilder {
         self.class(Sig(side.map(|side| side.rounded_border())))
     }
 
-    fn border_opacity(self, opacity: Opacity) -> Self {
-        self.class(opacity.border())
+    fn border_opacity(self, opacity: impl SignalOrValue<Item = Opacity>) -> Self {
+        self.class(opacity.map(|opacity| opacity.border()))
     }
 
-    fn border_opacity_signal(self, opacity: impl Signal<Item = Opacity> + 'static) -> Self {
-        self.class(Sig(opacity.map(|opacity| opacity.border())))
-    }
-
-    /// Set a medium drop shadow
-    fn shadow(self) -> Self {
-        self.shadow_of_size(Shadow::Medium)
-    }
-
-    fn shadow_of_size(self, shadow: Shadow) -> Self {
-        self.class(shadow.class())
-    }
-
-    fn shadow_of_size_signal(self, shadow: impl Signal<Item = Shadow> + 'static) -> Self {
-        self.class(Sig(shadow.map(|shadow| shadow.class())))
+    fn shadow(self, shadow: impl SignalOrValue<Item = Shadow>) -> Self {
+        self.class(shadow.map(|shadow| shadow.class()))
     }
 }
 
 pub trait SetOverflow: ElementBuilder {
-    fn overflow(self, overflow: Overflow) -> Self {
-        self.class(overflow.class())
-    }
-
-    fn overflow_signal(self, overflow: impl Signal<Item = Overflow> + 'static) -> Self {
-        self.class(Sig(overflow.map(|overflow| overflow.class())))
+    fn overflow(self, overflow: impl SignalOrValue<Item = Overflow>) -> Self {
+        self.class(overflow.map(|overflow| overflow.class()))
     }
 }
 
 pub trait SetColour: ElementBuilder {
-    fn background_colour(self, colour: Colour) -> Self {
-        self.class(colour.background())
+    fn background_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
+        self.class(colour.map(|colour| colour.background()))
     }
 
-    fn background_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
-        self.class(Sig(colour.map(|colour| colour.background())))
-    }
-
-    fn text_colour(self, colour: Colour) -> Self {
-        self.class(colour.text())
-    }
-
-    fn text_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
-        self.class(Sig(colour.map(|colour| colour.text())))
+    fn text_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
+        self.class(colour.map(|colour| colour.text()))
     }
 }
 
@@ -675,12 +658,8 @@ pub trait SetFlex: ElementBuilder {
             .class(direction.map(FlexDirection::class))
     }
 
-    fn align_items(self, align: Align) -> Self {
-        self.class(align.align_items())
-    }
-
-    fn align_items_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {
-        self.class(Sig(align.map(|align| align.align_items())))
+    fn align_items(self, align: impl SignalOrValue<Item = Align>) -> Self {
+        self.class(align.map(|align| align.align_items()))
     }
 }
 

@@ -4,7 +4,7 @@ use silkenweb::{
     elements::html::{i, IBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents},
-    value::{Sig, Value},
+    value::{Sig, SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -17,12 +17,8 @@ pub mod css {
     silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
 
-pub fn icon(icon: IconType) -> IconBuilder {
-    IconBuilder(i().class(icon.class()))
-}
-
-pub fn icon_signal(icon: impl Signal<Item = IconType> + 'static) -> IconBuilder {
-    IconBuilder(i().class(Sig(icon.map(IconType::class))))
+pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> IconBuilder {
+    IconBuilder(i().class(icon.map(IconType::class)))
 }
 
 #[derive(ElementBuilder, Into)]
@@ -115,3 +111,5 @@ impl IconType {
         }
     }
 }
+
+impl Value for IconType {}

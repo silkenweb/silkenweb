@@ -6,7 +6,7 @@ use silkenweb::{
     },
     node::{element::ElementBuilder, Node},
     prelude::ParentBuilder,
-    value::SignalOrValue,
+    value::{SignalOrValue, Value},
 };
 
 use crate::css;
@@ -51,6 +51,8 @@ impl MenuBuilder {
     }
 }
 
+impl Value for MenuBuilder {}
+
 // TODO: Once we've written the dropdown container, we won't need this.
 impl From<MenuBuilder> for Node {
     fn from(builder: MenuBuilder) -> Self {
@@ -60,6 +62,8 @@ impl From<MenuBuilder> for Node {
 
 #[derive(Into)] // TODO: Once we've written the dropdown container, we won't need to derive Into
 pub struct Menu(Node);
+
+impl Value for Menu {}
 
 pub struct MenuItem(Node);
 
