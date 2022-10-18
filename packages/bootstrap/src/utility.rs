@@ -457,7 +457,7 @@ impl FlexDirection {
     }
 }
 
-impl Value<'static> for FlexDirection {}
+impl Value for FlexDirection {}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Align {
@@ -667,7 +667,7 @@ pub trait SetFlex: ElementBuilder {
     }
 
     /// Add `display: flex` and `flex-direction: <direction>` classes
-    fn flex(self, direction: impl SignalOrValue<'static, Item = FlexDirection>) -> Self {
+    fn flex(self, direction: impl SignalOrValue<Item = FlexDirection>) -> Self {
         self.class(css::D_FLEX)
             .class(direction.map(FlexDirection::class))
     }

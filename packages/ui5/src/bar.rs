@@ -27,7 +27,7 @@ impl Attribute for BarDesign {
     }
 }
 
-impl Value<'static> for BarDesign {}
+impl Value for BarDesign {}
 
 impl AsAttribute<BarDesign> for BarDesign {}
 

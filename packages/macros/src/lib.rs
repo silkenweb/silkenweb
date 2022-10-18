@@ -87,7 +87,7 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             type DomType = #dom_type;
             type Target = #target;
 
-            fn class<'a, T>(self, class: impl ::silkenweb::node::element::SignalOrValue<'a, Item = T>) -> Self
+            fn class<'a, T>(self, class: impl ::silkenweb::node::element::RefSignalOrValue<'a, Item = T>) -> Self
             where
                 T: 'a + AsRef<str>
             {
@@ -96,7 +96,7 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
 
             fn classes<'a, T>(
                 self,
-                classes: impl ::silkenweb::node::element::SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+                classes: impl ::silkenweb::node::element::RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
             ) -> Self
             where
                 T: 'a + AsRef<str>
@@ -107,7 +107,7 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             fn attribute<'a>(
                 mut self,
                 name: &str,
-                value: impl ::silkenweb::node::element::SignalOrValue<'a, Item = impl ::silkenweb::attribute::Attribute>,
+                value: impl ::silkenweb::node::element::RefSignalOrValue<'a, Item = impl ::silkenweb::attribute::Attribute>,
             ) -> Self {
                 Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
             }

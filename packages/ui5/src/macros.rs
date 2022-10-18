@@ -1,6 +1,6 @@
 macro_rules! attribute {
     ([$($index:tt),*] $name:ident : $t:ty) => {
-        pub fn $name(self, value: impl ::silkenweb::node::element::SignalOrValue<'static, Item = $t>) -> Self {
+        pub fn $name(self, value: impl ::silkenweb::node::element::SignalOrValue<Item = $t>) -> Self {
             Self(self.0.$name(value) $(, self.$index)*)
         }
     };

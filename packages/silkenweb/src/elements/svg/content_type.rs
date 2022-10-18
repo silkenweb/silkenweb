@@ -39,7 +39,7 @@ impl Attribute for Length {
     }
 }
 
-impl Value<'static> for Length {}
+impl Value for Length {}
 
 impl AsAttribute<Length> for Length {}
 impl AsAttribute<Length> for Percentage {}
@@ -55,7 +55,7 @@ impl Attribute for Percentage {
 }
 
 impl AsAttribute<Percentage> for Percentage {}
-impl Value<'static> for Percentage {}
+impl Value for Percentage {}
 
 /// For SVG attributes that accept "auto"
 pub struct Auto;
@@ -68,7 +68,7 @@ impl Attribute for Auto {
 
 impl AsAttribute<Auto> for Auto {}
 
-impl Value<'static> for Auto {}
+impl Value for Auto {}
 
 /// Marker type for SVG attributes that can be a number or percentage
 pub struct NumberOrPercentage;

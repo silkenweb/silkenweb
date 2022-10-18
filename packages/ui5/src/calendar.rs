@@ -109,7 +109,7 @@ impl Attribute for SelectionMode {
 
 impl AsAttribute<SelectionMode> for SelectionMode {}
 
-impl Value<'static> for SelectionMode {}
+impl Value for SelectionMode {}
 
 #[derive(Display, Copy, Clone)]
 pub enum CalendarType {

@@ -98,7 +98,7 @@ impl Attribute for GroupType {
     }
 }
 
-impl Value<'static> for GroupType {}
+impl Value for GroupType {}
 
 impl AsAttribute<GroupType> for GroupType {}
 
@@ -153,29 +153,23 @@ pub struct AvatarBuilder(elements::Ui5AvatarBuilder);
 impl AvatarBuilder {
     attributes0! {accessible_name: String, color_scheme: ColorScheme}
 
-    pub fn icon(self, value: impl SignalOrValue<'static, Item = Icon>) -> Self {
+    pub fn icon(self, value: impl SignalOrValue<Item = Icon>) -> Self {
         Self(self.0.icon(value))
     }
 
-    pub fn initials(
-        self,
-        value: impl SignalOrValue<'static, Item = impl AsAttribute<String>>,
-    ) -> Self {
+    pub fn initials(self, value: impl SignalOrValue<Item = impl AsAttribute<String>>) -> Self {
         Self(self.0.initials(value))
     }
 
-    pub fn interactive(
-        self,
-        value: impl SignalOrValue<'static, Item = impl AsAttribute<bool>>,
-    ) -> Self {
+    pub fn interactive(self, value: impl SignalOrValue<Item = impl AsAttribute<bool>>) -> Self {
         Self(self.0.interactive(value))
     }
 
-    pub fn shape(self, value: impl SignalOrValue<'static, Item = impl AsAttribute<Shape>>) -> Self {
+    pub fn shape(self, value: impl SignalOrValue<Item = impl AsAttribute<Shape>>) -> Self {
         Self(self.0.shape(value))
     }
 
-    pub fn size(self, value: impl SignalOrValue<'static, Item = impl AsAttribute<Size>>) -> Self {
+    pub fn size(self, value: impl SignalOrValue<Item = impl AsAttribute<Size>>) -> Self {
         Self(self.0.size(value))
     }
 

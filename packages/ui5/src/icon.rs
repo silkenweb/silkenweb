@@ -1380,7 +1380,7 @@ impl Attribute for Icon {
 
 impl AsAttribute<Icon> for Icon {}
 
-impl Value<'static> for Icon {}
+impl Value for Icon {}
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum FioriIcon {

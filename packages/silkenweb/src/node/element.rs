@@ -308,22 +308,18 @@ impl Class for String {
     }
 }
 
-// TODO: Rename SignalOrValue to RefSignalOrValue and:
-// pub trait SignalOrValue: RefSignalOrValue<'static> {}
-// impl<T: RefSignalOrValue<'static>> SignalOrValue for T {}
-
 // TODO: Doc
 // TODO: Move this somewhere else
-pub trait SignalOrValue<'a> {
+pub trait RefSignalOrValue<'a> {
     type Item: 'a;
-    type Map<F, R>: SignalOrValue<'a, Item = R>
+    type Map<F, R>: RefSignalOrValue<'a, Item = R>
     where
         F: FnMut(Self::Item) -> R + 'a,
-        R: SignalOrValue<'a, Item = R> + 'a;
+        R: RefSignalOrValue<'a, Item = R> + 'a;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        R: SignalOrValue<'a, Item = R> + 'a,
+        R: RefSignalOrValue<'a, Item = R> + 'a,
         F: FnMut(Self::Item) -> R + 'a,
         Self: Sized;
 
@@ -341,16 +337,24 @@ pub trait SignalOrValue<'a> {
         Self: Sized;
 }
 
+pub trait SignalOrValue: RefSignalOrValue<'static> {}
+
+impl<T: RefSignalOrValue<'static>> SignalOrValue for T {}
+
 pub trait Executor {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static);
 }
 
-pub trait Value<'a> {}
+pub trait RefValue<'a> {}
+
+pub trait Value: RefValue<'static> {}
+
+impl<T: Value> RefValue<'static> for T {}
 
 macro_rules! static_values{
     ($($t:ty),*) => {
         $(
-            impl Value<'static> for $t {}
+            impl Value for $t {}
         )*
     }
 }
@@ -360,22 +364,22 @@ static_values!(u8, u16, u32, u64);
 static_values!(f32, f64);
 static_values!(bool, String);
 
-impl<'a> Value<'a> for &'a str {}
-impl<'a> Value<'a> for &'a String {}
-impl<'a, T: 'a> Value<'a> for Option<T> {}
-impl<'a, T: 'a> Value<'a> for [T] {}
-impl<'a, const COUNT: usize, T: 'a> Value<'a> for [T; COUNT] {}
+impl<'a> RefValue<'a> for &'a str {}
+impl<'a> RefValue<'a> for &'a String {}
+impl<'a, T: 'a> RefValue<'a> for Option<T> {}
+impl<'a, T: 'a> RefValue<'a> for [T] {}
+impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
 
-impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
+impl<'a, T: RefValue<'a> + 'a> RefSignalOrValue<'a> for T {
     type Item = Self;
     type Map<F, R> = R
     where
         F: FnMut(Self::Item) -> R + 'a,
-        R: SignalOrValue<'a, Item = R> + 'a;
+        R: RefSignalOrValue<'a, Item = R> + 'a;
 
     fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
     where
-        R: SignalOrValue<'a, Item = R> + 'a,
+        R: RefSignalOrValue<'a, Item = R> + 'a,
         F: FnMut(Self::Item) -> R + 'a,
         Self: Sized,
     {
@@ -399,7 +403,7 @@ impl<'a, T: Value<'a> + 'a> SignalOrValue<'a> for T {
     }
 }
 
-impl<T, S> SignalOrValue<'static> for Sig<S>
+impl<T, S> RefSignalOrValue<'static> for Sig<S>
 where
     T: 'static,
     S: Signal<Item = T> + 'static,
@@ -408,11 +412,11 @@ where
     type Map<F, R> = Sig<signal::Map<S, F>>
         where
             F: FnMut(Self::Item) -> R + 'static,
-            R: SignalOrValue<'static, Item = R> + 'static;
+            R: RefSignalOrValue<'static, Item = R> + 'static;
 
     fn map<F, R>(self, callback: F) -> Self::Map<F, R>
     where
-        R: SignalOrValue<'static, Item = R> + 'static,
+        R: RefSignalOrValue<'static, Item = R> + 'static,
         F: FnMut(Self::Item) -> R + 'static,
         Self: Sized,
     {
@@ -441,7 +445,7 @@ impl ElementBuilder for ElementBuilderBase {
     type DomType = web_sys::Element;
     type Target = Element;
 
-    fn class<'a, T>(mut self, class: impl SignalOrValue<'a, Item = T>) -> Self
+    fn class<'a, T>(mut self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str>,
     {
@@ -471,7 +475,7 @@ impl ElementBuilder for ElementBuilderBase {
 
     fn classes<'a, T>(
         mut self,
-        classes: impl SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+        classes: impl RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
     ) -> Self
     where
         T: 'a + AsRef<str>,
@@ -517,7 +521,7 @@ impl ElementBuilder for ElementBuilderBase {
     fn attribute<'a>(
         mut self,
         name: &str,
-        value: impl SignalOrValue<'a, Item = impl Attribute>,
+        value: impl RefSignalOrValue<'a, Item = impl Attribute>,
     ) -> Self {
         self.check_attribute_unique(name);
 
@@ -672,7 +676,7 @@ pub trait ElementBuilder: Sized {
     type DomType: JsCast + 'static;
 
     // TODO: Doc
-    fn class<'a, T>(self, class: impl SignalOrValue<'a, Item = T>) -> Self
+    fn class<'a, T>(self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str>;
 
@@ -696,7 +700,7 @@ pub trait ElementBuilder: Sized {
     /// Panics if any of the items in `value` contain whitespace.
     fn classes<'a, T>(
         self,
-        classes: impl SignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+        classes: impl RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
     ) -> Self
     where
         T: 'a + AsRef<str>;
@@ -709,7 +713,7 @@ pub trait ElementBuilder: Sized {
     fn attribute<'a>(
         self,
         name: &str,
-        value: impl SignalOrValue<'a, Item = impl Attribute>,
+        value: impl RefSignalOrValue<'a, Item = impl Attribute>,
     ) -> Self;
 
     /// Apply an effect after the next render.
