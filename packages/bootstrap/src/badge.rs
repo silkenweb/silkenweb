@@ -3,7 +3,7 @@ use silkenweb::{
     elements::html::{span, SpanBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
-    value::{RefSignalOrValue, SignalOrValue},
+    value::{RefSignalOrValue, SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -35,6 +35,7 @@ impl BadgeBuilder {
     }
 }
 
+impl Value for BadgeBuilder {}
 impl ElementEvents for BadgeBuilder {}
 impl HtmlElementEvents for BadgeBuilder {}
 impl SetSpacing for BadgeBuilder {}

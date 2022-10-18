@@ -6,6 +6,7 @@ use silkenweb::{
     mount,
     node::element::{Element, ElementBuilder},
     prelude::ParentBuilder,
+    value::Sig,
 };
 use silkenweb_ui5::{
     avatar::{self, Avatar, AvatarGroup},
@@ -48,7 +49,7 @@ pub fn main() -> Result<(), JsValue> {
         div()
             .class(FLEX)
             .child(side_bar)
-            .child_signal(selected_signal.map(move |selection| -> Element {
+            .child(Sig(selected_signal.map(move |selection| -> Element {
                 match selection {
                     Selected::Avatar => avatar().into(),
                     Selected::AvatarGroup => avatar_group().into(),
@@ -60,7 +61,7 @@ pub fn main() -> Result<(), JsValue> {
                     Selected::Calendar => calendar().into(),
                     Selected::Icon => icon().into(),
                 }
-            })),
+            }))),
     );
 
     Ok(())

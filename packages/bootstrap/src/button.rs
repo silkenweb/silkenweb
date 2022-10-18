@@ -6,7 +6,7 @@ use silkenweb::{
     elements::html,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{RefSignalOrValue, Sig, Value},
+    value::{RefSignalOrValue, Sig, SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -21,6 +21,8 @@ pub enum State {}
 #[derive(ElementBuilder, Into)]
 #[element_target(Button)]
 pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
+
+impl Value for ButtonBuilder<Set> {}
 
 // TODO: Construct different types of button:
 // (<button> | <a> | <input>)
@@ -72,16 +74,12 @@ impl<Content> ButtonBuilder<Content> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text(text)))
     }
 
-    pub fn icon(self, icon: impl Into<Icon>) -> ButtonBuilder<Set> {
-        ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.child(icon.into())))
-    }
-
-    pub fn icon_signal(
+    pub fn icon(
         self,
-        icon: impl Signal<Item = impl Into<Icon> + Value + 'static> + 'static,
+        icon: impl SignalOrValue<Item = impl Value + Into<Icon> + 'static>,
     ) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(
-            self.0 .0.child_signal(icon.map(|icon| icon.into())),
+            self.0 .0.child(icon.map(|icon| icon.into())),
         ))
     }
 }

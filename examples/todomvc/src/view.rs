@@ -105,7 +105,7 @@ impl TodoAppView {
     fn render_footer(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Footer {
         footer()
             .class("footer")
-            .child_signal(self.active_count().map(move |active_count| {
+            .child(Sig(self.active_count().map(move |active_count| {
                 span()
                     .class("todo-count")
                     .child(strong().text(&format!("{}", active_count)))
@@ -113,9 +113,9 @@ impl TodoAppView {
                         " item{} left",
                         if active_count == 1 { "" } else { "s" }
                     ))
-            }))
+            })))
             .child(self.render_filters(item_filter))
-            .optional_child_signal(self.render_clear_completed())
+            .optional_child(Sig(self.render_clear_completed()))
             .build()
     }
 

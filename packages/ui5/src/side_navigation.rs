@@ -9,7 +9,7 @@ use silkenweb::{
     elements::CustomEvent,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{Sig, SignalOrValue},
+    value::{Sig, SignalOrValue, Value},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
@@ -89,8 +89,8 @@ where
         Self(self.0.collapsed(value), PhantomData)
     }
 
-    // We don't include `child` and `child_signal` methods as they're not so useful
-    // when the item type is specific.
+    // We don't include a `child` method as they're not so useful when the item type
+    // is specific.
     pub fn children(
         self,
         children: impl IntoIterator<Item = SideNavigationItemBuilder<Id>>,
@@ -124,6 +124,8 @@ where
         )
     }
 }
+
+impl<Id> Value for SideNavigationBuilder<Id> {}
 
 impl<Id> HtmlElement for SideNavigationBuilder<Id> {}
 

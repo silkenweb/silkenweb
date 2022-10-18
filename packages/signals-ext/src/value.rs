@@ -34,6 +34,12 @@ pub trait RefSignalOrValue<'a> {
         Task: Future<Output = ()> + 'a,
         Exec: Executor,
         Self: Sized;
+
+    fn select<FVal, FSig, Data>(self, fn_val: FVal, fn_sig: FSig, data: &mut Data)
+    where
+        FVal: FnOnce(&mut Data, Self::Item),
+        FSig: FnOnce(&mut Data, Self),
+        Self: Sized;
 }
 
 pub trait SignalOrValue: RefSignalOrValue<'static> {}
@@ -89,6 +95,7 @@ where
         callback(self)
     }
 
+    // TODO: Can we just use select and get rid of this?
     fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
         fn_val: FVal,
@@ -103,6 +110,15 @@ where
         Self: Sized,
     {
         fn_val(executor, self);
+    }
+
+    fn select<FVal, FSig, Data>(self, fn_val: FVal, _fn_sig: FSig, data: &mut Data)
+    where
+        FVal: FnOnce(&mut Data, Self::Item),
+        FSig: FnOnce(&mut Data, Self),
+        Self: Sized,
+    {
+        fn_val(data, self);
     }
 }
 
@@ -143,5 +159,14 @@ where
     {
         let fn_sig = fn_init_sig(executor);
         executor.spawn(self.0.for_each(fn_sig));
+    }
+
+    fn select<FVal, FSig, Data>(self, _fn_val: FVal, fn_sig: FSig, data: &mut Data)
+    where
+        FVal: FnOnce(&mut Data, Self::Item),
+        FSig: FnOnce(&mut Data, Self),
+        Self: Sized,
+    {
+        fn_sig(data, self);
     }
 }

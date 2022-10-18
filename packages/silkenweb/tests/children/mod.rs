@@ -17,6 +17,7 @@ use silkenweb::{
     node::element::ElementBuilder,
     prelude::ParentBuilder,
     task::render_now,
+    value::Sig,
 };
 
 use crate::{app_html, create_app_container, APP_ID};
@@ -99,7 +100,7 @@ async fn test_children(
         .map(|(index, is_some)| optional_child(index, is_some));
 
     for child in optional_child_signals {
-        parent = parent.optional_child_signal(child);
+        parent = parent.optional_child(Sig(child));
     }
 
     let children_vec = MutableVec::new_with_values((0..children_vec_len).collect());

@@ -408,23 +408,20 @@ macro_rules! parent_element {
                 Self{ builder: self.builder.text(child) }
             }
 
-            fn child(self, c: impl Into<$crate::node::Node>) -> Self
+            fn child(
+                self,
+                child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node> + 'static>
+            ) -> Self
             {
-                Self{ builder: self.builder.child(c) }
+                Self{ builder: self.builder.child(child) }
             }
 
-            fn child_signal(
+            fn optional_child(
                 self,
-                children: impl $crate::macros::Signal<Item = impl $crate::value::Value + Into<$crate::node::Node> + 'static> + 'static,
-            ) -> Self {
-                Self{ builder: self.builder.child_signal(children) }
-            }
-
-            fn optional_child_signal(
-                self,
-                children: impl $crate::macros::Signal<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node> + 'static>> + 'static,
-            ) -> Self {
-                Self{ builder: self.builder.optional_child_signal(children) }
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node> + 'static>>
+            ) -> Self
+            {
+                Self{ builder: self.builder.optional_child(child) }
             }
 
             fn children_signal(

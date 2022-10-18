@@ -38,6 +38,7 @@ impl IconBuilder {
     }
 }
 
+impl Value for IconBuilder {}
 impl ElementEvents for IconBuilder {}
 impl HtmlElementEvents for IconBuilder {}
 impl SetSpacing for IconBuilder {}

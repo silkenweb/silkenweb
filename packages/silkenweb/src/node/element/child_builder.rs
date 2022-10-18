@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{signal_vec::MutableVec, CancelableFutureHandle};
-use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Value};
+use silkenweb_signals_ext::value::{Executor, SignalOrValue, Value};
 
 use super::{spawn_cancelable_future, Node};
 
@@ -25,16 +25,13 @@ impl ChildBuilder {
         Self::default()
     }
 
-    pub fn child<'a>(
-        &mut self,
-        node: impl RefSignalOrValue<'a, Item = impl Value + Into<Node> + 'a>,
-    ) {
+    pub fn child(&mut self, node: impl SignalOrValue<Item = impl Value + Into<Node> + 'static>) {
         self.optional_child(node.map(|e| Some(e)));
     }
 
-    pub fn optional_child<'a>(
+    pub fn optional_child(
         &mut self,
-        node: impl RefSignalOrValue<'a, Item = Option<impl Value + Into<Node>>>,
+        node: impl SignalOrValue<Item = Option<impl Value + Into<Node> + 'static>>,
     ) {
         node.for_each(
             |builder, node| {

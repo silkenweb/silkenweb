@@ -1,14 +1,12 @@
 use derive_more::Into;
-use futures_signals::{
-    signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
-};
+use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
     elements::html::{
         li, ul, ABuilder, ButtonBuilder, FormBuilder, HrBuilder, SpanBuilder, UlBuilder,
     },
     node::{element::ElementBuilder, Node},
     prelude::ParentBuilder,
+    value::SignalOrValue,
 };
 
 use crate::css;
@@ -20,21 +18,17 @@ pub fn menu() -> MenuBuilder {
 }
 
 impl MenuBuilder {
-    pub fn child(self, child: impl Into<MenuItem>) -> Self {
-        Self(self.0.child(child.into().0))
+    pub fn child(self, child: impl SignalOrValue<Item = MenuItem>) -> Self {
+        Self(self.0.child(child.map(|child| child.0)))
     }
 
-    pub fn child_signal(self, child: impl Signal<Item = impl Into<MenuItem>> + 'static) -> Self {
-        Self(self.0.child_signal(child.map(|child| child.into().0)))
-    }
-
-    pub fn optional_child_signal(
+    pub fn optional_child(
         self,
-        child: impl Signal<Item = Option<impl Into<MenuItem>>> + 'static,
+        child: impl SignalOrValue<Item = Option<MenuItem>> + 'static,
     ) -> Self {
         Self(
             self.0
-                .optional_child_signal(child.map(|child| child.map(|child| child.into().0))),
+                .optional_child(child.map(|child| child.map(|child| child.0))),
         )
     }
 

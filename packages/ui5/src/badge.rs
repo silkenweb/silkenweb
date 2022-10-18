@@ -1,8 +1,7 @@
-use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     node::element::ParentBuilder,
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
-    value::RefSignalOrValue,
+    value::{RefSignalOrValue, SignalOrValue},
     ElementBuilder,
 };
 
@@ -34,15 +33,8 @@ pub struct BadgeBuilder(elements::Ui5BadgeBuilder);
 impl BadgeBuilder {
     attributes0! {color_scheme: u8}
 
-    pub fn icon(self, icon: impl Into<Ui5Icon>) -> Self {
-        Self(self.0.child(icon.into()))
-    }
-
-    pub fn icon_signal(
-        self,
-        icon: impl Signal<Item = impl Into<Ui5Icon> + 'static> + 'static,
-    ) -> Self {
-        Self(self.0.child_signal(icon.map(|img| img.into())))
+    pub fn icon(self, icon: impl SignalOrValue<Item = Ui5Icon>) -> Self {
+        Self(self.0.child(icon))
     }
 
     pub fn text<'a>(

@@ -1,4 +1,3 @@
-use futures_signals::signal::{Signal, SignalExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
@@ -7,7 +6,7 @@ use silkenweb::{
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
-    value::Value,
+    value::{SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -65,42 +64,30 @@ pub fn bar() -> BarBuilder {
 impl BarBuilder {
     attributes0! {design: BarDesign}
 
-    pub fn start_content(self, child: impl HtmlElement + Into<Element>) -> Self {
-        Self(self.0.child(child.slot("startContent").into()))
-    }
-
-    pub fn start_content_signal(
+    pub fn start_content(
         self,
-        child: impl Signal<Item = impl HtmlElement + Into<Element>> + 'static,
+        child: impl SignalOrValue<Item = impl HtmlElement + Into<Element> + Value> + 'static,
     ) -> Self {
         Self(
             self.0
-                .child_signal(child.map(|child| child.slot("startContent").into())),
+                .child(child.map(|child| child.slot("startContent").into())),
         )
     }
 
-    pub fn middle_content(self, child: impl Into<Node>) -> Self {
+    pub fn middle_content(
+        self,
+        child: impl SignalOrValue<Item = impl Value + Into<Node> + 'static> + 'static,
+    ) -> Self {
         Self(self.0.child(child))
     }
 
-    pub fn middle_content_signal(
+    pub fn end_content(
         self,
-        child: impl Signal<Item = impl Value + Into<Node> + 'static> + 'static,
-    ) -> Self {
-        Self(self.0.child_signal(child))
-    }
-
-    pub fn end_content(self, child: impl HtmlElement + Into<Element>) -> Self {
-        Self(self.0.child(child.slot("endContent").into()))
-    }
-
-    pub fn end_content_signal(
-        self,
-        child: impl Signal<Item = impl HtmlElement + Into<Element>> + 'static,
+        child: impl SignalOrValue<Item = impl HtmlElement + Into<Element>> + 'static,
     ) -> Self {
         Self(
             self.0
-                .child_signal(child.map(|child| child.slot("endContent").into())),
+                .child(child.map(|child| child.slot("endContent").into())),
         )
     }
 }

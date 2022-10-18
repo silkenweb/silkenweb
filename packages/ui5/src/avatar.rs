@@ -5,10 +5,7 @@ use std::{
     str::FromStr,
 };
 
-use futures_signals::{
-    signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
-};
+use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
@@ -174,12 +171,8 @@ impl AvatarBuilder {
         Self(self.0.size(value))
     }
 
-    pub fn image(self, image: impl Into<Node>) -> Avatar {
-        self.0.child(image.into()).build()
-    }
-
-    pub fn image_signal(self, image: impl Signal<Item = impl Into<Node>> + 'static) -> Avatar {
-        self.0.child_signal(image.map(|img| img.into())).build()
+    pub fn image(self, image: impl SignalOrValue<Item = impl Into<Node>>) -> Avatar {
+        self.0.child(image.map(|img| img.into())).build()
     }
 }
 
@@ -206,7 +199,7 @@ where
 {
     attributes1! {1, r#type: GroupType}
 
-    pub fn overflow_button(self, button: impl HtmlElement + Into<Node>) -> Self {
+    pub fn overflow_button(self, button: impl HtmlElement + Into<Node> + Value + 'static) -> Self {
         Self(self.0.child(button.slot("overflowButton")), self.1)
     }
 

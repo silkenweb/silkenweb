@@ -13,6 +13,7 @@ use silkenweb::{
     node::element::{Element, ElementBuilder, ParentBuilder},
     router,
     task::spawn_local,
+    value::Sig,
 };
 use timeago::Formatter;
 
@@ -50,13 +51,13 @@ impl App {
             .child(
                 html::main()
                     .class(PAGE_CONTENT)
-                    .child_signal(self.0.signal_ref(|content| {
+                    .child(Sig(self.0.signal_ref(|content| {
                         if let Some(content) = content {
                             content.render()
                         } else {
                             p().text("Loading...").into()
                         }
-                    })),
+                    }))),
             )
             .build()
     }
