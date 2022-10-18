@@ -449,23 +449,33 @@ impl ElementBuilder for ElementBuilderBase {
     where
         T: 'a + AsRef<str>,
     {
-        // TODO: Tidy
+        type PreviousValue<T0> = Rc<Cell<Option<T0>>>;
+
+        fn class_signal<T1>(
+            class: T1,
+            element: &mut HydrationElement,
+            previous_value: &PreviousValue<T1>,
+        ) -> impl Future<Output = ()>
+        where
+            T1: AsRef<str>,
+        {
+            if let Some(previous) = previous_value.replace(None) {
+                element.remove_class(previous.as_ref());
+            }
+
+            element.add_class(class.as_ref());
+            previous_value.set(Some(class));
+
+            async {}
+        }
+
         class.for_each(
             |builder, class| builder.element.hydro_elem.add_class(class.as_ref()),
             |builder| {
                 let mut element = builder.element.hydro_elem.clone();
-                let previous_value: Rc<Cell<Option<T>>> = Rc::new(Cell::new(None));
+                let previous_value: PreviousValue<T> = Rc::new(Cell::new(None));
 
-                move |class: T| {
-                    if let Some(previous) = previous_value.replace(None) {
-                        element.remove_class(previous.as_ref());
-                    }
-
-                    element.add_class(class.as_ref());
-                    previous_value.set(Some(class));
-
-                    async {}
-                }
+                move |class: T| class_signal(class, &mut element, &previous_value)
             },
             &mut self,
         );
@@ -473,44 +483,60 @@ impl ElementBuilder for ElementBuilderBase {
         self
     }
 
-    fn classes<'a, T>(
-        mut self,
-        classes: impl RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
-    ) -> Self
+    fn classes<'a, T, Iter>(mut self, classes: impl RefSignalOrValue<'a, Item = Iter>) -> Self
     where
         T: 'a + AsRef<str>,
+        Iter: 'a + IntoIterator<Item = T>,
     {
-        // TODO: Tidy
-        classes.for_each(
-            |builder, classes| {
-                let element = &mut builder.element.hydro_elem;
+        fn classes_value<T0>(
+            builder: &mut ElementBuilderBase,
+            classes: impl IntoIterator<Item = T0>,
+        ) where
+            T0: AsRef<str>,
+        {
+            let element = &mut builder.element.hydro_elem;
 
-                for class in classes {
-                    element.add_class(class.as_ref());
-                }
-            },
+            for class in classes {
+                element.add_class(class.as_ref());
+            }
+        }
+
+        type PreviousValues<T0> = Rc<Cell<Vec<T0>>>;
+
+        fn classes_signal<T1, I>(
+            classes: I,
+            element: &mut HydrationElement,
+            previous_values: &PreviousValues<T1>,
+        ) -> impl Future<Output = ()>
+        where
+            T1: AsRef<str>,
+            I: IntoIterator<Item = T1>,
+        {
+            let mut previous = previous_values.replace(Vec::new());
+
+            for to_remove in &previous {
+                element.remove_class(to_remove.as_ref());
+            }
+
+            previous.clear();
+
+            for to_add in classes {
+                element.add_class(to_add.as_ref());
+                previous.push(to_add);
+            }
+
+            previous_values.set(previous);
+
+            async {}
+        }
+
+        classes.for_each(
+            classes_value,
             |builder| {
                 let mut element = builder.element.hydro_elem.clone();
-                let previous_value: Rc<Cell<Vec<T>>> = Rc::new(Cell::new(Vec::new()));
+                let previous_values: PreviousValues<T> = Rc::new(Cell::new(Vec::new()));
 
-                move |classes| {
-                    let mut previous = previous_value.replace(Vec::new());
-
-                    for to_remove in &previous {
-                        element.remove_class(to_remove.as_ref());
-                    }
-
-                    previous.clear();
-
-                    for to_add in classes {
-                        element.add_class(to_add.as_ref());
-                        previous.push(to_add);
-                    }
-
-                    previous_value.set(previous);
-
-                    async {}
-                }
+                move |classes| classes_signal(classes, &mut element, &previous_values)
             },
             &mut self,
         );
@@ -526,9 +552,7 @@ impl ElementBuilder for ElementBuilderBase {
         self.check_attribute_unique(name);
 
         value.for_each(
-            |builder, value| {
-                builder.element.hydro_elem.attribute(name, value);
-            },
+            |builder, value| builder.element.hydro_elem.attribute(name, value),
             |builder| {
                 let name = name.to_owned();
                 let mut element = builder.element.hydro_elem.clone();
@@ -662,8 +686,6 @@ impl Display for Element {
 
 // TODO: `Val` wrapper for values
 
-// TODO: Is there any way to have the default SignalOrValue lifetime as 'static?
-
 // TODO: Use `SignalOrValue` for `text_signal`, `child_signal`,
 // `optional_child_signal`, but not `children_signal`.
 
@@ -698,12 +720,10 @@ pub trait ElementBuilder: Sized {
     /// # Panics
     ///
     /// Panics if any of the items in `value` contain whitespace.
-    fn classes<'a, T>(
-        self,
-        classes: impl RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
-    ) -> Self
+    fn classes<'a, T, Iter>(self, classes: impl RefSignalOrValue<'a, Item = Iter>) -> Self
     where
-        T: 'a + AsRef<str>;
+        T: 'a + AsRef<str>,
+        Iter: 'a + IntoIterator<Item = T>;
 
     /// Set an attribute
     ///

@@ -94,12 +94,13 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
                 Self {#derive_field: self.#derive_field.class(class) #fields_tail}
             }
 
-            fn classes<'a, T>(
+            fn classes<'a, T, Iter>(
                 self,
-                classes: impl ::silkenweb::node::element::RefSignalOrValue<'a, Item = impl IntoIterator<Item = T>>,
+                classes: impl ::silkenweb::node::element::RefSignalOrValue<'a, Item = Iter>,
             ) -> Self
             where
-                T: 'a + AsRef<str>
+                T: 'a + AsRef<str>,
+                Iter: 'a + IntoIterator<Item = T>,
             {
                     Self {#derive_field: self.#derive_field.classes(classes) #fields_tail}
             }
