@@ -31,7 +31,7 @@ pub fn badge<'a>(
 
 impl BadgeBuilder {
     pub fn rounded_pill_border(self) -> Self {
-        Self(self.0.rounded_pill_border())
+        Self(self.0.rounded_pill_border(true))
     }
 }
 

@@ -505,17 +505,26 @@ pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
     /// A `size` of `None` will set the margin to `auto`
-    fn margin(self, size: Option<Size>) -> Self {
-        self.class(size.margin())
+    fn margin(self, size: impl SignalOrValue<Item = Option<Size>>) -> Self {
+        self.class(size.map(Option::<Size>::margin))
     }
 
+    fn margin_on(
+        self,
+        margin: impl SignalOrValue<Item = (Option<Size>, Option<SideOrAxis>)>,
+    ) -> Self {
+        self.class(margin.map(|m| m.margin()))
+    }
+
+    // TODO: Signal version. Signal of tuple or 2 signals?
     /// Set the margin on `side`
     ///
     /// A `size` of `None` will set the margin to `auto`
-    fn margin_on(self, size: Option<Size>, side: Side) -> Self {
+    fn margin_on_side(self, size: Option<Size>, side: Side) -> Self {
         self.class((size, side).margin())
     }
 
+    // TODO: Signal version. Signal of tuple or 2 signals?
     /// Set the margin on `axis`
     ///
     /// A `size` of `None` will set the margin to `auto`
@@ -523,97 +532,58 @@ pub trait SetSpacing: ElementBuilder {
         self.class((size, axis).margin())
     }
 
-    fn margin_signal(
-        self,
-        margin: impl Signal<Item = (Option<Size>, Option<SideOrAxis>)> + 'static,
-    ) -> Self {
-        self.class(Sig(margin.map(|m| m.margin())))
+    fn padding(self, size: impl SignalOrValue<Item = Size>) -> Self {
+        self.class(size.map(Size::padding))
     }
 
-    fn padding(self, size: Size) -> Self {
-        self.class(size.padding())
+    // TODO: Signal version. Signal of tuple or 2 signals?
+    fn padding_on(self, size: Size, side_or_axis: SideOrAxis) -> Self {
+        self.class((size, side_or_axis).padding())
     }
 
-    fn padding_on(self, size: Size, side: Side) -> Self {
+    // TODO: Signal version. Signal of tuple or 2 signals?
+    fn padding_on_side(self, size: Size, side: Side) -> Self {
         self.class((size, side).padding())
     }
 
+    // TODO: Signal version. Signal of tuple or 2 signals?
     fn padding_on_axis(self, size: Size, axis: Axis) -> Self {
         self.class((size, axis).padding())
-    }
-
-    fn padding_signal(self, size: Size, side_or_axis: SideOrAxis) -> Self {
-        self.class((size, side_or_axis).padding())
     }
 }
 
 pub trait SetBorder: ElementBuilder {
     /// Use a border
-    fn border(self) -> Self {
-        self.class(css::BORDER)
+    fn border(self, active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(active.map(|active| active.then_some(css::BORDER)))
     }
 
-    fn border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
-        self.classes(Sig(active.map(|active| active.then_some(css::BORDER))))
+    fn border_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
+        self.class(colour.map(|colour| colour.border()))
     }
 
-    fn border_colour(self, colour: Colour) -> Self {
-        self.class(colour.border())
+    fn border_width(self, size: impl SignalOrValue<Item = Size>) -> Self {
+        self.class(size.map(|size| size.border()))
     }
 
-    fn border_colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
-        self.class(Sig(colour.map(|colour| colour.border())))
+    fn rounded_border(self, active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(active.map(|active| active.then_some(css::ROUNDED)))
     }
 
-    fn border_width(self, size: Size) -> Self {
-        self.class(size.border())
+    fn rounded_border_on(self, side: impl SignalOrValue<Item = Side>) -> Self {
+        self.class(side.map(|side| side.rounded_border()))
     }
 
-    fn border_width_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
-        self.class(Sig(size.map(|size| size.border())))
+    fn rounded_border_of_size(self, size: impl SignalOrValue<Item = Size>) -> Self {
+        self.class(size.map(Size::rounded_border))
     }
 
-    fn rounded_border(self) -> Self {
-        self.class(css::ROUNDED)
+    fn rounded_pill_border(self, active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(active.map(|active| active.then_some(css::ROUNDED_PILL)))
     }
 
-    fn rounded_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
-        self.classes(Sig(active.map(|active| active.then_some(css::ROUNDED))))
-    }
-
-    fn rounded_border_of_size(self, size: Size) -> Self {
-        self.class(size.rounded_border())
-    }
-
-    fn rounded_border_of_size_signal(self, size: impl Signal<Item = Size> + 'static) -> Self {
-        self.class(Sig(size.map(Size::rounded_border)))
-    }
-
-    fn rounded_pill_border(self) -> Self {
-        self.class(css::ROUNDED_PILL)
-    }
-
-    fn rounded_pill_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
-        self.classes(Sig(active.map(|active| active.then_some(css::ROUNDED_PILL))))
-    }
-
-    fn rounded_circular_border(self) -> Self {
-        self.class(css::ROUNDED_CIRCLE)
-    }
-
-    // TODO: Get rid of `_signal` variants
-    fn rounded_circular_border_signal(self, active: impl Signal<Item = bool> + 'static) -> Self {
-        self.classes(Sig(
-            active.map(|active| active.then_some(css::ROUNDED_CIRCLE))
-        ))
-    }
-
-    fn rounded_border_on(self, side: Side) -> Self {
-        self.class(side.rounded_border())
-    }
-
-    fn rounded_border_on_signal(self, side: impl Signal<Item = Side> + 'static) -> Self {
-        self.class(Sig(side.map(|side| side.rounded_border())))
+    fn rounded_circular_border(self, active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(active.map(|active| active.then_some(css::ROUNDED_CIRCLE)))
     }
 
     fn border_opacity(self, opacity: impl SignalOrValue<Item = Opacity>) -> Self {
