@@ -1,11 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
 use discard::DiscardOnDrop;
-use futures_signals::{
-    signal::{Signal, SignalExt},
-    signal_vec::MutableVec,
-    CancelableFutureHandle,
-};
+use futures_signals::{signal_vec::MutableVec, CancelableFutureHandle};
+use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Value};
 
 use super::{spawn_cancelable_future, Node};
 
@@ -28,29 +25,37 @@ impl ChildBuilder {
         Self::default()
     }
 
-    pub fn child(&mut self, node: impl Into<Node>) {
-        self.push(Some(node));
-    }
-
-    pub fn child_signal(&mut self, node: impl Signal<Item = impl Into<Node>> + 'static) {
-        self.optional_child_signal(node.map(|e| Some(e)));
-    }
-
-    pub fn optional_child_signal(
+    pub fn child<'a>(
         &mut self,
-        node: impl Signal<Item = Option<impl Into<Node>>> + 'static,
+        node: impl RefSignalOrValue<'a, Item = impl Value + Into<Node> + 'a>,
     ) {
-        let index = self.push(None as Option<Node>);
-        let items = self.items.clone();
+        self.optional_child(node.map(|e| Some(e)));
+    }
 
-        let future = node.for_each(move |node| {
-            items
-                .borrow_mut()
-                .lock_mut()
-                .set_cloned(index, Rc::new(RefCell::new(node.map(|e| e.into()))));
-            async {}
-        });
-        self.futures.push(spawn_cancelable_future(future));
+    pub fn optional_child<'a>(
+        &mut self,
+        node: impl RefSignalOrValue<'a, Item = Option<impl Value + Into<Node>>>,
+    ) {
+        node.for_each(
+            |builder, node| {
+                if node.is_some() {
+                    builder.push(node);
+                }
+            },
+            |builder| {
+                let index = builder.push(None as Option<Node>);
+                let items = builder.items.clone();
+
+                move |node| {
+                    items
+                        .borrow_mut()
+                        .lock_mut()
+                        .set_cloned(index, Rc::new(RefCell::new(node.map(|e| e.into()))));
+                    async {}
+                }
+            },
+            self,
+        );
     }
 
     /// Push an item and return it's index
@@ -60,5 +65,11 @@ impl ChildBuilder {
         let index = items_mut.len();
         items_mut.push_cloned(Rc::new(RefCell::new(node.map(|e| e.into()))));
         index
+    }
+}
+
+impl Executor for ChildBuilder {
+    fn spawn(&mut self, future: impl futures::Future<Output = ()> + 'static) {
+        self.futures.push(spawn_cancelable_future(future));
     }
 }

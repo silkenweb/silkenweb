@@ -4,7 +4,7 @@ use silkenweb::{
     elements::html::{i, IBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents},
-    value::Sig,
+    value::{Sig, Value},
     ElementBuilder,
 };
 
@@ -50,6 +50,8 @@ impl From<IconBuilder> for Node {
 
 #[derive(Into)]
 pub struct Icon(Node);
+
+impl Value for Icon {}
 
 impl From<IconBuilder> for Icon {
     fn from(icon: IconBuilder) -> Self {

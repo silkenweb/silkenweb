@@ -1,6 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::html::*, node::element::Element, prelude::*, task::server::render_now_sync,
+    value::Sig,
 };
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>
@@ -16,7 +17,7 @@ fn main() {
 
     let element: Element = div()
         .child(button().on_click(inc).text("+"))
-        .child(p().text_signal(count_text))
+        .child(p().text(Sig(count_text)))
         .into();
 
     assert_eq!(

@@ -246,7 +246,7 @@ children_signal_test!(
 isomorphic_test! {
     async fn text_signal() {
         let text = Mutable::new("Initial text");
-        let elem = p().text_signal(text.signal()).build();
+        let elem = p().text(Sig(text.signal())).build();
         render_now().await;
         assert_eq!(elem.to_string(), "<p>Initial text</p>");
         text.set("Updated text");

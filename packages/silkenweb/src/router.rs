@@ -14,6 +14,7 @@
 //! #     mount,
 //! #     prelude::ParentBuilder,
 //! #     router,
+//! #     value::Sig,
 //! # };
 //!
 //! div()
@@ -27,9 +28,9 @@
 //!             .on_click(|_, _| router::set_url_path("route_2"))
 //!             .text("Go to route 2"),
 //!     )
-//!     .child(p().text_signal(
+//!     .child(p().text(Sig(
 //!         router::url_path().signal_ref(|url_path| format!("URL Path is: {url_path}")),
-//!     ));
+//!     )));
 //! ```
 use std::{collections::HashMap, fmt::Display};
 

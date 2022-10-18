@@ -271,7 +271,7 @@ impl TodoItemView {
         div()
             .class("view")
             .child(completed_checkbox)
-            .child(label().text_signal(todo.text()).on_dblclick({
+            .child(label().text(Sig(todo.text())).on_dblclick({
                 clone!(todo);
                 move |_, _| todo.set_editing()
             }))

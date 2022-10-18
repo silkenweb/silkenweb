@@ -94,6 +94,8 @@ impl Colour {
     }
 }
 
+impl Value for Colour {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Side {
     Top,

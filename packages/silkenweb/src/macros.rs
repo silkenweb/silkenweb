@@ -313,6 +313,8 @@ macro_rules! dom_element {
             }
         }
 
+        impl $crate::value::Value for $camel_name {}
+
         impl From<$camel_builder_name> for $crate::node::element::ElementBuilderBase {
             fn from(builder: $camel_builder_name) -> Self {
                 builder.builder
@@ -330,6 +332,8 @@ macro_rules! dom_element {
                 $crate::node::element::ElementBuilder::build(builder).into()
             }
         }
+
+        impl $crate::value::Value for $camel_builder_name {}
 
         pub struct $camel_name($crate::node::element::Element);
 
@@ -397,15 +401,11 @@ macro_rules! parent_element {
         impl $crate::node::element::ParentBuilder for
             [< $name:camel Builder >]
         {
-            fn text(self, child: &str) -> Self {
+            fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
+            where
+                T: 'a + AsRef<str> + Into<String>
+            {
                 Self{ builder: self.builder.text(child) }
-            }
-
-            fn text_signal(
-                self,
-                child: impl $crate::macros::Signal<Item = impl Into<String>> + 'static
-            ) -> Self {
-                Self{ builder: self.builder.text_signal(child) }
             }
 
             fn child(self, c: impl Into<$crate::node::Node>) -> Self
@@ -415,14 +415,14 @@ macro_rules! parent_element {
 
             fn child_signal(
                 self,
-                children: impl $crate::macros::Signal<Item = impl Into<$crate::node::Node>> + 'static,
+                children: impl $crate::macros::Signal<Item = impl $crate::value::Value + Into<$crate::node::Node> + 'static> + 'static,
             ) -> Self {
                 Self{ builder: self.builder.child_signal(children) }
             }
 
             fn optional_child_signal(
                 self,
-                children: impl $crate::macros::Signal<Item = ::std::option::Option<impl Into<$crate::node::Node>>> + 'static,
+                children: impl $crate::macros::Signal<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node> + 'static>> + 'static,
             ) -> Self {
                 Self{ builder: self.builder.optional_child_signal(children) }
             }

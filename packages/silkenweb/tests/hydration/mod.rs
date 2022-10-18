@@ -9,6 +9,7 @@ use silkenweb::{
     prelude::ParentBuilder,
     task::render_now,
     unmount,
+    value::Sig,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 
@@ -149,7 +150,7 @@ async fn event() {
                     })
                     .text("+"),
             )
-            .text_signal(count_text),
+            .text(Sig(count_text)),
     )
     .await;
 
@@ -171,7 +172,7 @@ async fn event() {
 async fn basic_signal() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = div().child(p().text_signal(text.signal()));
+    let app = div().child(p().text(Sig(text.signal())));
 
     render_now().await;
     hydrate(APP_ID, app).await;

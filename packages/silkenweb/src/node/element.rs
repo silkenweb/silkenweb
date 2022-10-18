@@ -31,7 +31,7 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, intern_str};
-use silkenweb_signals_ext::value::{Executor, RefSignalOrValue};
+use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, Value};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
@@ -164,49 +164,46 @@ impl ElementBuilderBase {
 }
 
 impl ParentBuilder for ElementBuilderBase {
-    fn text(mut self, child: &str) -> Self {
+    fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
+    where
+        T: 'a + AsRef<str> + Into<String>,
+    {
+        fn text_value(builder: &mut ElementBuilderBase, child: impl AsRef<str>) {
+            builder
+                .element
+                .hydro_elem
+                .append_child(HydrationText::new(child.as_ref()));
+        }
+
         self.has_preceding_children = true;
 
         if let Some(child_builder) = self.child_builder.as_mut() {
-            child_builder.child(text(child));
+            child_builder.child(child.map(|child| text(child.as_ref())));
             return self;
         }
 
-        self.element
-            .hydro_elem
-            .append_child(HydrationText::new(child));
+        child.for_each(
+            text_value,
+            |builder| {
+                let mut text_node = HydrationText::new(intern_str(""));
+                builder.element.hydro_elem.append_child(text_node.clone());
+
+                move |new_value| {
+                    text_node.set_text(new_value.into());
+                    async {}
+                }
+            },
+            &mut self,
+        );
+
         self
-    }
-
-    fn text_signal(
-        mut self,
-        child_signal: impl Signal<Item = impl Into<String>> + 'static,
-    ) -> Self {
-        self.has_preceding_children = true;
-
-        if let Some(child_builder) = self.child_builder.as_mut() {
-            child_builder.child_signal(child_signal.map(|child| text(&child.into())));
-            return self;
-        }
-
-        let mut text_node = HydrationText::new(intern_str(""));
-        self.element.hydro_elem.append_child(text_node.clone());
-
-        let updater = child_signal.for_each({
-            move |new_value| {
-                text_node.set_text(new_value.into());
-                async {}
-            }
-        });
-
-        self.spawn_future(updater)
     }
 
     fn child(mut self, child: impl Into<Node>) -> Self {
         self.has_preceding_children = true;
 
         if let Some(child_builder) = self.child_builder.as_mut() {
-            child_builder.child(child);
+            child_builder.child(child.into());
             return self;
         }
 
@@ -224,16 +221,19 @@ impl ParentBuilder for ElementBuilderBase {
         self
     }
 
-    fn child_signal(mut self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self {
-        self.child_builder_mut().child_signal(child);
+    fn child_signal(
+        mut self,
+        child: impl Signal<Item = impl Value + Into<Node> + 'static> + 'static,
+    ) -> Self {
+        self.child_builder_mut().child(Sig(child));
         self
     }
 
     fn optional_child_signal(
         mut self,
-        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
+        child: impl Signal<Item = Option<impl Value + Into<Node> + 'static>> + 'static,
     ) -> Self {
-        self.child_builder_mut().optional_child_signal(child);
+        self.child_builder_mut().optional_child(Sig(child));
         self
     }
 
@@ -535,6 +535,8 @@ impl Display for Element {
     }
 }
 
+impl Value for Element {}
+
 // TODO: `Val` wrapper for values
 
 // TODO: Use `SignalOrValue` for `text_signal`, `child_signal`,
@@ -615,7 +617,12 @@ pub trait ElementBuilder: Sized {
     ///
     /// ```no_run
     /// # use futures_signals::signal::Mutable;
-    /// # use silkenweb::{elements::html::*, node::element::ElementBuilder, prelude::*};
+    /// # use silkenweb::{
+    /// #     elements::html::*,
+    /// #     node::element::ElementBuilder,
+    /// #     prelude::*,
+    /// #     value::Sig
+    /// # };
     /// let text = Mutable::new("".to_string());
     /// let input = input();
     /// let input_handle = input.handle();
@@ -625,7 +632,7 @@ pub trait ElementBuilder: Sized {
     ///         clone!(text);
     ///         move |_, _| text.set(input_handle.dom_element().value())
     ///     }))
-    ///     .text_signal(text.signal_cloned());
+    ///     .text(Sig(text.signal_cloned()));
     /// ```
     fn handle(&self) -> ElementHandle<Self::DomType>;
 
@@ -649,6 +656,7 @@ pub trait ElementBuilder: Sized {
 
 /// An element that is allowed to have children.
 pub trait ParentBuilder: ElementBuilder {
+    // TODO: Docs for signal variant
     /// Add a text child to this element
     ///
     /// # Example
@@ -657,22 +665,9 @@ pub trait ParentBuilder: ElementBuilder {
     /// # use silkenweb::{elements::html::div, node::element::ParentBuilder};
     /// div().text("Hello, world!");
     /// ```
-    fn text(self, child: &str) -> Self;
-
-    /// Add a text signal child to this element
-    ///
-    /// The text will update when the signal is updated.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{elements::html::div, node::element::ParentBuilder};
-    /// let hello = Mutable::new("Hello");
-    ///
-    /// div().text_signal(hello.signal());
-    /// ```
-    fn text_signal(self, child: impl Signal<Item = impl Into<String>> + 'static) -> Self;
+    fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
+    where
+        T: 'a + AsRef<str> + Into<String>;
 
     /// Add a child node to the element.
     ///
@@ -698,7 +693,10 @@ pub trait ParentBuilder: ElementBuilder {
     ///
     /// div().child_signal(text.signal().map(|text| div().text(text)));
     /// ```
-    fn child_signal(self, child: impl Signal<Item = impl Into<Node>> + 'static) -> Self;
+    fn child_signal(
+        self,
+        child: impl Signal<Item = impl Value + Into<Node> + 'static> + 'static,
+    ) -> Self;
 
     /// Add an optional child to the element.
     ///
@@ -720,7 +718,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// ```
     fn optional_child_signal(
         self,
-        child: impl Signal<Item = Option<impl Into<Node>>> + 'static,
+        child: impl Signal<Item = Option<impl Value + Into<Node> + 'static>> + 'static,
     ) -> Self;
 
     /// Add children to the element.

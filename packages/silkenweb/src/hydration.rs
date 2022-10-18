@@ -138,8 +138,9 @@ impl fmt::Display for HydrationStats {
 /// #     hydration::hydrate,
 /// #     node::element::{ElementBuilder, ParentBuilder},
 /// #     task::spawn_local,
+/// #     value::Sig,
 /// # };
-/// let app = p().text_signal(always("Hello, world!"));
+/// let app = p().text(Sig(always("Hello, world!")));
 ///
 /// spawn_local(async {
 ///     hydrate("app", app);
@@ -157,9 +158,10 @@ impl fmt::Display for HydrationStats {
 /// #     hydration::hydrate,
 /// #     node::element::{ElementBuilder, ParentBuilder},
 /// #     task::spawn_local,
+/// #     value::Sig,
 /// # };
 /// spawn_local(async {
-///     let app = p().text_signal(always("Hello, world!"));
+///     let app = p().text(Sig(always("Hello, world!")));
 ///     hydrate("app", app);
 /// });
 /// ```

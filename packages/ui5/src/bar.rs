@@ -85,7 +85,7 @@ impl BarBuilder {
 
     pub fn middle_content_signal(
         self,
-        child: impl Signal<Item = impl Into<Node>> + 'static,
+        child: impl Signal<Item = impl Value + Into<Node> + 'static> + 'static,
     ) -> Self {
         Self(self.0.child_signal(child))
     }

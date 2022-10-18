@@ -7,6 +7,7 @@ use silkenweb::{
     node::element::ElementBuilder,
     prelude::ParentBuilder,
     router::{self, UrlPath},
+    value::Sig,
 };
 
 fn main() {
@@ -19,7 +20,7 @@ fn main() {
                 "with_query?x=1&y=2&flag",
                 "Go to route with query string",
             ))
-            .child(p().text_signal(router::url_path().signal_ref(|url_path| {
+            .child(p().text(Sig(router::url_path().signal_ref(|url_path| {
                 let path_components = url_path.path_components_vec();
 
                 match &path_components[..] {
@@ -29,7 +30,7 @@ fn main() {
                     ["with_query"] => format!("Route with query: {:?}", url_path.query_map()),
                     _ => "Unknown route".to_string(),
                 }
-            })))
+            }))))
     });
 }
 

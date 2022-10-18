@@ -1,5 +1,7 @@
 //! Generic DOM types.
 
+use silkenweb_signals_ext::value::Value;
+
 use self::element::{Element, Resource};
 use crate::hydration::{
     lazy::IsDry,
@@ -47,6 +49,7 @@ impl Node {
     }
 }
 
+impl Value for Node {}
 impl HydrationNode for Node {}
 
 impl IsDry for Node {
@@ -123,6 +126,8 @@ impl Text {
         Vec::new()
     }
 }
+
+impl Value for Text {}
 
 /// Construct a text node
 pub fn text(text: &str) -> Text {

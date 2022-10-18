@@ -1,5 +1,5 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, node::element::ElementBuilder, prelude::*};
+use silkenweb::{elements::html::*, node::element::ElementBuilder, prelude::*, value::Sig};
 
 fn main() {
     let text = Mutable::new("".to_string());
@@ -12,7 +12,7 @@ fn main() {
             clone!(text);
             move |_, _| text.set(input_handle.dom_element().value())
         }))
-        .text_signal(text.signal_cloned());
+        .text(Sig(text.signal_cloned()));
 
     mount("app", app);
 }

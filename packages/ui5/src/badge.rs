@@ -2,6 +2,7 @@ use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     node::element::ParentBuilder,
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    value::RefSignalOrValue,
     ElementBuilder,
 };
 
@@ -37,16 +38,18 @@ impl BadgeBuilder {
         Self(self.0.child(icon.into()))
     }
 
-    pub fn icon_signal(self, icon: impl Signal<Item = impl Into<Ui5Icon>> + 'static) -> Self {
+    pub fn icon_signal(
+        self,
+        icon: impl Signal<Item = impl Into<Ui5Icon> + 'static> + 'static,
+    ) -> Self {
         Self(self.0.child_signal(icon.map(|img| img.into())))
     }
 
-    pub fn text(self, text: &str) -> BadgeBuilder {
+    pub fn text<'a>(
+        self,
+        text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
+    ) -> BadgeBuilder {
         Self(self.0.text(text))
-    }
-
-    pub fn text_signal(self, text: impl Signal<Item = String> + 'static) -> BadgeBuilder {
-        Self(self.0.text_signal(text))
     }
 }
 

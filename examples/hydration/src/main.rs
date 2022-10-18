@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::html::*, hydration::hydrate, node::element::ElementBuilder, prelude::*,
-    task::spawn_local,
+    task::spawn_local, value::Sig,
 };
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>
@@ -14,7 +14,7 @@ fn main() {
 
     let app = div().child(button().on_click(inc).text("+")).child(
         p().attribute("data-silkenweb-test", true)
-            .text_signal(count_text),
+            .text(Sig(count_text)),
     );
 
     spawn_local(async {

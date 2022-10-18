@@ -6,17 +6,20 @@ use futures_signals::signal::{self, Signal, SignalExt};
 pub struct Sig<T>(pub T);
 
 // TODO: Doc
+// TODO: Do we need the sized constraints?
+// TODO: Do we want a seperate `RefSignalOrValue` and `SignalOrValue`?
 pub trait RefSignalOrValue<'a> {
     type Item: 'a;
-    type Map<F, R>: RefSignalOrValue<'a, Item = R>
+    type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
     where
-        F: FnMut(Self::Item) -> R + 'a,
-        R: RefSignalOrValue<'a, Item = R> + 'a;
+        'b: 'a,
+        F: FnMut(Self::Item) -> R + 'b,
+        R: RefSignalOrValue<'b, Item = R> + 'b;
 
-    fn map<F, R>(self, callback: F) -> Self::Map<F, R>
+    fn map<'b: 'a, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
-        R: RefSignalOrValue<'a, Item = R> + 'a,
-        F: FnMut(Self::Item) -> R + 'a,
+        R: RefSignalOrValue<'b, Item = R> + 'b,
+        F: FnMut(Self::Item) -> R + 'b,
         Self: Sized;
 
     fn for_each<FVal, FInitSig, FSig, Task, Exec>(
@@ -71,15 +74,16 @@ where
     T: RefValue<'a> + 'a,
 {
     type Item = Self;
-    type Map<F, R> = R
+    type Map<'b, F, R> = R
     where
-        F: FnMut(Self::Item) -> R + 'a,
-        R: RefSignalOrValue<'a, Item = R> + 'a;
+        'b: 'a,
+        F: FnMut(Self::Item) -> R + 'b,
+        R: RefSignalOrValue<'b, Item = R> + 'b;
 
-    fn map<F, R>(self, mut callback: F) -> Self::Map<F, R>
+    fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
     where
-        R: RefSignalOrValue<'a, Item = R> + 'a,
-        F: FnMut(Self::Item) -> R + 'a,
+        R: RefSignalOrValue<'b, Item = R> + 'b,
+        F: FnMut(Self::Item) -> R + 'b,
         Self: Sized,
     {
         callback(self)
@@ -108,15 +112,17 @@ where
     S: Signal<Item = T> + 'static,
 {
     type Item = T;
-    type Map<F, R> = Sig<signal::Map<S, F>>
-        where
-            F: FnMut(Self::Item) -> R + 'static,
-            R: RefSignalOrValue<'static, Item = R> + 'static;
-
-    fn map<F, R>(self, callback: F) -> Self::Map<F, R>
+    type Map<'b, F, R> = Sig<signal::Map<S, F>>
     where
-        R: RefSignalOrValue<'static, Item = R> + 'static,
-        F: FnMut(Self::Item) -> R + 'static,
+        'b: 'static,
+        F: FnMut(Self::Item) -> R + 'b,
+        R: RefSignalOrValue<'b, Item = R> + 'b;
+
+    fn map<'b: 'static, F, R>(self, callback: F) -> Self::Map<'b, F, R>
+    where
+        'b: 'static,
+        R: RefSignalOrValue<'b, Item = R> + 'b,
+        F: FnMut(Self::Item) -> R + 'b,
         Self: Sized,
     {
         Sig(self.0.map(callback))

@@ -12,6 +12,7 @@ use silkenweb::{
     mount,
     node::element::ElementBuilder,
     prelude::ParentBuilder,
+    value::Sig,
 };
 
 fn main() {
@@ -24,7 +25,7 @@ fn main() {
             .child(
                 div()
                     .child(pop_button(list.clone()))
-                    .text_signal(list.signal_vec().len().map(|len| format!("{}", len)))
+                    .text(Sig(list.signal_vec().len().map(|len| format!("{}", len))))
                     .child(push_button(list.clone())),
             )
             .child(hr())
@@ -57,7 +58,7 @@ pub fn define_counter() -> Div {
 
     div()
         .child(define_button("-", -1, count.clone()))
-        .text_signal(count_text)
+        .text(Sig(count_text))
         .child(define_button("+", 1, count))
         .build()
 }

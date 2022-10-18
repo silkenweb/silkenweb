@@ -9,7 +9,7 @@ use silkenweb::{
     elements::CustomEvent,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::SignalOrValue,
+    value::{Sig, SignalOrValue},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
@@ -173,7 +173,8 @@ where
     }
 
     pub fn text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
-        Self(self.0.text_signal(value), PhantomData)
+        // TODO: Unify `text` and `text_signal`
+        Self(self.0.text(Sig(value)), PhantomData)
     }
 
     // We don't include `child` and `child_signal` methods as they're not so useful

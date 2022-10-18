@@ -90,7 +90,7 @@ impl Row {
             .children([
                 td().class("col-md-1").text(&id.to_string()),
                 td().class("col-md-4")
-                    .child(a().text_signal(self.label.signal_cloned()).on_click({
+                    .child(a().text(Sig(self.label.signal_cloned())).on_click({
                         clone!(app);
                         move |_, _| app.select_row(id)
                     })),

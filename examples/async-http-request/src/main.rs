@@ -10,6 +10,7 @@ use silkenweb::{
     mount,
     prelude::{ElementEvents, ParentBuilder},
     task,
+    value::Sig,
 };
 
 async fn get_ip() -> Result<String, reqwasm::Error> {
@@ -39,6 +40,6 @@ fn main() {
                     );
                 });
             }))
-            .child(p().text_signal(text_signal)),
+            .child(p().text(Sig(text_signal))),
     );
 }

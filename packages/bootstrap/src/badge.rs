@@ -1,10 +1,9 @@
 use derive_more::Into;
-use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html::{span, SpanBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
-    value::Sig,
+    value::{RefSignalOrValue, SignalOrValue},
     ElementBuilder,
 };
 
@@ -17,23 +16,16 @@ use crate::{
 #[element_target(Badge)]
 pub struct BadgeBuilder(SpanBuilder);
 
-pub fn badge(text: &str, background_colour: Colour) -> BadgeBuilder {
-    BadgeBuilder(
-        span()
-            .classes([css::BADGE, background_colour.text_background()])
-            .text(text),
-    )
-}
-
-pub fn badge_signal(
-    text: impl Signal<Item = impl Into<String>> + 'static,
-    background_colour: impl Signal<Item = Colour> + 'static,
+pub fn badge<'a>(
+    // TODO: trait `TextLike: Into<String> + AsRef<str>`?
+    text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
+    background_colour: impl SignalOrValue<Item = Colour>,
 ) -> BadgeBuilder {
     BadgeBuilder(
         span()
             .class(css::BADGE)
-            .class(Sig(background_colour.map(Colour::text_background)))
-            .text_signal(text),
+            .class(background_colour.map(Colour::text_background))
+            .text(text),
     )
 }
 

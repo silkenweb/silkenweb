@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable, SignalExt};
-use silkenweb::{elements::html::*, prelude::*};
+use silkenweb::{elements::html::*, prelude::*, value::Sig};
 
 fn main() {
     let count = Mutable::new(0);
@@ -10,7 +10,7 @@ fn main() {
 
     let app = div()
         .child(button().on_click(inc).text("+"))
-        .child(p().text_signal(count_text));
+        .child(p().text(Sig(count_text)));
 
     mount("app", app);
 }

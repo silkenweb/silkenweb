@@ -9,6 +9,7 @@ use silkenweb::{
     prelude::HtmlElement,
     task::render_now,
     unmount,
+    value::Sig,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
@@ -55,7 +56,7 @@ async fn simple_counter() {
                     })
                     .text("+"),
             )
-            .text_signal(count_text),
+            .text(Sig(count_text)),
     );
 
     render_now().await;
@@ -79,7 +80,7 @@ async fn reactive_text() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text_signal(text_signal.signal()),
+        p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -93,7 +94,7 @@ async fn reactive_text_reference() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text_signal(text_signal.signal()),
+        p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -111,8 +112,8 @@ async fn multiple_reactive_text() {
     mount(
         APP_ID,
         p().id(TEXT_ID)
-            .text_signal(first_text.signal())
-            .text_signal(second_text.signal()),
+            .text(Sig(first_text.signal()))
+            .text(Sig(second_text.signal())),
     );
 
     render_now().await;

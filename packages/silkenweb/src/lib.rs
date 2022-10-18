@@ -40,7 +40,7 @@
 //!
 //! ```no_run
 //! # use futures_signals::signal::{Mutable, SignalExt};
-//! # use silkenweb::{elements::html::*, prelude::*};
+//! # use silkenweb::{elements::html::*, prelude::*, value::Sig};
 //! #
 //! # let count = Mutable::new(0);
 //! # let count_text = count.signal().map(|i| format!("{}", i));
@@ -51,7 +51,7 @@
 //!
 //! let app = div()
 //!     .child(button().on_click(inc).text("+"))
-//!     .child(p().text_signal(count_text));
+//!     .child(p().text(Sig(count_text)));
 //! ```
 //!
 //! Finally, we [`mount`] our app on the DOM. This will find the element with
@@ -59,7 +59,7 @@
 //!
 //! ```no_run
 //! # use futures_signals::signal::{Mutable, SignalExt};
-//! # use silkenweb::{elements::html::*, prelude::*};
+//! # use silkenweb::{elements::html::*, prelude::*, value::Sig};
 //! #
 //! # let count = Mutable::new(0);
 //! # let count_text = count.signal().map(|i| format!("{}", i));
@@ -70,7 +70,7 @@
 //! #
 //! # let app = div()
 //! #     .child(button().on_click(inc).text("+"))
-//! #     .child(p().text_signal(count_text));
+//! #     .child(p().text(Sig(count_text)));
 //! mount("app", app);
 //! ```
 //!

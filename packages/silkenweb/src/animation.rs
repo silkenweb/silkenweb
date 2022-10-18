@@ -25,7 +25,7 @@ use crate::task::{animation_timestamp, request_animation_frame};
 /// # use silkenweb::{
 /// #   animation::finite_animation,
 /// #   elements::html::progress,
-/// #   node::element::Sig,
+/// #   value::Sig,
 /// #   mount,
 /// # };
 /// const DURATION: f64 = 3000.0;
@@ -61,8 +61,9 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// # use silkenweb::{
 /// #     animation::infinite_animation,
 /// #     elements::svg::{attributes::Presentation, content_type::Length::Px, rect, svg},
-/// #     node::element::{Sig, ParentBuilder},
+/// #     node::element::ParentBuilder,
 /// #     mount,
+/// #     value::Sig,
 /// # };
 /// svg().width(200.0).height(200.0).child(
 ///     rect()

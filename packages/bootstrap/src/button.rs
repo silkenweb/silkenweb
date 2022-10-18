@@ -6,7 +6,7 @@ use silkenweb::{
     elements::html,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::Sig,
+    value::{RefSignalOrValue, Sig, Value},
     ElementBuilder,
 };
 
@@ -65,12 +65,11 @@ impl ButtonStyle {
 }
 
 impl<Content> ButtonBuilder<Content> {
-    pub fn text(self, text: &str) -> ButtonBuilder<Set> {
+    pub fn text<'a>(
+        self,
+        text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
+    ) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text(text)))
-    }
-
-    pub fn text_signal(self, text: impl Signal<Item = String> + 'static) -> ButtonBuilder<Set> {
-        ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text_signal(text)))
     }
 
     pub fn icon(self, icon: impl Into<Icon>) -> ButtonBuilder<Set> {
@@ -79,7 +78,7 @@ impl<Content> ButtonBuilder<Content> {
 
     pub fn icon_signal(
         self,
-        icon: impl Signal<Item = impl Into<Icon>> + 'static,
+        icon: impl Signal<Item = impl Into<Icon> + Value + 'static> + 'static,
     ) -> ButtonBuilder<Set> {
         ButtonBuilder::chain(HtmlElementBuilder(
             self.0 .0.child_signal(icon.map(|icon| icon.into())),
