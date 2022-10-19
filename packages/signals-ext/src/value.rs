@@ -6,8 +6,6 @@ use futures_signals::signal::{self, Signal, SignalExt};
 pub struct Sig<T>(pub T);
 
 // TODO: Doc
-// TODO: Do we need the sized constraints?
-// TODO: Do we want a seperate `RefSignalOrValue` and `SignalOrValue`?
 pub trait RefSignalOrValue<'a> {
     type Item: 'a;
     type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
@@ -108,7 +106,6 @@ where
         callback(self)
     }
 
-    // TODO: Can we just use select and get rid of this?
     fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
         fn_val: FVal,
