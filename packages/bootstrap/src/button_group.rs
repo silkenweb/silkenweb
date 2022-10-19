@@ -5,7 +5,7 @@ use silkenweb::{
         html::{div, DivBuilder},
         AriaElement,
     },
-    node::{element::ElementBuilder, Node},
+    node::{element::{ElementBuilder, Element}, Node},
     prelude::ParentBuilder,
     value::{RefSignalOrValue, SignalOrValue},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
@@ -35,6 +35,12 @@ impl ButtonGroupBuilder {
     }
 }
 
+impl From<ButtonGroupBuilder> for Element {
+    fn from(elem: ButtonGroupBuilder) -> Self {
+        elem.0.into()
+    }
+}
+
 impl From<ButtonGroupBuilder> for Node {
     fn from(elem: ButtonGroupBuilder) -> Self {
         elem.0.into()
@@ -42,4 +48,10 @@ impl From<ButtonGroupBuilder> for Node {
 }
 
 #[derive(Into, Value)]
-pub struct ButtonGroup(Node);
+pub struct ButtonGroup(Element);
+
+impl From<ButtonGroup> for Node {
+    fn from(elem: ButtonGroup) -> Self {
+        elem.0.into()
+    }
+}

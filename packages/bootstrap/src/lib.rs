@@ -1,6 +1,9 @@
 use silkenweb::{
     elements::html::{div, DivBuilder},
-    node::{element::ElementBuilderBase, Node},
+    node::{
+        element::{Element, ElementBuilderBase},
+        Node,
+    },
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use utility::SetFlex;
@@ -25,6 +28,12 @@ pub type Class = &'static str;
 /// an "escape hatch".
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct HtmlElementBuilder(ElementBuilderBase);
+
+impl From<HtmlElementBuilder> for Element {
+    fn from(builder: HtmlElementBuilder) -> Self {
+        builder.0.into()
+    }
+}
 
 impl From<HtmlElementBuilder> for Node {
     fn from(builder: HtmlElementBuilder) -> Self {

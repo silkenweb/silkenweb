@@ -1,7 +1,10 @@
 use derive_more::Into;
 use silkenweb::{
     elements::html::{span, SpanBuilder},
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
     value::{RefSignalOrValue, SignalOrValue},
     ElementBuilder, Value,
@@ -38,6 +41,12 @@ impl ElementEvents for BadgeBuilder {}
 impl HtmlElementEvents for BadgeBuilder {}
 impl SetSpacing for BadgeBuilder {}
 
+impl From<BadgeBuilder> for Element {
+    fn from(badge: BadgeBuilder) -> Self {
+        badge.0.into()
+    }
+}
+
 impl From<BadgeBuilder> for Node {
     fn from(badge: BadgeBuilder) -> Self {
         badge.0.into()
@@ -45,7 +54,13 @@ impl From<BadgeBuilder> for Node {
 }
 
 #[derive(Into)]
-pub struct Badge(Node);
+pub struct Badge(Element);
+
+impl From<Badge> for Node {
+    fn from(badge: Badge) -> Self {
+        badge.0.into()
+    }
+}
 
 impl From<SpanBuilder> for Badge {
     fn from(builder: SpanBuilder) -> Self {

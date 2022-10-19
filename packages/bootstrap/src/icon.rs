@@ -1,7 +1,10 @@
 use derive_more::Into;
 use silkenweb::{
     elements::html::{i, IBuilder},
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
     value::SignalOrValue,
     ElementBuilder, ElementEvents, HtmlElementEvents, Value,
 };
@@ -30,6 +33,12 @@ impl IconBuilder {
 
 impl SetSpacing for IconBuilder {}
 
+impl From<IconBuilder> for Element {
+    fn from(icon: IconBuilder) -> Self {
+        icon.0.into()
+    }
+}
+
 impl From<IconBuilder> for Node {
     fn from(icon: IconBuilder) -> Self {
         icon.0.into()
@@ -37,7 +46,13 @@ impl From<IconBuilder> for Node {
 }
 
 #[derive(Into, Value)]
-pub struct Icon(Node);
+pub struct Icon(Element);
+
+impl From<Icon> for Node {
+    fn from(elem: Icon) -> Self {
+        elem.0.into()
+    }
+}
 
 impl From<IconBuilder> for Icon {
     fn from(icon: IconBuilder) -> Self {

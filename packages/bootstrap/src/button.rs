@@ -3,7 +3,10 @@ use std::marker::PhantomData;
 use derive_more::Into;
 use silkenweb::{
     elements::{html, AriaElement},
-    node::{element::ElementBuilder, Node},
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{RefSignalOrValue, SignalOrValue, Value},
     ElementBuilder, Value,
@@ -74,10 +77,17 @@ impl<Content> ButtonBuilder<Content> {
     }
 }
 
+// TODO: Make empty derive macros handle generics
 impl<Content> HtmlElement for ButtonBuilder<Content> {}
 impl<Content> ElementEvents for ButtonBuilder<Content> {}
 impl<Content> HtmlElementEvents for ButtonBuilder<Content> {}
 impl<Content> AriaElement for ButtonBuilder<Content> {}
+
+impl From<ButtonBuilder<Set>> for Element {
+    fn from(builder: ButtonBuilder<Set>) -> Self {
+        builder.0.into()
+    }
+}
 
 impl From<ButtonBuilder<Set>> for Node {
     fn from(builder: ButtonBuilder<Set>) -> Self {
@@ -86,10 +96,16 @@ impl From<ButtonBuilder<Set>> for Node {
 }
 
 #[derive(Into)]
-pub struct Button(Node);
+pub struct Button(Element);
 
 impl From<HtmlElementBuilder> for Button {
     fn from(builder: HtmlElementBuilder) -> Self {
         Self(builder.0.into())
+    }
+}
+
+impl From<Button> for Node {
+    fn from(elem: Button) -> Self {
+        elem.0.into()
     }
 }

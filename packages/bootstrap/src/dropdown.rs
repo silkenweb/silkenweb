@@ -7,7 +7,7 @@ use silkenweb::{
         },
         AriaElement,
     },
-    node::{element::ElementBuilder, Node},
+    node::{element::{ElementBuilder, Element}, Node},
     prelude::ParentBuilder,
     value::SignalOrValue,
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
@@ -33,6 +33,12 @@ pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder
     )
 }
 
+impl From<DropdownBuilder> for Element {
+    fn from(builder: DropdownBuilder) -> Self {
+        builder.0.into()
+    }
+}
+
 impl From<DropdownBuilder> for Node {
     fn from(builder: DropdownBuilder) -> Self {
         builder.0.into()
@@ -40,7 +46,13 @@ impl From<DropdownBuilder> for Node {
 }
 
 #[derive(Into, Value)]
-pub struct Dropdown(Node);
+pub struct Dropdown(Element);
+
+impl From<Dropdown> for Node {
+    fn from(elem: Dropdown) -> Self {
+        elem.0.into()
+    }
+}
 
 #[derive(Value)]
 pub struct MenuBuilder(UlBuilder);
