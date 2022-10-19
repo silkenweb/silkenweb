@@ -7,10 +7,7 @@ use silkenweb::{
         },
         AriaElement,
     },
-    node::{
-        element::{Element, ElementBuilder},
-        Node,
-    },
+    node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{SignalOrValue, Value},
     ElementBuilder,
@@ -22,8 +19,8 @@ use crate::{button::ButtonBuilder, css};
 #[element_target(Dropdown)]
 pub struct DropdownBuilder(DivBuilder);
 
+// TODO: Proc macro derives for all of these
 impl Value for DropdownBuilder {}
-
 impl HtmlElement for DropdownBuilder {}
 impl HtmlElementEvents for DropdownBuilder {}
 impl ElementEvents for DropdownBuilder {}
@@ -47,12 +44,6 @@ pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder
     )
 }
 
-impl From<DropdownBuilder> for Element {
-    fn from(builder: DropdownBuilder) -> Self {
-        builder.0.into()
-    }
-}
-
 impl From<DropdownBuilder> for Node {
     fn from(builder: DropdownBuilder) -> Self {
         builder.0.into()
@@ -60,15 +51,9 @@ impl From<DropdownBuilder> for Node {
 }
 
 #[derive(Into)]
-pub struct Dropdown(Element);
+pub struct Dropdown(Node);
 
 impl Value for Dropdown {}
-
-impl From<Dropdown> for Node {
-    fn from(elem: Dropdown) -> Self {
-        elem.0.into()
-    }
-}
 
 pub struct MenuBuilder(UlBuilder);
 

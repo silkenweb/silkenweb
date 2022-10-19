@@ -5,10 +5,7 @@ use silkenweb::{
         html::{div, DivBuilder},
         AriaElement,
     },
-    node::{
-        element::{Element, ElementBuilder},
-        Node,
-    },
+    node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{RefSignalOrValue, SignalOrValue, Value},
     ElementBuilder,
@@ -44,12 +41,6 @@ impl HtmlElementEvents for ButtonGroupBuilder {}
 impl ElementEvents for ButtonGroupBuilder {}
 impl AriaElement for ButtonGroupBuilder {}
 
-impl From<ButtonGroupBuilder> for Element {
-    fn from(elem: ButtonGroupBuilder) -> Self {
-        elem.0.into()
-    }
-}
-
 impl From<ButtonGroupBuilder> for Node {
     fn from(elem: ButtonGroupBuilder) -> Self {
         elem.0.into()
@@ -57,12 +48,6 @@ impl From<ButtonGroupBuilder> for Node {
 }
 
 #[derive(Into)]
-pub struct ButtonGroup(Element);
+pub struct ButtonGroup(Node);
 
 impl Value for ButtonGroup {}
-
-impl From<ButtonGroup> for Node {
-    fn from(elem: ButtonGroup) -> Self {
-        elem.0.into()
-    }
-}
