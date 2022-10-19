@@ -532,8 +532,6 @@ impl Display for Element {
 
 impl Value for Element {}
 
-// TODO: `Val` wrapper for values
-
 /// An HTML element builder.
 pub trait ElementBuilder: Sized {
     type Target;
