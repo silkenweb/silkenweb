@@ -4,12 +4,13 @@ use std::{
     str::FromStr,
 };
 
-use futures_signals::{signal::Signal, signal_vec::SignalVec};
+use futures_signals::signal_vec::SignalVec;
 use silkenweb::{
+    attribute::AsAttribute,
     elements::CustomEvent,
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{Sig, SignalOrValue, Value},
+    value::{SignalOrValue, Value},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
@@ -170,13 +171,9 @@ where
         Self(self.0.whole_item_toggleable(value), PhantomData)
     }
 
-    pub fn text(self, text: &str) -> Self {
-        Self(self.0.text(text), PhantomData)
-    }
-
-    pub fn text_signal(self, value: impl Signal<Item = String> + 'static) -> Self {
+    pub fn text(self, value: impl SignalOrValue<Item = impl AsAttribute<String>>) -> Self {
         // TODO: Unify `text` and `text_signal`
-        Self(self.0.text(Sig(value)), PhantomData)
+        Self(self.0.text(value), PhantomData)
     }
 
     // We don't include `child` and `child_signal` methods as they're not so useful
