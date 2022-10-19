@@ -16,10 +16,7 @@ use silkenweb::{
     ElementBuilder,
 };
 
-use crate::{
-    button::{ButtonBuilder, Set},
-    css,
-};
+use crate::{button::ButtonBuilder, css};
 
 #[derive(ElementBuilder)]
 #[element_target(Dropdown)]
