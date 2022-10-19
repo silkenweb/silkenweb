@@ -7,7 +7,10 @@ use silkenweb::{
         },
         AriaElement,
     },
-    node::{element::{ElementBuilder, Element}, Node},
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
     prelude::ParentBuilder,
     value::SignalOrValue,
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
@@ -62,17 +65,17 @@ pub fn dropdown_menu() -> MenuBuilder {
 }
 
 impl MenuBuilder {
-    pub fn child(self, child: impl SignalOrValue<Item = MenuItem>) -> Self {
-        Self(self.0.child(child.map(|child| child.0)))
+    pub fn child(self, child: impl SignalOrValue<Item = impl Into<MenuItem>>) -> Self {
+        Self(self.0.child(child.map(|child| child.into().0)))
     }
 
     pub fn optional_child(
         self,
-        child: impl SignalOrValue<Item = Option<MenuItem>> + 'static,
+        child: impl SignalOrValue<Item = Option<impl Into<MenuItem>>> + 'static,
     ) -> Self {
         Self(
             self.0
-                .optional_child(child.map(|child| child.map(|child| child.0))),
+                .optional_child(child.map(|child| child.map(|child| child.into().0))),
         )
     }
 
@@ -120,7 +123,6 @@ macro_rules! menu_items{
 
 menu_items! {
     HrBuilder,
-    // TODO: Wrap button (and other items?)
     html::ButtonBuilder,
     FormBuilder,
     ABuilder,
