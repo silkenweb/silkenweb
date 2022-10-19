@@ -1,10 +1,9 @@
 use derive_more::Into;
-use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     elements::html::{i, IBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents},
-    value::{Sig, SignalOrValue, Value},
+    value::{SignalOrValue, Value},
     ElementBuilder,
 };
 
@@ -25,12 +24,8 @@ pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> IconBuilder {
 pub struct IconBuilder(IBuilder);
 
 impl IconBuilder {
-    pub fn colour(self, colour: Colour) -> Self {
-        self.class(colour.text())
-    }
-
-    pub fn colour_signal(self, colour: impl Signal<Item = Colour> + 'static) -> Self {
-        self.class(Sig(colour.map(Colour::text)))
+    pub fn colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
+        self.class(colour.map(Colour::text))
     }
 }
 
