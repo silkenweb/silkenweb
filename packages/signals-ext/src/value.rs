@@ -78,8 +78,8 @@ impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
 impl<'a> RefValue<'a> for () {}
 
 macro_rules! tuple_values {
-    ($t:tt $(,)?) => {};
-    ($t0:tt, $t1:tt $(, $tail:tt)* $(,)?) => {
+    ($t:ident $(,)?) => {};
+    ($t0:ident, $t1:ident $(, $tail:ident)* $(,)?) => {
         impl<'a, $t0, $t1 $(, $tail)*> RefValue<'a> for ($t0, $t1 $(, $tail)*) {}
 
         tuple_values!($t1, $($tail),*);
