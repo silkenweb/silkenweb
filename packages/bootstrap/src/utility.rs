@@ -210,6 +210,8 @@ impl Size {
     }
 }
 
+impl Value for Size {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Opacity {
     Opacity10,
