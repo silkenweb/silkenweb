@@ -34,7 +34,12 @@ pub trait RefSignalOrValue<'a> {
     fn select<FVal, FSig, Data>(self, fn_val: FVal, fn_sig: FSig, data: &mut Data)
     where
         FVal: FnOnce(&mut Data, Self::Item),
-        FSig: FnOnce(&mut Data, Self),
+        FSig: FnOnce(&mut Data, Self);
+
+    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, fn_sig: FSig, data: Data) -> Out
+    where
+        FVal: FnOnce(Data, Self::Item) -> Out,
+        FSig: FnOnce(Data, Self) -> Out,
         Self: Sized;
 }
 
@@ -125,6 +130,14 @@ where
     {
         fn_val(data, self);
     }
+
+    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
+    where
+        FVal: FnOnce(Data, Self::Item) -> Out,
+        FSig: FnOnce(Data, Self) -> Out,
+    {
+        fn_val(data, self)
+    }
 }
 
 impl<T, S> RefSignalOrValue<'static> for Sig<S>
@@ -170,5 +183,13 @@ where
         FSig: FnOnce(&mut Data, Self),
     {
         fn_sig(data, self);
+    }
+
+    fn select_owned<FVal, FSig, Data, Out>(self, _fn_val: FVal, fn_sig: FSig, data: Data) -> Out
+    where
+        FVal: FnOnce(Data, Self::Item) -> Out,
+        FSig: FnOnce(Data, Self) -> Out,
+    {
+        fn_sig(data, self)
     }
 }
