@@ -2,14 +2,14 @@ use std::marker::PhantomData;
 
 use derive_more::Into;
 use silkenweb::{
-    elements::{html, AriaElement},
+    elements::html,
     node::{
         element::{Element, ElementBuilder},
         Node,
     },
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    prelude::ParentBuilder,
     value::{RefSignalOrValue, SignalOrValue, Value},
-    ElementBuilder, Value,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{css, icon::Icon, utility::Colour, Class, HtmlElementBuilder};
@@ -20,7 +20,9 @@ pub struct Set;
 pub struct Unset;
 
 pub enum State {}
-#[derive(Value, ElementBuilder, Into)]
+#[derive(
+    Value, Into, ElementBuilder, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
+)]
 #[element_target(Button)]
 pub struct ButtonBuilder<Content = Set>(HtmlElementBuilder, PhantomData<Content>);
 
@@ -76,12 +78,6 @@ impl<Content> ButtonBuilder<Content> {
         Self(elem, PhantomData)
     }
 }
-
-// TODO: Make empty derive macros handle generics
-impl<Content> HtmlElement for ButtonBuilder<Content> {}
-impl<Content> ElementEvents for ButtonBuilder<Content> {}
-impl<Content> HtmlElementEvents for ButtonBuilder<Content> {}
-impl<Content> AriaElement for ButtonBuilder<Content> {}
 
 impl From<ButtonBuilder<Set>> for Element {
     fn from(builder: ButtonBuilder<Set>) -> Self {

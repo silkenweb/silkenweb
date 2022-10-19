@@ -25,12 +25,18 @@ macro_rules! derive_empty(
         #[doc = "This will derive an instance with an empty body:"]
         #[doc = ""]
         #[doc = concat!("`impl ", stringify!($type_name), " for MyType {}`")]
+        #[doc = ""]
+        #[doc = "Types with generic parameters are supported."]
         #[proc_macro_derive($type_name)]
         pub fn $proc_name(item: TokenStream) -> TokenStream {
             let new_type: DeriveInput = parse_macro_input!(item);
+            let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
             let name = new_type.ident;
 
-            quote!(impl ::silkenweb::$type_path::$type_name for #name {}).into()
+            quote!(
+                impl #impl_generics ::silkenweb::$type_path::$type_name
+                for #name #ty_generics #where_clause {}
+            ).into()
         }
     )*}
 );
