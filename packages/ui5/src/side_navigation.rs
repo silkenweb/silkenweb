@@ -172,7 +172,6 @@ where
     }
 
     pub fn text(self, value: impl SignalOrValue<Item = impl AsAttribute<String>>) -> Self {
-        // TODO: Unify `text` and `text_signal`
         Self(self.0.text(value), PhantomData)
     }
 
