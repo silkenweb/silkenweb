@@ -17,7 +17,6 @@ use crate::{
 pub struct BadgeBuilder(SpanBuilder);
 
 pub fn badge<'a>(
-    // TODO: trait `TextLike: Into<String> + AsRef<str>`?
     text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
     background_colour: impl SignalOrValue<Item = Colour>,
 ) -> BadgeBuilder {
