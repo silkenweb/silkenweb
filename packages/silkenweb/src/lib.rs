@@ -175,5 +175,3 @@ thread_local!(
     static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node)>> =
         RefCell::new(HashMap::new());
 );
-
-// TODO: Logging
