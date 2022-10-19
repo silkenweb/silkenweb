@@ -103,6 +103,8 @@ use silkenweb_base::document;
 /// [`ElementBuilder`]: crate::node::element::ElementBuilder
 pub use silkenweb_macros::ElementBuilder;
 pub use silkenweb_macros::{css, css_classes};
+#[doc(inline)]
+pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};
 use wasm_bindgen::UnwrapThrowExt;
 
 #[doc(hidden)]

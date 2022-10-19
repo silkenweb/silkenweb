@@ -1,12 +1,13 @@
 use silkenweb::{
     node::element::ElementBuilder,
     prelude::{HtmlElement, ParentBuilder},
-    value::{SignalOrValue, Value},
+    value::SignalOrValue,
+    Value,
 };
 
 use crate::{css, Class};
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Colour {
     Primary,
     Secondary,
@@ -93,9 +94,7 @@ impl Colour {
     }
 }
 
-impl Value for Colour {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Side {
     Top,
     Bottom,
@@ -123,9 +122,7 @@ impl Side {
     }
 }
 
-impl Value for Side {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Axis {
     X,
     Y,
@@ -140,9 +137,7 @@ impl Axis {
     }
 }
 
-impl Value for Axis {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum SideOrAxis {
     Side(Side),
     Axis(Axis),
@@ -157,9 +152,7 @@ impl SideOrAxis {
     }
 }
 
-impl Value for SideOrAxis {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Size {
     Size0,
     Size1,
@@ -215,9 +208,7 @@ impl Size {
     }
 }
 
-impl Value for Size {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Opacity {
     Opacity10,
     Opacity25,
@@ -238,9 +229,7 @@ impl Opacity {
     }
 }
 
-impl Value for Opacity {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Shadow {
     None,
     Small,
@@ -259,9 +248,7 @@ impl Shadow {
     }
 }
 
-impl Value for Shadow {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Overflow {
     Auto,
     Hidden,
@@ -279,8 +266,6 @@ impl Overflow {
         }
     }
 }
-
-impl Value for Overflow {}
 
 pub trait Margin {
     fn margin(self) -> Class;
@@ -454,7 +439,7 @@ impl Padding for (Size, SideOrAxis) {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum FlexDirection {
     Row,
     RowReverse,
@@ -473,9 +458,7 @@ impl FlexDirection {
     }
 }
 
-impl Value for FlexDirection {}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Align {
     Start,
     End,
@@ -505,8 +488,6 @@ impl Align {
         }
     }
 }
-
-impl Value for Align {}
 
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size

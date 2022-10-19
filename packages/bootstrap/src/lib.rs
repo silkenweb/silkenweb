@@ -1,8 +1,7 @@
 use silkenweb::{
     elements::html::{div, DivBuilder},
     node::{element::ElementBuilderBase, Node},
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
-    ElementBuilder,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use utility::SetFlex;
 
@@ -24,12 +23,9 @@ pub type Class = &'static str;
 ///
 /// Some bootstrap types, like [`Badge`](badge::Badge) will convert into this as
 /// an "escape hatch".
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+// TODO: Use Node and derive Into?
 pub struct HtmlElementBuilder(ElementBuilderBase);
-
-impl HtmlElement for HtmlElementBuilder {}
-impl HtmlElementEvents for HtmlElementBuilder {}
-impl ElementEvents for HtmlElementBuilder {}
 
 impl From<HtmlElementBuilder> for Node {
     fn from(builder: HtmlElementBuilder) -> Self {

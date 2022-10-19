@@ -6,9 +6,7 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::element::ParentBuilder,
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
-    value::Value,
-    ElementBuilder,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
@@ -55,7 +53,7 @@ pub fn calendar() -> CalendarBuilder {
     CalendarBuilder(ui5_calendar())
 }
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct CalendarBuilder(Ui5CalendarBuilder);
 
 impl CalendarBuilder {
@@ -89,13 +87,7 @@ impl CalendarBuilder {
     }
 }
 
-impl HtmlElement for CalendarBuilder {}
-
-impl HtmlElementEvents for CalendarBuilder {}
-
-impl ElementEvents for CalendarBuilder {}
-
-#[derive(Display, Copy, Clone)]
+#[derive(Display, Copy, Clone, Value)]
 pub enum SelectionMode {
     Single,
     Range,
@@ -109,8 +101,6 @@ impl Attribute for SelectionMode {
 }
 
 impl AsAttribute<SelectionMode> for SelectionMode {}
-
-impl Value for SelectionMode {}
 
 #[derive(Display, Copy, Clone)]
 pub enum CalendarType {

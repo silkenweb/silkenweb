@@ -6,14 +6,14 @@ use silkenweb::{
         AriaElement,
     },
     node::{element::ElementBuilder, Node},
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{RefSignalOrValue, SignalOrValue, Value},
-    ElementBuilder,
+    prelude::ParentBuilder,
+    value::{RefSignalOrValue, SignalOrValue},
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{button::ButtonBuilder, css, dropdown::DropdownBuilder};
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 #[element_target(ButtonGroup)]
 pub struct ButtonGroupBuilder(DivBuilder);
 
@@ -35,19 +35,11 @@ impl ButtonGroupBuilder {
     }
 }
 
-impl Value for ButtonGroupBuilder {}
-impl HtmlElement for ButtonGroupBuilder {}
-impl HtmlElementEvents for ButtonGroupBuilder {}
-impl ElementEvents for ButtonGroupBuilder {}
-impl AriaElement for ButtonGroupBuilder {}
-
 impl From<ButtonGroupBuilder> for Node {
     fn from(elem: ButtonGroupBuilder) -> Self {
         elem.0.into()
     }
 }
 
-#[derive(Into)]
+#[derive(Into, Value)]
 pub struct ButtonGroup(Node);
-
-impl Value for ButtonGroup {}

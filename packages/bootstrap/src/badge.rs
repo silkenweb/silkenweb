@@ -3,8 +3,8 @@ use silkenweb::{
     elements::html::{span, SpanBuilder},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElementEvents, ParentBuilder},
-    value::{RefSignalOrValue, SignalOrValue, Value},
-    ElementBuilder,
+    value::{RefSignalOrValue, SignalOrValue},
+    ElementBuilder, Value,
 };
 
 use crate::{
@@ -12,7 +12,7 @@ use crate::{
     utility::{Colour, SetBorder, SetSpacing},
 };
 
-#[derive(ElementBuilder, Into)]
+#[derive(ElementBuilder, Into, Value)]
 #[element_target(Badge)]
 pub struct BadgeBuilder(SpanBuilder);
 
@@ -34,7 +34,6 @@ impl BadgeBuilder {
     }
 }
 
-impl Value for BadgeBuilder {}
 impl ElementEvents for BadgeBuilder {}
 impl HtmlElementEvents for BadgeBuilder {}
 impl SetSpacing for BadgeBuilder {}

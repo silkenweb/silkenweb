@@ -16,7 +16,7 @@ use silkenweb::{
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     value::{SignalOrValue, Value},
-    ElementBuilder,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -83,7 +83,7 @@ impl Attribute for Size {
 
 impl AsAttribute<Size> for Size {}
 
-#[derive(Display)]
+#[derive(Display, Value)]
 #[display(style = "CamelCase")]
 pub enum GroupType {
     Group,
@@ -95,8 +95,6 @@ impl Attribute for GroupType {
         Some(self.to_string().into())
     }
 }
-
-impl Value for GroupType {}
 
 impl AsAttribute<GroupType> for GroupType {}
 
@@ -145,7 +143,7 @@ pub fn avatar() -> AvatarBuilder {
     AvatarBuilder(ui5_avatar())
 }
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct AvatarBuilder(elements::Ui5AvatarBuilder);
 
 impl AvatarBuilder {
@@ -175,12 +173,6 @@ impl AvatarBuilder {
         self.0.child(image.map(|img| img.into())).build()
     }
 }
-
-impl HtmlElement for AvatarBuilder {}
-
-impl HtmlElementEvents for AvatarBuilder {}
-
-impl ElementEvents for AvatarBuilder {}
 
 pub type AvatarGroup = Ui5AvatarGroup;
 

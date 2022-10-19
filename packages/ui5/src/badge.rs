@@ -1,8 +1,7 @@
 use silkenweb::{
     node::element::ParentBuilder,
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     value::{RefSignalOrValue, SignalOrValue},
-    ElementBuilder,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use self::elements::ui5_badge;
@@ -27,7 +26,7 @@ pub fn badge() -> BadgeBuilder {
     BadgeBuilder(ui5_badge())
 }
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct BadgeBuilder(elements::Ui5BadgeBuilder);
 
 impl BadgeBuilder {
@@ -44,9 +43,3 @@ impl BadgeBuilder {
         Self(self.0.text(text))
     }
 }
-
-impl HtmlElement for BadgeBuilder {}
-
-impl HtmlElementEvents for BadgeBuilder {}
-
-impl ElementEvents for BadgeBuilder {}

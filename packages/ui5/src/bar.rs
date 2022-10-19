@@ -5,15 +5,15 @@ use silkenweb::{
         element::{Element, ParentBuilder},
         Node,
     },
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
+    prelude::HtmlElement,
     value::{SignalOrValue, Value},
-    ElementBuilder,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use self::element::{ui5_bar, Ui5BarBuilder};
 use crate::macros::attributes0;
 
-#[derive(Copy, Clone, Eq, PartialEq, Display)]
+#[derive(Copy, Clone, Eq, PartialEq, Display, Value)]
 pub enum BarDesign {
     Header,
     Subheader,
@@ -26,8 +26,6 @@ impl Attribute for BarDesign {
         Some(self.to_string().into())
     }
 }
-
-impl Value for BarDesign {}
 
 impl AsAttribute<BarDesign> for BarDesign {}
 
@@ -48,14 +46,8 @@ mod element {
 
 pub use element::Ui5Bar as Bar;
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct BarBuilder(Ui5BarBuilder);
-
-impl HtmlElement for BarBuilder {}
-
-impl HtmlElementEvents for BarBuilder {}
-
-impl ElementEvents for BarBuilder {}
 
 pub fn bar() -> BarBuilder {
     BarBuilder(ui5_bar())

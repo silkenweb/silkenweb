@@ -8,23 +8,16 @@ use silkenweb::{
         AriaElement,
     },
     node::{element::ElementBuilder, Node},
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
-    value::{SignalOrValue, Value},
-    ElementBuilder,
+    prelude::ParentBuilder,
+    value::SignalOrValue,
+    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{button::ButtonBuilder, css};
 
-#[derive(ElementBuilder)]
+#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 #[element_target(Dropdown)]
 pub struct DropdownBuilder(DivBuilder);
-
-// TODO: Proc macro derives for all of these
-impl Value for DropdownBuilder {}
-impl HtmlElement for DropdownBuilder {}
-impl HtmlElementEvents for DropdownBuilder {}
-impl ElementEvents for DropdownBuilder {}
-impl AriaElement for DropdownBuilder {}
 
 pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder {
     // TODO: BTN_GROUP vs DROPDOWN classes: what's the difference?
@@ -50,11 +43,10 @@ impl From<DropdownBuilder> for Node {
     }
 }
 
-#[derive(Into)]
+#[derive(Into, Value)]
 pub struct Dropdown(Node);
 
-impl Value for Dropdown {}
-
+#[derive(Value)]
 pub struct MenuBuilder(UlBuilder);
 
 pub fn dropdown_menu() -> MenuBuilder {
@@ -95,8 +87,6 @@ impl MenuBuilder {
     }
 }
 
-impl Value for MenuBuilder {}
-
 // TODO: Once we've written the dropdown container, we won't need this.
 impl From<MenuBuilder> for Node {
     fn from(builder: MenuBuilder) -> Self {
@@ -104,7 +94,7 @@ impl From<MenuBuilder> for Node {
     }
 }
 
-#[derive(Into)] // TODO: Once we've written the dropdown container, we won't need to derive Into
+#[derive(Into, Value)] // TODO: Once we've written the dropdown container, we won't need to derive Into
 pub struct Menu(Node);
 
 impl From<MenuBuilder> for Menu {
@@ -112,8 +102,6 @@ impl From<MenuBuilder> for Menu {
         Menu(builder.0.into())
     }
 }
-
-impl Value for Menu {}
 
 pub struct MenuItem(Node);
 

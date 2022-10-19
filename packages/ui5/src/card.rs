@@ -33,10 +33,7 @@ mod elements {
 }
 
 pub use elements::{Ui5Card as Card, Ui5CardHeader as CardHeader};
-use silkenweb::{
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
-    ElementBuilder,
-};
+use silkenweb::ElementBuilder;
 
 use self::elements::{ui5_card_header, Ui5CardHeaderBuilder};
 use crate::macros::attributes0;
@@ -60,9 +57,3 @@ impl CardHeaderBuilder {
         Self(self.0.on_click(f))
     }
 }
-
-impl HtmlElement for CardHeaderBuilder {}
-
-impl HtmlElementEvents for CardHeaderBuilder {}
-
-impl ElementEvents for CardHeaderBuilder {}

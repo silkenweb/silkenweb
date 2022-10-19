@@ -2,8 +2,7 @@ use std::borrow::Cow;
 
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    custom_html_element,
-    value::Value,
+    custom_html_element, Value,
 };
 
 custom_html_element!(
@@ -18,7 +17,7 @@ custom_html_element!(
     }
 );
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Value)]
 pub enum Icon {
     Accelerated,
     Accept,
@@ -1379,8 +1378,6 @@ impl Attribute for Icon {
 }
 
 impl AsAttribute<Icon> for Icon {}
-
-impl Value for Icon {}
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum FioriIcon {

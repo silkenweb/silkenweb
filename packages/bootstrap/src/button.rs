@@ -6,7 +6,7 @@ use silkenweb::{
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{RefSignalOrValue, SignalOrValue, Value},
-    ElementBuilder,
+    ElementBuilder, Value,
 };
 
 use crate::{css, icon::Icon, utility::Colour, Class, HtmlElementBuilder};
@@ -17,11 +17,9 @@ pub struct Set;
 pub struct Unset;
 
 pub enum State {}
-#[derive(ElementBuilder, Into)]
+#[derive(Value, ElementBuilder, Into)]
 #[element_target(Button)]
 pub struct ButtonBuilder<Content = Set>(HtmlElementBuilder, PhantomData<Content>);
-
-impl Value for ButtonBuilder {}
 
 pub fn button(
     button_type: &str,
@@ -35,7 +33,7 @@ pub fn button(
 }
 
 // TODO: Does this apply to more than buttons?
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum ButtonStyle {
     Link,
     Solid(Colour),
@@ -51,8 +49,6 @@ impl ButtonStyle {
         }
     }
 }
-
-impl Value for ButtonStyle {}
 
 impl<Content> ButtonBuilder<Content> {
     pub fn text<'a>(

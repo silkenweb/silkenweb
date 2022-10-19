@@ -570,6 +570,8 @@ pub trait ElementBuilder: Sized {
     /// The attribute can either be a value or a signal. Signals should be
     /// wrapped in the [`Sig`] newtype.`Option<impl Attribute>` can be used to
     /// add/remove an attribute based on a signal.
+    ///
+    /// [`Sig`]: crate::value::Sig
     fn attribute<'a>(
         self,
         name: &str,

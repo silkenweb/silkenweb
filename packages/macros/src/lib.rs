@@ -16,7 +16,33 @@ use syn::{
 
 mod parser;
 
-// TODO: Docs
+macro_rules! derive_empty(
+    (
+        $($proc_name:ident ( $type_path:path, $type_name:ident ); )*
+    ) => {$(
+        #[doc = concat!("Derive `", stringify!($type_name), "`")]
+        #[doc = ""]
+        #[doc = "This will derive an instance with an empty body:"]
+        #[doc = ""]
+        #[doc = concat!("`impl ", stringify!($type_name), " for MyType {}`")]
+        #[proc_macro_derive($type_name)]
+        pub fn $proc_name(item: TokenStream) -> TokenStream {
+            let new_type: DeriveInput = parse_macro_input!(item);
+            let name = new_type.ident;
+
+            quote!(impl ::silkenweb::$type_path::$type_name for #name {}).into()
+        }
+    )*}
+);
+
+derive_empty!(
+    derive_value(value, Value);
+    derive_html_element(elements, HtmlElement);
+    derive_aria_element(elements, AriaElement);
+    derive_html_element_events(elements, HtmlElementEvents);
+    derive_element_events(elements, ElementEvents);
+);
+
 #[proc_macro_derive(ElementBuilder, attributes(element_target, element_dom_type))]
 #[proc_macro_error]
 pub fn derive_element_builder(item: TokenStream) -> TokenStream {

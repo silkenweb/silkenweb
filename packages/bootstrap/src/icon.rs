@@ -2,9 +2,8 @@ use derive_more::Into;
 use silkenweb::{
     elements::html::{i, IBuilder},
     node::{element::ElementBuilder, Node},
-    prelude::{ElementEvents, HtmlElementEvents},
-    value::{SignalOrValue, Value},
-    ElementBuilder,
+    value::SignalOrValue,
+    ElementBuilder, ElementEvents, HtmlElementEvents, Value,
 };
 
 use crate::{
@@ -20,7 +19,7 @@ pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> IconBuilder {
     IconBuilder(i().class(icon.map(IconType::class)))
 }
 
-#[derive(ElementBuilder, Into)]
+#[derive(Value, ElementBuilder, ElementEvents, HtmlElementEvents, Into)]
 pub struct IconBuilder(IBuilder);
 
 impl IconBuilder {
@@ -29,9 +28,6 @@ impl IconBuilder {
     }
 }
 
-impl Value for IconBuilder {}
-impl ElementEvents for IconBuilder {}
-impl HtmlElementEvents for IconBuilder {}
 impl SetSpacing for IconBuilder {}
 
 impl From<IconBuilder> for Node {
@@ -40,10 +36,8 @@ impl From<IconBuilder> for Node {
     }
 }
 
-#[derive(Into)]
+#[derive(Into, Value)]
 pub struct Icon(Node);
-
-impl Value for Icon {}
 
 impl From<IconBuilder> for Icon {
     fn from(icon: IconBuilder) -> Self {
@@ -84,7 +78,7 @@ impl Icon {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum IconType {
     Circle,
     PlayCircleFill,
@@ -106,5 +100,3 @@ impl IconType {
         }
     }
 }
-
-impl Value for IconType {}
