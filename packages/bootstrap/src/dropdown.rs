@@ -32,14 +32,14 @@ impl HtmlElementEvents for DropdownBuilder {}
 impl ElementEvents for DropdownBuilder {}
 impl AriaElement for DropdownBuilder {}
 
-pub fn dropdown(button: ButtonBuilder<Set>, menu: impl Into<Menu>) -> DropdownBuilder {
+pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder {
     // TODO: BTN_GROUP vs DROPDOWN classes: what's the difference?
     // DROPDOWN just applies position: relative, btn_group applies border radius,
     // display and alignment. We only want to apply button group when we're a
     // child of button group (button group show do this).
     DropdownBuilder(
         div()
-            .classes([css::BTN_GROUP, css::DROPDOWN])
+            .classes([css::DROPDOWN])
             .child(
                 button
                     .class(css::DROPDOWN_TOGGLE)
@@ -48,12 +48,6 @@ pub fn dropdown(button: ButtonBuilder<Set>, menu: impl Into<Menu>) -> DropdownBu
             )
             .child(menu.into()),
     )
-}
-
-impl From<DropdownBuilder> for Dropdown {
-    fn from(builder: DropdownBuilder) -> Self {
-        Dropdown(builder.0.into())
-    }
 }
 
 impl From<DropdownBuilder> for Element {
@@ -155,7 +149,7 @@ macro_rules! menu_items{
 
 menu_items! {
     HrBuilder,
-    // TODO: Wrap button
+    // TODO: Wrap button (and other items?)
     html::ButtonBuilder,
     FormBuilder,
     ABuilder,

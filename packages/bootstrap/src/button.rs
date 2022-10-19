@@ -19,9 +19,9 @@ pub struct Unset;
 pub enum State {}
 #[derive(ElementBuilder, Into)]
 #[element_target(Button)]
-pub struct ButtonBuilder<Content>(HtmlElementBuilder, PhantomData<Content>);
+pub struct ButtonBuilder<Content = Set>(HtmlElementBuilder, PhantomData<Content>);
 
-impl Value for ButtonBuilder<Set> {}
+impl Value for ButtonBuilder {}
 
 pub fn button(
     button_type: &str,

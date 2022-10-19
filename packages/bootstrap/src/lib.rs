@@ -8,6 +8,7 @@ use utility::SetFlex;
 
 pub mod badge;
 pub mod button;
+pub mod button_group;
 pub mod dropdown;
 pub mod icon;
 pub mod utility;
