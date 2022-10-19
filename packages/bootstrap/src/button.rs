@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use derive_more::Into;
 use silkenweb::{
-    elements::html,
+    elements::{html, AriaElement},
     node::{element::ElementBuilder, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{RefSignalOrValue, SignalOrValue, Value},
@@ -34,6 +34,7 @@ pub fn button(
     )
 }
 
+// TODO: Does this apply to more than buttons?
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonStyle {
     Link,
@@ -80,6 +81,7 @@ impl<Content> ButtonBuilder<Content> {
 impl<Content> HtmlElement for ButtonBuilder<Content> {}
 impl<Content> ElementEvents for ButtonBuilder<Content> {}
 impl<Content> HtmlElementEvents for ButtonBuilder<Content> {}
+impl<Content> AriaElement for ButtonBuilder<Content> {}
 
 impl From<ButtonBuilder<Set>> for Node {
     fn from(builder: ButtonBuilder<Set>) -> Self {

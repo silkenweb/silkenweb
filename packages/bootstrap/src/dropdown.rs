@@ -1,15 +1,83 @@
 use derive_more::Into;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
-    elements::html::{
-        li, ul, ABuilder, ButtonBuilder, FormBuilder, HrBuilder, SpanBuilder, UlBuilder,
+    elements::{
+        html::{
+            self, div, li, ul, ABuilder, DivBuilder, FormBuilder, HrBuilder, SpanBuilder, UlBuilder,
+        },
+        AriaElement,
     },
-    node::{element::ElementBuilder, Node},
-    prelude::ParentBuilder,
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     value::{SignalOrValue, Value},
+    ElementBuilder,
 };
 
-use crate::css;
+use crate::{
+    button::{ButtonBuilder, Set},
+    css,
+};
+
+#[derive(ElementBuilder)]
+#[element_target(Dropdown)]
+pub struct DropdownBuilder(DivBuilder);
+
+impl Value for DropdownBuilder {}
+
+impl HtmlElement for DropdownBuilder {}
+impl HtmlElementEvents for DropdownBuilder {}
+impl ElementEvents for DropdownBuilder {}
+impl AriaElement for DropdownBuilder {}
+
+pub fn dropdown(button: ButtonBuilder<Set>, menu: impl Into<Menu>) -> DropdownBuilder {
+    // TODO: BTN_GROUP vs DROPDOWN classes: what's the difference?
+    // DROPDOWN just applies position: relative, btn_group applies border radius,
+    // display and alignment. We only want to apply button group when we're a
+    // child of button group (button group show do this).
+    DropdownBuilder(
+        div()
+            .classes([css::BTN_GROUP, css::DROPDOWN])
+            .child(
+                button
+                    .class(css::DROPDOWN_TOGGLE)
+                    .aria_expanded("false")
+                    .attribute("data-bs-toggle", "dropdown"),
+            )
+            .child(menu.into()),
+    )
+}
+
+impl From<DropdownBuilder> for Dropdown {
+    fn from(builder: DropdownBuilder) -> Self {
+        Dropdown(builder.0.into())
+    }
+}
+
+impl From<DropdownBuilder> for Element {
+    fn from(builder: DropdownBuilder) -> Self {
+        builder.0.into()
+    }
+}
+
+impl From<DropdownBuilder> for Node {
+    fn from(builder: DropdownBuilder) -> Self {
+        builder.0.into()
+    }
+}
+
+#[derive(Into)]
+pub struct Dropdown(Element);
+
+impl Value for Dropdown {}
+
+impl From<Dropdown> for Node {
+    fn from(elem: Dropdown) -> Self {
+        elem.0.into()
+    }
+}
 
 pub struct MenuBuilder(UlBuilder);
 
@@ -63,12 +131,18 @@ impl From<MenuBuilder> for Node {
 #[derive(Into)] // TODO: Once we've written the dropdown container, we won't need to derive Into
 pub struct Menu(Node);
 
+impl From<MenuBuilder> for Menu {
+    fn from(builder: MenuBuilder) -> Self {
+        Menu(builder.0.into())
+    }
+}
+
 impl Value for Menu {}
 
 pub struct MenuItem(Node);
 
 macro_rules! menu_items{
-    ($($elem:ty),* $(,)?) => {
+    ($($elem:path),* $(,)?) => {
         $(
             impl From<$elem> for MenuItem {
                 fn from(item: $elem) -> Self {
@@ -82,7 +156,7 @@ macro_rules! menu_items{
 menu_items! {
     HrBuilder,
     // TODO: Wrap button
-    ButtonBuilder,
+    html::ButtonBuilder,
     FormBuilder,
     ABuilder,
     SpanBuilder,
