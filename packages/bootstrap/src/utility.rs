@@ -1,8 +1,7 @@
-use futures_signals::signal::{Signal, SignalExt};
 use silkenweb::{
     node::element::ElementBuilder,
     prelude::{HtmlElement, ParentBuilder},
-    value::{Sig, SignalOrValue, Value},
+    value::{SignalOrValue, Value},
 };
 
 use crate::{css, Class};
@@ -124,6 +123,8 @@ impl Side {
     }
 }
 
+impl Value for Side {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Axis {
     X,
@@ -139,6 +140,8 @@ impl Axis {
     }
 }
 
+impl Value for Axis {}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SideOrAxis {
     Side(Side),
@@ -153,6 +156,8 @@ impl SideOrAxis {
         }
     }
 }
+
+impl Value for SideOrAxis {}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Size {
@@ -631,12 +636,8 @@ pub trait SetFlex: ElementBuilder {
 }
 
 pub trait SetAlign: ElementBuilder {
-    fn align_self(self, align: Align) -> Self {
-        self.class(align.align_self())
-    }
-
-    fn align_self_signal(self, align: impl Signal<Item = Align> + 'static) -> Self {
-        self.class(Sig(align.map(|align| align.align_self())))
+    fn align_self(self, align: impl SignalOrValue<Item = Align>) -> Self {
+        self.class(align.map(|align| align.align_self()))
     }
 }
 
