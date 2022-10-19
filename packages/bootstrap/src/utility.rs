@@ -516,39 +516,34 @@ pub trait SetSpacing: ElementBuilder {
         self.class(margin.map(|m| m.margin()))
     }
 
-    // TODO: Signal version. Signal of tuple or 2 signals?
     /// Set the margin on `side`
     ///
-    /// A `size` of `None` will set the margin to `auto`
-    fn margin_on_side(self, size: Option<Size>, side: Side) -> Self {
-        self.class((size, side).margin())
+    /// A `Size` of `None` will set the margin to `auto`
+    fn margin_on_side(self, margin: impl SignalOrValue<Item = (Option<Size>, Side)>) -> Self {
+        self.class(margin.map(|m| m.margin()))
     }
 
-    // TODO: Signal version. Signal of tuple or 2 signals?
     /// Set the margin on `axis`
     ///
-    /// A `size` of `None` will set the margin to `auto`
-    fn margin_on_axis(self, size: Option<Size>, axis: Axis) -> Self {
-        self.class((size, axis).margin())
+    /// A `Size` of `None` will set the margin to `auto`
+    fn margin_on_axis(self, margin: impl SignalOrValue<Item = (Option<Size>, Axis)>) -> Self {
+        self.class(margin.map(|m| m.margin()))
     }
 
     fn padding(self, size: impl SignalOrValue<Item = Size>) -> Self {
         self.class(size.map(Size::padding))
     }
 
-    // TODO: Signal version. Signal of tuple or 2 signals?
-    fn padding_on(self, size: Size, side_or_axis: SideOrAxis) -> Self {
-        self.class((size, side_or_axis).padding())
+    fn padding_on(self, padding: impl SignalOrValue<Item = (Size, SideOrAxis)>) -> Self {
+        self.class(padding.map(|p| p.padding()))
     }
 
-    // TODO: Signal version. Signal of tuple or 2 signals?
-    fn padding_on_side(self, size: Size, side: Side) -> Self {
-        self.class((size, side).padding())
+    fn padding_on_side(self, padding: impl SignalOrValue<Item = (Size, Side)>) -> Self {
+        self.class(padding.map(|p| p.padding()))
     }
 
-    // TODO: Signal version. Signal of tuple or 2 signals?
-    fn padding_on_axis(self, size: Size, axis: Axis) -> Self {
-        self.class((size, axis).padding())
+    fn padding_on_axis(self, padding: impl SignalOrValue<Item = (Size, Axis)>) -> Self {
+        self.class(padding.map(|p| p.padding()))
     }
 }
 
