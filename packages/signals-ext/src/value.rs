@@ -17,8 +17,7 @@ pub trait RefSignalOrValue<'a> {
     fn map<'b: 'a, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
-        F: FnMut(Self::Item) -> R + 'b,
-        Self: Sized;
+        F: FnMut(Self::Item) -> R + 'b;
 
     fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
@@ -30,8 +29,7 @@ pub trait RefSignalOrValue<'a> {
         FInitSig: FnOnce(&mut Exec) -> FSig,
         FSig: FnMut(Self::Item) -> Task + 'a,
         Task: Future<Output = ()> + 'a,
-        Exec: Executor,
-        Self: Sized;
+        Exec: Executor;
 
     fn select<FVal, FSig, Data>(self, fn_val: FVal, fn_sig: FSig, data: &mut Data)
     where
@@ -101,7 +99,6 @@ where
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
         F: FnMut(Self::Item) -> R + 'b,
-        Self: Sized,
     {
         callback(self)
     }
@@ -117,7 +114,6 @@ where
         FSig: FnMut(Self::Item) -> Task + 'a,
         Task: Future<Output = ()> + 'a,
         Exec: Executor,
-        Self: Sized,
     {
         fn_val(executor, self);
     }
@@ -126,7 +122,6 @@ where
     where
         FVal: FnOnce(&mut Data, Self::Item),
         FSig: FnOnce(&mut Data, Self),
-        Self: Sized,
     {
         fn_val(data, self);
     }
@@ -149,7 +144,6 @@ where
         'b: 'static,
         R: RefSignalOrValue<'b, Item = R> + 'b,
         F: FnMut(Self::Item) -> R + 'b,
-        Self: Sized,
     {
         Sig(self.0.map(callback))
     }
@@ -165,7 +159,6 @@ where
         FSig: FnMut(Self::Item) -> Task + 'static,
         Task: Future<Output = ()> + 'static,
         Exec: Executor,
-        Self: Sized,
     {
         let fn_sig = fn_init_sig(executor);
         executor.spawn(self.0.for_each(fn_sig));
@@ -175,7 +168,6 @@ where
     where
         FVal: FnOnce(&mut Data, Self::Item),
         FSig: FnOnce(&mut Data, Self),
-        Self: Sized,
     {
         fn_sig(data, self);
     }
