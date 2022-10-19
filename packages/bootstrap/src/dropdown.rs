@@ -75,7 +75,7 @@ impl From<Dropdown> for Node {
 
 pub struct MenuBuilder(UlBuilder);
 
-pub fn menu() -> MenuBuilder {
+pub fn dropdown_menu() -> MenuBuilder {
     MenuBuilder(ul().class(css::DROPDOWN_MENU))
 }
 
