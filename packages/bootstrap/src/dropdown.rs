@@ -20,10 +20,6 @@ use crate::{button::ButtonBuilder, css};
 pub struct DropdownBuilder(DivBuilder);
 
 pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder {
-    // TODO: BTN_GROUP vs DROPDOWN classes: what's the difference?
-    // DROPDOWN just applies position: relative, btn_group applies border radius,
-    // display and alignment. We only want to apply button group when we're a
-    // child of button group (button group show do this).
     DropdownBuilder(
         div()
             .classes([css::DROPDOWN])
@@ -33,7 +29,7 @@ pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder
                     .aria_expanded("false")
                     .attribute("data-bs-toggle", "dropdown"),
             )
-            .child(menu.into()),
+            .child(menu.into().0),
     )
 }
 
@@ -87,14 +83,7 @@ impl MenuBuilder {
     }
 }
 
-// TODO: Once we've written the dropdown container, we won't need this.
-impl From<MenuBuilder> for Node {
-    fn from(builder: MenuBuilder) -> Self {
-        builder.0.into()
-    }
-}
-
-#[derive(Into, Value)] // TODO: Once we've written the dropdown container, we won't need to derive Into
+#[derive(Value)]
 pub struct Menu(Node);
 
 impl From<MenuBuilder> for Menu {

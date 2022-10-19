@@ -24,7 +24,6 @@ pub type Class = &'static str;
 /// Some bootstrap types, like [`Badge`](badge::Badge) will convert into this as
 /// an "escape hatch".
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-// TODO: Use Node and derive Into?
 pub struct HtmlElementBuilder(ElementBuilderBase);
 
 impl From<HtmlElementBuilder> for Node {
