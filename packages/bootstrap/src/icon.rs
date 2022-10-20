@@ -57,13 +57,7 @@ impl From<Icon> for Node {
 
 impl From<IconBuilder> for Icon {
     fn from(icon: IconBuilder) -> Self {
-        icon.0.into()
-    }
-}
-
-impl From<IBuilder> for Icon {
-    fn from(builder: IBuilder) -> Self {
-        Self(builder.into())
+        Self(icon.0.into())
     }
 }
 
