@@ -5,7 +5,10 @@ use silkenweb::{
         html::{div, DivBuilder},
         AriaElement,
     },
-    node::{element::{ElementBuilder, Element}, Node},
+    node::{
+        element::{Element, ElementBuilder},
+        Node,
+    },
     prelude::ParentBuilder,
     value::{RefSignalOrValue, SignalOrValue},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
