@@ -21,11 +21,11 @@ pub mod css {
 
 pub type Class = &'static str;
 
-// TODO: Does anything need to use this?
 /// A generic HTML element builder
 ///
-/// Some bootstrap types, like [`Badge`](badge::Badge) will convert into this as
-/// an "escape hatch".
+/// Bootstrap builder types that don't implement `HtmlElement`, like
+/// [`BadgeBuilder`](badge::BadgeBuilder) will convert into this as an "escape
+/// hatch".
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct HtmlElementBuilder(ElementBuilderBase);
 

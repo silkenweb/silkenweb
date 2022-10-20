@@ -20,8 +20,6 @@ use crate::{button::ButtonBuilder, css, dropdown::DropdownBuilder};
 #[element_target(ButtonGroup)]
 pub struct ButtonGroupBuilder(DivBuilder);
 
-// TODO: Checkbox and radio (how do we see what's checked), active flag,
-// toolbars
 pub fn button_group<'a>(
     name: impl RefSignalOrValue<'a, Item = impl AsAttribute<String>>,
 ) -> ButtonGroupBuilder {

@@ -37,7 +37,6 @@ pub fn button(
     )
 }
 
-// TODO: Does this apply to more than buttons?
 #[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum ButtonStyle {
     Link,
