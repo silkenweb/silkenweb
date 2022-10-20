@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
+use silkenweb_base::css;
 use syn::{
     bracketed,
     parse::{Lookahead1, Parse, ParseStream, Peek},
@@ -13,8 +14,6 @@ use syn::{
     Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed, Ident,
     Index, LitStr, Meta, NestedMeta, Path, Visibility,
 };
-
-mod parser;
 
 macro_rules! derive_empty(
     (
@@ -336,7 +335,7 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
         .into_string()
         .expect("Expected path to be convertible to string");
 
-    let classes = parser::class_names(&path)
+    let classes = css::class_names(&path)
         .unwrap_or_else(|e| abort_call_site!("'{}': {}", path, e.to_string()))
         .filter(|class| {
             let include = if let Some(include_prefixes) = include_prefixes.as_ref() {

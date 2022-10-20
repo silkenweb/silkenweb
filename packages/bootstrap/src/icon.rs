@@ -8,6 +8,7 @@ use silkenweb::{
     value::SignalOrValue,
     ElementBuilder, ElementEvents, HtmlElementEvents, Value,
 };
+use silkenweb_bootstrap_macros::define_icons;
 
 use crate::{
     utility::{Colour, SetSpacing},
@@ -66,52 +67,4 @@ impl From<IBuilder> for Icon {
     }
 }
 
-// TODO: Generate all of this from a macro and the css file
-impl Icon {
-    pub fn circle() -> IconBuilder {
-        icon(IconType::Circle)
-    }
-
-    pub fn play_circle_fill() -> IconBuilder {
-        icon(IconType::PlayCircleFill)
-    }
-
-    pub fn check_circle_fill() -> IconBuilder {
-        icon(IconType::CheckCircleFill)
-    }
-
-    pub fn exclamation_triangle_fill() -> IconBuilder {
-        icon(IconType::ExclamationTriangleFill)
-    }
-
-    pub fn zoom_out() -> IconBuilder {
-        icon(IconType::ZoomOut)
-    }
-
-    pub fn zoom_in() -> IconBuilder {
-        icon(IconType::ZoomIn)
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Value)]
-pub enum IconType {
-    Circle,
-    PlayCircleFill,
-    CheckCircleFill,
-    ExclamationTriangleFill,
-    ZoomOut,
-    ZoomIn,
-}
-
-impl IconType {
-    pub fn class(self) -> Class {
-        match self {
-            Self::Circle => css::BI_CIRCLE,
-            Self::PlayCircleFill => css::BI_PLAY_CIRCLE_FILL,
-            Self::CheckCircleFill => css::BI_CHECK_CIRCLE_FILL,
-            Self::ExclamationTriangleFill => css::BI_EXCLAMATION_TRIANGLE_FILL,
-            Self::ZoomOut => css::BI_ZOOM_OUT,
-            Self::ZoomIn => css::BI_ZOOM_IN,
-        }
-    }
-}
+define_icons!("bootstrap-icons-1.9.1/bootstrap-icons.css");
