@@ -1,7 +1,6 @@
 [workspace]
 
 members = ["packages/*", "examples/*"]
-default-members = ["packages/*"]
 
 [profile.release]
 codegen-units = 1
