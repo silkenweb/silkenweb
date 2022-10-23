@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use derive_more::Into;
 use silkenweb::{
     elements::html,
@@ -14,30 +12,34 @@ use silkenweb::{
 
 use crate::{css, icon::Icon, utility::Colour, Class, HtmlElementBuilder};
 
-// TODO: Doc
-pub struct Set;
-// TODO: Doc
-pub struct Unset;
-
-pub enum State {}
 #[derive(
     Value, Into, ElementBuilder, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
 )]
-
-// TODO: This lets you `.build()` a `ButtonBuilder<Unset>`. Just have `button` and `icon_button`
-// funcions.
 #[element_target(Button)]
-pub struct ButtonBuilder<Content = Set>(HtmlElementBuilder, PhantomData<Content>);
+pub struct ButtonBuilder(HtmlElementBuilder);
 
-pub fn button(
+pub fn button<'a>(
     button_type: &str,
+    text: impl RefSignalOrValue<'a, Item = impl AsRef<str> + Into<String> + 'a>,
     style: impl SignalOrValue<Item = ButtonStyle>,
-) -> ButtonBuilder<Unset> {
+) -> ButtonBuilder {
     ButtonBuilder(
         HtmlElementBuilder(html::button().r#type(button_type).class(css::BTN).into())
             .class(style.map(ButtonStyle::class)),
-        PhantomData,
     )
+    .text(text)
+}
+
+pub fn icon_button(
+    button_type: &str,
+    icon: impl SignalOrValue<Item = impl Value + Into<Icon> + 'static>,
+    style: impl SignalOrValue<Item = ButtonStyle>,
+) -> ButtonBuilder {
+    ButtonBuilder(
+        HtmlElementBuilder(html::button().r#type(button_type).class(css::BTN).into())
+            .class(style.map(ButtonStyle::class)),
+    )
+    .icon(icon)
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Value)]
@@ -57,38 +59,32 @@ impl ButtonStyle {
     }
 }
 
-impl<Content> ButtonBuilder<Content> {
+impl ButtonBuilder {
     pub fn text<'a>(
         self,
         text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
-    ) -> ButtonBuilder<Set> {
-        ButtonBuilder::chain(HtmlElementBuilder(self.0 .0.text(text)))
+    ) -> ButtonBuilder {
+        ButtonBuilder(HtmlElementBuilder(self.0 .0.text(text)))
     }
 
     pub fn icon(
         self,
         icon: impl SignalOrValue<Item = impl Value + Into<Icon> + 'static>,
-    ) -> ButtonBuilder<Set> {
-        ButtonBuilder::chain(HtmlElementBuilder(
+    ) -> ButtonBuilder {
+        ButtonBuilder(HtmlElementBuilder(
             self.0 .0.child(icon.map(|icon| icon.into())),
         ))
     }
 }
 
-impl<Content> ButtonBuilder<Content> {
-    fn chain(elem: HtmlElementBuilder) -> Self {
-        Self(elem, PhantomData)
-    }
-}
-
-impl From<ButtonBuilder<Set>> for Element {
-    fn from(builder: ButtonBuilder<Set>) -> Self {
+impl From<ButtonBuilder> for Element {
+    fn from(builder: ButtonBuilder) -> Self {
         builder.0.into()
     }
 }
 
-impl From<ButtonBuilder<Set>> for Node {
-    fn from(builder: ButtonBuilder<Set>) -> Self {
+impl From<ButtonBuilder> for Node {
+    fn from(builder: ButtonBuilder) -> Self {
         builder.0.into()
     }
 }
