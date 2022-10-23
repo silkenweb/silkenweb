@@ -23,6 +23,9 @@ pub enum State {}
 #[derive(
     Value, Into, ElementBuilder, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
 )]
+
+// TODO: This lets you `.build()` a `ButtonBuilder<Unset>`. Just have `button` and `icon_button`
+// funcions.
 #[element_target(Button)]
 pub struct ButtonBuilder<Content = Set>(HtmlElementBuilder, PhantomData<Content>);
 
