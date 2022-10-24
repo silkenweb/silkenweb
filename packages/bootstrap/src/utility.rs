@@ -206,6 +206,17 @@ impl Size {
             Size::Size5 => css::ROUNDED_5,
         }
     }
+
+    pub fn gap(self) -> Class {
+        match self {
+            Size::Size0 => css::GAP_0,
+            Size::Size1 => css::GAP_1,
+            Size::Size2 => css::GAP_2,
+            Size::Size3 => css::GAP_3,
+            Size::Size4 => css::GAP_4,
+            Size::Size5 => css::GAP_5,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Value)]
@@ -622,9 +633,16 @@ pub trait SetAlign: ElementBuilder {
     }
 }
 
+pub trait SetGap: ElementBuilder {
+    fn gap(self, size: impl SignalOrValue<Item = Size>) -> Self {
+        self.class(size.map(Size::gap))
+    }
+}
+
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
 impl<T: ParentBuilder> SetFlex for T {}
+impl<T: ParentBuilder> SetGap for T {}
