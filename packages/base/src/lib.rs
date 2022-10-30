@@ -65,6 +65,14 @@ pub mod document {
             .unwrap_throw()
             .unwrap_throw()
     }
+
+    pub fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| doc.add_event_listener_with_callback(name, listener).unwrap_throw())
+    }
+
+    pub fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| doc.remove_event_listener_with_callback(name, listener).unwrap_throw())
+    }
 }
 
 #[cfg(target_arch = "wasm32")]

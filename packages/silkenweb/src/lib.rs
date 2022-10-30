@@ -94,7 +94,7 @@ use hydration::node::WetNode;
 use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
-use silkenweb_base::document;
+use silkenweb_base::document as base_document;
 /// Newtype derive for [`ElementBuilder`].
 ///
 /// Only non empty structs are supported. The first field must implement
@@ -113,6 +113,7 @@ pub mod macros;
 
 pub mod animation;
 pub mod attribute;
+pub mod document;
 pub mod elements;
 pub mod hydration;
 pub mod node;
@@ -149,7 +150,7 @@ pub fn mount(id: &str, node: impl Into<Node>) {
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
-    document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
+    base_document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
 }
 
 fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
