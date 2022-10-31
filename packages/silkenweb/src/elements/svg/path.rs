@@ -1,5 +1,7 @@
 use std::fmt::Write;
 
+use silkenweb_signals_ext::value::Value;
+
 use crate::attribute::{AsAttribute, Attribute};
 
 #[derive(Copy, Clone)]
@@ -8,7 +10,7 @@ pub enum Offset {
     Rel,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Data(String);
 
 impl Data {
@@ -165,3 +167,5 @@ impl Attribute for Data {
         Some(self.0.as_str().into())
     }
 }
+
+impl Value for Data {}
