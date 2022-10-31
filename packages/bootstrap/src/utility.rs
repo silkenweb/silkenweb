@@ -513,6 +513,27 @@ impl Align {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
+pub enum Position {
+    Static,
+    Relative,
+    Absolute,
+    Fixed,
+    Sticky,
+}
+
+impl Position {
+    pub fn class(self) -> Class {
+        match self {
+            Position::Static => css::POSITION_STATIC,
+            Position::Relative => css::POSITION_RELATIVE,
+            Position::Absolute => css::POSITION_ABSOLUTE,
+            Position::Fixed => css::POSITION_FIXED,
+            Position::Sticky => css::POSITION_STICKY,
+        }
+    }
+}
+
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
@@ -656,6 +677,12 @@ pub trait SetGap: ElementBuilder {
     }
 }
 
+pub trait SetPosition: ElementBuilder {
+    fn position(self, position: impl SignalOrValue<Item = Position>) -> Self {
+        self.class(position.map(Position::class))
+    }
+}
+
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
@@ -663,3 +690,4 @@ impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
 impl<T: ParentBuilder> SetFlex for T {}
 impl<T: ParentBuilder> SetGap for T {}
+impl<T: HtmlElement> SetPosition for T {}
