@@ -59,6 +59,19 @@ impl Colour {
         }
     }
 
+    pub fn link(self) -> Class {
+        match self {
+            Self::Primary => css::LINK_PRIMARY,
+            Self::Secondary => css::LINK_SECONDARY,
+            Self::Success => css::LINK_SUCCESS,
+            Self::Danger => css::LINK_DANGER,
+            Self::Warning => css::LINK_WARNING,
+            Self::Info => css::LINK_INFO,
+            Self::Light => css::LINK_LIGHT,
+            Self::Dark => css::LINK_DARK,
+        }
+    }
+
     pub fn border(self) -> Class {
         match self {
             Colour::Primary => css::BORDER_PRIMARY,
@@ -602,6 +615,10 @@ pub trait SetColour: ElementBuilder {
 
     fn text_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
         self.class(colour.map(|colour| colour.text()))
+    }
+
+    fn link_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
+        self.class(colour.map(|colour| colour.link()))
     }
 }
 
