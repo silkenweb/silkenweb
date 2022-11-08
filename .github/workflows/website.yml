@@ -6,7 +6,7 @@ on:
 jobs:
   deploy-website:
     env:
-      rust: 1.64
+      rust: 1.65
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
