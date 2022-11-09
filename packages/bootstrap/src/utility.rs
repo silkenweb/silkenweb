@@ -125,6 +125,15 @@ impl Side {
         }
     }
 
+    pub fn border(self) -> Class {
+        match self {
+            Side::Top => css::BORDER_TOP,
+            Side::Bottom => css::BORDER_BOTTOM,
+            Side::Start => css::BORDER_START,
+            Side::End => css::BORDER_END,
+        }
+    }
+
     pub fn rounded_border(self) -> Class {
         match self {
             Side::Top => css::ROUNDED_TOP,
@@ -584,6 +593,10 @@ pub trait SetBorder: ElementBuilder {
     /// Use a border
     fn border(self, active: impl SignalOrValue<Item = bool>) -> Self {
         self.classes(active.map(|active| active.then_some(css::BORDER)))
+    }
+
+    fn border_on(self, side: impl SignalOrValue<Item = Side>) -> Self {
+        self.class(side.map(|side| side.border()))
     }
 
     fn border_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
