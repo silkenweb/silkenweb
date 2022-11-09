@@ -150,7 +150,8 @@ pub fn mount(id: &str, node: impl Into<Node>) {
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
-    base_document::get_element_by_id(id).unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
+    base_document::get_element_by_id(id)
+        .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
 }
 
 fn insert_component(id: &str, parent: web_sys::Node, child: Node) {
