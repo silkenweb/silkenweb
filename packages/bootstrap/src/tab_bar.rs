@@ -99,13 +99,13 @@ pub enum Fill {
 
 pub struct TabBarItem<Base = Nav>(Node, PhantomData<Base>);
 
-impl<A: Actionable> From<A> for TabBarItem<Nav> {
+impl<A: TabBarElement> From<A> for TabBarItem<Nav> {
     fn from(elem: A) -> Self {
         Self(elem.class(css::NAV_LINK).into(), PhantomData)
     }
 }
 
-impl<A: Actionable, L: List> From<A> for TabBarItem<L> {
+impl<A: TabBarElement, L: List> From<A> for TabBarItem<L> {
     fn from(elem: A) -> Self {
         Self(
             li().class(css::NAV_ITEM)
@@ -128,9 +128,9 @@ impl<L: List> TabBarItem<L> {
     }
 }
 
-pub trait Actionable: ElementBuilder + ParentBuilder + Into<Node> + Value + 'static {}
-impl Actionable for ABuilder {}
-impl Actionable for html::ButtonBuilder {}
+pub trait TabBarElement: ElementBuilder + ParentBuilder + Into<Node> + Value + 'static {}
+impl TabBarElement for ABuilder {}
+impl TabBarElement for html::ButtonBuilder {}
 
 #[derive(Into, Value)]
 pub struct TabBar(Element);
