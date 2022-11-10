@@ -1,10 +1,16 @@
-use silkenweb::{elements::html::div, mount, prelude::ParentBuilder};
+use silkenweb::{
+    elements::html::{a, div, ABuilder},
+    mount,
+    prelude::ParentBuilder,
+};
 use silkenweb_bootstrap::{
     badge::badge,
     button::{button, ButtonStyle},
     column,
+    dropdown::dropdown_menu,
     icon::Icon,
-    utility::{Align, Colour, SetFlex, SetSpacing, Size},
+    tab_bar::{self, tab_bar, tab_bar_unordered, TabBarItem},
+    utility::{Active, Align, Colour, Disabled, SetFlex, SetSpacing, Size},
 };
 
 fn main() {
@@ -22,6 +28,38 @@ fn main() {
             div()
                 .margin(margin)
                 .child(Icon::circle().colour(Colour::Danger)),
+        )
+        .child(tab_bar().children(tab_bar_items()))
+        .child(
+            tab_bar()
+                .style(tab_bar::Style::Tabs)
+                .children(tab_bar_items()),
+        )
+        .child(
+            tab_bar()
+                .style(tab_bar::Style::Pills)
+                .children(tab_bar_items()),
+        )
+        .child(
+            tab_bar_unordered()
+                .style(tab_bar::Style::Tabs)
+                .children(tab_bar_items())
+                .child(TabBarItem::dropdown(
+                    a().href("#").text("Menu"),
+                    dropdown_menu().children([
+                        a().href("#").text("Menu item 1"),
+                        a().href("#").text("Menu item 2"),
+                    ]),
+                )),
         );
     mount("app", app);
+}
+
+fn tab_bar_items() -> impl Iterator<Item = ABuilder> {
+    [
+        a().href("#").text("Active").active(true),
+        a().href("#").text("Tab"),
+        a().href("#").text("Disabled").disabled(true),
+    ]
+    .into_iter()
 }
