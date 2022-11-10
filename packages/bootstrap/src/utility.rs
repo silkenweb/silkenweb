@@ -561,16 +561,16 @@ pub enum Display {
 impl Display {
     pub fn class(self) -> Class {
         match self {
-            Display::None => "none",
-            Display::Inline => "inline",
-            Display::InlineBlock => "inline-block",
-            Display::Block => "block",
-            Display::Grid => "grid",
-            Display::Table => "table",
-            Display::TableCell => "table-cell",
-            Display::TableRow => "table-row",
-            Display::Flex => "flex",
-            Display::InlineFlex => "inline-flex",
+            Display::None => "d-none",
+            Display::Inline => "d-inline",
+            Display::InlineBlock => "d-inline-block",
+            Display::Block => "d-block",
+            Display::Grid => "d-grid",
+            Display::Table => "d-table",
+            Display::TableCell => "d-table-cell",
+            Display::TableRow => "d-table-row",
+            Display::Flex => "d-flex",
+            Display::InlineFlex => "d-inline-flex",
         }
     }
 }
