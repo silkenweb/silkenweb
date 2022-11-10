@@ -6,7 +6,7 @@ use silkenweb::{
     },
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
-use utility::SetFlex;
+use utility::SetDisplay;
 
 pub mod badge;
 pub mod button;

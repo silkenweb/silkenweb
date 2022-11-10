@@ -544,6 +544,37 @@ impl Position {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
+pub enum Display {
+    None,
+    Inline,
+    InlineBlock,
+    Block,
+    Grid,
+    Table,
+    TableCell,
+    TableRow,
+    Flex,
+    InlineFlex,
+}
+
+impl Display {
+    pub fn class(self) -> Class {
+        match self {
+            Display::None => "none",
+            Display::Inline => "inline",
+            Display::InlineBlock => "inline-block",
+            Display::Block => "block",
+            Display::Grid => "grid",
+            Display::Table => "table",
+            Display::TableCell => "table-cell",
+            Display::TableRow => "table-row",
+            Display::Flex => "flex",
+            Display::InlineFlex => "inline-flex",
+        }
+    }
+}
+
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
@@ -657,7 +688,11 @@ pub trait SetColour: ElementBuilder {
     }
 }
 
-pub trait SetFlex: ElementBuilder {
+pub trait SetDisplay: ElementBuilder {
+    fn display(self, display: impl SignalOrValue<Item = Display>) -> Self {
+        self.class(display.map(Display::class))
+    }
+
     /// Add `d-flex` and `flex-column` classes
     fn flex_column(self) -> Self {
         self.flex(FlexDirection::Column)
@@ -714,7 +749,7 @@ impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
-impl<T: ParentBuilder> SetFlex for T {}
+impl<T: ParentBuilder> SetDisplay for T {}
 impl<T: ParentBuilder> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
 

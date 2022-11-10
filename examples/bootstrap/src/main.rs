@@ -10,7 +10,7 @@ use silkenweb_bootstrap::{
     dropdown::dropdown_menu,
     icon::Icon,
     tab_bar::{self, tab_bar, tab_bar_unordered, TabBarItem},
-    utility::{Active, Align, Colour, Disabled, SetFlex, SetSpacing, Size},
+    utility::{Active, Align, Colour, Disabled, SetDisplay, SetSpacing, Size},
 };
 
 fn main() {
