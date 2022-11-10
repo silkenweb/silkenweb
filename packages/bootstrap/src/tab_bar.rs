@@ -3,7 +3,10 @@ use std::marker::PhantomData;
 use derive_more::Into;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
-    elements::html::{self, li, nav, ABuilder, Nav},
+    elements::{
+        html::{self, li, nav, ol, ul, ABuilder, Nav, Ol, Ul},
+        AriaElement,
+    },
     node::{
         element::{Element, ElementBuilder, ElementBuilderBase},
         Node,
@@ -16,11 +19,15 @@ use silkenweb::{
 use crate::{css, dropdown::Menu, utility::SetFlex, List};
 
 pub fn tab_bar() -> TabBarBuilder<Nav> {
-    tab_bar_on()
+    TabBarBuilder(nav().class(css::NAV).into(), PhantomData)
 }
 
-pub fn tab_bar_on<Base>() -> TabBarBuilder<Base> {
-    TabBarBuilder(nav().class(css::NAV).into(), PhantomData)
+pub fn tab_bar_unordered() -> TabBarBuilder<Ul> {
+    TabBarBuilder(ul().class(css::NAV).into(), PhantomData)
+}
+
+pub fn tab_bar_ordered() -> TabBarBuilder<Ol> {
+    TabBarBuilder(ol().class(css::NAV).into(), PhantomData)
 }
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
@@ -83,20 +90,27 @@ impl<Base> TabBarBuilder<Base> {
 
 impl<Base> SetFlex for TabBarBuilder<Base> {}
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+impl<Base> From<TabBarBuilder<Base>> for Node {
+    fn from(elem: TabBarBuilder<Base>) -> Self {
+        elem.0.into()
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Style {
     Plain,
     Tabs,
     Pills,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
 pub enum Fill {
     Compact,
     Stretch,
     Justified,
 }
 
+#[derive(Value)]
 pub struct TabBarItem<Base = Nav>(Node, PhantomData<Base>);
 
 impl<A: TabBarElement> From<A> for TabBarItem<Nav> {
@@ -117,10 +131,16 @@ impl<A: TabBarElement, L: List> From<A> for TabBarItem<L> {
 }
 
 impl<L: List> TabBarItem<L> {
-    pub fn dropdown(item: TabBarItem<Nav>, menu: impl Into<Menu>) -> Self {
+    pub fn dropdown(item: impl TabBarElement, menu: impl Into<Menu>) -> Self {
         Self(
             li().class(css::NAV_ITEM)
-                .child(item.0)
+                .child(
+                    item.classes([css::NAV_LINK, css::DROPDOWN_TOGGLE])
+                        .attribute("data-bs-toggle", "dropdown")
+                        .role("button")
+                        .aria_expanded("false")
+                        .into(),
+                )
                 .child(menu.into())
                 .into(),
             PhantomData,
@@ -128,7 +148,10 @@ impl<L: List> TabBarItem<L> {
     }
 }
 
-pub trait TabBarElement: ElementBuilder + ParentBuilder + Into<Node> + Value + 'static {}
+pub trait TabBarElement:
+    ElementBuilder + AriaElement + ParentBuilder + Into<Node> + Value + 'static
+{
+}
 impl TabBarElement for ABuilder {}
 impl TabBarElement for html::ButtonBuilder {}
 
