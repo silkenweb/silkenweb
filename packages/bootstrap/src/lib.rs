@@ -1,5 +1,5 @@
 use silkenweb::{
-    elements::html::{div, DivBuilder},
+    elements::html::{div, DivBuilder, Ol, Ul},
     node::{
         element::{Element, ElementBuilderBase},
         Node,
@@ -54,3 +54,6 @@ pub fn column() -> DivBuilder {
 
 /// Marker trait for lists
 pub trait List {}
+
+impl List for Ol {}
+impl List for Ul {}

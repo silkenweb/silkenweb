@@ -3,17 +3,17 @@ use std::marker::PhantomData;
 use derive_more::Into;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
-    elements::html::{self, li, nav, ABuilder, Nav, Ul},
+    elements::html::{self, li, nav, ABuilder, Nav},
     node::{
         element::{Element, ElementBuilder, ElementBuilderBase},
         Node,
     },
     prelude::ParentBuilder,
-    value::SignalOrValue,
+    value::{SignalOrValue, Value},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
-use crate::{css, dropdown::Menu, utility::SetFlex};
+use crate::{css, dropdown::Menu, utility::SetFlex, List};
 
 pub fn tab_bar() -> TabBarBuilder<Nav> {
     tab_bar_on()
@@ -99,22 +99,14 @@ pub enum Fill {
 
 pub struct TabBarItem<Base = Nav>(Node, PhantomData<Base>);
 
-impl From<ABuilder> for TabBarItem<Nav> {
-    fn from(elem: ABuilder) -> Self {
+impl<A: Actionable> From<A> for TabBarItem<Nav> {
+    fn from(elem: A) -> Self {
         Self(elem.class(css::NAV_LINK).into(), PhantomData)
     }
 }
 
-impl From<html::ButtonBuilder> for TabBarItem<Nav> {
-    fn from(elem: html::ButtonBuilder) -> Self {
-        Self(elem.class(css::NAV_LINK).into(), PhantomData)
-    }
-}
-
-// TODO: Generate with a macro for (ul + ol) * (link + button)
-impl From<ABuilder> for TabBarItem<Ul> {
-    fn from(elem: ABuilder) -> Self {
-        // TODO: Factor some of this code out between TabBarItem<Nav|Ol|Ul * Button|Link>
+impl<A: Actionable, L: List> From<A> for TabBarItem<L> {
+    fn from(elem: A) -> Self {
         Self(
             li().class(css::NAV_ITEM)
                 .child(elem.class(css::NAV_LINK))
@@ -124,8 +116,7 @@ impl From<ABuilder> for TabBarItem<Ul> {
     }
 }
 
-// TODO: Impl for Ol using List trait
-impl TabBarItem<Ul> {
+impl<L: List> TabBarItem<L> {
     pub fn dropdown(item: TabBarItem<Nav>, menu: impl Into<Menu>) -> Self {
         Self(
             li().class(css::NAV_ITEM)
@@ -136,6 +127,10 @@ impl TabBarItem<Ul> {
         )
     }
 }
+
+pub trait Actionable: ElementBuilder + ParentBuilder + Into<Node> + Value + 'static {}
+impl Actionable for ABuilder {}
+impl Actionable for html::ButtonBuilder {}
 
 #[derive(Into, Value)]
 pub struct TabBar(Element);
