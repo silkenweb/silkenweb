@@ -1,4 +1,5 @@
 use silkenweb::{
+    elements::html,
     node::element::ElementBuilder,
     prelude::{HtmlElement, ParentBuilder},
     value::SignalOrValue,
@@ -696,6 +697,18 @@ pub trait SetPosition: ElementBuilder {
     }
 }
 
+pub trait Active: ElementBuilder {
+    fn active(self, is_active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(is_active.map(|flag| flag.then_some(css::ACTIVE)))
+    }
+}
+
+pub trait Disabled: ElementBuilder {
+    fn disabled(self, is_disabled: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(is_disabled.map(|flag| flag.then_some(css::DISABLED)))
+    }
+}
+
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
@@ -704,3 +717,8 @@ impl<T: HtmlElement> SetAlign for T {}
 impl<T: ParentBuilder> SetFlex for T {}
 impl<T: ParentBuilder> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
+
+impl Active for html::ABuilder {}
+impl Active for html::ButtonBuilder {}
+
+impl Disabled for html::ABuilder {}

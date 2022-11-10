@@ -13,6 +13,7 @@ pub mod button;
 pub mod button_group;
 pub mod dropdown;
 pub mod icon;
+pub mod tab_bar;
 pub mod utility;
 
 pub mod css {
