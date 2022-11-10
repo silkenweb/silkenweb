@@ -51,3 +51,6 @@ pub fn row() -> DivBuilder {
 pub fn column() -> DivBuilder {
     div().flex_column()
 }
+
+/// Marker trait for lists
+pub trait List {}

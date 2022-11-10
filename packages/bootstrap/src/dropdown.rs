@@ -98,7 +98,7 @@ impl MenuBuilder {
     }
 }
 
-#[derive(Value)]
+#[derive(Value, Into)]
 pub struct Menu(Node);
 
 impl From<MenuBuilder> for Menu {
