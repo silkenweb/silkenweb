@@ -1,18 +1,19 @@
 use silkenweb::{
-    elements::html::{div, DivBuilder},
+    elements::html::{div, DivBuilder, Ol, Ul},
     node::{
         element::{Element, ElementBuilderBase},
         Node,
     },
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
-use utility::SetFlex;
+use utility::SetDisplay;
 
 pub mod badge;
 pub mod button;
 pub mod button_group;
 pub mod dropdown;
 pub mod icon;
+pub mod tab_bar;
 pub mod utility;
 
 pub mod css {
@@ -50,3 +51,9 @@ pub fn row() -> DivBuilder {
 pub fn column() -> DivBuilder {
     div().flex_column()
 }
+
+/// Marker trait for lists
+pub trait List {}
+
+impl List for Ol {}
+impl List for Ul {}

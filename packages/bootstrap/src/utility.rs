@@ -1,4 +1,5 @@
 use silkenweb::{
+    elements::html,
     node::element::ElementBuilder,
     prelude::{HtmlElement, ParentBuilder},
     value::SignalOrValue,
@@ -543,6 +544,37 @@ impl Position {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Value)]
+pub enum Display {
+    None,
+    Inline,
+    InlineBlock,
+    Block,
+    Grid,
+    Table,
+    TableCell,
+    TableRow,
+    Flex,
+    InlineFlex,
+}
+
+impl Display {
+    pub fn class(self) -> Class {
+        match self {
+            Display::None => "d-none",
+            Display::Inline => "d-inline",
+            Display::InlineBlock => "d-inline-block",
+            Display::Block => "d-block",
+            Display::Grid => "d-grid",
+            Display::Table => "d-table",
+            Display::TableCell => "d-table-cell",
+            Display::TableRow => "d-table-row",
+            Display::Flex => "d-flex",
+            Display::InlineFlex => "d-inline-flex",
+        }
+    }
+}
+
 pub trait SetSpacing: ElementBuilder {
     /// Set the margin size
     ///
@@ -656,7 +688,11 @@ pub trait SetColour: ElementBuilder {
     }
 }
 
-pub trait SetFlex: ElementBuilder {
+pub trait SetDisplay: ElementBuilder {
+    fn display(self, display: impl SignalOrValue<Item = Display>) -> Self {
+        self.class(display.map(Display::class))
+    }
+
     /// Add `d-flex` and `flex-column` classes
     fn flex_column(self) -> Self {
         self.flex(FlexDirection::Column)
@@ -696,11 +732,28 @@ pub trait SetPosition: ElementBuilder {
     }
 }
 
+pub trait Active: ElementBuilder {
+    fn active(self, is_active: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(is_active.map(|flag| flag.then_some(css::ACTIVE)))
+    }
+}
+
+pub trait Disabled: ElementBuilder {
+    fn disabled(self, is_disabled: impl SignalOrValue<Item = bool>) -> Self {
+        self.classes(is_disabled.map(|flag| flag.then_some(css::DISABLED)))
+    }
+}
+
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
 impl<T: ParentBuilder> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
-impl<T: ParentBuilder> SetFlex for T {}
+impl<T: ParentBuilder> SetDisplay for T {}
 impl<T: ParentBuilder> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
+
+impl Active for html::ABuilder {}
+impl Active for html::ButtonBuilder {}
+
+impl Disabled for html::ABuilder {}
