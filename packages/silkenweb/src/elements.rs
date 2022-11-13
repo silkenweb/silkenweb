@@ -270,6 +270,7 @@ pub trait HtmlElementEvents: ElementBuilder {
         pointerout: web_sys::PointerEvent,
         pointerover: web_sys::PointerEvent,
         pointerup: web_sys::PointerEvent,
+        transitioncancel: web_sys::TransitionEvent,
         transitionend: web_sys::TransitionEvent,
     });
 }
