@@ -241,14 +241,14 @@ macro_rules! dom_element {
                         Self { builder: self.builder.class(class) }
             }
 
-        fn classes<'a, T, Iter>(
-            self,
-            classes: impl $crate::value::RefSignalOrValue<'a, Item = Iter>,
-        ) -> Self
-            where
-                T: 'a + AsRef<str>,
-                Iter: 'a + IntoIterator<Item = T>,
-        {
+            fn classes<'a, T, Iter>(
+                self,
+                classes: impl $crate::value::RefSignalOrValue<'a, Item = Iter>,
+            ) -> Self
+                where
+                    T: 'a + AsRef<str>,
+                    Iter: 'a + IntoIterator<Item = T>,
+            {
                 Self { builder: self.builder.classes(classes) }
             }
 
