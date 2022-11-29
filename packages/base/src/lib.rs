@@ -83,8 +83,7 @@ pub mod document {
 
 #[cfg(target_arch = "wasm32")]
 pub fn intern_str(s: &str) -> &str {
-    use wasm_bindgen::intern;
-    intern(s)
+    wasm_bindgen::intern(s)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
