@@ -15,7 +15,7 @@ use rand::{
 use silkenweb::{
     clone,
     elements::{
-        html::{a, button, div, h1, span, table, tbody, td, tr, ABuilder, Div, Table, Tr},
+        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
         ElementEvents, HtmlElement,
     },
     mount,
@@ -80,14 +80,6 @@ impl Row {
     }
 
     fn render(&self, app: Rc<App>) -> Tr {
-        thread_local! {
-                static REMOVE_LINK: ABuilder = a().child(
-                span()
-                    .classes(["glyphicon", "glyphicon-remove"])
-                    .attribute("aria-hidden", "true"),
-            );
-        }
-
         let id = self.id;
 
         tr().classes(Sig(app
@@ -103,9 +95,12 @@ impl Row {
                         move |_, _| app.select_row(id)
                     })),
                 td().class("col-md-1").child(
-                    REMOVE_LINK
-                        .with(|rl| rl.clone_node())
-                        .on_click(move |_, _| app.remove_row(id)),
+                    a().child(
+                        span()
+                            .classes(["glyphicon", "glyphicon-remove"])
+                            .attribute("aria-hidden", "true"),
+                    )
+                    .on_click(move |_, _| app.remove_row(id)),
                 ),
                 td().class("col-md-6"),
             ])
