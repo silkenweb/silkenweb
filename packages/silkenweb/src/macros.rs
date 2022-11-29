@@ -305,6 +305,10 @@ macro_rules! dom_element {
             fn build(self) -> Self::Target {
                 $camel_name(self.builder.build())
             }
+
+            fn clone_node(&self) -> Self {
+                Self{ builder: self.builder.clone_node() }
+            }
         }
 
         impl ::std::fmt::Display for $camel_name {

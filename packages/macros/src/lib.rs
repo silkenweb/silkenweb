@@ -171,6 +171,10 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
             fn build(self) -> Self::Target {
                 #build_fn_body
             }
+
+            fn clone_node(&self) -> Self {
+                Self{#derive_field: self.#derive_field.clone_node() #fields_tail}
+            }
         }
     )
     .into()

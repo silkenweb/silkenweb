@@ -1,5 +1,5 @@
 use std::{
-    cell::{RefCell, RefMut},
+    cell::{Ref, RefCell, RefMut},
     fmt::{self, Display},
     rc::{Rc, Weak},
 };
@@ -143,6 +143,17 @@ impl HydrationElement {
         WeakHydrationElement(Rc::downgrade(&self.0))
     }
 
+    pub fn clone_node(&self) -> Self {
+        Self(Rc::new(RefCell::new(self.borrow().map_self(
+            |elem| elem.clone_node(),
+            |elem| elem.clone_node(),
+        ))))
+    }
+
+    fn borrow(&self) -> Ref<Lazy<WetElement, DryElement>> {
+        self.0.borrow()
+    }
+
     fn borrow_mut(&self) -> RefMut<Lazy<WetElement, DryElement>> {
         self.0.borrow_mut()
     }
@@ -206,6 +217,17 @@ impl HydrationText {
         Rc::weak_count(&self.0) != 0
     }
 
+    pub fn clone_node(&self) -> Self {
+        Self(Rc::new(RefCell::new(self.borrow().map_self(
+            |text| text.clone_node(),
+            |text| text.clone_node(),
+        ))))
+    }
+
+    fn borrow(&self) -> Ref<Lazy<WetText, DryText>> {
+        self.0.borrow()
+    }
+
     fn borrow_mut(&self) -> RefMut<Lazy<WetText, DryText>> {
         self.0.borrow_mut()
     }
@@ -249,6 +271,13 @@ impl HydrationNodeData {
             HydrationNodeEnum::Element(elem) => elem.hydrate_child(parent, child, tracker).into(),
             HydrationNodeEnum::Text(text) => text.hydrate_child(parent, child, tracker).into(),
         }
+    }
+
+    pub fn clone_node(&self) -> Self {
+        Self(match &self.0 {
+            HydrationNodeEnum::Element(elem) => HydrationNodeEnum::Element(elem.clone_node()),
+            HydrationNodeEnum::Text(text) => HydrationNodeEnum::Text(text.clone_node()),
+        })
     }
 
     fn take_wet_event_callbacks(&mut self) -> Vec<EventCallback> {

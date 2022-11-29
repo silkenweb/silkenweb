@@ -472,6 +472,16 @@ impl ElementBuilder for ElementBuilderBase {
             self.element
         }
     }
+
+    fn clone_node(&self) -> Self {
+        Self {
+            element: self.element.clone_node(),
+            has_preceding_children: self.has_preceding_children,
+            child_builder: None,
+            #[cfg(debug_assertions)]
+            attributes: self.attributes.clone(),
+        }
+    }
 }
 
 impl Executor for ElementBuilderBase {
@@ -521,6 +531,13 @@ impl Element {
 
     pub(super) fn take_resources(&mut self) -> Vec<Resource> {
         mem::take(&mut self.resources)
+    }
+
+    fn clone_node(&self) -> Self {
+        Self {
+            hydro_elem: self.hydro_elem.clone_node(),
+            resources: Vec::new(),
+        }
     }
 }
 
@@ -644,6 +661,9 @@ pub trait ElementBuilder: Sized {
     fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
 
     fn build(self) -> Self::Target;
+
+    // TODO: Doc
+    fn clone_node(&self) -> Self;
 }
 
 /// An element that is allowed to have children.

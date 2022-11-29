@@ -5,7 +5,7 @@ use std::{
 
 use html_escape::encode_text_minimal;
 use silkenweb_base::{document, intern_str};
-use wasm_bindgen::{JsValue, UnwrapThrowExt};
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{event::EventCallback, HydrationNodeData, Namespace, WetNode};
 use crate::{attribute::Attribute, task::on_animation_frame};
@@ -97,6 +97,18 @@ impl WetElement {
         on_animation_frame(move || f(&dom_element));
     }
 
+    pub fn clone_node(&self) -> Self {
+        Self {
+            dom_element: self
+                .dom_element
+                .clone_node_with_deep(true)
+                .unwrap()
+                .dyn_into()
+                .unwrap(),
+            event_callbacks: Vec::new(),
+        }
+    }
+
     pub(super) fn take_event_callbacks(&mut self) -> Vec<EventCallback> {
         mem::take(&mut self.event_callbacks)
     }
@@ -135,6 +147,16 @@ impl WetText {
 
     pub fn set_text(&mut self, text: String) {
         self.0.set_text_content(Some(&text));
+    }
+
+    pub fn clone_node(&self) -> Self {
+        Self(
+            self.0
+                .clone_node_with_deep(true)
+                .unwrap()
+                .dyn_into()
+                .unwrap(),
+        )
     }
 }
 

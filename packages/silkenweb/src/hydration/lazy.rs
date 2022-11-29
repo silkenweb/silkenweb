@@ -32,6 +32,17 @@ mod select_impl {
             }
         }
 
+        pub fn map_self(
+            &self,
+            f_dry: impl FnOnce(&Dry) -> Dry,
+            f_wet: impl FnOnce(&Wet) -> Wet,
+        ) -> Self {
+            Self(match &self.0 {
+                LazyEnum::Wet(wet) => LazyEnum::Wet(f_wet(wet)),
+                LazyEnum::Dry(dry) => LazyEnum::Dry(Some(f_dry(dry.as_ref().unwrap()))),
+            })
+        }
+
         pub fn map<Arg, R>(
             &mut self,
             arg: Arg,
@@ -140,6 +151,17 @@ mod select_impl {
             self.wet()
         }
 
+        pub fn map_self(
+            &self,
+            _f_dry: impl FnOnce(&Dry) -> Dry,
+            f_wet: impl FnOnce(&Wet) -> Wet,
+        ) -> Self {
+            Self {
+                wet: f_wet(&self.wet),
+                phantom: PhantomData,
+            }
+        }
+
         pub fn map<Arg, R>(
             &mut self,
             arg: Arg,
@@ -206,6 +228,17 @@ mod select_impl {
 
         pub fn wet_with(&mut self, _f: impl FnOnce(Dry) -> Wet) -> &mut Wet {
             panic!("Build is configured for dry items only")
+        }
+
+        pub fn map_self(
+            &self,
+            f_dry: impl FnOnce(&Dry) -> Dry,
+            _f_wet: impl FnOnce(&Wet) -> Wet,
+        ) -> Self {
+            Self {
+                dry: f_dry(&self.dry),
+                wet: PhantomData,
+            }
         }
 
         pub fn map<Arg, R>(

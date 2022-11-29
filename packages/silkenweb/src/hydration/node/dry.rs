@@ -246,6 +246,21 @@ impl DryElement {
             .push(Box::new(move |element| element.effect(f)))
     }
 
+    pub fn clone_node(&self) -> Self {
+        Self {
+            namespace: self.namespace,
+            tag: self.tag.clone(),
+            attributes: self.attributes.clone(),
+            children: self
+                .children
+                .iter()
+                .map(HydrationNodeData::clone_node)
+                .collect(),
+            stored_children: Vec::new(),
+            hydrate_actions: Vec::new(),
+        }
+    }
+
     fn requires_closing_tag(&self) -> bool {
         ![
             "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta",
@@ -350,6 +365,10 @@ impl DryText {
 
     pub fn set_text(&mut self, text: String) {
         self.0 = text;
+    }
+
+    pub fn clone_node(&self) -> Self {
+        Self(self.0.clone())
     }
 }
 
