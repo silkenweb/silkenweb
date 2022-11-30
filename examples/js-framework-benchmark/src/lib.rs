@@ -16,7 +16,7 @@ use silkenweb::{
     clone,
     elements::{
         html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
-        ElementEvents, HtmlElement,
+        AriaElement, ElementEvents, HtmlElement,
     },
     mount,
     node::element::{ElementBuilder, ParentBuilder},
@@ -98,7 +98,7 @@ impl Row {
                     a().child(
                         span()
                             .classes(["glyphicon", "glyphicon-remove"])
-                            .attribute("aria-hidden", "true"),
+                            .aria_hidden("true"),
                     )
                     .on_click(move |_, _| app.remove_row(id)),
                 ),
