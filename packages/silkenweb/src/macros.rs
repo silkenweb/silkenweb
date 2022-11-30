@@ -195,7 +195,7 @@ macro_rules! dom_element {
         $(#[$elem_meta])*
         pub fn $snake_name() -> $camel_builder_name {
             $camel_builder_name { builder: $crate::create_element_fn!(
-                $($namespace, )? $crate::macros::intern_str($text_name)
+                $($namespace, )? $crate::intern_static_str!($text_name)
             ) }
         }
 
@@ -614,7 +614,7 @@ macro_rules! attribute {
         where
             T: $crate::attribute::AsAttribute<$typ>
         {
-            $crate::node::element::ElementBuilder::attribute(self, $crate::macros::intern_str($text_attr), value)
+            $crate::node::element::ElementBuilder::attribute(self, $crate::intern_static_str!($text_attr), value)
         }
     };
 }
@@ -623,7 +623,7 @@ macro_rules! attribute {
 #[macro_export]
 macro_rules! text_name_intern {
     ($($name:tt)*) => {
-        $crate::macros::intern_str($crate::text_name!($($name)*))
+        $crate::intern_static_str!($crate::text_name!($($name)*))
     }
 }
 
@@ -636,4 +636,16 @@ macro_rules! text_name {
     ($name:ident) => {
         $crate::macros::rust_to_html_ident!($name)
     };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! intern_static_str {
+    ($s:expr) => {{
+        ::std::thread_local! {
+            static NAME: &'static str = $crate::macros::intern_str($s);
+        }
+
+        NAME.with(|name| *name)
+    }};
 }

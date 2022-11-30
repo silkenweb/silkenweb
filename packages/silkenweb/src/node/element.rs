@@ -30,7 +30,7 @@ use futures_signals::{
     signal_vec::{MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
     CancelableFutureHandle,
 };
-use silkenweb_base::{clone, intern_str};
+use silkenweb_base::{clone, empty_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
@@ -185,7 +185,7 @@ impl ParentBuilder for ElementBuilderBase {
         child.for_each(
             text_value,
             |builder| {
-                let mut text_node = HydrationText::new(intern_str(""));
+                let mut text_node = HydrationText::new(empty_str());
                 builder.element.hydro_elem.append_child(text_node.clone());
 
                 move |new_value| {
