@@ -30,7 +30,7 @@ use futures_signals::{
     signal_vec::{MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
     CancelableFutureHandle,
 };
-use silkenweb_base::{clone, empty_str};
+use silkenweb_base::{clone, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
@@ -309,14 +309,19 @@ impl ElementBuilder for ElementBuilderBase {
                 element.remove_class(previous.as_ref());
             }
 
-            element.add_class(class.as_ref());
+            element.add_class(intern_str(class.as_ref()));
             previous_value.set(Some(class));
 
             async {}
         }
 
         class.for_each(
-            |builder, class| builder.element.hydro_elem.add_class(class.as_ref()),
+            |builder, class| {
+                builder
+                    .element
+                    .hydro_elem
+                    .add_class(intern_str(class.as_ref()))
+            },
             |builder| {
                 let mut element = builder.element.hydro_elem.clone();
                 let previous_value: PreviousValue<T> = Rc::new(Cell::new(None));
@@ -343,7 +348,7 @@ impl ElementBuilder for ElementBuilderBase {
             let element = &mut builder.element.hydro_elem;
 
             for class in classes {
-                element.add_class(class.as_ref());
+                element.add_class(intern_str(class.as_ref()));
             }
         }
 
@@ -367,7 +372,7 @@ impl ElementBuilder for ElementBuilderBase {
             previous.clear();
 
             for to_add in classes {
-                element.add_class(to_add.as_ref());
+                element.add_class(intern_str(to_add.as_ref()));
                 previous.push(to_add);
             }
 
