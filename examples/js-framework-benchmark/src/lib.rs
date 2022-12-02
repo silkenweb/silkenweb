@@ -64,6 +64,7 @@ const NOUNS: &[&str] = &[
 struct Row {
     id: usize,
     label: Mutable<String>,
+    selected: Mutable<bool>,
 }
 
 impl Row {
@@ -76,23 +77,24 @@ impl Row {
                 COLOURS.choose(rng).unwrap_throw(),
                 NOUNS.choose(rng).unwrap_throw()
             )),
+            selected: Mutable::new(false),
         })
     }
 
     fn render(&self, app: Rc<App>) -> Tr {
         let id = self.id;
 
-        tr().classes(Sig(app
-            .selected_row_id
-            .signal_ref(move |selected| *selected == Some(id))
-            .dedupe()
+        tr().classes(Sig(self
+            .selected
+            .signal()
             .map(|selected| selected.then_some("danger"))))
             .children([
                 td().class("col-md-1").text(&id.to_string()),
                 td().class("col-md-4")
                     .child(a().text(Sig(self.label.signal_cloned())).on_click({
+                        let selected = self.selected.clone();
                         clone!(app);
-                        move |_, _| app.select_row(id)
+                        move |_, _| app.select_row(selected.clone())
                     })),
                 td().class("col-md-1").child(
                     a().child(
@@ -110,7 +112,7 @@ impl Row {
 
 struct App {
     data: MutableVec<Rc<Row>>,
-    selected_row_id: Mutable<Option<usize>>,
+    selected_row: Cell<Option<Mutable<bool>>>,
     next_row_id: Cell<usize>,
     rng: RefCell<SmallRng>,
 }
@@ -119,7 +121,7 @@ impl App {
     fn new() -> Rc<Self> {
         Rc::new(Self {
             data: MutableVec::new(),
-            selected_row_id: Mutable::new(None),
+            selected_row: Cell::new(None),
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
         })
@@ -127,7 +129,7 @@ impl App {
 
     fn clear(&self) {
         self.data.lock_mut().clear();
-        self.selected_row_id.set(None);
+        self.selected_row.replace(None);
     }
 
     fn append(&self, count: usize) {
@@ -153,8 +155,12 @@ impl App {
         self.data.lock_mut().swap(1, 998);
     }
 
-    fn select_row(&self, row_id: usize) {
-        self.selected_row_id.set(Some(row_id));
+    fn select_row(&self, selected: Mutable<bool>) {
+        selected.set(true);
+
+        if let Some(current) = self.selected_row.replace(Some(selected)) {
+            current.set(false);
+        }
     }
 
     fn remove_row(&self, row_id: usize) {
