@@ -194,9 +194,16 @@ macro_rules! dom_element {
         )?
         $(#[$elem_meta])*
         pub fn $snake_name() -> $camel_builder_name {
-            $camel_builder_name { builder: $crate::create_element_fn!(
-                $($namespace, )? $crate::intern_static_str!($text_name)
-            ) }
+            thread_local!{
+                static ELEM: $crate::node::element::ElementBuilderBase =
+                    $crate::create_element_fn!($($namespace, )? $text_name);
+            }
+
+            ELEM.with(|elem| {
+                $camel_builder_name {
+                    builder: $crate::node::element::ElementBuilder::clone_node(elem)
+                }
+            })
         }
 
         pub struct $camel_builder_name {
