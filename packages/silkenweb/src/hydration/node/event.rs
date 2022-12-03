@@ -15,7 +15,7 @@ impl EventCallback {
         name: &'static str,
         f: impl FnMut(JsValue) + 'static,
     ) -> Self {
-        let callback = Closure::wrap(Box::new(f) as Box<dyn FnMut(JsValue)>);
+        let callback = Closure::new(f);
         target
             .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
             .unwrap_throw();
