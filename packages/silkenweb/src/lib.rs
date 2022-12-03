@@ -173,6 +173,25 @@ pub fn unmount(id: &str) {
     }
 }
 
+// TODO: Doc
+#[macro_export]
+macro_rules! cache {
+    ($node:expr) => {{
+        use ::std::any::Any;
+
+        // We've got no way to name the type of `$expr`, so we have to use `Any`.
+        thread_local! {
+            static NODE: Box<dyn Any> = Box::new($node);
+        }
+
+        fn cast<T: 'static>(_f: impl FnOnce() -> T, x: &Box<dyn Any>) -> &T {
+            x.downcast_ref().unwrap()
+        }
+
+        NODE.with(|node| cast(|| $node, node).clone_node())
+    }};
+}
+
 thread_local!(
     static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node)>> =
         RefCell::new(HashMap::new());

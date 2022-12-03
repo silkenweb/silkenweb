@@ -20,7 +20,7 @@ use silkenweb::{
     },
     mount,
     node::element::{ElementBuilder, ParentBuilder},
-    value::Sig,
+    value::Sig, cache,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -89,22 +89,23 @@ impl Row {
             .signal()
             .map(|selected| selected.then_some("danger"))))
             .children([
-                td().class("col-md-1").text(&id.to_string()),
-                td().class("col-md-4")
-                    .child(a().text(Sig(self.label.signal_cloned())).on_click({
+                cache!(td().class("col-md-1")).text(&id.to_string()),
+                cache!(td().class("col-md-4")).child(
+                    a().text(Sig(self.label.signal_cloned())).on_click({
                         let selected = self.selected.clone();
                         clone!(app);
                         move |_, _| app.select_row(selected.clone())
-                    })),
-                td().class("col-md-1").child(
-                    a().child(
+                    }),
+                ),
+                cache!(td().class("col-md-1")).child(
+                    cache!(a().child(
                         span()
                             .classes(["glyphicon", "glyphicon-remove"])
                             .aria_hidden("true"),
-                    )
+                    ))
                     .on_click(move |_, _| app.remove_row(id)),
                 ),
-                td().class("col-md-6"),
+                cache!(td().class("col-md-6")),
             ])
             .build()
     }
