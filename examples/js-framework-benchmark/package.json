@@ -8,16 +8,11 @@
   },
   "scripts": {
     "build-prod": "echo This is a no-op. && echo Due to heavy dependencies, the generated javascript is already provided. && echo If you really want to rebuild from source use: && echo npm run build-prod-force",
-    "build-prod-force": "rimraf bundled-dist pkg && webpack"
+    "build-prod-force": "trunk build --release"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/krausest/js-framework-benchmark.git"
   },
-  "devDependencies": {
-    "@wasm-tool/wasm-pack-plugin": "^1.6.0",
-    "rimraf": "^3.0.2",
-    "webpack": "^5.65.0",
-    "webpack-cli": "^4.9.1"
-  }
+  "devDependencies": {}
 }

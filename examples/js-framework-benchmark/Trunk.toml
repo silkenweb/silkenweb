@@ -1,0 +1,12 @@
+[build]
+target = "trunk-target.html"
+public_url = "/frameworks/keyed/silkenweb/dist/"
+
+[tools]
+wasm_bindgen = "0.2.83"
+wasm_opt = "version_111"
+
+[[hooks]]
+stage = "post_build"
+command = "sh"
+command_arguments = ["-c", "cp \"$TRUNK_STAGING_DIR/index.html\" ."]
