@@ -13,14 +13,14 @@ use rand::{
     Rng, SeedableRng,
 };
 use silkenweb::{
-    clone,
+    cache, clone,
     elements::{
         html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
         AriaElement, ElementEvents, HtmlElement,
     },
     mount,
     node::element::{ElementBuilder, ParentBuilder},
-    value::Sig, cache,
+    value::Sig,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
