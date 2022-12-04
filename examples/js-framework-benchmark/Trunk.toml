@@ -9,4 +9,10 @@ wasm_opt = "version_111"
 [[hooks]]
 stage = "post_build"
 command = "sh"
-command_arguments = ["-c", "cp \"$TRUNK_STAGING_DIR/index.html\" ."]
+# `rsync` using a checksum rather than file times, otherwise `trunk serve` gets
+# into a loop where it builds, modifies `index.html`, which triggers another 
+# build.
+command_arguments = [
+    "-c",
+    "rsync --checksum \"$TRUNK_STAGING_DIR/index.html\" .",
+]
