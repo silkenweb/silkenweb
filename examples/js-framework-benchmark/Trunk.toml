@@ -2,6 +2,9 @@
 target = "trunk-target.html"
 public_url = "/frameworks/keyed/silkenweb/dist/"
 
+[watch]
+ignore = ["index.html"]
+
 [tools]
 wasm_bindgen = "0.2.83"
 wasm_opt = "version_111"
