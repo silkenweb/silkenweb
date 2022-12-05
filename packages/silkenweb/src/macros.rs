@@ -5,6 +5,25 @@ pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
+// TODO: Doc
+#[macro_export]
+macro_rules! cache {
+    ($node:expr) => {{
+        use ::std::any::Any;
+
+        // We've got no way to name the type of `$expr`, so we have to use `Any`.
+        thread_local! {
+            static NODE: Box<dyn Any> = Box::new($node);
+        }
+
+        fn cast<T: 'static>(_f: impl FnOnce() -> T, x: &Box<dyn Any>) -> &T {
+            x.downcast_ref().unwrap()
+        }
+
+        NODE.with(|node| cast(|| $node, node).clone_node())
+    }};
+}
+
 /// Define a custom html element.
 ///
 /// This will define a builder struct for an html element, with a method for
