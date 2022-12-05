@@ -8,8 +8,6 @@ pub struct Sig<T>(pub T);
 // TODO: Doc
 pub struct Val<T>(pub T);
 
-impl<T> Value for Val<T> {}
-
 // TODO: Doc
 pub trait RefSignalOrValue<'a> {
     type Item: 'a;
@@ -142,6 +140,57 @@ where
         FSig: FnOnce(Data, Self) -> Out,
     {
         fn_val(data, self)
+    }
+}
+
+impl<'a, T> RefSignalOrValue<'a> for Val<T>
+where
+    T: 'static,
+{
+    type Item = T;
+    type Map<'b, F, R> = R
+    where
+        'b: 'a,
+        F: FnMut(Self::Item) -> R + 'b,
+        R: RefSignalOrValue<'b, Item = R> + 'b;
+
+    fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
+    where
+        R: RefSignalOrValue<'b, Item = R> + 'b,
+        F: FnMut(Self::Item) -> R + 'b,
+    {
+        callback(self.0)
+    }
+
+    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
+        self,
+        fn_val: FVal,
+        _fn_init_sig: FInitSig,
+        executor: &mut Exec,
+    ) where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FInitSig: FnOnce(&mut Exec) -> FSig,
+        FSig: FnMut(Self::Item) -> Task + 'a,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor,
+    {
+        fn_val(executor, self.0);
+    }
+
+    fn select<FVal, FSig, Data>(self, fn_val: FVal, _fn_sig: FSig, data: &mut Data)
+    where
+        FVal: FnOnce(&mut Data, Self::Item),
+        FSig: FnOnce(&mut Data, Self),
+    {
+        fn_val(data, self.0);
+    }
+
+    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
+    where
+        FVal: FnOnce(Data, Self::Item) -> Out,
+        FSig: FnOnce(Data, Self) -> Out,
+    {
+        fn_val(data, self.0)
     }
 }
 
