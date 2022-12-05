@@ -2,6 +2,8 @@
 
 ## Next
 
+<!-- TODO: Update changelog -->
+
 - `impl From<String> for UrlPath`
 - Use `serde_wasm_bindgen` for Tauri serialization to fix warnings about serde_json.
 - Rename `html_element` to `custom_html_element`
