@@ -64,7 +64,7 @@ macro_rules! events{
     )*}}
 }
 
-events!{
+events! {
     auxclick: web_sys::MouseEvent,
     click: web_sys::MouseEvent,
     compositionend: web_sys::CompositionEvent,
