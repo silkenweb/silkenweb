@@ -74,9 +74,11 @@ impl CalendarBuilder {
         )
     }
 
-    pub fn selected_dates_signal(self, dates: impl SignalVec<Item = String> + 'static) -> Calendar {
-        self.0
-            .children_signal(dates.map(|date| ui5_date().value(date)))
+    pub fn selected_dates_signal(self, dates: impl SignalVec<Item = String> + 'static) -> Self {
+        Self(
+            self.0
+                .children_signal(dates.map(|date| ui5_date().value(date))),
+        )
     }
 
     pub fn on_selected_dates_change(

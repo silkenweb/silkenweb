@@ -16,9 +16,8 @@ use silkenweb::{
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 use self::elements::{
-    ui5_side_navigation, ui5_side_navigation_item, ui5_side_navigation_sub_item, Ui5SideNavigation,
-    Ui5SideNavigationBuilder, Ui5SideNavigationItem, Ui5SideNavigationItemBuilder,
-    Ui5SideNavigationSubItemBuilder,
+    ui5_side_navigation, ui5_side_navigation_item, ui5_side_navigation_sub_item,
+    Ui5SideNavigationBuilder, Ui5SideNavigationItemBuilder, Ui5SideNavigationSubItemBuilder,
 };
 use crate::{icon::Icon, SELECTED_ID};
 
@@ -102,8 +101,8 @@ where
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = SideNavigationItemBuilder<Id>> + 'static,
-    ) -> Ui5SideNavigation {
-        self.0.children_signal(children)
+    ) -> Self {
+        Self(self.0.children_signal(children), PhantomData)
     }
 
     pub fn on_selection_change(
@@ -187,8 +186,8 @@ where
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = SideNavigationSubItemBuilder<Id>> + 'static,
-    ) -> Ui5SideNavigationItem {
-        self.0.children_signal(children)
+    ) -> Self {
+        Self(self.0.children_signal(children), PhantomData)
     }
 }
 

@@ -209,9 +209,12 @@ where
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = (Id, AvatarBuilder)> + 'static,
-    ) -> AvatarGroup {
-        self.0.children_signal(
-            children.map(|(id, avatar)| avatar.attribute(SELECTED_ID, id.to_string()).0),
+    ) -> Self {
+        Self(
+            self.0.children_signal(
+                children.map(|(id, avatar)| avatar.attribute(SELECTED_ID, id.to_string()).0),
+            ),
+            PhantomData,
         )
     }
 

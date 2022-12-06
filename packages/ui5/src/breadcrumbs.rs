@@ -150,9 +150,13 @@ where
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = (Id, BreadcrumbsItemBuilder)> + 'static,
-    ) -> Ui5Breadcrumbs {
-        self.0
-            .children_signal(children.map(|(id, item)| item.attribute(SELECTED_ID, id.to_string())))
+    ) -> Self {
+        Self(
+            self.0.children_signal(
+                children.map(|(id, item)| item.attribute(SELECTED_ID, id.to_string())),
+            ),
+            PhantomData,
+        )
     }
 
     pub fn on_item_click(

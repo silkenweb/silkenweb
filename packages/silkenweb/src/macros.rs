@@ -457,8 +457,8 @@ macro_rules! parent_element {
             fn children_signal(
                 self,
                 children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node>> + 'static,
-            ) -> Self::Target {
-                [< $name:camel >] (self.builder.children_signal(children))
+            ) -> Self {
+                Self{ builder: self.builder.children_signal(children) }
             }
         }
     }};

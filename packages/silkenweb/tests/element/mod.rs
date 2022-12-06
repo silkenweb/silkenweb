@@ -328,7 +328,8 @@ pub async fn children_signal_test(
     ) {
         let children = MutableVec::<usize>::new_with_values(initial.to_vec());
         let element = initial_elem
-            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
+            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))))
+            .build();
 
         f(children.lock_mut());
         let mut expected_html = String::new();

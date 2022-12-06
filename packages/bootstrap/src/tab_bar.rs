@@ -83,8 +83,11 @@ impl<Base> TabBarBuilder<Base> {
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = impl Into<TabBarItem<Base>>> + 'static,
-    ) -> TabBar {
-        TabBar(self.0.children_signal(children.map(|child| child.into().0)))
+    ) -> Self {
+        Self(
+            self.0.children_signal(children.map(|child| child.into().0)),
+            PhantomData,
+        )
     }
 }
 

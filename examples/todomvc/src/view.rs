@@ -72,6 +72,7 @@ impl TodoAppView {
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
             .children_signal(body)
+            .build()
     }
 
     fn render_main(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {

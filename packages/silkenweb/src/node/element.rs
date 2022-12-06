@@ -19,6 +19,7 @@ use std::{
     future::Future,
     marker::PhantomData,
     mem,
+    pin::Pin,
     rc::Rc,
 };
 
@@ -53,6 +54,7 @@ mod child_vec;
 pub struct ElementBuilderBase {
     element: Element,
     has_preceding_children: bool,
+    child_vec: Option<Pin<Box<dyn SignalVec<Item = Node>>>>,
     child_builder: Option<Box<ChildBuilder>>,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -88,6 +90,7 @@ impl ElementBuilderBase {
                 resources: Vec::new(),
             },
             has_preceding_children: false,
+            child_vec: None,
             child_builder: None,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
@@ -106,26 +109,26 @@ impl ElementBuilderBase {
         let _ = name;
     }
 
-    fn simple_children_signal(
-        mut self,
-        children: impl SignalVec<Item = impl Into<Node>> + 'static,
-    ) -> Element {
-        assert!(self.child_builder.is_none());
+    fn build_children(&mut self) {
+        if let Some(child_builder) = self.child_builder.take() {
+            self.element
+                .resources
+                .extend(child_builder.futures.into_iter().map(Resource::Future));
 
-        let child_vec = Rc::new(RefCell::new(ChildVec::new(
-            self.element.hydro_elem.clone(),
-            self.has_preceding_children,
-        )));
-        self.element
-            .resources
-            .push(Resource::ChildVec(child_vec.clone()));
+            let existing_children = child_builder
+                .items
+                .borrow()
+                .signal_vec_cloned()
+                .filter_map(|e| e.borrow_mut().take());
 
-        let updater = children.for_each(move |update| {
-            child_vec.borrow_mut().apply_update(update);
-            async {}
-        });
+            let boxed_children = if let Some(existing_child_vec) = self.child_vec.take() {
+                existing_child_vec.chain(existing_children).boxed_local()
+            } else {
+                existing_children.boxed_local()
+            };
 
-        self.spawn_future(updater).build()
+            self.child_vec = Some(boxed_children);
+        }
     }
 }
 
@@ -201,25 +204,19 @@ impl ParentBuilder for ElementBuilderBase {
     fn children_signal(
         mut self,
         children: impl SignalVec<Item = impl Into<Node>> + 'static,
-    ) -> Self::Target {
-        if let Some(child_builder) = self.child_builder.take() {
-            self.element
-                .resources
-                .extend(child_builder.futures.into_iter().map(Resource::Future));
+    ) -> Self {
+        self.build_children();
+        let new_children = children.map(|child| child.into());
 
-            let element = self.simple_children_signal(
-                child_builder
-                    .items
-                    .borrow()
-                    .signal_vec_cloned()
-                    .filter_map(|e| e.borrow_mut().take())
-                    .chain(children.map(|child| child.into())),
-            );
-
-            element
+        let boxed_children = if let Some(child_vec) = self.child_vec.take() {
+            child_vec.chain(new_children).boxed_local()
         } else {
-            self.simple_children_signal(children)
-        }
+            new_children.boxed_local()
+        };
+
+        self.child_vec = Some(boxed_children);
+
+        self
     }
 }
 
@@ -414,18 +411,25 @@ impl ElementBuilder for ElementBuilderBase {
     }
 
     fn build(mut self) -> Self::Target {
-        if let Some(child_builder) = self.child_builder.take() {
+        self.build_children();
+
+        if let Some(children) = self.child_vec.take() {
+            assert!(self.child_builder.is_none());
+
+            let child_vec = Rc::new(RefCell::new(ChildVec::new(
+                self.element.hydro_elem.clone(),
+                self.has_preceding_children,
+            )));
             self.element
                 .resources
-                .extend(child_builder.futures.into_iter().map(Resource::Future));
+                .push(Resource::ChildVec(child_vec.clone()));
 
-            self.simple_children_signal(
-                child_builder
-                    .items
-                    .borrow()
-                    .signal_vec_cloned()
-                    .filter_map(|e| e.borrow_mut().take()),
-            )
+            let updater = children.for_each(move |update| {
+                child_vec.borrow_mut().apply_update(update);
+                async {}
+            });
+
+            self.spawn_future(updater).build()
         } else {
             self.element.resources.shrink_to_fit();
             self.element.hydro_elem.shrink_to_fit();
@@ -438,6 +442,7 @@ impl ElementBuilder for ElementBuilderBase {
             element: self.element.clone_node(),
             has_preceding_children: self.has_preceding_children,
             child_builder: None,
+            child_vec: None,
             #[cfg(debug_assertions)]
             attributes: self.attributes.clone(),
         }
@@ -723,10 +728,7 @@ pub trait ParentBuilder: ElementBuilder {
     ///
     /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
     /// for an example
-    fn children_signal(
-        self,
-        children: impl SignalVec<Item = impl Into<Node>> + 'static,
-    ) -> Self::Target;
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self;
 }
 
 /// An element that is allowed to have a shadow root
