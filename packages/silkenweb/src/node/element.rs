@@ -27,7 +27,7 @@ use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future,
     signal::{Signal, SignalExt},
-    signal_vec::{MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
+    signal_vec::{SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, empty_str, intern_str};
@@ -104,40 +104,6 @@ impl ElementBuilderBase {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
         let _ = name;
-    }
-
-    fn append_update(
-        items: &mut MutableVecLockMut<Rc<RefCell<Option<Node>>>>,
-        update: VecDiff<impl Into<Node>>,
-        len: usize,
-    ) {
-        fn item(value: impl Into<Node>) -> Rc<RefCell<Option<Node>>> {
-            Rc::new(RefCell::new(Some(value.into())))
-        }
-
-        match update {
-            VecDiff::Replace { values } => {
-                items.truncate(len);
-
-                for value in values {
-                    items.push_cloned(item(value));
-                }
-            }
-            VecDiff::InsertAt { index, value } => items.insert_cloned(index + len, item(value)),
-            VecDiff::UpdateAt { index, value } => items.set_cloned(index + len, item(value)),
-            VecDiff::RemoveAt { index } => {
-                items.remove(index + len);
-            }
-            VecDiff::Move {
-                old_index,
-                new_index,
-            } => items.move_from_to(old_index + len, new_index + len),
-            VecDiff::Push { value } => items.push_cloned(item(value)),
-            VecDiff::Pop {} => {
-                items.pop();
-            }
-            VecDiff::Clear {} => items.truncate(len),
-        }
     }
 
     fn simple_children_signal(
@@ -240,25 +206,14 @@ impl ParentBuilder for ElementBuilderBase {
             self.element
                 .resources
                 .extend(child_builder.futures.into_iter().map(Resource::Future));
-            let items = child_builder.items;
-            let len = items.borrow().lock_ref().len();
-
-            let updater = children.for_each({
-                clone!(items);
-                move |update| {
-                    let items = items.borrow_mut();
-
-                    Self::append_update(&mut items.lock_mut(), update, len);
-                    async {}
-                }
-            });
-            self = self.spawn_future(updater);
 
             let element = self.simple_children_signal(
-                items
+                child_builder
+                    .items
                     .borrow()
                     .signal_vec_cloned()
-                    .filter_map(|e| e.borrow_mut().take()),
+                    .filter_map(|e| e.borrow_mut().take())
+                    .chain(children.map(|child| child.into())),
             );
 
             element
