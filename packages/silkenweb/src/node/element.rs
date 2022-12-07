@@ -32,7 +32,7 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, empty_str, intern_str};
-use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value, Sig};
+use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
