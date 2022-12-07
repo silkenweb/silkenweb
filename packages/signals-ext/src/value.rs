@@ -1,6 +1,6 @@
 use std::future::Future;
 
-use futures_signals::signal::{self, Signal, SignalExt};
+use futures_signals::signal::{self, Always, Signal, SignalExt};
 
 // TODO: Doc
 pub struct Sig<T>(pub T);
@@ -11,6 +11,7 @@ pub struct Val<T>(pub T);
 // TODO: Doc
 pub trait RefSignalOrValue<'a> {
     type Item: 'a;
+    type Signal: Signal<Item = Self::Item> + 'a;
     type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
     where
         'b: 'a,
@@ -37,7 +38,7 @@ pub trait RefSignalOrValue<'a> {
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
-        FSig: FnOnce(Data, Self) -> Out,
+        FSig: FnOnce(Data, Self::Signal) -> Out,
         Self: Sized;
 }
 
@@ -97,6 +98,7 @@ where
         'b: 'a,
         F: FnMut(Self::Item) -> R + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
+    type Signal = Always<Self::Item>;
 
     fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
     where
@@ -124,7 +126,7 @@ where
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
-        FSig: FnOnce(Data, Self) -> Out,
+        FSig: FnOnce(Data, Self::Signal) -> Out,
     {
         fn_val(data, self)
     }
@@ -140,6 +142,7 @@ where
         'b: 'a,
         F: FnMut(Self::Item) -> R + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
+    type Signal = Always<Self::Item>;
 
     fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
     where
@@ -167,7 +170,7 @@ where
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
-        FSig: FnOnce(Data, Self) -> Out,
+        FSig: FnOnce(Data, Self::Signal) -> Out,
     {
         fn_val(data, self.0)
     }
@@ -184,6 +187,7 @@ where
         'b: 'static,
         F: FnMut(Self::Item) -> R + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
+    type Signal = S;
 
     fn map<'b, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
@@ -213,8 +217,8 @@ where
     fn select<FVal, FSig, Data, Out>(self, _fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
-        FSig: FnOnce(Data, Self) -> Out,
+        FSig: FnOnce(Data, Self::Signal) -> Out,
     {
-        fn_sig(data, self)
+        fn_sig(data, self.0)
     }
 }

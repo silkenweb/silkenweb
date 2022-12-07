@@ -32,7 +32,7 @@ use futures_signals::{
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, empty_str, intern_str};
-use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
+use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value, Sig};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
@@ -194,7 +194,7 @@ impl ParentBuilder for ElementBuilderBase {
                     }
                 }
             },
-            |builder, child| builder.child_builder_mut().optional_child(child),
+            |builder, child| builder.child_builder_mut().optional_child(Sig(child)),
             &mut self,
         );
 
