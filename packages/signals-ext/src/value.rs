@@ -34,12 +34,7 @@ pub trait RefSignalOrValue<'a> {
         Task: Future<Output = ()> + 'a,
         Exec: Executor;
 
-    fn select<FVal, FSig, Data>(self, fn_val: FVal, fn_sig: FSig, data: &mut Data)
-    where
-        FVal: FnOnce(&mut Data, Self::Item),
-        FSig: FnOnce(&mut Data, Self);
-
-    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, fn_sig: FSig, data: Data) -> Out
+    fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self) -> Out,
@@ -126,15 +121,7 @@ where
         fn_val(executor, self);
     }
 
-    fn select<FVal, FSig, Data>(self, fn_val: FVal, _fn_sig: FSig, data: &mut Data)
-    where
-        FVal: FnOnce(&mut Data, Self::Item),
-        FSig: FnOnce(&mut Data, Self),
-    {
-        fn_val(data, self);
-    }
-
-    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
+    fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self) -> Out,
@@ -177,15 +164,7 @@ where
         fn_val(executor, self.0);
     }
 
-    fn select<FVal, FSig, Data>(self, fn_val: FVal, _fn_sig: FSig, data: &mut Data)
-    where
-        FVal: FnOnce(&mut Data, Self::Item),
-        FSig: FnOnce(&mut Data, Self),
-    {
-        fn_val(data, self.0);
-    }
-
-    fn select_owned<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
+    fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self) -> Out,
@@ -231,15 +210,7 @@ where
         executor.spawn(self.0.for_each(fn_sig));
     }
 
-    fn select<FVal, FSig, Data>(self, _fn_val: FVal, fn_sig: FSig, data: &mut Data)
-    where
-        FVal: FnOnce(&mut Data, Self::Item),
-        FSig: FnOnce(&mut Data, Self),
-    {
-        fn_sig(data, self);
-    }
-
-    fn select_owned<FVal, FSig, Data, Out>(self, _fn_val: FVal, fn_sig: FSig, data: Data) -> Out
+    fn select<FVal, FSig, Data, Out>(self, _fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self) -> Out,
