@@ -13,7 +13,7 @@ use silkenweb::{
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
-use crate::{button::Button, css, dropdown::DropdownBuilder};
+use crate::{button::Button, css, dropdown::Dropdown};
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct ButtonGroup(Div);
@@ -29,7 +29,7 @@ impl ButtonGroup {
         Self(self.0.child(elem))
     }
 
-    pub fn dropdown(self, elem: impl SignalOrValue<Item = DropdownBuilder>) -> Self {
+    pub fn dropdown(self, elem: impl SignalOrValue<Item = Dropdown>) -> Self {
         Self(self.0.child(elem.map(|elem| elem.class(css::BTN_GROUP))))
     }
 }

@@ -17,10 +17,10 @@ use crate::{button::Button, css};
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 #[element_target(Dropdown)]
-pub struct DropdownBuilder(Div);
+pub struct Dropdown(Div);
 
-pub fn dropdown(button: Button, menu: impl Into<Menu>) -> DropdownBuilder {
-    DropdownBuilder(
+pub fn dropdown(button: Button, menu: impl Into<Menu>) -> Dropdown {
+    Dropdown(
         div()
             .classes([css::DROPDOWN])
             .child(
@@ -33,15 +33,15 @@ pub fn dropdown(button: Button, menu: impl Into<Menu>) -> DropdownBuilder {
     )
 }
 
-impl From<DropdownBuilder> for GenericElement {
-    fn from(builder: DropdownBuilder) -> Self {
-        builder.0.into()
+impl From<Dropdown> for GenericElement {
+    fn from(elem: Dropdown) -> Self {
+        elem.0.into()
     }
 }
 
-impl From<DropdownBuilder> for Node {
-    fn from(builder: DropdownBuilder) -> Self {
-        builder.0.into()
+impl From<Dropdown> for Node {
+    fn from(elem: Dropdown) -> Self {
+        elem.0.into()
     }
 }
 
