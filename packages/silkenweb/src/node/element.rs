@@ -15,7 +15,6 @@ use std::collections::HashSet;
 use std::{
     self,
     cell::{Cell, RefCell},
-    fmt::{self, Display},
     future::Future,
     marker::PhantomData,
     mem,
@@ -478,13 +477,6 @@ impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
         self.resources
             .push(Resource::Future(spawn_cancelable_future(future)));
-    }
-}
-
-impl<D: Dom> Display for GenericElement<D> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO: Somehow we need to build the element first, to pick up all signal results.
-        self.hydro_elem.fmt(f)
     }
 }
 
