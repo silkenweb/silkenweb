@@ -114,6 +114,7 @@ pub mod macros;
 pub mod animation;
 pub mod attribute;
 pub mod document;
+pub mod dom;
 pub mod elements;
 pub mod hydration;
 pub mod node;
