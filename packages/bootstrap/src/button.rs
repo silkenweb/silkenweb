@@ -2,18 +2,18 @@ use derive_more::Into;
 use silkenweb::{
     elements::html,
     node::{
-        element::{GenericElement, ElementBuilder},
+        element::{GenericElement, Element},
         Node,
     },
     prelude::ParentElement,
     value::{RefSignalOrValue, SignalOrValue, Value},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{css, icon::Icon, utility::Colour, Class, HtmlElementBuilder};
 
 #[derive(
-    Value, Into, ElementBuilder, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
+    Value, Into, Element, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
 )]
 pub struct Button(HtmlElementBuilder);
 

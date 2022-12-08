@@ -1,10 +1,10 @@
 //! Traits for defining attribute types.
 //!
 //! Once you've implemented [`Attribute`] and [`AsAttribute`] for your type, you
-//! can use it with [`ElementBuilder::attribute`], or define attributes on your
+//! can use it with [`Element::attribute`], or define attributes on your
 //! own html element using the [`custom_html_element`] macro.
 //!
-//! [`ElementBuilder::attribute`]: crate::node::element::ElementBuilder::attribute
+//! [`Element::attribute`]: crate::node::element::Element::attribute
 use std::borrow::Cow;
 
 /// A type that can be used as the value of an attribute.

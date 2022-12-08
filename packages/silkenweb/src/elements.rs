@@ -13,7 +13,7 @@
 //!
 //! The builder type implements:
 //!
-//! - [`ElementBuilder`]
+//! - [`Element`]
 //! - [`HtmlElement`]
 //! - [`HtmlElementEvents`]
 //! - [`ElementEvents`]
@@ -28,7 +28,7 @@ use std::marker::PhantomData;
 
 use wasm_bindgen::JsCast;
 
-use crate::node::element::ElementBuilder;
+use crate::node::element::Element;
 
 pub mod html;
 pub mod svg;
@@ -88,7 +88,7 @@ macro_rules! global_attribute_doc {
 /// An HTML element
 ///
 /// Methods for setting attributes specific to HTML elements
-pub trait HtmlElement: ElementBuilder {
+pub trait HtmlElement: Element {
     global_attributes![
         /// Provides a hint for generating a keyboard shortcut for the current
         /// element. This attribute consists of a space-separated list of
@@ -252,7 +252,7 @@ pub trait HtmlElement: ElementBuilder {
 }
 
 /// Events common to all HTML elements
-pub trait HtmlElementEvents: ElementBuilder {
+pub trait HtmlElementEvents: Element {
     events!(Self::DomType {
         animationend: web_sys::AnimationEvent,
         animationiteration: web_sys::AnimationEvent,
@@ -276,7 +276,7 @@ pub trait HtmlElementEvents: ElementBuilder {
 }
 
 /// Events common to all elements
-pub trait ElementEvents: ElementBuilder {
+pub trait ElementEvents: Element {
     events!(Self::DomType {
         auxclick: web_sys::MouseEvent,
         blur: web_sys::FocusEvent,
@@ -341,7 +341,7 @@ macro_rules! aria_attribute_doc {
     };
 }
 
-pub trait AriaElement: ElementBuilder {
+pub trait AriaElement: Element {
     attributes![
         /// The ARIA [role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
         /// attribute

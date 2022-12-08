@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    elements::html::*, hydration::hydrate, node::element::ElementBuilder, prelude::*,
+    elements::html::*, hydration::hydrate, node::element::Element, prelude::*,
     task::spawn_local, value::Sig,
 };
 

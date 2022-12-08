@@ -136,7 +136,7 @@ impl fmt::Display for HydrationStats {
 /// # use silkenweb::{
 /// #     elements::html::p,
 /// #     hydration::hydrate,
-/// #     node::element::{ElementBuilder, ParentElement},
+/// #     node::element::{Element, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };
@@ -156,7 +156,7 @@ impl fmt::Display for HydrationStats {
 /// # use silkenweb::{
 /// #     elements::html::p,
 /// #     hydration::hydrate,
-/// #     node::element::{ElementBuilder, ParentElement},
+/// #     node::element::{Element, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };
@@ -174,7 +174,7 @@ impl fmt::Display for HydrationStats {
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
 /// for an example.
 ///
-/// [`effect`]: crate::node::element::ElementBuilder::effect
+/// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
 pub async fn hydrate(id: &str, node: impl Into<Node>) -> HydrationStats {
     let node = node.into();

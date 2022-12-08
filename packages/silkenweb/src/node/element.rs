@@ -4,7 +4,7 @@
 //! [`crate::elements::html`] should be used in preference to these, where they
 //! are available.
 //!
-//! The [`ElementBuilder`] and [`ParentElement`] traits are implemented by
+//! The [`Element`] and [`ParentElement`] traits are implemented by
 //! specific DOM elements as well as by [`ElementBuilderBase`]. See the [`div`]
 //! element for example.
 //!
@@ -283,7 +283,7 @@ impl ShadowRootParentBuilder for GenericElement {
     }
 }
 
-impl ElementBuilder for GenericElement {
+impl Element for GenericElement {
     type DomType = web_sys::Element;
 
     fn class<'a, T>(mut self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
@@ -477,7 +477,7 @@ impl Display for GenericElement {
 impl Value for GenericElement {}
 
 /// An HTML element builder.
-pub trait ElementBuilder: Sized {
+pub trait Element: Sized {
     type DomType: JsCast + 'static;
 
     // TODO: Doc
@@ -531,7 +531,7 @@ pub trait ElementBuilder: Sized {
     ///
     /// ```no_run
     /// # use web_sys::HtmlInputElement;
-    /// # use silkenweb::{elements::html::input, node::element::ElementBuilder};
+    /// # use silkenweb::{elements::html::input, node::element::Element};
     /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
     /// ```
     fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
@@ -554,7 +554,7 @@ pub trait ElementBuilder: Sized {
     /// # use futures_signals::signal::Mutable;
     /// # use silkenweb::{
     /// #     elements::html::*,
-    /// #     node::element::ElementBuilder,
+    /// #     node::element::Element,
     /// #     prelude::*,
     /// #     value::Sig
     /// # };
@@ -591,7 +591,7 @@ pub trait ElementBuilder: Sized {
 }
 
 /// An element that is allowed to have children.
-pub trait ParentElement: ElementBuilder {
+pub trait ParentElement: Element {
     // TODO: Docs for signal variant
     /// Add a text child to this element
     ///
@@ -614,7 +614,7 @@ pub trait ParentElement: ElementBuilder {
     /// #     elements::html::div,
     /// #     node::element::{
     /// #         ParentElement,
-    /// #         ElementBuilder
+    /// #         Element
     /// #     },
     /// #     value::Sig
     /// # };
@@ -647,7 +647,7 @@ pub trait ParentElement: ElementBuilder {
     ///
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{elements::html::div, node::element::{ParentElement, ElementBuilder}, value::Sig};
+    /// # use silkenweb::{elements::html::div, node::element::{ParentElement, Element}, value::Sig};
     /// let text = Mutable::new("hello");
     ///
     /// div().optional_child(Sig(text.signal().map(|text| {
@@ -691,7 +691,7 @@ pub trait ParentElement: ElementBuilder {
 }
 
 /// An element that is allowed to have a shadow root
-pub trait ShadowRootParentBuilder: ElementBuilder {
+pub trait ShadowRootParentBuilder: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
@@ -724,7 +724,7 @@ pub(super) enum Resource {
 
 /// A handle to an element in the DOM.
 ///
-/// This acts as a weak reference to the element. See [`ElementBuilder::handle`]
+/// This acts as a weak reference to the element. See [`Element::handle`]
 /// for an example.
 #[derive(Clone)]
 pub struct ElementHandle<DomType>(WeakHydrationElement, PhantomData<DomType>);

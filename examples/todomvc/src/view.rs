@@ -13,7 +13,7 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::{element::ElementBuilder, Node},
+    node::{element::Element, Node},
     prelude::ParentElement,
     value::Sig,
 };

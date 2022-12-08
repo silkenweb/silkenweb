@@ -219,7 +219,7 @@ macro_rules! dom_element {
 
             ELEM.with(|elem| {
                 $camel_name {
-                    elem: $crate::node::element::ElementBuilder::clone_node(elem)
+                    elem: $crate::node::element::Element::clone_node(elem)
                 }
             })
         }
@@ -256,7 +256,7 @@ macro_rules! dom_element {
             ); )?
         }
 
-        impl $crate::node::element::ElementBuilder for $camel_name {
+        impl $crate::node::element::Element for $camel_name {
             type DomType = $elem_type;
 
             fn class<'a, T>(self, class: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
@@ -323,7 +323,7 @@ macro_rules! dom_element {
                 name: &'static str,
                 f: impl FnMut($crate::macros::JsValue) + 'static
             ) -> Self {
-                Self{ elem: $crate::node::element::ElementBuilder::on(self.elem, name, f) }
+                Self{ elem: $crate::node::element::Element::on(self.elem, name, f) }
             }
 
             fn clone_node(&self) -> Self {
@@ -462,7 +462,7 @@ macro_rules! events {
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
-                $crate::node::element::ElementBuilder::on(
+                $crate::node::element::Element::on(
                     self,
                     $crate::text_name_intern!($name),
                     move |js_ev| {
@@ -497,7 +497,7 @@ macro_rules! custom_events {
                 self,
                 mut f: impl FnMut($event_type, $elem_type) + 'static
             ) -> Self {
-                $crate::node::element::ElementBuilder::on(
+                $crate::node::element::Element::on(
                     self,
                     $crate::text_name_intern!($name),
                     move |js_ev| {
@@ -604,7 +604,7 @@ macro_rules! attribute {
         where
             T: $crate::attribute::AsAttribute<$typ>
         {
-            $crate::node::element::ElementBuilder::attribute(self, $crate::intern_static_str!($text_attr), value)
+            $crate::node::element::Element::attribute(self, $crate::intern_static_str!($text_attr), value)
         }
     };
 }

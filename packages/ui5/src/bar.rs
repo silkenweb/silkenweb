@@ -4,7 +4,7 @@ use silkenweb::{
     node::{element::{ParentElement, GenericElement}, Node},
     prelude::HtmlElement,
     value::{SignalOrValue, Value},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use self::element::{ui5_bar, Ui5Bar};
@@ -41,7 +41,7 @@ mod element {
     parent_element!(ui5_bar);
 }
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct Bar(Ui5Bar);
 
 pub fn bar() -> Bar {

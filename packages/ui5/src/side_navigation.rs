@@ -8,10 +8,10 @@ use futures_signals::signal_vec::SignalVec;
 use silkenweb::{
     attribute::AsAttribute,
     elements::CustomEvent,
-    node::{element::ElementBuilder, Node},
+    node::{element::Element, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentElement},
     value::{SignalOrValue, Value},
-    ElementBuilder,
+    Element,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -73,7 +73,7 @@ pub fn side_navigation<Id>() -> SideNavigation<Id> {
     SideNavigation(ui5_side_navigation(), PhantomData)
 }
 
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct SideNavigation<Id>(Ui5SideNavigation, PhantomData<Id>);
 
 impl<Id> SideNavigation<Id>
@@ -139,7 +139,7 @@ pub fn item<Id: Display>(id: Id) -> SideNavigationItem<Id> {
     )
 }
 
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct SideNavigationItem<Id>(Ui5SideNavigationItem, PhantomData<Id>);
 
 impl<Id> SideNavigationItem<Id>
@@ -200,7 +200,7 @@ pub fn sub_item<Id: Display>(id: Id) -> SideNavigationSubItem<Id> {
     )
 }
 
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct SideNavigationSubItem<Id>(Ui5SideNavigationSubItem, PhantomData<Id>);
 
 impl<Id> SideNavigationSubItem<Id>

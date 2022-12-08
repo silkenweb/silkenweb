@@ -5,17 +5,17 @@ use silkenweb::{
         AriaElement,
     },
     node::{
-        element::{ElementBuilder, GenericElement},
+        element::{Element, GenericElement},
         Node,
     },
     prelude::ParentElement,
     value::SignalOrValue,
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{button::Button, css};
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 #[element_target(Dropdown)]
 pub struct Dropdown(Div);
 

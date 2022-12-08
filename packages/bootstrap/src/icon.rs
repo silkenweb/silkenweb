@@ -2,11 +2,11 @@ use derive_more::Into;
 use silkenweb::{
     elements::html::{i, I},
     node::{
-        element::{ElementBuilder, GenericElement},
+        element::{Element, GenericElement},
         Node,
     },
     value::SignalOrValue,
-    ElementBuilder, ElementEvents, HtmlElementEvents, Value,
+    Element, ElementEvents, HtmlElementEvents, Value,
 };
 use silkenweb_bootstrap_macros::define_icons;
 
@@ -23,7 +23,7 @@ pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> Icon {
     Icon(i().class(icon.map(IconType::class)))
 }
 
-#[derive(Value, ElementBuilder, ElementEvents, HtmlElementEvents, Into)]
+#[derive(Value, Element, ElementEvents, HtmlElementEvents, Into)]
 pub struct Icon(I);
 
 impl Icon {

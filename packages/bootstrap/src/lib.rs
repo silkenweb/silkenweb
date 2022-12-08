@@ -1,7 +1,7 @@
 use silkenweb::{
     elements::html::{div, Div, Ol, Ul},
     node::{element::GenericElement, Node},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use utility::SetDisplay;
 
@@ -25,7 +25,7 @@ pub type Class = &'static str;
 /// Bootstrap elem types that don't implement `HtmlElement`, like
 /// [`Badge`](badge::Badge) will convert into this as an "escape
 /// hatch".
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct HtmlElementBuilder(GenericElement);
 
 impl From<HtmlElementBuilder> for GenericElement {

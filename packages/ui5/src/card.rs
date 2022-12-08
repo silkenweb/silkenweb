@@ -33,7 +33,7 @@ mod elements {
 }
 
 pub use elements::Ui5Card as Card;
-use silkenweb::ElementBuilder;
+use silkenweb::Element;
 
 use self::elements::{ui5_card_header, Ui5CardHeader};
 use crate::macros::attributes0;
@@ -42,7 +42,7 @@ pub fn card_header_builder() -> CardHeader {
     CardHeader(ui5_card_header())
 }
 
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct CardHeader(Ui5CardHeader);
 
 impl CardHeader {

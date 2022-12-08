@@ -11,12 +11,12 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, GenericElement, ParentElement},
+        element::{Element, GenericElement, ParentElement},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
     value::{SignalOrValue, Value},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -141,7 +141,7 @@ pub fn avatar() -> Avatar {
     Avatar(ui5_avatar())
 }
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct Avatar(elements::Ui5Avatar);
 
 impl Avatar {
@@ -183,7 +183,7 @@ pub fn avatar_group<Id>() -> AvatarGroup<Id> {
 }
 
 /// Warning: Don't use. This isn't working properly yet.
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct AvatarGroup<Id>(Ui5AvatarGroup, PhantomData<Id>);
 
 impl<Id> AvatarGroup<Id>
@@ -219,7 +219,7 @@ where
 
     pub fn on_click(
         self,
-        mut f: impl FnMut(CustomEvent<GroupClicked>, <Self as ElementBuilder>::DomType, Option<Id>)
+        mut f: impl FnMut(CustomEvent<GroupClicked>, <Self as Element>::DomType, Option<Id>)
             + 'static,
     ) -> Self {
         Self(
@@ -245,7 +245,7 @@ where
 
     pub fn on_overflow(
         self,
-        f: impl FnMut(web_sys::CustomEvent, <Self as ElementBuilder>::DomType) + 'static,
+        f: impl FnMut(web_sys::CustomEvent, <Self as Element>::DomType) + 'static,
     ) -> Self {
         Self(self.0.on_overflow(f), self.1)
     }

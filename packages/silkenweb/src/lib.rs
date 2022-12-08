@@ -95,13 +95,13 @@ use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
-/// Newtype derive for [`ElementBuilder`].
+/// Newtype derive for [`Element`].
 ///
 /// Only non empty structs are supported. The first field must implement
-/// [`ElementBuilder`].
+/// [`Element`].
 ///
-/// [`ElementBuilder`]: crate::node::element::ElementBuilder
-pub use silkenweb_macros::ElementBuilder;
+/// [`Element`]: crate::node::element::Element
+pub use silkenweb_macros::Element;
 pub use silkenweb_macros::{css, css_classes};
 #[doc(inline)]
 pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};

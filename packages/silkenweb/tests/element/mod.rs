@@ -7,7 +7,7 @@ use silkenweb::{
         html::{div, p, Div},
         HtmlElement,
     },
-    node::{element::ElementBuilder, text},
+    node::{element::Element, text},
     prelude::ParentElement,
     task::render_now,
     value::Sig,

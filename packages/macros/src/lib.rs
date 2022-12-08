@@ -48,9 +48,9 @@ derive_empty!(
     derive_element_events(elements, ElementEvents);
 );
 
-#[proc_macro_derive(ElementBuilder, attributes(element_target, element_dom_type))]
+#[proc_macro_derive(Element, attributes(element_target, element_dom_type))]
 #[proc_macro_error]
-pub fn derive_element_builder(item: TokenStream) -> TokenStream {
+pub fn derive_element(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
     let dom_type = extract_attr_type(&new_type.attrs, "element_dom_type", || {
         abort_call_site!("Use `element_dom_type(DomType)`")
@@ -95,12 +95,12 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
     };
 
     let dom_type = match dom_type {
-        None => quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType),
+        None => quote!(<#derive_from as ::silkenweb::node::element::Element>::DomType),
         Some(dom_type) => quote!(#dom_type),
     };
 
     quote!(
-        impl #impl_generics ::silkenweb::node::element::ElementBuilder
+        impl #impl_generics ::silkenweb::node::element::Element
         for #name #ty_generics #where_clause {
             type DomType = #dom_type;
 

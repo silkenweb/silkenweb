@@ -1,6 +1,6 @@
 use silkenweb::{
     elements::html,
-    node::element::ElementBuilder,
+    node::element::Element,
     prelude::{HtmlElement, ParentElement},
     value::SignalOrValue,
     Value,
@@ -575,7 +575,7 @@ impl Display {
     }
 }
 
-pub trait SetSpacing: ElementBuilder {
+pub trait SetSpacing: Element {
     /// Set the margin size
     ///
     /// A `size` of `None` will set the margin to `auto`
@@ -621,7 +621,7 @@ pub trait SetSpacing: ElementBuilder {
     }
 }
 
-pub trait SetBorder: ElementBuilder {
+pub trait SetBorder: Element {
     /// Use a border
     fn border(self, active: impl SignalOrValue<Item = bool>) -> Self {
         self.classes(active.map(|active| active.then_some(css::BORDER)))
@@ -668,13 +668,13 @@ pub trait SetBorder: ElementBuilder {
     }
 }
 
-pub trait SetOverflow: ElementBuilder {
+pub trait SetOverflow: Element {
     fn overflow(self, overflow: impl SignalOrValue<Item = Overflow>) -> Self {
         self.class(overflow.map(|overflow| overflow.class()))
     }
 }
 
-pub trait SetColour: ElementBuilder {
+pub trait SetColour: Element {
     fn background_colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
         self.class(colour.map(|colour| colour.background()))
     }
@@ -688,7 +688,7 @@ pub trait SetColour: ElementBuilder {
     }
 }
 
-pub trait SetDisplay: ElementBuilder {
+pub trait SetDisplay: Element {
     fn display(self, display: impl SignalOrValue<Item = Display>) -> Self {
         self.class(display.map(Display::class))
     }
@@ -714,31 +714,31 @@ pub trait SetDisplay: ElementBuilder {
     }
 }
 
-pub trait SetAlign: ElementBuilder {
+pub trait SetAlign: Element {
     fn align_self(self, align: impl SignalOrValue<Item = Align>) -> Self {
         self.class(align.map(|align| align.align_self()))
     }
 }
 
-pub trait SetGap: ElementBuilder {
+pub trait SetGap: Element {
     fn gap(self, size: impl SignalOrValue<Item = Size>) -> Self {
         self.class(size.map(Size::gap))
     }
 }
 
-pub trait SetPosition: ElementBuilder {
+pub trait SetPosition: Element {
     fn position(self, position: impl SignalOrValue<Item = Position>) -> Self {
         self.class(position.map(Position::class))
     }
 }
 
-pub trait Active: ElementBuilder {
+pub trait Active: Element {
     fn active(self, is_active: impl SignalOrValue<Item = bool>) -> Self {
         self.classes(is_active.map(|flag| flag.then_some(css::ACTIVE)))
     }
 }
 
-pub trait Disabled: ElementBuilder {
+pub trait Disabled: Element {
     fn disabled(self, is_disabled: impl SignalOrValue<Item = bool>) -> Self {
         self.classes(is_disabled.map(|flag| flag.then_some(css::DISABLED)))
     }

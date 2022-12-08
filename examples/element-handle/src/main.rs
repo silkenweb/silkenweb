@@ -1,5 +1,5 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, node::element::ElementBuilder, prelude::*, value::Sig};
+use silkenweb::{elements::html::*, node::element::Element, prelude::*, value::Sig};
 
 fn main() {
     let text = Mutable::new("".to_string());

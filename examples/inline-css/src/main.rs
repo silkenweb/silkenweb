@@ -2,7 +2,7 @@ use silkenweb::{
     css,
     elements::html::{div, p, style},
     mount,
-    node::element::ElementBuilder,
+    node::element::Element,
     prelude::ParentElement,
 };
 

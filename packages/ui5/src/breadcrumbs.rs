@@ -9,9 +9,9 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
-    node::{element::{ElementBuilder, GenericElement}, Node},
+    node::{element::{Element, GenericElement}, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentElement},
-    ElementBuilder,
+    Element,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
@@ -114,7 +114,7 @@ pub fn breadcrumbs<T>() -> Breadcrumbs<T> {
     Breadcrumbs(ui5_breadcrumbs(), PhantomData)
 }
 
-#[derive(ElementBuilder)]
+#[derive(Element)]
 pub struct Breadcrumbs<Id>(Ui5Breadcrumbs, PhantomData<Id>);
 
 impl<Id> Breadcrumbs<Id>

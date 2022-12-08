@@ -6,7 +6,7 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     node::element::{ParentElement, GenericElement},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
 
@@ -51,7 +51,7 @@ pub fn calendar() -> Calendar {
     Calendar(ui5_calendar())
 }
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct Calendar(Ui5Calendar);
 
 impl Calendar {

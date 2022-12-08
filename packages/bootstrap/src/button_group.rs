@@ -5,17 +5,17 @@ use silkenweb::{
         AriaElement,
     },
     node::{
-        element::{GenericElement, ElementBuilder},
+        element::{GenericElement, Element},
         Node,
     },
     prelude::ParentElement,
     value::{RefSignalOrValue, SignalOrValue},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{button::Button, css, dropdown::Dropdown};
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct ButtonGroup(Div);
 
 pub fn button_group<'a>(

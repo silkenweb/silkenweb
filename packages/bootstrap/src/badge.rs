@@ -2,12 +2,12 @@ use derive_more::Into;
 use silkenweb::{
     elements::html::{span, Span},
     node::{
-        element::{ElementBuilder, GenericElement},
+        element::{Element, GenericElement},
         Node,
     },
     prelude::ParentElement,
     value::{RefSignalOrValue, SignalOrValue},
-    ElementBuilder, ElementEvents, HtmlElementEvents, Value,
+    Element, ElementEvents, HtmlElementEvents, Value,
 };
 
 use crate::{
@@ -15,7 +15,7 @@ use crate::{
     utility::{Colour, SetBorder, SetSpacing},
 };
 
-#[derive(ElementBuilder, ElementEvents, HtmlElementEvents, Into, Value)]
+#[derive(Element, ElementEvents, HtmlElementEvents, Into, Value)]
 pub struct Badge(Span);
 
 pub fn badge<'a>(

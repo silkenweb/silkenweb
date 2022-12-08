@@ -4,7 +4,7 @@ use silkenweb::{
     css_classes,
     elements::html::div,
     mount,
-    node::element::{ElementBuilder, GenericElement},
+    node::element::{Element, GenericElement},
     prelude::ParentElement,
     value::Sig,
 };

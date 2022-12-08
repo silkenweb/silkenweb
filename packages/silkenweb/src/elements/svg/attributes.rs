@@ -2,7 +2,7 @@ use super::{
     content_type::{Length, NumberOrPercentage},
     path::Data,
 };
-use crate::node::element::ElementBuilder;
+use crate::node::element::Element;
 
 macro_rules! svg_attributes {
     ($($t:tt)*) => {
@@ -20,7 +20,7 @@ macro_rules! svg_attributes {
 /// An SVG element
 ///
 /// Methods for setting attributes specific to SVG elements
-pub trait Global: ElementBuilder {
+pub trait Global: Element {
     svg_attributes![
         /// Defines a unique identifier (ID) which must be unique in the whole
         /// document. Its purpose is to identify the element when linking (using
@@ -44,7 +44,7 @@ pub trait Global: ElementBuilder {
     ];
 }
 
-pub trait AnimationTiming: ElementBuilder {
+pub trait AnimationTiming: Element {
     svg_attributes![
         /// The begin attribute defines when an animation should begin or when
         /// an element should be discarded.
@@ -89,7 +89,7 @@ pub trait AnimationTiming: ElementBuilder {
     ];
 }
 
-pub trait AnimationValue: ElementBuilder {
+pub trait AnimationValue: Element {
     svg_attributes![
         /// The calcMode attribute specifies the interpolation mode for the
         /// animation.
@@ -153,7 +153,7 @@ pub trait AnimationValue: ElementBuilder {
     ];
 }
 
-pub trait OtherAnimation: ElementBuilder {
+pub trait OtherAnimation: Element {
     svg_attributes![
         /// The attributeName attribute indicates the name of the CSS property
         /// or attribute of the target element that is going to be changed
@@ -174,7 +174,7 @@ pub trait OtherAnimation: ElementBuilder {
 }
 
 /// SVG Presentation Attributes
-pub trait Presentation: ElementBuilder {
+pub trait Presentation: Element {
     svg_attributes![
         /// It specifies how an object is aligned along the font baseline with
         /// respect to its parent. Value:
@@ -374,7 +374,7 @@ pub trait Presentation: ElementBuilder {
 }
 
 /// SVG Conditional Processing Attributes
-pub trait ConditionalProcessing: ElementBuilder {
+pub trait ConditionalProcessing: Element {
     svg_attributes![
         /// List all the browser specific capabilities that must be supported by
         /// the browser to be allowed to render the associated element. Value: A
@@ -389,7 +389,7 @@ pub trait ConditionalProcessing: ElementBuilder {
 }
 
 /// SVG Filter Primitve Attributes
-pub trait FilterPrimitives: ElementBuilder {
+pub trait FilterPrimitives: Element {
     svg_attributes![
         /// The height attribute defines the vertical length of an element in
         /// the user coordinate system.
@@ -416,7 +416,7 @@ pub trait FilterPrimitives: ElementBuilder {
 }
 
 /// SVG Transfer Function Attributes
-pub trait TransferFunction: ElementBuilder {
+pub trait TransferFunction: Element {
     svg_attributes![
         /// The type attribute is a generic attribute and it has different
         /// meaning based on the context in which it's used.

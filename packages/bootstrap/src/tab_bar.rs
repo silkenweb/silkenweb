@@ -7,12 +7,12 @@ use silkenweb::{
         AriaElement,
     },
     node::{
-        element::{ElementBuilder, GenericElement},
+        element::{Element, GenericElement},
         Node,
     },
     prelude::ParentElement,
     value::{SignalOrValue, Value},
-    AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
 use crate::{css, dropdown::Menu, utility::SetDisplay, List};
@@ -29,7 +29,7 @@ pub fn tab_bar_ordered() -> TabBar<Ol> {
     TabBar(ol().class(css::NAV).into(), PhantomData)
 }
 
-#[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
+#[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 pub struct TabBar<Base = Nav>(GenericElement, PhantomData<Base>);
 
 impl<Base> TabBar<Base> {
@@ -150,7 +150,7 @@ impl<L: List> TabBarItem<L> {
 }
 
 pub trait TabBarElement:
-    ElementBuilder + AriaElement + ParentElement + Into<Node> + Value + 'static
+    Element + AriaElement + ParentElement + Into<Node> + Value + 'static
 {
 }
 impl TabBarElement for html::A {}
