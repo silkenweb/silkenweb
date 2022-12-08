@@ -483,6 +483,7 @@ impl<D: Dom> Executor for GenericElement<D> {
 
 impl<D: Dom> Display for GenericElement<D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO: Somehow we need to build the element first, to pick up all signal results.
         self.hydro_elem.fmt(f)
     }
 }
