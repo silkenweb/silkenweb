@@ -18,8 +18,7 @@
 //! - [`HtmlElementEvents`]
 //! - [`ElementEvents`]
 //! - [`ParentElement`] (if it is a parent element)
-//! - [`ShadowRootParent`] (if it's allowed to have a shadow root
-//!   attached)
+//! - [`ShadowRootParent`] (if it's allowed to have a shadow root attached)
 //!
 //! [`ParentElement`]: crate::node::element::ParentElement
 //! [`ShadowRootParent`]: crate::node::element::ShadowRootParent

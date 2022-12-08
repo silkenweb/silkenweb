@@ -1,7 +1,10 @@
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::{element::{ParentElement, GenericElement}, Node},
+    node::{
+        element::{GenericElement, ParentElement},
+        Node,
+    },
     prelude::HtmlElement,
     value::{SignalOrValue, Value},
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
@@ -84,4 +87,3 @@ impl From<Bar> for GenericElement {
         elem.0.into()
     }
 }
-

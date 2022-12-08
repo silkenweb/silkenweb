@@ -9,7 +9,10 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
-    node::{element::{Element, GenericElement}, Node},
+    node::{
+        element::{Element, GenericElement},
+        Node,
+    },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentElement},
     Element,
 };
@@ -128,10 +131,7 @@ where
         separator_style: BreadcrumbsSeparatorStyle
     }
 
-    pub fn children(
-        self,
-        children: impl IntoIterator<Item = (Id, BreadcrumbsItem)>,
-    ) -> Self {
+    pub fn children(self, children: impl IntoIterator<Item = (Id, BreadcrumbsItem)>) -> Self {
         Self(
             self.0.children(
                 children

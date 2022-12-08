@@ -78,10 +78,7 @@ impl Menu {
         self,
         children: impl SignalVec<Item = impl Into<MenuItem>> + 'static,
     ) -> Self {
-        Self(
-            self.0
-                .children_signal(children.map(|child| child.into().0))
-        )
+        Self(self.0.children_signal(children.map(|child| child.into().0)))
     }
 }
 

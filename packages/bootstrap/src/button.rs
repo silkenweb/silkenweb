@@ -2,7 +2,7 @@ use derive_more::Into;
 use silkenweb::{
     elements::html,
     node::{
-        element::{GenericElement, Element},
+        element::{Element, GenericElement},
         Node,
     },
     prelude::ParentElement,
@@ -12,9 +12,7 @@ use silkenweb::{
 
 use crate::{css, icon::Icon, utility::Colour, Class, GenericHtmlElement};
 
-#[derive(
-    Value, Into, Element, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement,
-)]
+#[derive(Value, Into, Element, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement)]
 pub struct Button(GenericHtmlElement);
 
 pub fn button<'a>(

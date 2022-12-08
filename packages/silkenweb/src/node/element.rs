@@ -157,9 +157,7 @@ impl GenericElement {
                 self.hydro_elem.clone(),
                 self.has_preceding_children,
             )));
-            self
-                .resources
-                .push(Resource::ChildVec(child_vec.clone()));
+            self.resources.push(Resource::ChildVec(child_vec.clone()));
 
             let updater = children.for_each(move |update| {
                 child_vec.borrow_mut().apply_update(update);
@@ -265,19 +263,20 @@ impl ParentElement for GenericElement {
 impl ShadowRootParent for GenericElement {
     /// Currently, there's no way to send the shadow root as plain HTML, until
     /// we get [Declarative Shadow Root](`<template shadowroot="open">...`).
-    /// 
+    ///
     /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
     fn attach_shadow_children(
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
     ) -> Self {
-        // We can only implement this for the real DOM until we get Declarative 
+        // We can only implement this for the real DOM until we get Declarative
         // Shadow Root, so we use an effect.
         self.effect(move |elem| {
-            let shadow_root = elem.shadow_root().unwrap_or_else(|| elem
-                .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                .unwrap_throw());
-                
+            let shadow_root = elem.shadow_root().unwrap_or_else(|| {
+                elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                    .unwrap_throw()
+            });
+
             for child in children {
                 shadow_root
                     .append_child(&child.into().eval_dom_node())
@@ -333,10 +332,8 @@ impl Element for GenericElement {
         T: 'a + AsRef<str>,
         Iter: 'a + IntoIterator<Item = T>,
     {
-        fn classes_value<T0>(
-            elem: &mut GenericElement,
-            classes: impl IntoIterator<Item = T0>,
-        ) where
+        fn classes_value<T0>(elem: &mut GenericElement, classes: impl IntoIterator<Item = T0>)
+        where
             T0: AsRef<str>,
         {
             let element = &mut elem.hydro_elem;

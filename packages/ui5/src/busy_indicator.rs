@@ -36,6 +36,4 @@ mod element {
     parent_element!(ui5_busy_indicator);
 }
 
-pub use element::{
-    ui5_busy_indicator as busy_indicator, Ui5BusyIndicator as BusyIndicator,
-};
+pub use element::{ui5_busy_indicator as busy_indicator, Ui5BusyIndicator as BusyIndicator};

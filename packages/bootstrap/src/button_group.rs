@@ -5,7 +5,7 @@ use silkenweb::{
         AriaElement,
     },
     node::{
-        element::{GenericElement, Element},
+        element::{Element, GenericElement},
         Node,
     },
     prelude::ParentElement,

@@ -219,8 +219,7 @@ where
 
     pub fn on_click(
         self,
-        mut f: impl FnMut(CustomEvent<GroupClicked>, <Self as Element>::DomType, Option<Id>)
-            + 'static,
+        mut f: impl FnMut(CustomEvent<GroupClicked>, <Self as Element>::DomType, Option<Id>) + 'static,
     ) -> Self {
         Self(
             self.0.on_click(move |ev, target| {
