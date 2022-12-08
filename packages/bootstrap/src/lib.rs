@@ -26,16 +26,16 @@ pub type Class = &'static str;
 /// [`Badge`](badge::Badge) will convert into this as an "escape
 /// hatch".
 #[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct HtmlElementBuilder(GenericElement);
+pub struct GenericHtmlElement(GenericElement);
 
-impl From<HtmlElementBuilder> for GenericElement {
-    fn from(elem: HtmlElementBuilder) -> Self {
+impl From<GenericHtmlElement> for GenericElement {
+    fn from(elem: GenericHtmlElement) -> Self {
         elem.0
     }
 }
 
-impl From<HtmlElementBuilder> for Node {
-    fn from(elem: HtmlElementBuilder) -> Self {
+impl From<GenericHtmlElement> for Node {
+    fn from(elem: GenericHtmlElement) -> Self {
         elem.0.into()
     }
 }
