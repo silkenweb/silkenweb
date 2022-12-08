@@ -40,6 +40,7 @@ use self::child_vec::ChildVec;
 use super::{text, Node};
 use crate::{
     attribute::Attribute,
+    dom::{DefaultDom, Dom, DomElement},
     hydration::{
         node::{DryNode, HydrationElement, HydrationText, Namespace, WeakHydrationElement},
         HydrationStats,
@@ -51,12 +52,13 @@ mod child_builder;
 mod child_vec;
 
 /// Build an HTML element.
-pub struct GenericElement {
+pub struct GenericElement<D: Dom = DefaultDom> {
     has_preceding_children: bool,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node>>>>,
     child_builder: Option<Box<ChildBuilder>>,
     resources: Vec<Resource>,
     pub(super) hydro_elem: HydrationElement,
+    element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
@@ -75,22 +77,29 @@ pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> GenericE
     GenericElement::new_in_namespace(namespace, name)
 }
 
-impl GenericElement {
+impl<D: Dom> GenericElement<D> {
     fn new(tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(Namespace::Html, tag))
+        Self::new_element(
+            HydrationElement::new(Namespace::Html, tag),
+            D::Element::new(Namespace::Html, tag),
+        )
     }
 
     fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
-        Self::new_element(HydrationElement::new(Namespace::Other(namespace), tag))
+        Self::new_element(
+            HydrationElement::new(Namespace::Other(namespace), tag),
+            D::Element::new(Namespace::Other(namespace), tag),
+        )
     }
 
-    fn new_element(hydro_elem: HydrationElement) -> Self {
+    fn new_element(hydro_elem: HydrationElement, element: D::Element) -> Self {
         Self {
             has_preceding_children: false,
             child_vec: None,
             child_builder: None,
             resources: Vec::new(),
             hydro_elem,
+            element,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
@@ -173,12 +182,12 @@ impl GenericElement {
     }
 }
 
-impl ParentElement for GenericElement {
+impl<D: Dom> ParentElement for GenericElement<D> {
     fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>,
     {
-        fn text_value(parent: &mut GenericElement, child: impl AsRef<str>) {
+        fn text_value<D: Dom>(parent: &mut GenericElement<D>, child: impl AsRef<str>) {
             parent
                 .hydro_elem
                 .append_child(HydrationText::new(child.as_ref()));
@@ -260,7 +269,7 @@ impl ParentElement for GenericElement {
     }
 }
 
-impl ShadowRootParent for GenericElement {
+impl<D: Dom> ShadowRootParent for GenericElement<D> {
     /// Currently, there's no way to send the shadow root as plain HTML, until
     /// we get [Declarative Shadow Root](`<template shadowroot="open">...`).
     ///
@@ -286,7 +295,7 @@ impl ShadowRootParent for GenericElement {
     }
 }
 
-impl Element for GenericElement {
+impl<D: Dom> Element for GenericElement<D> {
     type DomType = web_sys::Element;
 
     fn class<'a, T>(mut self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
@@ -332,8 +341,10 @@ impl Element for GenericElement {
         T: 'a + AsRef<str>,
         Iter: 'a + IntoIterator<Item = T>,
     {
-        fn classes_value<T0>(elem: &mut GenericElement, classes: impl IntoIterator<Item = T0>)
-        where
+        fn classes_value<D: Dom, T0>(
+            elem: &mut GenericElement<D>,
+            classes: impl IntoIterator<Item = T0>,
+        ) where
             T0: AsRef<str>,
         {
             let element = &mut elem.hydro_elem;
@@ -456,26 +467,27 @@ impl Element for GenericElement {
             child_vec: None,
             resources: Vec::new(),
             hydro_elem: self.hydro_elem.clone_node(),
+            element: self.element.clone(),
             #[cfg(debug_assertions)]
             attributes: self.attributes.clone(),
         }
     }
 }
 
-impl Executor for GenericElement {
+impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
         self.resources
             .push(Resource::Future(spawn_cancelable_future(future)));
     }
 }
 
-impl Display for GenericElement {
+impl<D: Dom> Display for GenericElement<D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.hydro_elem.fmt(f)
     }
 }
 
-impl Value for GenericElement {}
+impl<D: Dom> Value for GenericElement<D> {}
 
 /// An HTML element builder.
 pub trait Element: Sized {

@@ -224,13 +224,13 @@ macro_rules! dom_element {
             })
         }
 
-        pub struct $camel_name<Dom = $crate::dom::wet::Wet> {
-            elem: $crate::node::element::GenericElement,
+        pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> {
+            elem: $crate::node::element::GenericElement<Dom>,
             phantom: ::std::marker::PhantomData<Dom>,
         }
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
-            fn from_elem(elem: $crate::node::element::GenericElement) -> Self {
+            fn from_elem(elem: $crate::node::element::GenericElement<Dom>) -> Self {
                 Self {
                     elem,
                     phantom: ::std::marker::PhantomData
