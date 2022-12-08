@@ -127,8 +127,8 @@ impl<Id> HtmlElementEvents for SideNavigation<Id> {}
 impl<Id> ElementEvents for SideNavigation<Id> {}
 
 impl<T> From<SideNavigation<T>> for Node {
-    fn from(builder: SideNavigation<T>) -> Self {
-        builder.0.into()
+    fn from(elem: SideNavigation<T>) -> Self {
+        elem.0.into()
     }
 }
 
@@ -188,8 +188,8 @@ impl<Id> HtmlElementEvents for SideNavigationItem<Id> {}
 impl<Id> ElementEvents for SideNavigationItem<Id> {}
 
 impl<T> From<SideNavigationItem<T>> for Node {
-    fn from(builder: SideNavigationItem<T>) -> Self {
-        builder.0.into()
+    fn from(elem: SideNavigationItem<T>) -> Self {
+        elem.0.into()
     }
 }
 
@@ -232,8 +232,8 @@ impl<Id> HtmlElementEvents for SideNavigationSubItem<Id> {}
 impl<Id> ElementEvents for SideNavigationSubItem<Id> {}
 
 impl<T> From<SideNavigationSubItem<T>> for Node {
-    fn from(builder: SideNavigationSubItem<T>) -> Self {
-        builder.0.into()
+    fn from(elem: SideNavigationSubItem<T>) -> Self {
+        elem.0.into()
     }
 }
 

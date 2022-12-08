@@ -88,8 +88,8 @@ impl Calendar {
 }
 
 impl From<Calendar> for GenericElement {
-    fn from(builder: Calendar) -> Self {
-        builder.0.into()
+    fn from(elem: Calendar) -> Self {
+        elem.0.into()
     }
 }
 

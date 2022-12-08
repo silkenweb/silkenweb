@@ -38,7 +38,7 @@ use silkenweb::Element;
 use self::elements::{ui5_card_header, Ui5CardHeader};
 use crate::macros::attributes0;
 
-pub fn card_header_builder() -> CardHeader {
+pub fn card_header() -> CardHeader {
     CardHeader(ui5_card_header())
 }
 

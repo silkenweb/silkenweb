@@ -181,14 +181,14 @@ impl<Id> HtmlElementEvents for Breadcrumbs<Id> {}
 impl<Id> ElementEvents for Breadcrumbs<Id> {}
 
 impl<T> From<Breadcrumbs<T>> for GenericElement {
-    fn from(builder: Breadcrumbs<T>) -> Self {
-        builder.0.into()
+    fn from(elem: Breadcrumbs<T>) -> Self {
+        elem.0.into()
     }
 }
 
 impl<T> From<Breadcrumbs<T>> for Node {
-    fn from(builder: Breadcrumbs<T>) -> Self {
-        builder.0.into()
+    fn from(elem: Breadcrumbs<T>) -> Self {
+        elem.0.into()
     }
 }
 

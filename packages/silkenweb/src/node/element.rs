@@ -180,8 +180,8 @@ impl ParentElement for GenericElement {
     where
         T: 'a + AsRef<str> + Into<String>,
     {
-        fn text_value(builder: &mut GenericElement, child: impl AsRef<str>) {
-            builder
+        fn text_value(parent: &mut GenericElement, child: impl AsRef<str>) {
+            parent
                 .hydro_elem
                 .append_child(HydrationText::new(child.as_ref()));
         }
@@ -195,9 +195,9 @@ impl ParentElement for GenericElement {
 
         child.for_each(
             text_value,
-            |builder| {
+            |parent| {
                 let mut text_node = HydrationText::new(empty_str());
-                builder.hydro_elem.append_child(text_node.clone());
+                parent.hydro_elem.append_child(text_node.clone());
 
                 move |new_value| {
                     text_node.set_text(new_value.into());
@@ -222,21 +222,21 @@ impl ParentElement for GenericElement {
         }
 
         child.select(
-            |builder, child| {
+            |parent, child| {
                 if let Some(child) = child {
                     let mut child = child.into();
 
-                    builder.hydro_elem.append_child(&child);
+                    parent.hydro_elem.append_child(&child);
 
                     if child.has_weak_refs() {
-                        builder.resources.push(Resource::Child(child));
+                        parent.resources.push(Resource::Child(child));
                     } else {
-                        builder.resources.extend(child.take_resources());
-                        builder.hydro_elem.store_child(child.into_hydro());
+                        parent.resources.extend(child.take_resources());
+                        parent.hydro_elem.store_child(child.into_hydro());
                     }
                 }
             },
-            |builder, child| builder.child_builder_mut().optional_child(Sig(child)),
+            |parent, child| parent.child_builder_mut().optional_child(Sig(child)),
             &mut self,
         );
 
@@ -311,9 +311,9 @@ impl Element for GenericElement {
         }
 
         class.for_each(
-            |builder, class| builder.hydro_elem.add_class(intern_str(class.as_ref())),
-            |builder| {
-                let mut element = builder.hydro_elem.clone();
+            |elem, class| elem.hydro_elem.add_class(intern_str(class.as_ref())),
+            |elem| {
+                let mut element = elem.hydro_elem.clone();
                 let previous_value: PreviousValue<T> = Rc::new(Cell::new(None));
 
                 move |class: T| class_signal(class, &mut element, &previous_value)
@@ -330,12 +330,12 @@ impl Element for GenericElement {
         Iter: 'a + IntoIterator<Item = T>,
     {
         fn classes_value<T0>(
-            builder: &mut GenericElement,
+            elem: &mut GenericElement,
             classes: impl IntoIterator<Item = T0>,
         ) where
             T0: AsRef<str>,
         {
-            let element = &mut builder.hydro_elem;
+            let element = &mut elem.hydro_elem;
 
             for class in classes {
                 element.add_class(intern_str(class.as_ref()));
@@ -373,8 +373,8 @@ impl Element for GenericElement {
 
         classes.for_each(
             classes_value,
-            |builder| {
-                let mut element = builder.hydro_elem.clone();
+            |elem| {
+                let mut element = elem.hydro_elem.clone();
                 let previous_values: PreviousValues<T> = Rc::new(Cell::new(Vec::new()));
 
                 move |classes| classes_signal(classes, &mut element, &previous_values)
@@ -393,10 +393,10 @@ impl Element for GenericElement {
         self.check_attribute_unique(name);
 
         value.for_each(
-            |builder, value| builder.hydro_elem.attribute(name, value),
-            |builder| {
+            |elem, value| elem.hydro_elem.attribute(name, value),
+            |elem| {
                 let name = name.to_owned();
-                let mut element = builder.hydro_elem.clone();
+                let mut element = elem.hydro_elem.clone();
 
                 move |new_value| {
                     element.attribute(&name, new_value);
