@@ -336,16 +336,16 @@ macro_rules! dom_element {
             }
         }
 
-        impl ::std::fmt::Display for $camel_name {
+        impl<Dom: $crate::dom::Dom> ::std::fmt::Display for $camel_name<Dom> {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 self.elem.fmt(f)
             }
         }
 
-        impl $crate::value::Value for $camel_name {}
+        impl<Dom: $crate::dom::Dom> $crate::value::Value for $camel_name<Dom> {}
 
-        impl From<$camel_name> for $crate::node::element::GenericElement {
-            fn from(elem: $camel_name) -> Self {
+        impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>> for $crate::node::element::GenericElement<Dom> {
+            fn from(elem: $camel_name<Dom>) -> Self {
                 elem.elem
             }
         }
@@ -356,13 +356,13 @@ macro_rules! dom_element {
             }
         }
 
-        $(impl $attribute_trait for $camel_name {})*
+        $(impl<Dom: $crate::dom::Dom> $attribute_trait for $camel_name<Dom> {})*
 
         $(
-            impl $event_trait for $camel_name {}
+            impl<Dom: $crate::dom::Dom> $event_trait for $camel_name<Dom> {}
         )*
 
-        impl $crate::elements::ElementEvents for $camel_name {}
+        impl<Dom: $crate::dom::Dom> $crate::elements::ElementEvents for $camel_name<Dom> {}
     };
     (
         $(#[$elem_meta:meta])*
