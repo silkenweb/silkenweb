@@ -1,5 +1,5 @@
 use silkenweb::{
-    node::element::{ParentBuilder, GenericElement},
+    node::element::{ParentElement, GenericElement},
     value::{RefSignalOrValue, SignalOrValue},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };

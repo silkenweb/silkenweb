@@ -10,7 +10,7 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{element::{ElementBuilder, GenericElement}, Node},
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentElement},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};

@@ -10,7 +10,7 @@ use silkenweb::{
     clone, css_classes,
     elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
     mount,
-    node::element::{ElementBuilder, GenericElement, ParentBuilder},
+    node::element::{ElementBuilder, GenericElement, ParentElement},
     router,
     task::spawn_local,
     value::Sig,

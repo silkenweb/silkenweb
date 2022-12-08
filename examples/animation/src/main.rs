@@ -13,7 +13,7 @@ use silkenweb::{
         },
     },
     mount,
-    node::element::ParentBuilder,
+    node::element::ParentElement,
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;

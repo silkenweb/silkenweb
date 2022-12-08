@@ -12,7 +12,7 @@
 //! #         ElementEvents,
 //! #     },
 //! #     mount,
-//! #     prelude::ParentBuilder,
+//! #     prelude::ParentElement,
 //! #     router,
 //! #     value::Sig,
 //! # };
@@ -201,7 +201,7 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, node::element::ParentBuilder, prelude::ElementEvents, router::anchor,
+/// #     elements::html::a, node::element::ParentElement, prelude::ElementEvents, router::anchor,
 /// # };
 /// let link = anchor("/my-path").text("click me");
 /// ```
@@ -219,7 +219,7 @@ pub fn anchor(path: impl Into<String>) -> A {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, node::element::ParentBuilder, prelude::ElementEvents,
+/// #     elements::html::a, node::element::ParentElement, prelude::ElementEvents,
 /// #     router::link_clicked,
 /// # };
 /// let path = "/my_path";

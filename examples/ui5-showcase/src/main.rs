@@ -5,7 +5,7 @@ use silkenweb::{
     elements::html::div,
     mount,
     node::element::{ElementBuilder, GenericElement},
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     value::Sig,
 };
 use silkenweb_ui5::{

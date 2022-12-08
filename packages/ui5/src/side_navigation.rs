@@ -9,7 +9,7 @@ use silkenweb::{
     attribute::AsAttribute,
     elements::CustomEvent,
     node::{element::ElementBuilder, Node},
-    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
+    prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentElement},
     value::{SignalOrValue, Value},
     ElementBuilder,
 };

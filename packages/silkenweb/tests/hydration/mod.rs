@@ -6,7 +6,7 @@ use silkenweb::{
     },
     hydration::hydrate,
     node::Node,
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     task::render_now,
     unmount,
     value::Sig,

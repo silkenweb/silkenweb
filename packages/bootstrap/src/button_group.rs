@@ -8,7 +8,7 @@ use silkenweb::{
         element::{GenericElement, ElementBuilder},
         Node,
     },
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     value::{RefSignalOrValue, SignalOrValue},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };

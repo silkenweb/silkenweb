@@ -5,7 +5,7 @@ use silkenweb::{
         ElementEvents,
     },
     mount,
-    node::element::{tag, ParentBuilder},
+    node::element::{tag, ParentElement},
     prelude::HtmlElement,
     task::render_now,
     unmount,

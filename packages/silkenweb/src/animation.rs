@@ -61,7 +61,7 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// # use silkenweb::{
 /// #     animation::infinite_animation,
 /// #     elements::svg::{attributes::Presentation, content_type::Length::Px, rect, svg},
-/// #     node::element::ParentBuilder,
+/// #     node::element::ParentElement,
 /// #     mount,
 /// #     value::Sig,
 /// # };

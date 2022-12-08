@@ -9,9 +9,9 @@ use super::{spawn_cancelable_future, Node};
 /// Helper to build more complex sets of children.
 ///
 /// Some children may be signals and optional. See
-/// [`ParentBuilder::child_builder`] for an example.
+/// [`ParentElement::child_builder`] for an example.
 ///
-/// [`ParentBuilder::child_builder`]: super::ParentBuilder::child_builder
+/// [`ParentElement::child_builder`]: super::ParentElement::child_builder
 #[derive(Default)]
 pub struct ChildBuilder {
     pub(super) items: Rc<RefCell<MutableVec<Item>>>,

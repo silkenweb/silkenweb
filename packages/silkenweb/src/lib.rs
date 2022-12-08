@@ -127,7 +127,7 @@ pub mod prelude {
         clone,
         elements::{ElementEvents, HtmlElement, HtmlElementEvents},
         mount,
-        node::element::ParentBuilder,
+        node::element::ParentElement,
     };
 }
 

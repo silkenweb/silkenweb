@@ -1,7 +1,7 @@
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::{element::{ParentBuilder, GenericElement}, Node},
+    node::{element::{ParentElement, GenericElement}, Node},
     prelude::HtmlElement,
     value::{SignalOrValue, Value},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,

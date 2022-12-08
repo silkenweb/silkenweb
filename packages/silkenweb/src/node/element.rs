@@ -4,7 +4,7 @@
 //! [`crate::elements::html`] should be used in preference to these, where they
 //! are available.
 //!
-//! The [`ElementBuilder`] and [`ParentBuilder`] traits are implemented by
+//! The [`ElementBuilder`] and [`ParentElement`] traits are implemented by
 //! specific DOM elements as well as by [`ElementBuilderBase`]. See the [`div`]
 //! element for example.
 //!
@@ -175,7 +175,7 @@ impl GenericElement {
     }
 }
 
-impl ParentBuilder for GenericElement {
+impl ParentElement for GenericElement {
     fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>,
@@ -591,14 +591,14 @@ pub trait ElementBuilder: Sized {
 }
 
 /// An element that is allowed to have children.
-pub trait ParentBuilder: ElementBuilder {
+pub trait ParentElement: ElementBuilder {
     // TODO: Docs for signal variant
     /// Add a text child to this element
     ///
     /// # Example
     ///
     /// ```no_run
-    /// # use silkenweb::{elements::html::div, node::element::ParentBuilder};
+    /// # use silkenweb::{elements::html::div, node::element::ParentElement};
     /// div().text("Hello, world!");
     /// ```
     fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
@@ -613,7 +613,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// # use silkenweb::{
     /// #     elements::html::div,
     /// #     node::element::{
-    /// #         ParentBuilder,
+    /// #         ParentElement,
     /// #         ElementBuilder
     /// #     },
     /// #     value::Sig
@@ -631,7 +631,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use silkenweb::{
     /// #     elements::html::{div, p},
-    /// #     node::element::ParentBuilder,
+    /// #     node::element::ParentElement,
     /// # };
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
@@ -647,7 +647,7 @@ pub trait ParentBuilder: ElementBuilder {
     ///
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{elements::html::div, node::element::{ParentBuilder, ElementBuilder}, value::Sig};
+    /// # use silkenweb::{elements::html::div, node::element::{ParentElement, ElementBuilder}, value::Sig};
     /// let text = Mutable::new("hello");
     ///
     /// div().optional_child(Sig(text.signal().map(|text| {
@@ -671,7 +671,7 @@ pub trait ParentBuilder: ElementBuilder {
     /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use silkenweb::{
     /// #     elements::html::{div, p},
-    /// #     node::element::ParentBuilder,
+    /// #     node::element::ParentElement,
     /// # };
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```

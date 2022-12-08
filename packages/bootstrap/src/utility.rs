@@ -1,7 +1,7 @@
 use silkenweb::{
     elements::html,
     node::element::ElementBuilder,
-    prelude::{HtmlElement, ParentBuilder},
+    prelude::{HtmlElement, ParentElement},
     value::SignalOrValue,
     Value,
 };
@@ -746,11 +746,11 @@ pub trait Disabled: ElementBuilder {
 
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
-impl<T: ParentBuilder> SetOverflow for T {}
+impl<T: ParentElement> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
-impl<T: ParentBuilder> SetDisplay for T {}
-impl<T: ParentBuilder> SetGap for T {}
+impl<T: ParentElement> SetDisplay for T {}
+impl<T: ParentElement> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
 
 impl Active for html::A {}

@@ -11,7 +11,7 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, GenericElement, ParentBuilder},
+        element::{ElementBuilder, GenericElement, ParentElement},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},

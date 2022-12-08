@@ -393,7 +393,7 @@ macro_rules! create_element_fn {
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{
-        impl $crate::node::element::ParentBuilder for [< $name:camel >]
+        impl $crate::node::element::ParentElement for [< $name:camel >]
         {
             fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where

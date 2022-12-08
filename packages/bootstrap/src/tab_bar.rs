@@ -10,7 +10,7 @@ use silkenweb::{
         element::{ElementBuilder, GenericElement},
         Node,
     },
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     value::{SignalOrValue, Value},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
@@ -150,7 +150,7 @@ impl<L: List> TabBarItem<L> {
 }
 
 pub trait TabBarElement:
-    ElementBuilder + AriaElement + ParentBuilder + Into<Node> + Value + 'static
+    ElementBuilder + AriaElement + ParentElement + Into<Node> + Value + 'static
 {
 }
 impl TabBarElement for html::A {}

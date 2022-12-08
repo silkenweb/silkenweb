@@ -10,7 +10,7 @@ use silkenweb::{
         ElementEvents,
     },
     mount,
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     value::Sig,
 };
 

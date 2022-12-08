@@ -136,7 +136,7 @@ impl fmt::Display for HydrationStats {
 /// # use silkenweb::{
 /// #     elements::html::p,
 /// #     hydration::hydrate,
-/// #     node::element::{ElementBuilder, ParentBuilder},
+/// #     node::element::{ElementBuilder, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };
@@ -156,7 +156,7 @@ impl fmt::Display for HydrationStats {
 /// # use silkenweb::{
 /// #     elements::html::p,
 /// #     hydration::hydrate,
-/// #     node::element::{ElementBuilder, ParentBuilder},
+/// #     node::element::{ElementBuilder, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };

@@ -14,7 +14,7 @@ use silkenweb::{
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
     node::{element::ElementBuilder, Node},
-    prelude::ParentBuilder,
+    prelude::ParentElement,
     value::Sig,
 };
 use silkenweb_signals_ext::SignalProduct;

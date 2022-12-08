@@ -1,7 +1,7 @@
 use silkenweb::{
     elements::html::{a, div, A},
     mount,
-    prelude::ParentBuilder,
+    prelude::ParentElement,
 };
 use silkenweb_bootstrap::{
     badge::badge,
