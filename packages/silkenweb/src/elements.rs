@@ -18,11 +18,11 @@
 //! - [`HtmlElementEvents`]
 //! - [`ElementEvents`]
 //! - [`ParentElement`] (if it is a parent element)
-//! - [`ShadowRootParentBuilder`] (if it's allowed to have a shadow root
+//! - [`ShadowRootParent`] (if it's allowed to have a shadow root
 //!   attached)
 //!
 //! [`ParentElement`]: crate::node::element::ParentElement
-//! [`ShadowRootParentBuilder`]: crate::node::element::ShadowRootParentBuilder
+//! [`ShadowRootParent`]: crate::node::element::ShadowRootParent
 
 use std::marker::PhantomData;
 

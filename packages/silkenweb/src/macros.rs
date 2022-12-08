@@ -428,12 +428,12 @@ macro_rules! parent_element {
     }};
 }
 
-/// Implement `ShadowRootParentBuilder` for the HTML element
+/// Implement `ShadowRootParent` for the HTML element
 #[macro_export]
 macro_rules! shadow_parent_element {
     ($name:ident) => {
         $crate::macros::paste! {
-            impl $crate::node::element::ShadowRootParentBuilder for
+            impl $crate::node::element::ShadowRootParent for
                 [< $name:camel >]
             {
                 fn attach_shadow_children(

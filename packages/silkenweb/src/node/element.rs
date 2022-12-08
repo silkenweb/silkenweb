@@ -262,7 +262,7 @@ impl ParentElement for GenericElement {
     }
 }
 
-impl ShadowRootParentBuilder for GenericElement {
+impl ShadowRootParent for GenericElement {
     fn attach_shadow_children(
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
@@ -691,7 +691,7 @@ pub trait ParentElement: Element {
 }
 
 /// An element that is allowed to have a shadow root
-pub trait ShadowRootParentBuilder: Element {
+pub trait ShadowRootParent: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
