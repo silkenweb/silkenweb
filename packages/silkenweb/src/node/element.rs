@@ -263,17 +263,21 @@ impl ParentElement for GenericElement {
 }
 
 impl ShadowRootParent for GenericElement {
+    /// Currently, there's no way to send the shadow root as plain HTML, until
+    /// we get [Declarative Shadow Root](`<template shadowroot="open">...`).
+    /// 
+    /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
     fn attach_shadow_children(
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
     ) -> Self {
-        // TODO: This should store an Option<ShadowRoot> for wet elements, and a
-        // vec<Node> for dry elements, so it's callable multiple times.
-        // It shouldn't run as an effect.
+        // We can only implement this for the real DOM until we get Declarative 
+        // Shadow Root, so we use an effect.
         self.effect(move |elem| {
-            let shadow_root = elem
+            let shadow_root = elem.shadow_root().unwrap_or_else(|| elem
                 .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                .unwrap_throw();
+                .unwrap_throw());
+                
             for child in children {
                 shadow_root
                     .append_child(&child.into().eval_dom_node())
