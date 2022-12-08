@@ -1,8 +1,8 @@
 use derive_more::Into;
 use silkenweb::{
-    elements::html::{span, SpanBuilder},
+    elements::html::{span, Span},
     node::{
-        element::{Element, ElementBuilder},
+        element::{ElementBuilder, GenericElement},
         Node,
     },
     prelude::ParentBuilder,
@@ -16,14 +16,13 @@ use crate::{
 };
 
 #[derive(ElementBuilder, ElementEvents, HtmlElementEvents, Into, Value)]
-#[element_target(Badge)]
-pub struct BadgeBuilder(SpanBuilder);
+pub struct Badge(Span);
 
 pub fn badge<'a>(
     text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
     background_colour: impl SignalOrValue<Item = Colour>,
-) -> BadgeBuilder {
-    BadgeBuilder(
+) -> Badge {
+    Badge(
         span()
             .class(css::BADGE)
             .class(background_colour.map(Colour::text_background))
@@ -31,37 +30,22 @@ pub fn badge<'a>(
     )
 }
 
-impl BadgeBuilder {
+impl Badge {
     pub fn rounded_pill_border(self) -> Self {
         Self(self.0.rounded_pill_border(true))
     }
 }
 
-impl SetSpacing for BadgeBuilder {}
+impl SetSpacing for Badge {}
 
-impl From<BadgeBuilder> for Element {
-    fn from(badge: BadgeBuilder) -> Self {
-        badge.0.into()
-    }
-}
-
-impl From<BadgeBuilder> for Node {
-    fn from(badge: BadgeBuilder) -> Self {
-        badge.0.into()
-    }
-}
-
-#[derive(Into)]
-pub struct Badge(Element);
-
-impl From<Badge> for Node {
+impl From<Badge> for GenericElement {
     fn from(badge: Badge) -> Self {
         badge.0.into()
     }
 }
 
-impl From<SpanBuilder> for Badge {
-    fn from(builder: SpanBuilder) -> Self {
-        Self(builder.into())
+impl From<Badge> for Node {
+    fn from(badge: Badge) -> Self {
+        badge.0.into()
     }
 }

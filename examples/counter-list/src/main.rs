@@ -10,7 +10,6 @@ use silkenweb::{
         ElementEvents,
     },
     mount,
-    node::element::ElementBuilder,
     prelude::ParentBuilder,
     value::Sig,
 };
@@ -40,7 +39,6 @@ fn push_button(list: Rc<MutableVec<Counter>>) -> Button {
     button()
         .on_click(move |_, _| list.lock_mut().push_cloned(Counter))
         .text("+")
-        .build()
 }
 
 fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
@@ -49,7 +47,6 @@ fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
             list.lock_mut().pop();
         })
         .text("-")
-        .build()
 }
 
 pub fn define_counter() -> Div {
@@ -60,7 +57,6 @@ pub fn define_counter() -> Div {
         .child(define_button("-", -1, count.clone()))
         .text(Sig(count_text))
         .child(define_button("+", 1, count))
-        .build()
 }
 
 pub fn define_button(label: &str, delta: i64, count: Rc<Mutable<i64>>) -> Button {
@@ -69,5 +65,4 @@ pub fn define_button(label: &str, delta: i64, count: Rc<Mutable<i64>>) -> Button
             count.replace_with(move |i| *i + delta);
         })
         .text(label)
-        .build()
 }

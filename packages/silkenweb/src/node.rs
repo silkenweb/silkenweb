@@ -2,7 +2,7 @@
 
 use silkenweb_signals_ext::value::Value;
 
-use self::element::{Element, Resource};
+use self::element::{GenericElement, Resource};
 use crate::hydration::{
     lazy::IsDry,
     node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
@@ -86,9 +86,9 @@ impl WetNode for Node {
     }
 }
 
-impl From<Element> for Node {
-    fn from(elem: Element) -> Self {
-        Self(NodeEnum::Element(elem))
+impl From<GenericElement> for Node {
+    fn from(elem: GenericElement) -> Self {
+        Self(NodeEnum::Element(elem.build()))
     }
 }
 
@@ -99,7 +99,7 @@ impl From<Text> for Node {
 }
 
 enum NodeEnum {
-    Element(Element),
+    Element(GenericElement),
     Text(Text),
 }
 

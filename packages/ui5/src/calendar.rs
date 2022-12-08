@@ -5,7 +5,7 @@ use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::element::ParentBuilder,
+    node::element::{ParentBuilder, GenericElement},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue, UnwrapThrowExt};
@@ -44,19 +44,17 @@ mod elements {
     );
 }
 
-pub use elements::Ui5Calendar as Calendar;
-
-use self::elements::{ui5_calendar, ui5_date, Ui5CalendarBuilder};
+use self::elements::{ui5_calendar, ui5_date, Ui5Calendar};
 use crate::macros::attributes0;
 
-pub fn calendar() -> CalendarBuilder {
-    CalendarBuilder(ui5_calendar())
+pub fn calendar() -> Calendar {
+    Calendar(ui5_calendar())
 }
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct CalendarBuilder(Ui5CalendarBuilder);
+pub struct Calendar(Ui5Calendar);
 
-impl CalendarBuilder {
+impl Calendar {
     attributes0! {
         hide_week_numbers: bool,
         selection_mode: SelectionMode,
@@ -86,6 +84,12 @@ impl CalendarBuilder {
         f: impl FnMut(SelectedDatesChange, web_sys::HtmlElement) + 'static,
     ) -> Self {
         Self(self.0.on_selected_dates_change(f))
+    }
+}
+
+impl From<Calendar> for GenericElement {
+    fn from(builder: Calendar) -> Self {
+        builder.0.into()
     }
 }
 

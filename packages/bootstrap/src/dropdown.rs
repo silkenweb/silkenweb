@@ -1,14 +1,11 @@
-use derive_more::Into;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
     elements::{
-        html::{
-            self, div, li, ul, ABuilder, DivBuilder, FormBuilder, HrBuilder, SpanBuilder, UlBuilder,
-        },
+        html::{self, div, li, ul, Div, Form, Hr, Span, Ul, A},
         AriaElement,
     },
     node::{
-        element::{Element, ElementBuilder},
+        element::{ElementBuilder, GenericElement},
         Node,
     },
     prelude::ParentBuilder,
@@ -16,13 +13,13 @@ use silkenweb::{
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
-use crate::{button::ButtonBuilder, css};
+use crate::{button::Button, css};
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
 #[element_target(Dropdown)]
-pub struct DropdownBuilder(DivBuilder);
+pub struct DropdownBuilder(Div);
 
-pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder {
+pub fn dropdown(button: Button, menu: impl Into<Menu>) -> DropdownBuilder {
     DropdownBuilder(
         div()
             .classes([css::DROPDOWN])
@@ -36,7 +33,7 @@ pub fn dropdown(button: ButtonBuilder, menu: impl Into<Menu>) -> DropdownBuilder
     )
 }
 
-impl From<DropdownBuilder> for Element {
+impl From<DropdownBuilder> for GenericElement {
     fn from(builder: DropdownBuilder) -> Self {
         builder.0.into()
     }
@@ -48,23 +45,14 @@ impl From<DropdownBuilder> for Node {
     }
 }
 
-#[derive(Into, Value)]
-pub struct Dropdown(Element);
-
-impl From<Dropdown> for Node {
-    fn from(elem: Dropdown) -> Self {
-        elem.0.into()
-    }
-}
-
 #[derive(Value)]
-pub struct MenuBuilder(UlBuilder);
+pub struct Menu(Ul);
 
-pub fn dropdown_menu() -> MenuBuilder {
-    MenuBuilder(ul().class(css::DROPDOWN_MENU))
+pub fn dropdown_menu() -> Menu {
+    Menu(ul().class(css::DROPDOWN_MENU))
 }
 
-impl MenuBuilder {
+impl Menu {
     pub fn child(self, child: impl SignalOrValue<Item = impl Into<MenuItem>>) -> Self {
         Self(self.0.child(child.map(|child| child.into().0)))
     }
@@ -89,21 +77,17 @@ impl MenuBuilder {
     pub fn children_signal(
         self,
         children: impl SignalVec<Item = impl Into<MenuItem>> + 'static,
-    ) -> Menu {
-        Menu(
+    ) -> Self {
+        Self(
             self.0
                 .children_signal(children.map(|child| child.into().0))
-                .into(),
         )
     }
 }
 
-#[derive(Value, Into)]
-pub struct Menu(Node);
-
-impl From<MenuBuilder> for Menu {
-    fn from(builder: MenuBuilder) -> Self {
-        Menu(builder.0.into())
+impl From<Menu> for Node {
+    fn from(elem: Menu) -> Self {
+        elem.0.into()
     }
 }
 
@@ -122,9 +106,9 @@ macro_rules! menu_items{
 }
 
 menu_items! {
-    HrBuilder,
-    html::ButtonBuilder,
-    FormBuilder,
-    ABuilder,
-    SpanBuilder,
+    Hr,
+    html::Button,
+    Form,
+    A,
+    Span,
 }

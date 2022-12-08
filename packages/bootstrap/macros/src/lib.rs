@@ -77,7 +77,7 @@ fn code_gen(path: &str, classes: impl Iterator<Item = Class>) -> TokenStream {
         let fn_name = &class.fn_name;
 
         quote!(
-            pub fn #fn_name() -> IconBuilder {
+            pub fn #fn_name() -> Icon {
                 icon(IconType::#enum_variant)
             }
         )

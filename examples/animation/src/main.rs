@@ -13,7 +13,7 @@ use silkenweb::{
         },
     },
     mount,
-    node::element::{ElementBuilder, ParentBuilder},
+    node::element::ParentBuilder,
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -39,11 +39,7 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
             .smooth_quadradic_bezier_curves(Rel, iter::repeat((hump_width, 0.0)).take(humps - 1))
     });
 
-    svg::path()
-        .d(Sig(path))
-        .stroke("black")
-        .fill("transparent")
-        .build()
+    svg::path().d(Sig(path)).stroke("black").fill("transparent")
 }
 
 fn main() {

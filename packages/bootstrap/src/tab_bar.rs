@@ -1,14 +1,13 @@
 use std::marker::PhantomData;
 
-use derive_more::Into;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use silkenweb::{
     elements::{
-        html::{self, li, nav, ol, ul, ABuilder, Nav, Ol, Ul},
+        html::{self, li, nav, ol, ul, Nav, Ol, Ul},
         AriaElement,
     },
     node::{
-        element::{Element, ElementBuilder, ElementBuilderBase},
+        element::{ElementBuilder, GenericElement},
         Node,
     },
     prelude::ParentBuilder,
@@ -18,25 +17,24 @@ use silkenweb::{
 
 use crate::{css, dropdown::Menu, utility::SetDisplay, List};
 
-pub fn tab_bar() -> TabBarBuilder<Nav> {
-    TabBarBuilder(nav().class(css::NAV).into(), PhantomData)
+pub fn tab_bar() -> TabBar<Nav> {
+    TabBar(nav().class(css::NAV).into(), PhantomData)
 }
 
-pub fn tab_bar_unordered() -> TabBarBuilder<Ul> {
-    TabBarBuilder(ul().class(css::NAV).into(), PhantomData)
+pub fn tab_bar_unordered() -> TabBar<Ul> {
+    TabBar(ul().class(css::NAV).into(), PhantomData)
 }
 
-pub fn tab_bar_ordered() -> TabBarBuilder<Ol> {
-    TabBarBuilder(ol().class(css::NAV).into(), PhantomData)
+pub fn tab_bar_ordered() -> TabBar<Ol> {
+    TabBar(ol().class(css::NAV).into(), PhantomData)
 }
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-#[element_target(TabBar)]
-pub struct TabBarBuilder<Base = Nav>(ElementBuilderBase, PhantomData<Base>);
+pub struct TabBar<Base = Nav>(GenericElement, PhantomData<Base>);
 
-impl<Base> TabBarBuilder<Base> {
+impl<Base> TabBar<Base> {
     pub fn style(self, style: impl SignalOrValue<Item = Style>) -> Self {
-        TabBarBuilder(
+        TabBar(
             self.0.classes(style.map(|s| match s {
                 Style::Plain => None,
                 Style::Tabs => Some(css::NAV_TABS),
@@ -47,7 +45,7 @@ impl<Base> TabBarBuilder<Base> {
     }
 
     pub fn fill(self, fill: impl SignalOrValue<Item = Fill>) -> Self {
-        TabBarBuilder(
+        TabBar(
             self.0.classes(fill.map(|fl| match fl {
                 Fill::Compact => None,
                 Fill::Stretch => Some(css::NAV_FILL),
@@ -91,10 +89,10 @@ impl<Base> TabBarBuilder<Base> {
     }
 }
 
-impl<Base> SetDisplay for TabBarBuilder<Base> {}
+impl<Base> SetDisplay for TabBar<Base> {}
 
-impl<Base> From<TabBarBuilder<Base>> for Node {
-    fn from(elem: TabBarBuilder<Base>) -> Self {
+impl<Base> From<TabBar<Base>> for Node {
+    fn from(elem: TabBar<Base>) -> Self {
         elem.0.into()
     }
 }
@@ -155,14 +153,5 @@ pub trait TabBarElement:
     ElementBuilder + AriaElement + ParentBuilder + Into<Node> + Value + 'static
 {
 }
-impl TabBarElement for ABuilder {}
-impl TabBarElement for html::ButtonBuilder {}
-
-#[derive(Into, Value)]
-pub struct TabBar(Element);
-
-impl From<TabBar> for Node {
-    fn from(elem: TabBar) -> Self {
-        elem.0.into()
-    }
-}
+impl TabBarElement for html::A {}
+impl TabBarElement for html::Button {}

@@ -1,9 +1,6 @@
 use silkenweb::{
-    elements::html::{div, DivBuilder, Ol, Ul},
-    node::{
-        element::{Element, ElementBuilderBase},
-        Node,
-    },
+    elements::html::{div, Div, Ol, Ul},
+    node::{element::GenericElement, Node},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 use utility::SetDisplay;
@@ -22,33 +19,34 @@ pub mod css {
 
 pub type Class = &'static str;
 
-/// A generic HTML element builder
+// TODO: Rename to GenericHtmlElement
+/// A generic HTML element
 ///
-/// Bootstrap builder types that don't implement `HtmlElement`, like
-/// [`BadgeBuilder`](badge::BadgeBuilder) will convert into this as an "escape
+/// Bootstrap elem types that don't implement `HtmlElement`, like
+/// [`Badge`](badge::Badge) will convert into this as an "escape
 /// hatch".
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct HtmlElementBuilder(ElementBuilderBase);
+pub struct HtmlElementBuilder(GenericElement);
 
-impl From<HtmlElementBuilder> for Element {
-    fn from(builder: HtmlElementBuilder) -> Self {
-        builder.0.into()
+impl From<HtmlElementBuilder> for GenericElement {
+    fn from(elem: HtmlElementBuilder) -> Self {
+        elem.0
     }
 }
 
 impl From<HtmlElementBuilder> for Node {
-    fn from(builder: HtmlElementBuilder) -> Self {
-        builder.0.into()
+    fn from(elem: HtmlElementBuilder) -> Self {
+        elem.0.into()
     }
 }
 
 /// Shorthand for `div().flex_row()`
-pub fn row() -> DivBuilder {
+pub fn row() -> Div {
     div().flex_row()
 }
 
 /// Shorthand for `div().flex_column()`
-pub fn column() -> DivBuilder {
+pub fn column() -> Div {
     div().flex_column()
 }
 

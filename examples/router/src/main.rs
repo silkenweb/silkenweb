@@ -4,7 +4,6 @@ use silkenweb::{
         ElementEvents,
     },
     mount,
-    node::element::ElementBuilder,
     prelude::ParentBuilder,
     router::{self, UrlPath},
     value::Sig,
@@ -39,5 +38,4 @@ fn route_button(route: &str, description: &str) -> Button {
     button()
         .on_click(move |_, _| router::set_url_path(route.clone()))
         .text(description)
-        .build()
 }

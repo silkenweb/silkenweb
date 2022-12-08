@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::{
-        html::{button, div, p, PBuilder},
+        html::{button, div, p, P},
         ElementEvents,
     },
     mount,
@@ -134,11 +134,7 @@ async fn multiple_reactive_text() {
     );
 }
 
-async fn verify_reactive_text(
-    paragraph: PBuilder,
-    text_id: &str,
-    text: &mut Mutable<&'static str>,
-) {
+async fn verify_reactive_text(paragraph: P, text_id: &str, text: &mut Mutable<&'static str>) {
     mount(APP_ID, paragraph);
     render_now().await;
     assert_eq!("0", text_content(text_id));

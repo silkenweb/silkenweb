@@ -1,16 +1,13 @@
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    node::{
-        element::{Element, ParentBuilder},
-        Node,
-    },
+    node::{element::{ParentBuilder, GenericElement}, Node},
     prelude::HtmlElement,
     value::{SignalOrValue, Value},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
-use self::element::{ui5_bar, Ui5BarBuilder};
+use self::element::{ui5_bar, Ui5Bar};
 use crate::macros::attributes0;
 
 #[derive(Copy, Clone, Eq, PartialEq, Display, Value)]
@@ -44,21 +41,19 @@ mod element {
     parent_element!(ui5_bar);
 }
 
-pub use element::Ui5Bar as Bar;
-
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct BarBuilder(Ui5BarBuilder);
+pub struct Bar(Ui5Bar);
 
-pub fn bar() -> BarBuilder {
-    BarBuilder(ui5_bar())
+pub fn bar() -> Bar {
+    Bar(ui5_bar())
 }
 
-impl BarBuilder {
+impl Bar {
     attributes0! {design: BarDesign}
 
     pub fn start_content(
         self,
-        child: impl SignalOrValue<Item = impl HtmlElement + Into<Element> + Value> + 'static,
+        child: impl SignalOrValue<Item = impl HtmlElement + Into<GenericElement> + Value> + 'static,
     ) -> Self {
         Self(
             self.0
@@ -75,7 +70,7 @@ impl BarBuilder {
 
     pub fn end_content(
         self,
-        child: impl SignalOrValue<Item = impl HtmlElement + Into<Element>> + 'static,
+        child: impl SignalOrValue<Item = impl HtmlElement + Into<GenericElement>> + 'static,
     ) -> Self {
         Self(
             self.0
@@ -83,3 +78,10 @@ impl BarBuilder {
         )
     }
 }
+
+impl From<Bar> for GenericElement {
+    fn from(elem: Bar) -> Self {
+        elem.0.into()
+    }
+}
+

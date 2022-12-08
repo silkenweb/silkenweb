@@ -107,7 +107,6 @@ impl Row {
                 ),
                 cache!(td().class("col-md-6")),
             ])
-            .build()
     }
 }
 
@@ -184,31 +183,24 @@ impl App {
                     .classes(["preloadicon", "glyphicon", "glyphicon-remove"])
                     .attribute("aria-hidden", "true"),
             )
-            .build()
     }
 
     fn render_jumbotron(self: Rc<Self>) -> Div {
-        div()
-            .class("jumbotron")
-            .child(div().class("row").children([
-                div().class("col-md-6").child(h1().text("Silkenweb keyed")),
-                div().class("col-md-6").child(self.render_action_buttons()),
-            ]))
-            .build()
+        div().class("jumbotron").child(div().class("row").children([
+            div().class("col-md-6").child(h1().text("Silkenweb keyed")),
+            div().class("col-md-6").child(self.render_action_buttons()),
+        ]))
     }
 
     fn render_action_buttons(self: &Rc<Self>) -> Div {
-        div()
-            .class("row")
-            .children([
-                self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)),
-                self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)),
-                self.render_button("add", "Append 1,000 rows", |app| app.append(1_000)),
-                self.render_button("update", "Update every 10th row", |app| app.update()),
-                self.render_button("clear", "Clear", |app| app.clear()),
-                self.render_button("swaprows", "Swap Rows", |app| app.swap()),
-            ])
-            .build()
+        div().class("row").children([
+            self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)),
+            self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)),
+            self.render_button("add", "Append 1,000 rows", |app| app.append(1_000)),
+            self.render_button("update", "Update every 10th row", |app| app.update()),
+            self.render_button("clear", "Clear", |app| app.clear()),
+            self.render_button("swaprows", "Swap Rows", |app| app.swap()),
+        ])
     }
 
     fn render_button<F>(self: &Rc<Self>, id: &str, title: &str, mut on_click: F) -> Div
@@ -217,17 +209,14 @@ impl App {
     {
         let app = self.clone();
 
-        div()
-            .classes(["col-sm-6", "smallpad"])
-            .child(
-                button()
-                    .classes(["btn", "btn-primary", "btn-block"])
-                    .r#type("button")
-                    .id(id)
-                    .text(title)
-                    .on_click(move |_, _| on_click(&app)),
-            )
-            .build()
+        div().classes(["col-sm-6", "smallpad"]).child(
+            button()
+                .classes(["btn", "btn-primary", "btn-block"])
+                .r#type("button")
+                .id(id)
+                .text(title)
+                .on_click(move |_, _| on_click(&app)),
+        )
     }
 
     fn render_table(self: Rc<Self>) -> Table {
@@ -240,7 +229,6 @@ impl App {
                         .map(move |row| row.render(self.clone())),
                 ),
             )
-            .build()
     }
 }
 

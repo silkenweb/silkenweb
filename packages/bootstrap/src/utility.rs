@@ -753,7 +753,7 @@ impl<T: ParentBuilder> SetDisplay for T {}
 impl<T: ParentBuilder> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
 
-impl Active for html::ABuilder {}
-impl Active for html::ButtonBuilder {}
+impl Active for html::A {}
+impl Active for html::Button {}
 
-impl Disabled for html::ABuilder {}
+impl Disabled for html::A {}

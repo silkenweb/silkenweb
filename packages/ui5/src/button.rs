@@ -48,4 +48,4 @@ mod element {
     parent_element!(ui5_button);
 }
 
-pub use element::{ui5_button as button, Ui5Button as Button, Ui5ButtonBuilder as ButtonBuilder};
+pub use element::{ui5_button as button, Ui5Button as Button};

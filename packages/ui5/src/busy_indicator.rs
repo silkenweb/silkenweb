@@ -38,5 +38,4 @@ mod element {
 
 pub use element::{
     ui5_busy_indicator as busy_indicator, Ui5BusyIndicator as BusyIndicator,
-    Ui5BusyIndicatorBuilder as BusyIndicatorBuilder,
 };

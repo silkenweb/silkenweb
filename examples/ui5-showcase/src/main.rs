@@ -4,7 +4,7 @@ use silkenweb::{
     css_classes,
     elements::html::div,
     mount,
-    node::element::{Element, ElementBuilder},
+    node::element::{ElementBuilder, GenericElement},
     prelude::ParentBuilder,
     value::Sig,
 };
@@ -49,42 +49,44 @@ pub fn main() -> Result<(), JsValue> {
         div()
             .class(FLEX)
             .child(side_bar)
-            .child(Sig(selected_signal.map(move |selection| -> Element {
-                match selection {
-                    Selected::Avatar => avatar().into(),
-                    Selected::AvatarGroup => avatar_group().into(),
-                    Selected::Badge => badge().into(),
-                    Selected::Bar => bar().into(),
-                    Selected::BusyIndicator => busy_indicator().into(),
-                    Selected::Breadcrumbs => breadcrumbs().into(),
-                    Selected::Button => button().into(),
-                    Selected::Calendar => calendar().into(),
-                    Selected::Icon => icon().into(),
-                }
-            }))),
+            .child(Sig(selected_signal.map(
+                move |selection| -> GenericElement {
+                    match selection {
+                        Selected::Avatar => avatar().into(),
+                        Selected::AvatarGroup => avatar_group().into(),
+                        Selected::Badge => badge().into(),
+                        Selected::Bar => bar().into(),
+                        Selected::BusyIndicator => busy_indicator().into(),
+                        Selected::Breadcrumbs => breadcrumbs().into(),
+                        Selected::Button => button().into(),
+                        Selected::Calendar => calendar().into(),
+                        Selected::Icon => icon().into(),
+                    }
+                },
+            ))),
     );
 
     Ok(())
 }
 
 fn avatar() -> Avatar {
-    avatar::avatar().initials("SB").build()
+    avatar::avatar().initials("SB")
 }
 
-fn avatar_group() -> AvatarGroup {
-    #[derive(Display, FromStr)]
-    enum Avatar {
-        Sb,
-        Bb,
-    }
+#[derive(Display, FromStr)]
+enum AvatarId {
+    Sb,
+    Bb,
+}
 
+fn avatar_group() -> AvatarGroup<AvatarId> {
     avatar::avatar_group()
         .children([
             (
-                Avatar::Sb,
+                AvatarId::Sb,
                 avatar::avatar().initials("SB").icon(Icon::Employee),
             ),
-            (Avatar::Bb, avatar::avatar().initials("BB")),
+            (AvatarId::Bb, avatar::avatar().initials("BB")),
         ])
         .on_overflow(|_, _| web_log::println!("Visible avatars changed"))
         .on_click(|_, _, id| {
@@ -93,15 +95,10 @@ fn avatar_group() -> AvatarGroup {
                 id.map_or_else(|| "Overflow button".to_string(), |av| av.to_string())
             )
         })
-        .build()
 }
 
 fn badge() -> Badge {
-    badge::badge()
-        .color_scheme(2)
-        .text("Badge")
-        .icon(icon())
-        .build()
+    badge::badge().color_scheme(2).text("Badge").icon(icon())
 }
 
 fn bar() -> Bar {
@@ -110,19 +107,18 @@ fn bar() -> Bar {
         .middle_content(div().text("Middle"))
         .end_content(div().text("End"))
         .design(BarDesign::Header)
-        .build()
 }
 
-fn breadcrumbs() -> Breadcrumbs {
-    #[derive(FromStr, Display)]
-    enum BreadcrumbId {
-        Item1,
-        Item2,
-        Item3,
-        Item4,
-        Item5,
-    }
+#[derive(FromStr, Display)]
+enum BreadcrumbId {
+    Item1,
+    Item2,
+    Item3,
+    Item4,
+    Item5,
+}
 
+fn breadcrumbs() -> Breadcrumbs<BreadcrumbId> {
     breadcrumbs::breadcrumbs()
         .children([
             (BreadcrumbId::Item1, breadcrumbs_item().text("Item1")),
@@ -132,18 +128,16 @@ fn breadcrumbs() -> Breadcrumbs {
             (BreadcrumbId::Item5, breadcrumbs_item().text("Item5")),
         ])
         .on_item_click(|_, id| web_log::println!("{} clicked", id))
-        .build()
 }
 
 fn busy_indicator() -> BusyIndicator {
-    busy_indicator::busy_indicator().active(true).build()
+    busy_indicator::busy_indicator().active(true)
 }
 
 fn button() -> Button {
     button::button()
         .text("Press Me")
         .on_click(|_, _| web_log::println!("Button clicked"))
-        .build()
 }
 
 fn calendar() -> Calendar {
@@ -156,11 +150,10 @@ fn calendar() -> Calendar {
                 web_log::println!("{}", d);
             }
         })
-        .build()
 }
 
 fn icon() -> Ui5Icon {
-    ui5_icon().name(Icon::Activate).build()
+    ui5_icon().name(Icon::Activate)
 }
 
 #[derive(Display, FromStr, Copy, Clone)]

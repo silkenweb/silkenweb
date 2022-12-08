@@ -9,11 +9,11 @@ use silkenweb::{
     elements::{
         html::{
             a, button, div, footer, h1, header, input, label, li, section, span, strong, ul,
-            Button, Div, Footer, Input, Li, LiBuilder, Section, Ul,
+            Button, Div, Footer, Input, Li, Section, Ul,
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::element::{Element, ElementBuilder},
+    node::{element::ElementBuilder, Node},
     prelude::ParentBuilder,
     value::Sig,
 };
@@ -49,8 +49,7 @@ impl TodoAppView {
                     }
                 }
             })
-            .effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw())
-            .build();
+            .effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw());
 
         let item_filter = Broadcaster::new(item_filter);
         let app_view = self.clone();
@@ -63,7 +62,7 @@ impl TodoAppView {
                     vec![
                         app_view.render_main(item_filter.signal()).into(),
                         app_view.render_footer(item_filter.signal()).into(),
-                    ] as Vec<Element>
+                    ] as Vec<Node>
                 }
             })
             .to_signal_vec();
@@ -72,7 +71,6 @@ impl TodoAppView {
             .class("todoapp")
             .child(header().child(h1().text("todos")).child(input_elem))
             .children_signal(body)
-            .build()
     }
 
     fn render_main(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {
@@ -100,7 +98,6 @@ impl TodoAppView {
                         .map(move |item| TodoItemView::render(item, app.clone())),
                 ),
             )
-            .build()
     }
 
     fn render_footer(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Footer {
@@ -117,7 +114,6 @@ impl TodoAppView {
             })))
             .child(self.render_filters(item_filter))
             .optional_child(Sig(self.render_clear_completed()))
-            .build()
     }
 
     fn render_filter_link(
@@ -125,7 +121,7 @@ impl TodoAppView {
         filter: Filter,
         item_filter: impl Signal<Item = Filter> + 'static,
         seperator: &str,
-    ) -> LiBuilder {
+    ) -> Li {
         let filter_name = format!("{}", filter);
 
         li().child(
@@ -140,13 +136,11 @@ impl TodoAppView {
 
     fn render_filters(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Ul {
         let item_filter = Broadcaster::new(item_filter);
-        ul().class("filters")
-            .children([
-                self.render_filter_link(Filter::All, item_filter.signal(), " "),
-                self.render_filter_link(Filter::Active, item_filter.signal(), " "),
-                self.render_filter_link(Filter::Completed, item_filter.signal(), ""),
-            ])
-            .build()
+        ul().class("filters").children([
+            self.render_filter_link(Filter::All, item_filter.signal(), " "),
+            self.render_filter_link(Filter::Active, item_filter.signal(), " "),
+            self.render_filter_link(Filter::Completed, item_filter.signal(), ""),
+        ])
     }
 
     fn render_clear_completed(&self) -> impl Signal<Item = Option<Button>> {
@@ -160,7 +154,6 @@ impl TodoAppView {
                     .class("clear-completed")
                     .text("Clear completed")
                     .on_click(move |_, _| app.clear_completed_todos())
-                    .build()
             })
         })
     }
@@ -221,7 +214,6 @@ impl TodoItemView {
         li().classes(Sig(view.class()))
             .child(view.render_edit())
             .child(view.render_view())
-            .build()
     }
 
     fn render_edit(&self) -> Input {
@@ -251,7 +243,6 @@ impl TodoItemView {
                     elem.focus().unwrap_throw();
                 }
             })
-            .build()
     }
 
     fn render_view(&self) -> Div {
@@ -281,7 +272,6 @@ impl TodoItemView {
                 move |_, _| todo.remove(&app)
             }))
             .effect_signal(todo.is_editing(), |elem, editing| elem.set_hidden(editing))
-            .build()
     }
 
     fn class(&self) -> impl Signal<Item = impl Iterator<Item = &'static str>> {

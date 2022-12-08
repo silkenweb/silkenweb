@@ -1,5 +1,5 @@
 use silkenweb::{
-    node::element::ParentBuilder,
+    node::element::{ParentBuilder, GenericElement},
     value::{RefSignalOrValue, SignalOrValue},
     AriaElement, ElementBuilder, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
@@ -20,16 +20,14 @@ mod elements {
     parent_element!(ui5_badge);
 }
 
-pub type Badge = elements::Ui5Badge;
-
-pub fn badge() -> BadgeBuilder {
-    BadgeBuilder(ui5_badge())
+pub fn badge() -> Badge {
+    Badge(ui5_badge())
 }
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct BadgeBuilder(elements::Ui5BadgeBuilder);
+pub struct Badge(elements::Ui5Badge);
 
-impl BadgeBuilder {
+impl Badge {
     attributes0! {color_scheme: u8}
 
     pub fn icon(self, icon: impl SignalOrValue<Item = Ui5Icon>) -> Self {
@@ -39,7 +37,13 @@ impl BadgeBuilder {
     pub fn text<'a>(
         self,
         text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
-    ) -> BadgeBuilder {
+    ) -> Badge {
         Self(self.0.text(text))
+    }
+}
+
+impl From<Badge> for GenericElement {
+    fn from(elem: Badge) -> Self {
+        elem.0.into()
     }
 }

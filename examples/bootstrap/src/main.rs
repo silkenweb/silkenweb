@@ -1,5 +1,5 @@
 use silkenweb::{
-    elements::html::{a, div, ABuilder},
+    elements::html::{a, div, A},
     mount,
     prelude::ParentBuilder,
 };
@@ -55,7 +55,7 @@ fn main() {
     mount("app", app);
 }
 
-fn tab_bar_items() -> impl Iterator<Item = ABuilder> {
+fn tab_bar_items() -> impl Iterator<Item = A> {
     [
         a().href("#").text("Active").active(true),
         a().href("#").text("Tab"),

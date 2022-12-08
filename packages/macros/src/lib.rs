@@ -52,9 +52,6 @@ derive_empty!(
 #[proc_macro_error]
 pub fn derive_element_builder(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
-    let target = extract_attr_type(&new_type.attrs, "element_target", || {
-        abort_call_site!("Use `element_target(TargetType)`")
-    });
     let dom_type = extract_attr_type(&new_type.attrs, "element_dom_type", || {
         abort_call_site!("Use `element_dom_type(DomType)`")
     });
@@ -101,22 +98,11 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
         None => quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::DomType),
         Some(dom_type) => quote!(#dom_type),
     };
-    let (target, build_fn_body) = match target {
-        None => (
-            quote!(<#derive_from as ::silkenweb::node::element::ElementBuilder>::Target),
-            quote!(self.#derive_field.build()),
-        ),
-        Some(target) => (
-            quote!(#target),
-            quote!(#target(self.#derive_field.build().into())),
-        ),
-    };
 
     quote!(
         impl #impl_generics ::silkenweb::node::element::ElementBuilder
         for #name #ty_generics #where_clause {
             type DomType = #dom_type;
-            type Target = #target;
 
             fn class<'a, T>(self, class: impl ::silkenweb::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
@@ -166,10 +152,6 @@ pub fn derive_element_builder(item: TokenStream) -> TokenStream {
 
             fn on(self, name: &'static str, f: impl FnMut(::silkenweb::macros::JsValue) + 'static) -> Self {
                 Self{#derive_field: self.#derive_field.on(name, f) #fields_tail}
-            }
-
-            fn build(self) -> Self::Target {
-                #build_fn_body
             }
 
             fn clone_node(&self) -> Self {

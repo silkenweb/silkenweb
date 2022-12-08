@@ -26,10 +26,10 @@ macro_rules! cache {
 
 /// Define a custom html element.
 ///
-/// This will define a builder struct for an html element, with a method for
-/// each attribute. It will also define a struct for the built element.
-/// Underscores are converted to dashes in element, attribute, and event names,
-/// and raw identifiers have their `r#` prefix stripped.
+/// This will define a struct for an html element, with a method for each
+/// attribute. It will also define a struct for the built element. Underscores
+/// are converted to dashes in element, attribute, and event names, and raw
+/// identifiers have their `r#` prefix stripped.
 ///
 /// The html identifier can be explicitly specified in brackets after the
 /// element or attribute name. See `my_explicitly_named_attribute` in the
@@ -180,7 +180,6 @@ macro_rules! dom_element {
         $(#[$elem_meta:meta])*
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
-            camel_builder_name = $camel_builder_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
             $(doc_macro = $doc_macro:ident;)?
@@ -212,24 +211,24 @@ macro_rules! dom_element {
             #[doc = ""]
         )?
         $(#[$elem_meta])*
-        pub fn $snake_name() -> $camel_builder_name {
+        pub fn $snake_name() -> $camel_name {
             thread_local!{
-                static ELEM: $crate::node::element::ElementBuilderBase =
+                static ELEM: $crate::node::element::GenericElement =
                     $crate::create_element_fn!($($namespace, )? $text_name);
             }
 
             ELEM.with(|elem| {
-                $camel_builder_name {
-                    builder: $crate::node::element::ElementBuilder::clone_node(elem)
+                $camel_name {
+                    elem: $crate::node::element::ElementBuilder::clone_node(elem)
                 }
             })
         }
 
-        pub struct $camel_builder_name {
-            builder: $crate::node::element::ElementBuilderBase
+        pub struct $camel_name {
+            elem: $crate::node::element::GenericElement
         }
 
-        impl $camel_builder_name {
+        impl $camel_name {
             $crate::attributes![
                 $([
                         attribute_parent = $text_name,
@@ -257,14 +256,13 @@ macro_rules! dom_element {
             ); )?
         }
 
-        impl $crate::node::element::ElementBuilder for $camel_builder_name {
-            type Target = $camel_name;
+        impl $crate::node::element::ElementBuilder for $camel_name {
             type DomType = $elem_type;
 
             fn class<'a, T>(self, class: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
                 T: 'a + AsRef<str> {
-                        Self { builder: self.builder.class(class) }
+                        Self { elem: self.elem.class(class) }
             }
 
             fn classes<'a, T, Iter>(
@@ -275,7 +273,7 @@ macro_rules! dom_element {
                     T: 'a + AsRef<str>,
                     Iter: 'a + IntoIterator<Item = T>,
             {
-                Self { builder: self.builder.classes(classes) }
+                Self { elem: self.elem.classes(classes) }
             }
 
             fn attribute<'a>(
@@ -283,12 +281,12 @@ macro_rules! dom_element {
                 name: &str,
                 value: impl $crate::value::RefSignalOrValue<'a, Item = impl $crate::attribute::Attribute>
             ) -> Self {
-                Self{ builder: self.builder.attribute(name, value) }
+                Self{ elem: self.elem.attribute(name, value) }
             }
 
             fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
                 Self {
-                    builder: self.builder.effect(|elem| {
+                    elem: self.elem.effect(|elem| {
                         f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))
                     })
                 }
@@ -300,7 +298,7 @@ macro_rules! dom_element {
                 f: impl Fn(&Self::DomType, T) + Clone + 'static,
             ) -> Self {
                 Self{
-                    builder: self.builder.effect_signal(
+                    elem: self.elem.effect_signal(
                         sig,
                         move |elem, signal| {
                             f(
@@ -313,11 +311,11 @@ macro_rules! dom_element {
             }
 
             fn handle(&self) -> $crate::node::element::ElementHandle<Self::DomType> {
-                self.builder.handle().cast()
+                self.elem.handle().cast()
             }
 
             fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
-                Self{ builder: self.builder.spawn_future(future) }
+                Self{ elem: self.elem.spawn_future(future) }
             }
 
             fn on(
@@ -325,73 +323,41 @@ macro_rules! dom_element {
                 name: &'static str,
                 f: impl FnMut($crate::macros::JsValue) + 'static
             ) -> Self {
-                Self{ builder: $crate::node::element::ElementBuilder::on(self.builder, name, f) }
-            }
-
-            fn build(self) -> Self::Target {
-                $camel_name(self.builder.build())
+                Self{ elem: $crate::node::element::ElementBuilder::on(self.elem, name, f) }
             }
 
             fn clone_node(&self) -> Self {
-                Self{ builder: self.builder.clone_node() }
+                Self{ elem: self.elem.clone_node() }
             }
         }
 
         impl ::std::fmt::Display for $camel_name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                self.0.fmt(f)
+                self.elem.fmt(f)
             }
         }
 
         impl $crate::value::Value for $camel_name {}
 
-        impl From<$camel_builder_name> for $crate::node::element::ElementBuilderBase {
-            fn from(builder: $camel_builder_name) -> Self {
-                builder.builder
-            }
-        }
-
-        impl From<$camel_builder_name> for $crate::node::element::Element {
-            fn from(builder: $camel_builder_name) -> Self {
-                $crate::node::element::ElementBuilder::build(builder).into()
-            }
-        }
-
-        impl From<$camel_builder_name> for $crate::node::Node {
-            fn from(builder: $camel_builder_name) -> Self {
-                $crate::node::element::ElementBuilder::build(builder).into()
-            }
-        }
-
-        impl $crate::value::Value for $camel_builder_name {}
-
-        pub struct $camel_name($crate::node::element::Element);
-
-        impl $camel_name {
-            pub fn handle(&self) -> $crate::node::element::ElementHandle<$elem_type> {
-                self.0.handle().cast()
-            }
-        }
-
-        impl From<$camel_name> for $crate::node::element::Element {
-            fn from(html_elem: $camel_name) -> Self {
-                html_elem.0
+        impl From<$camel_name> for $crate::node::element::GenericElement {
+            fn from(elem: $camel_name) -> Self {
+                elem.elem
             }
         }
 
         impl From<$camel_name> for $crate::node::Node {
-            fn from(html_elem: $camel_name) -> Self {
-                html_elem.0.into()
+            fn from(elem: $camel_name) -> Self {
+                elem.elem.into()
             }
         }
 
-        $(impl $attribute_trait for $camel_builder_name {})*
+        $(impl $attribute_trait for $camel_name {})*
 
         $(
-            impl $event_trait for $camel_builder_name {}
+            impl $event_trait for $camel_name {}
         )*
 
-        impl $crate::elements::ElementEvents for $camel_builder_name {}
+        impl $crate::elements::ElementEvents for $camel_name {}
     };
     (
         $(#[$elem_meta:meta])*
@@ -403,7 +369,6 @@ macro_rules! dom_element {
             $(#[$elem_meta])*
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
-                camel_builder_name = [< $name:camel Builder >];
                 common_attributes $($tail)*
             }
         );
@@ -421,21 +386,20 @@ macro_rules! create_element_fn {
     };
 }
 
-/// Add `child` and `text` methods to an html element builder.
+/// Add `child` and `text` methods to an html element.
 ///
 /// See [`custom_html_element`] for a complete example of defining an html
 /// element.
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{
-        impl $crate::node::element::ParentBuilder for
-            [< $name:camel Builder >]
+        impl $crate::node::element::ParentBuilder for [< $name:camel >]
         {
             fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
                 T: 'a + AsRef<str> + Into<String>
             {
-                Self{ builder: self.builder.text(child) }
+                Self{ elem: self.elem.text(child) }
             }
 
             fn child(
@@ -443,7 +407,7 @@ macro_rules! parent_element {
                 child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node> + 'static>
             ) -> Self
             {
-                Self{ builder: self.builder.child(child) }
+                Self{ elem: self.elem.child(child) }
             }
 
             fn optional_child(
@@ -451,14 +415,14 @@ macro_rules! parent_element {
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node> + 'static>>
             ) -> Self
             {
-                Self{ builder: self.builder.optional_child(child) }
+                Self{ elem: self.elem.optional_child(child) }
             }
 
             fn children_signal(
                 self,
                 children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node>> + 'static,
             ) -> Self {
-                Self{ builder: self.builder.children_signal(children) }
+                Self{ elem: self.elem.children_signal(children) }
             }
         }
     }};
@@ -470,13 +434,13 @@ macro_rules! shadow_parent_element {
     ($name:ident) => {
         $crate::macros::paste! {
             impl $crate::node::element::ShadowRootParentBuilder for
-                [< $name:camel Builder >]
+                [< $name:camel >]
             {
                 fn attach_shadow_children(
                     self,
                     children: impl IntoIterator<Item = impl Into<$crate::node::Node>> + 'static
-                ) -> Self::Target {
-                    [< $name:camel >] (self.builder.attach_shadow_children(children))
+                ) -> Self {
+                    [< $name:camel >] { elem: self.elem.attach_shadow_children(children) }
                 }
             }
         }

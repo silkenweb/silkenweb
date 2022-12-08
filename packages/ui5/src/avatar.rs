@@ -11,7 +11,7 @@ use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
     node::{
-        element::{ElementBuilder, ParentBuilder},
+        element::{ElementBuilder, GenericElement, ParentBuilder},
         Node,
     },
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents},
@@ -20,7 +20,7 @@ use silkenweb::{
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
-use self::elements::{ui5_avatar, ui5_avatar_group, Ui5AvatarGroup, Ui5AvatarGroupBuilder};
+use self::elements::{ui5_avatar, ui5_avatar_group, Ui5AvatarGroup};
 use crate::{
     icon::Icon,
     macros::{attributes0, attributes1},
@@ -137,16 +137,14 @@ mod elements {
     parent_element!(ui5_avatar_group);
 }
 
-pub type Avatar = elements::Ui5Avatar;
-
-pub fn avatar() -> AvatarBuilder {
-    AvatarBuilder(ui5_avatar())
+pub fn avatar() -> Avatar {
+    Avatar(ui5_avatar())
 }
 
 #[derive(Value, ElementBuilder, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct AvatarBuilder(elements::Ui5AvatarBuilder);
+pub struct Avatar(elements::Ui5Avatar);
 
-impl AvatarBuilder {
+impl Avatar {
     attributes0! {accessible_name: String, color_scheme: ColorScheme}
 
     pub fn icon(self, value: impl SignalOrValue<Item = Icon>) -> Self {
@@ -169,22 +167,26 @@ impl AvatarBuilder {
         Self(self.0.size(value))
     }
 
-    pub fn image(self, image: impl SignalOrValue<Item = impl Into<Node>>) -> Avatar {
-        self.0.child(image.map(|img| img.into())).build()
+    pub fn image(self, image: impl SignalOrValue<Item = impl Into<Node>>) -> Self {
+        Self(self.0.child(image.map(|img| img.into())))
     }
 }
 
-pub type AvatarGroup = Ui5AvatarGroup;
+impl From<Avatar> for GenericElement {
+    fn from(elem: Avatar) -> Self {
+        elem.0.into()
+    }
+}
 
-pub fn avatar_group<Id>() -> AvatarGroupBuilder<Id> {
-    AvatarGroupBuilder(ui5_avatar_group(), PhantomData)
+pub fn avatar_group<Id>() -> AvatarGroup<Id> {
+    AvatarGroup(ui5_avatar_group(), PhantomData)
 }
 
 /// Warning: Don't use. This isn't working properly yet.
 #[derive(ElementBuilder)]
-pub struct AvatarGroupBuilder<Id>(Ui5AvatarGroupBuilder, PhantomData<Id>);
+pub struct AvatarGroup<Id>(Ui5AvatarGroup, PhantomData<Id>);
 
-impl<Id> AvatarGroupBuilder<Id>
+impl<Id> AvatarGroup<Id>
 where
     Id: Display + FromStr,
     Id::Err: Debug,
@@ -195,7 +197,7 @@ where
         Self(self.0.child(button.slot("overflowButton")), self.1)
     }
 
-    pub fn children(self, children: impl IntoIterator<Item = (Id, AvatarBuilder)>) -> Self {
+    pub fn children(self, children: impl IntoIterator<Item = (Id, Avatar)>) -> Self {
         Self(
             self.0.children(
                 children
@@ -206,10 +208,7 @@ where
         )
     }
 
-    pub fn children_signal(
-        self,
-        children: impl SignalVec<Item = (Id, AvatarBuilder)> + 'static,
-    ) -> Self {
+    pub fn children_signal(self, children: impl SignalVec<Item = (Id, Avatar)> + 'static) -> Self {
         Self(
             self.0.children_signal(
                 children.map(|(id, avatar)| avatar.attribute(SELECTED_ID, id.to_string()).0),
@@ -252,11 +251,17 @@ where
     }
 }
 
-impl<Id> HtmlElement for AvatarGroupBuilder<Id> {}
+impl<Id> HtmlElement for AvatarGroup<Id> {}
 
-impl<Id> HtmlElementEvents for AvatarGroupBuilder<Id> {}
+impl<Id> HtmlElementEvents for AvatarGroup<Id> {}
 
-impl<Id> ElementEvents for AvatarGroupBuilder<Id> {}
+impl<Id> ElementEvents for AvatarGroup<Id> {}
+
+impl<Id> From<AvatarGroup<Id>> for GenericElement {
+    fn from(elem: AvatarGroup<Id>) -> Self {
+        elem.0.into()
+    }
+}
 
 #[wasm_bindgen]
 extern "C" {

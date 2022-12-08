@@ -9,16 +9,13 @@ use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
     elements::CustomEvent,
-    node::{element::ElementBuilder, Node},
+    node::{element::{ElementBuilder, GenericElement}, Node},
     prelude::{ElementEvents, HtmlElement, HtmlElementEvents, ParentBuilder},
     ElementBuilder,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
-use self::element::{
-    ui5_breadcrumbs, ui5_breadcrumbs_item, Ui5Breadcrumbs, Ui5BreadcrumbsBuilder,
-    Ui5BreadcrumbsItem, Ui5BreadcrumbsItemBuilder,
-};
+use self::element::{ui5_breadcrumbs, ui5_breadcrumbs_item, Ui5Breadcrumbs, Ui5BreadcrumbsItem};
 use crate::{macros::attributes1, SELECTED_ID};
 
 #[derive(Copy, Clone, Display, Eq, PartialEq)]
@@ -113,16 +110,14 @@ mod element {
     parent_element!(ui5_breadcrumbs_item);
 }
 
-pub type Breadcrumbs = Ui5Breadcrumbs;
-
-pub fn breadcrumbs<T>() -> BreadcrumbsBuilder<T> {
-    BreadcrumbsBuilder(ui5_breadcrumbs(), PhantomData)
+pub fn breadcrumbs<T>() -> Breadcrumbs<T> {
+    Breadcrumbs(ui5_breadcrumbs(), PhantomData)
 }
 
 #[derive(ElementBuilder)]
-pub struct BreadcrumbsBuilder<Id>(Ui5BreadcrumbsBuilder, PhantomData<Id>);
+pub struct Breadcrumbs<Id>(Ui5Breadcrumbs, PhantomData<Id>);
 
-impl<Id> BreadcrumbsBuilder<Id>
+impl<Id> Breadcrumbs<Id>
 where
     Id: Display + FromStr,
     Id::Err: Debug,
@@ -135,7 +130,7 @@ where
 
     pub fn children(
         self,
-        children: impl IntoIterator<Item = (Id, BreadcrumbsItemBuilder)>,
+        children: impl IntoIterator<Item = (Id, BreadcrumbsItem)>,
     ) -> Self {
         Self(
             self.0.children(
@@ -149,7 +144,7 @@ where
 
     pub fn children_signal(
         self,
-        children: impl SignalVec<Item = (Id, BreadcrumbsItemBuilder)> + 'static,
+        children: impl SignalVec<Item = (Id, BreadcrumbsItem)> + 'static,
     ) -> Self {
         Self(
             self.0.children_signal(
@@ -179,23 +174,28 @@ where
     }
 }
 
-impl<Id> HtmlElement for BreadcrumbsBuilder<Id> {}
+impl<Id> HtmlElement for Breadcrumbs<Id> {}
 
-impl<Id> HtmlElementEvents for BreadcrumbsBuilder<Id> {}
+impl<Id> HtmlElementEvents for Breadcrumbs<Id> {}
 
-impl<Id> ElementEvents for BreadcrumbsBuilder<Id> {}
+impl<Id> ElementEvents for Breadcrumbs<Id> {}
 
-impl<T> From<BreadcrumbsBuilder<T>> for Node {
-    fn from(builder: BreadcrumbsBuilder<T>) -> Self {
+impl<T> From<Breadcrumbs<T>> for GenericElement {
+    fn from(builder: Breadcrumbs<T>) -> Self {
         builder.0.into()
     }
 }
 
-pub fn breadcrumbs_item() -> BreadcrumbsItemBuilder {
+impl<T> From<Breadcrumbs<T>> for Node {
+    fn from(builder: Breadcrumbs<T>) -> Self {
+        builder.0.into()
+    }
+}
+
+pub fn breadcrumbs_item() -> BreadcrumbsItem {
     ui5_breadcrumbs_item()
 }
 
-pub type BreadcrumbsItemBuilder = Ui5BreadcrumbsItemBuilder;
 pub type BreadcrumbsItem = Ui5BreadcrumbsItem;
 
 #[wasm_bindgen]

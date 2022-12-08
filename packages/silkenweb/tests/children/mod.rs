@@ -14,7 +14,6 @@ use silkenweb::{
     elements::html::{div, Div},
     macros::Signal,
     mount,
-    node::element::ElementBuilder,
     prelude::ParentBuilder,
     task::render_now,
     value::Sig,
@@ -146,7 +145,7 @@ async fn check(
 }
 
 fn child(index: usize) -> Div {
-    div().text(&format!("{index}")).build()
+    div().text(&format!("{index}"))
 }
 
 fn optional_child(index: usize, is_some: &Mutable<bool>) -> impl Signal<Item = Option<Div>> {

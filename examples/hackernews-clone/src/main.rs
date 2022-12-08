@@ -10,7 +10,7 @@ use silkenweb::{
     clone, css_classes,
     elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
     mount,
-    node::element::{Element, ElementBuilder, ParentBuilder},
+    node::element::{ElementBuilder, GenericElement, ParentBuilder},
     router,
     task::spawn_local,
     value::Sig,
@@ -59,7 +59,6 @@ impl App {
                         }
                     }))),
             )
-            .build()
     }
 }
 
@@ -108,7 +107,7 @@ impl Content {
         Self::Error(err.to_string())
     }
 
-    fn render(&self) -> Element {
+    fn render(&self) -> GenericElement {
         match self {
             Content::FrontPage(articles) => ul()
                 .children(articles.iter().map(|article| li().child(article.render())))
@@ -164,7 +163,6 @@ impl Story {
                             .text(&format!("{descendants} comment{}", plural(descendants))),
                     ),
             )
-            .build()
     }
 }
 
@@ -206,7 +204,6 @@ impl UserDetails {
                 ul().class(USER_SUBMITTED_STORIES)
                     .children(self.submitted.iter().map(Story::render)),
             )
-            .build()
     }
 }
 
@@ -221,7 +218,6 @@ impl StoryDetail {
             .child(self.story.render())
             .child(text_as_html(&self.story.text))
             .child(ul().children(self.comments.iter().map(|comment| comment.render())))
-            .build()
     }
 }
 
@@ -259,7 +255,6 @@ impl CommentTree {
             )
             .child(text_as_html(&self.comment.text))
             .child(ul().children(self.children.iter().map(move |child| child.render())))
-            .build()
     }
 }
 
@@ -268,11 +263,10 @@ fn text_as_html(text: &str) -> Div {
     div()
         .class(USER_CONTENT)
         .effect(move |elem| elem.set_inner_html(&text))
-        .build()
 }
 
 fn user_link(user: &str) -> A {
-    router::anchor(format!("user/{}", user)).text(user).build()
+    router::anchor(format!("user/{}", user)).text(user)
 }
 
 async fn join_ok<T>(items: impl IntoIterator<Item = impl Future<Output = Result<T>>>) -> Vec<T> {

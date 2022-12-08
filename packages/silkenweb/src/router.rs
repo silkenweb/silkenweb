@@ -37,7 +37,7 @@ use std::{collections::HashMap, fmt::Display};
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 use crate::{
-    elements::html::{a, ABuilder},
+    elements::html::{a, A},
     prelude::ElementEvents,
 };
 
@@ -205,7 +205,7 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 /// # };
 /// let link = anchor("/my-path").text("click me");
 /// ```
-pub fn anchor(path: impl Into<String>) -> ABuilder {
+pub fn anchor(path: impl Into<String>) -> A {
     let path = path.into();
 
     a().href(&path).on_click(link_clicked(path))

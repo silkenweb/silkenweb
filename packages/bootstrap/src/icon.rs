@@ -1,8 +1,8 @@
 use derive_more::Into;
 use silkenweb::{
-    elements::html::{i, IBuilder},
+    elements::html::{i, I},
     node::{
-        element::{Element, ElementBuilder},
+        element::{ElementBuilder, GenericElement},
         Node,
     },
     value::SignalOrValue,
@@ -19,45 +19,30 @@ pub mod css {
     silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
 
-pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> IconBuilder {
-    IconBuilder(i().class(icon.map(IconType::class)))
+pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> Icon {
+    Icon(i().class(icon.map(IconType::class)))
 }
 
 #[derive(Value, ElementBuilder, ElementEvents, HtmlElementEvents, Into)]
-pub struct IconBuilder(IBuilder);
+pub struct Icon(I);
 
-impl IconBuilder {
+impl Icon {
     pub fn colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
         self.class(colour.map(Colour::text))
     }
 }
 
-impl SetSpacing for IconBuilder {}
+impl SetSpacing for Icon {}
 
-impl From<IconBuilder> for Element {
-    fn from(icon: IconBuilder) -> Self {
+impl From<Icon> for GenericElement {
+    fn from(icon: Icon) -> Self {
         icon.0.into()
     }
 }
-
-impl From<IconBuilder> for Node {
-    fn from(icon: IconBuilder) -> Self {
-        icon.0.into()
-    }
-}
-
-#[derive(Into, Value)]
-pub struct Icon(Element);
 
 impl From<Icon> for Node {
-    fn from(elem: Icon) -> Self {
-        elem.0.into()
-    }
-}
-
-impl From<IconBuilder> for Icon {
-    fn from(icon: IconBuilder) -> Self {
-        Self(icon.0.into())
+    fn from(icon: Icon) -> Self {
+        icon.0.into()
     }
 }
 

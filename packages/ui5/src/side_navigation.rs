@@ -16,8 +16,8 @@ use silkenweb::{
 use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
 
 use self::elements::{
-    ui5_side_navigation, ui5_side_navigation_item, ui5_side_navigation_sub_item,
-    Ui5SideNavigationBuilder, Ui5SideNavigationItemBuilder, Ui5SideNavigationSubItemBuilder,
+    ui5_side_navigation, ui5_side_navigation_item, ui5_side_navigation_sub_item, Ui5SideNavigation,
+    Ui5SideNavigationItem, Ui5SideNavigationSubItem,
 };
 use crate::{icon::Icon, SELECTED_ID};
 
@@ -69,18 +69,14 @@ mod elements {
     );
 }
 
-pub type SideNavigation = elements::Ui5SideNavigation;
-pub type SideNavigationItem = elements::Ui5SideNavigationItem;
-pub type SideNavigationSubItem = elements::Ui5SideNavigationSubItem;
-
-pub fn side_navigation<Id>() -> SideNavigationBuilder<Id> {
-    SideNavigationBuilder(ui5_side_navigation(), PhantomData)
+pub fn side_navigation<Id>() -> SideNavigation<Id> {
+    SideNavigation(ui5_side_navigation(), PhantomData)
 }
 
 #[derive(ElementBuilder)]
-pub struct SideNavigationBuilder<Id>(Ui5SideNavigationBuilder, PhantomData<Id>);
+pub struct SideNavigation<Id>(Ui5SideNavigation, PhantomData<Id>);
 
-impl<Id> SideNavigationBuilder<Id>
+impl<Id> SideNavigation<Id>
 where
     Id: FromStr,
     Id::Err: Debug,
@@ -91,16 +87,13 @@ where
 
     // We don't include a `child` method as they're not so useful when the item type
     // is specific.
-    pub fn children(
-        self,
-        children: impl IntoIterator<Item = SideNavigationItemBuilder<Id>>,
-    ) -> Self {
+    pub fn children(self, children: impl IntoIterator<Item = SideNavigationItem<Id>>) -> Self {
         Self(self.0.children(children), PhantomData)
     }
 
     pub fn children_signal(
         self,
-        children: impl SignalVec<Item = SideNavigationItemBuilder<Id>> + 'static,
+        children: impl SignalVec<Item = SideNavigationItem<Id>> + 'static,
     ) -> Self {
         Self(self.0.children_signal(children), PhantomData)
     }
@@ -125,31 +118,31 @@ where
     }
 }
 
-impl<Id> Value for SideNavigationBuilder<Id> {}
+impl<Id> Value for SideNavigation<Id> {}
 
-impl<Id> HtmlElement for SideNavigationBuilder<Id> {}
+impl<Id> HtmlElement for SideNavigation<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationBuilder<Id> {}
+impl<Id> HtmlElementEvents for SideNavigation<Id> {}
 
-impl<Id> ElementEvents for SideNavigationBuilder<Id> {}
+impl<Id> ElementEvents for SideNavigation<Id> {}
 
-impl<T> From<SideNavigationBuilder<T>> for Node {
-    fn from(builder: SideNavigationBuilder<T>) -> Self {
+impl<T> From<SideNavigation<T>> for Node {
+    fn from(builder: SideNavigation<T>) -> Self {
         builder.0.into()
     }
 }
 
-pub fn item<Id: Display>(id: Id) -> SideNavigationItemBuilder<Id> {
-    SideNavigationItemBuilder(
+pub fn item<Id: Display>(id: Id) -> SideNavigationItem<Id> {
+    SideNavigationItem(
         ui5_side_navigation_item().attribute(SELECTED_ID, &id.to_string()),
         PhantomData,
     )
 }
 
 #[derive(ElementBuilder)]
-pub struct SideNavigationItemBuilder<Id>(Ui5SideNavigationItemBuilder, PhantomData<Id>);
+pub struct SideNavigationItem<Id>(Ui5SideNavigationItem, PhantomData<Id>);
 
-impl<Id> SideNavigationItemBuilder<Id>
+impl<Id> SideNavigationItem<Id>
 where
     Id: FromStr,
     Id::Err: Debug,
@@ -176,44 +169,41 @@ where
 
     // We don't include `child` and `child_signal` methods as they're not so useful
     // when the item type is specific.
-    pub fn children(
-        self,
-        children: impl IntoIterator<Item = SideNavigationSubItemBuilder<Id>>,
-    ) -> Self {
+    pub fn children(self, children: impl IntoIterator<Item = SideNavigationSubItem<Id>>) -> Self {
         Self(self.0.children(children), PhantomData)
     }
 
     pub fn children_signal(
         self,
-        children: impl SignalVec<Item = SideNavigationSubItemBuilder<Id>> + 'static,
+        children: impl SignalVec<Item = SideNavigationSubItem<Id>> + 'static,
     ) -> Self {
         Self(self.0.children_signal(children), PhantomData)
     }
 }
 
-impl<Id> HtmlElement for SideNavigationItemBuilder<Id> {}
+impl<Id> HtmlElement for SideNavigationItem<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationItemBuilder<Id> {}
+impl<Id> HtmlElementEvents for SideNavigationItem<Id> {}
 
-impl<Id> ElementEvents for SideNavigationItemBuilder<Id> {}
+impl<Id> ElementEvents for SideNavigationItem<Id> {}
 
-impl<T> From<SideNavigationItemBuilder<T>> for Node {
-    fn from(builder: SideNavigationItemBuilder<T>) -> Self {
+impl<T> From<SideNavigationItem<T>> for Node {
+    fn from(builder: SideNavigationItem<T>) -> Self {
         builder.0.into()
     }
 }
 
-pub fn sub_item<Id: Display>(id: Id) -> SideNavigationSubItemBuilder<Id> {
-    SideNavigationSubItemBuilder(
+pub fn sub_item<Id: Display>(id: Id) -> SideNavigationSubItem<Id> {
+    SideNavigationSubItem(
         ui5_side_navigation_sub_item().attribute(SELECTED_ID, &id.to_string()),
         PhantomData,
     )
 }
 
 #[derive(ElementBuilder)]
-pub struct SideNavigationSubItemBuilder<Id>(Ui5SideNavigationSubItemBuilder, PhantomData<Id>);
+pub struct SideNavigationSubItem<Id>(Ui5SideNavigationSubItem, PhantomData<Id>);
 
-impl<Id> SideNavigationSubItemBuilder<Id>
+impl<Id> SideNavigationSubItem<Id>
 where
     Id: FromStr,
     Id::Err: Debug,
@@ -235,14 +225,14 @@ where
     }
 }
 
-impl<Id> HtmlElement for SideNavigationSubItemBuilder<Id> {}
+impl<Id> HtmlElement for SideNavigationSubItem<Id> {}
 
-impl<Id> HtmlElementEvents for SideNavigationSubItemBuilder<Id> {}
+impl<Id> HtmlElementEvents for SideNavigationSubItem<Id> {}
 
-impl<Id> ElementEvents for SideNavigationSubItemBuilder<Id> {}
+impl<Id> ElementEvents for SideNavigationSubItem<Id> {}
 
-impl<T> From<SideNavigationSubItemBuilder<T>> for Node {
-    fn from(builder: SideNavigationSubItemBuilder<T>) -> Self {
+impl<T> From<SideNavigationSubItem<T>> for Node {
+    fn from(builder: SideNavigationSubItem<T>) -> Self {
         builder.0.into()
     }
 }

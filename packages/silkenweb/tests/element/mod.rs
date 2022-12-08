@@ -4,7 +4,7 @@ use futures_signals::{
 };
 use silkenweb::{
     elements::{
-        html::{div, p, DivBuilder},
+        html::{div, p, Div},
         HtmlElement,
     },
     node::{element::ElementBuilder, text},
@@ -33,7 +33,7 @@ macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
         isomorphic_test! {
             async fn $name() {
-                assert_eq!($node.build().to_string(), $expected)
+                assert_eq!($node.to_string(), $expected)
             }
         }
     };
@@ -246,7 +246,7 @@ children_signal_test!(
 isomorphic_test! {
     async fn text_signal() {
         let text = Mutable::new("Initial text");
-        let elem = p().text(Sig(text.signal())).build();
+        let elem = p().text(Sig(text.signal()));
         render_now().await;
         assert_eq!(elem.to_string(), "<p>Initial text</p>");
         text.set("Updated text");
@@ -262,7 +262,7 @@ isomorphic_test! {
         let elem =
             div()
                 .classes(Sig(test_class1.signal()))
-                .classes(Sig(test_class2.signal())).build();
+                .classes(Sig(test_class2.signal()));
 
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="test-class-1 test-class-2"></div>"#);
@@ -285,7 +285,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn attribute_signal() {
         let text = Mutable::new("Initial text");
-        let elem = div().title(Sig(text.signal())).build();
+        let elem = div().title(Sig(text.signal()));
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set("Updated text");
@@ -297,7 +297,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn optional_attribute_signal() {
         let text = Mutable::new(Some("Initial text"));
-        let elem = div().title(Sig(text.signal())).build();
+        let elem = div().title(Sig(text.signal()));
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set(None);
@@ -310,7 +310,7 @@ isomorphic_test! {
     async fn text_node() {
         let elem = div().child(text("Hello, world!"));
         render_now().await;
-        assert_eq!(elem.build().to_string(), r#"<div>Hello, world!</div>"#);
+        assert_eq!(elem.to_string(), r#"<div>Hello, world!</div>"#);
     }
 }
 
@@ -320,7 +320,7 @@ pub async fn children_signal_test(
     expected: &[usize],
 ) {
     async fn with_existing_children(
-        initial_elem: DivBuilder,
+        initial_elem: Div,
         initial_child_text: &str,
         initial: &[usize],
         f: impl FnOnce(MutableVecLockMut<usize>),
@@ -328,8 +328,7 @@ pub async fn children_signal_test(
     ) {
         let children = MutableVec::<usize>::new_with_values(initial.to_vec());
         let element = initial_elem
-            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))))
-            .build();
+            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))));
 
         f(children.lock_mut());
         let mut expected_html = String::new();

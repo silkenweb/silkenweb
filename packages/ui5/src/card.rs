@@ -32,20 +32,20 @@ mod elements {
     parent_element!(ui5_card_header);
 }
 
-pub use elements::{Ui5Card as Card, Ui5CardHeader as CardHeader};
+pub use elements::Ui5Card as Card;
 use silkenweb::ElementBuilder;
 
-use self::elements::{ui5_card_header, Ui5CardHeaderBuilder};
+use self::elements::{ui5_card_header, Ui5CardHeader};
 use crate::macros::attributes0;
 
-pub fn card_header_builder() -> CardHeaderBuilder {
-    CardHeaderBuilder(ui5_card_header())
+pub fn card_header_builder() -> CardHeader {
+    CardHeader(ui5_card_header())
 }
 
 #[derive(ElementBuilder)]
-pub struct CardHeaderBuilder(Ui5CardHeaderBuilder);
+pub struct CardHeader(Ui5CardHeader);
 
-impl CardHeaderBuilder {
+impl CardHeader {
     attributes0! {
         interactive: bool,
         status: String,

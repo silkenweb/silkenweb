@@ -72,8 +72,8 @@ svg_element!(
 );
 
 parent_element!(a);
-impl ConditionalProcessing for ABuilder {}
-impl Presentation for ABuilder {}
+impl ConditionalProcessing for A {}
+impl Presentation for A {}
 
 svg_element!(
     /// The SVG `<animate>` element provides a way to animate an attribute of an
@@ -83,9 +83,9 @@ svg_element!(
     }
 );
 
-impl AnimationTiming for AnimateBuilder {}
-impl AnimationValue for AnimateBuilder {}
-impl OtherAnimation for AnimateBuilder {}
+impl AnimationTiming for Animate {}
+impl AnimationValue for Animate {}
+impl OtherAnimation for Animate {}
 
 svg_element!(
     /// The `<circle>` SVG element is an SVG basic shape, used to draw circles
@@ -113,8 +113,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for CircleBuilder {}
-impl Presentation for CircleBuilder {}
+impl ConditionalProcessing for Circle {}
+impl Presentation for Circle {}
 
 parent_element!(circle);
 
@@ -136,8 +136,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for ClipPathBuilder {}
-impl Presentation for ClipPathBuilder {}
+impl ConditionalProcessing for ClipPath {}
+impl Presentation for ClipPath {}
 
 parent_element!(clip_path);
 
@@ -157,8 +157,8 @@ svg_element!(
 );
 
 parent_element!(defs);
-impl ConditionalProcessing for DefsBuilder {}
-impl Presentation for DefsBuilder {}
+impl ConditionalProcessing for Defs {}
+impl Presentation for Defs {}
 
 svg_element!(
     /// The `<desc>` element provides an accessible, long-text description of
@@ -211,8 +211,8 @@ svg_element!(
 );
 
 parent_element!(ellipse);
-impl ConditionalProcessing for EllipseBuilder {}
-impl Presentation for EllipseBuilder {}
+impl ConditionalProcessing for Ellipse {}
+impl Presentation for Ellipse {}
 
 svg_element!(
     fe_blend("feBlend") = {
@@ -226,9 +226,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeBlendBuilder {}
-impl Presentation for FeBlendBuilder {}
-impl FilterPrimitives for FeBlendBuilder {}
+impl ConditionalProcessing for FeBlend {}
+impl Presentation for FeBlend {}
+impl FilterPrimitives for FeBlend {}
 
 parent_element!(fe_blend);
 
@@ -244,9 +244,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeColorMatrixBuilder {}
-impl Presentation for FeColorMatrixBuilder {}
-impl FilterPrimitives for FeColorMatrixBuilder {}
+impl ConditionalProcessing for FeColorMatrix {}
+impl Presentation for FeColorMatrix {}
+impl FilterPrimitives for FeColorMatrix {}
 
 parent_element!(fe_color_matrix);
 
@@ -258,9 +258,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeComponentTransferBuilder {}
-impl Presentation for FeComponentTransferBuilder {}
-impl FilterPrimitives for FeComponentTransferBuilder {}
+impl ConditionalProcessing for FeComponentTransfer {}
+impl Presentation for FeComponentTransfer {}
+impl FilterPrimitives for FeComponentTransfer {}
 
 parent_element!(fe_component_transfer);
 
@@ -280,9 +280,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeCompositeBuilder {}
-impl Presentation for FeCompositeBuilder {}
-impl FilterPrimitives for FeCompositeBuilder {}
+impl ConditionalProcessing for FeComposite {}
+impl Presentation for FeComposite {}
+impl FilterPrimitives for FeComposite {}
 
 parent_element!(fe_composite);
 
@@ -304,9 +304,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeConvolveMatrixBuilder {}
-impl Presentation for FeConvolveMatrixBuilder {}
-impl FilterPrimitives for FeConvolveMatrixBuilder {}
+impl ConditionalProcessing for FeConvolveMatrix {}
+impl Presentation for FeConvolveMatrix {}
+impl FilterPrimitives for FeConvolveMatrix {}
 
 parent_element!(fe_convolve_matrix);
 
@@ -322,9 +322,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeDiffuseLightingBuilder {}
-impl Presentation for FeDiffuseLightingBuilder {}
-impl FilterPrimitives for FeDiffuseLightingBuilder {}
+impl ConditionalProcessing for FeDiffuseLighting {}
+impl Presentation for FeDiffuseLighting {}
+impl FilterPrimitives for FeDiffuseLighting {}
 
 parent_element!(fe_diffuse_lighting);
 
@@ -342,9 +342,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeDisplacementMapBuilder {}
-impl Presentation for FeDisplacementMapBuilder {}
-impl FilterPrimitives for FeDisplacementMapBuilder {}
+impl ConditionalProcessing for FeDisplacementMap {}
+impl Presentation for FeDisplacementMap {}
+impl FilterPrimitives for FeDisplacementMap {}
 
 parent_element!(fe_displacement_map);
 
@@ -372,9 +372,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeFloodBuilder {}
-impl Presentation for FeFloodBuilder {}
-impl FilterPrimitives for FeFloodBuilder {}
+impl ConditionalProcessing for FeFlood {}
+impl Presentation for FeFlood {}
+impl FilterPrimitives for FeFlood {}
 
 parent_element!(fe_flood);
 
@@ -386,7 +386,7 @@ svg_element!(
     }
 );
 
-impl TransferFunction for FeFuncABuilder {}
+impl TransferFunction for FeFuncA {}
 
 parent_element!(fe_func_a);
 
@@ -398,7 +398,7 @@ svg_element!(
     }
 );
 
-impl TransferFunction for FeFuncBBuilder {}
+impl TransferFunction for FeFuncB {}
 
 parent_element!(fe_func_b);
 
@@ -410,7 +410,7 @@ svg_element!(
     }
 );
 
-impl TransferFunction for FeFuncGBuilder {}
+impl TransferFunction for FeFuncG {}
 
 parent_element!(fe_func_g);
 
@@ -422,7 +422,7 @@ svg_element!(
     }
 );
 
-impl TransferFunction for FeFuncRBuilder {}
+impl TransferFunction for FeFuncR {}
 
 parent_element!(fe_func_r);
 
@@ -438,9 +438,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeGaussianBlurBuilder {}
-impl Presentation for FeGaussianBlurBuilder {}
-impl FilterPrimitives for FeGaussianBlurBuilder {}
+impl ConditionalProcessing for FeGaussianBlur {}
+impl Presentation for FeGaussianBlur {}
+impl FilterPrimitives for FeGaussianBlur {}
 
 parent_element!(fe_gaussian_blur);
 
@@ -454,9 +454,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeImageBuilder {}
-impl Presentation for FeImageBuilder {}
-impl FilterPrimitives for FeImageBuilder {}
+impl ConditionalProcessing for FeImage {}
+impl Presentation for FeImage {}
+impl FilterPrimitives for FeImage {}
 
 parent_element!(fe_image);
 
@@ -468,9 +468,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeMergeBuilder {}
-impl Presentation for FeMergeBuilder {}
-impl FilterPrimitives for FeMergeBuilder {}
+impl ConditionalProcessing for FeMerge {}
+impl Presentation for FeMerge {}
+impl FilterPrimitives for FeMerge {}
 
 parent_element!(fe_merge);
 
@@ -496,9 +496,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeMorphologyBuilder {}
-impl Presentation for FeMorphologyBuilder {}
-impl FilterPrimitives for FeMorphologyBuilder {}
+impl ConditionalProcessing for FeMorphology {}
+impl Presentation for FeMorphology {}
+impl FilterPrimitives for FeMorphology {}
 
 parent_element!(fe_morphology);
 
@@ -514,9 +514,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeOffsetBuilder {}
-impl Presentation for FeOffsetBuilder {}
-impl FilterPrimitives for FeOffsetBuilder {}
+impl ConditionalProcessing for FeOffset {}
+impl Presentation for FeOffset {}
+impl FilterPrimitives for FeOffset {}
 
 parent_element!(fe_offset);
 
@@ -547,9 +547,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeSpecularLightingBuilder {}
-impl Presentation for FeSpecularLightingBuilder {}
-impl FilterPrimitives for FeSpecularLightingBuilder {}
+impl ConditionalProcessing for FeSpecularLighting {}
+impl Presentation for FeSpecularLighting {}
+impl FilterPrimitives for FeSpecularLighting {}
 
 parent_element!(fe_specular_lighting);
 
@@ -570,9 +570,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeSpotLightBuilder {}
-impl Presentation for FeSpotLightBuilder {}
-impl FilterPrimitives for FeSpotLightBuilder {}
+impl ConditionalProcessing for FeSpotLight {}
+impl Presentation for FeSpotLight {}
+impl FilterPrimitives for FeSpotLight {}
 
 parent_element!(fe_spot_light);
 
@@ -584,9 +584,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeTileBuilder {}
-impl Presentation for FeTileBuilder {}
-impl FilterPrimitives for FeTileBuilder {}
+impl ConditionalProcessing for FeTile {}
+impl Presentation for FeTile {}
+impl FilterPrimitives for FeTile {}
 
 parent_element!(fe_tile);
 
@@ -604,9 +604,9 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for FeTurbulenceBuilder {}
-impl Presentation for FeTurbulenceBuilder {}
-impl FilterPrimitives for FeTurbulenceBuilder {}
+impl ConditionalProcessing for FeTurbulence {}
+impl Presentation for FeTurbulence {}
+impl FilterPrimitives for FeTurbulence {}
 
 parent_element!(fe_turbulence);
 
@@ -627,7 +627,7 @@ svg_element!(
 
 parent_element!(filter);
 
-impl Presentation for FilterBuilder {}
+impl Presentation for Filter {}
 
 svg_element!(
     foreign_object("foreignObject") = {
@@ -644,7 +644,7 @@ svg_element!(
 
 parent_element!(foreign_object);
 
-impl ConditionalProcessing for ForeignObjectBuilder {}
+impl ConditionalProcessing for ForeignObject {}
 
 svg_element!(
     /// The `<g>` SVG element is a container used to group other SVG elements.
@@ -658,8 +658,8 @@ svg_element!(
 );
 
 parent_element!(g);
-impl ConditionalProcessing for GBuilder {}
-impl Presentation for GBuilder {}
+impl ConditionalProcessing for G {}
+impl Presentation for G {}
 
 svg_element!(
     line = {
@@ -695,8 +695,8 @@ svg_element!(
 
 parent_element!(line);
 
-impl ConditionalProcessing for LineBuilder {}
-impl Presentation for LineBuilder {}
+impl ConditionalProcessing for Line {}
+impl Presentation for Line {}
 
 svg_element!(
     marker = {
@@ -750,8 +750,8 @@ svg_element!(
 
 parent_element!(marker);
 
-impl ConditionalProcessing for MarkerBuilder {}
-impl Presentation for MarkerBuilder {}
+impl ConditionalProcessing for Marker {}
+impl Presentation for Marker {}
 
 svg_element!(
     mask = {
@@ -792,8 +792,8 @@ svg_element!(
 
 parent_element!(mask);
 
-impl ConditionalProcessing for MaskBuilder {}
-impl Presentation for MaskBuilder {}
+impl ConditionalProcessing for Mask {}
+impl Presentation for Mask {}
 
 svg_element!(
     metadata = {
@@ -828,8 +828,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for PathBuilder {}
-impl Presentation for PathBuilder {}
+impl ConditionalProcessing for Path {}
+impl Presentation for Path {}
 
 parent_element!(path);
 
@@ -897,8 +897,8 @@ svg_element!(
 
 parent_element!(pattern);
 
-impl ConditionalProcessing for PatternBuilder {}
-impl Presentation for PatternBuilder {}
+impl ConditionalProcessing for Pattern {}
+impl Presentation for Pattern {}
 
 svg_element!(
     polygon = {
@@ -920,8 +920,8 @@ svg_element!(
 
 parent_element!(polygon);
 
-impl ConditionalProcessing for PolygonBuilder {}
-impl Presentation for PolygonBuilder {}
+impl ConditionalProcessing for Polygon {}
+impl Presentation for Polygon {}
 
 svg_element!(
     polyline = {
@@ -943,8 +943,8 @@ svg_element!(
 
 parent_element!(polyline);
 
-impl ConditionalProcessing for PolylineBuilder {}
-impl Presentation for PolylineBuilder {}
+impl ConditionalProcessing for Polyline {}
+impl Presentation for Polyline {}
 
 svg_element!(
     /// The `<rect>` element is a basic SVG shape that draws rectangles, defined
@@ -985,8 +985,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for RectBuilder {}
-impl Presentation for RectBuilder {}
+impl ConditionalProcessing for Rect {}
+impl Presentation for Rect {}
 
 parent_element!(rect);
 
@@ -1030,8 +1030,8 @@ svg_element!(
 
 parent_element!(set);
 
-impl AnimationTiming for SetBuilder {}
-impl OtherAnimation for SetBuilder {}
+impl AnimationTiming for Set {}
+impl OtherAnimation for Set {}
 
 svg_element!(
     stop = {
@@ -1059,7 +1059,7 @@ svg_element!(
 
 parent_element!(stop);
 
-impl Presentation for StopBuilder {}
+impl Presentation for Stop {}
 
 svg_element!(
     style = {
@@ -1131,8 +1131,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for SvgBuilder {}
-impl Presentation for SvgBuilder {}
+impl ConditionalProcessing for Svg {}
+impl Presentation for Svg {}
 
 parent_element!(svg);
 
@@ -1146,8 +1146,8 @@ svg_element!(
 
 parent_element!(switch);
 
-impl ConditionalProcessing for SwitchBuilder {}
-impl Presentation for SwitchBuilder {}
+impl ConditionalProcessing for Switch {}
+impl Presentation for Switch {}
 
 svg_element!(
     symbol = {
@@ -1199,7 +1199,7 @@ svg_element!(
 
 parent_element!(symbol);
 
-impl Presentation for SymbolBuilder {}
+impl Presentation for Symbol {}
 
 svg_element!(
     text = {
@@ -1246,8 +1246,8 @@ svg_element!(
 
 parent_element!(text);
 
-impl ConditionalProcessing for TextBuilder {}
-impl Presentation for TextBuilder {}
+impl ConditionalProcessing for Text {}
+impl Presentation for Text {}
 
 svg_element!(
     text_path("textPath") = {
@@ -1297,8 +1297,8 @@ svg_element!(
 
 parent_element!(text_path);
 
-impl ConditionalProcessing for TextPathBuilder {}
-impl Presentation for TextPathBuilder {}
+impl ConditionalProcessing for TextPath {}
+impl Presentation for TextPath {}
 
 svg_element!(
     title = {
@@ -1355,8 +1355,8 @@ svg_element!(
 
 parent_element!(tspan);
 
-impl ConditionalProcessing for TspanBuilder {}
-impl Presentation for TspanBuilder {}
+impl ConditionalProcessing for Tspan {}
+impl Presentation for Tspan {}
 
 svg_element!(
     /// The `<use>` element takes nodes from within the SVG document, and
@@ -1383,8 +1383,8 @@ svg_element!(
     }
 );
 
-impl ConditionalProcessing for UseBuilder {}
-impl Presentation for UseBuilder {}
+impl ConditionalProcessing for Use {}
+impl Presentation for Use {}
 
 parent_element!(use);
 
