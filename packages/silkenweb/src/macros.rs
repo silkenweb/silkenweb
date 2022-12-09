@@ -336,12 +336,6 @@ macro_rules! dom_element {
             }
         }
 
-        impl<Dom: $crate::dom::Dom> ::std::fmt::Display for $camel_name<Dom> {
-            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                self.elem.fmt(f)
-            }
-        }
-
         impl<Dom: $crate::dom::Dom> $crate::value::Value for $camel_name<Dom> {}
 
         impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>> for $crate::node::element::GenericElement<Dom> {

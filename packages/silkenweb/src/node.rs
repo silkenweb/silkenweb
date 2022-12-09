@@ -1,5 +1,7 @@
 //! Generic DOM types.
 
+use std::fmt::{self, Display};
+
 use silkenweb_signals_ext::value::Value;
 
 use self::element::{GenericElement, Resource};
@@ -51,6 +53,15 @@ impl Node {
 
 impl Value for Node {}
 impl HydrationNode for Node {}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            NodeEnum::Element(elem) => elem.hydro_elem.fmt(f),
+            NodeEnum::Text(text) => text.hydro_text.fmt(f),
+        }
+    }
+}
 
 impl IsDry for Node {
     fn is_dry(&self) -> bool {
