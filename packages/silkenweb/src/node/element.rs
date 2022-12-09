@@ -17,7 +17,6 @@ use std::{
     cell::{Cell, RefCell},
     future::Future,
     marker::PhantomData,
-    mem,
     pin::Pin,
     rc::Rc,
 };
@@ -39,12 +38,11 @@ use self::child_vec::ChildVec;
 use super::Node;
 use crate::{
     attribute::Attribute,
-    dom::{DefaultDom, Dom, DomElement},
+    dom::{DefaultDom, Dom, DomElement, DomText},
     hydration::{
-        node::{HydrationElement, HydrationText, Namespace, WeakHydrationElement},
-        HydrationStats,
+        node::{Namespace, WeakHydrationElement},
     },
-    node::{text, Text},
+    node::{text},
     task,
 };
 
@@ -58,7 +56,6 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     child_builder: Option<Box<ChildBuilder<D>>>,
     // TODO: Can we make these private?
     pub(super) resources: Vec<Resource<D>>,
-    pub(super) hydro_elem: HydrationElement,
     pub(super) element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -80,26 +77,19 @@ pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> GenericE
 
 impl<D: Dom> GenericElement<D> {
     fn new(tag: &str) -> Self {
-        Self::new_element(
-            HydrationElement::new(Namespace::Html, tag),
-            D::Element::new(Namespace::Html, tag),
-        )
+        Self::new_element(D::Element::new(Namespace::Html, tag))
     }
 
     fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
-        Self::new_element(
-            HydrationElement::new(Namespace::Other(namespace), tag),
-            D::Element::new(Namespace::Other(namespace), tag),
-        )
+        Self::new_element(D::Element::new(Namespace::Other(namespace), tag))
     }
 
-    fn new_element(hydro_elem: HydrationElement, element: D::Element) -> Self {
+    fn new_element(element: D::Element) -> Self {
         Self {
             has_preceding_children: false,
             child_vec: None,
             child_builder: None,
             resources: Vec::new(),
-            hydro_elem,
             element,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
@@ -139,23 +129,6 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
-    pub(crate) fn eval_dom_element(&self) -> web_sys::Element {
-        self.hydro_elem.eval_dom_element()
-    }
-
-    pub(crate) fn hydrate_child(
-        &self,
-        parent: &web_sys::Node,
-        child: &web_sys::Node,
-        tracker: &mut HydrationStats,
-    ) -> web_sys::Element {
-        self.hydro_elem.hydrate_child(parent, child, tracker)
-    }
-
-    pub(super) fn take_resources(&mut self) -> Vec<Resource<D>> {
-        mem::take(&mut self.resources)
-    }
-
     // TODO: Move this to `From<Self> for Node`
     pub(crate) fn build(mut self) -> Self {
         self.build_children();
@@ -177,7 +150,6 @@ impl<D: Dom> GenericElement<D> {
             self.spawn_future(updater)
         } else {
             self.resources.shrink_to_fit();
-            self.hydro_elem.shrink_to_fit();
             self
         }
     }
@@ -190,8 +162,8 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     {
         fn text_value<D: Dom>(parent: &mut GenericElement<D>, child: impl AsRef<str>) {
             parent
-                .hydro_elem
-                .append_child(HydrationText::new(child.as_ref()));
+                .element
+                .append_child(&D::Text::new(child.as_ref()).into());
         }
 
         self.has_preceding_children = true;
@@ -204,11 +176,11 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         child.for_each(
             text_value,
             |parent| {
-                let mut text_node = HydrationText::new(empty_str());
-                parent.hydro_elem.append_child(text_node.clone());
+                let mut text_node = D::Text::new(empty_str());
+                parent.element.append_child(&text_node.clone().into());
 
                 move |new_value| {
-                    text_node.set_text(new_value.into());
+                    text_node.set_text(new_value.as_ref());
                     async {}
                 }
             },
@@ -306,13 +278,14 @@ impl<D: Dom> Element for GenericElement<D> {
     {
         type PreviousValue<T0> = Rc<Cell<Option<T0>>>;
 
-        fn class_signal<T1>(
+        fn class_signal<T1, E>(
             class: T1,
-            element: &mut HydrationElement,
+            element: &mut E,
             previous_value: &PreviousValue<T1>,
         ) -> impl Future<Output = ()>
         where
             T1: AsRef<str>,
+            E: DomElement,
         {
             if let Some(previous) = previous_value.replace(None) {
                 element.remove_class(previous.as_ref());
@@ -325,9 +298,9 @@ impl<D: Dom> Element for GenericElement<D> {
         }
 
         class.for_each(
-            |elem, class| elem.hydro_elem.add_class(intern_str(class.as_ref())),
+            |elem, class| elem.element.add_class(intern_str(class.as_ref())),
             |elem| {
-                let mut element = elem.hydro_elem.clone();
+                let mut element = elem.element.clone();
                 let previous_value: PreviousValue<T> = Rc::new(Cell::new(None));
 
                 move |class: T| class_signal(class, &mut element, &previous_value)
@@ -349,7 +322,7 @@ impl<D: Dom> Element for GenericElement<D> {
         ) where
             T0: AsRef<str>,
         {
-            let element = &mut elem.hydro_elem;
+            let element = &mut elem.element;
 
             for class in classes {
                 element.add_class(intern_str(class.as_ref()));
@@ -358,13 +331,14 @@ impl<D: Dom> Element for GenericElement<D> {
 
         type PreviousValues<T0> = Rc<Cell<Vec<T0>>>;
 
-        fn classes_signal<T1, I>(
+        fn classes_signal<T1, E, I>(
             classes: I,
-            element: &mut HydrationElement,
+            element: &mut E,
             previous_values: &PreviousValues<T1>,
         ) -> impl Future<Output = ()>
         where
             T1: AsRef<str>,
+            E: DomElement,
             I: IntoIterator<Item = T1>,
         {
             let mut previous = previous_values.replace(Vec::new());
@@ -388,7 +362,7 @@ impl<D: Dom> Element for GenericElement<D> {
         classes.for_each(
             classes_value,
             |elem| {
-                let mut element = elem.hydro_elem.clone();
+                let mut element = elem.element.clone();
                 let previous_values: PreviousValues<T> = Rc::new(Cell::new(Vec::new()));
 
                 move |classes| classes_signal(classes, &mut element, &previous_values)
@@ -407,10 +381,10 @@ impl<D: Dom> Element for GenericElement<D> {
         self.check_attribute_unique(name);
 
         value.for_each(
-            |elem, value| elem.hydro_elem.attribute(name, value),
+            |elem, value| elem.element.attribute(name, value),
             |elem| {
                 let name = name.to_owned();
-                let mut element = elem.hydro_elem.clone();
+                let mut element = elem.element.clone();
 
                 move |new_value| {
                     element.attribute(&name, new_value);
@@ -425,7 +399,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-        self.hydro_elem.effect(f);
+        self.element.effect(f);
         self
     }
 
@@ -437,7 +411,7 @@ impl<D: Dom> Element for GenericElement<D> {
     where
         T: 'static,
     {
-        let mut element = self.hydro_elem.clone();
+        let mut element = self.element.clone();
 
         let future = sig.for_each(move |x| {
             clone!(f);
@@ -449,7 +423,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn handle(&self) -> ElementHandle<Self::DomType> {
-        ElementHandle(self.hydro_elem.weak(), PhantomData)
+        ElementHandle(todo!(), PhantomData)
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
@@ -458,7 +432,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        self.hydro_elem.on(name, f);
+        self.element.on(name, f);
         self
     }
 
@@ -468,7 +442,7 @@ impl<D: Dom> Element for GenericElement<D> {
             child_builder: None,
             child_vec: None,
             resources: Vec::new(),
-            hydro_elem: self.hydro_elem.clone_node(),
+            // TODO: This is wrong. We should `clone_node`
             element: self.element.clone(),
             #[cfg(debug_assertions)]
             attributes: self.attributes.clone(),

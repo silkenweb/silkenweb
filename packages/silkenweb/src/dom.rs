@@ -6,21 +6,23 @@ pub mod dry;
 pub mod wet;
 
 pub trait Dom: 'static {
-    type Element: DomElement<Self::Node>;
-    type Text: DomText<Self::Node>;
+    type Element: DomElement<Node = Self::Node>;
+    type Text: DomText + Into<Self::Node>;
     type Node;
 }
 
-pub trait DomElement<Node>: Into<Node> + Clone + 'static {
+pub trait DomElement: Into<Self::Node> + Clone + 'static {
+    type Node;
+
     fn new(ns: Namespace, tag: &str) -> Self;
 
-    fn append_child(&mut self, child: &Node);
+    fn append_child(&mut self, child: &Self::Node);
 
-    fn insert_child_before(&mut self, child: &Node, next_child: Option<&Node>);
+    fn insert_child_before(&mut self, child: &Self::Node, next_child: Option<&Self::Node>);
 
-    fn replace_child(&mut self, new_child: &Node, old_child: &Node);
+    fn replace_child(&mut self, new_child: &Self::Node, old_child: &Self::Node);
 
-    fn remove_child(&mut self, child: &Node);
+    fn remove_child(&mut self, child: &Self::Node);
 
     fn clear_children(&mut self);
 
@@ -36,11 +38,13 @@ pub trait DomElement<Node>: Into<Node> + Clone + 'static {
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
 
-    fn store_child(&mut self, child: Node);
+    fn store_child(&mut self, child: Self::Node);
 }
 
-pub trait DomText<Node>: Into<Node> + Clone + 'static {
+pub trait DomText: Clone + 'static {
     fn new(text: &str) -> Self;
+
+    fn set_text(&mut self, text: &str);
 }
 
 pub type DefaultDom = wet::Wet;

@@ -18,7 +18,9 @@ pub struct WetElement {
     // TODO: Store event callbacks, unless weak-refs is enabled.
 }
 
-impl DomElement<WetNode> for WetElement {
+impl DomElement for WetElement {
+    type Node = WetNode;
+
     fn new(ns: Namespace, tag: &str) -> Self {
         let element = match ns {
             Namespace::Html => document::create_element(tag),
@@ -91,9 +93,13 @@ impl DomElement<WetNode> for WetElement {
 #[derive(Clone)]
 pub struct WetText(web_sys::Text);
 
-impl DomText<WetNode> for WetText {
+impl DomText for WetText {
     fn new(text: &str) -> Self {
         Self(document::create_text_node(text))
+    }
+
+    fn set_text(&mut self, text: &str) {
+        self.0.set_text_content(Some(&text));
     }
 }
 
