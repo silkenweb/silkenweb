@@ -46,6 +46,7 @@ use crate::{
 pub struct UrlPath {
     url: String,
     path_end: usize,
+    query_end: usize,
 }
 
 impl UrlPath {
@@ -55,9 +56,14 @@ impl UrlPath {
     /// Any leading `'/'`s are removed.
     pub fn new(path: &str) -> Self {
         let url = path.trim_start_matches('/').to_string();
-        let path_end = url.find('?').unwrap_or(url.len());
+        let query_end = url.find('#').unwrap_or(url.len());
+        let path_end = url[..query_end].find('?').unwrap_or(query_end);
 
-        Self { url, path_end }
+        Self {
+            url,
+            path_end,
+            query_end,
+        }
     }
 
     /// Get the path portion of the `UrlPath`
@@ -70,7 +76,7 @@ impl UrlPath {
     /// assert_eq!(UrlPath::new("").path(), "");
     /// ```
     pub fn path(&self) -> &str {
-        self.url.split_at(self.path_end).0
+        &self.url[..self.path_end]
     }
 
     /// Get the path components of the `UrlPath`
@@ -114,13 +120,14 @@ impl UrlPath {
     /// assert_eq!(UrlPath::new("?query_string").query_string(), "query_string");
     /// assert_eq!(UrlPath::new("?").query_string(), "");
     /// assert_eq!(UrlPath::new("").query_string(), "");
+    /// assert_eq!(UrlPath::new("#hash").query_string(), "");
+    /// assert_eq!(
+    ///     UrlPath::new("?query_string#hash").query_string(),
+    ///     "query_string"
+    /// );
     /// ```
     pub fn query_string(&self) -> &str {
-        if self.path_end == self.url.len() {
-            ""
-        } else {
-            self.url.split_at(self.path_end + 1).1
-        }
+        self.range(self.path_end, self.query_end)
     }
 
     /// Split the query string into key/value pairs
@@ -145,9 +152,32 @@ impl UrlPath {
         self.query().collect()
     }
 
+    /// Get the query string portion of the `UrlPath`
+    ///
+    /// ```
+    /// # use silkenweb::router::UrlPath;
+    /// assert_eq!(UrlPath::new("path?query_string#hash").hash(), "hash");
+    /// assert_eq!(UrlPath::new("#hash").hash(), "hash");
+    /// assert_eq!(UrlPath::new("#").hash(), "");
+    /// assert_eq!(UrlPath::new("").hash(), "");
+    /// ```
+    pub fn hash(&self) -> &str {
+        self.range(self.query_end, self.url.len())
+    }
+
     /// Get the whole path as a `&str`
     pub fn as_str(&self) -> &str {
         &self.url
+    }
+
+    fn range(&self, previous_end: usize, end: usize) -> &str {
+        let start = previous_end + 1;
+
+        if start > end {
+            ""
+        } else {
+            &self.url[start..end]
+        }
     }
 }
 
