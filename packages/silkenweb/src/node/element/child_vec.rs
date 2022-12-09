@@ -2,16 +2,19 @@ use std::mem;
 
 use futures_signals::signal_vec::VecDiff;
 
-use crate::{hydration::node::HydrationElement, node::Node};
+use crate::{
+    dom::{Dom, DomElement},
+    node::Node,
+};
 
-pub struct ChildVec {
-    parent: HydrationElement,
-    children: Vec<Node>,
+pub struct ChildVec<D: Dom> {
+    parent: D::Element,
+    children: Vec<Node<D>>,
     has_preceding_children: bool,
 }
 
-impl ChildVec {
-    pub fn new(parent: HydrationElement, has_preceding_children: bool) -> Self {
+impl<D: Dom> ChildVec<D> {
+    pub fn new(parent: D::Element, has_preceding_children: bool) -> Self {
         Self {
             parent,
             children: Vec::new(),
@@ -19,7 +22,7 @@ impl ChildVec {
         }
     }
 
-    pub fn apply_update(&mut self, update: VecDiff<impl Into<Node>>) {
+    pub fn apply_update(&mut self, update: VecDiff<impl Into<Node<D>>>) {
         match update {
             VecDiff::Replace { values } => self.replace(values),
             VecDiff::InsertAt { index, value } => self.insert(index, value),
@@ -37,18 +40,21 @@ impl ChildVec {
         }
     }
 
-    pub fn replace(&mut self, new_children: Vec<impl Into<Node>>) {
+    pub fn replace(&mut self, new_children: Vec<impl Into<Node<D>>>) {
         self.clear();
-        self.children = new_children.into_iter().map(Into::<Node>::into).collect();
+        self.children = new_children
+            .into_iter()
+            .map(Into::<Node<D>>::into)
+            .collect();
 
         let mut parent = self.parent.clone();
 
         for child in &self.children {
-            parent.append_child(child);
+            parent.append_child(child.as_node());
         }
     }
 
-    pub fn insert(&mut self, index: usize, new_child: impl Into<Node>) {
+    pub fn insert(&mut self, index: usize, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
 
         if index >= self.children.len() {
@@ -59,23 +65,24 @@ impl ChildVec {
         assert!(index < self.children.len());
 
         self.parent
-            .insert_child_before(&new_child, Some(&self.children[index]));
+            .insert_child_before(new_child.as_node(), Some(self.children[index].as_node()));
 
         self.children.insert(index, new_child);
     }
 
-    pub fn set_at(&mut self, index: usize, new_child: impl Into<Node>) {
+    pub fn set_at(&mut self, index: usize, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
         let old_child = &mut self.children[index];
 
-        self.parent.replace_child(&new_child, &old_child);
+        self.parent
+            .replace_child(new_child.as_node(), old_child.as_node());
 
         *old_child = new_child;
     }
 
-    pub fn remove(&mut self, index: usize) -> Node {
+    pub fn remove(&mut self, index: usize) -> Node<D> {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(&old_child);
+        self.parent.remove_child(old_child.as_node());
 
         old_child
     }
@@ -85,9 +92,9 @@ impl ChildVec {
         self.insert(new_index, child);
     }
 
-    pub fn push(&mut self, new_child: impl Into<Node>) {
+    pub fn push(&mut self, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
-        self.parent.append_child(&new_child);
+        self.parent.append_child(new_child.as_node());
         self.children.push(new_child);
     }
 
@@ -95,7 +102,7 @@ impl ChildVec {
         let removed_child = self.children.pop();
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(removed_child);
+            self.parent.remove_child(removed_child.as_node());
         }
     }
 
@@ -105,7 +112,7 @@ impl ChildVec {
             let children = mem::take(&mut self.children);
 
             for child in children {
-                parent.remove_child(child);
+                parent.remove_child(child.as_node());
             }
         } else {
             self.children.clear();

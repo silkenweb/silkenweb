@@ -2,24 +2,25 @@ use wasm_bindgen::JsValue;
 
 use crate::{attribute::Attribute, hydration::node::Namespace};
 
+pub mod dry;
 pub mod wet;
 
-pub trait Dom {
-    type Element: DomElement;
-    type Text;
+pub trait Dom: 'static {
+    type Element: DomElement<Self::Node>;
+    type Text: DomText<Self::Node>;
     type Node;
 }
 
-pub trait DomElement: Clone {
+pub trait DomElement<Node>: Into<Node> + Clone + 'static {
     fn new(ns: Namespace, tag: &str) -> Self;
 
-    fn append_child(&mut self, child: Self);
+    fn append_child(&mut self, child: &Node);
 
-    fn insert_child_before(&mut self, child: Self, next_child: Option<Self>);
+    fn insert_child_before(&mut self, child: &Node, next_child: Option<&Node>);
 
-    fn replace_child(&mut self, new_child: Self, old_child: Self);
+    fn replace_child(&mut self, new_child: &Node, old_child: &Node);
 
-    fn remove_child(&mut self, child: Self);
+    fn remove_child(&mut self, child: &Node);
 
     fn clear_children(&mut self);
 
@@ -34,6 +35,12 @@ pub trait DomElement: Clone {
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static);
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
+
+    fn store_child(&mut self, child: Node);
+}
+
+pub trait DomText<Node>: Into<Node> + Clone + 'static {
+    fn new(text: &str) -> Self;
 }
 
 pub type DefaultDom = wet::Wet;

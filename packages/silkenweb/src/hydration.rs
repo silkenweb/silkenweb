@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{insert_component, mount_point, node::Node};
+use crate::{insert_component, mount_point, node::Node, dom::dry::Dry};
 
 pub(super) mod lazy;
 pub(super) mod node;
@@ -176,21 +176,22 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
-pub async fn hydrate(id: &str, node: impl Into<Node>) -> HydrationStats {
+pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
     let node = node.into();
     let mut stats = HydrationStats::default();
 
     let mount_point = mount_point(id);
 
-    if let Some(hydration_point) = mount_point.first_child() {
-        let node: web_sys::Node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
+    // TODO: Hydration
+    // if let Some(hydration_point) = mount_point.first_child() {
+    //     let node: web_sys::Node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
 
-        remove_following_siblings(&mount_point, node.next_sibling());
-    } else {
-        let new_elem = node.eval_dom_node();
-        stats.node_added(&new_elem);
-        mount_point.append_child(&new_elem).unwrap_throw();
-    }
+    //     remove_following_siblings(&mount_point, node.next_sibling());
+    // } else {
+    //     let new_elem = node.eval_dom_node();
+    //     stats.node_added(&new_elem);
+    //     mount_point.append_child(&new_elem).unwrap_throw();
+    // }
 
     insert_component(id, mount_point.into(), node);
 

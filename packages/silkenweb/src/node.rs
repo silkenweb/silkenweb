@@ -1,148 +1,83 @@
 //! Generic DOM types.
 
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    mem,
+};
 
 use silkenweb_signals_ext::value::Value;
 
 use self::element::{GenericElement, Resource};
-use crate::hydration::{
-    lazy::IsDry,
-    node::{DryNode, HydrationNode, HydrationNodeData, HydrationText, WetNode},
-    HydrationStats,
-};
+use crate::dom::{wet::Wet, DefaultDom, Dom, DomText};
 
 pub mod element;
 
 /// A DOM Node
-pub struct Node(NodeEnum);
+pub struct Node<D: Dom = DefaultDom> {
+    node: D::Node,
+    resources: Vec<Resource<D>>,
+}
 
-impl Node {
-    pub(super) fn eval_dom_node(&self) -> web_sys::Node {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.eval_dom_element().into(),
-            NodeEnum::Text(text) => text.eval_dom_text().into(),
-        }
+impl<D: Dom> Node<D> {
+    pub(super) fn as_node(&self) -> &D::Node {
+        &self.node
     }
 
-    pub(super) fn hydrate_child(
-        &self,
-        parent: &web_sys::Node,
-        child: &web_sys::Node,
-        tracker: &mut HydrationStats,
-    ) -> web_sys::Node {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydrate_child(parent, child, tracker).into(),
-            NodeEnum::Text(text) => text.hydrate_child(parent, child, tracker).into(),
-        }
+    pub(super) fn into_node(self) -> D::Node {
+        self.node
     }
 
-    fn has_weak_refs(&self) -> bool {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.has_weak_refs(),
-            NodeEnum::Text(text) => text.hydro_text.has_weak_refs(),
-        }
-    }
-
-    fn take_resources(&mut self) -> Vec<Resource> {
-        match &mut self.0 {
-            NodeEnum::Element(elem) => elem.take_resources(),
-            NodeEnum::Text(text) => text.take_resources(),
-        }
+    fn take_resources(&mut self) -> Vec<Resource<D>> {
+        mem::take(&mut self.resources)
     }
 }
 
-impl Value for Node {}
-impl HydrationNode for Node {}
+impl Node<Wet> {
+    pub fn dom_node(&self) -> &web_sys::Node {
+        self.node.dom_node()
+    }
+}
 
-impl Display for Node {
+impl<D: Dom> Value for Node<D> {}
+
+impl<D: Dom> Display for Node<D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.fmt(f),
-            NodeEnum::Text(text) => text.hydro_text.fmt(f),
+        todo!()
+    }
+}
+
+impl<D: Dom> From<GenericElement<D>> for Node<D> {
+    fn from(elem: GenericElement<D>) -> Self {
+        let elem = elem.build();
+
+        Self {
+            node: elem.element.into(),
+            resources: elem.resources,
         }
     }
 }
 
-impl IsDry for Node {
-    fn is_dry(&self) -> bool {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.is_dry(),
-            NodeEnum::Text(text) => text.hydro_text.is_dry(),
+impl<D: Dom> From<Text<D>> for Node<D> {
+    fn from(text: Text<D>) -> Self {
+        Self {
+            node: text.0.into(),
+            resources: Vec::new(),
         }
     }
-}
-
-impl DryNode for Node {
-    fn clone_into_hydro(&self) -> HydrationNodeData {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.clone_into_hydro(),
-            NodeEnum::Text(text) => text.hydro_text.clone_into_hydro(),
-        }
-    }
-
-    fn into_hydro(self) -> HydrationNodeData {
-        match self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.into_hydro(),
-            NodeEnum::Text(text) => text.hydro_text.into_hydro(),
-        }
-    }
-}
-
-impl WetNode for Node {
-    fn dom_node(&self) -> web_sys::Node {
-        match &self.0 {
-            NodeEnum::Element(elem) => elem.hydro_elem.dom_node(),
-            NodeEnum::Text(text) => text.hydro_text.dom_node(),
-        }
-    }
-}
-
-impl From<GenericElement> for Node {
-    fn from(elem: GenericElement) -> Self {
-        Self(NodeEnum::Element(elem.build()))
-    }
-}
-
-impl From<Text> for Node {
-    fn from(text: Text) -> Self {
-        Self(NodeEnum::Text(text))
-    }
-}
-
-enum NodeEnum {
-    Element(GenericElement),
-    Text(Text),
 }
 
 /// A text DOM node
-pub struct Text {
-    pub(super) hydro_text: HydrationText,
-}
+pub struct Text<D: Dom>(D::Text);
 
-impl Text {
-    pub(crate) fn hydrate_child(
-        &self,
-        parent: &web_sys::Node,
-        child: &web_sys::Node,
-        tracker: &mut HydrationStats,
-    ) -> web_sys::Text {
-        self.hydro_text.hydrate_child(parent, child, tracker)
-    }
-
-    fn eval_dom_text(&self) -> web_sys::Text {
-        self.hydro_text.eval_dom_text()
-    }
-
-    fn take_resources(&mut self) -> Vec<Resource> {
-        Vec::new()
+impl<D: Dom> Text<D> {
+    pub fn new(text: &str) -> Self {
+        Self(D::Text::new(text))
     }
 }
 
-impl Value for Text {}
+impl<D: Dom> Value for Text<D> {}
 
 /// Construct a text node
-pub fn text(text: &str) -> Text {
-    Text {
-        hydro_text: HydrationText::new(text),
-    }
+pub fn text<D: Dom>(text: &str) -> Text<D> {
+    Text(D::Text::new(text))
 }

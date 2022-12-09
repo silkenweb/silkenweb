@@ -344,8 +344,9 @@ macro_rules! dom_element {
             }
         }
 
-        impl From<$camel_name> for $crate::node::Node {
-            fn from(elem: $camel_name) -> Self {
+        impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>>
+        for $crate::node::Node<Dom> {
+            fn from(elem: $camel_name<Dom>) -> Self {
                 elem.elem.into()
             }
         }
@@ -392,7 +393,8 @@ macro_rules! create_element_fn {
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{
-        impl $crate::node::element::ParentElement for [< $name:camel >]
+        impl<Dom: $crate::dom::Dom> $crate::node::element::ParentElement<Dom>
+        for [< $name:camel >] <Dom>
         {
             fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
@@ -403,7 +405,7 @@ macro_rules! parent_element {
 
             fn child(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node> + 'static>
+                child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>
             ) -> Self
             {
                 Self::from_elem(self.elem.child(child))
@@ -411,7 +413,7 @@ macro_rules! parent_element {
 
             fn optional_child(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node> + 'static>>
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>>
             ) -> Self
             {
                 Self::from_elem(self.elem.optional_child(child))
@@ -419,7 +421,7 @@ macro_rules! parent_element {
 
             fn children_signal(
                 self,
-                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node>> + 'static,
+                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node<Dom>>> + 'static,
             ) -> Self {
                 Self::from_elem(self.elem.children_signal(children))
             }
@@ -432,12 +434,12 @@ macro_rules! parent_element {
 macro_rules! shadow_parent_element {
     ($name:ident) => {
         $crate::macros::paste! {
-            impl $crate::node::element::ShadowRootParent for
-                [< $name:camel >]
+            impl<Dom: $crate::dom::Dom> $crate::node::element::ShadowRootParent<Dom> for
+                [< $name:camel >]<Dom>
             {
                 fn attach_shadow_children(
                     self,
-                    children: impl IntoIterator<Item = impl Into<$crate::node::Node>> + 'static
+                    children: impl IntoIterator<Item = impl Into<$crate::node::Node<Dom>>> + 'static
                 ) -> Self {
                     [< $name:camel >] ::from_elem(self.elem.attach_shadow_children(children))
                 }

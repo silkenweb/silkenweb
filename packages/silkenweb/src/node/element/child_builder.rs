@@ -4,7 +4,8 @@ use discard::DiscardOnDrop;
 use futures_signals::{signal_vec::MutableVec, CancelableFutureHandle};
 use silkenweb_signals_ext::value::{Executor, SignalOrValue, Value};
 
-use super::{spawn_cancelable_future, Node};
+use super::spawn_cancelable_future;
+use crate::{dom::Dom, node::Node};
 
 /// Helper to build more complex sets of children.
 ///
@@ -12,26 +13,34 @@ use super::{spawn_cancelable_future, Node};
 /// [`ParentElement::child_builder`] for an example.
 ///
 /// [`ParentElement::child_builder`]: super::ParentElement::child_builder
-#[derive(Default)]
-pub struct ChildBuilder {
-    pub(super) items: Rc<RefCell<MutableVec<Item>>>,
+pub struct ChildBuilder<D: Dom> {
+    pub(super) items: Rc<RefCell<MutableVec<Item<D>>>>,
     pub(super) futures: Vec<DiscardOnDrop<CancelableFutureHandle>>,
 }
 
-type Item = Rc<RefCell<Option<Node>>>;
+impl<D: Dom> Default for ChildBuilder<D> {
+    fn default() -> Self {
+        Self {
+            items: Default::default(),
+            futures: Default::default(),
+        }
+    }
+}
 
-impl ChildBuilder {
+type Item<D> = Rc<RefCell<Option<Node<D>>>>;
+
+impl<D: Dom> ChildBuilder<D> {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn child(&mut self, node: impl SignalOrValue<Item = impl Value + Into<Node> + 'static>) {
+    pub fn child(&mut self, node: impl SignalOrValue<Item = impl Value + Into<Node<D>> + 'static>) {
         self.optional_child(node.map(|e| Some(e)));
     }
 
     pub fn optional_child(
         &mut self,
-        node: impl SignalOrValue<Item = Option<impl Value + Into<Node> + 'static>>,
+        node: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
     ) {
         node.for_each(
             |builder, node| {
@@ -40,7 +49,7 @@ impl ChildBuilder {
                 }
             },
             |builder| {
-                let index = builder.push(None as Option<Node>);
+                let index = builder.push(None as Option<Node<D>>);
                 let items = builder.items.clone();
 
                 move |node| {
@@ -56,7 +65,7 @@ impl ChildBuilder {
     }
 
     /// Push an item and return it's index
-    fn push(&mut self, node: Option<impl Into<Node>>) -> usize {
+    fn push(&mut self, node: Option<impl Into<Node<D>>>) -> usize {
         let items_mut = self.items.borrow_mut();
         let mut items_mut = items_mut.lock_mut();
         let index = items_mut.len();
@@ -65,7 +74,7 @@ impl ChildBuilder {
     }
 }
 
-impl Executor for ChildBuilder {
+impl<D: Dom> Executor for ChildBuilder<D> {
     fn spawn(&mut self, future: impl futures::Future<Output = ()> + 'static) {
         self.futures.push(spawn_cancelable_future(future));
     }

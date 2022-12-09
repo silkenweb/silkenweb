@@ -36,14 +36,15 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use self::child_vec::ChildVec;
-use super::{text, Node};
+use super::Node;
 use crate::{
     attribute::Attribute,
     dom::{DefaultDom, Dom, DomElement},
     hydration::{
-        node::{DryNode, HydrationElement, HydrationText, Namespace, WeakHydrationElement},
+        node::{HydrationElement, HydrationText, Namespace, WeakHydrationElement},
         HydrationStats,
     },
+    node::{text, Text},
     task,
 };
 
@@ -53,11 +54,12 @@ mod child_vec;
 /// Build an HTML element.
 pub struct GenericElement<D: Dom = DefaultDom> {
     has_preceding_children: bool,
-    child_vec: Option<Pin<Box<dyn SignalVec<Item = Node>>>>,
-    child_builder: Option<Box<ChildBuilder>>,
-    resources: Vec<Resource>,
+    child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
+    child_builder: Option<Box<ChildBuilder<D>>>,
+    // TODO: Can we make these private?
+    pub(super) resources: Vec<Resource<D>>,
     pub(super) hydro_elem: HydrationElement,
-    element: D::Element,
+    pub(super) element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
@@ -104,7 +106,7 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
-    fn child_builder_mut(&mut self) -> &mut ChildBuilder {
+    fn child_builder_mut(&mut self) -> &mut ChildBuilder<D> {
         self.has_preceding_children = true;
         self.child_builder
             .get_or_insert_with(|| Box::new(ChildBuilder::new()))
@@ -150,7 +152,7 @@ impl<D: Dom> GenericElement<D> {
         self.hydro_elem.hydrate_child(parent, child, tracker)
     }
 
-    pub(super) fn take_resources(&mut self) -> Vec<Resource> {
+    pub(super) fn take_resources(&mut self) -> Vec<Resource<D>> {
         mem::take(&mut self.resources)
     }
 
@@ -162,7 +164,7 @@ impl<D: Dom> GenericElement<D> {
             assert!(self.child_builder.is_none());
 
             let child_vec = Rc::new(RefCell::new(ChildVec::new(
-                self.hydro_elem.clone(),
+                self.element.clone(),
                 self.has_preceding_children,
             )));
             self.resources.push(Resource::ChildVec(child_vec.clone()));
@@ -181,7 +183,7 @@ impl<D: Dom> GenericElement<D> {
     }
 }
 
-impl<D: Dom> ParentElement for GenericElement<D> {
+impl<D: Dom> ParentElement<D> for GenericElement<D> {
     fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>,
@@ -218,7 +220,7 @@ impl<D: Dom> ParentElement for GenericElement<D> {
 
     fn optional_child(
         mut self,
-        child: impl SignalOrValue<Item = Option<impl Value + Into<Node> + 'static>>,
+        child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
     ) -> Self {
         self.has_preceding_children = true;
 
@@ -232,14 +234,14 @@ impl<D: Dom> ParentElement for GenericElement<D> {
                 if let Some(child) = child {
                     let mut child = child.into();
 
-                    parent.hydro_elem.append_child(&child);
+                    parent.element.append_child(child.as_node());
 
-                    if child.has_weak_refs() {
-                        parent.resources.push(Resource::Child(child));
-                    } else {
-                        parent.resources.extend(child.take_resources());
-                        parent.hydro_elem.store_child(child.into_hydro());
-                    }
+                    // TODO: if child.has_weak_refs() {
+                    //     parent.resources.push(Resource::Child(child));
+                    // } else {
+                    parent.resources.extend(child.take_resources());
+                    parent.element.store_child(child.into_node());
+                    // }
                 }
             },
             |parent, child| parent.child_builder_mut().optional_child(Sig(child)),
@@ -251,7 +253,7 @@ impl<D: Dom> ParentElement for GenericElement<D> {
 
     fn children_signal(
         mut self,
-        children: impl SignalVec<Item = impl Into<Node>> + 'static,
+        children: impl SignalVec<Item = impl Into<Node<D>>> + 'static,
     ) -> Self {
         self.build_children();
         let new_children = children.map(|child| child.into());
@@ -268,14 +270,14 @@ impl<D: Dom> ParentElement for GenericElement<D> {
     }
 }
 
-impl<D: Dom> ShadowRootParent for GenericElement<D> {
+impl<D: Dom> ShadowRootParent<D> for GenericElement<D> {
     /// Currently, there's no way to send the shadow root as plain HTML, until
     /// we get [Declarative Shadow Root](`<template shadowroot="open">...`).
     ///
     /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
     fn attach_shadow_children(
         self,
-        children: impl IntoIterator<Item = impl Into<Node>> + 'static,
+        children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
     ) -> Self {
         // We can only implement this for the real DOM when we get Declarative
         // Shadow Root, so we use an effect.
@@ -286,9 +288,10 @@ impl<D: Dom> ShadowRootParent for GenericElement<D> {
             });
 
             for child in children {
-                shadow_root
-                    .append_child(&child.into().eval_dom_node())
-                    .unwrap_throw();
+                // TODO: hydrate the child
+                // shadow_root
+                //     .append_child(child.into().dom_node())
+                //     .unwrap_throw();
             }
         })
     }
@@ -597,7 +600,7 @@ pub trait Element: Sized {
 }
 
 /// An element that is allowed to have children.
-pub trait ParentElement: Element {
+pub trait ParentElement<D: Dom = DefaultDom>: Element {
     // TODO: Docs for signal variant
     /// Add a text child to this element
     ///
@@ -641,7 +644,7 @@ pub trait ParentElement: Element {
     /// # };
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
-    fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node> + 'static>) -> Self {
+    fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node<D>> + 'static>) -> Self {
         self.optional_child(child.map(|child| Some(child)))
     }
 
@@ -666,7 +669,7 @@ pub trait ParentElement: Element {
     /// ```
     fn optional_child(
         self,
-        child: impl SignalOrValue<Item = Option<impl Value + Into<Node> + 'static>>,
+        child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
     ) -> Self;
 
     /// Add children to the element.
@@ -681,7 +684,7 @@ pub trait ParentElement: Element {
     /// # };
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
-    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node>>) -> Self {
+    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self {
         for child in children {
             self = self.child(child.into());
         }
@@ -693,17 +696,18 @@ pub trait ParentElement: Element {
     ///
     /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
     /// for an example
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node>> + 'static) -> Self;
+    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node<D>>> + 'static)
+        -> Self;
 }
 
 /// An element that is allowed to have a shadow root
-pub trait ShadowRootParent: Element {
+pub trait ShadowRootParent<D: Dom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
     fn attach_shadow_children(
         self,
-        children: impl IntoIterator<Item = impl Into<Node>> + 'static,
+        children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
     ) -> Self;
 }
 
@@ -722,9 +726,9 @@ fn spawn_cancelable_future(
 /// The signal futures will end once they've yielded their last value, so we
 /// can't rely on the futures to hold resources via closure captures. Hence the
 /// other resource types. For example, `always` will yield a value, then finish.
-pub(super) enum Resource {
-    ChildVec(Rc<RefCell<ChildVec>>),
-    Child(Node),
+pub(super) enum Resource<D: Dom> {
+    ChildVec(Rc<RefCell<ChildVec<D>>>),
+    Child(D::Node),
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }
 

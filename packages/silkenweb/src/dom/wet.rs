@@ -1,7 +1,7 @@
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-use super::{Dom, DomElement};
+use super::{Dom, DomElement, DomText};
 use crate::{hydration::node::Namespace, task::on_animation_frame};
 
 pub struct Wet;
@@ -15,9 +15,10 @@ impl Dom for Wet {
 #[derive(Clone)]
 pub struct WetElement {
     element: web_sys::Element,
+    // TODO: Store event callbacks, unless weak-refs is enabled.
 }
 
-impl DomElement for WetElement {
+impl DomElement<WetNode> for WetElement {
     fn new(ns: Namespace, tag: &str) -> Self {
         let element = match ns {
             Namespace::Html => document::create_element(tag),
@@ -27,27 +28,24 @@ impl DomElement for WetElement {
         Self { element }
     }
 
-    fn append_child(&mut self, child: Self) {
-        self.element.append_child(&child.element).unwrap_throw();
+    fn append_child(&mut self, child: &WetNode) {
+        self.element.append_child(child.dom_node()).unwrap_throw();
     }
 
-    fn insert_child_before(&mut self, child: Self, next_child: Option<Self>) {
+    fn insert_child_before(&mut self, child: &WetNode, next_child: Option<&WetNode>) {
         self.element
-            .insert_before(
-                &child.element,
-                next_child.map(|c| c.element.into()).as_ref(),
-            )
+            .insert_before(child.dom_node(), next_child.map(|c| c.dom_node()))
             .unwrap_throw();
     }
 
-    fn replace_child(&mut self, new_child: Self, old_child: Self) {
+    fn replace_child(&mut self, new_child: &WetNode, old_child: &WetNode) {
         self.element
-            .replace_child(&new_child.element, &old_child.element)
+            .replace_child(new_child.dom_node(), old_child.dom_node())
             .unwrap_throw();
     }
 
-    fn remove_child(&mut self, child: Self) {
-        self.element.remove_child(&child.element).unwrap_throw();
+    fn remove_child(&mut self, child: &WetNode) {
+        self.element.remove_child(child.dom_node()).unwrap_throw();
     }
 
     fn clear_children(&mut self) {
@@ -86,7 +84,35 @@ impl DomElement for WetElement {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));
     }
+
+    fn store_child(&mut self, _child: WetNode) {}
 }
 
-pub struct WetText {}
-pub struct WetNode {}
+#[derive(Clone)]
+pub struct WetText(web_sys::Text);
+
+impl DomText<WetNode> for WetText {
+    fn new(text: &str) -> Self {
+        Self(document::create_text_node(text))
+    }
+}
+
+pub struct WetNode(web_sys::Node);
+
+impl WetNode {
+    pub(crate) fn dom_node(&self) -> &web_sys::Node {
+        &self.0
+    }
+}
+
+impl From<WetElement> for WetNode {
+    fn from(element: WetElement) -> Self {
+        Self(element.element.into())
+    }
+}
+
+impl From<WetText> for WetNode {
+    fn from(text: WetText) -> Self {
+        Self(text.0.into())
+    }
+}
