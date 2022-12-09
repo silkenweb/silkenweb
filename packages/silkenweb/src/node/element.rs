@@ -39,10 +39,8 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     dom::{DefaultDom, Dom, DomElement, DomText},
-    hydration::{
-        node::{Namespace, WeakHydrationElement},
-    },
-    node::{text},
+    hydration::node::{Namespace, WeakHydrationElement},
+    node::text,
     task,
 };
 
@@ -442,8 +440,7 @@ impl<D: Dom> Element for GenericElement<D> {
             child_builder: None,
             child_vec: None,
             resources: Vec::new(),
-            // TODO: This is wrong. We should `clone_node`
-            element: self.element.clone(),
+            element: self.element.clone_node(),
             #[cfg(debug_assertions)]
             attributes: self.attributes.clone(),
         }

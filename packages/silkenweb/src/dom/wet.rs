@@ -62,6 +62,12 @@ impl DomElement for WetElement {
         self.element.class_list().remove_1(name).unwrap_throw()
     }
 
+    fn clone_node(&self) -> Self {
+        Self {
+            element: self.element.clone_node().unwrap().unchecked_into(),
+        }
+    }
+
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,

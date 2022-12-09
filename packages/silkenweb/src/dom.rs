@@ -30,6 +30,8 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn remove_class(&mut self, name: &str);
 
+    fn clone_node(&self) -> Self;
+
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: Attribute;
