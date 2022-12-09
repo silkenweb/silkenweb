@@ -5,8 +5,8 @@
 //! attribute for that element, as well as methods for each event. For example:
 //!
 //! ```no_run
-//! # use silkenweb::elements::{html::{a, A, ABuilder}, ElementEvents};
-//! let link: ABuilder = a()
+//! # use silkenweb::elements::{html::{a, A}, ElementEvents};
+//! let link: A = a()
 //!     .href("https://example.com/")
 //!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
 //! ```
