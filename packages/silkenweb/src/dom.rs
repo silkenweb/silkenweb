@@ -32,6 +32,8 @@ pub trait DomElement: Clone {
         A: Attribute;
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static);
+
+    fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
 }
 
 pub type DefaultDom = wet::Wet;

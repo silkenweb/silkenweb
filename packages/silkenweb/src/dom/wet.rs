@@ -2,7 +2,7 @@ use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
 use super::{Dom, DomElement};
-use crate::hydration::node::Namespace;
+use crate::{hydration::node::Namespace, task::on_animation_frame};
 
 pub struct Wet;
 
@@ -80,6 +80,11 @@ impl DomElement for WetElement {
         self.element
             .add_event_listener_with_callback(name, Closure::new(f).into_js_value().unchecked_ref())
             .unwrap_throw();
+    }
+
+    fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        let element = self.element.clone();
+        on_animation_frame(move || f(&element));
     }
 }
 
