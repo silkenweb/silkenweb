@@ -105,7 +105,7 @@ impl DomText for WetText {
     }
 
     fn set_text(&mut self, text: &str) {
-        self.0.set_text_content(Some(&text));
+        self.0.set_text_content(Some(text));
     }
 }
 
