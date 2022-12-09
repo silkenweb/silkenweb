@@ -278,7 +278,7 @@ impl<D: Dom> ShadowRootParent for GenericElement<D> {
         self,
         children: impl IntoIterator<Item = impl Into<Node>> + 'static,
     ) -> Self {
-        // We can only implement this for the real DOM until we get Declarative
+        // We can only implement this for the real DOM when we get Declarative
         // Shadow Root, so we use an effect.
         self.effect(move |elem| {
             let shadow_root = elem.shadow_root().unwrap_or_else(|| {
