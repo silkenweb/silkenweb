@@ -204,10 +204,10 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
                     parent.element.append_child(child.as_node());
 
-                    // TODO: Should we always just store the child? It might even be faster, and we
-                    // could get rid of `store_child`.
+                    // TODO:
                     // if child.has_weak_refs()
-                    // {     parent.resources.push(Resource::Child(child));
+                    // {
+                    //     parent.resources.push(Resource::Child(child));
                     // } else {
                     parent.resources.extend(child.take_resources());
                     parent.element.store_child(child.into_node());
