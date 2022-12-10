@@ -18,43 +18,6 @@ pub struct TemplateElement<D: Dom, Param> {
     instantiation_data: OnInstantiate<Self, Param>,
 }
 
-struct OnInstantiate<Element, Param>(Rc<RefCell<OnInstantiateData<Element, Param>>>);
-
-impl<Element, Param> OnInstantiate<Element, Param> {
-    fn new() -> Self {
-        Self(Rc::new(RefCell::new(OnInstantiateData::new())))
-    }
-
-    fn add_fn(&mut self, f: impl 'static + Fn(Element, Param) -> Element) {
-        self.0.borrow_mut().instantiate_fns.push(Box::new(f))
-    }
-
-    fn append_child(&mut self, child: Self) {
-        self.0.borrow_mut().children.push(child);
-    }
-}
-
-impl<Element, Param> Clone for OnInstantiate<Element, Param> {
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
-
-struct OnInstantiateData<Element, Param> {
-    instantiate_fns: Vec<Box<dyn Fn(Element, Param) -> Element>>,
-    children: Vec<OnInstantiate<Element, Param>>,
-}
-
-impl<Element, Param> OnInstantiateData<Element, Param> {
-    fn new() -> Self {
-        Self {
-            instantiate_fns: Vec::new(),
-            // TODO: Optimize children. 
-            children: Vec::new(),
-        }
-    }
-}
-
 impl<D: Dom, Param> TemplateElement<D, Param> {
     pub fn on_instantiate(&mut self, f: impl 'static + Fn(Self, Param) -> Self) {
         self.instantiation_data.add_fn(f)
@@ -180,6 +143,43 @@ impl<D: Dom, Param> From<TemplateText<D>> for TemplateNode<D, Param> {
         Self {
             node: elem.0.into(),
             instantiation_data: OnInstantiate::new(),
+        }
+    }
+}
+
+struct OnInstantiate<Element, Param>(Rc<RefCell<OnInstantiateData<Element, Param>>>);
+
+impl<Element, Param> OnInstantiate<Element, Param> {
+    fn new() -> Self {
+        Self(Rc::new(RefCell::new(OnInstantiateData::new())))
+    }
+
+    fn add_fn(&mut self, f: impl 'static + Fn(Element, Param) -> Element) {
+        self.0.borrow_mut().instantiate_fns.push(Box::new(f))
+    }
+
+    fn append_child(&mut self, child: Self) {
+        self.0.borrow_mut().children.push(child);
+    }
+}
+
+impl<Element, Param> Clone for OnInstantiate<Element, Param> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+struct OnInstantiateData<Element, Param> {
+    instantiate_fns: Vec<Box<dyn Fn(Element, Param) -> Element>>,
+    children: Vec<OnInstantiate<Element, Param>>,
+}
+
+impl<Element, Param> OnInstantiateData<Element, Param> {
+    fn new() -> Self {
+        Self {
+            instantiate_fns: Vec::new(),
+            // TODO: Optimize children. 
+            children: Vec::new(),
         }
     }
 }
