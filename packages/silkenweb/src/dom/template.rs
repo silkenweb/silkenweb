@@ -1,4 +1,4 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, collections::BTreeMap, marker::PhantomData, rc::Rc};
 
 use wasm_bindgen::JsValue;
 
@@ -22,7 +22,8 @@ impl<D: Dom, Param> TemplateElement<D, Param> {
     pub fn instantiate(&self, param: Param) -> D::Element {
         let element = self.element.clone_node();
 
-        // TODO: We'll need to translate the function parameter in `GenericElement` and typed elements.
+        // TODO: We'll need to translate the function parameter in `GenericElement` and
+        // typed elements.
         // TODO: Call initialization fns.
 
         element
@@ -176,7 +177,21 @@ impl<D: Dom, Param> InitializationFns<D, Param> {
     }
 
     fn append_child(&mut self, child: TemplateNode<D, Param>) {
-        self.0.borrow_mut().children.push(child);
+        let mut data = self.0.borrow_mut();
+
+        if !child.initialization_fns.is_empty() {
+            let child_count = data.child_count;
+
+            data.children.insert(child_count, child);
+        }
+
+        data.child_count += 1;
+    }
+
+    fn is_empty(&self) -> bool {
+        let data = self.0.borrow();
+
+        data.initialization_fns.is_empty() && data.children.is_empty()
     }
 }
 
@@ -188,15 +203,16 @@ impl<D: Dom, Param> Clone for InitializationFns<D, Param> {
 
 struct SharedInitializationFns<D: Dom, Param> {
     initialization_fns: Vec<InitializeElem<D, Param>>,
-    children: Vec<TemplateNode<D, Param>>,
+    children: BTreeMap<usize, TemplateNode<D, Param>>,
+    child_count: usize,
 }
 
 impl<D: Dom, Param> SharedInitializationFns<D, Param> {
     fn new() -> Self {
         Self {
             initialization_fns: Vec::new(),
-            // TODO: Optimize children.
-            children: Vec::new(),
+            children: BTreeMap::new(),
+            child_count: 0,
         }
     }
 }
