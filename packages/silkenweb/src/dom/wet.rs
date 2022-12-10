@@ -51,7 +51,7 @@ impl DomElement for WetElement {
     }
 
     fn clear_children(&mut self) {
-        self.element.set_inner_html("")
+        self.element.set_text_content(Some(""))
     }
 
     fn add_class(&mut self, name: &str) {
