@@ -3,6 +3,7 @@ use wasm_bindgen::JsValue;
 use crate::{attribute::Attribute, hydration::node::Namespace};
 
 pub mod dry;
+pub mod template;
 pub mod wet;
 
 pub trait Dom: 'static {
@@ -30,6 +31,7 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn remove_class(&mut self, name: &str);
 
+    // TODO: Remove
     fn clone_node(&self) -> Self;
 
     fn attribute<A>(&mut self, name: &str, value: A)
