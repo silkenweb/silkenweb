@@ -19,6 +19,13 @@ pub struct TemplateElement<D: Dom, Param> {
 }
 
 impl<D: Dom, Param> TemplateElement<D, Param> {
+    pub fn instantiate(&self, param: Param) -> D::Element {
+        let element = self.element.clone_node();
+
+        // TODO: Call on_instantiate fns
+        element
+    }
+
     pub fn on_instantiate(&mut self, f: impl 'static + Fn(Self, Param) -> Self) {
         self.instantiation_data.add_fn(f)
     }
