@@ -15,7 +15,7 @@ impl Dom for Wet {
 #[derive(Clone)]
 pub struct WetElement {
     element: web_sys::Element,
-    // TODO: Store event callbacks, unless weak-refs is enabled.
+    // TODO: Store event callbacks, unless wasm-bindgen weak-refs is enabled.
 }
 
 impl DomElement for WetElement {
@@ -81,8 +81,6 @@ impl DomElement for WetElement {
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        // TODO: This only works with weak-refs. We need to store the callback for
-        // none-weak-refs
         self.element
             .add_event_listener_with_callback(name, Closure::new(f).into_js_value().unchecked_ref())
             .unwrap_throw();

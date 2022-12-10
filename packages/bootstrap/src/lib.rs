@@ -19,7 +19,6 @@ pub mod css {
 
 pub type Class = &'static str;
 
-// TODO: Rename to GenericHtmlElement
 /// A generic HTML element
 ///
 /// Bootstrap elem types that don't implement `HtmlElement`, like
