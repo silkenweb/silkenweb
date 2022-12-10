@@ -22,7 +22,7 @@ use silkenweb::{
     node::element::{Element, ParentElement},
     value::Sig,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, UnwrapThrowExt};
+use wasm_bindgen::UnwrapThrowExt;
 
 const ADJECTIVES: &[&str] = &[
     "pretty",
@@ -232,7 +232,6 @@ impl App {
     }
 }
 
-#[wasm_bindgen(start)]
-pub fn main_js() {
+pub fn main() {
     mount("main", App::new().render());
 }

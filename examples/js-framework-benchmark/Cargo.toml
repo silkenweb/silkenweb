@@ -5,9 +5,6 @@ authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 publish = false
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
 futures-signals = "0.3.31"
