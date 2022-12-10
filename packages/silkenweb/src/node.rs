@@ -19,11 +19,11 @@ pub struct Node<D: Dom = DefaultDom> {
 }
 
 impl<D: Dom> Node<D> {
-    pub(super) fn as_node(&self) -> &D::Node {
+    fn as_node(&self) -> &D::Node {
         &self.node
     }
 
-    pub(super) fn into_node(self) -> D::Node {
+    fn into_node(self) -> D::Node {
         self.node
     }
 
