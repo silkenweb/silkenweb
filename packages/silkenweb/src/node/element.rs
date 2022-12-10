@@ -126,8 +126,7 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
-    // TODO: Move this to `From<Self> for Node`
-    pub(crate) fn build(mut self) -> Self {
+    fn build(mut self) -> Self {
         self.build_children();
 
         if let Some(children) = self.child_vec.take() {
