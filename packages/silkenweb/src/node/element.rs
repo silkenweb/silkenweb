@@ -52,9 +52,8 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     has_preceding_children: bool,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     child_builder: Option<Box<ChildBuilder<D>>>,
-    // TODO: Can we make these private?
-    pub(super) resources: Vec<Resource<D>>,
-    pub(super) element: D::Element,
+    resources: Vec<Resource<D>>,
+    element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
 }
@@ -455,6 +454,17 @@ impl<D: Dom> Executor for GenericElement<D> {
 }
 
 impl<D: Dom> Value for GenericElement<D> {}
+
+impl<D: Dom> From<GenericElement<D>> for Node<D> {
+    fn from(elem: GenericElement<D>) -> Self {
+        let elem = elem.build();
+
+        Self {
+            node: elem.element.into(),
+            resources: elem.resources,
+        }
+    }
+}
 
 /// An HTML element builder.
 pub trait Element: Sized {

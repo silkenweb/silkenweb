@@ -46,17 +46,6 @@ impl<D: Dom> Display for Node<D> {
     }
 }
 
-impl<D: Dom> From<GenericElement<D>> for Node<D> {
-    fn from(elem: GenericElement<D>) -> Self {
-        let elem = elem.build();
-
-        Self {
-            node: elem.element.into(),
-            resources: elem.resources,
-        }
-    }
-}
-
 impl<D: Dom> From<Text<D>> for Node<D> {
     fn from(text: Text<D>) -> Self {
         Self {
