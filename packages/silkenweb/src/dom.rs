@@ -9,7 +9,7 @@ pub mod wet;
 pub trait Dom: 'static {
     type Element: DomElement<Node = Self::Node>;
     type Text: DomText + Into<Self::Node>;
-    type Node;
+    type Node: Clone;
 }
 
 pub trait DomElement: Into<Self::Node> + Clone + 'static {

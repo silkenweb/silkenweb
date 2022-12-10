@@ -111,6 +111,7 @@ impl DomText for WetText {
     }
 }
 
+#[derive(Clone)]
 pub struct WetNode(web_sys::Node);
 
 impl WetNode {
