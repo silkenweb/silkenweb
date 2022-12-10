@@ -64,7 +64,11 @@ impl DomElement for WetElement {
 
     fn clone_node(&self) -> Self {
         Self {
-            element: self.element.clone_node().unwrap().unchecked_into(),
+            element: self
+                .element
+                .clone_node_with_deep(true)
+                .unwrap()
+                .unchecked_into(),
         }
     }
 
