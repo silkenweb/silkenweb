@@ -264,6 +264,27 @@ macro_rules! dom_element {
             ); )?
         }
 
+        impl<Dom, InitParam> $camel_name<$crate::node::element::template::Template<Dom, InitParam>>
+        where
+            Dom: $crate::dom::Dom,
+            InitParam: 'static
+        {
+            pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
+                $camel_name::from_elem(self.elem.instantiate(param))
+            }
+        
+            pub fn on_instantiate(
+                self,
+                f: impl 'static + Fn($camel_name<Dom>, &InitParam) -> $camel_name<Dom>,
+            ) -> Self {
+                $camel_name::from_elem(self.elem.on_instantiate(
+                    move |elem, param| {
+                        f($camel_name::from_elem(elem), param).elem
+                    }
+                ))
+            }
+        }
+
         impl<Dom: $crate::dom::Dom> $crate::node::element::Element for $camel_name<Dom> {
             type DomType = $elem_type;
 
