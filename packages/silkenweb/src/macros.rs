@@ -254,7 +254,7 @@ macro_rules! dom_element {
             pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
                 $camel_name::from_elem(self.elem.instantiate(param))
             }
-        
+
             pub fn on_instantiate(
                 self,
                 f: impl 'static + Fn($camel_name<Dom>, &InitParam) -> $camel_name<Dom>,

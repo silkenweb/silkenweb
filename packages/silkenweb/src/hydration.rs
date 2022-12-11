@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{insert_component, mount_point, node::Node, dom::dry::Dry};
+use crate::{dom::dry::Dry, insert_component, mount_point, node::Node};
 
 pub(super) mod lazy;
 pub(super) mod node;
@@ -184,7 +184,8 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
 
     // TODO: Hydration
     // if let Some(hydration_point) = mount_point.first_child() {
-    //     let node: web_sys::Node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
+    //     let node: web_sys::Node = node.hydrate_child(&mount_point,
+    // &hydration_point, &mut stats);
 
     //     remove_following_siblings(&mount_point, node.next_sibling());
     // } else {

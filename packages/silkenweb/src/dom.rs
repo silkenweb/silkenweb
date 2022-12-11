@@ -11,7 +11,9 @@ pub trait Dom: 'static {
     type Node: Clone + 'static;
 }
 
-pub trait InstantiableDom: Dom<Element = Self::InstantiableElement, Node = Self::InstantiableNode> {
+pub trait InstantiableDom:
+    Dom<Element = Self::InstantiableElement, Node = Self::InstantiableNode>
+{
     type InstantiableElement: InstantiableDomElement<Node = Self::InstantiableNode>;
     type InstantiableNode: InstantiableDomNode<DomType = Self>;
 }

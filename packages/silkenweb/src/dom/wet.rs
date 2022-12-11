@@ -1,7 +1,9 @@
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-use super::{Dom, DomElement, DomText, InstantiableDomNode, InstantiableDom, InstantiableDomElement};
+use super::{
+    Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
+};
 use crate::{hydration::node::Namespace, task::on_animation_frame};
 
 pub struct Wet;
@@ -67,8 +69,6 @@ impl DomElement for WetElement {
         self.element.class_list().remove_1(name).unwrap_throw()
     }
 
-    
-
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,
@@ -133,7 +133,9 @@ impl InstantiableDomNode for WetNode {
     type DomType = Wet;
 
     fn into_element(self) -> WetElement {
-        WetElement{ element: self.0.unchecked_into() }
+        WetElement {
+            element: self.0.unchecked_into(),
+        }
     }
 
     fn first_child(&self) -> Self {

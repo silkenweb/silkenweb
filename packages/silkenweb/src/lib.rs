@@ -144,9 +144,7 @@ pub fn mount(id: &str, node: impl Into<Node<Wet>>) {
     let node = node.into();
 
     let mount_point = mount_point(id);
-    mount_point
-        .append_child(node.dom_node())
-        .unwrap_throw();
+    mount_point.append_child(node.dom_node()).unwrap_throw();
     insert_component(id, mount_point.into(), node);
 }
 
