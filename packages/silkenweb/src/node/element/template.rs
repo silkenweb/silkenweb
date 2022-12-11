@@ -1,4 +1,9 @@
-use std::{cell::RefCell, collections::BTreeMap, marker::PhantomData, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{BTreeMap, HashSet},
+    marker::PhantomData,
+    rc::Rc,
+};
 
 use wasm_bindgen::JsValue;
 
@@ -19,26 +24,13 @@ pub struct TemplateElement<D: Dom, Param> {
 }
 
 impl<D: Dom, Param> TemplateElement<D, Param> {
-    pub fn instantiate(&self, param: Param) -> GenericElement<D> {
-        let element = GenericElement {
-            element: self.element.clone_node(),
-            has_preceding_children: todo!(),
-            child_vec: todo!(),
-            child_builder: todo!(),
-            resources: todo!(),
-            attributes: todo!(),
-        };
-
-        // TODO: We'll need to translate the function parameter in `GenericElement` and
-        // typed elements.
-        // TODO: Call initialization fns.
-
-        element
+    pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
+        self.initialization_fns.initialize(&self.element, param)
     }
 
     pub fn on_instantiate(
         &mut self,
-        f: impl 'static + Fn(GenericElement<D>, Param) -> GenericElement<D>,
+        f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>,
     ) {
         self.initialization_fns.add_fn(f)
     }
@@ -182,7 +174,7 @@ impl<D: Dom, Param> InitializationFns<D, Param> {
         Self(Rc::new(RefCell::new(SharedInitializationFns::new())))
     }
 
-    fn add_fn(&mut self, f: impl 'static + Fn(GenericElement<D>, Param) -> GenericElement<D>) {
+    fn add_fn(&mut self, f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>) {
         self.0.borrow_mut().initialization_fns.push(Box::new(f))
     }
 
@@ -196,6 +188,27 @@ impl<D: Dom, Param> InitializationFns<D, Param> {
         }
 
         data.child_count += 1;
+    }
+
+    fn initialize(&self, element: &D::Element, param: &Param) -> GenericElement<D> {
+        let data = self.0.borrow();
+        let mut element = GenericElement {
+            element: element.clone_node(),
+            has_preceding_children: data.child_count > 0,
+            child_vec: None,
+            child_builder: None,
+            resources: Vec::new(),
+            #[cfg(debug_assertions)]
+            attributes: HashSet::new(),
+        };
+
+        for f in &data.initialization_fns {
+            element = f(element, param);
+        }
+
+        // TODO: Initialize children
+
+        element
     }
 
     fn is_empty(&self) -> bool {
@@ -227,4 +240,4 @@ impl<D: Dom, Param> SharedInitializationFns<D, Param> {
     }
 }
 
-type InitializeElem<D, Param> = Box<dyn Fn(GenericElement<D>, Param) -> GenericElement<D>>;
+type InitializeElem<D, Param> = Box<dyn Fn(GenericElement<D>, &Param) -> GenericElement<D>>;
