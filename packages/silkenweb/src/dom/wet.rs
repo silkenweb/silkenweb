@@ -1,7 +1,7 @@
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-use super::{Dom, DomElement, DomText};
+use super::{Dom, DomElement, DomText, DomNode};
 use crate::{hydration::node::Namespace, task::on_animation_frame};
 
 pub struct Wet;
@@ -117,6 +117,22 @@ pub struct WetNode(web_sys::Node);
 impl WetNode {
     pub(crate) fn dom_node(&self) -> &web_sys::Node {
         &self.0
+    }
+}
+
+impl DomNode for WetNode {
+    type DomType = Wet;
+
+    fn try_to_element(self) -> Option<WetElement> {
+        todo!()
+    }
+
+    fn first_child(&self) -> Option<Self> {
+        todo!()
+    }
+
+    fn next_sibling(&self) -> Option<Self> {
+        todo!()
     }
 }
 

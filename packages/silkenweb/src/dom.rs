@@ -8,7 +8,7 @@ pub mod wet;
 pub trait Dom: 'static {
     type Element: DomElement<Node = Self::Node>;
     type Text: DomText + Into<Self::Node>;
-    type Node: Clone;
+    type Node: DomNode<DomType = Self>;
 }
 
 pub trait DomElement: Into<Self::Node> + Clone + 'static {
@@ -48,6 +48,16 @@ pub trait DomText: Clone + 'static {
     fn new(text: &str) -> Self;
 
     fn set_text(&mut self, text: &str);
+}
+
+pub trait DomNode: Clone + 'static {
+    type DomType: Dom;
+
+    fn try_to_element(self) -> Option<<Self::DomType as Dom>::Element>;
+
+    fn first_child(&self) -> Option<Self>;
+
+    fn next_sibling(&self) -> Option<Self>;
 }
 
 pub type DefaultDom = wet::Wet;

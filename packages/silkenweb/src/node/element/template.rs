@@ -8,7 +8,7 @@ use std::{
 use wasm_bindgen::JsValue;
 
 use super::{Dom, DomElement, DomText, GenericElement};
-use crate::hydration::node::Namespace;
+use crate::{dom::DomNode, hydration::node::Namespace};
 
 pub struct Template<D: Dom, Param>(PhantomData<(D, Param)>);
 
@@ -120,6 +120,26 @@ impl<D: Dom, Param> Clone for TemplateElement<D, Param> {
 pub struct TemplateNode<D: Dom, Param> {
     node: D::Node,
     initialization_fns: InitializationFns<D, Param>,
+}
+
+impl<D, Param> DomNode for TemplateNode<D, Param>
+where
+    D: Dom,
+    Param: 'static,
+{
+    type DomType = Template<D, Param>;
+
+    fn try_to_element(self) -> Option<TemplateElement<D, Param>> {
+        todo!()
+    }
+
+    fn first_child(&self) -> Option<Self> {
+        todo!()
+    }
+
+    fn next_sibling(&self) -> Option<Self> {
+        todo!()
+    }
 }
 
 impl<D: Dom, Param> Clone for TemplateNode<D, Param> {
