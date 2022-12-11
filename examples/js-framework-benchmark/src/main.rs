@@ -66,7 +66,6 @@ const NOUNS: &[&str] = &[
 struct Row {
     id: usize,
     label: Mutable<String>,
-    selected: Mutable<bool>,
 }
 
 impl Row {
@@ -79,7 +78,6 @@ impl Row {
                 COLOURS.choose(rng).unwrap_throw(),
                 NOUNS.choose(rng).unwrap_throw()
             )),
-            selected: Mutable::new(false),
         })
     }
 
@@ -98,7 +96,7 @@ struct RowParams {
 
 struct App {
     data: MutableVec<Rc<Row>>,
-    selected_row: Cell<Option<Mutable<bool>>>,
+    selected_row: Mutable<Option<usize>>,
     next_row_id: Cell<usize>,
     rng: RefCell<SmallRng>,
     row_template: Tr<Template<Wet, RowParams>>,
@@ -108,14 +106,17 @@ impl App {
     fn new() -> Rc<Self> {
         Rc::new(Self {
             data: MutableVec::new(),
-            selected_row: Cell::new(None),
+            selected_row: Mutable::new(None),
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
             row_template: Tr::new()
-                .on_instantiate(|tr, RowParams { row, .. }| {
-                    tr.classes(Sig(row
-                        .selected
-                        .signal()
+                .on_instantiate(|tr, RowParams { app, row }| {
+                    let row_id = row.id;
+                    tr.classes(Sig(app
+                        .selected_row
+                        .signal_cloned()
+                        .map(move |selected_row| selected_row == Some(row_id))
+                        .dedupe()
                         .map(|selected| selected.then_some("danger"))))
                 })
                 .children([
@@ -125,10 +126,10 @@ impl App {
                     Td::new().class("col-md-4").child(A::new().on_instantiate(
                         |a, RowParams { row, app }| {
                             clone!(app);
-                            let selected = row.selected.clone();
+                            let id = row.id;
 
                             a.text(Sig(row.label.signal_cloned()))
-                                .on_click(move |_, _| app.select_row(selected.clone()))
+                                .on_click(move |_, _| app.select_row(id))
                         },
                     )),
                     Td::new().class("col-md-1").child(
@@ -177,12 +178,8 @@ impl App {
         self.data.lock_mut().swap(1, 998);
     }
 
-    fn select_row(&self, selected: Mutable<bool>) {
-        selected.set(true);
-
-        if let Some(current) = self.selected_row.replace(Some(selected)) {
-            current.set(false);
-        }
+    fn select_row(&self, row_id: usize) {
+        self.selected_row.set(Some(row_id));
     }
 
     fn remove_row(&self, row_id: usize) {
