@@ -63,14 +63,14 @@ pub struct GenericElement<D: Dom = DefaultDom> {
 /// An HTML element tag.
 ///
 /// For example: `tag("div")`
-pub fn tag(name: &str) -> GenericElement {
+pub fn tag<D: Dom>(name: &str) -> GenericElement<D> {
     GenericElement::new(name)
 }
 
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace(namespace: Option<&'static str>, name: &str) -> GenericElement {
+pub fn tag_in_namespace<D: Dom>(namespace: Option<&'static str>, name: &str) -> GenericElement<D> {
     GenericElement::new_in_namespace(namespace, name)
 }
 
