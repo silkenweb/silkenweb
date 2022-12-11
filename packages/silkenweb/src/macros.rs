@@ -230,6 +230,10 @@ macro_rules! dom_element {
         }
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
+            pub fn new() -> Self {
+                Self::from_elem($crate::create_element_fn!($($namespace, )? $text_name))
+            }
+
             fn from_elem(elem: $crate::node::element::GenericElement<Dom>) -> Self {
                 Self {
                     elem,
@@ -262,6 +266,12 @@ macro_rules! dom_element {
                     ),*
                 }
             ); )?
+        }
+
+        impl<Dom: $crate::dom::Dom> Default for $camel_name<Dom> {
+            fn default() -> Self {
+                Self::new()
+            }
         }
 
         impl<Dom, InitParam> $camel_name<$crate::node::element::template::Template<Dom, InitParam>>
