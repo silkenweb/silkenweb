@@ -263,11 +263,12 @@ where
                     current_index += 1;
                 }
 
-                let child_elem = child_template
+                let mut child_elem = child_template
                     .initialization_fns
-                    .initialize(current_child.clone().into_element(), param);
-                element.resources.append(&mut child_elem.build().resources);
-                // TODO: Do we need to store child?
+                    .initialize(current_child.clone().into_element(), param)
+                    .build();
+                element.resources.append(&mut child_elem.resources);
+                element.element.store_child(child_elem.element.into());
             }
         }
 
