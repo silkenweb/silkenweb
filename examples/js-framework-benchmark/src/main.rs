@@ -13,6 +13,7 @@ use rand::{
     Rng, SeedableRng,
 };
 use silkenweb::{
+    clone,
     dom::wet::Wet,
     elements::{
         html::{button, div, h1, span, table, tbody, Div, Span, Table, Td, Tr, A},
@@ -111,9 +112,8 @@ impl App {
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
             row_template: Tr::new()
-                .on_instantiate(|tr, params: &RowParams| {
-                    tr.classes(Sig(params
-                        .row
+                .on_instantiate(|tr, RowParams { row, .. }| {
+                    tr.classes(Sig(row
                         .selected
                         .signal()
                         .map(|selected| selected.then_some("danger"))))
@@ -121,15 +121,13 @@ impl App {
                 .children([
                     Td::new()
                         .class("col-md-1")
-                        .on_instantiate(|td, params: &RowParams| {
-                            td.text(params.row.id.to_string())
-                        }),
+                        .on_instantiate(|td, RowParams { row, .. }| td.text(row.id.to_string())),
                     Td::new().class("col-md-4").child(A::new().on_instantiate(
-                        |a, params: &RowParams| {
-                            let app = params.app.clone();
-                            let selected = params.row.selected.clone();
+                        |a, RowParams { row, app }| {
+                            clone!(app);
+                            let selected = row.selected.clone();
 
-                            a.text(Sig(params.row.label.signal_cloned()))
+                            a.text(Sig(row.label.signal_cloned()))
                                 .on_click(move |_, _| app.select_row(selected.clone()))
                         },
                     )),
@@ -140,9 +138,9 @@ impl App {
                                     .classes(["glyphicon", "glyphicon-remove"])
                                     .aria_hidden("true"),
                             )
-                            .on_instantiate(|a, params: &RowParams| {
-                                let app = params.app.clone();
-                                let id = params.row.id;
+                            .on_instantiate(|a, RowParams { row, app }| {
+                                clone!(app);
+                                let id = row.id;
                                 a.on_click(move |_, _| app.remove_row(id))
                             }),
                     ),
