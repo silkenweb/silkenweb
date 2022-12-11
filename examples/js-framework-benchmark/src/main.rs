@@ -13,13 +13,13 @@ use rand::{
     Rng, SeedableRng,
 };
 use silkenweb::{
-    cache, clone,
+    dom::wet::Wet,
     elements::{
-        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
+        html::{button, div, h1, span, table, tbody, Div, Span, Table, Td, Tr, A},
         AriaElement, ElementEvents, HtmlElement,
     },
     mount,
-    node::element::{Element, ParentElement},
+    node::element::{template::Template, Element, ParentElement},
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -61,6 +61,7 @@ const NOUNS: &[&str] = &[
     "pizza", "mouse", "keyboard",
 ];
 
+#[derive(Clone)]
 struct Row {
     id: usize,
     label: Mutable<String>,
@@ -82,32 +83,16 @@ impl Row {
     }
 
     fn render(&self, app: Rc<App>) -> Tr {
-        let id = self.id;
-
-        tr().classes(Sig(self
-            .selected
-            .signal()
-            .map(|selected| selected.then_some("danger"))))
-            .children([
-                cache!(td().class("col-md-1")).text(&id.to_string()),
-                cache!(td().class("col-md-4")).child(
-                    a().text(Sig(self.label.signal_cloned())).on_click({
-                        let selected = self.selected.clone();
-                        clone!(app);
-                        move |_, _| app.select_row(selected.clone())
-                    }),
-                ),
-                cache!(td().class("col-md-1")).child(
-                    cache!(a().child(
-                        span()
-                            .classes(["glyphicon", "glyphicon-remove"])
-                            .aria_hidden("true"),
-                    ))
-                    .on_click(move |_, _| app.remove_row(id)),
-                ),
-                cache!(td().class("col-md-6")),
-            ])
+        app.row_template.instantiate(&RowParams {
+            app: app.clone(),
+            row: self.clone(),
+        })
     }
+}
+
+struct RowParams {
+    app: Rc<App>,
+    row: Row,
 }
 
 struct App {
@@ -115,6 +100,7 @@ struct App {
     selected_row: Cell<Option<Mutable<bool>>>,
     next_row_id: Cell<usize>,
     rng: RefCell<SmallRng>,
+    row_template: Tr<Template<Wet, RowParams>>,
 }
 
 impl App {
@@ -124,6 +110,46 @@ impl App {
             selected_row: Cell::new(None),
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
+            row_template: Tr::new()
+                .on_instantiate(|tr, params: &RowParams| {
+                    tr.classes(Sig(params
+                        .row
+                        .selected
+                        .signal()
+                        .map(|selected| selected.then_some("danger"))))
+                        // TODO: Remove
+                        .child(Td::new().text(params.row.id.to_string()))
+                })
+                .children([
+                    Td::new()
+                        .class("col-md-1")
+                        .on_instantiate(|td, params: &RowParams| {
+                            td.text(params.row.id.to_string())
+                        }),
+                    Td::new().class("col-md-4").child(A::new().on_instantiate(
+                        |a, params: &RowParams| {
+                            let app = params.app.clone();
+                            let selected = params.row.selected.clone();
+
+                            a.text(Sig(params.row.label.signal_cloned()))
+                                .on_click(move |_, _| app.select_row(selected.clone()))
+                        },
+                    )),
+                    Td::new().class("col-md-1").child(
+                        A::new()
+                            .child(
+                                Span::new()
+                                    .classes(["glyphicon", "glyphicon-remove"])
+                                    .aria_hidden("true"),
+                            )
+                            .on_instantiate(|a, params: &RowParams| {
+                                let app = params.app.clone();
+                                let id = params.row.id;
+                                a.on_click(move |_, _| app.remove_row(id))
+                            }),
+                    ),
+                    Td::new().class("col-md-6"),
+                ]),
         })
     }
 
