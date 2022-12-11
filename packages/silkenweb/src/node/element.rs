@@ -223,15 +223,8 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                     let mut child = child.into();
 
                     parent.element.append_child(child.as_node());
-
-                    // TODO:
-                    // if child.has_weak_refs()
-                    // {
-                    //     parent.resources.push(Resource::Child(child));
-                    // } else {
                     parent.resources.extend(child.take_resources());
                     parent.element.store_child(child.into_node());
-                    // }
                 }
             },
             |parent, child| parent.child_builder_mut().optional_child(Sig(child)),
@@ -715,7 +708,6 @@ fn spawn_cancelable_future(
 /// other resource types. For example, `always` will yield a value, then finish.
 pub(super) enum Resource<D: Dom> {
     ChildVec(Rc<RefCell<ChildVec<D>>>),
-    Child(D::Node),
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }
 
