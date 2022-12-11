@@ -117,8 +117,6 @@ impl App {
                         .selected
                         .signal()
                         .map(|selected| selected.then_some("danger"))))
-                        // TODO: Remove
-                        .child(Td::new().text(params.row.id.to_string()))
                 })
                 .children([
                     Td::new()
