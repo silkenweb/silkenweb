@@ -123,16 +123,16 @@ impl WetNode {
 impl DomNode for WetNode {
     type DomType = Wet;
 
-    fn try_to_element(self) -> Option<WetElement> {
-        todo!()
+    fn into_element(self) -> WetElement {
+        WetElement{ element: self.0.unchecked_into() }
     }
 
-    fn first_child(&self) -> Option<Self> {
-        todo!()
+    fn first_child(&self) -> Self {
+        Self(self.0.first_child().unwrap())
     }
 
-    fn next_sibling(&self) -> Option<Self> {
-        todo!()
+    fn next_sibling(&self) -> Self {
+        Self(self.0.next_sibling().unwrap())
     }
 }
 

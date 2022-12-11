@@ -52,11 +52,11 @@ pub trait DomText: Clone + 'static {
 pub trait DomNode: Clone + 'static {
     type DomType: Dom;
 
-    fn try_to_element(self) -> Option<<Self::DomType as Dom>::Element>;
+    fn into_element(self) -> <Self::DomType as Dom>::Element;
 
-    fn first_child(&self) -> Option<Self>;
+    fn first_child(&self) -> Self;
 
-    fn next_sibling(&self) -> Option<Self>;
+    fn next_sibling(&self) -> Self;
 }
 
 pub type DefaultDom = wet::Wet;

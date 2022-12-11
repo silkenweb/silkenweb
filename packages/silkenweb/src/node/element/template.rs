@@ -23,7 +23,11 @@ pub struct TemplateElement<D: Dom, Param> {
     initialization_fns: InitializationFns<D, Param>,
 }
 
-impl<D: Dom, Param> TemplateElement<D, Param> {
+impl<D, Param> TemplateElement<D, Param>
+where
+    D: Dom,
+    Param: 'static,
+{
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
         self.initialization_fns.initialize(&self.element, param)
     }
@@ -129,15 +133,15 @@ where
 {
     type DomType = Template<D, Param>;
 
-    fn try_to_element(self) -> Option<TemplateElement<D, Param>> {
+    fn into_element(self) -> <Self::DomType as Dom>::Element {
         todo!()
     }
 
-    fn first_child(&self) -> Option<Self> {
+    fn first_child(&self) -> Self {
         todo!()
     }
 
-    fn next_sibling(&self) -> Option<Self> {
+    fn next_sibling(&self) -> Self {
         todo!()
     }
 }
@@ -178,7 +182,11 @@ impl<D: Dom> DomText for TemplateText<D> {
     }
 }
 
-impl<D: Dom, Param> From<TemplateText<D>> for TemplateNode<D, Param> {
+impl<D, Param> From<TemplateText<D>> for TemplateNode<D, Param>
+where
+    D: Dom,
+    Param: 'static,
+{
     fn from(elem: TemplateText<D>) -> Self {
         Self {
             node: elem.0.into(),
@@ -189,7 +197,11 @@ impl<D: Dom, Param> From<TemplateText<D>> for TemplateNode<D, Param> {
 
 struct InitializationFns<D: Dom, Param>(Rc<RefCell<SharedInitializationFns<D, Param>>>);
 
-impl<D: Dom, Param> InitializationFns<D, Param> {
+impl<D, Param> InitializationFns<D, Param>
+where
+    D: Dom,
+    Param: 'static,
+{
     fn new() -> Self {
         Self(Rc::new(RefCell::new(SharedInitializationFns::new())))
     }
@@ -211,24 +223,7 @@ impl<D: Dom, Param> InitializationFns<D, Param> {
     }
 
     fn initialize(&self, element: &D::Element, param: &Param) -> GenericElement<D> {
-        let data = self.0.borrow();
-        let mut element = GenericElement {
-            element: element.clone_node(),
-            has_preceding_children: data.child_count > 0,
-            child_vec: None,
-            child_builder: None,
-            resources: Vec::new(),
-            #[cfg(debug_assertions)]
-            attributes: HashSet::new(),
-        };
-
-        for f in &data.initialization_fns {
-            element = f(element, param);
-        }
-
-        // TODO: Initialize children
-
-        element
+        self.0.borrow().initialize(element, param)
     }
 
     fn is_empty(&self) -> bool {
@@ -250,13 +245,51 @@ struct SharedInitializationFns<D: Dom, Param> {
     child_count: usize,
 }
 
-impl<D: Dom, Param> SharedInitializationFns<D, Param> {
+impl<D, Param> SharedInitializationFns<D, Param>
+where
+    D: Dom,
+    Param: 'static,
+{
     fn new() -> Self {
         Self {
             initialization_fns: Vec::new(),
             children: BTreeMap::new(),
             child_count: 0,
         }
+    }
+
+    fn initialize(&self, element: &D::Element, param: &Param) -> GenericElement<D> {
+        let mut element = GenericElement {
+            element: element.clone_node(),
+            has_preceding_children: self.child_count > 0,
+            child_vec: None,
+            child_builder: None,
+            resources: Vec::new(),
+            #[cfg(debug_assertions)]
+            attributes: HashSet::new(),
+        };
+
+        for f in &self.initialization_fns {
+            element = f(element, param);
+        }
+
+        if !self.children.is_empty() {
+            let mut current_index = 0;
+            let mut current_child: D::Node = element.element.clone().into().first_child();
+
+            for (&index, child_template) in &self.children {
+                while current_index < index {
+                    current_child = current_child.next_sibling();
+                    current_index += 1;
+                }
+
+                child_template
+                    .initialization_fns
+                    .initialize(&current_child.clone().into_element(), param);
+            }
+        }
+
+        element
     }
 }
 
