@@ -63,7 +63,7 @@ where
         self.initialization_fns.append_child(child.clone());
     }
 
-    // TODO: Update `InitializationFns`
+    // TODO: Test
     fn insert_child_before(
         &mut self,
         index: usize,
@@ -71,23 +71,28 @@ where
         next_child: Option<&Self::Node>,
     ) {
         self.element
-            .insert_child_before(index, &child.node, next_child.map(|c| &c.node))
+            .insert_child_before(index, &child.node, next_child.map(|c| &c.node));
+        self.initialization_fns.insert_child(index, child.clone());
     }
 
-    // TODO: Update `InitializationFns`
+    // TODO: Test
     fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
         self.element
-            .replace_child(index, &new_child.node, &old_child.node)
+            .replace_child(index, &new_child.node, &old_child.node);
+        self.initialization_fns
+            .replace_child(index, new_child.clone());
     }
 
-    // TODO: Update `InitializationFns`
+    // TODO: Test
     fn remove_child(&mut self, index: usize, child: &Self::Node) {
-        self.element.remove_child(index, &child.node)
+        self.element.remove_child(index, &child.node);
+        self.initialization_fns.remove_child(index);
     }
 
-    // TODO: Update `InitializationFns`
+    // TODO: Test
     fn clear_children(&mut self) {
-        self.element.clear_children()
+        self.element.clear_children();
+        self.initialization_fns.clear_children();
     }
 
     fn add_class(&mut self, name: &str) {
@@ -206,6 +211,48 @@ where
         }
 
         data.child_count += 1;
+    }
+
+    fn insert_child(&mut self, index: usize, child: TemplateNode<D, Param>) {
+        let mut data = self.0.borrow_mut();
+        let later_children = data.children.split_off(&index);
+
+        for (i, existing_child) in later_children.into_iter() {
+            data.children.insert(i + 1, existing_child);
+        }
+
+        if !child.initialization_fns.is_empty() {
+            data.children.insert(index, child);
+        }
+
+        data.child_count += 1;
+    }
+
+    fn replace_child(&mut self, index: usize, child: TemplateNode<D, Param>) {
+        let mut data = self.0.borrow_mut();
+
+        if !child.initialization_fns.is_empty() {
+            data.children.insert(index, child);
+        }
+    }
+
+    fn remove_child(&mut self, index: usize) {
+        let mut data = self.0.borrow_mut();
+        data.children.remove(&index);
+
+        let later_children = data.children.split_off(&index);
+
+        for (i, child) in later_children.into_iter() {
+            data.children.insert(i - 1, child);
+        }
+
+        data.child_count -= 1;
+    }
+
+    fn clear_children(&mut self) {
+        let mut data = self.0.borrow_mut();
+        data.children.clear();
+        data.child_count = 0;
     }
 
     fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
