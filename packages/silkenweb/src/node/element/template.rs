@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::BTreeMap, marker::PhantomData, rc::Rc};
 
 use wasm_bindgen::JsValue;
 
-use super::{Dom, DomElement, DomText};
+use super::{Dom, DomElement, DomText, GenericElement};
 use crate::hydration::node::Namespace;
 
 pub struct Template<D: Dom, Param>(PhantomData<(D, Param)>);
@@ -19,8 +19,15 @@ pub struct TemplateElement<D: Dom, Param> {
 }
 
 impl<D: Dom, Param> TemplateElement<D, Param> {
-    pub fn instantiate(&self, param: Param) -> D::Element {
-        let element = self.element.clone_node();
+    pub fn instantiate(&self, param: Param) -> GenericElement<D> {
+        let element = GenericElement {
+            element: self.element.clone_node(),
+            has_preceding_children: todo!(),
+            child_vec: todo!(),
+            child_builder: todo!(),
+            resources: todo!(),
+            attributes: todo!(),
+        };
 
         // TODO: We'll need to translate the function parameter in `GenericElement` and
         // typed elements.
@@ -29,7 +36,10 @@ impl<D: Dom, Param> TemplateElement<D, Param> {
         element
     }
 
-    pub fn on_instantiate(&mut self, f: impl 'static + Fn(&mut D::Element, Param)) {
+    pub fn on_instantiate(
+        &mut self,
+        f: impl 'static + Fn(GenericElement<D>, Param) -> GenericElement<D>,
+    ) {
         self.initialization_fns.add_fn(f)
     }
 }
@@ -172,7 +182,7 @@ impl<D: Dom, Param> InitializationFns<D, Param> {
         Self(Rc::new(RefCell::new(SharedInitializationFns::new())))
     }
 
-    fn add_fn(&mut self, f: impl 'static + Fn(&mut D::Element, Param)) {
+    fn add_fn(&mut self, f: impl 'static + Fn(GenericElement<D>, Param) -> GenericElement<D>) {
         self.0.borrow_mut().initialization_fns.push(Box::new(f))
     }
 
@@ -217,4 +227,4 @@ impl<D: Dom, Param> SharedInitializationFns<D, Param> {
     }
 }
 
-type InitializeElem<D, Param> = Box<dyn Fn(&mut <D as Dom>::Element, Param)>;
+type InitializeElem<D, Param> = Box<dyn Fn(GenericElement<D>, Param) -> GenericElement<D>>;

@@ -47,6 +47,8 @@ use crate::{
 mod child_builder;
 mod child_vec;
 
+pub mod template;
+
 /// Build an HTML element.
 pub struct GenericElement<D: Dom = DefaultDom> {
     has_preceding_children: bool,
