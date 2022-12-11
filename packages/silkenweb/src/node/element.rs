@@ -34,7 +34,7 @@ use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, SignalOrValu
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
-use self::child_vec::ChildVec;
+use self::{child_vec::ChildVec, template::Template};
 use super::Node;
 use crate::{
     attribute::Attribute,
@@ -150,6 +150,24 @@ impl<D: Dom> GenericElement<D> {
             self.resources.shrink_to_fit();
             self
         }
+    }
+}
+
+impl<D, Param> GenericElement<Template<D, Param>>
+where
+    D: Dom,
+    Param: 'static,
+{
+    pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
+        self.element.instantiate(param)
+    }
+
+    pub fn on_instantiate(
+        mut self,
+        f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>,
+    ) -> Self {
+        self.element.on_instantiate(f);
+        self
     }
 }
 
