@@ -29,7 +29,7 @@ where
     Param: 'static,
 {
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
-        self.initialization_fns.initialize(&self.element, param)
+        self.initialization_fns.initialize(self.element.clone_node(), param)
     }
 
     pub fn on_instantiate(
@@ -222,7 +222,7 @@ where
         data.child_count += 1;
     }
 
-    fn initialize(&self, element: &D::Element, param: &Param) -> GenericElement<D> {
+    fn initialize(&self, element: D::Element, param: &Param) -> GenericElement<D> {
         self.0.borrow().initialize(element, param)
     }
 
@@ -258,9 +258,9 @@ where
         }
     }
 
-    fn initialize(&self, element: &D::Element, param: &Param) -> GenericElement<D> {
+    fn initialize(&self, element: D::Element, param: &Param) -> GenericElement<D> {
         let mut element = GenericElement {
-            element: element.clone_node(),
+            element,
             has_preceding_children: self.child_count > 0,
             child_vec: None,
             child_builder: None,
@@ -283,9 +283,11 @@ where
                     current_index += 1;
                 }
 
-                child_template
+                let child_elem = child_template
                     .initialization_fns
-                    .initialize(&current_child.clone().into_element(), param);
+                    .initialize(current_child.clone().into_element(), param);
+                element.resources.append(&mut child_elem.build().resources);
+                // TODO: Do we need to store child?
             }
         }
 
