@@ -85,7 +85,7 @@ where
     }
 
     fn clone_node(&self) -> Self {
-        todo!("get rid of `clone_node` completely")
+        todo!()
     }
 
     fn attribute<A>(&mut self, name: &str, value: A)
