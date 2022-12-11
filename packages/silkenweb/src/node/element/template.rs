@@ -8,28 +8,32 @@ use std::{
 use wasm_bindgen::JsValue;
 
 use super::{Dom, DomElement, DomText, GenericElement};
-use crate::{dom::DomNode, hydration::node::Namespace};
+use crate::{
+    dom::{InstantiableDom, InstantiableDomElement, InstantiableDomNode},
+    hydration::node::Namespace,
+};
 
-pub struct Template<D: Dom, Param>(PhantomData<(D, Param)>);
+pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
 
-impl<D: Dom, Param: 'static> Dom for Template<D, Param> {
+impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {
     type Element = TemplateElement<D, Param>;
     type Node = TemplateNode<D, Param>;
     type Text = TemplateText<D>;
 }
 
-pub struct TemplateElement<D: Dom, Param> {
-    element: D::Element,
+pub struct TemplateElement<D: InstantiableDom, Param> {
+    element: D::InstantiableElement,
     initialization_fns: InitializationFns<D, Param>,
 }
 
 impl<D, Param> TemplateElement<D, Param>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
-        self.initialization_fns.initialize(self.element.clone_node(), param)
+        self.initialization_fns
+            .initialize(self.element.clone_node(), param)
     }
 
     pub fn on_instantiate(
@@ -42,14 +46,14 @@ where
 
 impl<D, Param> DomElement for TemplateElement<D, Param>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     type Node = TemplateNode<D, Param>;
 
     fn new(ns: Namespace, tag: &str) -> Self {
         Self {
-            element: D::Element::new(ns, tag),
+            element: D::InstantiableElement::new(ns, tag),
             initialization_fns: InitializationFns::new(),
         }
     }
@@ -88,10 +92,6 @@ where
         self.element.remove_class(name)
     }
 
-    fn clone_node(&self) -> Self {
-        todo!()
-    }
-
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,
@@ -112,7 +112,7 @@ where
     }
 }
 
-impl<D: Dom, Param> Clone for TemplateElement<D, Param> {
+impl<D: InstantiableDom, Param> Clone for TemplateElement<D, Param> {
     fn clone(&self) -> Self {
         Self {
             element: self.element.clone(),
@@ -121,32 +121,12 @@ impl<D: Dom, Param> Clone for TemplateElement<D, Param> {
     }
 }
 
-pub struct TemplateNode<D: Dom, Param> {
+pub struct TemplateNode<D: InstantiableDom, Param> {
     node: D::Node,
     initialization_fns: InitializationFns<D, Param>,
 }
 
-impl<D, Param> DomNode for TemplateNode<D, Param>
-where
-    D: Dom,
-    Param: 'static,
-{
-    type DomType = Template<D, Param>;
-
-    fn into_element(self) -> <Self::DomType as Dom>::Element {
-        todo!()
-    }
-
-    fn first_child(&self) -> Self {
-        todo!()
-    }
-
-    fn next_sibling(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<D: Dom, Param> Clone for TemplateNode<D, Param> {
+impl<D: InstantiableDom, Param> Clone for TemplateNode<D, Param> {
     fn clone(&self) -> Self {
         Self {
             node: self.node.clone(),
@@ -155,7 +135,7 @@ impl<D: Dom, Param> Clone for TemplateNode<D, Param> {
     }
 }
 
-impl<D: Dom, Param> From<TemplateElement<D, Param>> for TemplateNode<D, Param> {
+impl<D: InstantiableDom, Param> From<TemplateElement<D, Param>> for TemplateNode<D, Param> {
     fn from(elem: TemplateElement<D, Param>) -> Self {
         Self {
             node: elem.element.into(),
@@ -164,15 +144,15 @@ impl<D: Dom, Param> From<TemplateElement<D, Param>> for TemplateNode<D, Param> {
     }
 }
 
-pub struct TemplateText<D: Dom>(D::Text);
+pub struct TemplateText<D: InstantiableDom>(D::Text);
 
-impl<D: Dom> Clone for TemplateText<D> {
+impl<D: InstantiableDom> Clone for TemplateText<D> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-impl<D: Dom> DomText for TemplateText<D> {
+impl<D: InstantiableDom> DomText for TemplateText<D> {
     fn new(text: &str) -> Self {
         Self(D::Text::new(text))
     }
@@ -184,7 +164,7 @@ impl<D: Dom> DomText for TemplateText<D> {
 
 impl<D, Param> From<TemplateText<D>> for TemplateNode<D, Param>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     fn from(elem: TemplateText<D>) -> Self {
@@ -195,11 +175,11 @@ where
     }
 }
 
-struct InitializationFns<D: Dom, Param>(Rc<RefCell<SharedInitializationFns<D, Param>>>);
+struct InitializationFns<D: InstantiableDom, Param>(Rc<RefCell<SharedInitializationFns<D, Param>>>);
 
 impl<D, Param> InitializationFns<D, Param>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     fn new() -> Self {
@@ -222,7 +202,7 @@ where
         data.child_count += 1;
     }
 
-    fn initialize(&self, element: D::Element, param: &Param) -> GenericElement<D> {
+    fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
         self.0.borrow().initialize(element, param)
     }
 
@@ -233,13 +213,13 @@ where
     }
 }
 
-impl<D: Dom, Param> Clone for InitializationFns<D, Param> {
+impl<D: InstantiableDom, Param> Clone for InitializationFns<D, Param> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-struct SharedInitializationFns<D: Dom, Param> {
+struct SharedInitializationFns<D: InstantiableDom, Param> {
     initialization_fns: Vec<InitializeElem<D, Param>>,
     children: BTreeMap<usize, TemplateNode<D, Param>>,
     child_count: usize,
@@ -247,7 +227,7 @@ struct SharedInitializationFns<D: Dom, Param> {
 
 impl<D, Param> SharedInitializationFns<D, Param>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     fn new() -> Self {
@@ -258,7 +238,7 @@ where
         }
     }
 
-    fn initialize(&self, element: D::Element, param: &Param) -> GenericElement<D> {
+    fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
         let mut element = GenericElement {
             element,
             has_preceding_children: self.child_count > 0,

@@ -1,7 +1,7 @@
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-use super::{Dom, DomElement, DomText, DomNode};
+use super::{Dom, DomElement, DomText, InstantiableDomNode, InstantiableDom, InstantiableDomElement};
 use crate::{hydration::node::Namespace, task::on_animation_frame};
 
 pub struct Wet;
@@ -10,6 +10,11 @@ impl Dom for Wet {
     type Element = WetElement;
     type Node = WetNode;
     type Text = WetText;
+}
+
+impl InstantiableDom for Wet {
+    type InstantiableElement = WetElement;
+    type InstantiableNode = WetNode;
 }
 
 #[derive(Clone)]
@@ -62,15 +67,7 @@ impl DomElement for WetElement {
         self.element.class_list().remove_1(name).unwrap_throw()
     }
 
-    fn clone_node(&self) -> Self {
-        Self {
-            element: self
-                .element
-                .clone_node_with_deep(true)
-                .unwrap()
-                .unchecked_into(),
-        }
-    }
+    
 
     fn attribute<A>(&mut self, name: &str, value: A)
     where
@@ -98,6 +95,18 @@ impl DomElement for WetElement {
     fn store_child(&mut self, _child: WetNode) {}
 }
 
+impl InstantiableDomElement for WetElement {
+    fn clone_node(&self) -> Self {
+        Self {
+            element: self
+                .element
+                .clone_node_with_deep(true)
+                .unwrap()
+                .unchecked_into(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct WetText(web_sys::Text);
 
@@ -120,7 +129,7 @@ impl WetNode {
     }
 }
 
-impl DomNode for WetNode {
+impl InstantiableDomNode for WetNode {
     type DomType = Wet;
 
     fn into_element(self) -> WetElement {

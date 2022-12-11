@@ -8,7 +8,12 @@ pub mod wet;
 pub trait Dom: 'static {
     type Element: DomElement<Node = Self::Node>;
     type Text: DomText + Into<Self::Node>;
-    type Node: DomNode<DomType = Self>;
+    type Node: Clone + 'static;
+}
+
+pub trait InstantiableDom: Dom<Element = Self::InstantiableElement, Node = Self::InstantiableNode> {
+    type InstantiableElement: InstantiableDomElement<Node = Self::InstantiableNode>;
+    type InstantiableNode: InstantiableDomNode<DomType = Self>;
 }
 
 pub trait DomElement: Into<Self::Node> + Clone + 'static {
@@ -30,8 +35,6 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn remove_class(&mut self, name: &str);
 
-    fn clone_node(&self) -> Self;
-
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: Attribute;
@@ -49,7 +52,11 @@ pub trait DomText: Clone + 'static {
     fn set_text(&mut self, text: &str);
 }
 
-pub trait DomNode: Clone + 'static {
+pub trait InstantiableDomElement: DomElement {
+    fn clone_node(&self) -> Self;
+}
+
+pub trait InstantiableDomNode: Clone {
     type DomType: Dom;
 
     fn into_element(self) -> <Self::DomType as Dom>::Element;

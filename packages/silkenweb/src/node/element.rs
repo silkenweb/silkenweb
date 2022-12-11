@@ -38,7 +38,7 @@ use self::{child_vec::ChildVec, template::Template};
 use super::Node;
 use crate::{
     attribute::Attribute,
-    dom::{DefaultDom, Dom, DomElement, DomText},
+    dom::{DefaultDom, Dom, DomElement, DomText, InstantiableDom},
     hydration::node::{Namespace, WeakHydrationElement},
     node::text,
     task,
@@ -155,7 +155,7 @@ impl<D: Dom> GenericElement<D> {
 
 impl<D, Param> GenericElement<Template<D, Param>>
 where
-    D: Dom,
+    D: InstantiableDom,
     Param: 'static,
 {
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
@@ -453,18 +453,6 @@ impl<D: Dom> Element for GenericElement<D> {
         self.element.on(name, f);
         self
     }
-
-    fn clone_node(&self) -> Self {
-        Self {
-            has_preceding_children: self.has_preceding_children,
-            child_builder: None,
-            child_vec: None,
-            resources: Vec::new(),
-            element: self.element.clone_node(),
-            #[cfg(debug_assertions)]
-            attributes: self.attributes.clone(),
-        }
-    }
 }
 
 impl<D: Dom> Executor for GenericElement<D> {
@@ -596,9 +584,6 @@ pub trait Element: Sized {
     ///
     /// [MDN Events]: https://developer.mozilla.org/en-US/docs/Web/Events
     fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
-
-    // TODO: Doc
-    fn clone_node(&self) -> Self;
 }
 
 /// An element that is allowed to have children.

@@ -153,10 +153,6 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
             fn on(self, name: &'static str, f: impl FnMut(::silkenweb::macros::JsValue) + 'static) -> Self {
                 Self{#derive_field: self.#derive_field.on(name, f) #fields_tail}
             }
-
-            fn clone_node(&self) -> Self {
-                Self{#derive_field: self.#derive_field.clone_node() #fields_tail}
-            }
         }
     )
     .into()

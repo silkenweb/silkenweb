@@ -5,25 +5,6 @@ pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
 
-// TODO: Doc
-#[macro_export]
-macro_rules! cache {
-    ($node:expr) => {{
-        use ::std::any::Any;
-
-        // We've got no way to name the type of `$expr`, so we have to use `Any`.
-        thread_local! {
-            static NODE: Box<dyn Any> = Box::new($node);
-        }
-
-        fn cast<T: 'static>(_f: impl FnOnce() -> T, x: &Box<dyn Any>) -> &T {
-            x.downcast_ref().unwrap()
-        }
-
-        NODE.with(|node| cast(|| $node, node).clone_node())
-    }};
-}
-
 /// Define a custom html element.
 ///
 /// This will define a struct for an html element, with a method for each
@@ -212,16 +193,7 @@ macro_rules! dom_element {
         )?
         $(#[$elem_meta])*
         pub fn $snake_name() -> $camel_name {
-            thread_local!{
-                static ELEM: $crate::node::element::GenericElement =
-                    $crate::create_element_fn!($($namespace, )? $text_name);
-            }
-
-            ELEM.with(|elem| {
-                $camel_name::from_elem(
-                    $crate::node::element::Element::clone_node(elem)
-                )
-            })
+            $camel_name::new()
         }
 
         pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> {
@@ -276,7 +248,7 @@ macro_rules! dom_element {
 
         impl<Dom, InitParam> $camel_name<$crate::node::element::template::Template<Dom, InitParam>>
         where
-            Dom: $crate::dom::Dom,
+            Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
         {
             pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
@@ -360,10 +332,6 @@ macro_rules! dom_element {
                 f: impl FnMut($crate::macros::JsValue) + 'static
             ) -> Self {
                 Self::from_elem($crate::node::element::Element::on(self.elem, name, f))
-            }
-
-            fn clone_node(&self) -> Self {
-                Self::from_elem(self.elem.clone_node())
             }
         }
 
