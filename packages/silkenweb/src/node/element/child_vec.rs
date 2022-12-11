@@ -10,15 +10,15 @@ use crate::{
 pub struct ChildVec<D: Dom> {
     parent: D::Element,
     children: Vec<Node<D>>,
-    has_preceding_children: bool,
+    static_child_count: usize,
 }
 
 impl<D: Dom> ChildVec<D> {
-    pub fn new(parent: D::Element, has_preceding_children: bool) -> Self {
+    pub fn new(parent: D::Element, static_child_count: usize) -> Self {
         Self {
             parent,
             children: Vec::new(),
-            has_preceding_children,
+            static_child_count,
         }
     }
 
@@ -64,8 +64,11 @@ impl<D: Dom> ChildVec<D> {
 
         assert!(index < self.children.len());
 
-        self.parent
-            .insert_child_before(new_child.as_node(), Some(self.children[index].as_node()));
+        self.parent.insert_child_before(
+            index + self.static_child_count,
+            new_child.as_node(),
+            Some(self.children[index].as_node()),
+        );
 
         self.children.insert(index, new_child);
     }
@@ -74,15 +77,19 @@ impl<D: Dom> ChildVec<D> {
         let new_child = new_child.into();
         let old_child = &mut self.children[index];
 
-        self.parent
-            .replace_child(new_child.as_node(), old_child.as_node());
+        self.parent.replace_child(
+            index + self.static_child_count,
+            new_child.as_node(),
+            old_child.as_node(),
+        );
 
         *old_child = new_child;
     }
 
     pub fn remove(&mut self, index: usize) -> Node<D> {
         let old_child = self.children.remove(index);
-        self.parent.remove_child(old_child.as_node());
+        self.parent
+            .remove_child(index + self.static_child_count, old_child.as_node());
 
         old_child
     }
@@ -102,17 +109,20 @@ impl<D: Dom> ChildVec<D> {
         let removed_child = self.children.pop();
 
         if let Some(removed_child) = removed_child {
-            self.parent.remove_child(removed_child.as_node());
+            self.parent.remove_child(
+                self.children.len() + self.static_child_count,
+                removed_child.as_node(),
+            );
         }
     }
 
     pub fn clear(&mut self) {
-        if self.has_preceding_children {
+        if self.static_child_count > 0 {
             let mut parent = self.parent.clone();
             let children = mem::take(&mut self.children);
 
-            for child in children {
-                parent.remove_child(child.as_node());
+            for (index, child) in children.into_iter().enumerate() {
+                parent.remove_child(index + self.static_child_count, child.as_node());
             }
         } else {
             self.children.clear();

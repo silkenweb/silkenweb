@@ -41,19 +41,19 @@ impl DomElement for WetElement {
         self.element.append_child(child.dom_node()).unwrap_throw();
     }
 
-    fn insert_child_before(&mut self, child: &WetNode, next_child: Option<&WetNode>) {
+    fn insert_child_before(&mut self, _index: usize, child: &WetNode, next_child: Option<&WetNode>) {
         self.element
             .insert_before(child.dom_node(), next_child.map(|c| c.dom_node()))
             .unwrap_throw();
     }
 
-    fn replace_child(&mut self, new_child: &WetNode, old_child: &WetNode) {
+    fn replace_child(&mut self, _index: usize, new_child: &WetNode, old_child: &WetNode) {
         self.element
             .replace_child(new_child.dom_node(), old_child.dom_node())
             .unwrap_throw();
     }
 
-    fn remove_child(&mut self, child: &WetNode) {
+    fn remove_child(&mut self, _index: usize, child: &WetNode) {
         self.element.remove_child(child.dom_node()).unwrap_throw();
     }
 

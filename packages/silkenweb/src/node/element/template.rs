@@ -64,19 +64,25 @@ where
     }
 
     // TODO: Update `InitializationFns`
-    fn insert_child_before(&mut self, child: &Self::Node, next_child: Option<&Self::Node>) {
+    fn insert_child_before(
+        &mut self,
+        index: usize,
+        child: &Self::Node,
+        next_child: Option<&Self::Node>,
+    ) {
         self.element
-            .insert_child_before(&child.node, next_child.map(|c| &c.node))
+            .insert_child_before(index, &child.node, next_child.map(|c| &c.node))
     }
 
     // TODO: Update `InitializationFns`
-    fn replace_child(&mut self, new_child: &Self::Node, old_child: &Self::Node) {
-        self.element.replace_child(&new_child.node, &old_child.node)
+    fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
+        self.element
+            .replace_child(index, &new_child.node, &old_child.node)
     }
 
     // TODO: Update `InitializationFns`
-    fn remove_child(&mut self, child: &Self::Node) {
-        self.element.remove_child(&child.node)
+    fn remove_child(&mut self, index: usize, child: &Self::Node) {
+        self.element.remove_child(index, &child.node)
     }
 
     // TODO: Update `InitializationFns`
@@ -241,7 +247,7 @@ where
     fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
         let mut element = GenericElement {
             element,
-            has_preceding_children: self.child_count > 0,
+            static_child_count: self.child_count,
             child_vec: None,
             child_builder: None,
             resources: Vec::new(),

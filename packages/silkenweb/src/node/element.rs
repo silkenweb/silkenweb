@@ -51,7 +51,7 @@ pub mod template;
 
 /// Build an HTML element.
 pub struct GenericElement<D: Dom = DefaultDom> {
-    has_preceding_children: bool,
+    static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     child_builder: Option<Box<ChildBuilder<D>>>,
     resources: Vec<Resource<D>>,
@@ -85,7 +85,7 @@ impl<D: Dom> GenericElement<D> {
 
     fn new_element(element: D::Element) -> Self {
         Self {
-            has_preceding_children: false,
+            static_child_count: 0,
             child_vec: None,
             child_builder: None,
             resources: Vec::new(),
@@ -96,7 +96,6 @@ impl<D: Dom> GenericElement<D> {
     }
 
     fn child_builder_mut(&mut self) -> &mut ChildBuilder<D> {
-        self.has_preceding_children = true;
         self.child_builder
             .get_or_insert_with(|| Box::new(ChildBuilder::new()))
     }
@@ -136,7 +135,7 @@ impl<D: Dom> GenericElement<D> {
 
             let child_vec = Rc::new(RefCell::new(ChildVec::new(
                 self.element.clone(),
-                self.has_preceding_children,
+                self.static_child_count,
             )));
             self.resources.push(Resource::ChildVec(child_vec.clone()));
 
@@ -182,12 +181,12 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                 .append_child(&D::Text::new(child.as_ref()).into());
         }
 
-        self.has_preceding_children = true;
-
         if let Some(child_builder) = self.child_builder.as_mut() {
             child_builder.child(child.map(|child| text(child.as_ref())));
             return self;
         }
+
+        self.static_child_count += 1;
 
         child.for_each(
             text_value,
@@ -210,8 +209,6 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         mut self,
         child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
     ) -> Self {
-        self.has_preceding_children = true;
-
         if let Some(child_builder) = self.child_builder.as_mut() {
             child_builder.optional_child(child);
             return self;
@@ -220,6 +217,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         child.select(
             |parent, child| {
                 if let Some(child) = child {
+                    parent.static_child_count += 1;
                     let mut child = child.into();
 
                     parent.element.append_child(child.as_node());

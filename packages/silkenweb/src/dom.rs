@@ -25,11 +25,11 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn append_child(&mut self, child: &Self::Node);
 
-    fn insert_child_before(&mut self, child: &Self::Node, next_child: Option<&Self::Node>);
+    fn insert_child_before(&mut self, index: usize, child: &Self::Node, next_child: Option<&Self::Node>);
 
-    fn replace_child(&mut self, new_child: &Self::Node, old_child: &Self::Node);
+    fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node);
 
-    fn remove_child(&mut self, child: &Self::Node);
+    fn remove_child(&mut self, index: usize, child: &Self::Node);
 
     fn clear_children(&mut self);
 
