@@ -37,6 +37,7 @@ use std::{collections::HashMap, fmt::Display};
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 use crate::{
+    dom::Dom,
     elements::html::{a, A},
     prelude::ElementEvents,
 };
@@ -235,10 +236,10 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 /// # };
 /// let link = anchor("/my-path").text("click me");
 /// ```
-pub fn anchor(path: impl Into<String>) -> A {
+pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
     let path = path.into();
 
-    a().href(&path).on_click(link_clicked(path))
+    A::new().href(&path).on_click(link_clicked(path))
 }
 
 /// An `on_click` handler for routed `<a>` elements.
