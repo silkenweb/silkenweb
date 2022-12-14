@@ -97,7 +97,7 @@ where
     }
 
     fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
-        // TODO: We need support shadow children in templates
+        // TODO: We need support for shadow children in `initialization_fns`
         todo!()
     }
 
