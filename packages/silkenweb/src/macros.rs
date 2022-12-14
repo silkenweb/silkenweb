@@ -370,10 +370,10 @@ macro_rules! dom_element {
 #[macro_export]
 macro_rules! create_element_fn {
     ($text_name:expr) => {
-        $crate::node::element::tag($text_name)
+        $crate::node::element::GenericElement::new($text_name)
     };
     ($namespace:expr, $text_name:expr) => {
-        $crate::node::element::tag_in_namespace($namespace, $text_name)
+        $crate::node::element::GenericElement::new_in_namespace($namespace, $text_name)
     };
 }
 

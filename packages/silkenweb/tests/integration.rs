@@ -5,7 +5,7 @@ use silkenweb::{
         ElementEvents,
     },
     mount,
-    node::element::{tag, ParentElement},
+    node::element::ParentElement,
     prelude::HtmlElement,
     task::render_now,
     unmount,
@@ -27,7 +27,7 @@ async fn mount_unmount() {
     create_app_container(APP_ID).await;
 
     let message = "Hello, world!";
-    mount(APP_ID, tag("p").text(message));
+    mount(APP_ID, P::new().text(message));
     render_now().await;
     assert_eq!(format!(r#"<p>{}</p>"#, message), app_html(APP_ID));
     unmount(APP_ID);

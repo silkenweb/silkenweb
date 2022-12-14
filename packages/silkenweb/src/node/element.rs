@@ -57,20 +57,6 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     attributes: HashSet<String>,
 }
 
-/// An HTML element tag.
-///
-/// For example: `tag("div")`
-pub fn tag<D: Dom>(name: &str) -> GenericElement<D> {
-    GenericElement::new(name)
-}
-
-/// An HTML element tag in a namespace.
-///
-/// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace<D: Dom>(namespace: Namespace, name: &str) -> GenericElement<D> {
-    GenericElement::new_in_namespace(namespace, name)
-}
-
 impl<D: Dom> GenericElement<D> {
     pub fn new(tag: &str) -> Self {
         Self::new_in_namespace(Namespace::Html, tag)
