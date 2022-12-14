@@ -129,6 +129,40 @@ impl<D: Dom> GenericElement<D> {
             self
         }
     }
+
+    fn classes_value(&mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) {
+        let element = &mut self.element;
+
+        for class in classes {
+            element.add_class(intern_str(class.as_ref()));
+        }
+    }
+
+    fn classes_signal<T>(
+        classes: impl IntoIterator<Item = T>,
+        element: &mut D::Element,
+        previous_values: &Rc<Cell<Vec<T>>>,
+    ) -> impl Future<Output = ()>
+    where
+        T: AsRef<str>,
+    {
+        let mut previous = previous_values.replace(Vec::new());
+
+        for to_remove in &previous {
+            element.remove_class(to_remove.as_ref());
+        }
+
+        previous.clear();
+
+        for to_add in classes {
+            element.add_class(intern_str(to_add.as_ref()));
+            previous.push(to_add);
+        }
+
+        previous_values.set(previous);
+
+        async {}
+    }
 }
 
 impl<D, Param> GenericElement<Template<D, Param>>
@@ -291,56 +325,13 @@ impl<D: Dom> Element for GenericElement<D> {
         T: 'a + AsRef<str>,
         Iter: 'a + IntoIterator<Item = T>,
     {
-        fn classes_value<D: Dom, T0>(
-            elem: &mut GenericElement<D>,
-            classes: impl IntoIterator<Item = T0>,
-        ) where
-            T0: AsRef<str>,
-        {
-            let element = &mut elem.element;
-
-            for class in classes {
-                element.add_class(intern_str(class.as_ref()));
-            }
-        }
-
-        type PreviousValues<T0> = Rc<Cell<Vec<T0>>>;
-
-        fn classes_signal<T1, E, I>(
-            classes: I,
-            element: &mut E,
-            previous_values: &PreviousValues<T1>,
-        ) -> impl Future<Output = ()>
-        where
-            T1: AsRef<str>,
-            E: DomElement,
-            I: IntoIterator<Item = T1>,
-        {
-            let mut previous = previous_values.replace(Vec::new());
-
-            for to_remove in &previous {
-                element.remove_class(to_remove.as_ref());
-            }
-
-            previous.clear();
-
-            for to_add in classes {
-                element.add_class(intern_str(to_add.as_ref()));
-                previous.push(to_add);
-            }
-
-            previous_values.set(previous);
-
-            async {}
-        }
-
         classes.for_each(
-            classes_value,
+            Self::classes_value,
             |elem| {
                 let mut element = elem.element.clone();
-                let previous_values: PreviousValues<T> = Rc::new(Cell::new(Vec::new()));
+                let previous_values = Rc::new(Cell::new(Vec::<T>::new()));
 
-                move |classes| classes_signal(classes, &mut element, &previous_values)
+                move |classes| Self::classes_signal(classes, &mut element, &previous_values)
             },
             &mut self,
         );
