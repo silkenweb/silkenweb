@@ -117,10 +117,6 @@ where
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
     }
-
-    fn store_child(&mut self, child: Self::Node) {
-        self.element.store_child(child.node)
-    }
 }
 
 impl<D: InstantiableDom, Param> Clone for TemplateElement<D, Param> {
@@ -321,7 +317,6 @@ where
                     .initialize(current_child.clone().into_element(), param)
                     .build();
                 element.resources.append(&mut child_elem.resources);
-                element.element.store_child(child_elem.element.into());
             }
         }
 

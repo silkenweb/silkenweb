@@ -44,9 +44,6 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static);
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
-
-    /// Store a child if there are weak references to it via `ElementHandle`
-    fn store_child(&mut self, child: Self::Node);
 }
 
 pub trait DomText: Clone + 'static {

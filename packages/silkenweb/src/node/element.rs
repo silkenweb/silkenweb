@@ -222,7 +222,6 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
                     parent.element.append_child(child.as_node());
                     parent.resources.extend(child.take_resources());
-                    parent.element.store_child(child.into_node());
                 }
             },
             |parent, child| parent.child_builder_mut().optional_child(Sig(child)),

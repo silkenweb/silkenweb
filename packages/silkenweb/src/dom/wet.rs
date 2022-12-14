@@ -91,8 +91,6 @@ impl DomElement for WetElement {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));
     }
-
-    fn store_child(&mut self, _child: WetNode) {}
 }
 
 impl InstantiableDomElement for WetElement {
