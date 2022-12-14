@@ -1,3 +1,5 @@
+use std::fmt;
+
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
@@ -146,6 +148,16 @@ pub struct WetNode(web_sys::Node);
 impl WetNode {
     pub(crate) fn dom_node(&self) -> &web_sys::Node {
         &self.0
+    }
+}
+
+impl fmt::Display for WetNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(elem) = self.0.dyn_ref::<web_sys::Element>() {
+            f.write_str(&elem.outer_html())
+        } else {
+            f.write_str(&self.0.text_content().expect("No text content found"))
+        }
     }
 }
 

@@ -1,8 +1,10 @@
 use std::{
-    cell::{RefCell, RefMut},
+    cell::{Ref, RefCell, RefMut},
+    fmt,
     rc::Rc,
 };
 
+use html_escape::encode_double_quoted_attribute;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use wasm_bindgen::JsValue;
@@ -29,7 +31,43 @@ impl InstantiableDom for Dry {
 #[derive(Clone)]
 pub struct DryElement(Rc<RefCell<SharedDryElement>>);
 
+impl fmt::Display for DryElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let shared = self.borrow();
+
+        write!(f, "<{}", shared.tag)?;
+
+        for (name, value) in &shared.attributes {
+            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+        }
+
+        f.write_str(">")?;
+
+        for child in &shared.children {
+            child.fmt(f)?;
+        }
+
+        let has_children = !shared.children.is_empty();
+        let requires_closing_tag = !NO_CLOSING_TAG.contains(&shared.tag.as_str());
+
+        if requires_closing_tag || has_children {
+            write!(f, "</{}>", shared.tag)?;
+        }
+
+        Ok(())
+    }
+}
+
+const NO_CLOSING_TAG: &[&str] = &[
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
+    "source", "track", "wbr",
+];
+
 impl DryElement {
+    fn borrow(&self) -> Ref<SharedDryElement> {
+        self.0.as_ref().borrow()
+    }
+
     fn borrow_mut(&self) -> RefMut<SharedDryElement> {
         self.0.as_ref().borrow_mut()
     }
@@ -227,6 +265,12 @@ impl DomText for DryText {
     }
 }
 
+impl fmt::Display for DryText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0.as_ref().borrow().text)
+    }
+}
+
 #[derive(Clone)]
 pub enum DryNode {
     Text(DryText),
@@ -240,6 +284,15 @@ impl DryNode {
         match self {
             DryNode::Text(text) => text.borrow_mut().next_sibling = next_sibling,
             DryNode::Element(element) => element.borrow_mut().next_sibling = next_sibling,
+        }
+    }
+}
+
+impl fmt::Display for DryNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DryNode::Text(text) => text.fmt(f),
+            DryNode::Element(elem) => elem.fmt(f),
         }
     }
 }

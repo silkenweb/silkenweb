@@ -8,7 +8,7 @@ use std::{
 use silkenweb_signals_ext::value::Value;
 
 use self::element::{GenericElement, Resource};
-use crate::dom::{wet::Wet, DefaultDom, Dom, DomText};
+use crate::dom::{wet::Wet, DefaultDom, Dom, DomText, dry::Dry};
 
 pub mod element;
 
@@ -40,18 +40,18 @@ impl Node<Wet> {
 
 impl<D: Dom> Value for Node<D> {}
 
-impl<D: Dom> Display for Node<D> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
-
 impl<D: Dom> From<Text<D>> for Node<D> {
     fn from(text: Text<D>) -> Self {
         Self {
             node: text.0.into(),
             resources: Vec::new(),
         }
+    }
+}
+
+impl<D: Dom> Display for Node<D> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.node.fmt(f)
     }
 }
 

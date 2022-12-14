@@ -3,8 +3,9 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
+    dom::{self, dry::Dry},
     elements::{
-        html::{div, p, Div},
+        html::{div, p, Div, P},
         HtmlElement,
     },
     node::{element::Element, text, Node},
@@ -29,11 +30,17 @@ macro_rules! isomorphic_test {
     };
 }
 
+#[cfg(target_arch = "wasm32")]
+type PlatformDom = dom::wet::Wet;
+
+#[cfg(not(target_arch = "wasm32"))]
+type PlatformDom = dom::dry::Dry;
+
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
         isomorphic_test! {
             async fn $name() {
-                assert_eq!(Node::from($node).to_string(), $expected)
+                assert_eq!(Node::<PlatformDom>::from($node).to_string(), $expected)
             }
         }
     };
@@ -46,36 +53,36 @@ fn block_on() {
     silkenweb::task::server::block_on(async { panic!("Make sure the future is run") });
 }
 
-render_test!(empty_element, div(), "<div></div>");
+render_test!(empty_element, Div::new(), "<div></div>");
 render_test!(
     single_attribute,
-    div().id("my-id"),
+    Div::new().id("my-id"),
     r#"<div id="my-id"></div>"#
 );
 render_test!(
     multi_attribute,
-    div().id("my-id").class("my-class"),
+    Div::new().id("my-id").class("my-class"),
     r#"<div id="my-id" class="my-class"></div>"#
 );
 render_test!(
     boolean_false_attribute,
-    div().hidden(false),
+    Div::new().hidden(false),
     r#"<div></div>"#
 );
 render_test!(
     boolean_true_attribute,
-    div().hidden(true),
+    Div::new().hidden(true),
     r#"<div hidden=""></div>"#
 );
 
 render_test!(
     child,
-    div().child(p().text("Hello!")),
+    Div::new().child(P::new().text("Hello!")),
     "<div><p>Hello!</p></div>"
 );
 render_test!(
     children,
-    div().children([p().text("Hello"), p().text("World!")]),
+    Div::new().children([P::new().text("Hello"), P::new().text("World!")]),
     "<div><p>Hello</p><p>World!</p></div>"
 );
 
@@ -246,7 +253,7 @@ children_signal_test!(
 isomorphic_test! {
     async fn text_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node = p().text(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = P::new().text(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), "<p>Initial text</p>");
         text.set("Updated text");
@@ -259,8 +266,8 @@ isomorphic_test! {
     async fn classes_signal() {
         let test_class1 = Mutable::new(Some("test-class-1"));
         let test_class2 = Mutable::new(Some("test-class-2"));
-        let elem: Node =
-            div()
+        let elem: Node<PlatformDom> =
+            Div::new()
                 .classes(Sig(test_class1.signal()))
                 .classes(Sig(test_class2.signal()))
                 .into();
@@ -286,7 +293,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn attribute_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node = div().title(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = Div::new().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set("Updated text");
@@ -298,7 +305,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn optional_attribute_signal() {
         let text = Mutable::new(Some("Initial text"));
-        let elem: Node = div().title(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = Div::new().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set(None);
@@ -309,7 +316,7 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn text_node() {
-        let elem: Node = div().child(text("Hello, world!")).into();
+        let elem: Node<PlatformDom> = Div::new().child(text("Hello, world!")).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div>Hello, world!</div>"#);
     }
@@ -321,15 +328,19 @@ pub async fn children_signal_test(
     expected: &[usize],
 ) {
     async fn with_existing_children(
-        initial_elem: Div,
+        initial_elem: Div<PlatformDom>,
         initial_child_text: &str,
         initial: &[usize],
         f: impl FnOnce(MutableVecLockMut<usize>),
         expected: &[usize],
     ) {
         let children = MutableVec::<usize>::new_with_values(initial.to_vec());
-        let element: Node = initial_elem
-            .children_signal(children.signal_vec().map(|i| p().text(&format!("{}", i))))
+        let element: Node<PlatformDom> = initial_elem
+            .children_signal(
+                children
+                    .signal_vec()
+                    .map(|i| P::new().text(&format!("{}", i))),
+            )
             .into();
 
         f(children.lock_mut());
@@ -346,6 +357,13 @@ pub async fn children_signal_test(
         );
     }
 
-    with_existing_children(div(), "", initial, f.clone(), expected).await;
-    with_existing_children(div().child(div()), "<div></div>", initial, f, expected).await;
+    with_existing_children(Div::new(), "", initial, f.clone(), expected).await;
+    with_existing_children(
+        Div::new().child(Div::new()),
+        "<div></div>",
+        initial,
+        f,
+        expected,
+    )
+    .await;
 }

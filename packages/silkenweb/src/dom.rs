@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use wasm_bindgen::JsValue;
 
 use crate::{attribute::Attribute, hydration::node::Namespace};
@@ -8,7 +10,7 @@ pub mod wet;
 pub trait Dom: 'static {
     type Element: DomElement<Node = Self::Node>;
     type Text: DomText + Into<Self::Node>;
-    type Node: Clone + 'static;
+    type Node: Clone + Display + 'static;
 }
 
 pub trait InstantiableDom:
@@ -65,7 +67,7 @@ pub trait InstantiableDomElement: DomElement {
     fn clone_node(&self) -> Self;
 }
 
-pub trait InstantiableDomNode: Clone {
+pub trait InstantiableDomNode: Display + Clone {
     type DomType: Dom;
 
     fn into_element(self) -> <Self::DomType as Dom>::Element;

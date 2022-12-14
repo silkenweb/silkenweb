@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell,
     collections::{BTreeMap, HashSet},
+    fmt,
     marker::PhantomData,
     rc::Rc,
 };
@@ -140,6 +141,12 @@ impl<D: InstantiableDom, Param> Clone for TemplateElement<D, Param> {
 pub struct TemplateNode<D: InstantiableDom, Param> {
     node: D::Node,
     initialization_fns: InitializationFns<D, Param>,
+}
+
+impl<D: InstantiableDom, Param> fmt::Display for TemplateNode<D, Param> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.node.fmt(f)
+    }
 }
 
 impl<D: InstantiableDom, Param> Clone for TemplateNode<D, Param> {
