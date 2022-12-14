@@ -735,6 +735,7 @@ pub enum Namespace {
     /// thus avoiding converting the namespace to a javascript string.
     Html,
     Svg,
+    MathML,
     Other(&'static str),
 }
 
@@ -743,6 +744,7 @@ impl Namespace {
         match self {
             Namespace::Html => "http://www.w3.org/1999/xhtml",
             Namespace::Svg => "http://www.w3.org/2000/svg",
+            Namespace::MathML => "http://www.w3.org/1998/Math/MathML",
             Namespace::Other(ns) => ns,
         }
     }
