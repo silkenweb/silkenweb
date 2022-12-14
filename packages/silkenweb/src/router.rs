@@ -36,11 +36,7 @@ use std::{collections::HashMap, fmt::Display};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
-use crate::{
-    dom::Dom,
-    elements::html::{a, A},
-    prelude::ElementEvents,
-};
+use crate::{dom::Dom, elements::html::A, prelude::ElementEvents};
 
 /// Represent the path portion of a URL (including any query string)
 #[derive(Clone, Eq, PartialEq)]

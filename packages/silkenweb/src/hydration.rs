@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{dom::dry::Dry, insert_component, mount_point, node::Node};
+use crate::{dom::dry::Dry, mount_point, node::Node};
 
 pub(super) mod lazy;
 pub(super) mod node;

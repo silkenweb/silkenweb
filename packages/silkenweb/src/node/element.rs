@@ -16,7 +16,6 @@ use std::{
     self,
     cell::{Cell, RefCell},
     future::Future,
-    marker::PhantomData,
     pin::Pin,
     rc::Rc,
 };
@@ -31,15 +30,13 @@ use futures_signals::{
 };
 use silkenweb_base::{clone, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, SignalOrValue, Value};
-use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
-use web_sys::{ShadowRootInit, ShadowRootMode};
+use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_vec::ChildVec, template::Template};
 use super::Node;
 use crate::{
     attribute::Attribute,
     dom::{DefaultDom, Dom, DomElement, DomText, InstantiableDom},
-    hydration::node::WeakHydrationElement,
     node::text,
     task,
 };

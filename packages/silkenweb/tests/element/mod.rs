@@ -3,9 +3,9 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
-    dom::{self, dry::Dry},
+    dom,
     elements::{
-        html::{div, p, Div, P},
+        html::{Div, P},
         HtmlElement,
     },
     node::{element::Element, text, Node},

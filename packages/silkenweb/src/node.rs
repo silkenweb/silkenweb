@@ -7,8 +7,8 @@ use std::{
 
 use silkenweb_signals_ext::value::Value;
 
-use self::element::{GenericElement, Resource};
-use crate::dom::{wet::Wet, DefaultDom, Dom, DomText, dry::Dry};
+use self::element::Resource;
+use crate::dom::{wet::Wet, DefaultDom, Dom, DomText};
 
 pub mod element;
 
