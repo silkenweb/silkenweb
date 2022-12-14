@@ -1,6 +1,6 @@
 //! Generic DOM types.
 
-use std::fmt::{self, Display};
+use std::fmt;
 
 use silkenweb_signals_ext::value::Value;
 
@@ -42,7 +42,7 @@ impl<D: Dom> From<Text<D>> for Node<D> {
     }
 }
 
-impl<D: Dom> Display for Node<D> {
+impl<D: Dom> fmt::Display for Node<D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.node.fmt(f)
     }
