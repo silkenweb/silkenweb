@@ -1,7 +1,8 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
+    dom::dry::Dry,
     elements::{
-        html::{button, div, p, Div, Button, P},
+        html::{button, div, p, Button, Div, P},
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
@@ -9,7 +10,7 @@ use silkenweb::{
     prelude::ParentElement,
     task::render_now,
     unmount,
-    value::Sig, dom::dry::Dry,
+    value::Sig,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 
