@@ -4,6 +4,7 @@ use std::{
 };
 
 use indexmap::IndexMap;
+use itertools::Itertools;
 use wasm_bindgen::JsValue;
 
 use super::{
@@ -29,7 +30,7 @@ impl InstantiableDom for Dry {
 pub struct DryElement(Rc<RefCell<SharedDryElement>>);
 
 impl DryElement {
-    fn borrow_mut(&mut self) -> RefMut<SharedDryElement> {
+    fn borrow_mut(&self) -> RefMut<SharedDryElement> {
         self.0.as_ref().borrow_mut()
     }
 }
@@ -62,43 +63,108 @@ impl DomElement for DryElement {
     fn append_child(&mut self, child: &DryNode) {
         let mut shared = self.borrow_mut();
 
-        set_next_sibling(shared.children.last_mut(), child.clone());
+        if let Some(last) = shared.children.last_mut() {
+            last.set_next_sibling(Some(child));
+        }
+
         shared.children.push(child.clone());
     }
 
     fn insert_child_before(&mut self, index: usize, child: &DryNode, next_child: Option<&DryNode>) {
-        todo!()
+        let mut shared = self.borrow_mut();
+
+        if index > 0 {
+            shared.children[index - 1].set_next_sibling(Some(child));
+        }
+
+        child.set_next_sibling(next_child);
+
+        shared.children.insert(index, child.clone());
     }
 
-    fn replace_child(&mut self, _index: usize, new_child: &DryNode, old_child: &DryNode) {
-        todo!()
+    fn replace_child(&mut self, index: usize, new_child: &DryNode, old_child: &DryNode) {
+        old_child.set_next_sibling(None);
+        let mut shared = self.borrow_mut();
+
+        if index > 0 {
+            shared.children[index - 1].set_next_sibling(Some(new_child));
+        }
+
+        new_child.set_next_sibling(shared.children.get(index + 1));
+
+        shared.children[index] = new_child.clone();
     }
 
-    fn remove_child(&mut self, _index: usize, child: &DryNode) {
-        todo!()
+    fn remove_child(&mut self, index: usize, child: &DryNode) {
+        child.set_next_sibling(None);
+        let mut shared = self.borrow_mut();
+
+        if index > 0 {
+            shared.children[index - 1].set_next_sibling(shared.children.get(index + 1));
+        }
+
+        shared.children.remove(index);
     }
 
     fn clear_children(&mut self) {
-        todo!()
+        let mut shared = self.borrow_mut();
+
+        for child in &shared.children {
+            child.set_next_sibling(None);
+        }
+
+        shared.children.clear();
     }
 
     fn add_class(&mut self, name: &str) {
-        todo!()
+        self.borrow_mut()
+            .attributes
+            .entry("class".to_owned())
+            .and_modify(|class| {
+                if !class.split_ascii_whitespace().any(|c| c == name) {
+                    if !class.is_empty() {
+                        class.push(' ');
+                    }
+
+                    class.push_str(name);
+                }
+            })
+            .or_insert_with(|| name.to_owned());
     }
 
     fn remove_class(&mut self, name: &str) {
-        todo!()
+        if let Some(class) = self.borrow_mut().attributes.get_mut("class") {
+            *class = class
+                .split_ascii_whitespace()
+                .filter(|&c| c != name)
+                .join(" ");
+        }
     }
 
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,
     {
-        todo!()
+        assert_ne!(
+            name, "xmlns",
+            "\"xmlns\" must be set via a namespace at tag creation time"
+        );
+
+        let mut shared = self.borrow_mut();
+
+        if let Some(value) = value.text() {
+            shared
+                .attributes
+                .insert(name.to_owned(), value.into_owned());
+        } else {
+            shared.attributes.remove(name);
+        }
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        todo!()
+        self.borrow_mut()
+            .hydrate_actions
+            .push(Box::new(move |element| element.on(name, f)))
     }
 
     fn dom_element(&self) -> Option<web_sys::Element> {
@@ -106,13 +172,29 @@ impl DomElement for DryElement {
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        todo!()
+        self.borrow_mut()
+            .hydrate_actions
+            .push(Box::new(move |element| element.effect(f)))
     }
 }
 
 impl InstantiableDomElement for DryElement {
     fn clone_node(&self) -> Self {
-        todo!()
+        let shared = self.borrow_mut();
+        let children = shared.children.clone();
+
+        for (index, child) in children.iter().enumerate() {
+            child.set_next_sibling(children.get(index + 1));
+        }
+
+        Self(Rc::new(RefCell::new(SharedDryElement {
+            namespace: shared.namespace,
+            tag: shared.tag.clone(),
+            attributes: shared.attributes.clone(),
+            children,
+            hydrate_actions: Vec::new(),
+            next_sibling: None,
+        })))
     }
 }
 
@@ -120,7 +202,7 @@ impl InstantiableDomElement for DryElement {
 pub struct DryText(Rc<RefCell<SharedDryText>>);
 
 impl DryText {
-    fn borrow_mut(&mut self) -> RefMut<SharedDryText> {
+    fn borrow_mut(&self) -> RefMut<SharedDryText> {
         self.0.as_ref().borrow_mut()
     }
 }
@@ -149,13 +231,14 @@ pub enum DryNode {
     Element(DryElement),
 }
 
-fn set_next_sibling(node: Option<&mut DryNode>, next_sibling: DryNode) {
-    match node {
-        Some(node) => match node {
-            DryNode::Text(text) => text.borrow_mut().next_sibling = Some(next_sibling),
-            DryNode::Element(element) => element.borrow_mut().next_sibling = Some(next_sibling),
-        },
-        None => (),
+impl DryNode {
+    fn set_next_sibling(&self, next_sibling: Option<&DryNode>) {
+        let next_sibling = next_sibling.map(DryNode::clone);
+
+        match self {
+            DryNode::Text(text) => text.borrow_mut().next_sibling = next_sibling,
+            DryNode::Element(element) => element.borrow_mut().next_sibling = next_sibling,
+        }
     }
 }
 
