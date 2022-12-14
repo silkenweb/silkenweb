@@ -39,7 +39,7 @@ use super::Node;
 use crate::{
     attribute::Attribute,
     dom::{DefaultDom, Dom, DomElement, DomText, InstantiableDom},
-    hydration::node::{Namespace, WeakHydrationElement},
+    hydration::node::WeakHydrationElement,
     node::text,
     task,
 };
@@ -730,5 +730,23 @@ impl ElementHandle<web_sys::Element> {
     /// It is the clients responsibility to ensure the new type is correct.
     pub fn cast<T: JsCast>(self) -> ElementHandle<T> {
         ElementHandle(self.0.map(|elem| elem.unchecked_into()))
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum Namespace {
+    /// New elements in the `Html` namespace are created with `create_element`,
+    /// thus avoiding converting the namespace to a javascript string.
+    Html,
+    Other(Option<&'static str>),
+}
+
+impl Namespace {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Namespace::Html => "http://www.w3.org/1999/xhtml",
+            Namespace::Other(None) => "",
+            Namespace::Other(Some(ns)) => ns,
+        }
     }
 }

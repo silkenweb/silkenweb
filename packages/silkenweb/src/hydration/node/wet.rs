@@ -7,8 +7,8 @@ use html_escape::encode_text_minimal;
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
-use super::{event::EventCallback, HydrationNodeData, Namespace, WetNode};
-use crate::{attribute::Attribute, task::on_animation_frame};
+use super::{event::EventCallback, HydrationNodeData, WetNode};
+use crate::{attribute::Attribute, node::element::Namespace, task::on_animation_frame};
 
 pub struct WetElement {
     dom_element: web_sys::Element,

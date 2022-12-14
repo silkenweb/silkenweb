@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use wasm_bindgen::JsValue;
 
-use crate::{attribute::Attribute, hydration::node::Namespace};
+use crate::{attribute::Attribute, node::element::Namespace};
 
 pub mod dry;
 pub mod wet;

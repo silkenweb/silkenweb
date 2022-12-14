@@ -12,11 +12,12 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetText},
-    DryNode, HydrationNodeData, Namespace, WetNode,
+    DryNode, HydrationNodeData, WetNode,
 };
 use crate::{
     attribute::Attribute,
     hydration::{remove_following_siblings, HydrationStats},
+    node::element::Namespace,
 };
 
 pub struct DryElement {

@@ -15,7 +15,7 @@ use super::{
     lazy::{IsDry, Lazy},
     HydrationStats,
 };
-use crate::attribute::Attribute;
+use crate::{attribute::Attribute, node::element::Namespace};
 
 mod dry;
 mod event;
@@ -420,23 +420,5 @@ impl IsDry for HydrationElement {
 impl IsDry for HydrationText {
     fn is_dry(&self) -> bool {
         self.0.borrow().is_dry()
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub enum Namespace {
-    /// New elements in the `Html` namespace are created with `create_element`,
-    /// thus avoiding converting the namespace to a javascript string.
-    Html,
-    Other(Option<&'static str>),
-}
-
-impl Namespace {
-    fn as_str(&self) -> &str {
-        match self {
-            Namespace::Html => "http://www.w3.org/1999/xhtml",
-            Namespace::Other(None) => "",
-            Namespace::Other(Some(ns)) => ns,
-        }
     }
 }

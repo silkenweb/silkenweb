@@ -13,7 +13,7 @@ use super::{
     wet::WetElement, Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement,
     InstantiableDomNode,
 };
-use crate::hydration::node::Namespace;
+use crate::node::element::Namespace;
 
 pub struct Dry;
 

@@ -11,7 +11,7 @@ use wasm_bindgen::JsValue;
 use super::{Dom, DomElement, DomText, GenericElement};
 use crate::{
     dom::{InstantiableDom, InstantiableDomElement, InstantiableDomNode},
-    hydration::node::Namespace,
+    node::element::Namespace,
 };
 
 pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);

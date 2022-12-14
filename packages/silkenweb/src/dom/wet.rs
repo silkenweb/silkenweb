@@ -7,7 +7,7 @@ use web_sys::{ShadowRootInit, ShadowRootMode};
 use super::{
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
-use crate::{hydration::node::Namespace, task::on_animation_frame};
+use crate::{node::element::Namespace, task::on_animation_frame};
 
 pub struct Wet;
 
