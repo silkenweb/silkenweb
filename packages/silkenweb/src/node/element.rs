@@ -76,20 +76,16 @@ pub fn tag_in_namespace<D: Dom>(namespace: Namespace, name: &str) -> GenericElem
 
 impl<D: Dom> GenericElement<D> {
     pub fn new(tag: &str) -> Self {
-        Self::new_element(D::Element::new(Namespace::Html, tag))
+        Self::new_in_namespace(Namespace::Html, tag)
     }
 
     pub fn new_in_namespace(namespace: Namespace, tag: &str) -> Self {
-        Self::new_element(D::Element::new(namespace, tag))
-    }
-
-    fn new_element(element: D::Element) -> Self {
         Self {
             static_child_count: 0,
             child_vec: None,
             child_builder: None,
             resources: Vec::new(),
-            element,
+            element: D::Element::new(namespace, tag),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
