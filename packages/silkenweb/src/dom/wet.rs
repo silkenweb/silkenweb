@@ -34,7 +34,7 @@ impl DomElement for WetElement {
     fn new(ns: Namespace, tag: &str) -> Self {
         let element = match ns {
             Namespace::Html => document::create_element(tag),
-            Namespace::Other(ns) => document::create_element_ns(ns.map(intern_str), tag),
+            _ => document::create_element_ns(intern_str(ns.as_str()), tag),
         };
 
         Self { element }

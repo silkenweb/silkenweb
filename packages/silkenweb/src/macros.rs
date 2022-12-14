@@ -123,7 +123,7 @@ macro_rules! svg_element {
                 common_events = [];
                 doc_macro = svg_element_doc;
                 attribute_doc_macro = svg_attribute_doc;
-                namespace = Some("http://www.w3.org/2000/svg");
+                namespace = $crate::node::element::Namespace::Svg;
                 $($tail)*
             }
         );

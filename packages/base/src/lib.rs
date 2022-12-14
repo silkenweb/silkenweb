@@ -51,8 +51,8 @@ pub mod document {
         DOCUMENT.with(|doc| doc.create_element(tag).unwrap_throw())
     }
 
-    pub fn create_element_ns(namespace: Option<&str>, tag: &str) -> web_sys::Element {
-        DOCUMENT.with(|doc| doc.create_element_ns(namespace, tag).unwrap_throw())
+    pub fn create_element_ns(namespace: &str, tag: &str) -> web_sys::Element {
+        DOCUMENT.with(|doc| doc.create_element_ns(Some(namespace), tag).unwrap_throw())
     }
 
     pub fn create_text_node(text: &str) -> web_sys::Text {

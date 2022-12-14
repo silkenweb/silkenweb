@@ -70,7 +70,7 @@ pub fn tag<D: Dom>(name: &str) -> GenericElement<D> {
 /// An HTML element tag in a namespace.
 ///
 /// For example: `tag_in_namespace("http://www.w3.org/2000/svg", "svg")`
-pub fn tag_in_namespace<D: Dom>(namespace: Option<&'static str>, name: &str) -> GenericElement<D> {
+pub fn tag_in_namespace<D: Dom>(namespace: Namespace, name: &str) -> GenericElement<D> {
     GenericElement::new_in_namespace(namespace, name)
 }
 
@@ -79,8 +79,8 @@ impl<D: Dom> GenericElement<D> {
         Self::new_element(D::Element::new(Namespace::Html, tag))
     }
 
-    fn new_in_namespace(namespace: Option<&'static str>, tag: &str) -> Self {
-        Self::new_element(D::Element::new(Namespace::Other(namespace), tag))
+    fn new_in_namespace(namespace: Namespace, tag: &str) -> Self {
+        Self::new_element(D::Element::new(namespace, tag))
     }
 
     fn new_element(element: D::Element) -> Self {
@@ -738,15 +738,16 @@ pub enum Namespace {
     /// New elements in the `Html` namespace are created with `create_element`,
     /// thus avoiding converting the namespace to a javascript string.
     Html,
-    Other(Option<&'static str>),
+    Svg,
+    Other(&'static str),
 }
 
 impl Namespace {
     pub fn as_str(&self) -> &str {
         match self {
             Namespace::Html => "http://www.w3.org/1999/xhtml",
-            Namespace::Other(None) => "",
-            Namespace::Other(Some(ns)) => ns,
+            Namespace::Svg => "http://www.w3.org/2000/svg",
+            Namespace::Other(ns) => ns,
         }
     }
 }

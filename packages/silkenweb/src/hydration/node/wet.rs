@@ -19,7 +19,7 @@ impl WetElement {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         let dom_element = match namespace {
             Namespace::Html => document::create_element(tag),
-            Namespace::Other(ns) => document::create_element_ns(ns.map(intern_str), tag),
+            _ => document::create_element_ns(intern_str(namespace.as_str()), tag),
         };
         Self::new_from_element(dom_element)
     }
