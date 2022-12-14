@@ -75,11 +75,11 @@ pub fn tag_in_namespace<D: Dom>(namespace: Namespace, name: &str) -> GenericElem
 }
 
 impl<D: Dom> GenericElement<D> {
-    fn new(tag: &str) -> Self {
+    pub fn new(tag: &str) -> Self {
         Self::new_element(D::Element::new(Namespace::Html, tag))
     }
 
-    fn new_in_namespace(namespace: Namespace, tag: &str) -> Self {
+    pub fn new_in_namespace(namespace: Namespace, tag: &str) -> Self {
         Self::new_element(D::Element::new(namespace, tag))
     }
 
