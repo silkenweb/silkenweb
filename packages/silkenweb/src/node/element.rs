@@ -731,7 +731,8 @@ impl<DomType: JsCast + Clone> ElementHandle<DomType> {
     ///
     /// This will panic if [`Self::try_dom_element`] would return [`None`].
     pub fn dom_element(&self) -> DomType {
-        self.try_dom_element().expect("Dom type doesn't support element handles")
+        self.try_dom_element()
+            .expect("Dom type doesn't support element handles")
     }
 }
 

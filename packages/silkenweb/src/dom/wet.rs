@@ -41,7 +41,12 @@ impl DomElement for WetElement {
         self.element.append_child(child.dom_node()).unwrap_throw();
     }
 
-    fn insert_child_before(&mut self, _index: usize, child: &WetNode, next_child: Option<&WetNode>) {
+    fn insert_child_before(
+        &mut self,
+        _index: usize,
+        child: &WetNode,
+        next_child: Option<&WetNode>,
+    ) {
         self.element
             .insert_before(child.dom_node(), next_child.map(|c| c.dom_node()))
             .unwrap_throw();
