@@ -196,21 +196,13 @@ macro_rules! dom_element {
             $camel_name::new()
         }
 
-        pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> {
-            elem: $crate::node::element::GenericElement<Dom>,
-            phantom: ::std::marker::PhantomData<Dom>,
-        }
+        pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
+            $crate::node::element::GenericElement<Dom>
+        );
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
             pub fn new() -> Self {
-                Self::from_elem($crate::create_element_fn!($($namespace, )? $text_name))
-            }
-
-            fn from_elem(elem: $crate::node::element::GenericElement<Dom>) -> Self {
-                Self {
-                    elem,
-                    phantom: ::std::marker::PhantomData
-                }
+                Self($crate::create_element_fn!($($namespace, )? $text_name))
             }
 
             $crate::attributes![
@@ -252,16 +244,16 @@ macro_rules! dom_element {
             InitParam: 'static
         {
             pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
-                $camel_name::from_elem(self.elem.instantiate(param))
+                $camel_name(self.0.instantiate(param))
             }
 
             pub fn on_instantiate(
                 self,
                 f: impl 'static + Fn($camel_name<Dom>, &InitParam) -> $camel_name<Dom>,
             ) -> Self {
-                $camel_name::from_elem(self.elem.on_instantiate(
+                $camel_name(self.0.on_instantiate(
                     move |elem, param| {
-                        f($camel_name::from_elem(elem), param).elem
+                        f($camel_name(elem), param).0
                     }
                 ))
             }
@@ -274,7 +266,7 @@ macro_rules! dom_element {
             where
                 T: 'a + AsRef<str>
             {
-                Self::from_elem(self.elem.class(class))
+                Self(self.0.class(class))
             }
 
             fn classes<'a, T, Iter>(
@@ -285,7 +277,7 @@ macro_rules! dom_element {
                     T: 'a + AsRef<str>,
                     Iter: 'a + IntoIterator<Item = T>,
             {
-                Self::from_elem(self.elem.classes(classes))
+                Self(self.0.classes(classes))
             }
 
             fn attribute<'a>(
@@ -293,11 +285,11 @@ macro_rules! dom_element {
                 name: &str,
                 value: impl $crate::value::RefSignalOrValue<'a, Item = impl $crate::attribute::Attribute>
             ) -> Self {
-                Self::from_elem(self.elem.attribute(name, value))
+                Self(self.0.attribute(name, value))
             }
 
             fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
-                Self::from_elem(self.elem.effect(|elem| {
+                Self(self.0.effect(|elem| {
                     f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))
                 }))
             }
@@ -307,7 +299,7 @@ macro_rules! dom_element {
                 sig: impl $crate::macros::Signal<Item = T> + 'static,
                 f: impl Fn(&Self::DomType, T) + Clone + 'static,
             ) -> Self {
-                Self::from_elem(self.elem.effect_signal(
+                Self(self.0.effect_signal(
                     sig,
                     move |elem, signal| {
                         f(
@@ -319,11 +311,11 @@ macro_rules! dom_element {
             }
 
             fn handle(&self) -> $crate::node::element::ElementHandle<Self::DomType> {
-                self.elem.handle().cast()
+                self.0.handle().cast()
             }
 
             fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
-                Self::from_elem(self.elem.spawn_future(future))
+                Self(self.0.spawn_future(future))
             }
 
             fn on(
@@ -331,7 +323,7 @@ macro_rules! dom_element {
                 name: &'static str,
                 f: impl FnMut($crate::macros::JsValue) + 'static
             ) -> Self {
-                Self::from_elem($crate::node::element::Element::on(self.elem, name, f))
+                Self($crate::node::element::Element::on(self.0, name, f))
             }
         }
 
@@ -339,14 +331,14 @@ macro_rules! dom_element {
 
         impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>> for $crate::node::element::GenericElement<Dom> {
             fn from(elem: $camel_name<Dom>) -> Self {
-                elem.elem
+                elem.0
             }
         }
 
         impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>>
         for $crate::node::Node<Dom> {
             fn from(elem: $camel_name<Dom>) -> Self {
-                elem.elem.into()
+                elem.0.into()
             }
         }
 
@@ -399,7 +391,7 @@ macro_rules! parent_element {
             where
                 T: 'a + AsRef<str> + Into<String>
             {
-                Self::from_elem(self.elem.text(child))
+                Self(self.0.text(child))
             }
 
             fn child(
@@ -407,7 +399,7 @@ macro_rules! parent_element {
                 child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>
             ) -> Self
             {
-                Self::from_elem(self.elem.child(child))
+                Self(self.0.child(child))
             }
 
             fn optional_child(
@@ -415,14 +407,14 @@ macro_rules! parent_element {
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>>
             ) -> Self
             {
-                Self::from_elem(self.elem.optional_child(child))
+                Self(self.0.optional_child(child))
             }
 
             fn children_signal(
                 self,
                 children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node<Dom>>> + 'static,
             ) -> Self {
-                Self::from_elem(self.elem.children_signal(children))
+                Self(self.0.children_signal(children))
             }
         }
     }};
@@ -440,7 +432,7 @@ macro_rules! shadow_parent_element {
                     self,
                     children: impl IntoIterator<Item = impl Into<$crate::node::Node<Dom>>> + 'static
                 ) -> Self {
-                    [< $name:camel >] ::from_elem(self.elem.attach_shadow_children(children))
+                    [< $name:camel >] (self.0.attach_shadow_children(children))
                 }
             }
         }
