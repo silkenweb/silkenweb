@@ -193,8 +193,8 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
     //     stats.node_added(&new_elem);
     //     mount_point.append_child(&new_elem).unwrap_throw();
     // }
-
-    insert_component(id, mount_point.into(), node);
+    //
+    // insert_component(id, mount_point.into(), node);
 
     stats
 }

@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     elements::{
-        html::{button, div, p},
+        html::{button, div, p, Div, Button, P},
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
@@ -9,7 +9,7 @@ use silkenweb::{
     prelude::ParentElement,
     task::render_now,
     unmount,
-    value::Sig,
+    value::Sig, dom::dry::Dry,
 };
 use wasm_bindgen_test::wasm_bindgen_test;
 
@@ -18,7 +18,7 @@ use crate::{app_html, create_app_container, query_element, APP_ID};
 #[wasm_bindgen_test]
 async fn missing_text() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
-    let app = div().child(p().text("Hello, world!"));
+    let app = Div::new().child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -40,7 +40,7 @@ async fn blank_text() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = Div::new().child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -58,7 +58,7 @@ async fn extra_child() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = Div::new().child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -76,7 +76,7 @@ async fn mismatched_element() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = Div::new().child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -94,7 +94,7 @@ async fn extra_attribute() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = Div::new().child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -112,7 +112,7 @@ async fn missing_attribute() {
     )
     .await;
 
-    let app = div().id("0").child(p().text("Hello, world!"));
+    let app = Div::new().id("0").child(P::new().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -140,10 +140,10 @@ async fn event() {
 
     hydrate(
         APP_ID,
-        div()
+        Div::new()
             .id(COUNTER_ID)
             .child(
-                button()
+                Button::new()
                     .id(BUTTON_ID)
                     .on_click(move |_, _| {
                         count.replace_with(|i| *i + 1);
@@ -172,7 +172,7 @@ async fn event() {
 async fn basic_signal() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = div().child(p().text(Sig(text.signal())));
+    let app = Div::new().child(P::new().text(Sig(text.signal())));
 
     render_now().await;
     hydrate(APP_ID, app).await;
@@ -195,7 +195,7 @@ async fn app_container(id: &str, inner_html: &str) {
     query_element(id).set_inner_html(inner_html);
 }
 
-async fn test_hydrate(id: &str, app: impl Into<Node>, expected_html: &str) {
+async fn test_hydrate(id: &str, app: impl Into<Node<Dry>>, expected_html: &str) {
     render_now().await;
     hydrate(id, app).await;
 
