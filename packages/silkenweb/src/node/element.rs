@@ -431,7 +431,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn handle(&self) -> ElementHandle<Self::DomType> {
-        ElementHandle(todo!(), PhantomData)
+        ElementHandle(self.element.dom_element()).cast()
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
@@ -713,17 +713,16 @@ pub(super) enum Resource<D: Dom> {
 /// This acts as a weak reference to the element. See [`Element::handle`]
 /// for an example.
 #[derive(Clone)]
-pub struct ElementHandle<DomType>(WeakHydrationElement, PhantomData<DomType>);
+pub struct ElementHandle<DomType>(Option<DomType>);
 
-impl<DomType: JsCast> ElementHandle<DomType> {
+// TODO: Docs
+impl<DomType: JsCast + Clone> ElementHandle<DomType> {
     /// Get the associated DOM element, if the referenced element is still live.
     ///
     /// If the referenced element is neither in the DOM, or referenced from the
     /// stack, this will return [`None`].
     pub fn try_dom_element(&self) -> Option<DomType> {
-        self.0
-            .try_eval_dom_element()
-            .map(|elem| elem.dyn_into().unwrap())
+        self.0.clone()
     }
 
     /// Get the associated DOM element, or panic.
@@ -732,8 +731,7 @@ impl<DomType: JsCast> ElementHandle<DomType> {
     ///
     /// This will panic if [`Self::try_dom_element`] would return [`None`].
     pub fn dom_element(&self) -> DomType {
-        self.try_dom_element()
-            .expect("Referenced element no longer exists")
+        self.try_dom_element().expect("Dom type doesn't support element handles")
     }
 }
 
@@ -742,6 +740,6 @@ impl ElementHandle<web_sys::Element> {
     ///
     /// It is the clients responsibility to ensure the new type is correct.
     pub fn cast<T: JsCast>(self) -> ElementHandle<T> {
-        ElementHandle(self.0, PhantomData)
+        ElementHandle(self.0.map(|elem| elem.unchecked_into()))
     }
 }

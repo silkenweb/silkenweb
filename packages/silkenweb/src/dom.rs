@@ -43,6 +43,8 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static);
 
+    fn dom_element(&self) -> Option<web_sys::Element>;
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
 }
 

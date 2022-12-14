@@ -114,6 +114,10 @@ where
         self.element.on(name, f)
     }
 
+    fn dom_element(&self) -> Option<web_sys::Element> {
+        self.element.dom_element()
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
     }

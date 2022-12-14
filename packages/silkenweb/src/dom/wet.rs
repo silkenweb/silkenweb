@@ -87,6 +87,10 @@ impl DomElement for WetElement {
             .unwrap_throw();
     }
 
+    fn dom_element(&self) -> Option<web_sys::Element> {
+        Some(self.element.clone())
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));
