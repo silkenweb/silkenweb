@@ -1,8 +1,6 @@
 //! Generic DOM types.
 
-use std::{
-    fmt::{self, Display},
-};
+use std::fmt::{self, Display};
 
 use silkenweb_signals_ext::value::Value;
 
@@ -28,7 +26,7 @@ impl<D: Dom> Node<D> {
 }
 
 impl Node<Wet> {
-    pub fn dom_node(&self) -> &web_sys::Node {
+    pub(super) fn dom_node(&self) -> &web_sys::Node {
         self.node.dom_node()
     }
 }
