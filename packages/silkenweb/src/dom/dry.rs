@@ -116,6 +116,8 @@ impl DomElement for DryElement {
         shared.children.clear();
     }
 
+    fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Self::Node>) {}
+
     fn add_class(&mut self, name: &str) {
         self.borrow_mut()
             .attributes

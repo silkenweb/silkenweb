@@ -259,21 +259,9 @@ impl<D: Dom> ShadowRootParent<D> for GenericElement<D> {
         self,
         children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
     ) -> Self {
-        // We can only implement this for the real DOM when we get Declarative
-        // Shadow Root, so we use an effect.
-        self.effect(move |elem| {
-            let shadow_root = elem.shadow_root().unwrap_or_else(|| {
-                elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                    .unwrap_throw()
-            });
-
-            for child in children {
-                // TODO: hydrate the child
-                // shadow_root
-                //     .append_child(child.into().dom_node())
-                //     .unwrap_throw();
-            }
-        })
+        self.element
+            .attach_shadow_children(children.into_iter().map(|child| child.into().into_node()));
+        self
     }
 }
 

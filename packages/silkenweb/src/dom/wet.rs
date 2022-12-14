@@ -1,5 +1,6 @@
 use silkenweb_base::{document, intern_str};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
@@ -64,6 +65,18 @@ impl DomElement for WetElement {
 
     fn clear_children(&mut self) {
         self.element.set_text_content(Some(""))
+    }
+
+    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
+        let elem = &self.element;
+        let shadow_root = elem.shadow_root().unwrap_or_else(|| {
+            elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                .unwrap_throw()
+        });
+
+        for child in children {
+            shadow_root.append_child(child.dom_node()).unwrap_throw();
+        }
     }
 
     fn add_class(&mut self, name: &str) {

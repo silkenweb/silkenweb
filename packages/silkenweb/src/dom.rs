@@ -38,6 +38,8 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
 
     fn clear_children(&mut self);
 
+    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>);
+
     fn add_class(&mut self, name: &str);
 
     fn remove_class(&mut self, name: &str);
