@@ -121,7 +121,7 @@ impl<D: Dom> ChildVec<D> {
             let mut parent = self.parent.clone();
             let children = mem::take(&mut self.children);
 
-            for (index, child) in children.into_iter().enumerate() {
+            for (index, child) in children.into_iter().enumerate().rev() {
                 parent.remove_child(index + self.static_child_count, child.as_node());
             }
         } else {
