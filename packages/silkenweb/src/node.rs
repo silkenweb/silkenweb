@@ -2,7 +2,6 @@
 
 use std::{
     fmt::{self, Display},
-    mem,
 };
 
 use silkenweb_signals_ext::value::Value;
@@ -25,10 +24,6 @@ impl<D: Dom> Node<D> {
 
     fn into_node(self) -> D::Node {
         self.node
-    }
-
-    fn take_resources(&mut self) -> Vec<Resource<D>> {
-        mem::take(&mut self.resources)
     }
 }
 

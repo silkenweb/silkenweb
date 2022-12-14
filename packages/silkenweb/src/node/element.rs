@@ -197,10 +197,10 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
             |parent, child| {
                 if let Some(child) = child {
                     parent.static_child_count += 1;
-                    let mut child = child.into();
+                    let child = child.into();
 
                     parent.element.append_child(child.as_node());
-                    parent.resources.extend(child.take_resources());
+                    parent.resources.extend(child.resources);
                 }
             },
             |parent, child| parent.child_builder_mut().optional_child(Sig(child)),
