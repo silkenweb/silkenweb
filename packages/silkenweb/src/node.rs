@@ -48,7 +48,7 @@ impl Node<Dry> {
     pub(super) fn into_wet(self) -> Node<Wet> {
         Node {
             node: self.node.into_wet(),
-            resources: todo!(),
+            resources: self.resources,
         }
     }
 }
