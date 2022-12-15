@@ -177,12 +177,6 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     where
         T: 'a + AsRef<str> + Into<String>,
     {
-        fn text_value<D: Dom>(parent: &mut GenericElement<D>, child: impl AsRef<str>) {
-            parent
-                .element
-                .append_child(&D::Text::new(child.as_ref()).into());
-        }
-
         if let Some(child_builder) = self.child_builder.as_mut() {
             child_builder.child(child.map(|child| text(child.as_ref())));
             return self;
@@ -191,7 +185,11 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         self.static_child_count += 1;
 
         child.for_each(
-            text_value,
+            |parent, child| {
+                parent
+                    .element
+                    .append_child(&D::Text::new(child.as_ref()).into());
+            },
             |parent| {
                 let mut text_node = D::Text::new(empty_str());
                 parent.element.append_child(&text_node.clone().into());
