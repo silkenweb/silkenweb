@@ -110,7 +110,8 @@ impl DryElement {
 }
 
 enum SharedDryElement {
-    Dry(DryData),
+    /// Box is used to keep the enum variant small
+    Dry(Box<DryData>),
     Wet(WetElement),
     /// Used only for swapping from `Dry` to `Wet`
     Unreachable,
@@ -131,14 +132,14 @@ impl DomElement for DryElement {
     type Node = DryNode;
 
     fn new(namespace: Namespace, tag: &str) -> Self {
-        Self::from_shared(SharedDryElement::Dry(DryData {
+        Self::from_shared(SharedDryElement::Dry(Box::new(DryData {
             namespace,
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
             children: Vec::new(),
             hydrate_actions: Vec::new(),
             next_sibling: None,
-        }))
+        })))
     }
 
     fn append_child(&mut self, child: &DryNode) {
@@ -323,14 +324,14 @@ impl InstantiableDomElement for DryElement {
                     child.set_next_sibling(children.get(index + 1));
                 }
 
-                SharedDryElement::Dry(DryData {
+                SharedDryElement::Dry(Box::new(DryData {
                     namespace: dry.namespace,
                     tag: dry.tag.clone(),
                     attributes: dry.attributes.clone(),
                     children,
                     hydrate_actions: Vec::new(),
                     next_sibling: None,
-                })
+                }))
             }
             SharedDryElement::Wet(wet) => SharedDryElement::Wet(wet.clone_node()),
             SharedDryElement::Unreachable => unreachable!(),
