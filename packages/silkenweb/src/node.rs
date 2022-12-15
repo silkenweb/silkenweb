@@ -15,7 +15,7 @@ pub mod element;
 /// A DOM Node
 pub struct Node<D: Dom = DefaultDom> {
     node: D::Node,
-    resources: Vec<Resource<D>>,
+    resources: Vec<Resource>,
 }
 
 impl<D: Dom> Node<D> {

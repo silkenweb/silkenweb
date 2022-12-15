@@ -51,7 +51,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     child_builder: Option<Box<ChildBuilder<D>>>,
-    resources: Vec<Resource<D>>,
+    resources: Vec<Resource>,
     element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -112,14 +112,10 @@ impl<D: Dom> GenericElement<D> {
         if let Some(children) = self.child_vec.take() {
             assert!(self.child_builder.is_none());
 
-            let child_vec = Rc::new(RefCell::new(ChildVec::new(
-                self.element.clone(),
-                self.static_child_count,
-            )));
-            self.resources.push(Resource::ChildVec(child_vec.clone()));
+            let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
 
             let updater = children.for_each(move |update| {
-                child_vec.borrow_mut().apply_update(update);
+                child_vec.apply_update(update);
                 async {}
             });
 
@@ -661,8 +657,7 @@ fn spawn_cancelable_future(
 /// The signal futures will end once they've yielded their last value, so we
 /// can't rely on the futures to hold resources via closure captures. Hence the
 /// other resource types. For example, `always` will yield a value, then finish.
-pub(super) enum Resource<D: Dom> {
-    ChildVec(Rc<RefCell<ChildVec<D>>>),
+pub(super) enum Resource {
     Future(DiscardOnDrop<CancelableFutureHandle>),
 }
 
