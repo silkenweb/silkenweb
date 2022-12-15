@@ -87,8 +87,7 @@ impl<D: Dom> GenericElement<D> {
 
     fn build_children(&mut self) {
         if let Some(child_builder) = self.child_builder.take() {
-            self.resources
-                .extend(child_builder.futures.into_iter().map(Resource::Future));
+            self.resources.extend(child_builder.futures);
 
             let existing_children = child_builder
                 .items
@@ -401,8 +400,7 @@ impl<D: Dom> Element for GenericElement<D> {
 
 impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.resources
-            .push(Resource::Future(spawn_cancelable_future(future)));
+        self.resources.push(spawn_cancelable_future(future));
     }
 }
 
@@ -657,9 +655,7 @@ fn spawn_cancelable_future(
 /// The signal futures will end once they've yielded their last value, so we
 /// can't rely on the futures to hold resources via closure captures. Hence the
 /// other resource types. For example, `always` will yield a value, then finish.
-pub(super) enum Resource {
-    Future(DiscardOnDrop<CancelableFutureHandle>),
-}
+pub(super) type Resource = DiscardOnDrop<CancelableFutureHandle>;
 
 /// A handle to an element in the DOM.
 ///
