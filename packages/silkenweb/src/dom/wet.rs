@@ -107,8 +107,8 @@ impl DomElement for WetElement {
             .unwrap_throw();
     }
 
-    fn dom_element(&self) -> Option<web_sys::Element> {
-        Some(self.element.clone())
+    fn try_dom_element(&self) -> Option<&web_sys::Element> {
+        Some(&self.element)
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -171,11 +171,11 @@ impl InstantiableDomNode for WetNode {
     }
 
     fn first_child(&self) -> Self {
-        Self(self.0.first_child().unwrap())
+        Self(self.0.first_child().unwrap_throw())
     }
 
     fn next_sibling(&self) -> Self {
-        Self(self.0.next_sibling().unwrap())
+        Self(self.0.next_sibling().unwrap_throw())
     }
 }
 

@@ -361,7 +361,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn handle(&self) -> ElementHandle<Self::DomType> {
-        ElementHandle(self.element.dom_element()).cast()
+        ElementHandle(self.element.try_dom_element().cloned()).cast()
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {

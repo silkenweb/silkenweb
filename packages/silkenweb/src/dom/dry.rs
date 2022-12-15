@@ -10,8 +10,8 @@ use itertools::Itertools;
 use wasm_bindgen::JsValue;
 
 use super::{
-    wet::{WetElement, WetNode}, Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement,
-    InstantiableDomNode,
+    wet::{WetElement, WetNode},
+    Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
 use crate::node::element::Namespace;
 
@@ -28,30 +28,36 @@ impl InstantiableDom for Dry {
     type InstantiableNode = DryNode;
 }
 
+// TODO: Come up with better names than wet and dry. "Fresh" for wet? "Dry"
+// represents either wet or dry really.
 #[derive(Clone)]
 pub struct DryElement(Rc<RefCell<SharedDryElement>>);
 
 impl fmt::Display for DryElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let shared = self.borrow();
+        match &*self.borrow() {
+            SharedDryElement::Dry(dry) => {
+                write!(f, "<{}", dry.tag)?;
 
-        write!(f, "<{}", shared.tag)?;
+                for (name, value) in &dry.attributes {
+                    write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+                }
 
-        for (name, value) in &shared.attributes {
-            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
-        }
+                f.write_str(">")?;
 
-        f.write_str(">")?;
+                for child in &dry.children {
+                    child.fmt(f)?;
+                }
 
-        for child in &shared.children {
-            child.fmt(f)?;
-        }
+                let has_children = !dry.children.is_empty();
+                let requires_closing_tag = !NO_CLOSING_TAG.contains(&dry.tag.as_str());
 
-        let has_children = !shared.children.is_empty();
-        let requires_closing_tag = !NO_CLOSING_TAG.contains(&shared.tag.as_str());
-
-        if requires_closing_tag || has_children {
-            write!(f, "</{}>", shared.tag)?;
+                if requires_closing_tag || has_children {
+                    write!(f, "</{}>", dry.tag)?;
+                }
+            }
+            SharedDryElement::Wet(wet) => f.write_str(&wet.dom_element().outer_html())?,
+            SharedDryElement::Unreachable => (),
         }
 
         Ok(())
@@ -64,6 +70,36 @@ const NO_CLOSING_TAG: &[&str] = &[
 ];
 
 impl DryElement {
+    fn from_shared(shared: SharedDryElement) -> Self {
+        Self(Rc::new(RefCell::new(shared)))
+    }
+
+    fn first_child(&self) -> DryNode {
+        match &*self.borrow() {
+            SharedDryElement::Dry(dry) => dry.children.first().unwrap().clone(),
+            SharedDryElement::Wet(wet) => DryNode::Wet(WetNode::from(wet.clone()).first_child()),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
+    }
+
+    fn next_sibling(&self) -> DryNode {
+        match &*self.borrow() {
+            SharedDryElement::Dry(dry) => {
+                dry.next_sibling.as_ref().expect("No more siblings").clone()
+            }
+            SharedDryElement::Wet(wet) => DryNode::Wet(WetNode::from(wet.clone()).next_sibling()),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
+    }
+
+    fn set_next_sibling(&self, next_sibling: Option<DryNode>) {
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => dry.next_sibling = next_sibling,
+            SharedDryElement::Wet(_) => (),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
+    }
+
     fn borrow(&self) -> Ref<SharedDryElement> {
         self.0.as_ref().borrow()
     }
@@ -73,7 +109,14 @@ impl DryElement {
     }
 }
 
-struct SharedDryElement {
+enum SharedDryElement {
+    Dry(DryData),
+    Wet(WetElement),
+    /// Used only for swapping from `Dry` to `Wet`
+    Unreachable,
+}
+
+struct DryData {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
@@ -88,96 +131,138 @@ impl DomElement for DryElement {
     type Node = DryNode;
 
     fn new(namespace: Namespace, tag: &str) -> Self {
-        Self(Rc::new(RefCell::new(SharedDryElement {
+        Self::from_shared(SharedDryElement::Dry(DryData {
             namespace,
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
             children: Vec::new(),
             hydrate_actions: Vec::new(),
             next_sibling: None,
-        })))
+        }))
     }
 
     fn append_child(&mut self, child: &DryNode) {
-        let mut shared = self.borrow_mut();
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                if let Some(last) = dry.children.last_mut() {
+                    last.set_next_sibling(Some(child));
+                }
 
-        if let Some(last) = shared.children.last_mut() {
-            last.set_next_sibling(Some(child));
+                dry.children.push(child.clone());
+            }
+            SharedDryElement::Wet(wet) => {
+                wet.append_child(&child.wet());
+            }
+            SharedDryElement::Unreachable => unreachable!(),
         }
-
-        shared.children.push(child.clone());
     }
 
     fn insert_child_before(&mut self, index: usize, child: &DryNode, next_child: Option<&DryNode>) {
-        let mut shared = self.borrow_mut();
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                if index > 0 {
+                    dry.children[index - 1].set_next_sibling(Some(child));
+                }
 
-        if index > 0 {
-            shared.children[index - 1].set_next_sibling(Some(child));
+                child.set_next_sibling(next_child);
+
+                dry.children.insert(index, child.clone());
+            }
+            SharedDryElement::Wet(wet) => {
+                wet.insert_child_before(index, &child.wet(), next_child.map(|c| c.wet()).as_ref());
+            }
+            SharedDryElement::Unreachable => unreachable!(),
         }
-
-        child.set_next_sibling(next_child);
-
-        shared.children.insert(index, child.clone());
     }
 
     fn replace_child(&mut self, index: usize, new_child: &DryNode, old_child: &DryNode) {
-        old_child.set_next_sibling(None);
-        let mut shared = self.borrow_mut();
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                old_child.set_next_sibling(None);
 
-        if index > 0 {
-            shared.children[index - 1].set_next_sibling(Some(new_child));
+                if index > 0 {
+                    dry.children[index - 1].set_next_sibling(Some(new_child));
+                }
+
+                new_child.set_next_sibling(dry.children.get(index + 1));
+
+                dry.children[index] = new_child.clone();
+            }
+            SharedDryElement::Wet(wet) => {
+                wet.replace_child(index, &new_child.wet(), &old_child.wet());
+            }
+            SharedDryElement::Unreachable => unreachable!(),
         }
-
-        new_child.set_next_sibling(shared.children.get(index + 1));
-
-        shared.children[index] = new_child.clone();
     }
 
     fn remove_child(&mut self, index: usize, child: &DryNode) {
-        child.set_next_sibling(None);
-        let mut shared = self.borrow_mut();
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                child.set_next_sibling(None);
+                if index > 0 {
+                    dry.children[index - 1].set_next_sibling(dry.children.get(index + 1));
+                }
 
-        if index > 0 {
-            shared.children[index - 1].set_next_sibling(shared.children.get(index + 1));
+                dry.children.remove(index);
+            }
+            SharedDryElement::Wet(wet) => {
+                wet.remove_child(index, &child.wet());
+            }
+            SharedDryElement::Unreachable => unreachable!(),
         }
-
-        shared.children.remove(index);
     }
 
     fn clear_children(&mut self) {
-        let mut shared = self.borrow_mut();
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                for child in &dry.children {
+                    child.set_next_sibling(None);
+                }
 
-        for child in &shared.children {
-            child.set_next_sibling(None);
+                dry.children.clear();
+            }
+            SharedDryElement::Wet(wet) => {
+                wet.clear_children();
+            }
+            SharedDryElement::Unreachable => unreachable!(),
         }
-
-        shared.children.clear();
     }
 
     fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Self::Node>) {}
 
     fn add_class(&mut self, name: &str) {
-        self.borrow_mut()
-            .attributes
-            .entry("class".to_owned())
-            .and_modify(|class| {
-                if !class.split_ascii_whitespace().any(|c| c == name) {
-                    if !class.is_empty() {
-                        class.push(' ');
-                    }
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                dry.attributes
+                    .entry("class".to_owned())
+                    .and_modify(|class| {
+                        if !class.split_ascii_whitespace().any(|c| c == name) {
+                            if !class.is_empty() {
+                                class.push(' ');
+                            }
 
-                    class.push_str(name);
-                }
-            })
-            .or_insert_with(|| name.to_owned());
+                            class.push_str(name);
+                        }
+                    })
+                    .or_insert_with(|| name.to_owned());
+            }
+            SharedDryElement::Wet(wet) => wet.add_class(name),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
     }
 
     fn remove_class(&mut self, name: &str) {
-        if let Some(class) = self.borrow_mut().attributes.get_mut("class") {
-            *class = class
-                .split_ascii_whitespace()
-                .filter(|&c| c != name)
-                .join(" ");
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                if let Some(class) = dry.attributes.get_mut("class") {
+                    *class = class
+                        .split_ascii_whitespace()
+                        .filter(|&c| c != name)
+                        .join(" ");
+                }
+            }
+            SharedDryElement::Wet(wet) => wet.remove_class(name),
+            SharedDryElement::Unreachable => unreachable!(),
         }
     }
 
@@ -190,54 +275,70 @@ impl DomElement for DryElement {
             "\"xmlns\" must be set via a namespace at tag creation time"
         );
 
-        let mut shared = self.borrow_mut();
-
-        if let Some(value) = value.text() {
-            shared
-                .attributes
-                .insert(name.to_owned(), value.into_owned());
-        } else {
-            shared.attributes.remove(name);
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => {
+                if let Some(value) = value.text() {
+                    dry.attributes.insert(name.to_owned(), value.into_owned());
+                } else {
+                    dry.attributes.remove(name);
+                }
+            }
+            SharedDryElement::Wet(wet) => wet.attribute(name, value),
+            SharedDryElement::Unreachable => unreachable!(),
         }
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.borrow_mut()
-            .hydrate_actions
-            .push(Box::new(move |element| element.on(name, f)))
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => dry
+                .hydrate_actions
+                .push(Box::new(move |element| element.on(name, f))),
+            SharedDryElement::Wet(wet) => wet.on(name, f),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
     }
 
-    fn dom_element(&self) -> Option<web_sys::Element> {
-        None
+    fn try_dom_element(&self) -> Option<&web_sys::Element> {
+        todo!()
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.borrow_mut()
-            .hydrate_actions
-            .push(Box::new(move |element| element.effect(f)))
+        match &mut *self.borrow_mut() {
+            SharedDryElement::Dry(dry) => dry
+                .hydrate_actions
+                .push(Box::new(move |element| element.effect(f))),
+            SharedDryElement::Wet(wet) => wet.effect(f),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
     }
 }
 
 impl InstantiableDomElement for DryElement {
     fn clone_node(&self) -> Self {
-        let shared = self.borrow_mut();
-        let children = shared.children.clone();
+        Self::from_shared(match &*self.borrow() {
+            SharedDryElement::Dry(dry) => {
+                let children = dry.children.clone();
 
-        for (index, child) in children.iter().enumerate() {
-            child.set_next_sibling(children.get(index + 1));
-        }
+                for (index, child) in children.iter().enumerate() {
+                    child.set_next_sibling(children.get(index + 1));
+                }
 
-        Self(Rc::new(RefCell::new(SharedDryElement {
-            namespace: shared.namespace,
-            tag: shared.tag.clone(),
-            attributes: shared.attributes.clone(),
-            children,
-            hydrate_actions: Vec::new(),
-            next_sibling: None,
-        })))
+                SharedDryElement::Dry(DryData {
+                    namespace: dry.namespace,
+                    tag: dry.tag.clone(),
+                    attributes: dry.attributes.clone(),
+                    children,
+                    hydrate_actions: Vec::new(),
+                    next_sibling: None,
+                })
+            }
+            SharedDryElement::Wet(wet) => SharedDryElement::Wet(wet.clone_node()),
+            SharedDryElement::Unreachable => unreachable!(),
+        })
     }
 }
 
+// TODO: Make this have an enum with wet and dry parts
 #[derive(Clone)]
 pub struct DryText(Rc<RefCell<SharedDryText>>);
 
@@ -275,10 +376,17 @@ impl fmt::Display for DryText {
 pub enum DryNode {
     Text(DryText),
     Element(DryElement),
+    Wet(WetNode),
+    /// Used only for swapping from `Dry` to `Wet`
+    Unreachable,
 }
 
 impl DryNode {
     pub fn into_wet(self) -> WetNode {
+        self.wet()
+    }
+
+    pub fn wet(&self) -> WetNode {
         todo!()
     }
 
@@ -286,8 +394,10 @@ impl DryNode {
         let next_sibling = next_sibling.map(DryNode::clone);
 
         match self {
-            DryNode::Text(text) => text.borrow_mut().next_sibling = next_sibling,
-            DryNode::Element(element) => element.borrow_mut().next_sibling = next_sibling,
+            Self::Text(text) => text.borrow_mut().next_sibling = next_sibling,
+            Self::Element(element) => element.set_next_sibling(next_sibling),
+            Self::Wet(_) => (),
+            Self::Unreachable => unreachable!(),
         }
     }
 }
@@ -295,8 +405,10 @@ impl DryNode {
 impl fmt::Display for DryNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            DryNode::Text(text) => text.fmt(f),
-            DryNode::Element(elem) => elem.fmt(f),
+            Self::Text(text) => text.fmt(f),
+            Self::Element(elem) => elem.fmt(f),
+            Self::Wet(wet) => wet.fmt(f),
+            Self::Unreachable => unreachable!(),
         }
     }
 }
@@ -308,32 +420,32 @@ impl InstantiableDomNode for DryNode {
         match self {
             Self::Element(element) => element,
             Self::Text(_) => panic!("Type is `Text`, not `Element`"),
+            Self::Wet(node) => DryElement::from_shared(SharedDryElement::Wet(node.into_element())),
+            Self::Unreachable => unreachable!(),
         }
     }
 
     fn first_child(&self) -> Self {
         match self {
             Self::Text(_) => panic!("Text elements don't have children"),
-            Self::Element(element) => element.0.borrow().children.first().unwrap().clone(),
+            Self::Element(element) => element.first_child(),
+            Self::Wet(wet) => Self::Wet(wet.first_child()),
+            Self::Unreachable => unreachable!(),
         }
     }
 
     fn next_sibling(&self) -> Self {
         match self {
-            DryNode::Text(text) => text
+            Self::Text(text) => text
                 .0
                 .borrow()
                 .next_sibling
                 .as_ref()
                 .expect("No more siblings")
                 .clone(),
-            DryNode::Element(element) => element
-                .0
-                .borrow()
-                .next_sibling
-                .as_ref()
-                .expect("No more siblings")
-                .clone(),
+            Self::Element(element) => element.next_sibling(),
+            Self::Wet(wet) => Self::Wet(wet.next_sibling()),
+            Self::Unreachable => unreachable!(),
         }
     }
 }
