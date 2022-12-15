@@ -228,9 +228,9 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, node::element::ParentElement, prelude::ElementEvents, router::anchor,
+/// #     elements::html::{a, A}, node::element::ParentElement, prelude::ElementEvents, router::anchor,
 /// # };
-/// let link = anchor("/my-path").text("click me");
+/// let link: A = anchor("/my-path").text("click me");
 /// ```
 pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
     let path = path.into();
