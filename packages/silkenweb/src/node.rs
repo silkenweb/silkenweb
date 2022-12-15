@@ -2,9 +2,10 @@
 
 use std::fmt;
 
+use discard::DiscardOnDrop;
+use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
-use self::element::Resource;
 use crate::{
     dom::{dry::Dry, wet::Wet, DefaultDom, Dom, DomText},
     hydration::HydrationStats,
@@ -84,3 +85,6 @@ impl<D: Dom> Value for Text<D> {}
 pub fn text<D: Dom>(text: &str) -> Text<D> {
     Text(D::Text::new(text))
 }
+
+/// A resource that needs to be held
+type Resource = DiscardOnDrop<CancelableFutureHandle>;

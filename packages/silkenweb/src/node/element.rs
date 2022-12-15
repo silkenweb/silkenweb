@@ -12,13 +12,7 @@
 
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{
-    self,
-    cell::{Cell, RefCell},
-    future::Future,
-    pin::Pin,
-    rc::Rc,
-};
+use std::{self, cell::Cell, future::Future, pin::Pin, rc::Rc};
 
 use child_builder::ChildBuilder;
 use discard::DiscardOnDrop;
@@ -33,7 +27,7 @@ use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, SignalOrValu
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_vec::ChildVec, template::Template};
-use super::Node;
+use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{DefaultDom, Dom, DomElement, DomText, InstantiableDom},
@@ -649,13 +643,6 @@ fn spawn_cancelable_future(
 
     handle
 }
-
-/// A resource that needs to be held
-///
-/// The signal futures will end once they've yielded their last value, so we
-/// can't rely on the futures to hold resources via closure captures. Hence the
-/// other resource types. For example, `always` will yield a value, then finish.
-pub(super) type Resource = DiscardOnDrop<CancelableFutureHandle>;
 
 /// A handle to an element in the DOM.
 ///
