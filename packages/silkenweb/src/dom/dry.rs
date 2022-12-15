@@ -10,7 +10,7 @@ use itertools::Itertools;
 use wasm_bindgen::JsValue;
 
 use super::{
-    wet::{WetElement, WetNode},
+    wet::{WetElement, WetNode, WetText},
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
 use crate::node::element::Namespace;
@@ -343,32 +343,67 @@ impl InstantiableDomElement for DryElement {
 pub struct DryText(Rc<RefCell<SharedDryText>>);
 
 impl DryText {
+    fn borrow(&self) -> Ref<SharedDryText> {
+        self.0.as_ref().borrow()
+    }
+
     fn borrow_mut(&self) -> RefMut<SharedDryText> {
         self.0.as_ref().borrow_mut()
     }
+
+    fn next_sibling(&self) -> DryNode {
+        match &*self.borrow() {
+            SharedDryText::Dry { next_sibling, .. } => {
+                next_sibling.as_ref().expect("No more siblings").clone()
+            }
+            SharedDryText::Wet(wet) => DryNode::Wet(WetNode::from(wet.clone()).next_sibling()),
+            SharedDryText::Unreachable => unreachable!(),
+        }
+    }
+
+    fn set_next_sibling(&self, new_next_sibling: Option<DryNode>) {
+        match &mut *self.borrow_mut() {
+            SharedDryText::Dry { next_sibling, .. } => *next_sibling = new_next_sibling,
+            SharedDryText::Wet(_) => (),
+            SharedDryText::Unreachable => unreachable!(),
+        }
+    }
 }
 
-struct SharedDryText {
-    text: String,
-    next_sibling: Option<DryNode>,
+enum SharedDryText {
+    Dry {
+        text: String,
+        next_sibling: Option<DryNode>,
+    },
+    Wet(WetText),
+    /// Used for swapping `Dry` for `Wet`
+    Unreachable,
 }
 
 impl DomText for DryText {
     fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(SharedDryText {
+        Self(Rc::new(RefCell::new(SharedDryText::Dry {
             text: text.to_owned(),
             next_sibling: None,
         })))
     }
 
     fn set_text(&mut self, text: &str) {
-        self.0.as_ref().borrow_mut().text = text.to_string();
+        match &mut *self.borrow_mut() {
+            SharedDryText::Dry { text, .. } => *text = text.to_string(),
+            SharedDryText::Wet(wet) => wet.set_text(text),
+            SharedDryText::Unreachable => unreachable!(),
+        }
     }
 }
 
 impl fmt::Display for DryText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0.as_ref().borrow().text)
+        match &*self.borrow() {
+            SharedDryText::Dry { text, .. } => f.write_str(text),
+            SharedDryText::Wet(wet) => f.write_str(&wet.text()),
+            SharedDryText::Unreachable => unreachable!(),
+        }
     }
 }
 
@@ -394,7 +429,7 @@ impl DryNode {
         let next_sibling = next_sibling.map(DryNode::clone);
 
         match self {
-            Self::Text(text) => text.borrow_mut().next_sibling = next_sibling,
+            Self::Text(text) => text.set_next_sibling(next_sibling),
             Self::Element(element) => element.set_next_sibling(next_sibling),
             Self::Wet(_) => (),
             Self::Unreachable => unreachable!(),
@@ -436,13 +471,7 @@ impl InstantiableDomNode for DryNode {
 
     fn next_sibling(&self) -> Self {
         match self {
-            Self::Text(text) => text
-                .0
-                .borrow()
-                .next_sibling
-                .as_ref()
-                .expect("No more siblings")
-                .clone(),
+            Self::Text(text) => text.next_sibling(),
             Self::Element(element) => element.next_sibling(),
             Self::Wet(wet) => Self::Wet(wet.next_sibling()),
             Self::Unreachable => unreachable!(),
