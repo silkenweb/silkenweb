@@ -180,13 +180,13 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                 if let Some(child) = child {
                     if parent.child_vec.is_some() {
                         return parent.children_signal(always(vec![child]));
-                    } else {
-                        parent.static_child_count += 1;
-                        let child = child.into();
-
-                        parent.element.append_child(child.as_node());
-                        parent.resources.extend(child.resources);
                     }
+
+                    parent.static_child_count += 1;
+                    let child = child.into();
+
+                    parent.element.append_child(child.as_node());
+                    parent.resources.extend(child.resources);
                 }
 
                 parent
