@@ -5,7 +5,10 @@ use std::fmt;
 use silkenweb_signals_ext::value::Value;
 
 use self::element::Resource;
-use crate::dom::{wet::Wet, DefaultDom, Dom, DomText};
+use crate::{
+    dom::{dry::Dry, wet::Wet, DefaultDom, Dom, DomText},
+    hydration::HydrationStats,
+};
 
 pub mod element;
 
@@ -28,6 +31,24 @@ impl<D: Dom> Node<D> {
 impl Node<Wet> {
     pub(super) fn dom_node(&self) -> &web_sys::Node {
         self.node.dom_node()
+    }
+}
+
+impl Node<Dry> {
+    pub(super) fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> Node<Wet> {
+        todo!()
+    }
+
+    pub(super) fn into_wet(self) -> Node<Wet> {
+        Node {
+            node: self.node.into_wet(),
+            resources: todo!(),
+        }
     }
 }
 

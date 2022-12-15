@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{dom::dry::Dry, mount_point, node::Node};
+use crate::{dom::dry::Dry, insert_component, mount_point, node::Node};
 
 pub(super) mod lazy;
 pub(super) mod node;
@@ -182,19 +182,20 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
 
     let mount_point = mount_point(id);
 
-    // TODO: Hydration
-    // if let Some(hydration_point) = mount_point.first_child() {
-    //     let node: web_sys::Node = node.hydrate_child(&mount_point,
-    // &hydration_point, &mut stats);
+    let wet_node = if let Some(hydration_point) = mount_point.first_child() {
+        let wet_node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
 
-    //     remove_following_siblings(&mount_point, node.next_sibling());
-    // } else {
-    //     let new_elem = node.eval_dom_node();
-    //     stats.node_added(&new_elem);
-    //     mount_point.append_child(&new_elem).unwrap_throw();
-    // }
-    //
-    // insert_component(id, mount_point.into(), node);
+        remove_following_siblings(&mount_point, wet_node.dom_node().next_sibling());
+        wet_node
+    } else {
+        let wet_node = node.into_wet();
+        let new_node = wet_node.dom_node();
+        stats.node_added(new_node);
+        mount_point.append_child(new_node).unwrap_throw();
+        wet_node
+    };
+
+    insert_component(id, mount_point.into(), wet_node);
 
     stats
 }

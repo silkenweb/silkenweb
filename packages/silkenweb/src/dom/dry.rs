@@ -10,7 +10,7 @@ use itertools::Itertools;
 use wasm_bindgen::JsValue;
 
 use super::{
-    wet::WetElement, Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement,
+    wet::{WetElement, WetNode}, Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement,
     InstantiableDomNode,
 };
 use crate::node::element::Namespace;
@@ -278,6 +278,10 @@ pub enum DryNode {
 }
 
 impl DryNode {
+    pub fn into_wet(self) -> WetNode {
+        todo!()
+    }
+
     fn set_next_sibling(&self, next_sibling: Option<&DryNode>) {
         let next_sibling = next_sibling.map(DryNode::clone);
 
