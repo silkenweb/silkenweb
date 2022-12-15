@@ -111,13 +111,13 @@ impl DryElement {
 
 enum SharedDryElement {
     /// Box is used to keep the enum variant small
-    Dry(Box<DryData>),
+    Dry(Box<DryElementData>),
     Wet(WetElement),
     /// Used only for swapping from `Dry` to `Wet`
     Unreachable,
 }
 
-struct DryData {
+struct DryElementData {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
@@ -132,7 +132,7 @@ impl DomElement for DryElement {
     type Node = DryNode;
 
     fn new(namespace: Namespace, tag: &str) -> Self {
-        Self::from_shared(SharedDryElement::Dry(Box::new(DryData {
+        Self::from_shared(SharedDryElement::Dry(Box::new(DryElementData {
             namespace,
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
@@ -324,7 +324,7 @@ impl InstantiableDomElement for DryElement {
                     child.set_next_sibling(children.get(index + 1));
                 }
 
-                SharedDryElement::Dry(Box::new(DryData {
+                SharedDryElement::Dry(Box::new(DryElementData {
                     namespace: dry.namespace,
                     tag: dry.tag.clone(),
                     attributes: dry.attributes.clone(),
