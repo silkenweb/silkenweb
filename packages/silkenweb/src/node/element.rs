@@ -14,16 +14,15 @@
 use std::collections::HashSet;
 use std::{self, cell::Cell, future::Future, pin::Pin, rc::Rc};
 
-use child_builder::ChildBuilder;
 use discard::DiscardOnDrop;
 use futures_signals::{
     cancelable_future,
     signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
+    signal_vec::{always, SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
 use silkenweb_base::{clone, empty_str, intern_str};
-use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, Sig, SignalOrValue, Value};
+use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::{child_vec::ChildVec, template::Template};
@@ -35,7 +34,6 @@ use crate::{
     task,
 };
 
-mod child_builder;
 mod child_vec;
 
 pub mod template;
@@ -44,7 +42,6 @@ pub mod template;
 pub struct GenericElement<D: Dom = DefaultDom> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
-    child_builder: Option<Box<ChildBuilder<D>>>,
     resources: Vec<Resource>,
     element: D::Element,
     #[cfg(debug_assertions)]
@@ -60,17 +57,11 @@ impl<D: Dom> GenericElement<D> {
         Self {
             static_child_count: 0,
             child_vec: None,
-            child_builder: None,
             resources: Vec::new(),
             element: D::Element::new(namespace, tag),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
-    }
-
-    fn child_builder_mut(&mut self) -> &mut ChildBuilder<D> {
-        self.child_builder
-            .get_or_insert_with(|| Box::new(ChildBuilder::new()))
     }
 
     fn check_attribute_unique(&mut self, name: &str) {
@@ -79,32 +70,8 @@ impl<D: Dom> GenericElement<D> {
         let _ = name;
     }
 
-    fn build_children(&mut self) {
-        if let Some(child_builder) = self.child_builder.take() {
-            self.resources.extend(child_builder.futures);
-
-            let existing_children = child_builder
-                .items
-                .borrow()
-                .signal_vec_cloned()
-                .filter_map(|e| e.borrow_mut().take());
-
-            let boxed_children = if let Some(existing_child_vec) = self.child_vec.take() {
-                existing_child_vec.chain(existing_children).boxed_local()
-            } else {
-                existing_children.boxed_local()
-            };
-
-            self.child_vec = Some(boxed_children);
-        }
-    }
-
     fn build(mut self) -> Self {
-        self.build_children();
-
         if let Some(children) = self.child_vec.take() {
-            assert!(self.child_builder.is_none());
-
             let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
 
             let updater = children.for_each(move |update| {
@@ -177,9 +144,8 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     where
         T: 'a + AsRef<str> + Into<String>,
     {
-        if let Some(child_builder) = self.child_builder.as_mut() {
-            child_builder.child(child.map(|child| text(child.as_ref())));
-            return self;
+        if self.child_vec.is_some() {
+            return self.child(child.map(|child| text(child.as_ref())));
         }
 
         self.static_child_count += 1;
@@ -206,36 +172,39 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     }
 
     fn optional_child(
-        mut self,
+        self,
         child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
     ) -> Self {
-        if let Some(child_builder) = self.child_builder.as_mut() {
-            child_builder.optional_child(child);
-            return self;
-        }
-
         child.select(
-            |parent, child| {
+            |mut parent, child| {
                 if let Some(child) = child {
-                    parent.static_child_count += 1;
-                    let child = child.into();
+                    if parent.child_vec.is_some() {
+                        return parent.children_signal(always(vec![child]));
+                    } else {
+                        parent.static_child_count += 1;
+                        let child = child.into();
 
-                    parent.element.append_child(child.as_node());
-                    parent.resources.extend(child.resources);
+                        parent.element.append_child(child.as_node());
+                        parent.resources.extend(child.resources);
+                    }
                 }
-            },
-            |parent, child| parent.child_builder_mut().optional_child(Sig(child)),
-            &mut self,
-        );
 
-        self
+                parent
+            },
+            |parent, child| {
+                let child_vec = child
+                    .map(|child| child.into_iter().collect::<Vec<_>>())
+                    .to_signal_vec();
+                parent.children_signal(child_vec)
+            },
+            self,
+        )
     }
 
     fn children_signal(
         mut self,
         children: impl SignalVec<Item = impl Into<Node<D>>> + 'static,
     ) -> Self {
-        self.build_children();
         let new_children = children.map(|child| child.into());
 
         let boxed_children = if let Some(child_vec) = self.child_vec.take() {

@@ -308,7 +308,6 @@ where
             element,
             static_child_count: self.child_count,
             child_vec: None,
-            child_builder: None,
             resources: Vec::new(),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
