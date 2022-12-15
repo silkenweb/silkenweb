@@ -201,6 +201,22 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         )
     }
 
+    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self {
+        if self.child_vec.is_some() {
+            let children = children
+                .into_iter()
+                .map(|node| node.into())
+                .collect::<Vec<_>>();
+            return self.children_signal(always(children));
+        }
+
+        for child in children {
+            self = self.child(child.into());
+        }
+
+        self
+    }
+
     fn children_signal(
         mut self,
         children: impl SignalVec<Item = impl Into<Node<D>>> + 'static,
@@ -574,13 +590,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # };
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
-    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self {
-        for child in children {
-            self = self.child(child.into());
-        }
-
-        self
-    }
+    fn children(self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self;
 
     /// Add children from a [`SignalVec`] to the element.
     ///

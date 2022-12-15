@@ -410,6 +410,10 @@ macro_rules! parent_element {
                 Self(self.0.optional_child(child))
             }
 
+            fn children(self, children: impl IntoIterator<Item = impl Into<$crate::node::Node<Dom>>>) -> Self {
+                Self(self.0.children(children))
+            }
+
             fn children_signal(
                 self,
                 children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node<Dom>>> + 'static,
