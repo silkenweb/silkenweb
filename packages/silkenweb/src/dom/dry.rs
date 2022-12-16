@@ -412,6 +412,19 @@ impl fmt::Display for DryText {
     }
 }
 
+impl From<DryText> for WetNode {
+    fn from(text: DryText) -> Self {
+        let wet = match text.0.replace(SharedDryText::Unreachable) {
+            SharedDryText::Dry { text, .. } => WetText::new(&text),
+            SharedDryText::Wet(wet) => wet,
+            SharedDryText::Unreachable => unreachable!(),
+        };
+
+        text.0.replace(SharedDryText::Wet(wet.clone()));
+        wet.into()
+    }
+}
+
 #[derive(Clone)]
 pub enum DryNode {
     Text(DryText),
