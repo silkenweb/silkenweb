@@ -13,7 +13,7 @@ use super::{
     wet::{WetElement, WetNode, WetText},
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
-use crate::node::element::Namespace;
+use crate::{node::element::Namespace, hydration::HydrationStats};
 
 pub struct Dry;
 
@@ -464,6 +464,15 @@ pub enum DryNode {
 impl DryNode {
     pub fn wet(&self) -> WetNode {
         self.clone().into()
+    }
+
+    pub fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> WetNode {
+        todo!()
     }
 
     fn set_next_sibling(&self, next_sibling: Option<&DryNode>) {

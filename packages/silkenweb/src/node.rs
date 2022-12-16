@@ -42,7 +42,10 @@ impl Node<Dry> {
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> Node<Wet> {
-        todo!()
+        Node {
+            node: self.node.hydrate_child(parent, child, tracker),
+            resources: self.resources,
+        }
     }
 
     pub(super) fn into_wet(self) -> Node<Wet> {
