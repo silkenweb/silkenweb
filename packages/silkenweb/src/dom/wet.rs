@@ -136,9 +136,17 @@ impl InstantiableDomElement for WetElement {
 }
 
 #[derive(Clone)]
-pub struct WetText(pub(crate) web_sys::Text);
+pub struct WetText(web_sys::Text);
 
 impl WetText {
+    pub(super) fn from_dom(text: web_sys::Text) -> Self {
+        Self(text)
+    }
+
+    pub(super) fn dom_text(&self) -> &web_sys::Text {
+        &self.0
+    }
+
     pub(super) fn text(&self) -> String {
         self.0.text_content().expect("No text content found")
     }

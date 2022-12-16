@@ -594,11 +594,11 @@ impl DryText {
                 });
 
         if let Some(dom_text) = matching_node {
-            WetText(dom_text.clone())
+            WetText::from_dom(dom_text.clone())
         } else {
             let new_text = WetText::new(&text);
 
-            let dom_text = &new_text.0;
+            let dom_text = new_text.dom_text();
             parent.insert_before(dom_text, Some(child)).unwrap_throw();
             tracker.node_added(dom_text);
 
