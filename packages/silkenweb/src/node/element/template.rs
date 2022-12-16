@@ -116,7 +116,7 @@ where
         self.element.on(name, f)
     }
 
-    fn try_dom_element(&self) -> Option<&web_sys::Element> {
+    fn try_dom_element(&self) -> Option<web_sys::Element> {
         self.element.try_dom_element()
     }
 

@@ -113,8 +113,8 @@ impl DomElement for WetElement {
             .unwrap_throw();
     }
 
-    fn try_dom_element(&self) -> Option<&web_sys::Element> {
-        Some(&self.element)
+    fn try_dom_element(&self) -> Option<web_sys::Element> {
+        Some(self.element.clone())
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {

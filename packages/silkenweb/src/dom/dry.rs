@@ -186,8 +186,8 @@ impl DryElementData {
 
         let wet_child: WetElement = self.into();
         let new_element = wet_child.dom_element();
-        parent.append_child(new_element).unwrap_throw();
-        tracker.node_added(new_element);
+        parent.append_child(&new_element).unwrap_throw();
+        tracker.node_added(&new_element);
 
         wet_child
     }
@@ -462,8 +462,12 @@ impl DomElement for DryElement {
         }
     }
 
-    fn try_dom_element(&self) -> Option<&web_sys::Element> {
-        todo!()
+    fn try_dom_element(&self) -> Option<web_sys::Element> {
+        match &*self.borrow_mut() {
+            SharedDryElement::Dry(_) => None,
+            SharedDryElement::Wet(wet) => wet.try_dom_element(),
+            SharedDryElement::Unreachable => unreachable!(),
+        }
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
