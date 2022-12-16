@@ -191,6 +191,28 @@ async fn basic_signal() {
     unmount(APP_ID);
 }
 
+#[wasm_bindgen_test]
+async fn nested_signal() {
+    app_container(APP_ID, r#"<div data-silkenweb="1"><p><p></p></p></div>"#).await;
+    let text = Mutable::new("Hello, world!");
+    let app = Div::new().child(P::new().child(P::new().text(Sig(text.signal()))));
+
+    render_now().await;
+    hydrate(APP_ID, app).await;
+    assert_eq!(
+        r#"<div data-silkenweb="1"><p><p>Hello, world!</p></p></div>"#,
+        app_html(APP_ID)
+    );
+
+    text.set("Some more text");
+    render_now().await;
+    assert_eq!(
+        r#"<div data-silkenweb="1"><p><p>Some more text</p></p></div>"#,
+        app_html(APP_ID)
+    );
+    unmount(APP_ID);
+}
+
 async fn app_container(id: &str, inner_html: &str) {
     create_app_container(id).await;
     query_element(id).set_inner_html(inner_html);
