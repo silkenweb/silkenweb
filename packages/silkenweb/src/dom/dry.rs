@@ -519,7 +519,6 @@ impl From<DryElement> for WetNode {
     }
 }
 
-// TODO: Make this have an enum with wet and dry parts
 #[derive(Clone)]
 pub struct DryText(Rc<RefCell<SharedDryText>>);
 
