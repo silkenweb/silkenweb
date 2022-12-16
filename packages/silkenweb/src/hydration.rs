@@ -202,7 +202,7 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Dry>>) -> HydrationStats {
 }
 
 /// Remove `child` and all siblings after `child`
-fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
+pub(super) fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
     while let Some(node) = child {
         let next_child = node.next_sibling();
         parent.remove_child(&node).unwrap_throw();

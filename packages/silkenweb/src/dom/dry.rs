@@ -1,19 +1,25 @@
 use std::{
     cell::{Ref, RefCell, RefMut},
+    collections::HashMap,
     fmt,
     rc::Rc,
 };
 
+use caseless::default_caseless_match_str;
 use html_escape::encode_double_quoted_attribute;
 use indexmap::IndexMap;
 use itertools::Itertools;
+use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetNode, WetText},
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
-use crate::{hydration::HydrationStats, node::element::Namespace};
+use crate::{
+    hydration::{remove_following_siblings, HydrationStats},
+    node::element::Namespace,
+};
 
 pub struct Dry;
 
@@ -153,7 +159,133 @@ impl DryElementData {
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> WetElement {
-        todo!()
+        clone!(mut child);
+
+        loop {
+            if let Some(elem_child) = child.dyn_ref::<web_sys::Element>() {
+                let dom_namespace = elem_child.namespace_uri().unwrap_or_default();
+                let dry_namespace = self.namespace.as_str();
+
+                if dry_namespace == dom_namespace
+                    && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
+                {
+                    return self.hydrate_element(elem_child, tracker);
+                }
+            }
+
+            let next = child.next_sibling();
+            tracker.node_removed(&child);
+            parent.remove_child(&child).unwrap_throw();
+
+            if let Some(next_child) = next {
+                child = next_child;
+            } else {
+                break;
+            }
+        }
+
+        let wet_child: WetElement = self.into();
+        let new_element = wet_child.dom_element();
+        parent.append_child(new_element).unwrap_throw();
+        tracker.node_added(new_element);
+
+        wet_child
+    }
+
+    fn hydrate_element(
+        self,
+        dom_elem: &web_sys::Element,
+        tracker: &mut HydrationStats,
+    ) -> WetElement {
+        self.reconcile_attributes(dom_elem, tracker);
+        let mut elem = WetElement::from_element(dom_elem.clone());
+        let mut current_child = dom_elem.first_child();
+
+        let mut children = self.children.into_iter();
+
+        for child in children.by_ref() {
+            if let Some(node) = &current_child {
+                let hydrated_elem = child.hydrate_child(dom_elem, node, tracker);
+                current_child = hydrated_elem.dom_node().next_sibling();
+            } else {
+                Self::hydrate_with_new(dom_elem, child, tracker);
+                break;
+            }
+        }
+
+        for child in children {
+            Self::hydrate_with_new(dom_elem, child, tracker);
+        }
+
+        remove_following_siblings(dom_elem, current_child);
+
+        for event in self.hydrate_actions {
+            event(&mut elem);
+        }
+
+        elem
+    }
+
+    fn hydrate_with_new(parent: &web_sys::Element, child: DryNode, tracker: &mut HydrationStats) {
+        let child = WetNode::from(child);
+        let new_child = child.dom_node();
+        parent.append_child(new_child).unwrap_throw();
+        tracker.node_added(new_child);
+    }
+
+    fn reconcile_attributes(&self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) {
+        let dom_attributes = dom_elem.attributes();
+        let mut dom_attr_map = HashMap::new();
+
+        for item_index in 0.. {
+            if let Some(attr) = dom_attributes.item(item_index) {
+                dom_attr_map.insert(attr.name(), attr.value());
+            } else {
+                break;
+            }
+        }
+
+        for (name, value) in &self.attributes {
+            let value = value.as_ref();
+
+            let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
+                value != existing_value
+            } else {
+                true
+            };
+
+            if set_attr {
+                dom_elem.set_attribute(name, value).unwrap_throw();
+                tracker.attribute_set(dom_elem, name, value);
+            }
+        }
+
+        for name in dom_attr_map.into_keys() {
+            if !name.starts_with("data-silkenweb") {
+                tracker.attribute_removed(dom_elem, &name);
+                dom_elem.remove_attribute(&name).unwrap_throw();
+            }
+        }
+    }
+}
+
+impl From<DryElementData> for WetElement {
+    fn from(dry: DryElementData) -> Self {
+        let mut wet = WetElement::new(dry.namespace, &dry.tag);
+
+        for (name, value) in dry.attributes {
+            wet.attribute(&name, value);
+        }
+
+        for child in dry.children {
+            wet.append_child(&child.into());
+        }
+
+        for action in dry.hydrate_actions {
+            action(&mut wet);
+        }
+
+        wet
     }
 }
 
@@ -373,23 +505,7 @@ impl InstantiableDomElement for DryElement {
 impl From<DryElement> for WetNode {
     fn from(elem: DryElement) -> Self {
         let wet = match elem.0.replace(SharedDryElement::Unreachable) {
-            SharedDryElement::Dry(dry) => {
-                let mut wet = WetElement::new(dry.namespace, &dry.tag);
-
-                for (name, value) in dry.attributes {
-                    wet.attribute(&name, value);
-                }
-
-                for child in dry.children {
-                    wet.append_child(&child.into());
-                }
-
-                for action in dry.hydrate_actions {
-                    action(&mut wet);
-                }
-
-                wet
-            }
+            SharedDryElement::Dry(dry) => (*dry).into(),
             SharedDryElement::Wet(wet) => wet,
             SharedDryElement::Unreachable => unreachable!(),
         };
@@ -496,10 +612,10 @@ impl DomText for DryText {
         })))
     }
 
-    fn set_text(&mut self, text: &str) {
+    fn set_text(&mut self, new_text: &str) {
         match &mut *self.borrow_mut() {
-            SharedDryText::Dry { text, .. } => *text = text.to_string(),
-            SharedDryText::Wet(wet) => wet.set_text(text),
+            SharedDryText::Dry { text, .. } => *text = new_text.to_string(),
+            SharedDryText::Wet(wet) => wet.set_text(new_text),
             SharedDryText::Unreachable => unreachable!(),
         }
     }

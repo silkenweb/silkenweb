@@ -28,6 +28,12 @@ pub struct WetElement {
     // TODO: Store event callbacks, unless wasm-bindgen weak-refs is enabled.
 }
 
+impl WetElement {
+    pub(super) fn from_element(element: web_sys::Element) -> Self {
+        Self { element }
+    }
+}
+
 impl DomElement for WetElement {
     type Node = WetNode;
 
