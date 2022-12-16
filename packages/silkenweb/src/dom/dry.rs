@@ -7,13 +7,13 @@ use std::{
 use html_escape::encode_double_quoted_attribute;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     wet::{WetElement, WetNode, WetText},
     Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
 };
-use crate::{node::element::Namespace, hydration::HydrationStats};
+use crate::{hydration::HydrationStats, node::element::Namespace};
 
 pub struct Dry;
 
@@ -100,6 +100,22 @@ impl DryElement {
         }
     }
 
+    fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> WetNode {
+        let wet = match self.0.replace(SharedDryElement::Unreachable) {
+            SharedDryElement::Dry(dry) => dry.hydrate_child(parent, child, tracker),
+            SharedDryElement::Wet(wet) => wet,
+            SharedDryElement::Unreachable => unreachable!(),
+        };
+
+        self.0.replace(SharedDryElement::Wet(wet.clone()));
+        wet.into()
+    }
+
     fn borrow(&self) -> Ref<SharedDryElement> {
         self.0.as_ref().borrow()
     }
@@ -128,6 +144,17 @@ struct DryElementData {
     children: Vec<DryNode>,
     hydrate_actions: Vec<LazyElementAction>,
     next_sibling: Option<DryNode>,
+}
+
+impl DryElementData {
+    fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> WetElement {
+        todo!()
+    }
 }
 
 type LazyElementAction = Box<dyn FnOnce(&mut WetElement)>;
@@ -402,6 +429,53 @@ impl DryText {
             SharedDryText::Unreachable => unreachable!(),
         }
     }
+
+    fn hydrate_child(
+        self,
+        parent: &web_sys::Node,
+        child: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> WetNode {
+        let wet = match self.0.replace(SharedDryText::Unreachable) {
+            SharedDryText::Dry { text, .. } => {
+                Self::hydrate_child_text(text, child, parent, tracker)
+            }
+            SharedDryText::Wet(wet) => wet,
+            SharedDryText::Unreachable => unreachable!(),
+        };
+
+        self.0.replace(SharedDryText::Wet(wet.clone()));
+
+        wet.into()
+    }
+
+    fn hydrate_child_text(
+        text: String,
+        child: &web_sys::Node,
+        parent: &web_sys::Node,
+        tracker: &mut HydrationStats,
+    ) -> WetText {
+        let matching_node =
+            child
+                .dyn_ref::<web_sys::Text>()
+                .and_then(|dom_text| match dom_text.text_content() {
+                    Some(current_text) if text == current_text => Some(dom_text),
+                    None if text.is_empty() => Some(dom_text),
+                    _ => None,
+                });
+
+        if let Some(dom_text) = matching_node {
+            WetText(dom_text.clone())
+        } else {
+            let new_text = WetText::new(&text);
+
+            let dom_text = &new_text.0;
+            parent.insert_before(dom_text, Some(child)).unwrap_throw();
+            tracker.node_added(dom_text);
+
+            new_text
+        }
+    }
 }
 
 enum SharedDryText {
@@ -472,7 +546,11 @@ impl DryNode {
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> WetNode {
-        todo!()
+        match self {
+            Self::Text(text) => text.hydrate_child(parent, child, tracker),
+            Self::Element(elem) => elem.hydrate_child(parent, child, tracker),
+            Self::Wet(wet) => wet,
+        }
     }
 
     fn set_next_sibling(&self, next_sibling: Option<&DryNode>) {

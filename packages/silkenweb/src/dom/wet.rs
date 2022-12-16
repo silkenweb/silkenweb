@@ -130,7 +130,7 @@ impl InstantiableDomElement for WetElement {
 }
 
 #[derive(Clone)]
-pub struct WetText(web_sys::Text);
+pub struct WetText(pub(crate) web_sys::Text);
 
 impl WetText {
     pub(super) fn text(&self) -> String {
