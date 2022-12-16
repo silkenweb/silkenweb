@@ -1,10 +1,6 @@
-use std::{
-    cell::RefCell,
-    collections::{BTreeMap, HashSet},
-    fmt,
-    marker::PhantomData,
-    rc::Rc,
-};
+#[cfg(debug_assertions)]
+use std::collections::HashSet;
+use std::{cell::RefCell, collections::BTreeMap, fmt, marker::PhantomData, rc::Rc};
 
 use wasm_bindgen::JsValue;
 
