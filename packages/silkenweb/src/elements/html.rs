@@ -1,3 +1,4 @@
+#![allow(rustdoc::invalid_html_tags)]
 //! HTML elements
 
 // This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on
