@@ -417,8 +417,6 @@ pub enum DryNode {
     Text(DryText),
     Element(DryElement),
     Wet(WetNode),
-    /// Used only for swapping from `Dry` to `Wet`
-    Unreachable,
 }
 
 impl DryNode {
@@ -437,7 +435,6 @@ impl DryNode {
             Self::Text(text) => text.set_next_sibling(next_sibling),
             Self::Element(element) => element.set_next_sibling(next_sibling),
             Self::Wet(_) => (),
-            Self::Unreachable => unreachable!(),
         }
     }
 }
@@ -448,7 +445,6 @@ impl fmt::Display for DryNode {
             Self::Text(text) => text.fmt(f),
             Self::Element(elem) => elem.fmt(f),
             Self::Wet(wet) => wet.fmt(f),
-            Self::Unreachable => unreachable!(),
         }
     }
 }
@@ -461,7 +457,6 @@ impl InstantiableDomNode for DryNode {
             Self::Element(element) => element,
             Self::Text(_) => panic!("Type is `Text`, not `Element`"),
             Self::Wet(node) => DryElement::from_shared(SharedDryElement::Wet(node.into_element())),
-            Self::Unreachable => unreachable!(),
         }
     }
 
@@ -470,7 +465,6 @@ impl InstantiableDomNode for DryNode {
             Self::Text(_) => panic!("Text elements don't have children"),
             Self::Element(element) => element.first_child(),
             Self::Wet(wet) => Self::Wet(wet.first_child()),
-            Self::Unreachable => unreachable!(),
         }
     }
 
@@ -479,7 +473,6 @@ impl InstantiableDomNode for DryNode {
             Self::Text(text) => text.next_sibling(),
             Self::Element(element) => element.next_sibling(),
             Self::Wet(wet) => Self::Wet(wet.next_sibling()),
-            Self::Unreachable => unreachable!(),
         }
     }
 }
