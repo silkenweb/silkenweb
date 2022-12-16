@@ -84,6 +84,24 @@ impl<D: Dom> GenericElement<D> {
         self
     }
 
+    fn class_signal<T>(
+        element: &mut D::Element,
+        class: T,
+        previous_value: &Rc<Cell<Option<T>>>,
+    ) -> impl Future<Output = ()>
+    where
+        T: AsRef<str>,
+    {
+        if let Some(previous) = previous_value.replace(None) {
+            element.remove_class(previous.as_ref());
+        }
+
+        element.add_class(intern_str(class.as_ref()));
+        previous_value.set(Some(class));
+
+        async {}
+    }
+
     fn classes_signal<T>(
         element: &mut D::Element,
         classes: impl IntoIterator<Item = T>,
@@ -247,34 +265,13 @@ impl<D: Dom> Element for GenericElement<D> {
     where
         T: 'a + AsRef<str>,
     {
-        type PreviousValue<T0> = Rc<Cell<Option<T0>>>;
-
-        fn class_signal<T1, E>(
-            class: T1,
-            element: &mut E,
-            previous_value: &PreviousValue<T1>,
-        ) -> impl Future<Output = ()>
-        where
-            T1: AsRef<str>,
-            E: DomElement,
-        {
-            if let Some(previous) = previous_value.replace(None) {
-                element.remove_class(previous.as_ref());
-            }
-
-            element.add_class(intern_str(class.as_ref()));
-            previous_value.set(Some(class));
-
-            async {}
-        }
-
         class.for_each(
             |elem, class| elem.element.add_class(intern_str(class.as_ref())),
             |elem| {
                 let mut element = elem.element.clone();
-                let previous_value: PreviousValue<T> = Rc::new(Cell::new(None));
+                let previous_value = Rc::new(Cell::new(None));
 
-                move |class: T| class_signal(class, &mut element, &previous_value)
+                move |class: T| Self::class_signal(&mut element, class, &previous_value)
             },
             &mut self,
         );
