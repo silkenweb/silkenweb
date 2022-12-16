@@ -94,7 +94,7 @@ where
 
     fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Self::Node>) {
         // TODO: We need support for shadow children in `initialization_fns`
-        todo!()
+        todo!("Shadow root is not supported on templates yet")
     }
 
     fn add_class(&mut self, name: &str) {
