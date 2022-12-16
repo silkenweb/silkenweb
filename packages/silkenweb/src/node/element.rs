@@ -74,16 +74,14 @@ impl<D: Dom> GenericElement<D> {
         if let Some(children) = self.child_vec.take() {
             let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
 
-            let updater = children.for_each(move |update| {
+            self.spawn(children.for_each(move |update| {
                 child_vec.apply_update(update);
                 async {}
-            });
-
-            self.spawn_future(updater)
-        } else {
-            self.resources.shrink_to_fit();
-            self
+            }))
         }
+
+        self.resources.shrink_to_fit();
+        self
     }
 
     fn classes_value(&mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) {
