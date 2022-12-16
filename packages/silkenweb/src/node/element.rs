@@ -84,14 +84,6 @@ impl<D: Dom> GenericElement<D> {
         self
     }
 
-    fn classes_value(&mut self, classes: impl IntoIterator<Item = impl AsRef<str>>) {
-        let element = &mut self.element;
-
-        for class in classes {
-            element.add_class(intern_str(class.as_ref()));
-        }
-    }
-
     fn classes_signal<T>(
         classes: impl IntoIterator<Item = T>,
         element: &mut D::Element,
@@ -296,7 +288,11 @@ impl<D: Dom> Element for GenericElement<D> {
         Iter: 'a + IntoIterator<Item = T>,
     {
         classes.for_each(
-            Self::classes_value,
+            |elem, classes| {
+                for class in classes {
+                    elem.element.add_class(intern_str(class.as_ref()));
+                }
+            },
             |elem| {
                 let mut element = elem.element.clone();
                 let previous_values = Rc::new(Cell::new(Vec::<T>::new()));
