@@ -85,8 +85,8 @@ impl<D: Dom> GenericElement<D> {
     }
 
     fn classes_signal<T>(
-        classes: impl IntoIterator<Item = T>,
         element: &mut D::Element,
+        classes: impl IntoIterator<Item = T>,
         previous_values: &Rc<Cell<Vec<T>>>,
     ) -> impl Future<Output = ()>
     where
@@ -297,7 +297,7 @@ impl<D: Dom> Element for GenericElement<D> {
                 let mut element = elem.element.clone();
                 let previous_values = Rc::new(Cell::new(Vec::<T>::new()));
 
-                move |classes| Self::classes_signal(classes, &mut element, &previous_values)
+                move |classes| Self::classes_signal(&mut element, classes, &previous_values)
             },
             &mut self,
         );
