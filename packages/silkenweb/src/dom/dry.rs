@@ -343,6 +343,35 @@ impl InstantiableDomElement for DryElement {
     }
 }
 
+impl From<DryElement> for WetNode {
+    fn from(elem: DryElement) -> Self {
+        let wet = match elem.0.replace(SharedDryElement::Unreachable) {
+            SharedDryElement::Dry(dry) => {
+                let mut wet = WetElement::new(dry.namespace, &dry.tag);
+
+                for (name, value) in dry.attributes {
+                    wet.attribute(&name, value);
+                }
+
+                for child in dry.children {
+                    wet.append_child(&child.into());
+                }
+
+                for action in dry.hydrate_actions {
+                    action(&mut wet);
+                }
+
+                wet
+            }
+            SharedDryElement::Wet(wet) => wet,
+            SharedDryElement::Unreachable => unreachable!(),
+        };
+
+        elem.0.replace(SharedDryElement::Wet(wet.clone()));
+        wet.into()
+    }
+}
+
 // TODO: Make this have an enum with wet and dry parts
 #[derive(Clone)]
 pub struct DryText(Rc<RefCell<SharedDryText>>);
@@ -433,12 +462,8 @@ pub enum DryNode {
 }
 
 impl DryNode {
-    pub fn into_wet(self) -> WetNode {
-        self.wet()
-    }
-
     pub fn wet(&self) -> WetNode {
-        todo!()
+        self.clone().into()
     }
 
     fn set_next_sibling(&self, next_sibling: Option<&DryNode>) {
@@ -448,6 +473,16 @@ impl DryNode {
             Self::Text(text) => text.set_next_sibling(next_sibling),
             Self::Element(element) => element.set_next_sibling(next_sibling),
             Self::Wet(_) => (),
+        }
+    }
+}
+
+impl From<DryNode> for WetNode {
+    fn from(node: DryNode) -> Self {
+        match node {
+            DryNode::Text(text) => text.into(),
+            DryNode::Element(elem) => elem.into(),
+            DryNode::Wet(wet) => wet,
         }
     }
 }
