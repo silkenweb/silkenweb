@@ -109,6 +109,8 @@ impl DryElement {
     }
 }
 
+// TODO: Renaming: Hydro should be hydratable node/text/element. Dry should be a
+// dry element (so `DryElementData` renames to `DryElement`)
 enum SharedDryElement {
     /// Box is used to keep the enum variant small
     Dry(Box<DryElementData>),
@@ -117,6 +119,8 @@ enum SharedDryElement {
     Unreachable,
 }
 
+// TODO: Parameterize `children` and `next_sibling` types and make this form the
+// basis of a dry dom?
 struct DryElementData {
     namespace: Namespace,
     tag: String,
