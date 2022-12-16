@@ -392,7 +392,17 @@ impl DomElement for DryElement {
         }
     }
 
-    fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Self::Node>) {}
+    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
+        // TODO: We need to support shadow root in dry nodes, we just don't print it yet
+        // (as there's no way to).
+        match &*self.borrow() {
+            SharedDryElement::Dry(_) => todo!(),
+            SharedDryElement::Wet(wet) => {
+                wet.attach_shadow_children(children.into_iter().map(Self::Node::into))
+            }
+            SharedDryElement::Unreachable => unreachable!(),
+        }
+    }
 
     fn add_class(&mut self, name: &str) {
         match &mut *self.borrow_mut() {
