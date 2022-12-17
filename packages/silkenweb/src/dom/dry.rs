@@ -9,14 +9,155 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::DomElement,
+    private::{self, DomElement},
     wet::{WetElement, WetNode},
-    TrackSibling,
+    Dom, InstantiableDom, TrackSibling,
 };
 use crate::{
     hydration::{remove_following_siblings, HydrationStats},
     node::element::Namespace,
 };
+
+pub struct Dry;
+
+impl Dom for Dry {}
+
+impl private::Dom for Dry {
+    type Element = DryElement;
+    type Node = DryNode;
+    type Text = DryText;
+}
+
+impl InstantiableDom for Dry {}
+
+impl private::InstantiableDom for Dry {
+    type InstantiableElement = DryElement;
+    type InstantiableNode = DryNode;
+}
+
+#[derive(Clone)]
+
+pub struct DryElement;
+
+impl private::DomElement for DryElement {
+    type Node = DryNode;
+
+    fn new(ns: Namespace, tag: &str) -> Self {
+        todo!()
+    }
+
+    fn append_child(&mut self, child: &Self::Node) {
+        todo!()
+    }
+
+    fn insert_child_before(
+        &mut self,
+        index: usize,
+        child: &Self::Node,
+        next_child: Option<&Self::Node>,
+    ) {
+        todo!()
+    }
+
+    fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
+        todo!()
+    }
+
+    fn remove_child(&mut self, index: usize, child: &Self::Node) {
+        todo!()
+    }
+
+    fn clear_children(&mut self) {
+        todo!()
+    }
+
+    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
+        todo!()
+    }
+
+    fn add_class(&mut self, name: &str) {
+        todo!()
+    }
+
+    fn remove_class(&mut self, name: &str) {
+        todo!()
+    }
+
+    fn attribute<A>(&mut self, name: &str, value: A)
+    where
+        A: crate::attribute::Attribute,
+    {
+        todo!()
+    }
+
+    fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
+        todo!()
+    }
+
+    fn try_dom_element(&self) -> Option<web_sys::Element> {
+        todo!()
+    }
+
+    fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
+        todo!()
+    }
+}
+
+impl private::InstantiableDomElement for DryElement {
+    fn clone_node(&self) -> Self {
+        todo!()
+    }
+}
+
+#[derive(Clone)]
+pub struct DryText;
+
+impl private::DomText for DryText {
+    fn new(text: &str) -> Self {
+        todo!()
+    }
+
+    fn set_text(&mut self, text: &str) {
+        todo!()
+    }
+}
+
+#[derive(Clone)]
+pub struct DryNode;
+
+impl private::InstantiableDomNode for DryNode {
+    type DomType = Dry;
+
+    fn into_element(self) -> <Self::DomType as private::Dom>::Element {
+        todo!()
+    }
+
+    fn first_child(&self) -> Self {
+        todo!()
+    }
+
+    fn next_sibling(&self) -> Self {
+        todo!()
+    }
+}
+
+impl From<DryElement> for DryNode {
+    fn from(value: DryElement) -> Self {
+        todo!()
+    }
+}
+
+impl From<DryText> for DryNode {
+    fn from(value: DryText) -> Self {
+        todo!()
+    }
+}
+
+impl fmt::Display for DryNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
 
 pub(super) struct SharedDryElement<Child> {
     namespace: Namespace,
@@ -345,7 +486,10 @@ pub(super) struct SharedDryText<Node> {
 
 impl<Node> SharedDryText<Node> {
     pub fn new(text: String) -> Self {
-        Self { text, next_sibling: None }
+        Self {
+            text,
+            next_sibling: None,
+        }
     }
 
     pub fn text(&self) -> &str {
