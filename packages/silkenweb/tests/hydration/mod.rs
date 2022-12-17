@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::dry::Dry,
+    dom::hydro::Dry,
     elements::{
         html::{Button, Div, P},
         ElementEvents, HtmlElement,
