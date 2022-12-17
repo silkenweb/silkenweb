@@ -134,7 +134,7 @@ impl<T> From<SideNavigation<T>> for Node {
 
 pub fn item<Id: Display>(id: Id) -> SideNavigationItem<Id> {
     SideNavigationItem(
-        ui5_side_navigation_item().attribute(SELECTED_ID, &id.to_string()),
+        ui5_side_navigation_item().attribute(SELECTED_ID, id.to_string()),
         PhantomData,
     )
 }
@@ -195,7 +195,7 @@ impl<T> From<SideNavigationItem<T>> for Node {
 
 pub fn sub_item<Id: Display>(id: Id) -> SideNavigationSubItem<Id> {
     SideNavigationSubItem(
-        ui5_side_navigation_sub_item().attribute(SELECTED_ID, &id.to_string()),
+        ui5_side_navigation_sub_item().attribute(SELECTED_ID, id.to_string()),
         PhantomData,
     )
 }

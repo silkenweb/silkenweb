@@ -145,7 +145,7 @@ async fn check(
 }
 
 fn child(index: usize) -> Div {
-    div().text(&format!("{index}"))
+    div().text(format!("{index}"))
 }
 
 fn optional_child(index: usize, is_some: &Mutable<bool>) -> impl Signal<Item = Option<Div>> {

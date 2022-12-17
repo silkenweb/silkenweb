@@ -339,7 +339,7 @@ pub async fn children_signal_test(
             .children_signal(
                 children
                     .signal_vec()
-                    .map(|i| P::new().text(&format!("{}", i))),
+                    .map(|i| P::new().text(format!("{}", i))),
             )
             .into();
 

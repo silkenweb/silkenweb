@@ -106,8 +106,8 @@ impl TodoAppView {
             .child(Sig(self.active_count().map(move |active_count| {
                 span()
                     .class("todo-count")
-                    .child(strong().text(&format!("{}", active_count)))
-                    .text(&format!(
+                    .child(strong().text(format!("{}", active_count)))
+                    .text(format!(
                         " item{} left",
                         if active_count == 1 { "" } else { "s" }
                     ))
@@ -128,7 +128,7 @@ impl TodoAppView {
             a().classes(Sig(
                 item_filter.map(move |f| (filter == f).then_some("selected"))
             ))
-            .href(&format!("#/{}", filter_name.to_lowercase()))
+            .href(format!("#/{}", filter_name.to_lowercase()))
             .text(&filter_name),
         )
         .text(seperator)

@@ -155,12 +155,12 @@ impl Story {
             .child(
                 span()
                     .class(DE_EMPHASIZE)
-                    .child(span().text(&format!("{score} point{} by ", plural(score))))
+                    .child(span().text(format!("{score} point{} by ", plural(score))))
                     .child(user_link(&self.by))
-                    .child(span().text(&format!(" {time_ago} | ")))
+                    .child(span().text(format!(" {time_ago} | ")))
                     .child(
                         router::anchor(url_path)
-                            .text(&format!("{descendants} comment{}", plural(descendants))),
+                            .text(format!("{descendants} comment{}", plural(descendants))),
                     ),
             )
     }
@@ -199,7 +199,7 @@ impl UserDetails {
         div()
             .child(h2().text(&self.user.id))
             .child(text_as_html(&self.user.about))
-            .child(span().text(&format!("{} karma", self.user.karma)))
+            .child(span().text(format!("{} karma", self.user.karma)))
             .child(
                 ul().class(USER_SUBMITTED_STORIES)
                     .children(self.submitted.iter().map(Story::render)),
@@ -251,7 +251,7 @@ impl CommentTree {
                 span()
                     .class(DE_EMPHASIZE)
                     .child(user_link(&self.comment.by))
-                    .text(&format!(" {time_ago}")),
+                    .text(format!(" {time_ago}")),
             )
             .child(text_as_html(&self.comment.text))
             .child(ul().children(self.children.iter().map(move |child| child.render())))
