@@ -1,9 +1,4 @@
-use std::{
-    cell::{Ref, RefCell},
-    collections::HashMap,
-    fmt,
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
 
 use caseless::default_caseless_match_str;
 use html_escape::encode_double_quoted_attribute;
@@ -124,58 +119,93 @@ impl private::InstantiableDomElement for DryElement {
 }
 
 #[derive(Clone)]
-pub struct DryText;
+pub struct DryText(Rc<RefCell<SharedDryText<DryNode>>>);
 
 impl private::DomText for DryText {
     fn new(text: &str) -> Self {
-        todo!()
+        Self(Rc::new(RefCell::new(SharedDryText::new(text.to_string()))))
     }
 
     fn set_text(&mut self, text: &str) {
-        todo!()
+        self.0.borrow_mut().set_text(text.to_string())
     }
 }
 
 #[derive(Clone)]
-pub struct DryNode;
+pub enum DryNode {
+    Element(DryElement),
+    Text(DryText),
+}
 
 impl private::InstantiableDomNode for DryNode {
     type DomType = Dry;
 
     fn into_element(self) -> <Self::DomType as private::Dom>::Element {
-        todo!()
+        match self {
+            DryNode::Element(element) => element,
+            DryNode::Text(_) => panic!("Text node when expecting element"),
+        }
     }
 
     fn first_child(&self) -> Self {
-        todo!()
+        match self {
+            DryNode::Element(element) => element
+                .0
+                .borrow()
+                .first_child()
+                .expect("No children")
+                .clone(),
+            DryNode::Text(_) => panic!("Text nodes can't have children"),
+        }
     }
 
     fn next_sibling(&self) -> Self {
-        todo!()
+        match self {
+            DryNode::Element(element) => element
+                .0
+                .borrow()
+                .next_sibling()
+                .expect("This is the last child")
+                .clone(),
+            DryNode::Text(text) => text
+                .0
+                .borrow()
+                .next_sibling()
+                .expect("This is the last child")
+                .clone(),
+        }
     }
 }
 
 impl From<DryElement> for DryNode {
     fn from(value: DryElement) -> Self {
-        todo!()
+        Self::Element(value)
     }
 }
 
 impl From<DryText> for DryNode {
     fn from(value: DryText) -> Self {
-        todo!()
+        Self::Text(value)
     }
 }
 
 impl fmt::Display for DryNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        match self {
+            DryNode::Element(element) => element.0.borrow().fmt(f),
+            DryNode::Text(text) => text.0.borrow().text.fmt(f),
+        }
     }
 }
 
 impl TrackSibling for DryNode {
     fn set_next_sibling(&self, next_sibling: Option<&Self>) {
-        todo!()
+        let next_sibling = next_sibling.cloned();
+
+        match self {
+            DryNode::Element(element) => element.0.borrow_mut().set_next_sibling(next_sibling),
+            DryNode::Text(text) => text.0.borrow_mut().set_next_sibling(next_sibling),
+        }
     }
 }
 
