@@ -29,7 +29,10 @@ use self::{child_vec::ChildVec, template::Template};
 use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
-    dom::{DefaultDom, Dom, DomElement, DomText, InstantiableDom},
+    dom::{
+        private::{DomElement, DomText},
+        DefaultDom, Dom, InstantiableDom,
+    },
     node::text,
     task,
 };

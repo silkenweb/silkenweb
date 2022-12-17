@@ -3,7 +3,7 @@ use std::mem;
 use futures_signals::signal_vec::VecDiff;
 
 use crate::{
-    dom::{Dom, DomElement},
+    dom::{private::DomElement, Dom},
     node::Node,
 };
 

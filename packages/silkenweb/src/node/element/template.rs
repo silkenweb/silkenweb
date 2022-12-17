@@ -4,15 +4,20 @@ use std::{cell::RefCell, collections::BTreeMap, fmt, marker::PhantomData, rc::Rc
 
 use wasm_bindgen::JsValue;
 
-use super::{Dom, DomElement, DomText, GenericElement};
+use super::GenericElement;
 use crate::{
-    dom::{InstantiableDom, InstantiableDomElement, InstantiableDomNode},
+    dom::{
+        private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+        Dom, InstantiableDom,
+    },
     node::element::Namespace,
 };
 
 pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
 
-impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {
+impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {}
+
+impl<D: InstantiableDom, Param: 'static> private::Dom for Template<D, Param> {
     type Element = TemplateElement<D, Param>;
     type Node = TemplateNode<D, Param>;
     type Text = TemplateText<D>;

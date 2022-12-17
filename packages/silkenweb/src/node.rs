@@ -7,7 +7,7 @@ use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
 use crate::{
-    dom::{dry::Dry, wet::Wet, DefaultDom, Dom, DomText},
+    dom::{dry::Dry, private::DomText, wet::Wet, DefaultDom, Dom},
     hydration::HydrationStats,
 };
 

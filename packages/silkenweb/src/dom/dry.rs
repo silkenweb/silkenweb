@@ -13,8 +13,9 @@ use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
+    private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
     wet::{WetElement, WetNode, WetText},
-    Dom, DomElement, DomText, InstantiableDom, InstantiableDomElement, InstantiableDomNode,
+    Dom, InstantiableDom,
 };
 use crate::{
     hydration::{remove_following_siblings, HydrationStats},
@@ -23,13 +24,17 @@ use crate::{
 
 pub struct Dry;
 
-impl Dom for Dry {
+impl Dom for Dry {}
+
+impl private::Dom for Dry {
     type Element = DryElement;
     type Node = DryNode;
     type Text = DryText;
 }
 
-impl InstantiableDom for Dry {
+impl InstantiableDom for Dry {}
+
+impl private::InstantiableDom for Dry {
     type InstantiableElement = DryElement;
     type InstantiableNode = DryNode;
 }
