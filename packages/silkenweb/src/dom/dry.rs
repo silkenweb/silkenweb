@@ -338,6 +338,39 @@ impl<Child: Into<WetNode>> From<SharedDryElement<Child>> for WetElement {
     }
 }
 
+pub(super) struct SharedDryText<Node> {
+    text: String,
+    next_sibling: Option<Node>,
+}
+
+impl<Node> SharedDryText<Node> {
+    pub fn new(text: String) -> Self {
+        Self { text, next_sibling: None }
+    }
+
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    pub fn set_text(&mut self, text: String) {
+        self.text = text;
+    }
+
+    pub fn next_sibling(&self) -> Option<&Node> {
+        self.next_sibling.as_ref()
+    }
+
+    pub fn set_next_sibling(&mut self, next_sibling: Option<Node>) {
+        self.next_sibling = next_sibling;
+    }
+}
+
+impl<Node> From<SharedDryText<Node>> for String {
+    fn from(value: SharedDryText<Node>) -> Self {
+        value.text
+    }
+}
+
 type LazyElementAction = Box<dyn FnOnce(&mut WetElement)>;
 
 const NO_CLOSING_TAG: &[&str] = &[

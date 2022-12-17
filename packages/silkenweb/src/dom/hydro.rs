@@ -7,7 +7,7 @@ use std::{
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    dry::SharedDryElement,
+    dry::{SharedDryElement, SharedDryText},
     private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
     wet::{WetElement, WetNode, WetText},
     Dom, InstantiableDom, TrackSibling,
@@ -274,9 +274,7 @@ impl HydroText {
 
     fn next_sibling(&self) -> HydroNode {
         match &*self.borrow() {
-            SharedHydroText::Dry(dry) => {
-                dry.next_sibling.as_ref().expect("No more siblings").clone()
-            }
+            SharedHydroText::Dry(dry) => dry.next_sibling().expect("No more siblings").clone(),
             SharedHydroText::Wet(wet) => HydroNode::Wet(WetNode::from(wet.clone()).next_sibling()),
             SharedHydroText::Unreachable => unreachable!(),
         }
@@ -284,7 +282,7 @@ impl HydroText {
 
     fn set_next_sibling(&self, new_next_sibling: Option<HydroNode>) {
         match &mut *self.borrow_mut() {
-            SharedHydroText::Dry(dry) => dry.next_sibling = new_next_sibling,
+            SharedHydroText::Dry(dry) => dry.set_next_sibling(new_next_sibling),
             SharedHydroText::Wet(_) => (),
             SharedHydroText::Unreachable => unreachable!(),
         }
@@ -297,7 +295,9 @@ impl HydroText {
         tracker: &mut HydrationStats,
     ) -> WetNode {
         let wet = match self.0.replace(SharedHydroText::Unreachable) {
-            SharedHydroText::Dry(dry) => Self::hydrate_child_text(dry.text, child, parent, tracker),
+            SharedHydroText::Dry(dry) => {
+                Self::hydrate_child_text(dry.into(), child, parent, tracker)
+            }
             SharedHydroText::Wet(wet) => wet,
             SharedHydroText::Unreachable => unreachable!(),
         };
@@ -337,7 +337,7 @@ impl HydroText {
 }
 
 enum SharedHydroText {
-    Dry(SharedDryText),
+    Dry(SharedDryText<HydroNode>),
     Wet(WetText),
     /// Used for swapping `Dry` for `Wet`
     Unreachable,
@@ -345,15 +345,14 @@ enum SharedHydroText {
 
 impl DomText for HydroText {
     fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(SharedHydroText::Dry(SharedDryText {
-            text: text.to_owned(),
-            next_sibling: None,
-        }))))
+        Self(Rc::new(RefCell::new(SharedHydroText::Dry(
+            SharedDryText::new(text.to_string()),
+        ))))
     }
 
     fn set_text(&mut self, new_text: &str) {
         match &mut *self.borrow_mut() {
-            SharedHydroText::Dry(dry) => dry.text = new_text.to_string(),
+            SharedHydroText::Dry(dry) => dry.set_text(new_text.to_string()),
             SharedHydroText::Wet(wet) => wet.set_text(new_text),
             SharedHydroText::Unreachable => unreachable!(),
         }
@@ -363,7 +362,7 @@ impl DomText for HydroText {
 impl fmt::Display for HydroText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self.borrow() {
-            SharedHydroText::Dry(dry) => f.write_str(&dry.text),
+            SharedHydroText::Dry(dry) => f.write_str(dry.text()),
             SharedHydroText::Wet(wet) => f.write_str(&wet.text()),
             SharedHydroText::Unreachable => unreachable!(),
         }
@@ -373,7 +372,7 @@ impl fmt::Display for HydroText {
 impl From<HydroText> for WetNode {
     fn from(text: HydroText) -> Self {
         let wet = match text.0.replace(SharedHydroText::Unreachable) {
-            SharedHydroText::Dry(dry) => WetText::new(&dry.text),
+            SharedHydroText::Dry(dry) => WetText::new(dry.text()),
             SharedHydroText::Wet(wet) => wet,
             SharedHydroText::Unreachable => unreachable!(),
         };
@@ -381,11 +380,6 @@ impl From<HydroText> for WetNode {
         text.0.replace(SharedHydroText::Wet(wet.clone()));
         wet.into()
     }
-}
-
-struct SharedDryText {
-    text: String,
-    next_sibling: Option<HydroNode>,
 }
 
 #[derive(Clone)]
