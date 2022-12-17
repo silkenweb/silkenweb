@@ -1,4 +1,9 @@
-use std::{collections::HashMap, fmt};
+use std::{
+    cell::{Ref, RefCell},
+    collections::HashMap,
+    fmt,
+    rc::Rc,
+};
 
 use caseless::default_caseless_match_str;
 use html_escape::encode_double_quoted_attribute;
@@ -37,17 +42,22 @@ impl private::InstantiableDom for Dry {
 
 #[derive(Clone)]
 
-pub struct DryElement;
+pub struct DryElement(Rc<RefCell<SharedDryElement<DryNode>>>);
 
+impl DryElement {
+    fn from_shared(shared: SharedDryElement<DryNode>) -> Self {
+        Self(Rc::new(RefCell::new(shared)))
+    }
+}
 impl private::DomElement for DryElement {
     type Node = DryNode;
 
     fn new(ns: Namespace, tag: &str) -> Self {
-        todo!()
+        Self::from_shared(SharedDryElement::new(ns, tag))
     }
 
     fn append_child(&mut self, child: &Self::Node) {
-        todo!()
+        self.0.borrow_mut().append_child(child)
     }
 
     fn insert_child_before(
@@ -56,56 +66,60 @@ impl private::DomElement for DryElement {
         child: &Self::Node,
         next_child: Option<&Self::Node>,
     ) {
-        todo!()
+        self.0
+            .borrow_mut()
+            .insert_child_before(index, child, next_child)
     }
 
     fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
-        todo!()
+        self.0
+            .borrow_mut()
+            .replace_child(index, new_child, old_child)
     }
 
     fn remove_child(&mut self, index: usize, child: &Self::Node) {
-        todo!()
+        self.0.borrow_mut().remove_child(index, child)
     }
 
     fn clear_children(&mut self) {
-        todo!()
+        self.0.borrow_mut().clear_children()
     }
 
-    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
-        todo!()
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
+        self.0.borrow_mut().attach_shadow_children(children)
     }
 
     fn add_class(&mut self, name: &str) {
-        todo!()
+        self.0.borrow_mut().add_class(name)
     }
 
     fn remove_class(&mut self, name: &str) {
-        todo!()
+        self.0.borrow_mut().remove_class(name)
     }
 
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,
     {
-        todo!()
+        self.0.borrow_mut().attribute(name, value)
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        todo!()
+        self.0.borrow_mut().on(name, f)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
-        todo!()
+        self.0.borrow().try_dom_element()
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        todo!()
+        self.0.borrow_mut().effect(f)
     }
 }
 
 impl private::InstantiableDomElement for DryElement {
     fn clone_node(&self) -> Self {
-        todo!()
+        Self::from_shared(self.0.borrow().clone_node())
     }
 }
 
@@ -155,6 +169,12 @@ impl From<DryText> for DryNode {
 
 impl fmt::Display for DryNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+impl TrackSibling for DryNode {
+    fn set_next_sibling(&self, next_sibling: Option<&Self>) {
         todo!()
     }
 }
@@ -239,7 +259,7 @@ impl<Node: TrackSibling> SharedDryElement<Node> {
         self.children.clear();
     }
 
-    pub fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Node>) {
+    pub fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Node>) {
         // TODO: We need to support shadow root in dry nodes, we just don't print it yet
         // (as there's no way to).
         todo!()

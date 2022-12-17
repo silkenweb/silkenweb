@@ -97,7 +97,7 @@ where
         self.initialization_fns.clear_children();
     }
 
-    fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Self::Node>) {
+    fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Self::Node>) {
         // TODO: We need support for shadow children in `initialization_fns`
         todo!("Shadow root is not supported on templates yet")
     }

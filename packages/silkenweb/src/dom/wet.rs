@@ -86,7 +86,7 @@ impl DomElement for WetElement {
         self.element.set_text_content(Some(""))
     }
 
-    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
         let elem = &self.element;
         let shadow_root = elem.shadow_root().unwrap_or_else(|| {
             elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))

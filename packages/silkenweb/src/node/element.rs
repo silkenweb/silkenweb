@@ -252,7 +252,7 @@ impl<D: Dom> ShadowRootParent<D> for GenericElement<D> {
     ///
     /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
     fn attach_shadow_children(
-        self,
+        mut self,
         children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
     ) -> Self {
         self.element

@@ -170,8 +170,8 @@ impl DomElement for HydroElement {
         }
     }
 
-    fn attach_shadow_children(&self, children: impl IntoIterator<Item = Self::Node>) {
-        match &*self.borrow() {
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
+        match &mut *self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.attach_shadow_children(children),
             SharedHydroElement::Wet(wet) => {
                 wet.attach_shadow_children(children.into_iter().map(Self::Node::into))
