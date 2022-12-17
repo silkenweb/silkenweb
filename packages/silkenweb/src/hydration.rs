@@ -63,12 +63,12 @@ impl HydrationStats {
         self.attributes_removed
     }
 
-    // TODO: Move this somewhere so we don't need pub(crate)
-    pub(crate) fn node_added(&mut self, _elem: &web_sys::Node) {
+    // TODO: Move this somewhere so we don't need pub(super)
+    pub(super) fn node_added(&mut self, _elem: &web_sys::Node) {
         self.nodes_added += 1;
     }
 
-    pub(crate) fn node_removed(&mut self, node: &web_sys::Node) {
+    pub(super) fn node_removed(&mut self, node: &web_sys::Node) {
         match node
             .dyn_ref::<web_sys::Text>()
             .and_then(|t| t.text_content())
@@ -78,11 +78,11 @@ impl HydrationStats {
         }
     }
 
-    pub(crate) fn attribute_set(&mut self, _elem: &web_sys::Element, _name: &str, _value: &str) {
+    pub(super) fn attribute_set(&mut self, _elem: &web_sys::Element, _name: &str, _value: &str) {
         self.attributes_set += 1;
     }
 
-    pub(crate) fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {
+    pub(super) fn attribute_removed(&mut self, _elem: &web_sys::Element, _name: &str) {
         self.attributes_removed += 1;
     }
 }
