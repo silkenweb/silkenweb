@@ -1,8 +1,8 @@
 pub(crate) mod private;
 
+pub mod dry;
 pub mod hydro;
 pub mod wet;
-pub mod dry;
 
 pub trait Dom: private::Dom {}
 
