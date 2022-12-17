@@ -159,16 +159,16 @@ impl fmt::Display for DryNode {
     }
 }
 
-pub(super) struct SharedDryElement<Child> {
+pub(super) struct SharedDryElement<Node> {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
-    children: Vec<Child>,
+    children: Vec<Node>,
     hydrate_actions: Vec<LazyElementAction>,
-    next_sibling: Option<Child>,
+    next_sibling: Option<Node>,
 }
 
-impl<Child: TrackSibling> SharedDryElement<Child> {
+impl<Node: TrackSibling> SharedDryElement<Node> {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self {
             namespace,
@@ -180,19 +180,19 @@ impl<Child: TrackSibling> SharedDryElement<Child> {
         }
     }
 
-    pub fn first_child(&self) -> Option<&Child> {
+    pub fn first_child(&self) -> Option<&Node> {
         self.children.first()
     }
 
-    pub fn next_sibling(&self) -> Option<&Child> {
+    pub fn next_sibling(&self) -> Option<&Node> {
         self.next_sibling.as_ref()
     }
 
-    pub fn set_next_sibling(&mut self, next_sibling: Option<Child>) {
+    pub fn set_next_sibling(&mut self, next_sibling: Option<Node>) {
         self.next_sibling = next_sibling;
     }
 
-    pub fn append_child(&mut self, child: &Child) {
+    pub fn append_child(&mut self, child: &Node) {
         if let Some(last) = self.children.last_mut() {
             last.set_next_sibling(Some(child));
         }
@@ -200,7 +200,7 @@ impl<Child: TrackSibling> SharedDryElement<Child> {
         self.children.push(child.clone());
     }
 
-    pub fn insert_child_before(&mut self, index: usize, child: &Child, next_child: Option<&Child>) {
+    pub fn insert_child_before(&mut self, index: usize, child: &Node, next_child: Option<&Node>) {
         if index > 0 {
             self.children[index - 1].set_next_sibling(Some(child));
         }
@@ -210,7 +210,7 @@ impl<Child: TrackSibling> SharedDryElement<Child> {
         self.children.insert(index, child.clone());
     }
 
-    pub fn replace_child(&mut self, index: usize, new_child: &Child, old_child: &Child) {
+    pub fn replace_child(&mut self, index: usize, new_child: &Node, old_child: &Node) {
         old_child.set_next_sibling(None);
 
         if index > 0 {
@@ -222,7 +222,7 @@ impl<Child: TrackSibling> SharedDryElement<Child> {
         self.children[index] = new_child.clone();
     }
 
-    pub fn remove_child(&mut self, index: usize, child: &Child) {
+    pub fn remove_child(&mut self, index: usize, child: &Node) {
         child.set_next_sibling(None);
         if index > 0 {
             self.children[index - 1].set_next_sibling(self.children.get(index + 1));
@@ -239,7 +239,7 @@ impl<Child: TrackSibling> SharedDryElement<Child> {
         self.children.clear();
     }
 
-    pub fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Child>) {
+    pub fn attach_shadow_children(&self, _children: impl IntoIterator<Item = Node>) {
         // TODO: We need to support shadow root in dry nodes, we just don't print it yet
         // (as there's no way to).
         todo!()
@@ -434,7 +434,7 @@ impl SharedDryElement<HydroNode> {
     }
 }
 
-impl<Child: fmt::Display> fmt::Display for SharedDryElement<Child> {
+impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<{}", self.tag)?;
 
@@ -459,8 +459,8 @@ impl<Child: fmt::Display> fmt::Display for SharedDryElement<Child> {
     }
 }
 
-impl<Child: Into<WetNode>> From<SharedDryElement<Child>> for WetElement {
-    fn from(dry: SharedDryElement<Child>) -> Self {
+impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
+    fn from(dry: SharedDryElement<Node>) -> Self {
         let mut wet = WetElement::new(dry.namespace, &dry.tag);
 
         for (name, value) in dry.attributes {
