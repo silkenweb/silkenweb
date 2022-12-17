@@ -47,31 +47,10 @@ pub struct HydroElement(Rc<RefCell<SharedHydroElement>>);
 impl fmt::Display for HydroElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self.borrow() {
-            SharedHydroElement::Dry(dry) => {
-                write!(f, "<{}", dry.tag)?;
-
-                for (name, value) in &dry.attributes {
-                    write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
-                }
-
-                f.write_str(">")?;
-
-                for child in &dry.children {
-                    child.fmt(f)?;
-                }
-
-                let has_children = !dry.children.is_empty();
-                let requires_closing_tag = !NO_CLOSING_TAG.contains(&dry.tag.as_str());
-
-                if requires_closing_tag || has_children {
-                    write!(f, "</{}>", dry.tag)?;
-                }
-            }
-            SharedHydroElement::Wet(wet) => wet.fmt(f)?,
-            SharedHydroElement::Unreachable => (),
+            SharedHydroElement::Dry(dry) => dry.fmt(f),
+            SharedHydroElement::Wet(wet) => wet.fmt(f),
+            SharedHydroElement::Unreachable => Ok(()),
         }
-
-        Ok(())
     }
 }
 
@@ -278,6 +257,30 @@ impl SharedDryElement {
     }
 }
 
+impl fmt::Display for SharedDryElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<{}", self.tag)?;
+
+        for (name, value) in &self.attributes {
+            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+        }
+
+        f.write_str(">")?;
+
+        for child in &self.children {
+            child.fmt(f)?;
+        }
+
+        let has_children = !self.children.is_empty();
+        let requires_closing_tag = !NO_CLOSING_TAG.contains(&self.tag.as_str());
+
+        if requires_closing_tag || has_children {
+            write!(f, "</{}>", self.tag)?;
+        }
+
+        Ok(())
+    }
+}
 impl From<SharedDryElement> for WetElement {
     fn from(dry: SharedDryElement) -> Self {
         let mut wet = WetElement::new(dry.namespace, &dry.tag);
