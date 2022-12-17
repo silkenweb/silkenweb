@@ -39,6 +39,12 @@ impl WetElement {
     }
 }
 
+impl fmt::Display for WetElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.element.outer_html())
+    }
+}
+
 impl DomElement for WetElement {
     type Node = WetNode;
 

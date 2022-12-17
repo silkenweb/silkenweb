@@ -67,7 +67,7 @@ impl fmt::Display for HydroElement {
                     write!(f, "</{}>", dry.tag)?;
                 }
             }
-            SharedHydroElement::Wet(wet) => f.write_str(&wet.dom_element().outer_html())?,
+            SharedHydroElement::Wet(wet) => wet.fmt(f)?,
             SharedHydroElement::Unreachable => (),
         }
 
