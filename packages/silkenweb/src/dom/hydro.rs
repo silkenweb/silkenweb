@@ -8,28 +8,11 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     dry::{SharedDryElement, SharedDryText},
-    private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
     wet::{WetElement, WetNode, WetText},
-    Dom, InstantiableDom, TrackSibling,
+    Hydro, TrackSibling,
 };
 use crate::{hydration::HydrationStats, node::element::Namespace};
-
-pub struct Hydro;
-
-impl Dom for Hydro {}
-
-impl private::Dom for Hydro {
-    type Element = HydroElement;
-    type Node = HydroNode;
-    type Text = HydroText;
-}
-
-impl InstantiableDom for Hydro {}
-
-impl private::InstantiableDom for Hydro {
-    type InstantiableElement = HydroElement;
-    type InstantiableNode = HydroNode;
-}
 
 // TODO: Come up with better names than wet and dry. "Fresh" for wet? "Dry"
 // represents either wet or dry really.

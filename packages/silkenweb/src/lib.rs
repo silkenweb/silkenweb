@@ -90,7 +90,7 @@
 //! [`mount`]: crate::mount
 use std::{cell::RefCell, collections::HashMap};
 
-use dom::wet::Wet;
+use dom::Wet;
 use node::Node;
 #[doc(inline)]
 pub use silkenweb_base::clone;

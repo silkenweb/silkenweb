@@ -1,7 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::dry::Dry, elements::html::*, node::Node, prelude::*, task::server::render_now_sync,
-    value::Sig,
+    dom::Dry, elements::html::*, node::Node, prelude::*, task::server::render_now_sync, value::Sig,
 };
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>

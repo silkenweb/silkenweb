@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{dom::hydro::Hydro, insert_component, mount_point, node::Node};
+use crate::{dom::Hydro, insert_component, mount_point, node::Node};
 
 /// Statistics about the hydration process.
 #[derive(Default)]

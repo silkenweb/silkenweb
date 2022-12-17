@@ -11,29 +11,12 @@ use super::{
     hydro::HydroNode,
     private::{self, DomElement},
     wet::{WetElement, WetNode},
-    Dom, InstantiableDom, TrackSibling,
+    Dry, TrackSibling,
 };
 use crate::{
     hydration::{remove_following_siblings, HydrationStats},
     node::element::Namespace,
 };
-
-pub struct Dry;
-
-impl Dom for Dry {}
-
-impl private::Dom for Dry {
-    type Element = DryElement;
-    type Node = DryNode;
-    type Text = DryText;
-}
-
-impl InstantiableDom for Dry {}
-
-impl private::InstantiableDom for Dry {
-    type InstantiableElement = DryElement;
-    type InstantiableNode = DryNode;
-}
 
 #[derive(Clone)]
 

@@ -5,27 +5,10 @@ use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
-    private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
-    Dom, InstantiableDom,
+    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+    Wet,
 };
 use crate::{node::element::Namespace, task::on_animation_frame};
-
-pub struct Wet;
-
-impl Dom for Wet {}
-
-impl private::Dom for Wet {
-    type Element = WetElement;
-    type Node = WetNode;
-    type Text = WetText;
-}
-
-impl InstantiableDom for Wet {}
-
-impl private::InstantiableDom for Wet {
-    type InstantiableElement = WetElement;
-    type InstantiableNode = WetNode;
-}
 
 #[derive(Clone)]
 pub struct WetElement {

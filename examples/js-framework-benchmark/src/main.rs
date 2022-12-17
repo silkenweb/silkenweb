@@ -14,7 +14,7 @@ use rand::{
 };
 use silkenweb::{
     clone,
-    dom::wet::Wet,
+    dom::Wet,
     elements::{
         html::{button, div, h1, span, table, tbody, Div, Span, Table, Td, Tr, A},
         AriaElement, ElementEvents, HtmlElement,
