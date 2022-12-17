@@ -33,8 +33,9 @@ macro_rules! isomorphic_test {
 #[cfg(target_arch = "wasm32")]
 type PlatformDom = dom::wet::Wet;
 
+// TODO: Tests for `Dry` (should use feature flags)
 #[cfg(not(target_arch = "wasm32"))]
-type PlatformDom = dom::hydro::Dry;
+type PlatformDom = dom::hydro::Hydro;
 
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {

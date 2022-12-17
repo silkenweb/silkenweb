@@ -7,7 +7,7 @@ use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
 use crate::{
-    dom::{hydro::Dry, private::DomText, wet::Wet, DefaultDom, Dom},
+    dom::{hydro::Hydro, private::DomText, wet::Wet, DefaultDom, Dom},
     hydration::HydrationStats,
 };
 
@@ -35,7 +35,7 @@ impl Node<Wet> {
     }
 }
 
-impl Node<Dry> {
+impl Node<Hydro> {
     pub(super) fn hydrate_child(
         self,
         parent: &web_sys::Node,

@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::hydro::Dry,
+    dom::hydro::Hydro,
     elements::{
         html::{Button, Div, P},
         ElementEvents, HtmlElement,
@@ -218,7 +218,7 @@ async fn app_container(id: &str, inner_html: &str) {
     query_element(id).set_inner_html(inner_html);
 }
 
-async fn test_hydrate(id: &str, app: impl Into<Node<Dry>>, expected_html: &str) {
+async fn test_hydrate(id: &str, app: impl Into<Node<Hydro>>, expected_html: &str) {
     render_now().await;
     hydrate(id, app).await;
 

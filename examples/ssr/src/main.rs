@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::hydro::Dry, elements::html::*, node::Node, prelude::*, task::server::render_now_sync,
+    dom::hydro::Hydro, elements::html::*, node::Node, prelude::*, task::server::render_now_sync,
     value::Sig,
 };
 
@@ -15,7 +15,8 @@ fn main() {
         }
     };
 
-    let element: Node<Dry> = Div::new()
+    // TODO: Use `Dry`
+    let element: Node<Hydro> = Div::new()
         .child(Button::new().on_click(inc).text("+"))
         .child(P::new().text(Sig(count_text)))
         .into();
