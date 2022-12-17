@@ -326,9 +326,7 @@ impl DomElement for HydroElement {
 
                 dry.children.push(child.clone());
             }
-            SharedHydroElement::Wet(wet) => {
-                wet.append_child(&child.wet());
-            }
+            SharedHydroElement::Wet(wet) => wet.append_child(&child.wet()),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -350,7 +348,7 @@ impl DomElement for HydroElement {
                 dry.children.insert(index, child.clone());
             }
             SharedHydroElement::Wet(wet) => {
-                wet.insert_child_before(index, &child.wet(), next_child.map(|c| c.wet()).as_ref());
+                wet.insert_child_before(index, &child.wet(), next_child.map(|c| c.wet()).as_ref())
             }
             SharedHydroElement::Unreachable => unreachable!(),
         }
@@ -370,7 +368,7 @@ impl DomElement for HydroElement {
                 dry.children[index] = new_child.clone();
             }
             SharedHydroElement::Wet(wet) => {
-                wet.replace_child(index, &new_child.wet(), &old_child.wet());
+                wet.replace_child(index, &new_child.wet(), &old_child.wet())
             }
             SharedHydroElement::Unreachable => unreachable!(),
         }
@@ -386,9 +384,7 @@ impl DomElement for HydroElement {
 
                 dry.children.remove(index);
             }
-            SharedHydroElement::Wet(wet) => {
-                wet.remove_child(index, &child.wet());
-            }
+            SharedHydroElement::Wet(wet) => wet.remove_child(index, &child.wet()),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -402,9 +398,7 @@ impl DomElement for HydroElement {
 
                 dry.children.clear();
             }
-            SharedHydroElement::Wet(wet) => {
-                wet.clear_children();
-            }
+            SharedHydroElement::Wet(wet) => wet.clear_children(),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
