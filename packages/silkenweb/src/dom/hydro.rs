@@ -14,8 +14,6 @@ use super::{
 };
 use crate::{hydration::HydrationStats, node::element::Namespace};
 
-// TODO: Come up with better names than wet and dry. "Fresh" for wet? "Dry"
-// represents either wet or dry really.
 #[derive(Clone)]
 pub struct HydroElement(Rc<RefCell<SharedHydroElement>>);
 
