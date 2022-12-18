@@ -63,7 +63,6 @@ impl HydrationStats {
         self.attributes_removed
     }
 
-    // TODO: Move this somewhere so we don't need pub(super)
     pub(super) fn node_added(&mut self, _elem: &web_sys::Node) {
         self.nodes_added += 1;
     }
