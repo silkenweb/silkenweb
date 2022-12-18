@@ -18,6 +18,7 @@ pub trait Dom: private::Dom {}
 
 pub trait InstantiableDom: Dom + private::InstantiableDom {}
 
+// TODO: Change this depending on features/platform
 pub type DefaultDom = Wet;
 
 pub struct Dry;
