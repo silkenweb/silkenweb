@@ -160,7 +160,7 @@ impl DomText for WetText {
 pub struct WetNode(web_sys::Node);
 
 impl WetNode {
-    pub(crate) fn dom_node(&self) -> &web_sys::Node {
+    pub fn dom_node(&self) -> &web_sys::Node {
         &self.0
     }
 }
