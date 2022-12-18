@@ -13,7 +13,6 @@ use crate::{node::element::Namespace, task::on_animation_frame};
 #[derive(Clone)]
 pub struct WetElement {
     element: web_sys::Element,
-    // TODO: Store event callbacks, unless wasm-bindgen weak-refs is enabled.
 }
 
 impl WetElement {
@@ -102,6 +101,11 @@ impl DomElement for WetElement {
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
+        // TODO: Store event callbacks, unless wasm-bindgen weak-refs is enabled.
+        // We need to return an `EventStore` that can be combined together. Underneath,
+        // it will be either empty (when weak-refs is enabled), or a Vec<Event>.
+        // `GenericElements` will have an `EventStore`, handled/combined in the same way
+        // a `resources`.
         self.element
             .add_event_listener_with_callback(name, Closure::new(f).into_js_value().unchecked_ref())
             .unwrap_throw();
