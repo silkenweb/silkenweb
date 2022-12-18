@@ -1,9 +1,5 @@
 use silkenweb::{
-    elements::html,
-    node::element::Element,
-    prelude::{HtmlElement, ParentElement},
-    value::SignalOrValue,
-    Value,
+    elements::html, node::element::Element, prelude::HtmlElement, value::SignalOrValue, Value, dom::Dom,
 };
 
 use crate::{css, Class};
@@ -746,14 +742,14 @@ pub trait Disabled: Element {
 
 impl<T: HtmlElement> SetSpacing for T {}
 impl<T: HtmlElement> SetBorder for T {}
-impl<T: ParentElement> SetOverflow for T {}
+impl<T: HtmlElement> SetOverflow for T {}
 impl<T: HtmlElement> SetColour for T {}
 impl<T: HtmlElement> SetAlign for T {}
-impl<T: ParentElement> SetDisplay for T {}
-impl<T: ParentElement> SetGap for T {}
+impl<T: HtmlElement> SetDisplay for T {}
+impl<T: HtmlElement> SetGap for T {}
 impl<T: HtmlElement> SetPosition for T {}
 
-impl Active for html::A {}
-impl Active for html::Button {}
+impl<D: Dom> Active for html::A<D> {}
+impl<D: Dom> Active for html::Button<D> {}
 
-impl Disabled for html::A {}
+impl<D: Dom> Disabled for html::A<D> {}

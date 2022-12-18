@@ -15,7 +15,7 @@ use silkenweb::{
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
-use crate::{css, dropdown::Menu, utility::SetDisplay, List};
+use crate::{css, dropdown::Menu, List};
 
 pub fn tab_bar() -> TabBar<Nav> {
     TabBar(nav().class(css::NAV).into(), PhantomData)
@@ -88,8 +88,6 @@ impl<Base> TabBar<Base> {
         )
     }
 }
-
-impl<Base> SetDisplay for TabBar<Base> {}
 
 impl<Base> From<TabBar<Base>> for Node {
     fn from(elem: TabBar<Base>) -> Self {

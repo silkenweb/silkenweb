@@ -1,5 +1,6 @@
 use silkenweb::{
-    elements::html::{div, Div, Ol, Ul},
+    dom::Dom,
+    elements::html::{Div, Ol, Ul, div},
     node::{element::GenericElement, Node},
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
@@ -40,12 +41,12 @@ impl From<GenericHtmlElement> for Node {
 }
 
 /// Shorthand for `div().flex_row()`
-pub fn row() -> Div {
+pub fn row<D: Dom>() -> Div<D> {
     div().flex_row()
 }
 
 /// Shorthand for `div().flex_column()`
-pub fn column() -> Div {
+pub fn column<D: Dom>() -> Div<D> {
     div().flex_column()
 }
 
