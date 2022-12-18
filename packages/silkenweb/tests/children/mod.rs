@@ -11,11 +11,7 @@ use futures_signals::{
 };
 use itertools::Itertools;
 use silkenweb::{
-    elements::html::{div, Div},
-    macros::Signal,
-    mount,
-    prelude::ParentElement,
-    task::render_now,
+    dom::Dom, elements::html::Div, macros::Signal, mount, prelude::ParentElement, task::render_now,
     value::Sig,
 };
 
@@ -88,7 +84,7 @@ async fn test_children(
 ) {
     create_app_container(APP_ID).await;
 
-    let mut parent = div();
+    let mut parent = Div::new();
     let optional_child_mutables: Vec<Mutable<bool>> = optional_children
         .iter()
         .map(|state| Mutable::new(state.initial))
@@ -144,11 +140,14 @@ async fn check(
     assert_eq!(app_html(APP_ID), div_html(inner_html))
 }
 
-fn child(index: usize) -> Div {
-    div().text(format!("{index}"))
+fn child<D: Dom>(index: usize) -> Div<D> {
+    Div::new().text(format!("{index}"))
 }
 
-fn optional_child(index: usize, is_some: &Mutable<bool>) -> impl Signal<Item = Option<Div>> {
+fn optional_child<D: Dom>(
+    index: usize,
+    is_some: &Mutable<bool>,
+) -> impl Signal<Item = Option<Div<D>>> {
     is_some.signal_ref(move |is_some| is_some.then(|| child(index)))
 }
 

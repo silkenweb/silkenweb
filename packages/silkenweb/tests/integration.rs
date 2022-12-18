@@ -1,7 +1,8 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
+    dom::Wet,
     elements::{
-        html::{button, div, p, P},
+        html::{Button, Div, P},
         ElementEvents,
     },
     mount,
@@ -46,10 +47,10 @@ async fn simple_counter() {
 
     mount(
         APP_ID,
-        div()
+        Div::new()
             .id(COUNTER_ID)
             .child(
-                button()
+                Button::new()
                     .id(BUTTON_ID)
                     .on_click(move |_, _| {
                         count.replace_with(|i| *i + 1);
@@ -80,7 +81,7 @@ async fn reactive_text() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(Sig(text_signal.signal())),
+        P::new().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -94,7 +95,7 @@ async fn reactive_text_reference() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        p().id("text").text(Sig(text_signal.signal())),
+        P::new().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -111,7 +112,8 @@ async fn multiple_reactive_text() {
 
     mount(
         APP_ID,
-        p().id(TEXT_ID)
+        P::new()
+            .id(TEXT_ID)
             .text(Sig(first_text.signal()))
             .text(Sig(second_text.signal())),
     );
@@ -134,7 +136,7 @@ async fn multiple_reactive_text() {
     );
 }
 
-async fn verify_reactive_text(paragraph: P, text_id: &str, text: &mut Mutable<&'static str>) {
+async fn verify_reactive_text(paragraph: P<Wet>, text_id: &str, text: &mut Mutable<&'static str>) {
     mount(APP_ID, paragraph);
     render_now().await;
     assert_eq!("0", text_content(text_id));
