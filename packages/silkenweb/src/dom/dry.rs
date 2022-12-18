@@ -270,9 +270,9 @@ impl<Node: TrackSibling> SharedDryElement<Node> {
     }
 
     pub fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Node>) {
-        // TODO: We need to support shadow root in dry nodes, we just don't print it yet
-        // (as there's no way to).
-        todo!()
+        unimplemented!(
+            "`attach_shadow_children` will likely be removed in favour of Declarative Shadow Roots"
+        )
     }
 
     pub fn add_class(&mut self, name: &str) {

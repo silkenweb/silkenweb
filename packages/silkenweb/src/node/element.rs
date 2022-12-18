@@ -260,10 +260,6 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 }
 
 impl<D: Dom> ShadowRootParent<D> for GenericElement<D> {
-    /// Currently, there's no way to send the shadow root as plain HTML, until
-    /// we get [Declarative Shadow Root](`<template shadowroot="open">...`).
-    ///
-    /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
     fn attach_shadow_children(
         mut self,
         children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
@@ -607,7 +603,12 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
         -> Self;
 }
 
-/// An element that is allowed to have a shadow root
+/// An element that is allowed to have a shadow root.
+///
+/// Once [Declarative Shadow Root] is available, this will likely be deprecated
+/// in favour of using HTML directly: `<template shadowroot="open">...`.
+///
+/// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
 pub trait ShadowRootParent<D: Dom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
