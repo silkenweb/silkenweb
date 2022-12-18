@@ -16,10 +16,6 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 mod children;
-#[cfg(any(target_arch = "wasm32", feature = "server-side-render"))]
-mod element;
-#[cfg(feature = "hydration")]
-mod hydration;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

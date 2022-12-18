@@ -6,6 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb", features = ["hydration"] }
+silkenweb = { path = "../../packages/silkenweb" }
 futures-signals = "0.3.31"
 web-log = "1.0.1"
