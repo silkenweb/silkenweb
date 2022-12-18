@@ -1,13 +1,17 @@
+use std::marker::PhantomData;
+
 use self::{
     dry::{DryElement, DryNode, DryText},
     hydro::{HydroElement, HydroNode, HydroText},
+    template::{TemplateElement, TemplateNode, TemplateText},
     wet::{WetElement, WetNode, WetText},
 };
 
-pub(crate) mod private;
+pub(super) mod private;
 
 mod dry;
 mod hydro;
+mod template;
 mod wet;
 
 pub trait Dom: private::Dom {}
@@ -69,4 +73,14 @@ impl InstantiableDom for Wet {}
 impl private::InstantiableDom for Wet {
     type InstantiableElement = WetElement;
     type InstantiableNode = WetNode;
+}
+
+pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
+
+impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {}
+
+impl<D: InstantiableDom, Param: 'static> private::Dom for Template<D, Param> {
+    type Element = TemplateElement<D, Param>;
+    type Node = TemplateNode<D, Param>;
+    type Text = TemplateText<D>;
 }

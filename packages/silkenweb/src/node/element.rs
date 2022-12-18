@@ -25,21 +25,19 @@ use silkenweb_base::{clone, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::{child_vec::ChildVec, template::Template};
+use self::child_vec::ChildVec;
 use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{
         private::{DomElement, DomText},
-        DefaultDom, Dom, InstantiableDom,
+        DefaultDom, Dom, InstantiableDom, Template,
     },
     node::text,
     task,
 };
 
 mod child_vec;
-
-pub mod template;
 
 /// Build an HTML element.
 pub struct GenericElement<D: Dom = DefaultDom> {
@@ -65,6 +63,21 @@ impl<D: Dom> GenericElement<D> {
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
+    }
+
+    pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
+        Self {
+            element,
+            static_child_count,
+            child_vec: None,
+            resources: Vec::new(),
+            #[cfg(debug_assertions)]
+            attributes: HashSet::new(),
+        }
+    }
+
+    pub(crate) fn store_child(&mut self, child: Self) {
+        self.resources.append(&mut child.build().resources);
     }
 
     fn check_attribute_unique(&mut self, name: &str) {

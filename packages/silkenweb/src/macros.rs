@@ -238,7 +238,7 @@ macro_rules! dom_element {
             }
         }
 
-        impl<Dom, InitParam> $camel_name<$crate::node::element::template::Template<Dom, InitParam>>
+        impl<Dom, InitParam> $camel_name<$crate::dom::Template<Dom, InitParam>>
         where
             Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
