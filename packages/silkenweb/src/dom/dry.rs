@@ -13,7 +13,7 @@ use super::{
     wet::{WetElement, WetNode},
     Dry, TrackSibling,
 };
-use crate::{hydration::HydrationStats, node::element::Namespace, remove_following_siblings};
+use crate::{hydration::HydrationStats, node::element::Namespace, remove_children_from};
 
 #[derive(Clone)]
 
@@ -412,7 +412,7 @@ impl SharedDryElement<HydroNode> {
             Self::hydrate_with_new(dom_elem, child, tracker);
         }
 
-        remove_following_siblings(dom_elem, current_child);
+        remove_children_from(dom_elem, current_child);
 
         for event in self.hydrate_actions {
             event(&mut elem);

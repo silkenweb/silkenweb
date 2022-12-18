@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{dom::Hydro, insert_component, mount_point, node::Node, remove_following_siblings};
+use crate::{dom::Hydro, insert_component, mount_point, node::Node, remove_children_from};
 
 /// Statistics about the hydration process.
 #[derive(Default)]
@@ -183,7 +183,7 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Hydro>>) -> HydrationStats {
     let wet_node = if let Some(hydration_point) = mount_point.first_child() {
         let wet_node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
 
-        remove_following_siblings(&mount_point, wet_node.dom_node().next_sibling());
+        remove_children_from(&mount_point, wet_node.dom_node().next_sibling());
         wet_node
     } else {
         let wet_node = node.into_wet();
