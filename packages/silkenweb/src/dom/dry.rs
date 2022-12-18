@@ -189,7 +189,7 @@ impl TrackSibling for DryNode {
     }
 }
 
-pub(super) struct SharedDryElement<Node> {
+pub struct SharedDryElement<Node> {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
@@ -509,7 +509,7 @@ impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
     }
 }
 
-pub(super) struct SharedDryText<Node> {
+pub struct SharedDryText<Node> {
     text: String,
     next_sibling: Option<Node>,
 }
