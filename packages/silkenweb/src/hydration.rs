@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-use crate::{dom::Hydro, insert_component, mount_point, node::Node};
+use crate::{dom::Hydro, insert_component, mount_point, node::Node, remove_following_siblings};
 
 /// Statistics about the hydration process.
 #[derive(Default)]
@@ -196,13 +196,4 @@ pub async fn hydrate(id: &str, node: impl Into<Node<Hydro>>) -> HydrationStats {
     insert_component(id, mount_point.into(), wet_node);
 
     stats
-}
-
-/// Remove `child` and all siblings after `child`
-pub(super) fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
-    while let Some(node) = child {
-        let next_child = node.next_sibling();
-        parent.remove_child(&node).unwrap_throw();
-        child = next_child;
-    }
 }

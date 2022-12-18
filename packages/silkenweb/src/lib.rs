@@ -148,6 +148,15 @@ pub fn mount(id: &str, node: impl Into<Node<Wet>>) {
     insert_component(id, mount_point.into(), node);
 }
 
+/// Unmount an element.
+///
+/// This is mostly useful for testing and checking for memory leaks
+pub fn unmount(id: &str) {
+    if let Some((parent, child)) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
+        parent.remove_child(child.dom_node()).unwrap_throw();
+    }
+}
+
 fn mount_point(id: &str) -> web_sys::Element {
     base_document::get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
@@ -163,12 +172,12 @@ fn insert_component(id: &str, parent: web_sys::Node, child: Node<Wet>) {
     }
 }
 
-/// Unmount an element.
-///
-/// This is mostly useful for testing and checking for memory leaks
-pub fn unmount(id: &str) {
-    if let Some((parent, child)) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
-        parent.remove_child(child.dom_node()).unwrap_throw();
+/// Remove `child` and all siblings after `child`
+fn remove_following_siblings(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
+    while let Some(node) = child {
+        let next_child = node.next_sibling();
+        parent.remove_child(&node).unwrap_throw();
+        child = next_child;
     }
 }
 

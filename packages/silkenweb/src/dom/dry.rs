@@ -13,10 +13,7 @@ use super::{
     wet::{WetElement, WetNode},
     Dry, TrackSibling,
 };
-use crate::{
-    hydration::{remove_following_siblings, HydrationStats},
-    node::element::Namespace,
-};
+use crate::{hydration::HydrationStats, node::element::Namespace, remove_following_siblings};
 
 #[derive(Clone)]
 
