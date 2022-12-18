@@ -77,3 +77,7 @@ pub trait InstantiableDomNode: Display + Clone {
 
     fn next_sibling(&self) -> Self;
 }
+
+pub trait TrackSibling: Clone {
+    fn set_next_sibling(&self, next_sibling: Option<&Self>);
+}

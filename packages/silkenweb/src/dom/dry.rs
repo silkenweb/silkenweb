@@ -9,9 +9,9 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::{self, DomElement},
+    private::{self, DomElement, TrackSibling},
     wet::{WetElement, WetNode},
-    Dry, TrackSibling,
+    Dry,
 };
 use crate::{hydration::HydrationStats, node::element::Namespace, remove_children_from};
 

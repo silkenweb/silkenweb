@@ -8,9 +8,9 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     dry::{SharedDryElement, SharedDryText},
-    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode, TrackSibling},
     wet::{WetElement, WetNode, WetText},
-    Hydro, TrackSibling,
+    Hydro,
 };
 use crate::{hydration::HydrationStats, node::element::Namespace};
 

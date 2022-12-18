@@ -20,10 +20,6 @@ pub trait InstantiableDom: Dom + private::InstantiableDom {}
 
 pub type DefaultDom = Wet;
 
-trait TrackSibling: Clone {
-    fn set_next_sibling(&self, next_sibling: Option<&Self>);
-}
-
 pub struct Dry;
 
 impl Dom for Dry {}
