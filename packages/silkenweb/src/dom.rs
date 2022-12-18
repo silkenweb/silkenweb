@@ -18,8 +18,25 @@ pub trait Dom: private::Dom {}
 
 pub trait InstantiableDom: Dom + private::InstantiableDom {}
 
-// TODO: Change this depending on features/platform
+#[cfg(any(
+    feature = "client-side-render",
+    all(
+        not(feature = "client-side-render"),
+        not(feature = "server-side-render"),
+        not(feature = "hydration")
+    )
+))]
 pub type DefaultDom = Wet;
+
+#[cfg(all(feature = "hydration", not(feature = "client-side-render"),))]
+pub type DefaultDom = Hydro;
+
+#[cfg(all(
+    feature = "server-side-render",
+    not(feature = "client-side-render"),
+    not(feature = "hydration")
+))]
+pub type DefaultDom = Dry;
 
 pub struct Dry;
 

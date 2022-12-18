@@ -13,6 +13,7 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [features]
+# TODO: Document features in lib.rs
 client-side-render = []
 server-side-render = []
 hydration = []
