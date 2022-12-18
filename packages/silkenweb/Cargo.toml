@@ -17,6 +17,7 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 client-side-render = []
 server-side-render = []
 hydration = []
+weak-refs = []
 
 [dependencies]
 discard = "1.0.4"

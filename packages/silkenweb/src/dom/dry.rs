@@ -9,7 +9,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::{self, DomElement, TrackSibling},
+    private::{self, DomElement, EventStore, TrackSibling},
     wet::{WetElement, WetNode},
     Dry,
 };
@@ -89,6 +89,10 @@ impl private::DomElement for DryElement {
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
+    }
+
+    fn events(&mut self) -> EventStore {
+        EventStore::default()
     }
 }
 

@@ -8,7 +8,9 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     dry::{SharedDryElement, SharedDryText},
-    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode, TrackSibling},
+    private::{
+        DomElement, DomText, EventStore, InstantiableDomElement, InstantiableDomNode, TrackSibling,
+    },
     wet::{WetElement, WetNode, WetText},
     Hydro,
 };
@@ -213,6 +215,14 @@ impl DomElement for HydroElement {
         match &mut *self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.effect(f),
             SharedHydroElement::Wet(wet) => wet.effect(f),
+            SharedHydroElement::Unreachable => unreachable!(),
+        }
+    }
+
+    fn events(&mut self) -> EventStore {
+        match &mut *self.borrow_mut() {
+            SharedHydroElement::Dry(_) => EventStore::default(),
+            SharedHydroElement::Wet(wet) => wet.events(),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }

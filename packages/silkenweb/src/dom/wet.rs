@@ -1,11 +1,11 @@
 use std::fmt;
 
 use silkenweb_base::{document, intern_str};
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
-    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+    private::{DomElement, DomText, EventStore, InstantiableDomElement, InstantiableDomNode},
     Wet,
 };
 use crate::{node::element::Namespace, task::on_animation_frame};
@@ -13,11 +13,15 @@ use crate::{node::element::Namespace, task::on_animation_frame};
 #[derive(Clone)]
 pub struct WetElement {
     element: web_sys::Element,
+    events: EventStore,
 }
 
 impl WetElement {
     pub fn from_element(element: web_sys::Element) -> Self {
-        Self { element }
+        Self {
+            element,
+            events: EventStore::default(),
+        }
     }
 }
 
@@ -36,7 +40,10 @@ impl DomElement for WetElement {
             _ => document::create_element_ns(intern_str(ns.as_str()), tag),
         };
 
-        Self { element }
+        Self {
+            element,
+            events: EventStore::default(),
+        }
     }
 
     fn append_child(&mut self, child: &WetNode) {
@@ -101,14 +108,7 @@ impl DomElement for WetElement {
     }
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        // TODO: Store event callbacks, unless wasm-bindgen weak-refs is enabled.
-        // We need to return an `EventStore` that can be combined together. Underneath,
-        // it will be either empty (when weak-refs is enabled), or a Vec<Event>.
-        // `GenericElements` will have an `EventStore`, handled/combined in the same way
-        // a `resources`.
-        self.element
-            .add_event_listener_with_callback(name, Closure::new(f).into_js_value().unchecked_ref())
-            .unwrap_throw();
+        self.events.add_listener(&self.element, name, f)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
@@ -118,6 +118,10 @@ impl DomElement for WetElement {
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));
+    }
+
+    fn events(&mut self) -> EventStore {
+        self.events.clone()
     }
 }
 
@@ -129,6 +133,7 @@ impl InstantiableDomElement for WetElement {
                 .clone_node_with_deep(true)
                 .unwrap()
                 .unchecked_into(),
+            events: EventStore::default(),
         }
     }
 }
@@ -161,20 +166,23 @@ impl DomText for WetText {
 }
 
 #[derive(Clone)]
-pub struct WetNode(web_sys::Node);
+pub struct WetNode {
+    node: web_sys::Node,
+    events: EventStore,
+}
 
 impl WetNode {
     pub fn dom_node(&self) -> &web_sys::Node {
-        &self.0
+        &self.node
     }
 }
 
 impl fmt::Display for WetNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(elem) = self.0.dyn_ref::<web_sys::Element>() {
+        if let Some(elem) = self.node.dyn_ref::<web_sys::Element>() {
             f.write_str(&elem.outer_html())
         } else {
-            f.write_str(&self.0.text_content().expect("No text content found"))
+            f.write_str(&self.node.text_content().expect("No text content found"))
         }
     }
 }
@@ -184,27 +192,40 @@ impl InstantiableDomNode for WetNode {
 
     fn into_element(self) -> WetElement {
         WetElement {
-            element: self.0.unchecked_into(),
+            element: self.node.unchecked_into(),
+            events: self.events,
         }
     }
 
     fn first_child(&self) -> Self {
-        Self(self.0.first_child().unwrap_throw())
+        Self {
+            node: self.node.first_child().unwrap_throw(),
+            events: EventStore::default(),
+        }
     }
 
     fn next_sibling(&self) -> Self {
-        Self(self.0.next_sibling().unwrap_throw())
+        Self {
+            node: self.node.next_sibling().unwrap_throw(),
+            events: EventStore::default(),
+        }
     }
 }
 
 impl From<WetElement> for WetNode {
     fn from(element: WetElement) -> Self {
-        Self(element.element.into())
+        Self {
+            node: element.element.into(),
+            events: element.events,
+        }
     }
 }
 
 impl From<WetText> for WetNode {
     fn from(text: WetText) -> Self {
-        Self(text.0.into())
+        Self {
+            node: text.0.into(),
+            events: EventStore::default(),
+        }
     }
 }

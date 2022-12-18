@@ -30,7 +30,7 @@ use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{
-        private::{DomElement, DomText},
+        private::{DomElement, DomText, EventStore},
         DefaultDom, Dom, InstantiableDom, Template,
     },
     node::text,
@@ -44,6 +44,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     resources: Vec<Resource>,
+    events: EventStore,
     element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -59,6 +60,7 @@ impl<D: Dom> GenericElement<D> {
             static_child_count: 0,
             child_vec: None,
             resources: Vec::new(),
+            events: EventStore::default(),
             element: D::Element::new(namespace, tag),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
@@ -71,13 +73,16 @@ impl<D: Dom> GenericElement<D> {
             static_child_count,
             child_vec: None,
             resources: Vec::new(),
+            events: EventStore::default(),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
     }
 
     pub(crate) fn store_child(&mut self, child: Self) {
-        self.resources.append(&mut child.build().resources);
+        let mut child = child.build();
+        self.resources.append(&mut child.resources);
+        self.events.combine(child.events);
     }
 
     fn check_attribute_unique(&mut self, name: &str) {
@@ -211,6 +216,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
                     parent.element.append_child(child.as_node());
                     parent.resources.extend(child.resources);
+                    parent.events.combine(child.events);
                 }
 
                 parent
@@ -393,6 +399,7 @@ impl<D: Dom> From<GenericElement<D>> for Node<D> {
         Self {
             node: elem.element.into(),
             resources: elem.resources,
+            events: elem.events,
         }
     }
 }

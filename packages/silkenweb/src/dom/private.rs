@@ -56,6 +56,8 @@ pub trait DomElement: Into<Self::Node> + Clone + 'static {
     fn try_dom_element(&self) -> Option<web_sys::Element>;
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
+
+    fn events(&mut self) -> EventStore;
 }
 
 pub trait DomText: Clone + 'static {
@@ -81,3 +83,85 @@ pub trait InstantiableDomNode: Display + Clone {
 pub trait TrackSibling: Clone {
     fn set_next_sibling(&self, next_sibling: Option<&Self>);
 }
+
+#[cfg(feature = "weak-refs")]
+mod event {
+    use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+
+    #[derive(Default, Clone)]
+    pub struct EventStore {}
+
+    impl EventStore {
+        pub fn add_listener(
+            &mut self,
+            element: &web_sys::Element,
+            name: &'static str,
+            f: impl FnMut(JsValue) + 'static,
+        ) {
+            element
+                .add_event_listener_with_callback(
+                    name,
+                    Closure::new(f).into_js_value().unchecked_ref(),
+                )
+                .unwrap_throw();
+        }
+
+        pub fn combine(&mut self, _other: Self) {}
+    }
+}
+
+#[cfg(not(feature = "weak-refs"))]
+mod event {
+    use std::{rc::Rc, cell::RefCell};
+
+    use wasm_bindgen::{JsValue, prelude::Closure, UnwrapThrowExt, JsCast};
+
+    #[derive(Default, Clone)]
+    pub struct EventStore(Rc<RefCell<Vec<EventCallback>>>);
+
+    impl EventStore {
+        /// `f` must be `'static` as JS callbacks are called once the stack
+        /// frame is finished. See the [Closure::wrap] and
+        /// <https://github.com/rustwasm/wasm-bindgen/issues/1914#issuecomment-566488497>
+        pub fn add_listener(
+            &mut self,
+            element: &web_sys::Element,
+            name: &'static str,
+            f: impl FnMut(JsValue) + 'static,
+        ) {
+            let callback = Closure::new(f);
+            element
+                .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
+                .unwrap_throw();
+
+            self.0.borrow_mut().push(EventCallback {
+                element: element.clone(),
+                name,
+                callback,
+            });
+        }
+
+        pub fn combine(&mut self, other: Self) {
+            self.0.borrow_mut().append(&mut other.0.borrow_mut());
+        }
+    }
+
+    pub struct EventCallback {
+        element: web_sys::Element,
+        name: &'static str,
+        callback: Closure<dyn FnMut(JsValue)>,
+    }
+
+    impl Drop for EventCallback {
+        fn drop(&mut self) {
+            self.element
+                .remove_event_listener_with_callback(
+                    self.name,
+                    self.callback.as_ref().as_ref().unchecked_ref(),
+                )
+                .unwrap_throw();
+        }
+    }
+}
+
+pub use event::EventStore;

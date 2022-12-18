@@ -10,6 +10,8 @@ use crate::{
     node::element::{GenericElement, Namespace},
 };
 
+use super::private::EventStore;
+
 pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
 
 impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {}
@@ -125,6 +127,10 @@ where
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
+    }
+
+    fn events(&mut self) -> EventStore {
+        self.element.events()
     }
 }
 
