@@ -192,7 +192,7 @@ macro_rules! dom_element {
             #[doc = ""]
         )?
         $(#[$elem_meta])*
-        pub fn $snake_name() -> $camel_name {
+        pub fn $snake_name<D:$crate::dom::Dom>() -> $camel_name<D> {
             $camel_name::new()
         }
 
