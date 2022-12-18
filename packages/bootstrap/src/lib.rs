@@ -1,6 +1,6 @@
 use silkenweb::{
     dom::Dom,
-    elements::html::{Div, Ol, Ul, div},
+    elements::html::{div, Div, Ol, Ul},
     node::{element::GenericElement, Node},
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };

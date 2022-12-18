@@ -1,5 +1,6 @@
 use silkenweb::{
-    elements::html, node::element::Element, prelude::HtmlElement, value::SignalOrValue, Value, dom::Dom,
+    dom::Dom, elements::html, node::element::Element, prelude::HtmlElement, value::SignalOrValue,
+    Value,
 };
 
 use crate::{css, Class};

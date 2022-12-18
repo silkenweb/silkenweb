@@ -1,7 +1,7 @@
 use derive_more::Into;
 use silkenweb::{
     dom::{DefaultDom, Dom},
-    elements::html::{Span, span},
+    elements::html::{span, Span},
     node::{
         element::{Element, GenericElement},
         Node,

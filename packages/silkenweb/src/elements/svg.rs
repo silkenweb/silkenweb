@@ -7,7 +7,7 @@ use self::{
     },
     content_type::{AutoOrLength, Length},
 };
-use crate::{elements::svg::content_type::NumberOrPercentage, dom::Dom};
+use crate::{dom::Dom, elements::svg::content_type::NumberOrPercentage};
 
 pub mod attributes;
 pub mod content_type;
