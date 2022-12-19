@@ -1,5 +1,6 @@
 use derive_more::Into;
 use silkenweb::{
+    dom::{DefaultDom, Dom},
     elements::html,
     node::{
         element::{Element, GenericElement},
@@ -13,13 +14,13 @@ use silkenweb::{
 use crate::{css, icon::Icon, utility::Colour, Class, GenericHtmlElement};
 
 #[derive(Value, Into, Element, HtmlElement, ElementEvents, HtmlElementEvents, AriaElement)]
-pub struct Button(GenericHtmlElement);
+pub struct Button<D: Dom = DefaultDom>(GenericHtmlElement<D>);
 
-pub fn button<'a>(
+pub fn button<'a, D: Dom>(
     button_type: &str,
     text: impl RefSignalOrValue<'a, Item = impl AsRef<str> + Into<String> + 'a>,
     style: impl SignalOrValue<Item = ButtonStyle>,
-) -> Button {
+) -> Button<D> {
     Button(
         GenericHtmlElement(html::button().r#type(button_type).class(css::BTN).into())
             .class(style.map(ButtonStyle::class)),
@@ -27,11 +28,11 @@ pub fn button<'a>(
     .text(text)
 }
 
-pub fn icon_button(
+pub fn icon_button<D: Dom>(
     button_type: &str,
-    icon: impl SignalOrValue<Item = impl Value + Into<Icon> + 'static>,
+    icon: impl SignalOrValue<Item = impl Value + Into<Icon<D>> + 'static>,
     style: impl SignalOrValue<Item = ButtonStyle>,
-) -> Button {
+) -> Button<D> {
     Button(
         GenericHtmlElement(html::button().r#type(button_type).class(css::BTN).into())
             .class(style.map(ButtonStyle::class)),
@@ -56,32 +57,32 @@ impl ButtonStyle {
     }
 }
 
-impl Button {
+impl<D: Dom> Button<D> {
     pub fn text<'a>(
         self,
         text: impl RefSignalOrValue<'a, Item = impl Into<String> + AsRef<str> + 'a>,
-    ) -> Button {
+    ) -> Self {
         Button(GenericHtmlElement(self.0 .0.text(text)))
     }
 
     pub fn icon(
         self,
-        icon: impl SignalOrValue<Item = impl Value + Into<Icon> + 'static>,
-    ) -> Button {
+        icon: impl SignalOrValue<Item = impl Value + Into<Icon<D>> + 'static>,
+    ) -> Self {
         Button(GenericHtmlElement(
             self.0 .0.child(icon.map(|icon| icon.into())),
         ))
     }
 }
 
-impl From<Button> for GenericElement {
-    fn from(elem: Button) -> Self {
+impl<D: Dom> From<Button<D>> for GenericElement<D> {
+    fn from(elem: Button<D>) -> Self {
         elem.0.into()
     }
 }
 
-impl From<Button> for Node {
-    fn from(elem: Button) -> Self {
+impl<D: Dom> From<Button<D>> for Node<D> {
+    fn from(elem: Button<D>) -> Self {
         elem.0.into()
     }
 }

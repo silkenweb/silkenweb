@@ -1,5 +1,6 @@
 use silkenweb::{
     attribute::AsAttribute,
+    dom::{DefaultDom, Dom},
     elements::{
         html::{div, Div},
         AriaElement,
@@ -16,32 +17,32 @@ use silkenweb::{
 use crate::{button::Button, css, dropdown::Dropdown};
 
 #[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct ButtonGroup(Div);
+pub struct ButtonGroup<D: Dom = DefaultDom>(Div<D>);
 
-pub fn button_group<'a>(
+pub fn button_group<'a, D: Dom>(
     name: impl RefSignalOrValue<'a, Item = impl AsAttribute<String>>,
-) -> ButtonGroup {
+) -> ButtonGroup<D> {
     ButtonGroup(div().role("group").aria_label(name).class(css::BTN_GROUP))
 }
 
-impl ButtonGroup {
-    pub fn button(self, elem: impl SignalOrValue<Item = Button>) -> Self {
+impl<D: Dom> ButtonGroup<D> {
+    pub fn button(self, elem: impl SignalOrValue<Item = Button<D>>) -> Self {
         Self(self.0.child(elem))
     }
 
-    pub fn dropdown(self, elem: impl SignalOrValue<Item = Dropdown>) -> Self {
+    pub fn dropdown(self, elem: impl SignalOrValue<Item = Dropdown<D>>) -> Self {
         Self(self.0.child(elem.map(|elem| elem.class(css::BTN_GROUP))))
     }
 }
 
-impl From<ButtonGroup> for GenericElement {
-    fn from(elem: ButtonGroup) -> Self {
+impl<D: Dom> From<ButtonGroup<D>> for GenericElement<D> {
+    fn from(elem: ButtonGroup<D>) -> Self {
         elem.0.into()
     }
 }
 
-impl From<ButtonGroup> for Node {
-    fn from(elem: ButtonGroup) -> Self {
+impl<D: Dom> From<ButtonGroup<D>> for Node<D> {
+    fn from(elem: ButtonGroup<D>) -> Self {
         elem.0.into()
     }
 }

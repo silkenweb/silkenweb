@@ -1,5 +1,6 @@
 use derive_more::Into;
 use silkenweb::{
+    dom::{DefaultDom, Dom},
     elements::html::{i, I},
     node::{
         element::{Element, GenericElement},
@@ -24,24 +25,24 @@ pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> Icon {
 }
 
 #[derive(Value, Element, ElementEvents, HtmlElementEvents, Into)]
-pub struct Icon(I);
+pub struct Icon<D: Dom = DefaultDom>(I<D>);
 
-impl Icon {
+impl<D: Dom> Icon<D> {
     pub fn colour(self, colour: impl SignalOrValue<Item = Colour>) -> Self {
         self.class(colour.map(Colour::text))
     }
 }
 
-impl SetSpacing for Icon {}
+impl<D: Dom> SetSpacing for Icon<D> {}
 
-impl From<Icon> for GenericElement {
-    fn from(icon: Icon) -> Self {
+impl<D: Dom> From<Icon<D>> for GenericElement<D> {
+    fn from(icon: Icon<D>) -> Self {
         icon.0.into()
     }
 }
 
-impl From<Icon> for Node {
-    fn from(icon: Icon) -> Self {
+impl<D: Dom> From<Icon<D>> for Node<D> {
+    fn from(icon: Icon<D>) -> Self {
         icon.0.into()
     }
 }
