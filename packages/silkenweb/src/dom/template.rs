@@ -62,7 +62,6 @@ where
         self.initialization_fns.append_child(child.clone());
     }
 
-    // TODO: Test
     fn insert_child_before(
         &mut self,
         index: usize,
@@ -74,7 +73,6 @@ where
         self.initialization_fns.insert_child(index, child.clone());
     }
 
-    // TODO: Test
     fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
         self.element
             .replace_child(index, &new_child.node, &old_child.node);
@@ -82,13 +80,11 @@ where
             .replace_child(index, new_child.clone());
     }
 
-    // TODO: Test
     fn remove_child(&mut self, index: usize, child: &Self::Node) {
         self.element.remove_child(index, &child.node);
         self.initialization_fns.remove_child(index);
     }
 
-    // TODO: Test
     fn clear_children(&mut self) {
         self.element.clear_children();
         self.initialization_fns.clear_children();

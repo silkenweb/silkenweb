@@ -78,8 +78,12 @@ isomorphic_test! {
         check(&template, (), r#"<div><div>0</div></div>"#).await;
         children.lock_mut().push(1);
         check(&template, (), r#"<div><div>0</div><div>1</div></div>"#).await;
-        children.lock_mut().remove(0);
-        check(&template, (), r#"<div><div>1</div></div>"#).await;
+        children.lock_mut().insert(1, 2);
+        check(&template, (), r#"<div><div>0</div><div>2</div><div>1</div></div>"#).await;
+        children.lock_mut().set(1, 3);
+        check(&template, (), r#"<div><div>0</div><div>3</div><div>1</div></div>"#).await;
+        children.lock_mut().remove(1);
+        check(&template, (), r#"<div><div>0</div><div>1</div></div>"#).await;
         children.lock_mut().clear();
         check(&template, (), r#"<div></div>"#).await;
     }
