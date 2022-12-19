@@ -452,7 +452,8 @@ pub trait Element: Sized {
     ///
     /// ```no_run
     /// # use web_sys::HtmlInputElement;
-    /// # use silkenweb::{elements::html::input, node::element::Element};
+    /// # use silkenweb::{elements::html::{input, Input}, node::element::Element};
+    /// # let input: Input =
     /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
     /// ```
     fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
@@ -482,7 +483,7 @@ pub trait Element: Sized {
     /// let text = Mutable::new("".to_string());
     /// let input = input();
     /// let input_handle = input.handle();
-    /// let app = div()
+    /// let app: Div = div()
     ///     .child(input)
     ///     .child(button().text("Read Input").on_click({
     ///         clone!(text);
@@ -516,7 +517,8 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # Example
     ///
     /// ```no_run
-    /// # use silkenweb::{elements::html::div, node::element::ParentElement};
+    /// # use silkenweb::{elements::html::{div, Div}, node::element::ParentElement};
+    /// # let d: Div =
     /// div().text("Hello, world!");
     /// ```
     fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
@@ -529,7 +531,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use silkenweb::{
-    /// #     elements::html::div,
+    /// #     elements::html::{div, Div},
     /// #     node::element::{
     /// #         ParentElement,
     /// #         Element
@@ -538,6 +540,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # };
     /// let text = Mutable::new("hello");
     ///
+    /// # let d: Div =
     /// div().child(Sig(text.signal().map(|text| div().text(text))));
     /// ```
     // TODO: Doc for signal variant ^^^^
@@ -548,9 +551,10 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use silkenweb::{
-    /// #     elements::html::{div, p},
+    /// #     elements::html::{div, Div, p},
     /// #     node::element::ParentElement,
     /// # };
+    /// # let div: Div =
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
     fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node<D>> + 'static>) -> Self {
@@ -565,9 +569,10 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     ///
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
-    /// # use silkenweb::{elements::html::div, node::element::{ParentElement, Element}, value::Sig};
+    /// # use silkenweb::{elements::html::{div, Div}, node::element::{ParentElement, Element}, value::Sig};
     /// let text = Mutable::new("hello");
     ///
+    /// # let div: Div =
     /// div().optional_child(Sig(text.signal().map(|text| {
     ///     if text.is_empty() {
     ///         None
@@ -588,9 +593,10 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// ```no_run
     /// # use futures_signals::signal::{Mutable, SignalExt};
     /// # use silkenweb::{
-    /// #     elements::html::{div, p},
+    /// #     elements::html::{div, Div, p},
     /// #     node::element::ParentElement,
     /// # };
+    /// # let div: Div =
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
     fn children(self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self;

@@ -11,7 +11,12 @@ use futures_signals::{
 };
 use itertools::Itertools;
 use silkenweb::{
-    dom::Dom, elements::html::Div, macros::Signal, mount, prelude::ParentElement, task::render_now,
+    dom::Dom,
+    elements::html::{div, Div},
+    macros::Signal,
+    mount,
+    prelude::ParentElement,
+    task::render_now,
     value::Sig,
 };
 
@@ -84,7 +89,7 @@ async fn test_children(
 ) {
     create_app_container(APP_ID).await;
 
-    let mut parent = Div::new();
+    let mut parent = div();
     let optional_child_mutables: Vec<Mutable<bool>> = optional_children
         .iter()
         .map(|state| Mutable::new(state.initial))
@@ -141,7 +146,7 @@ async fn check(
 }
 
 fn child<D: Dom>(index: usize) -> Div<D> {
-    Div::new().text(format!("{index}"))
+    div().text(format!("{index}"))
 }
 
 fn optional_child<D: Dom>(

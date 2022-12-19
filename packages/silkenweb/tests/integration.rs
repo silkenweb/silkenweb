@@ -1,13 +1,10 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     dom::Wet,
-    elements::{
-        html::{Button, Div, P},
-        ElementEvents,
-    },
+    elements::html::{button, div, p, P},
     mount,
     node::element::ParentElement,
-    prelude::HtmlElement,
+    prelude::{ElementEvents, HtmlElement},
     task::render_now,
     unmount,
     value::Sig,
@@ -24,7 +21,7 @@ async fn mount_unmount() {
     create_app_container(APP_ID).await;
 
     let message = "Hello, world!";
-    mount(APP_ID, P::new().text(message));
+    mount(APP_ID, p().text(message));
     render_now().await;
     assert_eq!(format!(r#"<p>{}</p>"#, message), app_html(APP_ID));
     unmount(APP_ID);
@@ -43,10 +40,10 @@ async fn simple_counter() {
 
     mount(
         APP_ID,
-        Div::new()
+        div()
             .id(COUNTER_ID)
             .child(
-                Button::new()
+                button()
                     .id(BUTTON_ID)
                     .on_click(move |_, _| {
                         count.replace_with(|i| *i + 1);
@@ -77,7 +74,7 @@ async fn reactive_text() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        P::new().id("text").text(Sig(text_signal.signal())),
+        p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -91,7 +88,7 @@ async fn reactive_text_reference() {
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
-        P::new().id("text").text(Sig(text_signal.signal())),
+        p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
         &mut text_signal,
     )
@@ -108,8 +105,7 @@ async fn multiple_reactive_text() {
 
     mount(
         APP_ID,
-        P::new()
-            .id(TEXT_ID)
+        p().id(TEXT_ID)
             .text(Sig(first_text.signal()))
             .text(Sig(second_text.signal())),
     );

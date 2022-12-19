@@ -19,7 +19,7 @@ use crate::{app_html, create_app_container, query_element, APP_ID};
 #[wasm_bindgen_test]
 async fn missing_text() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
-    let app = Div::new().child(P::new().text("Hello, world!"));
+    let app = div().child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -41,7 +41,7 @@ async fn blank_text() {
     )
     .await;
 
-    let app = Div::new().child(P::new().text("Hello, world!"));
+    let app = div().child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -59,7 +59,7 @@ async fn extra_child() {
     )
     .await;
 
-    let app = Div::new().child(P::new().text("Hello, world!"));
+    let app = div().child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -77,7 +77,7 @@ async fn mismatched_element() {
     )
     .await;
 
-    let app = Div::new().child(P::new().text("Hello, world!"));
+    let app = div().child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -95,7 +95,7 @@ async fn extra_attribute() {
     )
     .await;
 
-    let app = Div::new().child(P::new().text("Hello, world!"));
+    let app = div().child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -113,7 +113,7 @@ async fn missing_attribute() {
     )
     .await;
 
-    let app = Div::new().id("0").child(P::new().text("Hello, world!"));
+    let app = div().id("0").child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
@@ -141,10 +141,10 @@ async fn event() {
 
     hydrate(
         APP_ID,
-        Div::new()
+        div()
             .id(COUNTER_ID)
             .child(
-                Button::new()
+                button()
                     .id(BUTTON_ID)
                     .on_click(move |_, _| {
                         count.replace_with(|i| *i + 1);
@@ -173,7 +173,7 @@ async fn event() {
 async fn basic_signal() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = Div::new().child(P::new().text(Sig(text.signal())));
+    let app = div().child(p().text(Sig(text.signal())));
 
     render_now().await;
     hydrate(APP_ID, app).await;
@@ -195,7 +195,7 @@ async fn basic_signal() {
 async fn nested_signal() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p><p></p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = Div::new().child(P::new().child(P::new().text(Sig(text.signal()))));
+    let app = div().child(p().child(p().text(Sig(text.signal()))));
 
     render_now().await;
     hydrate(APP_ID, app).await;

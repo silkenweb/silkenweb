@@ -8,7 +8,7 @@
 //! ```no_run
 //! # use silkenweb::{
 //! #     elements::{
-//! #         html::{button, div, p},
+//! #         html::{button, div, Div, p},
 //! #         ElementEvents,
 //! #     },
 //! #     mount,
@@ -16,7 +16,7 @@
 //! #     router,
 //! #     value::Sig,
 //! # };
-//!
+//! # let doc: Div =
 //! div()
 //!     .child(
 //!         button()
@@ -36,7 +36,11 @@ use std::{collections::HashMap, fmt::Display};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
-use crate::{dom::Dom, elements::html::A, prelude::ElementEvents};
+use crate::{
+    dom::Dom,
+    elements::html::{a, A},
+    prelude::ElementEvents,
+};
 
 /// Represent the path portion of a URL (including any query string)
 #[derive(Clone, Eq, PartialEq)]
@@ -235,7 +239,7 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
     let path = path.into();
 
-    A::new().href(&path).on_click(link_clicked(path))
+    a().href(&path).on_click(link_clicked(path))
 }
 
 /// An `on_click` handler for routed `<a>` elements.
@@ -246,11 +250,11 @@ pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
 ///
 /// ```no_run
 /// # use silkenweb::{
-/// #     elements::html::a, node::element::ParentElement, prelude::ElementEvents,
+/// #     elements::html::{a, A}, node::element::ParentElement, prelude::ElementEvents,
 /// #     router::link_clicked,
 /// # };
 /// let path = "/my_path";
-/// let link = a().href(path).text("click me").on_click(link_clicked(path));
+/// let link: A = a().href(path).text("click me").on_click(link_clicked(path));
 /// ```
 pub fn link_clicked(
     path: impl Into<String>,

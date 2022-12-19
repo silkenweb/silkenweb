@@ -16,7 +16,7 @@ use silkenweb::{
     clone,
     dom::{Template, Wet},
     elements::{
-        html::{button, div, h1, span, table, tbody, Div, Span, Table, Td, Tr, A},
+        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
         AriaElement, ElementEvents, HtmlElement,
     },
     mount,
@@ -109,7 +109,7 @@ impl App {
             selected_row: Mutable::new(None),
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
-            row_template: Tr::new()
+            row_template: tr()
                 .on_instantiate(|tr, RowParams { app, row }| {
                     let row_id = row.id;
                     tr.classes(Sig(app
@@ -120,10 +120,9 @@ impl App {
                         .map(|selected| selected.then_some("danger"))))
                 })
                 .children([
-                    Td::new()
-                        .class("col-md-1")
+                    td().class("col-md-1")
                         .on_instantiate(|td, RowParams { row, .. }| td.text(row.id.to_string())),
-                    Td::new().class("col-md-4").child(A::new().on_instantiate(
+                    td().class("col-md-4").child(a().on_instantiate(
                         |a, RowParams { row, app }| {
                             clone!(app);
                             let id = row.id;
@@ -132,20 +131,19 @@ impl App {
                                 .on_click(move |_, _| app.select_row(id))
                         },
                     )),
-                    Td::new().class("col-md-1").child(
-                        A::new()
-                            .child(
-                                Span::new()
-                                    .classes(["glyphicon", "glyphicon-remove"])
-                                    .aria_hidden("true"),
-                            )
-                            .on_instantiate(|a, RowParams { row, app }| {
-                                clone!(app);
-                                let id = row.id;
-                                a.on_click(move |_, _| app.remove_row(id))
-                            }),
+                    td().class("col-md-1").child(
+                        a().child(
+                            span()
+                                .classes(["glyphicon", "glyphicon-remove"])
+                                .aria_hidden("true"),
+                        )
+                        .on_instantiate(|a, RowParams { row, app }| {
+                            clone!(app);
+                            let id = row.id;
+                            a.on_click(move |_, _| app.remove_row(id))
+                        }),
                     ),
-                    Td::new().class("col-md-6"),
+                    td().class("col-md-6"),
                 ]),
         })
     }

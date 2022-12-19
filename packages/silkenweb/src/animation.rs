@@ -24,11 +24,12 @@ use crate::task::{animation_timestamp, request_animation_frame};
 /// # use futures_signals::signal::SignalExt;
 /// # use silkenweb::{
 /// #   animation::finite_animation,
-/// #   elements::html::progress,
+/// #   elements::html::{progress, Progress},
 /// #   value::Sig,
 /// #   mount,
 /// # };
 /// const DURATION: f64 = 3000.0;
+/// # let p: Progress =
 /// progress().max(DURATION as f32).value(Sig(
 ///     finite_animation(DURATION).map(|time| time.unwrap_or(DURATION) as f32)
 /// ));
@@ -60,11 +61,12 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// # use futures_signals::signal::SignalExt;
 /// # use silkenweb::{
 /// #     animation::infinite_animation,
-/// #     elements::svg::{attributes::Presentation, content_type::Length::Px, rect, svg},
+/// #     elements::svg::{attributes::Presentation, content_type::Length::Px, rect, svg, Svg},
 /// #     node::element::ParentElement,
 /// #     mount,
 /// #     value::Sig,
 /// # };
+/// # let doc: Svg =
 /// svg().width(200.0).height(200.0).child(
 ///     rect()
 ///         .x(Px(25.0))

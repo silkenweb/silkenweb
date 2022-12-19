@@ -14,9 +14,9 @@ fn main() {
         }
     };
 
-    let element: Node<Dry> = Div::new()
-        .child(Button::new().on_click(inc).text("+"))
-        .child(P::new().text(Sig(count_text)))
+    let element: Node<Dry> = div()
+        .child(button().on_click(inc).text("+"))
+        .child(p().text(Sig(count_text)))
         .into();
 
     assert_eq!(

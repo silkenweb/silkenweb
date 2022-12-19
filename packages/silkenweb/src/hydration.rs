@@ -131,13 +131,13 @@ impl fmt::Display for HydrationStats {
 /// ```no_run
 /// # use futures_signals::signal::always;
 /// # use silkenweb::{
-/// #     elements::html::P,
+/// #     elements::html::p,
 /// #     hydration::hydrate,
 /// #     node::element::{Element, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };
-/// let app = P::new().text(Sig(always("Hello, world!")));
+/// let app = p().text(Sig(always("Hello, world!")));
 ///
 /// spawn_local(async {
 ///     hydrate("app", app);
@@ -151,14 +151,14 @@ impl fmt::Display for HydrationStats {
 /// ```no_run
 /// # use futures_signals::signal::always;
 /// # use silkenweb::{
-/// #     elements::html::P,
+/// #     elements::html::p,
 /// #     hydration::hydrate,
 /// #     node::element::{Element, ParentElement},
 /// #     task::spawn_local,
 /// #     value::Sig,
 /// # };
 /// spawn_local(async {
-///     let app = P::new().text(Sig(always("Hello, world!")));
+///     let app = p().text(Sig(always("Hello, world!")));
 ///     hydrate("app", app);
 /// });
 /// ```

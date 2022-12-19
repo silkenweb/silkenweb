@@ -53,36 +53,36 @@ fn block_on() {
     silkenweb::task::server::block_on(async { panic!("Make sure the future is run") });
 }
 
-render_test!(empty_element, Div::new(), "<div></div>");
+render_test!(empty_element, div(), "<div></div>");
 render_test!(
     single_attribute,
-    Div::new().id("my-id"),
+    div().id("my-id"),
     r#"<div id="my-id"></div>"#
 );
 render_test!(
     multi_attribute,
-    Div::new().id("my-id").class("my-class"),
+    div().id("my-id").class("my-class"),
     r#"<div id="my-id" class="my-class"></div>"#
 );
 render_test!(
     boolean_false_attribute,
-    Div::new().hidden(false),
+    div().hidden(false),
     r#"<div></div>"#
 );
 render_test!(
     boolean_true_attribute,
-    Div::new().hidden(true),
+    div().hidden(true),
     r#"<div hidden=""></div>"#
 );
 
 render_test!(
     child,
-    Div::new().child(P::new().text("Hello!")),
+    div().child(p().text("Hello!")),
     "<div><p>Hello!</p></div>"
 );
 render_test!(
     children,
-    Div::new().children([P::new().text("Hello"), P::new().text("World!")]),
+    div().children([p().text("Hello"), p().text("World!")]),
     "<div><p>Hello</p><p>World!</p></div>"
 );
 
@@ -253,7 +253,7 @@ children_signal_test!(
 isomorphic_test! {
     async fn text_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node<PlatformDom> = P::new().text(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = p().text(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), "<p>Initial text</p>");
         text.set("Updated text");
@@ -267,7 +267,7 @@ isomorphic_test! {
         let test_class1 = Mutable::new(Some("test-class-1"));
         let test_class2 = Mutable::new(Some("test-class-2"));
         let elem: Node<PlatformDom> =
-            Div::new()
+            div()
                 .classes(Sig(test_class1.signal()))
                 .classes(Sig(test_class2.signal()))
                 .into();
@@ -293,7 +293,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn attribute_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node<PlatformDom> = Div::new().title(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = div().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set("Updated text");
@@ -305,7 +305,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn optional_attribute_signal() {
         let text = Mutable::new(Some("Initial text"));
-        let elem: Node<PlatformDom> = Div::new().title(Sig(text.signal())).into();
+        let elem: Node<PlatformDom> = div().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set(None);
@@ -316,7 +316,7 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn text_node() {
-        let elem: Node<PlatformDom> = Div::new().child(text("Hello, world!")).into();
+        let elem: Node<PlatformDom> = div().child(text("Hello, world!")).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div>Hello, world!</div>"#);
     }
@@ -339,7 +339,7 @@ pub async fn children_signal_test(
             .children_signal(
                 children
                     .signal_vec()
-                    .map(|i| P::new().text(format!("{}", i))),
+                    .map(|i| p().text(format!("{}", i))),
             )
             .into();
 
@@ -357,9 +357,9 @@ pub async fn children_signal_test(
         );
     }
 
-    with_existing_children(Div::new(), "", initial, f.clone(), expected).await;
+    with_existing_children(div(), "", initial, f.clone(), expected).await;
     with_existing_children(
-        Div::new().child(Div::new()),
+        div().child(div()),
         "<div></div>",
         initial,
         f,

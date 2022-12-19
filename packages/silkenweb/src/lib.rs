@@ -49,7 +49,7 @@
 //!     count.replace_with(|i| *i + 1);
 //! };
 //!
-//! let app = div()
+//! let app: Div = div()
 //!     .child(button().on_click(inc).text("+"))
 //!     .child(p().text(Sig(count_text)));
 //! ```

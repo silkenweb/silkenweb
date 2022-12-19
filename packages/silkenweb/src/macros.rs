@@ -39,7 +39,7 @@ pub use web_sys;
 ///     };
 /// });
 ///
-/// let elem = my_html_element()
+/// let elem: MyHtmlElement = my_html_element()
 ///     .my_attribute("attribute-value")
 ///     .on_my_event(|event: web_sys::MouseEvent, target: web_sys::HtmlDivElement| {})
 ///     .on_my_custom_event(|event: CustomEvent<web_sys::HtmlElement>, target: web_sys::HtmlDivElement| {});
