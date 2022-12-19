@@ -2,7 +2,7 @@ use futures_signals::signal::Mutable;
 use silkenweb::{
     dom::Hydro,
     elements::{
-        html::{Button, Div, P},
+        html::{button, div, p},
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,

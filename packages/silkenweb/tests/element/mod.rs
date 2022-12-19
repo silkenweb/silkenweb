@@ -5,7 +5,7 @@ use futures_signals::{
 use silkenweb::{
     dom,
     elements::{
-        html::{Div, P},
+        html::{div, p, Div, DivTemplate},
         HtmlElement,
     },
     node::{element::Element, text, Node},

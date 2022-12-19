@@ -13,6 +13,8 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 mod children;
+mod element;
+mod hydration;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
