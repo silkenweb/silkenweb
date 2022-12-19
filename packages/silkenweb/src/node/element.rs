@@ -50,11 +50,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
 }
 
 impl<D: Dom> GenericElement<D> {
-    pub fn new(tag: &str) -> Self {
-        Self::new_in_namespace(Namespace::Html, tag)
-    }
-
-    pub fn new_in_namespace(namespace: Namespace, tag: &str) -> Self {
+    pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self {
             static_child_count: 0,
             child_vec: None,

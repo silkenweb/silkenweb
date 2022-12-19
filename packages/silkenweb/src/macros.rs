@@ -57,6 +57,7 @@ macro_rules! custom_html_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
+                namespace = $crate::node::element::Namespace::Html;
                 $($tail)*
             }
         );
@@ -75,6 +76,7 @@ macro_rules! html_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
+                namespace = $crate::node::element::Namespace::Html;
                 doc_macro = html_element_doc;
                 attribute_doc_macro = html_attribute_doc;
                 $($tail)*
@@ -121,9 +123,9 @@ macro_rules! svg_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::svg::attributes::Global, $crate::elements::AriaElement];
                 common_events = [];
+                namespace = $crate::node::element::Namespace::Svg;
                 doc_macro = svg_element_doc;
                 attribute_doc_macro = svg_attribute_doc;
-                namespace = $crate::node::element::Namespace::Svg;
                 $($tail)*
             }
         );
@@ -163,9 +165,9 @@ macro_rules! dom_element {
             camel_name = $camel_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
+            namespace = $namespace:expr;
             $(doc_macro = $doc_macro:ident;)?
             $(attribute_doc_macro = $attr_doc_macro:ident;)?
-            $(namespace = $namespace:expr; )?
             dom_type: $elem_type:ty;
 
             $(attributes { $(
@@ -202,7 +204,7 @@ macro_rules! dom_element {
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
             pub fn new() -> Self {
-                Self($crate::create_element_fn!($($namespace, )? $text_name))
+                Self($crate::node::element::GenericElement::new($namespace, $text_name))
             }
 
             $crate::attributes![
@@ -364,17 +366,6 @@ macro_rules! dom_element {
             }
         );
     }};
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! create_element_fn {
-    ($text_name:expr) => {
-        $crate::node::element::GenericElement::new($text_name)
-    };
-    ($namespace:expr, $text_name:expr) => {
-        $crate::node::element::GenericElement::new_in_namespace($namespace, $text_name)
-    };
 }
 
 /// Add `child` and `text` methods to an html element.
