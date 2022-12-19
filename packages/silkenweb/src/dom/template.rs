@@ -94,12 +94,6 @@ where
         self.initialization_fns.clear_children();
     }
 
-    fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Self::Node>) {
-        unimplemented!(
-            "`attach_shadow_children` will likely be removed in favour of Declarative Shadow Roots"
-        )
-    }
-
     fn add_class(&mut self, name: &str) {
         self.element.add_class(name)
     }

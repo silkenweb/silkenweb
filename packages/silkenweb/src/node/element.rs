@@ -30,7 +30,7 @@ use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{
-        private::{DomElement, DomText},
+        private::{DomElement, DomText, InstantiableDomElement},
         DefaultDom, Dom, InstantiableDom, Template,
     },
     node::text,
@@ -255,7 +255,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     }
 }
 
-impl<D: Dom> ShadowRootParent<D> for GenericElement<D> {
+impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
     fn attach_shadow_children(
         mut self,
         children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,

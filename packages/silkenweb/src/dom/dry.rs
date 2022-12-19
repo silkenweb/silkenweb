@@ -60,10 +60,6 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().clear_children()
     }
 
-    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
-        self.0.borrow_mut().attach_shadow_children(children)
-    }
-
     fn add_class(&mut self, name: &str) {
         self.0.borrow_mut().add_class(name)
     }
@@ -93,6 +89,10 @@ impl private::DomElement for DryElement {
 }
 
 impl private::InstantiableDomElement for DryElement {
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
+        self.0.borrow_mut().attach_shadow_children(children)
+    }
+
     fn clone_node(&self) -> Self {
         Self::from_shared(self.0.borrow().clone_node())
     }
@@ -270,9 +270,10 @@ impl<Node: TrackSibling> SharedDryElement<Node> {
     }
 
     pub fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Node>) {
-        unimplemented!(
-            "`attach_shadow_children` will likely be removed in favour of Declarative Shadow Roots"
-        )
+        // TODO: Add shadow children and create them when we hydrate
+        // TODO: Add a feature flag for `declarative-shadow-dom` to output `<template
+        // shadowroot="open">...`
+        todo!()
     }
 
     pub fn add_class(&mut self, name: &str) {

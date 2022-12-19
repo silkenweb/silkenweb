@@ -151,16 +151,6 @@ impl DomElement for HydroElement {
         }
     }
 
-    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
-        match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.attach_shadow_children(children),
-            SharedHydroElement::Wet(wet) => {
-                wet.attach_shadow_children(children.into_iter().map(Self::Node::into))
-            }
-            SharedHydroElement::Unreachable => unreachable!(),
-        }
-    }
-
     fn add_class(&mut self, name: &str) {
         match &mut *self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.add_class(name),
@@ -219,6 +209,16 @@ impl DomElement for HydroElement {
 }
 
 impl InstantiableDomElement for HydroElement {
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
+        match &mut *self.borrow_mut() {
+            SharedHydroElement::Dry(dry) => dry.attach_shadow_children(children),
+            SharedHydroElement::Wet(wet) => {
+                wet.attach_shadow_children(children.into_iter().map(Self::Node::into))
+            }
+            SharedHydroElement::Unreachable => unreachable!(),
+        }
+    }
+
     fn clone_node(&self) -> Self {
         Self::from_shared(match &*self.borrow() {
             SharedHydroElement::Dry(dry) => SharedHydroElement::Dry(Box::new(dry.clone_node())),

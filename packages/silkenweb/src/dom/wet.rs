@@ -68,18 +68,6 @@ impl DomElement for WetElement {
         self.element.set_text_content(Some(""))
     }
 
-    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
-        let elem = &self.element;
-        let shadow_root = elem.shadow_root().unwrap_or_else(|| {
-            elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                .unwrap_throw()
-        });
-
-        for child in children {
-            shadow_root.append_child(child.dom_node()).unwrap_throw();
-        }
-    }
-
     fn add_class(&mut self, name: &str) {
         self.element.class_list().add_1(name).unwrap_throw()
     }
@@ -118,6 +106,18 @@ impl DomElement for WetElement {
 }
 
 impl InstantiableDomElement for WetElement {
+    fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
+        let elem = &self.element;
+        let shadow_root = elem.shadow_root().unwrap_or_else(|| {
+            elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                .unwrap_throw()
+        });
+
+        for child in children {
+            shadow_root.append_child(child.dom_node()).unwrap_throw();
+        }
+    }
+
     fn clone_node(&self) -> Self {
         Self {
             element: self

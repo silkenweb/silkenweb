@@ -420,8 +420,8 @@ macro_rules! parent_element {
 macro_rules! shadow_parent_element {
     ($name:ident) => {
         $crate::macros::paste! {
-            impl<Dom: $crate::dom::Dom> $crate::node::element::ShadowRootParent<Dom> for
-                [< $name:camel >]<Dom>
+            impl<Dom: $crate::dom::InstantiableDom> $crate::node::element::ShadowRootParent<Dom>
+            for [< $name:camel >]<Dom>
             {
                 fn attach_shadow_children(
                     self,
