@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::Wet,
+    dom::{self, Wet},
     elements::html::{button, div, p, P},
     mount,
     node::element::ParentElement,
@@ -12,11 +12,34 @@ use silkenweb::{
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
+macro_rules! isomorphic_test {
+    (async fn $name:ident() $body:block) => {
+        #[cfg(not(target_arch = "wasm32"))]
+        #[test]
+        fn $name() {
+            silkenweb::task::server::block_on(async { $body });
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        #[wasm_bindgen_test::wasm_bindgen_test]
+        async fn $name() {
+            $body
+        }
+    };
+}
+
 mod children;
 mod element;
 mod hydration;
+mod template;
 
 wasm_bindgen_test_configure!(run_in_browser);
+
+#[cfg(target_arch = "wasm32")]
+type PlatformDom = dom::Wet;
+
+#[cfg(not(target_arch = "wasm32"))]
+type PlatformDom = dom::Dry;
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {

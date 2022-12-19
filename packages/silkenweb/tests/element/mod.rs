@@ -3,9 +3,8 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
-    dom,
     elements::{
-        html::{div, p, Div, DivTemplate},
+        html::{div, p, Div},
         HtmlElement,
     },
     node::{element::Element, text, Node},
@@ -14,27 +13,7 @@ use silkenweb::{
     value::Sig,
 };
 
-macro_rules! isomorphic_test {
-    (async fn $name:ident() $body:block) => {
-        #[cfg(not(target_arch = "wasm32"))]
-        #[test]
-        fn $name() {
-            silkenweb::task::server::block_on(async { $body });
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        #[wasm_bindgen_test::wasm_bindgen_test]
-        async fn $name() {
-            $body
-        }
-    };
-}
-
-#[cfg(target_arch = "wasm32")]
-type PlatformDom = dom::Wet;
-
-#[cfg(not(target_arch = "wasm32"))]
-type PlatformDom = dom::Dry;
+use super::PlatformDom;
 
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
