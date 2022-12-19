@@ -40,7 +40,7 @@ impl<D: Dom> ChildVec<D> {
         }
     }
 
-    pub fn replace(&mut self, new_children: Vec<impl Into<Node<D>>>) {
+    fn replace(&mut self, new_children: Vec<impl Into<Node<D>>>) {
         self.clear();
         self.children = new_children
             .into_iter()
@@ -54,7 +54,7 @@ impl<D: Dom> ChildVec<D> {
         }
     }
 
-    pub fn insert(&mut self, index: usize, new_child: impl Into<Node<D>>) {
+    fn insert(&mut self, index: usize, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
 
         if index >= self.children.len() {
@@ -73,7 +73,7 @@ impl<D: Dom> ChildVec<D> {
         self.children.insert(index, new_child);
     }
 
-    pub fn set_at(&mut self, index: usize, new_child: impl Into<Node<D>>) {
+    fn set_at(&mut self, index: usize, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
         let old_child = &mut self.children[index];
 
@@ -86,7 +86,7 @@ impl<D: Dom> ChildVec<D> {
         *old_child = new_child;
     }
 
-    pub fn remove(&mut self, index: usize) -> Node<D> {
+    fn remove(&mut self, index: usize) -> Node<D> {
         let old_child = self.children.remove(index);
         self.parent
             .remove_child(index + self.static_child_count, old_child.as_node());
@@ -94,18 +94,18 @@ impl<D: Dom> ChildVec<D> {
         old_child
     }
 
-    pub fn relocate(&mut self, old_index: usize, new_index: usize) {
+    fn relocate(&mut self, old_index: usize, new_index: usize) {
         let child = self.remove(old_index);
         self.insert(new_index, child);
     }
 
-    pub fn push(&mut self, new_child: impl Into<Node<D>>) {
+    fn push(&mut self, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
         self.parent.append_child(new_child.as_node());
         self.children.push(new_child);
     }
 
-    pub fn pop(&mut self) {
+    fn pop(&mut self) {
         let removed_child = self.children.pop();
 
         if let Some(removed_child) = removed_child {
@@ -116,7 +116,7 @@ impl<D: Dom> ChildVec<D> {
         }
     }
 
-    pub fn clear(&mut self) {
+    fn clear(&mut self) {
         if self.static_child_count > 0 {
             let mut parent = self.parent.clone();
             let children = mem::take(&mut self.children);
