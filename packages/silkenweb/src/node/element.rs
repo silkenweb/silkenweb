@@ -611,7 +611,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
 /// in favour of using HTML directly: `<template shadowroot="open">...`.
 ///
 /// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
-pub trait ShadowRootParent<D: Dom = DefaultDom>: Element {
+pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
