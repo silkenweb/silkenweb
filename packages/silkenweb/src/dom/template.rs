@@ -297,7 +297,7 @@ where
     }
 
     fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
-        let has_children = self.children.is_empty();
+        let has_children = !self.children.is_empty();
         let first_child = has_children.then(|| element.clone().into().first_child());
 
         let mut element = GenericElement::from_dom(element, self.child_count);
