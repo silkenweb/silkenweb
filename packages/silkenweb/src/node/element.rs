@@ -61,6 +61,10 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
+    pub fn freeze(self) -> FrozenElement<D> {
+        FrozenElement(self.build())
+    }
+
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
         Self {
             element,
@@ -146,10 +150,6 @@ where
     D: InstantiableDom,
     Param: 'static,
 {
-    pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
-        self.element.instantiate(param)
-    }
-
     pub fn on_instantiate(
         mut self,
         f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>,
@@ -620,6 +620,20 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
         children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
     ) -> Self;
 }
+
+pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
+
+impl<D, Param> FrozenElement<Template<D, Param>>
+where
+    D: InstantiableDom,
+    Param: 'static,
+{
+    pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
+        self.0.element.instantiate(param)
+    }
+}
+
+pub type TemplateElement<D, Param> = FrozenElement<Template<D, Param>>;
 
 fn spawn_cancelable_future(
     future: impl Future<Output = ()> + 'static,

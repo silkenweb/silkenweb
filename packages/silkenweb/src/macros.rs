@@ -163,6 +163,8 @@ macro_rules! dom_element {
         $(#[$elem_meta:meta])*
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
+            frozen_name = $frozen_name:ident;
+            template_name = $template_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
             namespace = $namespace:expr;
@@ -232,6 +234,10 @@ macro_rules! dom_element {
                     ),*
                 }
             ); )?
+
+            pub fn freeze(self) -> $frozen_name<Dom> {
+                $frozen_name(self.0.freeze())
+            }
         }
 
         impl<Dom: $crate::dom::Dom> Default for $camel_name<Dom> {
@@ -245,10 +251,6 @@ macro_rules! dom_element {
             Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
         {
-            pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
-                $camel_name(self.0.instantiate(param))
-            }
-
             pub fn on_instantiate(
                 self,
                 f: impl 'static + Fn($camel_name<Dom>, &InitParam) -> $camel_name<Dom>,
@@ -351,6 +353,23 @@ macro_rules! dom_element {
         )*
 
         impl<Dom: $crate::dom::Dom> $crate::elements::ElementEvents for $camel_name<Dom> {}
+
+        pub struct $frozen_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
+            $crate::node::element::FrozenElement<Dom>
+        );
+
+        impl<Dom, InitParam> $frozen_name<$crate::dom::Template<Dom, InitParam>>
+        where
+            Dom: $crate::dom::InstantiableDom,
+            InitParam: 'static
+        {
+            pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
+                $camel_name(self.0.instantiate(param))
+            }
+        }
+
+        pub type $template_name<Dom, InitParam> =
+            $frozen_name<$crate::dom::Template<Dom, InitParam>>;
     };
     (
         $(#[$elem_meta:meta])*
@@ -362,6 +381,8 @@ macro_rules! dom_element {
             $(#[$elem_meta])*
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
+                frozen_name = [< Frozen $name:camel >];
+                template_name = [< $name:camel Template >];
                 common_attributes $($tail)*
             }
         );
