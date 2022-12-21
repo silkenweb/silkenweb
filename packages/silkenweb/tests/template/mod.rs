@@ -3,14 +3,13 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use silkenweb::{
-    dom::Dry,
     elements::{
         html::{div, DivTemplate},
         HtmlElement,
     },
     node::Node,
     prelude::ParentElement,
-    task::{render_now, server::render_now_sync},
+    task::render_now,
     value::Sig,
 };
 
@@ -90,20 +89,31 @@ isomorphic_test! {
     }
 }
 
-#[test]
-fn dry_clone_node_is_deep() {
-    let template: DivTemplate<String, Dry> = div()
-        .child(div().on_instantiate(|div, s| div.text(s)))
-        .freeze();
-    render_now_sync();
-    let node1: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
-    let expected_node1 = r#"<div><div>Hello, world!</div></div>"#;
-    assert_eq!(node1.to_string(), expected_node1);
+#[cfg(not(target_arch = "wasm32"))]
+mod dry {
+    use silkenweb::{
+        dom::Dry,
+        elements::html::{div, DivTemplate},
+        node::Node,
+        prelude::ParentElement,
+        task::server::render_now_sync,
+    };
 
-    render_now_sync();
-    let node2: Node<Dry> = template.instantiate(&"Goodbye!".to_string()).into();
-    assert_eq!(node2.to_string(), r#"<div><div>Goodbye!</div></div>"#);
+    #[test]
+    fn dry_clone_node_is_deep() {
+        let template: DivTemplate<String, Dry> = div()
+            .child(div().on_instantiate(|div, s| div.text(s)))
+            .freeze();
+        render_now_sync();
+        let node1: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
+        let expected_node1 = r#"<div><div>Hello, world!</div></div>"#;
+        assert_eq!(node1.to_string(), expected_node1);
 
-    // If the dry clone isn't deep, this will fail.
-    assert_eq!(node1.to_string(), expected_node1);
+        render_now_sync();
+        let node2: Node<Dry> = template.instantiate(&"Goodbye!".to_string()).into();
+        assert_eq!(node2.to_string(), r#"<div><div>Goodbye!</div></div>"#);
+
+        // If the dry clone isn't deep, this will fail.
+        assert_eq!(node1.to_string(), expected_node1);
+    }
 }
