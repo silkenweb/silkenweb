@@ -71,12 +71,12 @@ impl private::InstantiableDom for Wet {
     type InstantiableNode = WetNode;
 }
 
-pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
+pub struct Template<Param, D: InstantiableDom = DefaultDom>(PhantomData<(Param, D)>);
 
-impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {}
+impl<Param: 'static, D: InstantiableDom> Dom for Template<Param, D> {}
 
-impl<D: InstantiableDom, Param: 'static> private::Dom for Template<D, Param> {
-    type Element = TemplateElement<D, Param>;
-    type Node = TemplateNode<D, Param>;
+impl<Param: 'static, D: InstantiableDom> private::Dom for Template<Param, D> {
+    type Element = TemplateElement<Param, D>;
+    type Node = TemplateNode<Param, D>;
     type Text = TemplateText<D>;
 }

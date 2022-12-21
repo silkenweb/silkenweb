@@ -1,31 +1,21 @@
-use std::{cell::RefCell, collections::BTreeMap, fmt, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, collections::BTreeMap, fmt, rc::Rc};
 
 use wasm_bindgen::JsValue;
 
 use crate::{
     dom::{
-        private::{self, DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
-        Dom, InstantiableDom,
+        private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+        InstantiableDom,
     },
     node::element::{GenericElement, Namespace},
 };
 
-pub struct Template<D: InstantiableDom, Param>(PhantomData<(D, Param)>);
-
-impl<D: InstantiableDom, Param: 'static> Dom for Template<D, Param> {}
-
-impl<D: InstantiableDom, Param: 'static> private::Dom for Template<D, Param> {
-    type Element = TemplateElement<D, Param>;
-    type Node = TemplateNode<D, Param>;
-    type Text = TemplateText<D>;
-}
-
-pub struct TemplateElement<D: InstantiableDom, Param> {
+pub struct TemplateElement<Param, D: InstantiableDom> {
     element: D::InstantiableElement,
-    initialization_fns: InitializationFns<D, Param>,
+    initialization_fns: InitializationFns<Param, D>,
 }
 
-impl<D, Param> TemplateElement<D, Param>
+impl<Param, D> TemplateElement<Param, D>
 where
     D: InstantiableDom,
     Param: 'static,
@@ -43,12 +33,12 @@ where
     }
 }
 
-impl<D, Param> DomElement for TemplateElement<D, Param>
+impl<Param, D> DomElement for TemplateElement<Param, D>
 where
     D: InstantiableDom,
     Param: 'static,
 {
-    type Node = TemplateNode<D, Param>;
+    type Node = TemplateNode<Param, D>;
 
     fn new(ns: Namespace, tag: &str) -> Self {
         Self {
@@ -118,7 +108,7 @@ where
     }
 }
 
-impl<D: InstantiableDom, Param> Clone for TemplateElement<D, Param> {
+impl<Param, D: InstantiableDom> Clone for TemplateElement<Param, D> {
     fn clone(&self) -> Self {
         Self {
             element: self.element.clone(),
@@ -127,18 +117,18 @@ impl<D: InstantiableDom, Param> Clone for TemplateElement<D, Param> {
     }
 }
 
-pub struct TemplateNode<D: InstantiableDom, Param> {
+pub struct TemplateNode<Param, D: InstantiableDom> {
     node: D::Node,
-    initialization_fns: InitializationFns<D, Param>,
+    initialization_fns: InitializationFns<Param, D>,
 }
 
-impl<D: InstantiableDom, Param> fmt::Display for TemplateNode<D, Param> {
+impl<Param, D: InstantiableDom> fmt::Display for TemplateNode<Param, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.node.fmt(f)
     }
 }
 
-impl<D: InstantiableDom, Param> Clone for TemplateNode<D, Param> {
+impl<Param, D: InstantiableDom> Clone for TemplateNode<Param, D> {
     fn clone(&self) -> Self {
         Self {
             node: self.node.clone(),
@@ -147,8 +137,8 @@ impl<D: InstantiableDom, Param> Clone for TemplateNode<D, Param> {
     }
 }
 
-impl<D: InstantiableDom, Param> From<TemplateElement<D, Param>> for TemplateNode<D, Param> {
-    fn from(elem: TemplateElement<D, Param>) -> Self {
+impl<Param, D: InstantiableDom> From<TemplateElement<Param, D>> for TemplateNode<Param, D> {
+    fn from(elem: TemplateElement<Param, D>) -> Self {
         Self {
             node: elem.element.into(),
             initialization_fns: elem.initialization_fns,
@@ -174,7 +164,7 @@ impl<D: InstantiableDom> DomText for TemplateText<D> {
     }
 }
 
-impl<D, Param> From<TemplateText<D>> for TemplateNode<D, Param>
+impl<Param, D> From<TemplateText<D>> for TemplateNode<Param, D>
 where
     D: InstantiableDom,
     Param: 'static,
@@ -187,9 +177,9 @@ where
     }
 }
 
-struct InitializationFns<D: InstantiableDom, Param>(Rc<RefCell<SharedInitializationFns<D, Param>>>);
+struct InitializationFns<Param, D: InstantiableDom>(Rc<RefCell<SharedInitializationFns<Param, D>>>);
 
-impl<D, Param> InitializationFns<D, Param>
+impl<Param, D> InitializationFns<Param, D>
 where
     D: InstantiableDom,
     Param: 'static,
@@ -202,7 +192,7 @@ where
         self.0.borrow_mut().initialization_fns.push(Box::new(f))
     }
 
-    fn append_child(&mut self, child: TemplateNode<D, Param>) {
+    fn append_child(&mut self, child: TemplateNode<Param, D>) {
         let mut data = self.0.borrow_mut();
 
         if !child.initialization_fns.is_empty() {
@@ -214,7 +204,7 @@ where
         data.child_count += 1;
     }
 
-    fn insert_child(&mut self, index: usize, child: TemplateNode<D, Param>) {
+    fn insert_child(&mut self, index: usize, child: TemplateNode<Param, D>) {
         let mut data = self.0.borrow_mut();
         let later_children = data.children.split_off(&index);
 
@@ -229,7 +219,7 @@ where
         data.child_count += 1;
     }
 
-    fn replace_child(&mut self, index: usize, child: TemplateNode<D, Param>) {
+    fn replace_child(&mut self, index: usize, child: TemplateNode<Param, D>) {
         let mut data = self.0.borrow_mut();
 
         if !child.initialization_fns.is_empty() {
@@ -267,19 +257,19 @@ where
     }
 }
 
-impl<D: InstantiableDom, Param> Clone for InitializationFns<D, Param> {
+impl<Param, D: InstantiableDom> Clone for InitializationFns<Param, D> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-struct SharedInitializationFns<D: InstantiableDom, Param> {
-    initialization_fns: Vec<InitializeElem<D, Param>>,
-    children: BTreeMap<usize, TemplateNode<D, Param>>,
+struct SharedInitializationFns<Param, D: InstantiableDom> {
+    initialization_fns: Vec<InitializeElem<Param, D>>,
+    children: BTreeMap<usize, TemplateNode<Param, D>>,
     child_count: usize,
 }
 
-impl<D, Param> SharedInitializationFns<D, Param>
+impl<Param, D> SharedInitializationFns<Param, D>
 where
     D: InstantiableDom,
     Param: 'static,
@@ -322,4 +312,4 @@ where
     }
 }
 
-type InitializeElem<D, Param> = Box<dyn Fn(GenericElement<D>, &Param) -> GenericElement<D>>;
+type InitializeElem<Param, D> = Box<dyn Fn(GenericElement<D>, &Param) -> GenericElement<D>>;

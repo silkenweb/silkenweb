@@ -246,7 +246,7 @@ macro_rules! dom_element {
             }
         }
 
-        impl<Dom, InitParam> $camel_name<$crate::dom::Template<Dom, InitParam>>
+        impl<InitParam, Dom> $camel_name<$crate::dom::Template<InitParam, Dom>>
         where
             Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
@@ -358,7 +358,7 @@ macro_rules! dom_element {
             $crate::node::element::FrozenElement<Dom>
         );
 
-        impl<Dom, InitParam> $frozen_name<$crate::dom::Template<Dom, InitParam>>
+        impl<InitParam, Dom> $frozen_name<$crate::dom::Template<InitParam, Dom>>
         where
             Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
@@ -368,8 +368,8 @@ macro_rules! dom_element {
             }
         }
 
-        pub type $template_name<Dom, InitParam> =
-            $frozen_name<$crate::dom::Template<Dom, InitParam>>;
+        pub type $template_name<InitParam, Dom = $crate::dom::DefaultDom> =
+            $frozen_name<$crate::dom::Template<InitParam, Dom>>;
     };
     (
         $(#[$elem_meta:meta])*

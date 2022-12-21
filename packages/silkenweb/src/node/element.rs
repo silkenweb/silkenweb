@@ -145,10 +145,10 @@ impl<D: Dom> GenericElement<D> {
     }
 }
 
-impl<D, Param> GenericElement<Template<D, Param>>
+impl<Param, D> GenericElement<Template<Param, D>>
 where
-    D: InstantiableDom,
     Param: 'static,
+    D: InstantiableDom,
 {
     pub fn on_instantiate(
         mut self,
@@ -623,7 +623,7 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
 
 pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
 
-impl<D, Param> FrozenElement<Template<D, Param>>
+impl<Param, D> FrozenElement<Template<Param, D>>
 where
     D: InstantiableDom,
     Param: 'static,

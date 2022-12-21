@@ -14,7 +14,6 @@ use rand::{
 };
 use silkenweb::{
     clone,
-    dom::Wet,
     elements::{
         html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr, TrTemplate},
         AriaElement, ElementEvents, HtmlElement,
@@ -99,7 +98,7 @@ struct App {
     selected_row: Mutable<Option<usize>>,
     next_row_id: Cell<usize>,
     rng: RefCell<SmallRng>,
-    row_template: TrTemplate<Wet, RowParams>,
+    row_template: TrTemplate<RowParams>,
 }
 
 impl App {
