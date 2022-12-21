@@ -3,6 +3,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use silkenweb::{
+    dom::Dry,
     elements::{
         html::{div, DivTemplate},
         HtmlElement,
@@ -10,7 +11,7 @@ use silkenweb::{
     node::Node,
     prelude::ParentElement,
     task::{render_now, server::render_now_sync},
-    value::Sig, dom::Dry,
+    value::Sig,
 };
 
 use super::PlatformDom;
@@ -91,7 +92,9 @@ isomorphic_test! {
 
 #[test]
 fn dry_clone_node_is_deep() {
-    let template: DivTemplate<String, Dry> = div().child(div().on_instantiate(|div, s| div.text(s))).freeze();
+    let template: DivTemplate<String, Dry> = div()
+        .child(div().on_instantiate(|div, s| div.text(s)))
+        .freeze();
     render_now_sync();
     let node1: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
     let expected_node1 = r#"<div><div>Hello, world!</div></div>"#;
