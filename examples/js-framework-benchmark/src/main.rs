@@ -103,48 +103,49 @@ struct App {
 
 impl App {
     fn new() -> Rc<Self> {
+        let id_cell = td()
+            .class("col-md-1")
+            .on_instantiate(|td, RowParams { row, .. }| td.text(row.id.to_string()));
+        let label_cell =
+            td().class("col-md-4")
+                .child(a().on_instantiate(|a, RowParams { app, row }| {
+                    clone!(app);
+                    let id = row.id;
+
+                    a.text(Sig(row.label.signal_cloned()))
+                        .on_click(move |_, _| app.select_row(id))
+                }));
+        let remove_cell = td().class("col-md-1").child(
+            a().child(
+                span()
+                    .classes(["glyphicon", "glyphicon-remove"])
+                    .aria_hidden("true"),
+            )
+            .on_instantiate(|a, RowParams { app, row }| {
+                clone!(app);
+                let id = row.id;
+                a.on_click(move |_, _| app.remove_row(id))
+            }),
+        );
+        let row_template = tr()
+            .on_instantiate(|tr, RowParams { app, row }| {
+                let row_id = row.id;
+                tr.classes(Sig(app
+                    .selected_row
+                    .signal_cloned()
+                    .map(move |selected_row| selected_row == Some(row_id))
+                    .dedupe()
+                    .map(|selected| selected.then_some("danger"))))
+            })
+            .children([id_cell, label_cell, remove_cell, td().class("col-md-6")])
+            .freeze();
+
         Rc::new(Self {
             data: MutableVec::new(),
             selected_row: Mutable::new(None),
             next_row_id: Cell::new(1),
             rng: RefCell::new(SmallRng::seed_from_u64(0)),
-            row_template: tr()
-                .on_instantiate(|tr, RowParams { app, row }| {
-                    let row_id = row.id;
-                    tr.classes(Sig(app
-                        .selected_row
-                        .signal_cloned()
-                        .map(move |selected_row| selected_row == Some(row_id))
-                        .dedupe()
-                        .map(|selected| selected.then_some("danger"))))
-                })
-                .children([
-                    td().class("col-md-1")
-                        .on_instantiate(|td, RowParams { row, .. }| td.text(row.id.to_string())),
-                    td().class("col-md-4").child(a().on_instantiate(
-                        |a, RowParams { row, app }| {
-                            clone!(app);
-                            let id = row.id;
-
-                            a.text(Sig(row.label.signal_cloned()))
-                                .on_click(move |_, _| app.select_row(id))
-                        },
-                    )),
-                    td().class("col-md-1").child(
-                        a().child(
-                            span()
-                                .classes(["glyphicon", "glyphicon-remove"])
-                                .aria_hidden("true"),
-                        )
-                        .on_instantiate(|a, RowParams { row, app }| {
-                            clone!(app);
-                            let id = row.id;
-                            a.on_click(move |_, _| app.remove_row(id))
-                        }),
-                    ),
-                    td().class("col-md-6"),
-                ])
-                .freeze(),
+            row_template,
         })
     }
 
