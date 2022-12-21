@@ -144,6 +144,10 @@ impl WetText {
     pub fn text(&self) -> String {
         self.0.text_content().expect("No text content found")
     }
+
+    pub fn clone_node(&self) -> Self {
+        Self(self.0.clone_node().unwrap_throw().unchecked_into())
+    }
 }
 
 impl DomText for WetText {
@@ -162,6 +166,10 @@ pub struct WetNode(web_sys::Node);
 impl WetNode {
     pub fn dom_node(&self) -> &web_sys::Node {
         &self.0
+    }
+
+    pub fn clone_node(&self) -> Self {
+        Self(self.0.clone_node_with_deep(true).unwrap_throw())
     }
 }
 

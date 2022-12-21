@@ -9,7 +9,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::{self, DomElement, TrackSibling},
+    private::{self, DomElement, DryChild, InstantiableDomElement},
     wet::{WetElement, WetNode},
     Dry,
 };
@@ -101,6 +101,12 @@ impl private::InstantiableDomElement for DryElement {
 #[derive(Clone)]
 pub struct DryText(Rc<RefCell<SharedDryText<DryNode>>>);
 
+impl DryText {
+    pub fn clone_node(&self) -> Self {
+        Self(Rc::new(RefCell::new(self.0.borrow().clone_node())))
+    }
+}
+
 impl private::DomText for DryText {
     fn new(text: &str) -> Self {
         Self(Rc::new(RefCell::new(SharedDryText::new(text.to_string()))))
@@ -178,7 +184,14 @@ impl fmt::Display for DryNode {
     }
 }
 
-impl TrackSibling for DryNode {
+impl DryChild for DryNode {
+    fn clone_node(&self) -> Self {
+        match self {
+            DryNode::Element(element) => DryNode::Element(element.clone_node()),
+            DryNode::Text(text) => DryNode::Text(text.clone_node()),
+        }
+    }
+
     fn set_next_sibling(&self, next_sibling: Option<&Self>) {
         let next_sibling = next_sibling.cloned();
 
@@ -198,7 +211,7 @@ pub struct SharedDryElement<Node> {
     next_sibling: Option<Node>,
 }
 
-impl<Node: TrackSibling> SharedDryElement<Node> {
+impl<Node: DryChild> SharedDryElement<Node> {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self {
             namespace,
@@ -331,7 +344,7 @@ impl<Node: TrackSibling> SharedDryElement<Node> {
     }
 
     pub fn clone_node(&self) -> Self {
-        let children = self.children.clone();
+        let children: Vec<Node> = self.children.iter().map(Node::clone_node).collect();
 
         for (index, child) in children.iter().enumerate() {
             child.set_next_sibling(children.get(index + 1));
@@ -537,6 +550,13 @@ impl<Node> SharedDryText<Node> {
 
     pub fn set_next_sibling(&mut self, next_sibling: Option<Node>) {
         self.next_sibling = next_sibling;
+    }
+
+    pub fn clone_node(&self) -> Self {
+        Self {
+            text: self.text.clone(),
+            next_sibling: None,
+        }
     }
 }
 

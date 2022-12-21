@@ -8,7 +8,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     dry::{SharedDryElement, SharedDryText},
-    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode, TrackSibling},
+    private::{DomElement, DomText, DryChild, InstantiableDomElement, InstantiableDomNode},
     wet::{WetElement, WetNode, WetText},
     Hydro,
 };
@@ -315,6 +315,10 @@ impl HydroText {
             new_text
         }
     }
+
+    fn clone_node(&self) -> Self {
+        Self(Rc::new(RefCell::new(self.borrow().clone_node())))
+    }
 }
 
 enum SharedHydroText {
@@ -322,6 +326,16 @@ enum SharedHydroText {
     Wet(WetText),
     /// Used for swapping `Dry` for `Wet`
     Unreachable,
+}
+
+impl SharedHydroText {
+    fn clone_node(&self) -> Self {
+        match self {
+            SharedHydroText::Dry(text) => SharedHydroText::Dry(text.clone_node()),
+            SharedHydroText::Wet(text) => SharedHydroText::Wet(text.clone_node()),
+            SharedHydroText::Unreachable => unreachable!(),
+        }
+    }
 }
 
 impl DomText for HydroText {
@@ -389,7 +403,15 @@ impl HydroNode {
     }
 }
 
-impl TrackSibling for HydroNode {
+impl DryChild for HydroNode {
+    fn clone_node(&self) -> Self {
+        match self {
+            HydroNode::Text(text) => HydroNode::Text(text.clone_node()),
+            HydroNode::Element(element) => HydroNode::Element(element.clone_node()),
+            HydroNode::Wet(node) => HydroNode::Wet(node.clone_node()),
+        }
+    }
+
     fn set_next_sibling(&self, next_sibling: Option<&HydroNode>) {
         let next_sibling = next_sibling.map(HydroNode::clone);
 
