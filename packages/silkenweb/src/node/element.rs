@@ -629,6 +629,9 @@ pub trait InstantiableElement {
     type Template<Param: 'static>;
 }
 
+// This is so we don't have to use fully qualified syntax to specify a template
+// element. Otherwise we'd need to write `<Div as
+// InstantiableElement>::Template`. See <https://github.com/rust-lang/rust/issues/38078>
 pub type TemplateElement<T, Param> = <T as InstantiableElement>::Template<Param>;
 
 pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
