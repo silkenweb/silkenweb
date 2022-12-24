@@ -368,8 +368,10 @@ macro_rules! dom_element {
             }
         }
 
-        pub type $template_name<InitParam, Dom = $crate::dom::DefaultDom> =
-            $frozen_name<$crate::dom::Template<InitParam, Dom>>;
+        impl<Dom: $crate::dom::InstantiableDom> $crate::node::element::InstantiableElement
+        for $camel_name<Dom> {
+            type Template<Param: 'static> = $frozen_name<$crate::dom::Template<Param, Dom>>;
+        }
     };
     (
         $(#[$elem_meta:meta])*

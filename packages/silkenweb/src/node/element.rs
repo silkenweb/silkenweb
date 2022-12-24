@@ -374,6 +374,10 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 }
 
+impl<D: InstantiableDom> InstantiableElement for GenericElement<D> {
+    type Template<Param: 'static> = FrozenElement<Template<Param, D>>;
+}
+
 impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
         self.resources.push(spawn_cancelable_future(future));
@@ -621,6 +625,12 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     ) -> Self;
 }
 
+pub trait InstantiableElement {
+    type Template<Param: 'static>;
+}
+
+pub type TemplateElement<T, Param> = <T as InstantiableElement>::Template<Param>;
+
 pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
 
 impl<Param, D> FrozenElement<Template<Param, D>>
@@ -632,8 +642,6 @@ where
         self.0.element.instantiate(param)
     }
 }
-
-pub type TemplateElement<D, Param> = FrozenElement<Template<D, Param>>;
 
 fn spawn_cancelable_future(
     future: impl Future<Output = ()> + 'static,

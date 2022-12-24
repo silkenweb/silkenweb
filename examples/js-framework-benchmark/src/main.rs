@@ -15,11 +15,11 @@ use rand::{
 use silkenweb::{
     clone,
     elements::{
-        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr, TrTemplate},
+        html::{a, button, div, h1, span, table, tbody, td, tr, Div, Table, Tr},
         AriaElement, ElementEvents, HtmlElement,
     },
     mount,
-    node::element::{Element, ParentElement},
+    node::element::{Element, ParentElement, TemplateElement},
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -98,7 +98,7 @@ struct App {
     selected_row: Mutable<Option<usize>>,
     next_row_id: Cell<usize>,
     rng: RefCell<SmallRng>,
-    row_template: TrTemplate<RowParams>,
+    row_template: TemplateElement<Tr, RowParams>,
 }
 
 impl App {
