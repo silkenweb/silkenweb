@@ -164,7 +164,6 @@ macro_rules! dom_element {
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
             frozen_name = $frozen_name:ident;
-            template_name = $template_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
             namespace = $namespace:expr;
@@ -384,7 +383,6 @@ macro_rules! dom_element {
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
                 frozen_name = [< Frozen $name:camel >];
-                template_name = [< $name:camel Template >];
                 common_attributes $($tail)*
             }
         );
