@@ -30,7 +30,7 @@ use super::{Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{
-        private::{DomElement, DomText, InstantiableDomElement},
+        private::{DomElement, DomText, EventStore, InstantiableDomElement},
         DefaultDom, Dom, InstantiableDom, Template,
     },
     node::text,
@@ -44,6 +44,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     resources: Vec<Resource>,
+    events: EventStore,
     element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
@@ -51,10 +52,12 @@ pub struct GenericElement<D: Dom = DefaultDom> {
 
 impl<D: Dom> GenericElement<D> {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
+        // TODO: Use `from_dom`
         Self {
             static_child_count: 0,
             child_vec: None,
             resources: Vec::new(),
+            events: EventStore::default(),
             element: D::Element::new(namespace, tag),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
@@ -71,13 +74,16 @@ impl<D: Dom> GenericElement<D> {
             static_child_count,
             child_vec: None,
             resources: Vec::new(),
+            events: EventStore::default(),
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
     }
 
     pub(crate) fn store_child(&mut self, child: Self) {
-        self.resources.append(&mut child.build().resources);
+        let mut child = child.build();
+        self.resources.append(&mut child.resources);
+        self.events.combine(child.events);
     }
 
     fn check_attribute_unique(&mut self, name: &str) {
@@ -96,6 +102,7 @@ impl<D: Dom> GenericElement<D> {
             }))
         }
 
+        // TODO: Is this actually a win?
         self.resources.shrink_to_fit();
         self
     }
@@ -207,6 +214,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
                     parent.element.append_child(child.as_node());
                     parent.resources.extend(child.resources);
+                    parent.events.combine(child.events);
                 }
 
                 parent
@@ -369,7 +377,7 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 
     fn on(mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self {
-        self.element.on(name, f);
+        self.element.on(name, f, &mut self.events);
         self
     }
 }
@@ -393,6 +401,7 @@ impl<D: Dom> From<GenericElement<D>> for Node<D> {
         Self {
             node: elem.element.into(),
             resources: elem.resources,
+            events: elem.events,
         }
     }
 }

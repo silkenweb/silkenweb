@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb" }
+silkenweb = { path = "../../packages/silkenweb", features = ["weak-refs"] }
 futures-signals = "0.3.31"
 js-sys = "0.3.60"
 wasm-bindgen = {version = "=0.2.83", features = ["enable-interning"]}

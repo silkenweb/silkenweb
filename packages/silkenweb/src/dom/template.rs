@@ -2,6 +2,7 @@ use std::{cell::RefCell, collections::BTreeMap, fmt, rc::Rc};
 
 use wasm_bindgen::JsValue;
 
+use super::private::EventStore;
 use crate::{
     dom::{
         private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
@@ -95,8 +96,13 @@ where
         self.element.attribute(name, value)
     }
 
-    fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.element.on(name, f)
+    fn on(
+        &mut self,
+        name: &'static str,
+        f: impl FnMut(JsValue) + 'static,
+        events: &mut EventStore,
+    ) {
+        self.element.on(name, f, events)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {

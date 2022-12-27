@@ -9,7 +9,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::{self, DomElement, InstantiableDomElement},
+    private::{self, DomElement, EventStore, InstantiableDomElement},
     wet::{WetElement, WetNode},
     Dry,
 };
@@ -75,8 +75,13 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().attribute(name, value)
     }
 
-    fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        self.0.borrow_mut().on(name, f)
+    fn on(
+        &mut self,
+        name: &'static str,
+        f: impl FnMut(JsValue) + 'static,
+        events: &mut EventStore,
+    ) {
+        self.0.borrow_mut().on(name, f, events)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
@@ -335,9 +340,16 @@ impl<Node: DryChild> SharedDryElement<Node> {
         }
     }
 
-    pub fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
+    pub fn on(
+        &mut self,
+        name: &'static str,
+        f: impl FnMut(JsValue) + 'static,
+        events: &mut EventStore,
+    ) {
+        clone!(mut events);
+
         self.hydrate_actions
-            .push(Box::new(move |element| element.on(name, f)))
+            .push(Box::new(move |element| element.on(name, f, &mut events)))
     }
 
     pub fn try_dom_element(&self) -> Option<web_sys::Element> {

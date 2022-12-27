@@ -7,7 +7,10 @@ use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
 use crate::{
-    dom::{private::DomText, DefaultDom, Dom, Hydro, Wet},
+    dom::{
+        private::{DomText, EventStore},
+        DefaultDom, Dom, Hydro, Wet,
+    },
     hydration::HydrationStats,
 };
 
@@ -17,6 +20,7 @@ pub mod element;
 pub struct Node<D: Dom = DefaultDom> {
     node: D::Node,
     resources: Vec<Resource>,
+    events: EventStore,
 }
 
 impl<D: Dom> Node<D> {
@@ -45,6 +49,7 @@ impl Node<Hydro> {
         Node {
             node: self.node.hydrate_child(parent, child, tracker),
             resources: self.resources,
+            events: self.events,
         }
     }
 
@@ -52,6 +57,7 @@ impl Node<Hydro> {
         Node {
             node: self.node.into(),
             resources: self.resources,
+            events: self.events,
         }
     }
 }
@@ -63,6 +69,7 @@ impl<D: Dom> From<Text<D>> for Node<D> {
         Self {
             node: text.0.into(),
             resources: Vec::new(),
+            events: EventStore::default(),
         }
     }
 }

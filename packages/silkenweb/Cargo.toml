@@ -12,6 +12,10 @@ license = "MIT OR Apache-2.0"
 categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
+[features]
+# TODO: Doc
+weak-refs = []
+
 [dependencies]
 discard = "1.0.4"
 js-sys = "0.3.60"

@@ -1,11 +1,11 @@
 use std::fmt;
 
 use silkenweb_base::{document, intern_str};
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
-    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
+    private::{DomElement, DomText, EventStore, InstantiableDomElement, InstantiableDomNode},
     Wet,
 };
 use crate::{node::element::Namespace, task::on_animation_frame};
@@ -88,11 +88,13 @@ impl DomElement for WetElement {
         .unwrap_throw()
     }
 
-    fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static) {
-        // TODO: Document that this will leak unless weak refs are supported.
-        self.element
-            .add_event_listener_with_callback(name, Closure::new(f).into_js_value().unchecked_ref())
-            .unwrap_throw();
+    fn on(
+        &mut self,
+        name: &'static str,
+        f: impl FnMut(JsValue) + 'static,
+        events: &mut EventStore,
+    ) {
+        events.add_listener(&self.element, name, f);
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
