@@ -77,9 +77,3 @@ pub trait InstantiableDomNode: Display + Clone {
 
     fn next_sibling(&self) -> Self;
 }
-
-pub trait DryChild: Clone {
-    fn clone_node(&self) -> Self;
-
-    fn set_next_sibling(&self, next_sibling: Option<&Self>);
-}

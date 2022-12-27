@@ -7,8 +7,8 @@ use std::{
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    dry::{SharedDryElement, SharedDryText},
-    private::{DomElement, DomText, DryChild, InstantiableDomElement, InstantiableDomNode},
+    dry::{DryChild, SharedDryElement, SharedDryText},
+    private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
     wet::{WetElement, WetNode, WetText},
     Hydro,
 };

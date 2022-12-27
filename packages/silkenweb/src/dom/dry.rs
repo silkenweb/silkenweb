@@ -9,7 +9,7 @@ use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
     hydro::HydroNode,
-    private::{self, DomElement, DryChild, InstantiableDomElement},
+    private::{self, DomElement, InstantiableDomElement},
     wet::{WetElement, WetNode},
     Dry,
 };
@@ -200,6 +200,12 @@ impl DryChild for DryNode {
             DryNode::Text(text) => text.0.borrow_mut().set_next_sibling(next_sibling),
         }
     }
+}
+
+pub trait DryChild: Clone {
+    fn clone_node(&self) -> Self;
+
+    fn set_next_sibling(&self, next_sibling: Option<&Self>);
 }
 
 pub struct SharedDryElement<Node> {
