@@ -52,16 +52,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
 
 impl<D: Dom> GenericElement<D> {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
-        // TODO: Use `from_dom`
-        Self {
-            static_child_count: 0,
-            child_vec: None,
-            resources: Vec::new(),
-            events: EventStore::default(),
-            element: D::Element::new(namespace, tag),
-            #[cfg(debug_assertions)]
-            attributes: HashSet::new(),
-        }
+        Self::from_dom(D::Element::new(namespace, tag), 0)
     }
 
     pub fn freeze(self) -> FrozenElement<D> {
@@ -70,11 +61,11 @@ impl<D: Dom> GenericElement<D> {
 
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
         Self {
-            element,
             static_child_count,
             child_vec: None,
             resources: Vec::new(),
             events: EventStore::default(),
+            element,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
         }
