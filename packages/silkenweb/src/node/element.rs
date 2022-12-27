@@ -93,7 +93,7 @@ impl<D: Dom> GenericElement<D> {
             }))
         }
 
-        // TODO: Is this actually a win?
+        // This improves memory usage, and doesn't detectably impact performance
         self.resources.shrink_to_fit();
         self
     }
