@@ -111,7 +111,7 @@ mod event {
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
     #[derive(Default, Clone)]
-    pub struct EventStore(Rc<RefCell<Vec<EventCallback>>>);
+    pub struct EventStore(Rc<RefCell<(Vec<EventCallback>, Vec<Self>)>>);
 
     impl EventStore {
         /// `f` must be `'static` as JS callbacks are called once the stack
@@ -128,7 +128,7 @@ mod event {
                 .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
                 .unwrap_throw();
 
-            self.0.borrow_mut().push(EventCallback {
+            self.0.borrow_mut().0.push(EventCallback {
                 element: element.clone(),
                 name,
                 callback,
@@ -136,7 +136,9 @@ mod event {
         }
 
         pub fn combine(&mut self, other: Self) {
-            self.0.borrow_mut().append(&mut other.0.borrow_mut());
+            // We need to keep track of any events subsequently added to `other`, so we need
+            // to keep track of it's `Rc`.
+            self.0.borrow_mut().1.push(other);
         }
     }
 
