@@ -68,6 +68,7 @@ fn main() {
                     ci_stable(false, None)?;
                     ci_nightly(Some("nightly"))?;
                     ci_browser()?;
+                    wasm_pack_test()?;
                 }
             }
             Commands::WasmPackTest => wasm_pack_test()?,
