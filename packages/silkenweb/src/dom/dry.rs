@@ -6,6 +6,7 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
     hydro::HydroNode,
@@ -218,6 +219,7 @@ pub struct SharedDryElement<Node> {
     tag: String,
     attributes: IndexMap<String, String>,
     children: Vec<Node>,
+    shadow_children: Vec<Node>,
     hydrate_actions: Vec<LazyElementAction>,
     next_sibling: Option<Node>,
 }
@@ -229,6 +231,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
             children: Vec::new(),
+            shadow_children: Vec::new(),
             hydrate_actions: Vec::new(),
             next_sibling: None,
         }
@@ -293,7 +296,14 @@ impl<Node: DryChild> SharedDryElement<Node> {
         self.children.clear();
     }
 
-    pub fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Node>) {
+    pub fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Node>) {
+        for child in children {
+            if let Some(previous_child) = self.shadow_children.last_mut() {
+                previous_child.set_next_sibling(Some(&child));
+            }
+
+            self.shadow_children.push(child);
+        }
         // TODO: Dry Shadow Children
         //
         // Add shadow children and create them when we hydrate.
@@ -363,20 +373,25 @@ impl<Node: DryChild> SharedDryElement<Node> {
     }
 
     pub fn clone_node(&self) -> Self {
-        let children: Vec<Node> = self.children.iter().map(Node::clone_node).collect();
+        Self {
+            namespace: self.namespace,
+            tag: self.tag.clone(),
+            attributes: self.attributes.clone(),
+            children: Self::clone_children(&self.children),
+            shadow_children: Self::clone_children(&self.shadow_children),
+            hydrate_actions: Vec::new(),
+            next_sibling: None,
+        }
+    }
+
+    fn clone_children(children: &[Node]) -> Vec<Node> {
+        let children: Vec<Node> = children.iter().map(Node::clone_node).collect();
 
         for (index, child) in children.iter().enumerate() {
             child.set_next_sibling(children.get(index + 1));
         }
 
-        Self {
-            namespace: self.namespace,
-            tag: self.tag.clone(),
-            attributes: self.attributes.clone(),
-            children,
-            hydrate_actions: Vec::new(),
-            next_sibling: None,
-        }
+        children
     }
 }
 
@@ -427,9 +442,33 @@ impl SharedDryElement<HydroNode> {
     ) -> WetElement {
         self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::from_element(dom_elem.clone());
-        let mut current_child = dom_elem.first_child();
 
-        let mut children = self.children.into_iter();
+        Self::hydrate_children(dom_elem, self.children, tracker);
+
+        if !self.shadow_children.is_empty() {
+            let shadow_root = dom_elem.shadow_root().unwrap_or_else(|| {
+                dom_elem
+                    .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                    .unwrap_throw()
+            });
+
+            Self::hydrate_children(&shadow_root, self.shadow_children, tracker);
+        }
+
+        for event in self.hydrate_actions {
+            event(&mut elem);
+        }
+
+        elem
+    }
+
+    fn hydrate_children(
+        dom_elem: &web_sys::Node,
+        children: impl IntoIterator<Item = HydroNode>,
+        tracker: &mut HydrationStats,
+    ) {
+        let mut children = children.into_iter();
+        let mut current_child = dom_elem.first_child();
 
         for child in children.by_ref() {
             if let Some(node) = &current_child {
@@ -446,15 +485,9 @@ impl SharedDryElement<HydroNode> {
         }
 
         remove_children_from(dom_elem, current_child);
-
-        for event in self.hydrate_actions {
-            event(&mut elem);
-        }
-
-        elem
     }
 
-    fn hydrate_with_new(parent: &web_sys::Element, child: HydroNode, tracker: &mut HydrationStats) {
+    fn hydrate_with_new(parent: &web_sys::Node, child: HydroNode, tracker: &mut HydrationStats) {
         let child = WetNode::from(child);
         let new_child = child.dom_node();
         parent.append_child(new_child).unwrap_throw();
@@ -532,6 +565,10 @@ impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
 
         for child in dry.children {
             wet.append_child(&child.into());
+        }
+
+        if !dry.shadow_children.is_empty() {
+            wet.attach_shadow_children(dry.shadow_children.into_iter().map(|child| child.into()));
         }
 
         for action in dry.hydrate_actions {
