@@ -1,6 +1,6 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{elements::html::*, prelude::*, value::Sig};
-use silkenweb_ui5_showcase::{ui5_button, ButtonDesign};
+use silkenweb_example_web_components_wrapper::{ui5_button, ButtonDesign};
 
 fn main() {
     let count = Mutable::new(0);

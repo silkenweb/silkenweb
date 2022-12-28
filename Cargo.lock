@@ -1668,6 +1668,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-web-components-wrapper"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "parse-display 0.8.0",
+ "silkenweb",
+ "web-sys",
+]
+
+[[package]]
 name = "silkenweb-examples-todomvc"
 version = "0.1.0"
 dependencies = [
@@ -1751,16 +1761,6 @@ dependencies = [
  "paste",
  "silkenweb",
  "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
-name = "silkenweb-ui5-showcase"
-version = "0.1.0"
-dependencies = [
- "futures-signals",
- "parse-display 0.8.0",
- "silkenweb",
  "web-sys",
 ]
 

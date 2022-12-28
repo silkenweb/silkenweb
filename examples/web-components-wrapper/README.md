@@ -1,4 +1,4 @@
-# Silkenweb UI5 Showcase
+# Silkenweb Example Web Components Wrapper
 
 This uses [Vite] via [NPM] to build the [UI5] web components, before building with [trunk].
 

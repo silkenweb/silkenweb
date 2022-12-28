@@ -1,6 +1,6 @@
 [package]
-name = "silkenweb-ui5-showcase"
-description = "Showcase Silkenweb UI5 Components"
+name = "silkenweb-example-web-components-wrapper"
+description = "Silkenweb Web Components Wrapper Example"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 categories = ["wasm"]
