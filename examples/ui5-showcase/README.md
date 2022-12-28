@@ -4,7 +4,7 @@ This uses [Vite] via [NPM] to build the [UI5] web components, before building wi
 
 ## Running
 
-You'll need [GNU Make], `sh`, `rsync` and [NPM] installed, then run `trunk serve --open`.
+You'll need [GNU Make], `sh`, and [NPM] installed, then run `trunk serve --open`.
 
 [Vite]: https://vitejs.dev/
 [NPM]: https://www.npmjs.com/
