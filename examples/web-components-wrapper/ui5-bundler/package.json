@@ -9,8 +9,6 @@
     "vite": "^4.0.3"
   },
   "dependencies": {
-    "@ui5/webcomponents": "^1.9.3",
-    "@ui5/webcomponents-fiori": "^1.9.3",
-    "@ui5/webcomponents-icons-tnt": "^1.9.3"
+    "@ui5/webcomponents": "^1.9.3"
   }
 }
