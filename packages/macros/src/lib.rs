@@ -182,11 +182,6 @@ fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -
     None
 }
 
-// TODO: Keep an eye on <https://github.com/kaj/rsass>:
-// - It provides a parser, so classes can be extracted
-// - The repo seems to be actively developed
-// - It looks fairly complete
-
 /// Compile SCSS.
 ///
 /// This takes a single string literal containing SCSS. It compiles it down to

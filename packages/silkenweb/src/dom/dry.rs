@@ -294,8 +294,10 @@ impl<Node: DryChild> SharedDryElement<Node> {
     }
 
     pub fn attach_shadow_children(&mut self, _children: impl IntoIterator<Item = Node>) {
-        // TODO: Add shadow children and create them when we hydrate
-        // TODO: Add a flag for `declarative-shadow-dom` to output `<template
+        // TODO: Dry Shadow Children
+        //
+        // Add shadow children and create them when we hydrate.
+        // Add a flag for `declarative-shadow-dom` to output `<template
         // shadowroot="open">...`
     }
 
