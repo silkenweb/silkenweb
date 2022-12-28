@@ -2,11 +2,3 @@
 stage = "pre_build"
 command = "make"
 command_arguments = ["--directory=ui5-bundler"]
-
-[[hooks]]
-stage = "post_build"
-command = "sh"
-command_arguments = [
-    "-c",
-    'rsync -a --exclude /build-finished.txt --exclude /ui5.esm.js ui5-bundler/dist/ "$TRUNK_STAGING_DIR/"',
-]
