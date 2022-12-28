@@ -6,7 +6,6 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
-use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use super::{
     hydro::HydroNode,
@@ -446,12 +445,7 @@ impl SharedDryElement<HydroNode> {
         Self::hydrate_children(dom_elem, self.children, tracker);
 
         if !self.shadow_children.is_empty() {
-            let shadow_root = dom_elem.shadow_root().unwrap_or_else(|| {
-                dom_elem
-                    .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                    .unwrap_throw()
-            });
-
+            let shadow_root = elem.create_shadow_root();
             Self::hydrate_children(&shadow_root, self.shadow_children, tracker);
         }
 

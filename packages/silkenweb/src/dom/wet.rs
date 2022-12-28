@@ -19,6 +19,14 @@ impl WetElement {
     pub fn from_element(element: web_sys::Element) -> Self {
         Self { element }
     }
+
+    pub fn create_shadow_root(&self) -> web_sys::ShadowRoot {
+        self.element.shadow_root().unwrap_or_else(|| {
+            self.element
+                .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+                .unwrap_throw()
+        })
+    }
 }
 
 impl fmt::Display for WetElement {
@@ -109,11 +117,7 @@ impl DomElement for WetElement {
 
 impl InstantiableDomElement for WetElement {
     fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
-        let elem = &self.element;
-        let shadow_root = elem.shadow_root().unwrap_or_else(|| {
-            elem.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-                .unwrap_throw()
-        });
+        let shadow_root = self.create_shadow_root();
 
         for child in children {
             shadow_root.append_child(child.dom_node()).unwrap_throw();
