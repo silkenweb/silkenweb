@@ -6,7 +6,7 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
-    node::Node,
+    node::{element::ShadowRootParent, Node},
     prelude::ParentElement,
     task::render_now,
     unmount,
@@ -209,6 +209,30 @@ async fn nested_signal() {
     assert_eq!(
         r#"<div data-silkenweb="1"><p><p>Some more text</p></p></div>"#,
         app_html(APP_ID)
+    );
+    unmount(APP_ID);
+}
+
+#[wasm_bindgen_test]
+async fn shadow_root_creation() {
+    let shadow_host_id = "shadow-host";
+    app_container(APP_ID, r#"<div data-silkenweb="1"></div>"#).await;
+    let app = div()
+        .id(shadow_host_id)
+        .attach_shadow_children([p().text("Shadow child")]);
+
+    render_now().await;
+    hydrate(APP_ID, app).await;
+    assert_eq!(
+        r#"<div data-silkenweb="1" id="shadow-host"></div>"#,
+        app_html(APP_ID)
+    );
+    assert_eq!(
+        r#"<p>Shadow child</p>"#,
+        query_element(shadow_host_id)
+            .shadow_root()
+            .unwrap()
+            .inner_html()
     );
     unmount(APP_ID);
 }
