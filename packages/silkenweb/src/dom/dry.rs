@@ -303,11 +303,6 @@ impl<Node: DryChild> SharedDryElement<Node> {
 
             self.shadow_children.push(child);
         }
-        // TODO: Dry Shadow Children
-        //
-        // Add shadow children and create them when we hydrate.
-        // Add a flag for `declarative-shadow-dom` to output `<template
-        // shadowroot="open">...`
     }
 
     pub fn add_class(&mut self, name: &str) {
@@ -526,6 +521,8 @@ impl SharedDryElement<HydroNode> {
 
 impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Optionally print declarative shadow root, if/when we get
+        // [Declarative Shadow Root](https://caniuse.com/mdn-html_elements_template_shadowroot)
         write!(f, "<{}", self.tag)?;
 
         for (name, value) in &self.attributes {
