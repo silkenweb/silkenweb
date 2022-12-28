@@ -899,39 +899,13 @@ checksum = "9ff7415e9ae3fff1225851df9e0d9e4e5479f947619774677a63572e55e80eff"
 
 [[package]]
 name = "parse-display"
-version = "0.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "813e91c6232dbeb2e9deba0eb0dc5c967bd6f380676fd34419f9ddd71411faa7"
-dependencies = [
- "once_cell",
- "parse-display-derive 0.5.5",
- "regex",
-]
-
-[[package]]
-name = "parse-display"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f96cc033d72896bb9a2c239a14e1141c3e2eae6d649e7c10ef4e598d66bc86c"
 dependencies = [
  "once_cell",
- "parse-display-derive 0.8.0",
+ "parse-display-derive",
  "regex",
-]
-
-[[package]]
-name = "parse-display-derive"
-version = "0.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "007ed61a69cf7d9b95cc5dc18489dbb4f70d4adb0a0c100e2dd46f0be241711a"
-dependencies = [
- "once_cell",
- "proc-macro2",
- "quote",
- "regex",
- "regex-syntax",
- "structmeta",
- "syn",
 ]
 
 [[package]]
@@ -1672,7 +1646,7 @@ name = "silkenweb-example-web-components-wrapper"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "parse-display 0.8.0",
+ "parse-display",
  "silkenweb",
  "web-sys",
 ]
@@ -1748,20 +1722,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "silkenweb-ui5"
-version = "0.3.0"
-dependencies = [
- "chrono",
- "futures-signals",
- "js-sys",
- "parse-display 0.5.5",
- "paste",
- "silkenweb",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]
