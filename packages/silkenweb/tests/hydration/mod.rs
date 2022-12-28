@@ -12,7 +12,9 @@ use silkenweb::{
     unmount,
     value::Sig,
 };
+use silkenweb_base::document::create_element;
 use wasm_bindgen_test::wasm_bindgen_test;
+use web_sys::{ShadowRootInit, ShadowRootMode};
 
 use crate::{app_html, create_app_container, query_element, APP_ID};
 
@@ -222,7 +224,41 @@ async fn shadow_root_creation() {
         .attach_shadow_children([p().text("Shadow child")]);
 
     render_now().await;
-    hydrate(APP_ID, app).await;
+    let stats = hydrate(APP_ID, app).await;
+    assert_eq!(stats.nodes_added(), 1);
+    assert_eq!(
+        r#"<div data-silkenweb="1" id="shadow-host"></div>"#,
+        app_html(APP_ID)
+    );
+    assert_eq!(
+        r#"<p>Shadow child</p>"#,
+        query_element(shadow_host_id)
+            .shadow_root()
+            .unwrap()
+            .inner_html()
+    );
+    unmount(APP_ID);
+}
+
+#[wasm_bindgen_test]
+async fn shadow_root_hydration() {
+    let shadow_host_id = "shadow-host";
+    app_container(APP_ID, r#"<div data-silkenweb="1" id="shadow-host"></div>"#).await;
+    let shadow_host = query_element(shadow_host_id);
+    let shadow_root = shadow_host
+        .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+        .unwrap();
+    let paragraph = create_element("p");
+    paragraph.set_text_content(Some("Shadow child"));
+    shadow_root.append_child(&paragraph).unwrap();
+
+    let app = div()
+        .id(shadow_host_id)
+        .attach_shadow_children([p().text("Shadow child")]);
+
+    render_now().await;
+    let stats = hydrate(APP_ID, app).await;
+    assert_eq!(stats.nodes_added(), 0);
     assert_eq!(
         r#"<div data-silkenweb="1" id="shadow-host"></div>"#,
         app_html(APP_ID)
