@@ -6,3 +6,6 @@ members = ["packages/*", "examples/*"]
 codegen-units = 1
 lto = true
 opt-level = "z"
+
+[profile.bench]
+opt-level=3
