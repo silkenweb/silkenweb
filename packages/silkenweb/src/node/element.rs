@@ -614,7 +614,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
 /// Once [Declarative Shadow Root] is available, this will likely be deprecated
 /// in favour of using HTML directly: `<template shadowroot="open">...`.
 ///
-/// [Declarative Shadow Root]: https://caniuse.com/?search=template%20shadowroot
+/// [Declarative Shadow Root]: https://caniuse.com/mdn-html_elements_template_shadowroot
 pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
