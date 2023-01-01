@@ -21,7 +21,7 @@ use futures_signals::{
     signal_vec::{always, SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use silkenweb_base::{clone, empty_str, intern_str};
+use silkenweb_base::{clone, document, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
@@ -739,6 +739,13 @@ pub enum Namespace {
 }
 
 impl Namespace {
+    pub fn create_element(self, tag: &str) -> web_sys::Element {
+        match self {
+            Namespace::Html => document::create_element(tag),
+            _ => document::create_element_ns(intern_str(self.as_str()), tag),
+        }
+    }
+
     pub fn as_str(&self) -> &str {
         match self {
             Namespace::Html => "http://www.w3.org/1999/xhtml",

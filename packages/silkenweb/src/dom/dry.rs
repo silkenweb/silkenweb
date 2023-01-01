@@ -406,7 +406,7 @@ impl SharedDryElement<HydroNode> {
                 if dry_namespace == dom_namespace
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
-                    return self.hydrate(elem_child, tracker);
+                    return self.hydrate_element(elem_child, tracker);
                 }
             }
 
@@ -430,6 +430,33 @@ impl SharedDryElement<HydroNode> {
     }
 
     pub fn hydrate(self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
+        let existing_namespace = dom_elem.namespace_uri().unwrap_or_default();
+        let new_namespace = self.namespace;
+        let new_tag = &self.tag;
+
+        if new_namespace.as_str() == existing_namespace
+            && default_caseless_match_str(&dom_elem.tag_name(), new_tag)
+        {
+            self.hydrate_element(dom_elem, tracker)
+        } else {
+            let new_dom_elem = new_namespace.create_element(new_tag);
+
+            while let Some(child) = dom_elem.first_child() {
+                new_dom_elem.append_child(&child).unwrap_throw();
+            }
+
+            dom_elem
+                .replace_with_with_node_1(&new_dom_elem)
+                .unwrap_throw();
+            self.hydrate_element(&new_dom_elem, tracker)
+        }
+    }
+
+    fn hydrate_element(
+        self,
+        dom_elem: &web_sys::Element,
+        tracker: &mut HydrationStats,
+    ) -> WetElement {
         self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::from_element(dom_elem.clone());
 

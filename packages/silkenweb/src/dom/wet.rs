@@ -1,6 +1,6 @@
 use std::fmt;
 
-use silkenweb_base::{document, intern_str};
+use silkenweb_base::document;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
@@ -39,12 +39,9 @@ impl DomElement for WetElement {
     type Node = WetNode;
 
     fn new(ns: Namespace, tag: &str) -> Self {
-        let element = match ns {
-            Namespace::Html => document::create_element(tag),
-            _ => document::create_element_ns(intern_str(ns.as_str()), tag),
-        };
-
-        Self { element }
+        Self {
+            element: ns.create_element(tag),
+        }
     }
 
     fn append_child(&mut self, child: &WetNode) {

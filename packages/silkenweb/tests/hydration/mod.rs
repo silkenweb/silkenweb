@@ -2,7 +2,7 @@ use futures_signals::signal::Mutable;
 use silkenweb::{
     dom::Hydro,
     elements::{
-        html::{button, div, p},
+        html::{self, button, div, p},
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
@@ -68,6 +68,24 @@ async fn extra_child() {
         APP_ID,
         app,
         r#"<div id="app"><p data-silkenweb="1">Hello, world!</p></div>"#,
+    )
+    .await;
+}
+
+#[wasm_bindgen_test]
+async fn mismatched_mount_point_tag() {
+    app_container(
+        APP_ID,
+        r#"<p data-silkenweb="1">Hello, world!</p><div></div>"#,
+    )
+    .await;
+
+    let app = html::main().id(APP_ID).child(p().text("Hello, world!"));
+
+    test_hydrate(
+        APP_ID,
+        app,
+        r#"<main id="app"><p data-silkenweb="1">Hello, world!</p></main>"#,
     )
     .await;
 }
