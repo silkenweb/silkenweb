@@ -181,8 +181,5 @@ pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro>>) -> Hyd
     let wet_element = element.hydrate(&mount_point, &mut stats);
     insert_element(wet_element);
 
-    // TODO: Check mount point element type is the same as `element` (and copy
-    // children across if not).
-
     stats
 }
