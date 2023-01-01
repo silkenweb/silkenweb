@@ -15,7 +15,7 @@ use silkenweb::{
     elements::html::{div, Div},
     macros::Signal,
     mount,
-    prelude::ParentElement,
+    prelude::{HtmlElement, ParentElement},
     task::render_now,
     value::Sig,
 };
@@ -89,7 +89,7 @@ async fn test_children(
 ) {
     create_app_container(APP_ID).await;
 
-    let mut parent = div();
+    let mut parent = div().id(APP_ID);
     let optional_child_mutables: Vec<Mutable<bool>> = optional_children
         .iter()
         .map(|state| Mutable::new(state.initial))
@@ -142,7 +142,10 @@ async fn check(
     let children_html = children.into_iter().map(div_html);
     let inner_html = optional_children_html.chain(children_html).join("");
 
-    assert_eq!(app_html(APP_ID), div_html(inner_html))
+    assert_eq!(
+        app_html(APP_ID),
+        format!(r#"<div id="app">{inner_html}</div>"#)
+    )
 }
 
 fn child<D: Dom>(index: usize) -> Div<D> {

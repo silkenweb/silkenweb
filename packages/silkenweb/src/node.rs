@@ -6,12 +6,9 @@ use discard::DiscardOnDrop;
 use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
-use crate::{
-    dom::{
-        private::{DomText, EventStore},
-        DefaultDom, Dom, Hydro, Wet,
-    },
-    hydration::HydrationStats,
+use crate::dom::{
+    private::{DomText, EventStore},
+    DefaultDom, Dom,
 };
 
 pub mod element;
@@ -30,35 +27,6 @@ impl<D: Dom> Node<D> {
 
     fn into_node(self) -> D::Node {
         self.node
-    }
-}
-
-impl Node<Wet> {
-    pub(super) fn dom_node(&self) -> &web_sys::Node {
-        self.node.dom_node()
-    }
-}
-
-impl Node<Hydro> {
-    pub(super) fn hydrate_child(
-        self,
-        parent: &web_sys::Node,
-        child: &web_sys::Node,
-        tracker: &mut HydrationStats,
-    ) -> Node<Wet> {
-        Node {
-            node: self.node.hydrate_child(parent, child, tracker),
-            resources: self.resources,
-            events: self.events,
-        }
-    }
-
-    pub(super) fn into_wet(self) -> Node<Wet> {
-        Node {
-            node: self.node.into(),
-            resources: self.resources,
-            events: self.events,
-        }
     }
 }
 

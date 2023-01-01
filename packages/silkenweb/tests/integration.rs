@@ -5,8 +5,8 @@ use silkenweb::{
     mount,
     node::element::ParentElement,
     prelude::{ElementEvents, HtmlElement},
+    remove_all_mounted,
     task::render_now,
-    unmount,
     value::Sig,
 };
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
@@ -46,11 +46,11 @@ async fn mount_unmount() {
     create_app_container(APP_ID).await;
 
     let message = "Hello, world!";
-    mount(APP_ID, p().text(message));
+    let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p>{}</p>"#, message), app_html(APP_ID));
-    unmount(APP_ID);
-    assert_eq!("", app_html(APP_ID));
+    assert_eq!(format!(r#"<p id="app">{}</p>"#, message), app_html(APP_ID));
+    mount_handle.unmount();
+    assert_eq!(r#"<div id="app"></div>"#, app_html(APP_ID));
 }
 
 #[wasm_bindgen_test]
@@ -174,6 +174,7 @@ async fn verify_reactive_text(paragraph: P<Wet>, text_id: &str, text: &mut Mutab
 async fn create_app_container(app_id: &str) {
     // Clear the render queue
     render_now().await;
+    remove_all_mounted();
     let app_container = document().create_element("div").unwrap_throw();
     app_container.set_id(app_id);
     let body = document().body().unwrap_throw();
@@ -190,7 +191,7 @@ fn query_element(id: &str) -> web_sys::HtmlElement {
 }
 
 fn app_html(id: &str) -> String {
-    query_element(id).inner_html()
+    query_element(id).outer_html()
 }
 
 fn document() -> web_sys::Document {

@@ -13,7 +13,7 @@ use super::{
     wet::{WetElement, WetNode},
     Dry,
 };
-use crate::{hydration::HydrationStats, node::element::Namespace, remove_children_from};
+use crate::{hydration::HydrationStats, node::element::Namespace};
 
 #[derive(Clone)]
 
@@ -406,7 +406,7 @@ impl SharedDryElement<HydroNode> {
                 if dry_namespace == dom_namespace
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
-                    return self.hydrate_element(elem_child, tracker);
+                    return self.hydrate(elem_child, tracker);
                 }
             }
 
@@ -429,11 +429,7 @@ impl SharedDryElement<HydroNode> {
         wet_child
     }
 
-    fn hydrate_element(
-        self,
-        dom_elem: &web_sys::Element,
-        tracker: &mut HydrationStats,
-    ) -> WetElement {
+    pub fn hydrate(self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
         self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::from_element(dom_elem.clone());
 
@@ -473,7 +469,16 @@ impl SharedDryElement<HydroNode> {
             Self::hydrate_with_new(dom_elem, child, tracker);
         }
 
-        remove_children_from(dom_elem, current_child);
+        Self::remove_children_from(dom_elem, current_child);
+    }
+
+    /// Remove `child` and all siblings after `child`
+    fn remove_children_from(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
+        while let Some(node) = child {
+            let next_child = node.next_sibling();
+            parent.remove_child(&node).unwrap_throw();
+            child = next_child;
+        }
     }
 
     fn hydrate_with_new(parent: &web_sys::Node, child: HydroNode, tracker: &mut HydrationStats) {

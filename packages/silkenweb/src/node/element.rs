@@ -23,7 +23,7 @@ use futures_signals::{
 };
 use silkenweb_base::{clone, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use self::child_vec::ChildVec;
 use super::{Node, Resource};
@@ -31,8 +31,9 @@ use crate::{
     attribute::Attribute,
     dom::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
-        DefaultDom, Dom, InstantiableDom, Template,
+        DefaultDom, Dom, Hydro, InstantiableDom, Template, Wet,
     },
+    hydration::HydrationStats,
     node::text,
     task,
 };
@@ -55,8 +56,9 @@ impl<D: Dom> GenericElement<D> {
         Self::from_dom(D::Element::new(namespace, tag), 0)
     }
 
-    pub fn freeze(self) -> FrozenElement<D> {
-        FrozenElement(self.build())
+    pub fn freeze(mut self) -> FrozenElement<D> {
+        self.build();
+        FrozenElement(self)
     }
 
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
@@ -71,8 +73,8 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
-    pub(crate) fn store_child(&mut self, child: Self) {
-        let mut child = child.build();
+    pub(crate) fn store_child(&mut self, mut child: Self) {
+        child.build();
         self.resources.append(&mut child.resources);
         self.events.combine(child.events);
     }
@@ -83,7 +85,7 @@ impl<D: Dom> GenericElement<D> {
         let _ = name;
     }
 
-    fn build(mut self) -> Self {
+    fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
             let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
 
@@ -95,7 +97,6 @@ impl<D: Dom> GenericElement<D> {
 
         // This improves memory usage, and doesn't detectably impact performance
         self.resources.shrink_to_fit();
-        self
     }
 
     fn class_signal<T>(
@@ -254,6 +255,40 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     }
 }
 
+impl GenericElement<Wet> {
+    pub(crate) fn dom_element(&self) -> web_sys::Element {
+        self.element.dom_element()
+    }
+
+    pub(crate) fn mount(&mut self, mount_point: &web_sys::Element) {
+        self.build();
+
+        mount_point
+            .replace_with_with_node_1(&self.dom_element())
+            .unwrap_throw();
+    }
+}
+
+impl GenericElement<Hydro> {
+    pub(crate) fn hydrate(
+        mut self,
+        element: &web_sys::Element,
+        tracker: &mut HydrationStats,
+    ) -> GenericElement<Wet> {
+        self.build();
+
+        GenericElement {
+            static_child_count: self.static_child_count,
+            child_vec: None,
+            resources: self.resources,
+            events: self.events,
+            element: self.element.hydrate(element, tracker),
+            #[cfg(debug_assertions)]
+            attributes: self.attributes,
+        }
+    }
+}
+
 impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
     fn attach_shadow_children(
         mut self,
@@ -386,8 +421,8 @@ impl<D: Dom> Executor for GenericElement<D> {
 impl<D: Dom> Value for GenericElement<D> {}
 
 impl<D: Dom> From<GenericElement<D>> for Node<D> {
-    fn from(elem: GenericElement<D>) -> Self {
-        let elem = elem.build();
+    fn from(mut elem: GenericElement<D>) -> Self {
+        elem.build();
 
         Self {
             node: elem.element.into(),

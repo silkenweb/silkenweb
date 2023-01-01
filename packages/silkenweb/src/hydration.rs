@@ -7,9 +7,9 @@
 //! this is done.
 use std::fmt;
 
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::JsCast;
 
-use crate::{dom::Hydro, insert_component, mount_point, node::Node, remove_children_from};
+use crate::{dom::Hydro, insert_element, mount_point, node::element::GenericElement};
 
 /// Statistics about the hydration process.
 #[derive(Default)]
@@ -173,26 +173,16 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
-pub async fn hydrate(id: &str, node: impl Into<Node<Hydro>>) -> HydrationStats {
-    let node = node.into();
+pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro>>) -> HydrationStats {
+    let element = element.into();
     let mut stats = HydrationStats::default();
 
     let mount_point = mount_point(id);
+    let wet_element = element.hydrate(&mount_point, &mut stats);
+    insert_element(wet_element);
 
-    let wet_node = if let Some(hydration_point) = mount_point.first_child() {
-        let wet_node = node.hydrate_child(&mount_point, &hydration_point, &mut stats);
-
-        remove_children_from(&mount_point, wet_node.dom_node().next_sibling());
-        wet_node
-    } else {
-        let wet_node = node.into_wet();
-        let new_node = wet_node.dom_node();
-        stats.node_added(new_node);
-        mount_point.append_child(new_node).unwrap_throw();
-        wet_node
-    };
-
-    insert_component(id, mount_point.into(), wet_node);
+    // TODO: Check mount point element type is the same as `element` (and copy
+    // children across if not).
 
     stats
 }

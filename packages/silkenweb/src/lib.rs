@@ -83,7 +83,7 @@
 use std::{cell::RefCell, collections::HashMap};
 
 use dom::Wet;
-use node::Node;
+use node::element::GenericElement;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
@@ -132,48 +132,98 @@ pub use silkenweb_signals_ext::value;
 /// the last child of this element.
 ///
 /// Mounting an `id` that is already mounted will remove that element.
-pub fn mount(id: &str, node: impl Into<Node<Wet>>) {
-    let node = node.into();
+pub fn mount(id: &str, element: impl Into<GenericElement<Wet>>) -> MountHandle {
+    let mut element = element.into();
 
     let mount_point = mount_point(id);
-    mount_point.append_child(node.dom_node()).unwrap_throw();
-    insert_component(id, mount_point.into(), node);
+    element.mount(&mount_point);
+    MountHandle::new(mount_point, element)
 }
 
-/// Unmount an element.
-///
-/// This is mostly useful for testing and checking for memory leaks
-pub fn unmount(id: &str) {
-    if let Some((parent, child)) = COMPONENTS.with(|apps| apps.borrow_mut().remove(id)) {
-        parent.remove_child(child.dom_node()).unwrap_throw();
+pub fn remove_all_mounted() {
+    ELEMENTS.with(|elements| {
+        for element in elements.take().into_values() {
+            element.dom_element().remove()
+        }
+    });
+}
+
+pub struct MountHandle {
+    id: u128,
+    mount_point: web_sys::Element,
+    on_drop: Option<DropAction>,
+}
+
+impl MountHandle {
+    pub fn new(mount_point: web_sys::Element, element: GenericElement<Wet>) -> Self {
+        Self {
+            id: insert_element(element),
+            mount_point,
+            on_drop: None,
+        }
     }
+
+    pub fn stop(mut self) {
+        self.stop_on_drop();
+    }
+
+    pub fn stop_on_drop(&mut self) {
+        self.on_drop = Some(DropAction::Stop);
+    }
+
+    pub fn unmount(mut self) {
+        self.unmount_on_drop();
+    }
+
+    pub fn unmount_on_drop(&mut self) {
+        self.on_drop = Some(DropAction::Unmount);
+    }
+}
+
+impl Drop for MountHandle {
+    fn drop(&mut self) {
+        match self.on_drop {
+            Some(DropAction::Stop) => {
+                remove_element(self.id);
+            }
+            Some(DropAction::Unmount) => {
+                if let Some(element) = remove_element(self.id) {
+                    element
+                        .dom_element()
+                        .replace_with_with_node_1(&self.mount_point)
+                        .unwrap_throw();
+                }
+            }
+            None => (),
+        }
+    }
+}
+
+enum DropAction {
+    Stop,
+    Unmount,
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
     base_document::get_element_by_id(id)
-        .unwrap_or_else(|| panic!("DOM node id = '{}' must exist", id))
+        .unwrap_or_else(|| panic!("DOM node id = '{id}' must exist"))
 }
 
-fn insert_component(id: &str, parent: web_sys::Node, child: Node<Wet>) {
-    if let Some((parent, child)) =
-        COMPONENTS.with(|apps| apps.borrow_mut().insert(id.to_owned(), (parent, child)))
-    {
-        // We discard the result, as we may have hydrated over `child` and removed it
-        // from parent if it didn't match.
-        let _discard_result = parent.remove_child(child.dom_node());
-    }
+fn insert_element(element: GenericElement<Wet>) -> u128 {
+    let id = next_node_handle_id();
+    ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
+    id
 }
 
-/// Remove `child` and all siblings after `child`
-fn remove_children_from(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
-    while let Some(node) = child {
-        let next_child = node.next_sibling();
-        parent.remove_child(&node).unwrap_throw();
-        child = next_child;
-    }
+fn remove_element(id: u128) -> Option<GenericElement<Wet>> {
+    ELEMENTS.with(|elements| elements.borrow_mut().remove(&id))
+}
+
+fn next_node_handle_id() -> u128 {
+    ELEMENT_HANDLE_ID.with(|id| id.replace_with(|id| *id + 1))
 }
 
 thread_local!(
-    static COMPONENTS: RefCell<HashMap<String, (web_sys::Node, Node<Wet>)>> =
-        RefCell::new(HashMap::new());
+    static ELEMENT_HANDLE_ID: RefCell<u128> = RefCell::new(0);
+    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet>>> = RefCell::new(HashMap::new());
 );

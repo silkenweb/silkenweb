@@ -6,10 +6,9 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
-    node::{element::ShadowRootParent, Node},
+    node::element::{GenericElement, ShadowRootParent},
     prelude::ParentElement,
     task::render_now,
-    unmount,
     value::Sig,
 };
 use silkenweb_base::document::create_element;
@@ -20,13 +19,13 @@ use crate::{app_html, create_app_container, query_element, APP_ID};
 
 #[wasm_bindgen_test]
 async fn missing_text() {
-    app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
-    let app = div().child(p().text("Hello, world!"));
+    app_container(APP_ID, r#"<p data-silkenweb="1"></p>"#).await;
+    let app = div().id(APP_ID).child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1">Hello, world!</p></div>"#,
     )
     .await;
 }
@@ -43,12 +42,14 @@ async fn blank_text() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = div()
+        .id(APP_ID)
+        .child(div().child(p().text("Hello, world!")));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><div data-silkenweb="1"><p>Hello, world!</p></div></div>"#,
     )
     .await;
 }
@@ -57,16 +58,16 @@ async fn blank_text() {
 async fn extra_child() {
     app_container(
         APP_ID,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p><div></div></div>"#,
+        r#"<p data-silkenweb="1">Hello, world!</p><div></div>"#,
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = div().id(APP_ID).child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1">Hello, world!</p></div>"#,
     )
     .await;
 }
@@ -79,12 +80,14 @@ async fn mismatched_element() {
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = div()
+        .id(APP_ID)
+        .child(div().child(p().text("Hello, world!")));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><div data-silkenweb="1"><p>Hello, world!</p></div></div>"#,
     )
     .await;
 }
@@ -93,34 +96,30 @@ async fn mismatched_element() {
 async fn extra_attribute() {
     app_container(
         APP_ID,
-        r#"<div data-silkenweb="1" id="0"><p>Hello, world!</p></div>"#,
+        r#"<p data-silkenweb="1" data-test="0">Hello, world!</p>"#,
     )
     .await;
 
-    let app = div().child(p().text("Hello, world!"));
+    let app = div().id(APP_ID).child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1">Hello, world!</p></div>"#,
     )
     .await;
 }
 
 #[wasm_bindgen_test]
 async fn missing_attribute() {
-    app_container(
-        APP_ID,
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
-    )
-    .await;
+    app_container(APP_ID, r#"<p data-silkenweb="1">Hello, world!</p>"#).await;
 
-    let app = div().id("0").child(p().text("Hello, world!"));
+    let app = div().id(APP_ID).child(p().text("Hello, world!"));
 
     test_hydrate(
         APP_ID,
         app,
-        r#"<div data-silkenweb="1" id="0"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1">Hello, world!</p></div>"#,
     )
     .await;
 }
@@ -132,7 +131,7 @@ async fn event() {
 
     app_container(
         APP_ID,
-        r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>0</div>"#,
+        r#"<button id="increment" data-silkenweb="button-data">+</button>0"#,
     )
     .await;
 
@@ -165,60 +164,61 @@ async fn event() {
     assert_eq!("+1", counter_text(), "Counter incremented after render");
 
     assert_eq!(
-        app_html(APP_ID),
+        app_html(COUNTER_ID),
         r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>1</div>"#
     );
-    unmount(APP_ID);
 }
 
 #[wasm_bindgen_test]
 async fn basic_signal() {
     app_container(APP_ID, r#"<div data-silkenweb="1"><p></p></div>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = div().child(p().text(Sig(text.signal())));
+    let app = div()
+        .id(APP_ID)
+        .child(div().child(p().text(Sig(text.signal()))));
 
     render_now().await;
     hydrate(APP_ID, app).await;
     assert_eq!(
-        r#"<div data-silkenweb="1"><p>Hello, world!</p></div>"#,
+        r#"<div id="app"><div data-silkenweb="1"><p>Hello, world!</p></div></div>"#,
         app_html(APP_ID)
     );
 
     text.set("Some more text");
     render_now().await;
     assert_eq!(
-        r#"<div data-silkenweb="1"><p>Some more text</p></div>"#,
+        r#"<div id="app"><div data-silkenweb="1"><p>Some more text</p></div></div>"#,
         app_html(APP_ID)
     );
-    unmount(APP_ID);
 }
 
 #[wasm_bindgen_test]
 async fn nested_signal() {
-    app_container(APP_ID, r#"<div data-silkenweb="1"><p><p></p></p></div>"#).await;
+    app_container(APP_ID, r#"<p data-silkenweb="1"><p></p></p>"#).await;
     let text = Mutable::new("Hello, world!");
-    let app = div().child(p().child(p().text(Sig(text.signal()))));
+    let app = div()
+        .id(APP_ID)
+        .child(p().child(p().text(Sig(text.signal()))));
 
     render_now().await;
     hydrate(APP_ID, app).await;
     assert_eq!(
-        r#"<div data-silkenweb="1"><p><p>Hello, world!</p></p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1"><p>Hello, world!</p></p></div>"#,
         app_html(APP_ID)
     );
 
     text.set("Some more text");
     render_now().await;
     assert_eq!(
-        r#"<div data-silkenweb="1"><p><p>Some more text</p></p></div>"#,
+        r#"<div id="app"><p data-silkenweb="1"><p>Some more text</p></p></div>"#,
         app_html(APP_ID)
     );
-    unmount(APP_ID);
 }
 
 #[wasm_bindgen_test]
 async fn shadow_root_creation() {
     let shadow_host_id = "shadow-host";
-    app_container(APP_ID, r#"<div data-silkenweb="1"></div>"#).await;
+    app_container(APP_ID, "").await;
     let app = div()
         .id(shadow_host_id)
         .attach_shadow_children([p().text("Shadow child")]);
@@ -226,10 +226,7 @@ async fn shadow_root_creation() {
     render_now().await;
     let stats = hydrate(APP_ID, app).await;
     assert_eq!(stats.nodes_added(), 1);
-    assert_eq!(
-        r#"<div data-silkenweb="1" id="shadow-host"></div>"#,
-        app_html(APP_ID)
-    );
+    assert_eq!(r#"<div id="shadow-host"></div>"#, app_html(shadow_host_id));
     assert_eq!(
         r#"<p>Shadow child</p>"#,
         query_element(shadow_host_id)
@@ -237,14 +234,12 @@ async fn shadow_root_creation() {
             .unwrap()
             .inner_html()
     );
-    unmount(APP_ID);
 }
 
 #[wasm_bindgen_test]
 async fn shadow_root_hydration() {
-    let shadow_host_id = "shadow-host";
-    app_container(APP_ID, r#"<div data-silkenweb="1" id="shadow-host"></div>"#).await;
-    let shadow_host = query_element(shadow_host_id);
+    app_container(APP_ID, "").await;
+    let shadow_host = query_element(APP_ID);
     let shadow_root = shadow_host
         .attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
         .unwrap();
@@ -253,24 +248,17 @@ async fn shadow_root_hydration() {
     shadow_root.append_child(&paragraph).unwrap();
 
     let app = div()
-        .id(shadow_host_id)
+        .id(APP_ID)
         .attach_shadow_children([p().text("Shadow child")]);
 
     render_now().await;
     let stats = hydrate(APP_ID, app).await;
     assert_eq!(stats.nodes_added(), 0);
-    assert_eq!(
-        r#"<div data-silkenweb="1" id="shadow-host"></div>"#,
-        app_html(APP_ID)
-    );
+    assert_eq!(r#"<div id="app"></div>"#, app_html(APP_ID));
     assert_eq!(
         r#"<p>Shadow child</p>"#,
-        query_element(shadow_host_id)
-            .shadow_root()
-            .unwrap()
-            .inner_html()
+        query_element(APP_ID).shadow_root().unwrap().inner_html()
     );
-    unmount(APP_ID);
 }
 
 async fn app_container(id: &str, inner_html: &str) {
@@ -278,10 +266,9 @@ async fn app_container(id: &str, inner_html: &str) {
     query_element(id).set_inner_html(inner_html);
 }
 
-async fn test_hydrate(id: &str, app: impl Into<Node<Hydro>>, expected_html: &str) {
+async fn test_hydrate(id: &str, app: impl Into<GenericElement<Hydro>>, expected_html: &str) {
     render_now().await;
     hydrate(id, app).await;
 
     assert_eq!(expected_html, app_html(id));
-    unmount(id);
 }

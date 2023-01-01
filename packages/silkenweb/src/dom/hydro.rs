@@ -28,6 +28,17 @@ impl fmt::Display for HydroElement {
 }
 
 impl HydroElement {
+    pub fn hydrate(self, element: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
+        let wet = match self.0.replace(SharedHydroElement::Unreachable) {
+            SharedHydroElement::Dry(dry) => dry.hydrate(element, tracker),
+            SharedHydroElement::Wet(wet) => wet,
+            SharedHydroElement::Unreachable => unreachable!(),
+        };
+
+        self.0.replace(SharedHydroElement::Wet(wet.clone()));
+        wet
+    }
+
     fn from_shared(shared: SharedHydroElement) -> Self {
         Self(Rc::new(RefCell::new(shared)))
     }

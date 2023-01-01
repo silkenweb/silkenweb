@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <title>Silkenweb Example: Hydration</title>
     <link rel="rust" data-trunk data-wasm-opt="z" data-weak-refs />
-    <base data-trunk-public-url/>
+    <base data-trunk-public-url />
 </head>
 
 <body>
@@ -14,11 +14,9 @@
         They are not necessary for hydration, but useful evidence that hydration is reusing elements.
         Other spurious attributes will be removed.
     -->
-    <div id="app">
-        <div data-silkenweb="0" data-will-be-removed="remove-me">
-            <button data-silkenweb="1">+</button>
-            <p data-silkenweb="2">0</p>
-        </div>
+    <div id="app" data-silkenweb="0" data-will-be-removed="remove-me">
+        <button data-silkenweb="1">+</button>
+        <p data-silkenweb="2">0</p>
     </div>
 </body>
 
