@@ -199,6 +199,11 @@ macro_rules! dom_element {
             $camel_name::new()
         }
 
+        $(
+            #[doc = $doc_macro!($text_name)]
+            #[doc = ""]
+        )?
+        $(#[$elem_meta])*
         pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
             $crate::node::element::GenericElement<Dom>
         );

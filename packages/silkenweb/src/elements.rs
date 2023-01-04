@@ -1,17 +1,19 @@
-//! Builders for HTML elements.
+//! HTML element types.
 //!
-//! Each HTML element has a function, a struct and a builder struct. The
-//! function is a constructor for the builder. The builder has methods for each
-//! attribute for that element, as well as methods for each event. For example:
+//! Each HTML element has an associated struct. For example, the `<a>` element
+//! is represented by [`A`]. The constructor is a free function of the same
+//! name, so you can write `a()` rather than `A::new()`. There are methods for
+//! each attribute and event. Event methods are prefixed with `on_`. For
+//! example:
 //!
 //! ```no_run
 //! # use silkenweb::elements::{html::{a, A}, ElementEvents};
 //! let link: A = a()
 //!     .href("https://example.com/")
-//!     .on_click(|event: web_sys::MouseEvent, link: web_sys::HtmlAnchorElement| {});
+//!     .on_click(|event, element| {});
 //! ```
 //!
-//! The builder type implements:
+//! The element type implements various traits, including:
 //!
 //! - [`Element`]
 //! - [`HtmlElement`]
@@ -32,7 +34,7 @@ use crate::node::element::Element;
 pub mod html;
 pub mod svg;
 
-/// Wrap a [`web_sys::CustomEvent`] and cast detail.
+/// Wrap a [`web_sys::CustomEvent`].
 ///
 /// This is used when defining custom HTML elements to represent web components.
 /// See [`custom_html_element`] for more details.
@@ -340,6 +342,9 @@ macro_rules! aria_attribute_doc {
     };
 }
 
+/// [ARIA] attributes.
+///
+/// [ARIA]: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
 pub trait AriaElement: Element {
     attributes![
         /// The ARIA [role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)

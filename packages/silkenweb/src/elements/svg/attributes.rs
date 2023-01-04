@@ -1,3 +1,5 @@
+//! Groups of SVG attributes.
+
 use super::{
     content_type::{Length, NumberOrPercentage},
     path::Data,
