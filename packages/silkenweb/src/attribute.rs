@@ -1,5 +1,11 @@
 //! Traits for defining attribute types.
 //!
+//! [`Attribute`] defines how an attribute is rendered and [`AsAttribute`] is a
+//! marker trait to say where the attribute can be used.
+//!
+//! For example, both `String` and `&str` can be used as `String` attributes
+//! because `&str` implements `AsAttribute<String>`.
+//!
 //! Once you've implemented [`Attribute`] and [`AsAttribute`] for your type, you
 //! can use it with [`Element::attribute`], or define attributes on your
 //! own html element using the [`custom_html_element`] macro.
@@ -8,6 +14,8 @@
 use std::borrow::Cow;
 
 /// A type that can be used as the value of an attribute.
+///
+/// See [module-level documentation](self) for more details.
 pub trait Attribute {
     /// The attribute value text.
     ///
@@ -19,8 +27,7 @@ pub trait Attribute {
 
 /// Define where an attribute type can be used.
 ///
-/// For example, both `String` and `&str` can be used as `String` attributes
-/// because `&str` implements `AsAttribute<String>`.
+/// See [module-level documentation](self) for more details.
 pub trait AsAttribute<T>: Attribute {}
 
 macro_rules! define_attribute_values{
