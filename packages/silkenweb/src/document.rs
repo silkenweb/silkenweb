@@ -1,4 +1,6 @@
+//! Document utilities.
 use paste::paste;
+use wasm_bindgen::JsCast;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod arch {
@@ -54,10 +56,22 @@ mod arch {
     }
 }
 
-pub use arch::EventCallback;
+/// Manage an event handler.
+///
+/// This will remove the event handler when dropped.
+pub struct EventCallback(arch::EventCallback);
+
+impl EventCallback {
+    fn new<Event: JsCast>(name: &'static str, f: impl FnMut(Event) + 'static) -> Self {
+        Self(arch::EventCallback::new(name, f))
+    }
+}
 
 macro_rules! events{
     ($($name:ident: $typ:ty),* $(,)?) => { paste!{ $(
+        #[doc = "Add an `" $name "` event handler at the document level." ]
+        ///
+        /// This only has an effect on WASM targets.
         pub fn [< on_ $name >] (f: impl FnMut($typ) + 'static) -> EventCallback {
             EventCallback::new(stringify!($name), f)
         }
