@@ -121,7 +121,7 @@ macro_rules! svg_element {
         $crate::dom_element!(
             $(#[$elem_meta])*
             $name $( ($text_name) )? = {
-                common_attributes = [$crate::elements::svg::attributes::Global, $crate::elements::AriaElement];
+                common_attributes = [$crate::elements::svg::attributes::Core, $crate::elements::AriaElement];
                 common_events = [];
                 namespace = $crate::node::element::Namespace::Svg;
                 doc_macro = svg_element_doc;

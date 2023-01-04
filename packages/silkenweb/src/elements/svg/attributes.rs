@@ -22,7 +22,7 @@ macro_rules! svg_attributes {
 /// An SVG element
 ///
 /// Methods for setting attributes specific to SVG elements
-pub trait Global: Element {
+pub trait Core: Element {
     svg_attributes![
         /// Defines a unique identifier (ID) which must be unique in the whole
         /// document. Its purpose is to identify the element when linking (using
