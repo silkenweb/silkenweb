@@ -39,6 +39,9 @@ pub type DefaultDom = Wet;
 ///
 /// # Example
 ///
+/// Type annotations have been provided for clarity, but the types can be
+/// inferred.
+///
 /// ```
 /// # use silkenweb::{
 /// #   dom::Dry,
@@ -70,12 +73,16 @@ impl private::InstantiableDom for Dry {
 ///
 /// # Example
 ///
+/// Type annotations have been provided for clarity, but the types can be
+/// inferred.
+///
 /// ```no_run
 /// # use silkenweb::{
-/// #   elements::html::p, node::{element::ParentElement},
+/// #   dom::Hydro,
+/// #   elements::html::{p, P}, node::{element::ParentElement},
 /// #   hydration::hydrate,
 /// # };
-/// let app = p().text("Hello, world!");
+/// let app: P<Hydro> = p().text("Hello, world!");
 ///
 /// hydrate("app-id", app);
 /// ```
@@ -100,12 +107,16 @@ impl private::InstantiableDom for Hydro {
 ///
 /// # Example
 ///
+/// Type annotations have been provided for clarity, but the types can be
+/// inferred.
+///
 /// ```no_run
 /// # use silkenweb::{
-/// #   elements::html::p, node::{element::ParentElement},
+/// #   dom::Wet,
+/// #   elements::html::{p, P}, node::{element::ParentElement},
 /// #   mount,
 /// # };
-/// let app = p().text("Hello, world!");
+/// let app: P<Wet> = p().text("Hello, world!");
 ///
 /// mount("app-id", app);
 /// ```
@@ -134,19 +145,23 @@ impl private::InstantiableDom for Wet {
 ///
 /// # Example
 ///
+/// Type annotations have been provided for clarity, but the types can be
+/// inferred.
+///
 /// ```
 /// # use silkenweb::{
-/// #   dom::Dry,
+/// #   dom::{Dry, Template},
 /// #   node::element::TemplateElement,
 /// #   elements::html::{p, P}, node::{element::ParentElement, Node},
 /// # };
-/// let template =
-///     p().on_instantiate(|p, message| p.text(message)).freeze();
-/// let app: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
+/// let elem: P<Template<String, Dry>> = p().on_instantiate(|p, message| p.text(message));
+/// let template: TemplateElement<P<Dry>, String> = elem.freeze();
+/// let hello: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
+/// let goodbye: Node<Dry> = template.instantiate(&"Goodbye!".to_string()).into();
 ///
-/// assert_eq!(app.to_string(), "<p>Hello, world!</p>");
+/// assert_eq!(hello.to_string(), "<p>Hello, world!</p>");
+/// assert_eq!(goodbye.to_string(), "<p>Goodbye!</p>");
 /// ```
-
 pub struct Template<Param, D: InstantiableDom = DefaultDom>(PhantomData<(Param, D)>);
 
 impl<Param: 'static, D: InstantiableDom> Dom for Template<Param, D> {}
