@@ -1,85 +1,48 @@
 //! A library for building reactive web apps
 //!
+//! # Overview
+//!
+//! - Pure rust API
+//! - Fine grained reactivity using [`futures_signals`]
+//! - [Routing]
+//! - [Tauri] support
+//! - [Server Side Rendering] with hydration
+//!
 //! # Quick Start
 //!
-//! First off, we'll need [trunk] to build our app. Install it with:
+//! First, install the `wasm32` target:
 //!
 //! ```bash
-//! cargo install trunk
+//! rustup target add wasm32-unknown-unknown
 //! ```
 //!
-//! Once that's completed, lets jump right in and have a play around with the
-//! example counter app. The full code is available [here][counter]. To run it:
+//! Then install [trunk]:
+//!
+//! ```bash
+//! cargo install trunk --locked
+//! ```
+//!
+//! To run the example [counter]:
 //!
 //! ```bash
 //! cd examples/counter
 //! trunk serve --open
 //! ```
 //!
-//! It's not the most complex app, but it'll serve as a good example to show how
-//! we can build an interactive web app. Lets go through the code, step by step.
+//! # Learning
 //!
-//! Firstly, we create a new [`Mutable`] and an associated [`Signal`].
+//! There's extensive documentation on each module in this crate, along with
+//! many other examples in the [examples] folder.
 //!
-//! ```rust
-//! # use futures_signals::signal::{Mutable, SignalExt};
-//! # use silkenweb::{elements::html::*, prelude::*};
-//!
-//! let count = Mutable::new(0);
-//! let count_text = count.signal().map(|i| format!("{}", i));
-//! ```
-//!
-//! [`Mutable`] represents a variable, and [`Signal`] represents values of that
-//! variable across time. Here we `map` a function over values of `count`, to
-//! convert it to text. See the [futures-signals tutorial] for more detail on
-//! [`Mutable`]s and [`Signal`]s.
-//!
-//! Next, we create a closure, `inc`, to increment `count`. Then we build the
-//! DOM for our counter. `on_click` installs `inc` as an event handler to
-//! increment the counter.
-//!
-//! ```no_run
-//! # use futures_signals::signal::{Mutable, SignalExt};
-//! # use silkenweb::{elements::html::*, prelude::*, value::Sig};
-//! #
-//! # let count = Mutable::new(0);
-//! # let count_text = count.signal().map(|i| format!("{}", i));
-//!
-//! let inc = move |_, _| {
-//!     count.replace_with(|i| *i + 1);
-//! };
-//!
-//! let app: Div = div()
-//!     .child(button().on_click(inc).text("+"))
-//!     .child(p().text(Sig(count_text)));
-//! ```
-//!
-//! Finally, we [`mount`] our app on the DOM. This will find the element with
-//! `id = "app"` and mount `app` there.
-//!
-//! ```no_run
-//! # use futures_signals::signal::{Mutable, SignalExt};
-//! # use silkenweb::{elements::html::*, prelude::*, value::Sig};
-//! #
-//! # let count = Mutable::new(0);
-//! # let count_text = count.signal().map(|i| format!("{}", i));
-//! #
-//! # let inc = move |_, _| {
-//! #     count.replace_with(|i| *i + 1);
-//! # };
-//! #
-//! # let app = div()
-//! #     .child(button().on_click(inc).text("+"))
-//! #     .child(p().text(Sig(count_text)));
-//! mount("app", app);
-//! ```
+//! Reactivity is provided by [`futures_signals`]. It would be helpful to
+//! familiarize yourself using [`futures_signals::tutorial`].
 //!
 //! [trunk]: https://trunkrs.dev/
-//! [futures-signals tutorial]: https://docs.rs/futures-signals/0.3.24/futures_signals/tutorial/index.html
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
-//! [`Mutable`]: futures_signals::signal::Mutable
-//! [`Signal`]: futures_signals::signal::Signal
-//! [`mount`]: crate::mount
+//! [routing]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
+//! [tauri]: https://github.com/silkenweb/tauri-example
+//! [Server Side Rendering]: https://github.com/silkenweb/ssr-example
+//! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
 use std::{cell::RefCell, collections::HashMap};
 
 use dom::Wet;
@@ -87,11 +50,12 @@ use node::element::GenericElement;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
-/// Newtype derive for [`Element`].
+/// Derive [`Element`] for a [newtype] wrapper.
 ///
 /// Only non empty structs are supported. The first field must implement
 /// [`Element`].
 ///
+/// [newtype]: https://doc.rust-lang.org/rust-by-example/generics/new_types.html
 /// [`Element`]: crate::node::element::Element
 pub use silkenweb_macros::Element;
 pub use silkenweb_macros::{css, css_classes};
@@ -128,10 +92,10 @@ pub use silkenweb_signals_ext::value;
 
 /// Mount an element on the document.
 ///
-/// `id` is the html element id of the parent element. The element is added as
-/// the last child of this element.
-///
-/// Mounting an `id` that is already mounted will remove that element.
+/// `id` is the html element id of the mount point. The element will replace the
+/// mount point. The returned `MountHandle` should usually just be discarded,
+/// but it can be used to restore the mount point if required. This can be
+/// useful for testing.
 pub fn mount(id: &str, element: impl Into<GenericElement<Wet>>) -> MountHandle {
     let mut element = element.into();
 
@@ -140,6 +104,10 @@ pub fn mount(id: &str, element: impl Into<GenericElement<Wet>>) -> MountHandle {
     MountHandle::new(mount_point, element)
 }
 
+/// Remove all mounted elements.
+///
+/// Mount points will not be restored. This is useful to ensure a clean
+/// environment for testing.
 pub fn remove_all_mounted() {
     ELEMENTS.with(|elements| {
         for element in elements.take().into_values() {
@@ -148,6 +116,7 @@ pub fn remove_all_mounted() {
     });
 }
 
+/// Manage a mount point
 pub struct MountHandle {
     id: u128,
     mount_point: web_sys::Element,
@@ -155,7 +124,7 @@ pub struct MountHandle {
 }
 
 impl MountHandle {
-    pub fn new(mount_point: web_sys::Element, element: GenericElement<Wet>) -> Self {
+    fn new(mount_point: web_sys::Element, element: GenericElement<Wet>) -> Self {
         Self {
             id: insert_element(element),
             mount_point,
@@ -163,18 +132,26 @@ impl MountHandle {
         }
     }
 
+    /// Stop the mounted element being reactive. This will free up any resources
+    /// that are providing reactivity for the mounted element.
     pub fn stop(mut self) {
         self.stop_on_drop();
     }
 
+    /// [`stop`][`Self::stop`] when `self` is dropped.
     pub fn stop_on_drop(&mut self) {
         self.on_drop = Some(DropAction::Stop);
     }
 
+    /// Remove the mounted element and restore the mount point.
+    ///
+    /// Equivalent to calling [`stop`][`Self::stop`] and replacing the mounted
+    /// element with the original mount point.
     pub fn unmount(mut self) {
         self.unmount_on_drop();
     }
 
+    /// [`unmount`][`Self::unmount`] when `self` is dropped.
     pub fn unmount_on_drop(&mut self) {
         self.on_drop = Some(DropAction::Unmount);
     }
