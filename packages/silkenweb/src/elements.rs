@@ -1,7 +1,7 @@
 //! HTML element types.
 //!
 //! Each HTML element has an associated struct. For example, the `<a>` element
-//! is represented by [`A`]. The constructor is a free function of the same
+//! is represented by [`html::A`]. The constructor is a free function of the same
 //! name, so you can write `a()` rather than `A::new()`. There are methods for
 //! each attribute and event. Event methods are prefixed with `on_`. For
 //! example:
