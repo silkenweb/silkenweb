@@ -1,3 +1,14 @@
+//! An abstraction for the underlying DOM.
+//!
+//! An application, or parts of an application, can be parameterized on the
+//! underlying DOM type so it can be rendered in different ways:
+//!
+//! - Server side rendering with [`Dry`]
+//! - Client side rendering with [`Wet`]
+//! - Hydrating a server side rendered initial application state with [`Hydro`]
+//! - As a template, or part of a template, with [`Template`]
+//!
+//! See the concrete DOM types for some examples.
 use std::marker::PhantomData;
 
 use self::{
@@ -14,12 +25,29 @@ mod hydro;
 mod template;
 mod wet;
 
+/// The main DOM abstraction.
+///
+/// This is not user implementable.
 pub trait Dom: private::Dom {}
 
+/// A DOM that can be instantiated from a [`Template`] DOM.
 pub trait InstantiableDom: Dom + private::InstantiableDom {}
 
 pub type DefaultDom = Wet;
 
+/// A DOM that can only be rendered on the server
+///
+/// # Example
+///
+/// ```
+/// # use silkenweb::{
+/// #   dom::Dry,
+/// #   elements::html::p, node::{element::ParentElement, Node},
+/// # };
+/// let app: Node<Dry> = p().text("Hello, world!").into();
+///
+/// assert_eq!(app.to_string(), "<p>Hello, world!</p>");
+/// ```
 pub struct Dry;
 
 impl Dom for Dry {}
@@ -37,6 +65,20 @@ impl private::InstantiableDom for Dry {
     type InstantiableNode = DryNode;
 }
 
+/// A DOM that can be rendered on the client or hydrated onto an existing DOM
+/// element.
+///
+/// # Example
+///
+/// ```no_run
+/// # use silkenweb::{
+/// #   elements::html::p, node::{element::ParentElement},
+/// #   hydration::hydrate,
+/// # };
+/// let app = p().text("Hello, world!");
+///
+/// hydrate("app-id", app);
+/// ```
 pub struct Hydro;
 
 impl Dom for Hydro {}
@@ -54,6 +96,19 @@ impl private::InstantiableDom for Hydro {
     type InstantiableNode = HydroNode;
 }
 
+/// A DOM that can only be rendered on the client.
+///
+/// # Example
+///
+/// ```no_run
+/// # use silkenweb::{
+/// #   elements::html::p, node::{element::ParentElement},
+/// #   mount,
+/// # };
+/// let app = p().text("Hello, world!");
+///
+/// mount("app-id", app);
+/// ```
 pub struct Wet;
 
 impl Dom for Wet {}
@@ -70,6 +125,27 @@ impl private::InstantiableDom for Wet {
     type InstantiableElement = WetElement;
     type InstantiableNode = WetNode;
 }
+
+/// A template DOM that can be used to instantiate other DOM types by cloning.
+///
+/// Cloning a template can be faster than creating each DOM node individually.
+/// It's likely to get a maximum 10-20% increase, so should only be used in hot
+/// code paths.
+///
+/// # Example
+///
+/// ```
+/// # use silkenweb::{
+/// #   dom::Dry,
+/// #   node::element::TemplateElement,
+/// #   elements::html::{p, P}, node::{element::ParentElement, Node},
+/// # };
+/// let template =
+///     p().on_instantiate(|p, message| p.text(message)).freeze();
+/// let app: Node<Dry> = template.instantiate(&"Hello, world!".to_string()).into();
+///
+/// assert_eq!(app.to_string(), "<p>Hello, world!</p>");
+/// ```
 
 pub struct Template<Param, D: InstantiableDom = DefaultDom>(PhantomData<(Param, D)>);
 
