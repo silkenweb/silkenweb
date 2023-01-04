@@ -185,7 +185,7 @@ pub trait OtherAnimation: Element {
 }
 
 /// SVG [Presentation] Attributes
-/// 
+///
 /// [Presentation]: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/Presentation
 pub trait Presentation: Element {
     svg_attributes![
@@ -387,7 +387,7 @@ pub trait Presentation: Element {
 }
 
 /// SVG [Conditional Processing] Attributes
-/// 
+///
 /// [Conditional Processing]: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/Conditional_Processing
 pub trait ConditionalProcessing: Element {
     svg_attributes![
@@ -404,7 +404,7 @@ pub trait ConditionalProcessing: Element {
 }
 
 /// SVG [Filter] Primitve Attributes
-/// 
+///
 /// [Filter]: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute#filters_attributes
 pub trait FilterPrimitives: Element {
     svg_attributes![
@@ -433,7 +433,7 @@ pub trait FilterPrimitives: Element {
 }
 
 /// SVG [Filter] Transfer Function Attributes
-/// 
+///
 /// [Filter]: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute#filters_attributes
 pub trait TransferFunction: Element {
     svg_attributes![
