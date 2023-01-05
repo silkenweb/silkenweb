@@ -24,7 +24,7 @@
 //! - [`ShadowRootParent`] (if it's allowed to have a shadow root attached)
 //!
 //! Each element can be frozen, making it immutable, using the `freeze` method.
-//! 
+//!
 //! [`ParentElement`]: crate::node::element::ParentElement
 //! [`ShadowRootParent`]: crate::node::element::ShadowRootParent
 

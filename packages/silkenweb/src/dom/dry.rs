@@ -24,6 +24,7 @@ impl DryElement {
         Self(Rc::new(RefCell::new(shared)))
     }
 }
+
 impl private::DomElement for DryElement {
     type Node = DryNode;
 
