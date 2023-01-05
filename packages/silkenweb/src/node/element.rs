@@ -655,6 +655,15 @@ pub type TemplateElement<T, Param> = <T as InstantiableElement>::Template<Param>
 
 pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
 
+impl<D> ::std::fmt::Display for FrozenElement<D>
+where
+    D: Dom,
+{
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.element.fmt(f)
+    }
+}
+
 impl<Param, D> FrozenElement<Template<Param, D>>
 where
     D: InstantiableDom,

@@ -17,7 +17,7 @@ pub trait InstantiableDom:
     type InstantiableNode: InstantiableDomNode<DomType = Self>;
 }
 
-pub trait DomElement: Into<Self::Node> + Clone + 'static {
+pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
     type Node;
 
     fn new(ns: Namespace, tag: &str) -> Self;

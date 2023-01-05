@@ -114,6 +114,16 @@ where
     }
 }
 
+impl<Param, D> fmt::Display for TemplateElement<Param, D>
+where
+    D: InstantiableDom,
+    Param: 'static,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.element.fmt(f)
+    }
+}
+
 impl<Param, D: InstantiableDom> Clone for TemplateElement<Param, D> {
     fn clone(&self) -> Self {
         Self {

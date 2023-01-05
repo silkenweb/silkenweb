@@ -103,6 +103,12 @@ impl private::InstantiableDomElement for DryElement {
     }
 }
 
+impl fmt::Display for DryElement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.borrow().fmt(f)
+    }
+}
+
 #[derive(Clone)]
 pub struct DryText(Rc<RefCell<SharedDryText<DryNode>>>);
 

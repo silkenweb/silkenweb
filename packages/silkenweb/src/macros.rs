@@ -369,6 +369,16 @@ macro_rules! dom_element {
             $crate::node::element::FrozenElement<Dom>
         );
 
+        impl<Dom> ::std::fmt::Display
+        for $frozen_name<Dom>
+        where
+            Dom: $crate::dom::Dom,
+        {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                self.0.fmt(f)
+            }
+        }
+
         impl<InitParam, Dom> $frozen_name<$crate::dom::Template<InitParam, Dom>>
         where
             Dom: $crate::dom::InstantiableDom,
