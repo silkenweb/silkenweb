@@ -622,14 +622,11 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
         -> Self;
 }
 
-/// An element that is allowed to have a shadow root.
-///
-/// Once [Declarative Shadow Root] is available, this will likely be deprecated
-/// in favour of using HTML directly: `<template shadowroot="open">...`.
-///
-/// [Declarative Shadow Root]: https://caniuse.com/mdn-html_elements_template_shadowroot
+/// An element that is allowed to be a shadow host.
 pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
+    ///
+    /// If there's already a shadow root, the `children` are appended to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
     fn attach_shadow_children(

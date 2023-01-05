@@ -205,7 +205,6 @@ pub fn url_path() -> ReadOnlyMutable<UrlPath> {
 /// example, the path of <http://example.com/this/is/the/path> is "/this/is/the/path".
 ///
 /// [`set_url_path`] will:
-/// - Strip any leading '/' characters
 /// - Set the browser URL
 /// - Push it onto the history stack so the forward and back buttons work
 /// - Set the [`url_path()`] signal
