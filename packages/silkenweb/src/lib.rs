@@ -80,11 +80,20 @@ pub mod task;
 
 /// Commonly used imports, all in one place.
 pub mod prelude {
+    pub use futures_signals::{
+        signal::{Mutable, Signal, SignalExt},
+        signal_vec::{MutableVec, SignalVec, SignalVecExt},
+    };
+
     pub use crate::{
         clone,
-        elements::{ElementEvents, HtmlElement, HtmlElementEvents},
+        elements::{html, svg, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents},
         mount,
-        node::element::ParentElement,
+        node::{
+            element::{Element, ParentElement, ShadowRootParent, TemplateElement},
+            Node,
+        },
+        value::Sig,
     };
 }
 
