@@ -211,8 +211,14 @@ macro_rules! dom_element {
         );
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
+            /// Construct with no attributes set.
             pub fn new() -> Self {
                 Self($crate::node::element::GenericElement::new($namespace, $text_name))
+            }
+
+            /// Freeze `self`, making it immutable.
+            pub fn freeze(self) -> $frozen_name<Dom> {
+                $frozen_name(self.0.freeze())
             }
 
             $crate::attributes![
@@ -240,10 +246,6 @@ macro_rules! dom_element {
                     ),*
                 }
             ); )?
-
-            pub fn freeze(self) -> $frozen_name<Dom> {
-                $frozen_name(self.0.freeze())
-            }
         }
 
         impl<Dom: $crate::dom::Dom> Default for $camel_name<Dom> {
