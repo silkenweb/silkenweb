@@ -1,15 +1,4 @@
-//! Element DOM types, and traits for building elements.
-//!
-//! The DOM element types are generic. Specific DOM elements from
-//! [`crate::elements::html`] should be used in preference to these, where they
-//! are available.
-//!
-//! The [`Element`] and [`ParentElement`] traits are implemented by
-//! specific DOM elements as well as by [`GenericElement`]. See the [`div`]
-//! element for example.
-//!
-//! [`div`]: crate::elements::html::div
-
+//! Traits and types for building elements.
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
 use std::{self, cell::Cell, future::Future, pin::Pin, rc::Rc};
@@ -40,7 +29,10 @@ use crate::{
 
 mod child_vec;
 
-/// Build an HTML element.
+/// A generic HTML element.
+///
+/// Where available, specific DOM elements from [`crate::elements::html`] should
+/// be used in preference to this.
 pub struct GenericElement<D: Dom = DefaultDom> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
@@ -52,10 +44,12 @@ pub struct GenericElement<D: Dom = DefaultDom> {
 }
 
 impl<D: Dom> GenericElement<D> {
+    /// Construct an element with type `tag` in `namespace`.
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self::from_dom(D::Element::new(namespace, tag), 0)
     }
 
+    /// Make this element immutable.
     pub fn freeze(mut self) -> FrozenElement<D> {
         self.build();
         FrozenElement(self)
@@ -432,7 +426,7 @@ impl<D: Dom> From<GenericElement<D>> for Node<D> {
     }
 }
 
-/// An HTML element builder.
+/// An HTML element.
 pub trait Element: Sized {
     type DomType: JsCast + 'static;
 
@@ -648,11 +642,16 @@ pub trait InstantiableElement {
     type Template<Param: 'static>;
 }
 
-// This is so we don't have to use fully qualified syntax to specify a template
-// element. Otherwise we'd need to write `<Div as
-// InstantiableElement>::Template`. See <https://github.com/rust-lang/rust/issues/38078>
+/// A template to produce an element.
+///
+/// This alias exists so we don't have to use fully qualified syntax to specify
+/// a template element.
+///
+/// Ideally we'd like to write `Div::Template`, but that won't compile.
+/// See <https://github.com/rust-lang/rust/issues/38078> for details.
 pub type TemplateElement<T, Param> = <T as InstantiableElement>::Template<Param>;
 
+/// An immutable element.
 pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
 
 impl<D> ::std::fmt::Display for FrozenElement<D>
@@ -669,6 +668,9 @@ where
     D: InstantiableDom,
     Param: 'static,
 {
+    /// Instantiate a template with `param`.
+    ///
+    /// See [`Template`] for an example.
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
         self.0.element.instantiate(param)
     }
@@ -686,17 +688,18 @@ fn spawn_cancelable_future(
 
 /// A handle to an element in the DOM.
 ///
-/// This acts as a weak reference to the element. See [`Element::handle`]
-/// for an example.
+/// The handle will only be valid for [`Wet`]  DOM elements, so the methods
+/// should only be used inside event handlers and effects.
+///
+/// See [`Element::handle`] for an example.
 #[derive(Clone)]
 pub struct ElementHandle<DomType>(Option<DomType>);
 
 // TODO: Docs
 impl<DomType: JsCast + Clone> ElementHandle<DomType> {
-    /// Get the associated DOM element, if the referenced element is still live.
+    /// Get the associated DOM element, if it is a [`Wet`] element.
     ///
-    /// If the referenced element is neither in the DOM, or referenced from the
-    /// stack, this will return [`None`].
+    /// If the referenced element is not [`Wet`], this will return [`None`].
     pub fn try_dom_element(&self) -> Option<DomType> {
         self.0.clone()
     }
@@ -721,6 +724,7 @@ impl ElementHandle<web_sys::Element> {
     }
 }
 
+/// The namespace of a DOM element.
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Namespace {
     /// New elements in the `Html` namespace are created with `create_element`,
@@ -732,14 +736,14 @@ pub enum Namespace {
 }
 
 impl Namespace {
-    pub fn create_element(self, tag: &str) -> web_sys::Element {
+    pub(crate) fn create_element(self, tag: &str) -> web_sys::Element {
         match self {
             Namespace::Html => document::create_element(tag),
             _ => document::create_element_ns(intern_str(self.as_str()), tag),
         }
     }
 
-    pub fn as_str(&self) -> &str {
+    pub(crate) fn as_str(&self) -> &str {
         match self {
             Namespace::Html => "http://www.w3.org/1999/xhtml",
             Namespace::Svg => "http://www.w3.org/2000/svg",
