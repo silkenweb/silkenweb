@@ -86,9 +86,10 @@ macro_rules! html_element {
 }
 
 macro_rules! html_element_doc {
-    ($name:expr) => {
+    ($prefix:literal, $name:expr) => {
         concat!(
-            "The HTML [",
+            $prefix,
+            " HTML [",
             $name,
             "](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",
             $name,
@@ -133,9 +134,10 @@ macro_rules! svg_element {
 }
 
 macro_rules! svg_element_doc {
-    ($name:expr) => {
+    ($prefix:literal, $name:expr) => {
         concat!(
-            "The SVG [`",
+            $prefix,
+            " SVG [`",
             $name,
             "`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",
             $name,
@@ -191,7 +193,7 @@ macro_rules! dom_element {
         }
     ) => {
         $(
-            #[doc = $doc_macro!($text_name)]
+            #[doc = $doc_macro!("Construct the", $text_name)]
             #[doc = ""]
         )?
         $(#[$elem_meta])*
@@ -200,7 +202,7 @@ macro_rules! dom_element {
         }
 
         $(
-            #[doc = $doc_macro!($text_name)]
+            #[doc = $doc_macro!("The", $text_name)]
             #[doc = ""]
         )?
         $(#[$elem_meta])*
@@ -358,6 +360,11 @@ macro_rules! dom_element {
 
         impl<Dom: $crate::dom::Dom> $crate::elements::ElementEvents for $camel_name<Dom> {}
 
+        $(
+            #[doc = $doc_macro!("The immutable", $text_name)]
+            #[doc = ""]
+        )?
+        $(#[$elem_meta])*
         pub struct $frozen_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
             $crate::node::element::FrozenElement<Dom>
         );
