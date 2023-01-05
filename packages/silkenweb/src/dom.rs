@@ -43,10 +43,7 @@ pub type DefaultDom = Wet;
 /// inferred.
 ///
 /// ```
-/// # use silkenweb::{
-/// #   dom::Dry,
-/// #   elements::html::p, node::{element::ParentElement, Node},
-/// # };
+/// # use silkenweb::{dom::Dry, elements::html::p, prelude::*};
 /// let app: Node<Dry> = p().text("Hello, world!").into();
 ///
 /// assert_eq!(app.to_string(), "<p>Hello, world!</p>");
@@ -77,11 +74,8 @@ impl private::InstantiableDom for Dry {
 /// inferred.
 ///
 /// ```no_run
-/// # use silkenweb::{
-/// #   dom::Hydro,
-/// #   elements::html::{p, P}, node::{element::ParentElement},
-/// #   hydration::hydrate,
-/// # };
+/// # use html::{p, P};
+/// # use silkenweb::{dom::Hydro, hydration::hydrate, prelude::*};
 /// let app: P<Hydro> = p().text("Hello, world!");
 ///
 /// hydrate("app-id", app);
@@ -111,11 +105,8 @@ impl private::InstantiableDom for Hydro {
 /// inferred.
 ///
 /// ```no_run
-/// # use silkenweb::{
-/// #   dom::Wet,
-/// #   elements::html::{p, P}, node::{element::ParentElement},
-/// #   mount,
-/// # };
+/// # use html::{p, P};
+/// # use silkenweb::{dom::Wet, prelude::*};
 /// let app: P<Wet> = p().text("Hello, world!");
 ///
 /// mount("app-id", app);
@@ -149,10 +140,10 @@ impl private::InstantiableDom for Wet {
 /// inferred.
 ///
 /// ```
+/// # use html::{p, P};
 /// # use silkenweb::{
-/// #   dom::{Dry, Template},
-/// #   node::element::TemplateElement,
-/// #   elements::html::{p, P}, node::{element::ParentElement, Node},
+/// #     dom::{Dry, Template},
+/// #     prelude::*,
 /// # };
 /// let elem: P<Template<String, Dry>> = p().on_instantiate(|p, message| p.text(message));
 /// let template: TemplateElement<P<Dry>, String> = elem.freeze();

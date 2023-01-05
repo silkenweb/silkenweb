@@ -6,16 +6,8 @@
 //! # Example
 //!
 //! ```no_run
-//! # use silkenweb::{
-//! #     elements::{
-//! #         html::{button, div, Div, p},
-//! #         ElementEvents,
-//! #     },
-//! #     mount,
-//! #     prelude::ParentElement,
-//! #     router,
-//! #     value::Sig,
-//! # };
+//! # use html::{button, div, p, Div};
+//! # use silkenweb::{prelude::*, router};
 //! # let doc: Div =
 //! div()
 //!     .child(
@@ -231,9 +223,8 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 /// # Example
 ///
 /// ```no_run
-/// # use silkenweb::{
-/// #     elements::html::{a, A}, node::element::ParentElement, prelude::ElementEvents, router::anchor,
-/// # };
+/// # use html::{a, A};
+/// use silkenweb::{prelude::*, router::anchor};
 /// let link: A = anchor("/my-path").text("click me");
 /// ```
 pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
@@ -249,10 +240,8 @@ pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
 /// # Example
 ///
 /// ```no_run
-/// # use silkenweb::{
-/// #     elements::html::{a, A}, node::element::ParentElement, prelude::ElementEvents,
-/// #     router::link_clicked,
-/// # };
+/// # use html::{a, A};
+/// # use silkenweb::{prelude::*, router::link_clicked};
 /// let path = "/my_path";
 /// let link: A = a().href(path).text("click me").on_click(link_clicked(path));
 /// ```

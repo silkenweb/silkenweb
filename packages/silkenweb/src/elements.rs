@@ -7,7 +7,8 @@
 //! example:
 //!
 //! ```no_run
-//! # use silkenweb::elements::{html::{a, A}, ElementEvents};
+//! # use silkenweb::prelude::*;
+//! # use html::{a, A};
 //! let link: A = a()
 //!     .href("https://example.com/")
 //!     .on_click(|event, element| {});
