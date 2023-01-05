@@ -103,16 +103,16 @@ impl fmt::Display for HydrationStats {
 /// existing HTML.
 ///
 /// [`hydrate`] will recursively attach the event handlers from `elem` to the
-/// frist child of the element with id=`id`. If any node in the existing HTML
-/// doesn't match the corresponding node within `elem`, the existing node will
-/// be deleted. If a matching node isn't found, a new one will be created. This
-/// way, hydration never fails, but in the worst case will discard the original
-/// HTML. You can track how well the existing HTML matched `elem` with the
-/// returned [`HydrationStats`]. Generally speaking, extra nodes in the existing
-/// document HTML will be removed, and hydration will continue. Extras nodes
-/// within `elem` will cause the existing HTML to be replaced. This allows extra
-/// whitespace nodes to be introduced to prettify the server HTML, without
-/// impacting the hydration process.
+/// element with id=`id`. If any node in the existing HTML doesn't match the
+/// corresponding node within `elem`, the existing node will be deleted. If a
+/// matching node isn't found, a new one will be created. This way, hydration
+/// never fails, but in the worst case will discard the original HTML. You can
+/// track how well the existing HTML matched `elem` with the returned
+/// [`HydrationStats`]. Generally speaking, extra nodes in the existing document
+/// HTML will be removed, and hydration will continue. Extra nodes within `elem`
+/// will cause the existing HTML to be replaced. This allows extra whitespace
+/// nodes to be introduced to prettify the server HTML, without impacting the
+/// hydration process.
 ///
 /// Attributes will be added or removed when necessary to make sure the exisitng
 /// HTML matches `elem`. Attributes beginning with `data-silkenweb` will be left
@@ -128,6 +128,8 @@ impl fmt::Display for HydrationStats {
 ///
 /// ## Good
 ///
+/// Creating the app outside the async block that calls [`hydrate`].
+///
 /// ```no_run
 /// # use futures_signals::signal::always;
 /// # use html::p;
@@ -142,6 +144,8 @@ impl fmt::Display for HydrationStats {
 /// This will hydrate to `<p>Hello, world!</p>` correctly.
 ///
 /// ## Bad
+///
+/// Creating the app inside the async block that calls [`hydrate`].
 ///
 /// ```no_run
 /// # use futures_signals::signal::always;

@@ -12,10 +12,13 @@ fn main() {
         count.replace_with(|i| *i + 1);
     };
 
-    let app = div().child(button().on_click(inc).text("+")).child(
-        p().attribute("data-silkenweb-test", true)
-            .text(Sig(count_text)),
-    );
+    let app = div()
+        .id("app")
+        .child(button().on_click(inc).text("+"))
+        .child(
+            p().attribute("data-silkenweb-test", true)
+                .text(Sig(count_text)),
+        );
 
     spawn_local(async {
         let stats = hydrate("app", app).await;
