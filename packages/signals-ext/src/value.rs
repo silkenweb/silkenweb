@@ -1,28 +1,88 @@
+//! Abstract over the signal/value-ness of types.
+//!
+//! This allows you to write a single function that works for both signals and
+//! values.
+//!
+//! # Example
+//!
+//! ```
+//! # use futures_signals::signal::Mutable;
+//! # use silkenweb_signals_ext::value::*;
+//! # use std::future::Future;
+//! #
+//! struct Exec;
+//!
+//! impl Executor for Exec {
+//!     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
+//!         // This is a stub `Executor` for brevity. In real code, it should
+//!         // run the future.
+//!     }
+//! }
+//!
+//! fn increment_and_print(x: impl SignalOrValue<Item = i32>) {
+//!     x.map(|x| x + 1).for_each(
+//!         |_exec, x| println!("{x}"),
+//!         |_exec| {
+//!             |x| {
+//!                 // We use `println` for brevity, but this should really do
+//!                 // `async` IO as it'll be executed in a future.
+//!                 println!("{x}");
+//!                 async {}
+//!             }
+//!         },
+//!         &mut Exec,
+//!     );
+//! }
+//!
+//! let x_signal = Mutable::new(0);
+//! let x_value = 0;
+//!
+//! increment_and_print(x_value);
+//! increment_and_print(Sig(x_signal.signal()));
+//! ```
 use std::future::Future;
 
 use futures_signals::signal::{self, Always, Signal, SignalExt};
 
-// TODO: Doc
+/// Newtype wrapper to mark this type as a signal.
+///
+/// For use with [`SignalOrValue`] and [`RefSignalOrValue`]
 pub struct Sig<T>(pub T);
 
-// TODO: Doc
+/// Newtype wrapper to mark this type as a static value.
+///
+/// For use with [`SignalOrValue`] and [`RefSignalOrValue`] for when you can't
+/// implement [`Value`] for a type.
 pub struct Val<T>(pub T);
 
-// TODO: Doc
+/// Abstract over a type that can be a value or a signal of an underlying type.
 pub trait RefSignalOrValue<'a> {
+    /// The underlying type of the value or signal.
     type Item: 'a;
+    /// The signal type. Use [`Always`] for value types.
     type Signal: Signal<Item = Self::Item> + 'a;
+    /// The return type for [`Self::map`].
     type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
     where
         'b: 'a,
         F: FnMut(Self::Item) -> R + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
 
+    /// Map a function over this signal/value to produce a new signal/value.
     fn map<'b: 'a, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
         F: FnMut(Self::Item) -> R + 'b;
 
+    /// Apply a function over the value or each value of a signal.
+    ///
+    /// # Params
+    ///
+    /// - `fn_val`: The function to apply if [`Self`] is a value type.
+    /// - `fn_init_sig`: The function to generate a function to apply if
+    ///   [`Self`] is signal type.
+    /// - `executor`: Where to run the future returned from
+    ///   [`SignalExt::for_each`], if this is a signal.
     fn for_each<FVal, FInitSig, FSig, Task, Exec>(
         self,
         fn_val: FVal,
@@ -35,6 +95,14 @@ pub trait RefSignalOrValue<'a> {
         Task: Future<Output = ()> + 'a,
         Exec: Executor;
 
+    /// Select a function based on whether this is a signal or value.
+    ///
+    /// # Params
+    ///
+    /// - `fn_val`: The function to call if this is a value.
+    /// - `fn_sig`: The function to call if this is a signal.
+    /// - `data`: Some data for the function to consume. This is useful if
+    ///   either of the functions needs to consume some data.
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
@@ -42,16 +110,20 @@ pub trait RefSignalOrValue<'a> {
         Self: Sized;
 }
 
+/// Like [`RefSignalOrValue`], when you know the type is `'static`.
 pub trait SignalOrValue: RefSignalOrValue<'static> {}
 
 impl<T: RefSignalOrValue<'static>> SignalOrValue for T {}
 
+/// A type that can spawn futures.
 pub trait Executor {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static);
 }
 
+/// Marker trait for values that can be used with [`RefSignalOrValue`].
 pub trait RefValue<'a> {}
 
+/// Marker trait for values that can be used with [`SignalOrValue`].
 pub trait Value: RefValue<'static> {}
 
 impl<T: Value> RefValue<'static> for T {}
