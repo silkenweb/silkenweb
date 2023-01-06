@@ -50,7 +50,7 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: trunk
-        version: 0.14.0
+        version: 0.16.0
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-bindgen-cli
