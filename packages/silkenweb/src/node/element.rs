@@ -614,10 +614,11 @@ pub trait Element: Sized {
 
 /// An element that can have children.
 pub trait ParentElement<D: Dom = DefaultDom>: Element {
-    // TODO: Docs for signal variant
     /// Add a text child to this element
     ///
     /// # Example
+    ///
+    /// Static text:
     ///
     /// ```no_run
     /// # use html::{div, Div};
@@ -625,25 +626,25 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let d: Div =
     /// div().text("Hello, world!");
     /// ```
+    ///
+    /// Dynamic text:
+    ///
+    /// ```no_run
+    /// # use html::{div, Div};
+    /// # use silkenweb::prelude::*;
+    /// let text = Mutable::new("Hello, world!");
+    /// # let d: Div =
+    /// div().text(Sig(text.signal()));
+    /// ```
     fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>;
 
     /// Add a child to the element.
     ///
-    /// The child will update when the signal changes.
-    /// ```no_run
-    /// # use html::{div, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("hello");
-    ///
-    /// # let d: Div =
-    /// div().child(Sig(text.signal().map(|text| div().text(text))));
-    /// ```
-    // TODO: Doc for signal variant ^^^^
-    /// Add a child node to the element.
-    ///
     /// # Example
+    ///
+    /// Add static children:
     ///
     /// ```no_run
     /// # use html::{div, p, Div};
@@ -651,15 +652,40 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let div: Div =
     /// div().child(p().text("Hello,")).child(p().text("world!"));
     /// ```
+    ///
+    /// Add a dynamic child:
+    ///
+    /// ```no_run
+    /// # use html::{div, Div};
+    /// # use silkenweb::prelude::*;
+    /// let text = Mutable::new("Hello, world!");
+    ///
+    /// # let d: Div =
+    /// div().child(Sig(text.signal().map(|text| div().text(text))));
+    /// ```
     fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node<D>> + 'static>) -> Self {
         self.optional_child(child.map(|child| Some(child)))
     }
 
-    // TODO: Doc for non signal
     /// Add an optional child to the element.
     ///
     /// The child will update when the signal changes to `Some(..)`, and will be
     /// removed when the signal changes to `None`.
+    ///
+    /// # Example
+    ///
+    /// Add a static optional child:
+    ///
+    /// ```no_run
+    /// # use html::{div, p, Div};
+    /// # use silkenweb::prelude::*;
+    /// let text = Mutable::new("hello");
+    ///
+    /// # let div: Div =
+    /// div().optional_child(Some(p().text("Hello, world!")));
+    /// ```
+    ///
+    /// Add a dynamic optional child:
     ///
     /// ```no_run
     /// # use html::{div, Div};
