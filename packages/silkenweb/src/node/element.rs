@@ -430,29 +430,107 @@ impl<D: Dom> From<GenericElement<D>> for Node<D> {
 pub trait Element: Sized {
     type DomType: JsCast + 'static;
 
-    // TODO: Doc
+    /// Add a class to the element.
+    ///
+    /// `class` must not contain whitespace. This method can be called multiple
+    /// times to add multiple classes.
+    ///
+    /// Classes must be unique across all
+    /// invocations of this method and [`Self::classes`], otherwise the results
+    /// are undefined. Any class signal values, past or present, must be unique
+    /// w.r.t. other invocations.
+    ///
+    /// # Panics
+    ///
+    /// This panics if `class` contains whitespace.
+    ///
+    /// # Examples
+    ///
+    /// Add static class names:
+    ///
+    /// ```
+    /// # use html::{div, Div};
+    /// # use silkenweb::{dom::Dry, prelude::*};
+    /// let app: Div<Dry> = div().class("my-class").class("my-other-class");
+    /// assert_eq!(
+    ///     app.freeze().to_string(),
+    ///     r#"<div class="my-class my-other-class"></div>"#
+    /// );
+    /// ```
+    ///
+    /// Add dynamic class names:
+    ///
+    /// ```
+    /// # use html::{div, Div};
+    /// # use silkenweb::{dom::Dry, prelude::*, task::server::render_now_sync};
+    /// let my_class = Mutable::new("my-class");
+    /// let my_other_class = Mutable::new("my-other-class");
+    /// let app: Div<Dry> = div()
+    ///     .class(Sig(my_class.signal()))
+    ///     .class(Sig(my_other_class.signal()));
+    /// let app = app.freeze();
+    ///
+    /// render_now_sync();
+    /// assert_eq!(
+    ///     app.to_string(),
+    ///     r#"<div class="my-class my-other-class"></div>"#
+    /// );
+    ///
+    /// my_other_class.set("my-other-class-updated");
+    ///
+    /// render_now_sync();
+    /// assert_eq!(
+    ///     app.to_string(),
+    ///     r#"<div class="my-class my-other-class-updated"></div>"#
+    /// );
+    /// ```
     fn class<'a, T>(self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str>;
 
-    // TODO: Doc
-    // Adds or removes class names on the element
-    //
-    // Each time the signal updates, the previous value's classes will be
-    // removed and the current classes will be added to the element.
-    //
-    // # Panics
-    //
-    // If a value contains whitespace, this will panic.
-
     /// Set the classes on an element
     ///
-    /// All items in `value` must not contain spaces. This method can be called
+    /// All `classes` must not contain spaces. This method can be called
     /// multiple times and will add to existing classes.
+    ///
+    /// Classes must be unique across all invocations of this method and
+    /// [`Self::class`], otherwise the results are undefined. Any class signal
+    /// values, past or present, must be unique w.r.t. other invocations.
     ///
     /// # Panics
     ///
-    /// Panics if any of the items in `value` contain whitespace.
+    /// Panics if any of the items in `classes` contain whitespace.
+    /// # Examples
+    ///
+    /// Add static class names:
+    ///
+    /// ```
+    /// # use html::{div, Div};
+    /// # use silkenweb::{dom::Dry, prelude::*};
+    /// let app: Div<Dry> = div().classes(["class0", "class1"]);
+    /// assert_eq!(
+    ///     app.freeze().to_string(),
+    ///     r#"<div class="class0 class1"></div>"#
+    /// );
+    /// ```
+    ///
+    /// Add dynamic class names:
+    ///
+    /// ```
+    /// # use html::{div, Div};
+    /// # use silkenweb::{dom::Dry, prelude::*, task::server::render_now_sync};
+    /// let my_classes = Mutable::new(vec!["class0", "class1"]);
+    /// let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
+    /// let app = app.freeze();
+    ///
+    /// render_now_sync();
+    /// assert_eq!(app.to_string(), r#"<div class="class0 class1"></div>"#);
+    ///
+    /// my_classes.set(vec![]);
+    ///
+    /// render_now_sync();
+    /// assert_eq!(app.to_string(), r#"<div class=""></div>"#);
+    /// ```
     fn classes<'a, T, Iter>(self, classes: impl RefSignalOrValue<'a, Item = Iter>) -> Self
     where
         T: 'a + AsRef<str>,
