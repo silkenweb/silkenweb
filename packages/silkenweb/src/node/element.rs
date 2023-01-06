@@ -797,7 +797,6 @@ fn spawn_cancelable_future(
 #[derive(Clone)]
 pub struct ElementHandle<DomType>(Option<DomType>);
 
-// TODO: Docs
 impl<DomType: JsCast + Clone> ElementHandle<DomType> {
     /// Get the associated DOM element, if it is a [`Wet`] element.
     ///
