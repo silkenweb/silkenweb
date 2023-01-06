@@ -29,6 +29,17 @@
 //! trunk serve --open
 //! ```
 //!
+//! # Feature Flags
+//!
+//! ## `weak-refs`
+//!
+//! Use Javascript weak references to manage event callbacks. This improves
+//! performance but must be enabled in `wasm-bindgen`. See the [trunk]
+//! documentation for details on how to do this using `data-weak-refs`.
+//!
+//! See [caniuse](https://caniuse.com/mdn-javascript_builtins_weakref) for
+//! current browser support.
+//!
 //! # Learning
 //!
 //! There's extensive documentation on each module in this crate, along with

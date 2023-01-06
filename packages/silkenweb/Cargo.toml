@@ -13,7 +13,6 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [features]
-# TODO: Doc
 weak-refs = []
 
 [dependencies]
