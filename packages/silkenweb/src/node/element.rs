@@ -612,7 +612,7 @@ pub trait Element: Sized {
     fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
 }
 
-/// An element that is allowed to have children.
+/// An element that can have children.
 pub trait ParentElement<D: Dom = DefaultDom>: Element {
     // TODO: Docs for signal variant
     /// Add a text child to this element
@@ -700,7 +700,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
         -> Self;
 }
 
-/// An element that is allowed to be a shadow host.
+/// An element that can be a shadow host.
 pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     /// Attach an open shadow root to `self` and add `children` to it.
     ///
@@ -713,6 +713,7 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     ) -> Self;
 }
 
+/// An element that can be instantiated from a template.
 pub trait InstantiableElement {
     type Template<Param: 'static>;
 }
