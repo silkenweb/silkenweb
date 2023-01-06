@@ -75,4 +75,4 @@ The advantage of using a macro DSL is that syntax is tailored to defining docume
 - [hydration](https://silkenweb.netlify.app/examples/hydration)
 - [router](https://silkenweb.netlify.app/examples/router)
 - [todomvc](https://silkenweb.netlify.app/examples/todomvc)
-- [ui5-showcase](https://silkenweb.netlify.app/examples/ui5-showcase)
+- [web-components-wrapper](https://silkenweb.netlify.app/examples/web-components-wrapper)
