@@ -148,11 +148,11 @@ impl private::InstantiableDom for Wet {
 /// # };
 /// let elem: P<Template<String, Dry>> = p().on_instantiate(|p, message| p.text(message));
 /// let template: P<Template<String, Dry>, Const> = elem.freeze();
-/// let hello = template.instantiate(&"Hello, world!".to_string()).freeze();
-/// let goodbye = template.instantiate(&"Goodbye!".to_string()).freeze();
+/// let hello = template.instantiate(&"Hello, world!".to_string());
+/// let goodbye = template.instantiate(&"Goodbye!".to_string());
 ///
-/// assert_eq!(hello.to_string(), "<p>Hello, world!</p>");
-/// assert_eq!(goodbye.to_string(), "<p>Goodbye!</p>");
+/// assert_eq!(hello.freeze().to_string(), "<p>Hello, world!</p>");
+/// assert_eq!(goodbye.freeze().to_string(), "<p>Goodbye!</p>");
 /// ```
 pub struct Template<Param, D: InstantiableDom = DefaultDom>(PhantomData<(Param, D)>);
 
