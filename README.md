@@ -1,4 +1,6 @@
-# Silkenweb
+# **This Crate is Deprecated**
+
+This is an old implementation crate for Silkenweb that is no longer used.
 
 [![tests](https://github.com/silkenweb/silkenweb/actions/workflows/tests.yml/badge.svg)](https://github.com/silkenweb/silkenweb/actions/workflows/tests.yml)
 [![crates.io](https://img.shields.io/crates/v/silkenweb.svg)](https://crates.io/crates/silkenweb)
