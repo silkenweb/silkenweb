@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-reactive"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2018"
 description = "Silkenweb reactive primitives"
@@ -11,6 +11,9 @@ license = "MIT OR Apache-2.0"
 
 categories = ["gui", "web-programming"]
 keywords = ["reactive", "dataflow", "dependency", "graph"]
+
+[badges]
+maintenance = { status = "deprecated" }
 
 [dependencies]
 num-traits = "0.2"
