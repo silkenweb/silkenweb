@@ -2,17 +2,25 @@
 
 ## Next
 
-<!-- TODO: Update changelog -->
-
-- `impl From<String> for UrlPath`
-- Use `serde_wasm_bindgen` for Tauri serialization to fix warnings about serde_json.
+<!-- TODO: Reword and link to examples -->
+- Signal and value method variants, such as `class` and `class_signal`, have been merged into a single method that accepts either a value or a signal. The only exception to this is `children_signal`, which still exists.
+- Added a work-in-progress bootstrap component library, and associated example.
+- TODO: Document removal of builder types.
+- Split `class` into `class` and `classes`. `class` adds a single class and `classes` adds a collection of classes. `class` and `classes` can be called multiple times to add more classes.
+- Add a `weak-refs` cargo feature flag to enable some event handling optimizations when weak refs are available.
+- Hydrate and mount over the mount point, rather than a child of the mount point.
+- Add templates, which allow you to pre render the DOM structure and instantiate it with more detail later. This can improve the performance of hot code paths.
+- Event handlers can be installed on the document.
+- `#[derive(...)]` macros for `Value`, `HtmlElement`, `AriaElement`, `HtmlElementEvents`, and `ElementEvents`.
+- `#[derive(Element)]` accepts an `element_dom_type` parameter to specify the dom type.
+- Explicit low level DOM abstraction with types for `Wet` (client only), `Dry` (server only), `Hydro` (client or server, with hydration), and `Template`.
 - Rename `html_element` to `custom_html_element`
-- Fix animation timestamps
+- `UrlPath` supports URL hashes.
+- `impl From<String> for UrlPath`
+- Fix animation timestamps. Previously they would be relative to the previous animation frame, now they start at 0.
 - Add `on_animation_frame`
 - Add `handle` method to `Element`
-- `class` and `class_signal` methods moved from `HtmlElement`/`SvgElement` to `ElementBuilder`
-- Change `class_signal` to update the classes rather than overwrite them
-- `#[derive(ElementBuilder)]` allows custom `Target` types
+- Use `serde_wasm_bindgen` for Tauri serialization to fix warnings about serde_json.
 
 ## 0.3.0 - 2022-10-05
 
