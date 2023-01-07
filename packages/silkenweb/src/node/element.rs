@@ -1,7 +1,7 @@
 //! Traits and types for building elements.
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{self, cell::Cell, future::Future, pin::Pin, rc::Rc};
+use std::{self, cell::Cell, future::Future, marker::PhantomData, pin::Pin, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -33,7 +33,9 @@ mod child_vec;
 ///
 /// Where available, specific DOM elements from [`crate::elements::html`] should
 /// be used in preference to this.
-pub struct GenericElement<D: Dom = DefaultDom> {
+///
+/// `Mutability` should be one of [`Mut`] or [`Const`].
+pub struct GenericElement<D: Dom = DefaultDom, Mutability = Mut> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
     resources: Vec<Resource>,
@@ -41,6 +43,7 @@ pub struct GenericElement<D: Dom = DefaultDom> {
     element: D::Element,
     #[cfg(debug_assertions)]
     attributes: HashSet<String>,
+    phantom: PhantomData<Mutability>,
 }
 
 impl<D: Dom> GenericElement<D> {
@@ -50,9 +53,18 @@ impl<D: Dom> GenericElement<D> {
     }
 
     /// Make this element immutable.
-    pub fn freeze(mut self) -> FrozenElement<D> {
+    pub fn freeze(mut self) -> GenericElement<D, Const> {
         self.build();
-        FrozenElement(self)
+        GenericElement {
+            static_child_count: self.static_child_count,
+            child_vec: self.child_vec,
+            resources: self.resources,
+            events: self.events,
+            element: self.element,
+            #[cfg(debug_assertions)]
+            attributes: self.attributes,
+            phantom: PhantomData,
+        }
     }
 
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
@@ -64,6 +76,7 @@ impl<D: Dom> GenericElement<D> {
             element,
             #[cfg(debug_assertions)]
             attributes: HashSet::new(),
+            phantom: PhantomData,
         }
     }
 
@@ -77,20 +90,6 @@ impl<D: Dom> GenericElement<D> {
         #[cfg(debug_assertions)]
         debug_assert!(self.attributes.insert(name.into()));
         let _ = name;
-    }
-
-    fn build(&mut self) {
-        if let Some(children) = self.child_vec.take() {
-            let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
-
-            self.spawn(children.for_each(move |update| {
-                child_vec.apply_update(update);
-                async {}
-            }))
-        }
-
-        // This improves memory usage, and doesn't detectably impact performance
-        self.resources.shrink_to_fit();
     }
 
     fn class_signal<T>(
@@ -135,6 +134,24 @@ impl<D: Dom> GenericElement<D> {
         previous_values.set(previous);
 
         async {}
+    }
+}
+
+impl<D: Dom, Mutability> GenericElement<D, Mutability> {
+    fn build(&mut self) {
+        if let Some(children) = self.child_vec.take() {
+            let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
+
+            let future = children.for_each(move |update| {
+                child_vec.apply_update(update);
+                async {}
+            });
+
+            self.resources.push(spawn_cancelable_future(future));
+        }
+
+        // This improves memory usage, and doesn't detectably impact performance
+        self.resources.shrink_to_fit();
     }
 }
 
@@ -249,7 +266,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
     }
 }
 
-impl GenericElement<Wet> {
+impl<Mutability> GenericElement<Wet, Mutability> {
     pub(crate) fn dom_element(&self) -> web_sys::Element {
         self.element.dom_element()
     }
@@ -263,7 +280,7 @@ impl GenericElement<Wet> {
     }
 }
 
-impl GenericElement<Hydro> {
+impl<Mutability> GenericElement<Hydro, Mutability> {
     pub(crate) fn hydrate(
         mut self,
         element: &web_sys::Element,
@@ -279,6 +296,7 @@ impl GenericElement<Hydro> {
             element: self.element.hydrate(element, tracker),
             #[cfg(debug_assertions)]
             attributes: self.attributes,
+            phantom: PhantomData,
         }
     }
 }
@@ -402,20 +420,16 @@ impl<D: Dom> Element for GenericElement<D> {
     }
 }
 
-impl<D: InstantiableDom> InstantiableElement for GenericElement<D> {
-    type Template<Param: 'static> = FrozenElement<Template<Param, D>>;
-}
-
 impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
         self.resources.push(spawn_cancelable_future(future));
     }
 }
 
-impl<D: Dom> Value for GenericElement<D> {}
+impl<D: Dom, Mutability> Value for GenericElement<D, Mutability> {}
 
-impl<D: Dom> From<GenericElement<D>> for Node<D> {
-    fn from(mut elem: GenericElement<D>) -> Self {
+impl<D: Dom, Mutability> From<GenericElement<D, Mutability>> for Node<D> {
+    fn from(mut elem: GenericElement<D, Mutability>) -> Self {
         elem.build();
 
         Self {
@@ -739,33 +753,16 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     ) -> Self;
 }
 
-/// An element that can be instantiated from a template.
-pub trait InstantiableElement {
-    type Template<Param: 'static>;
-}
-
-/// A template to produce an element.
-///
-/// This alias exists so we don't have to use fully qualified syntax to specify
-/// a template element.
-///
-/// Ideally we'd like to write `Div::Template`, but that won't compile.
-/// See <https://github.com/rust-lang/rust/issues/38078> for details.
-pub type TemplateElement<T, Param> = <T as InstantiableElement>::Template<Param>;
-
-/// An immutable element.
-pub struct FrozenElement<D: Dom = DefaultDom>(GenericElement<D>);
-
-impl<D> ::std::fmt::Display for FrozenElement<D>
+impl<D> ::std::fmt::Display for GenericElement<D, Const>
 where
     D: Dom,
 {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        self.0.element.fmt(f)
+        self.element.fmt(f)
     }
 }
 
-impl<Param, D> FrozenElement<Template<Param, D>>
+impl<Param, D> GenericElement<Template<Param, D>, Const>
 where
     D: InstantiableDom,
     Param: 'static,
@@ -774,7 +771,7 @@ where
     ///
     /// See [`Template`] for an example.
     pub fn instantiate(&self, param: &Param) -> GenericElement<D> {
-        self.0.element.instantiate(param)
+        self.element.instantiate(param)
     }
 }
 
@@ -853,3 +850,9 @@ impl Namespace {
         }
     }
 }
+
+/// Marker type for mutable elements.
+pub struct Mut;
+
+/// Marker type for immutable elements.
+pub struct Const;

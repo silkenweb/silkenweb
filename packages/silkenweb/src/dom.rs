@@ -143,10 +143,11 @@ impl private::InstantiableDom for Wet {
 /// # use html::{p, P};
 /// # use silkenweb::{
 /// #     dom::{Dry, Template},
+/// #     node::element::Const,
 /// #     prelude::*,
 /// # };
 /// let elem: P<Template<String, Dry>> = p().on_instantiate(|p, message| p.text(message));
-/// let template: TemplateElement<P<Dry>, String> = elem.freeze();
+/// let template: P<Template<String, Dry>, Const> = elem.freeze();
 /// let hello = template.instantiate(&"Hello, world!".to_string()).freeze();
 /// let goodbye = template.instantiate(&"Goodbye!".to_string()).freeze();
 ///

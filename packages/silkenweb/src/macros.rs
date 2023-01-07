@@ -165,7 +165,6 @@ macro_rules! dom_element {
         $(#[$elem_meta:meta])*
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
-            frozen_name = $frozen_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
             namespace = $namespace:expr;
@@ -206,8 +205,11 @@ macro_rules! dom_element {
             #[doc = ""]
         )?
         $(#[$elem_meta])*
-        pub struct $camel_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
-            $crate::node::element::GenericElement<Dom>
+        pub struct $camel_name<
+            Dom: $crate::dom::Dom = $crate::dom::DefaultDom,
+            Mutability = $crate::node::element::Mut,
+        > (
+            $crate::node::element::GenericElement<Dom, Mutability>
         );
 
         impl<Dom: $crate::dom::Dom> $camel_name<Dom> {
@@ -217,8 +219,8 @@ macro_rules! dom_element {
             }
 
             /// Freeze `self`, making it immutable.
-            pub fn freeze(self) -> $frozen_name<Dom> {
-                $frozen_name(self.0.freeze())
+            pub fn freeze(self) -> $camel_name<Dom, $crate::node::element::Const> {
+                $camel_name(self.0.freeze())
             }
 
             $crate::attributes![
@@ -339,17 +341,19 @@ macro_rules! dom_element {
             }
         }
 
-        impl<Dom: $crate::dom::Dom> $crate::value::Value for $camel_name<Dom> {}
+        impl<Dom: $crate::dom::Dom, Mutability> $crate::value::Value
+        for $camel_name<Dom, Mutability> {}
 
-        impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>> for $crate::node::element::GenericElement<Dom> {
-            fn from(elem: $camel_name<Dom>) -> Self {
+        impl<Dom: $crate::dom::Dom, Mutability> From<$camel_name<Dom, Mutability>>
+        for $crate::node::element::GenericElement<Dom, Mutability> {
+            fn from(elem: $camel_name<Dom, Mutability>) -> Self {
                 elem.0
             }
         }
 
-        impl<Dom: $crate::dom::Dom> From<$camel_name<Dom>>
+        impl<Dom: $crate::dom::Dom, Mutability> From<$camel_name<Dom, Mutability>>
         for $crate::node::Node<Dom> {
-            fn from(elem: $camel_name<Dom>) -> Self {
+            fn from(elem: $camel_name<Dom, Mutability>) -> Self {
                 elem.0.into()
             }
         }
@@ -362,17 +366,8 @@ macro_rules! dom_element {
 
         impl<Dom: $crate::dom::Dom> $crate::elements::ElementEvents for $camel_name<Dom> {}
 
-        $(
-            #[doc = $doc_macro!("The immutable", $text_name)]
-            #[doc = ""]
-        )?
-        $(#[$elem_meta])*
-        pub struct $frozen_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom>(
-            $crate::node::element::FrozenElement<Dom>
-        );
-
         impl<Dom> ::std::fmt::Display
-        for $frozen_name<Dom>
+        for $camel_name<Dom, $crate::node::element::Const>
         where
             Dom: $crate::dom::Dom,
         {
@@ -381,7 +376,10 @@ macro_rules! dom_element {
             }
         }
 
-        impl<InitParam, Dom> $frozen_name<$crate::dom::Template<InitParam, Dom>>
+        impl<InitParam, Dom> $camel_name<
+            $crate::dom::Template<InitParam, Dom>,
+            $crate::node::element::Const,
+        >
         where
             Dom: $crate::dom::InstantiableDom,
             InitParam: 'static
@@ -389,11 +387,6 @@ macro_rules! dom_element {
             pub fn instantiate(&self, param: &InitParam) -> $camel_name<Dom> {
                 $camel_name(self.0.instantiate(param))
             }
-        }
-
-        impl<Dom: $crate::dom::InstantiableDom> $crate::node::element::InstantiableElement
-        for $camel_name<Dom> {
-            type Template<Param: 'static> = $frozen_name<$crate::dom::Template<Param, Dom>>;
         }
     };
     (
@@ -406,7 +399,6 @@ macro_rules! dom_element {
             $(#[$elem_meta])*
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
-                frozen_name = [< Frozen $name:camel >];
                 common_attributes $($tail)*
             }
         );

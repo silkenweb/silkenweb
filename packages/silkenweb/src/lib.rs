@@ -101,7 +101,7 @@ pub mod prelude {
         elements::{html, svg, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents},
         mount,
         node::{
-            element::{Element, ParentElement, ShadowRootParent, TemplateElement},
+            element::{Element, ParentElement, ShadowRootParent},
             Node,
         },
         value::Sig,

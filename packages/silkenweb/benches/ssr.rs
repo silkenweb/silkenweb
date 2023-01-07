@@ -3,7 +3,8 @@ use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     dom::{Dom, Dry},
     elements::html::{self, button, div, h1, p, span, Div},
-    prelude::{html::FrozenMain, ElementEvents, ParentElement},
+    node::element::Const,
+    prelude::{html::Main, ElementEvents, ParentElement},
     task::server::render_now_sync,
     value::Sig,
 };
@@ -30,7 +31,7 @@ fn counter<D: Dom>(initial: isize) -> Div<D> {
 pub fn ssr(c: &mut Criterion) {
     c.bench_function("ssr", |b| {
         b.iter(|| {
-            let node: FrozenMain<Dry> = html::main()
+            let node: Main<Dry, Const> = html::main()
                 .child(h1().text("Welcome to our benchmark page."))
                 .child(p().text("Here's some introductory text."))
                 .children([1, 2, 3].into_iter().map(counter))
