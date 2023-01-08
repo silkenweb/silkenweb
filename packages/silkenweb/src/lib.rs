@@ -40,6 +40,13 @@
 //! See [caniuse](https://caniuse.com/mdn-javascript_builtins_weakref) for
 //! current browser support.
 //!
+//! ## `declarative-shadow-dom`
+//!
+//! Print [Declarative Shadow DOM] when server side rendering. Hydration will
+//! correctly deal with shadow DOM regardless of this flag. See
+//! [caniuse](https://caniuse.com/mdn-html_elements_template_shadowroot)
+//! for browser support. Polyfills are available.
+//!
 //! # Learning
 //!
 //! There's extensive documentation on each module in this crate, along with
@@ -54,6 +61,7 @@
 //! [tauri]: https://github.com/silkenweb/tauri-example
 //! [Server Side Rendering]: https://github.com/silkenweb/ssr-example
 //! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
+//! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
 use std::{cell::RefCell, collections::HashMap};
 
 use dom::Wet;

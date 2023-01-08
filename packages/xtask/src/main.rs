@@ -1,10 +1,11 @@
 use std::fmt::Write;
 
 use clap::{Parser, Subcommand};
+use itertools::Itertools;
 use scopeguard::defer;
 use xshell::{cmd, mkdir_p, pushd, rm_rf, write_file};
 use xtask_base::{
-    build_readme, ci_nightly, generate_open_source_files, run, CommonCmds, WorkflowResult,
+    build_readme, ci_nightly, clippy, generate_open_source_files, run, CommonCmds, WorkflowResult,
 };
 
 #[derive(Parser)]
@@ -20,6 +21,7 @@ enum Commands {
         #[clap(subcommand)]
         command: Option<CiCommand>,
     },
+    TestFeatures,
     WasmPackTest,
     /// Run TodoMVC with `trunk`
     TodomvcRun,
@@ -71,6 +73,7 @@ fn main() {
                     wasm_pack_test()?;
                 }
             }
+            Commands::TestFeatures => test_features()?,
             Commands::WasmPackTest => wasm_pack_test()?,
             Commands::TodomvcRun => {
                 let _dir = pushd("examples/todomvc")?;
@@ -144,6 +147,18 @@ fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
     xtask_base::ci_stable(fast, toolchain.as_deref(), &[])?;
+    test_features()
+}
+
+fn test_features() -> WorkflowResult<()> {
+    for features in ["declarative-shadow-dom"].into_iter().powerset() {
+        clippy(None, &features)?;
+
+        let features = features.join(",");
+
+        cmd!("cargo test --package silkenweb --features {features}").run()?;
+    }
+
     Ok(())
 }
 

@@ -6,6 +6,7 @@
 
 - Event handlers can be installed on the document.
 - Templates, which allow you to pre render the DOM structure and instantiate it with more detail later. This can improve the performance of hot code paths.
+- `declarative-shadow-dom` feature flag to support [Declarative Shadow DOM](https://web.dev/declarative-shadow-dom/) with SSR.
 - `on_animation_frame` will run a closure on the next animation frame.
 - `UrlPath` can extract the URL's hash.
 - `impl From<String> for UrlPath`

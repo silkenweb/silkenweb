@@ -558,10 +558,32 @@ impl SharedDryElement<HydroNode> {
     }
 }
 
+impl<Node: fmt::Display> SharedDryElement<Node> {
+    #[cfg(feature = "declarative-shadow-dom")]
+    fn write_shadow_dom(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.shadow_children.is_empty() {
+            return Ok(());
+        }
+
+        f.write_str(r#"<template shadowroot="open">"#)?;
+
+        for child in &self.shadow_children {
+            child.fmt(f)?;
+        }
+
+        f.write_str("</template>")?;
+
+        Ok(())
+    }
+
+    #[cfg(not(feature = "declarative-shadow-dom"))]
+    fn write_shadow_dom(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Ok(())
+    }
+}
+
 impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Optionally print declarative shadow root, if/when we get
-        // [Declarative Shadow Root](https://caniuse.com/mdn-html_elements_template_shadowroot)
         write!(f, "<{}", self.tag)?;
 
         for (name, value) in &self.attributes {
@@ -569,6 +591,8 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
         }
 
         f.write_str(">")?;
+
+        self.write_shadow_dom(f)?;
 
         for child in &self.children {
             child.fmt(f)?;
@@ -658,3 +682,32 @@ const NO_CLOSING_TAG: &[&str] = &[
     "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
     "source", "track", "wbr",
 ];
+
+#[cfg(test)]
+mod tests {
+    use crate::{dom::Dry, elements::html::*, prelude::*};
+
+    #[cfg(feature = "declarative-shadow-dom")]
+    #[test]
+    fn declarative_shadow_dom() {
+        assert_eq!(
+            shadow_host().freeze().to_string(),
+            r#"<div><template shadowroot="open"><slot></slot></template><h2>Light content</h2></div>"#
+        );
+    }
+
+    #[cfg(not(feature = "declarative-shadow-dom"))]
+    #[test]
+    fn declarative_shadow_dom() {
+        assert_eq!(
+            shadow_host().freeze().to_string(),
+            r#"<div><h2>Light content</h2></div>"#
+        );
+    }
+
+    fn shadow_host() -> Div<Dry> {
+        div()
+            .attach_shadow_children([slot()])
+            .child(h2().text("Light content"))
+    }
+}
