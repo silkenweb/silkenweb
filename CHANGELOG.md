@@ -17,6 +17,7 @@
 
 ### Improvements
 
+- Merge `css!` and `css_classes!` macros into `css!`, which now supports inline CSS.
 - Merge element builder types and their targets. For example `DivBuilder` and `Div` are merged into `Div`. Each element type has a marker type for mutablility which defaults to mutable.
 - Merge signal and value method variants, such as `class` and `class_signal`, into a single method that accepts either a value or a signal. The only exception to this is `children_signal`, which still exists.
 - Split `class` into `class` and `classes`. `class` adds a single class and `classes` adds a collection of classes. `class` and `classes` can be called multiple times to add more classes.

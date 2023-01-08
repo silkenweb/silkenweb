@@ -1,11 +1,51 @@
-use std::{collections::HashSet, fs, io};
+use std::{
+    collections::HashSet,
+    env, fs,
+    path::{Path, PathBuf},
+};
 
 use cssparser::{Parser, ParserInput, Token};
 
-pub fn class_names(filename: &str) -> Result<impl Iterator<Item = String>, io::Error> {
-    let css = fs::read_to_string(filename)?;
+#[derive(Debug)]
+pub struct Source {
+    content: String,
+    dependency: Option<String>,
+}
 
-    let mut parser_input = ParserInput::new(&css);
+impl Source {
+    pub fn inline(content: impl Into<String>) -> Self {
+        Self {
+            content: content.into(),
+            dependency: None,
+        }
+    }
+
+    pub fn path(path: impl AsRef<Path>) -> Result<Self, String> {
+        const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
+
+        let root_dir = env::var(CARGO_MANIFEST_DIR).map_err(|e| {
+            format!("Error reading environment variable '{CARGO_MANIFEST_DIR}': {e}")
+        })?;
+        let path = PathBuf::from(root_dir)
+            .join(path)
+            .into_os_string()
+            .into_string()
+            .expect("Expected path to be convertible to string");
+
+        Ok(Self {
+            content: fs::read_to_string(&path)
+                .map_err(|e| format!("Failed to read '{path}': {e}"))?,
+            dependency: Some(path),
+        })
+    }
+
+    pub fn dependency(&self) -> &Option<String> {
+        &self.dependency
+    }
+}
+
+pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
+    let mut parser_input = ParserInput::new(&css.content);
     let mut input = Parser::new(&mut parser_input);
     let mut classes = HashSet::new();
     let mut prev_dot = false;
@@ -20,5 +60,5 @@ pub fn class_names(filename: &str) -> Result<impl Iterator<Item = String>, io::E
         prev_dot = matches!(token, Token::Delim('.'));
     }
 
-    Ok(classes.into_iter())
+    classes.into_iter()
 }

@@ -7,7 +7,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
-    clone, css_classes,
+    clone, css,
     elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
     mount,
     node::element::{Element, GenericElement, ParentElement},
@@ -17,7 +17,7 @@ use silkenweb::{
 };
 use timeago::Formatter;
 
-css_classes!("hackernews.scss");
+css!("hackernews.scss");
 
 type Result<T> = result::Result<T, reqwasm::Error>;
 

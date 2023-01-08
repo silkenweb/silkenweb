@@ -17,7 +17,7 @@ use crate::{
 };
 
 pub mod css {
-    silkenweb::css_classes!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
+    silkenweb::css!(visibility: pub, path: "bootstrap-icons-1.9.1/bootstrap-icons.css");
 }
 
 pub fn icon(icon: impl SignalOrValue<Item = IconType>) -> Icon {

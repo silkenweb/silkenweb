@@ -61,6 +61,7 @@ use node::element::GenericElement;
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
+pub use silkenweb_macros::css;
 /// Derive [`Element`] for a [newtype] wrapper.
 ///
 /// Only non empty structs are supported. The first field must implement
@@ -69,7 +70,6 @@ use silkenweb_base::document as base_document;
 /// [newtype]: https://doc.rust-lang.org/rust-by-example/generics/new_types.html
 /// [`Element`]: crate::node::element::Element
 pub use silkenweb_macros::Element;
-pub use silkenweb_macros::{css, css_classes};
 #[doc(inline)]
 pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};
 use wasm_bindgen::UnwrapThrowExt;

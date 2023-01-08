@@ -1612,13 +1612,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-example-inline-css"
-version = "0.1.0"
-dependencies = [
- "silkenweb",
-]
-
-[[package]]
 name = "silkenweb-example-router"
 version = "0.1.0"
 dependencies = [

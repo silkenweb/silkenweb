@@ -1,10 +1,8 @@
-use std::{env, path::PathBuf};
-
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css;
+use silkenweb_base::css::{self, Source};
 use syn::{
     bracketed,
     parse::{Lookahead1, Parse, ParseStream, Peek},
@@ -182,53 +180,11 @@ fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -
     None
 }
 
-/// Compile SCSS.
-///
-/// This takes a single string literal containing SCSS. It compiles it down to
-/// CSS, and returns a `&'static str` containing the compiled CSS. All
-/// valid CSS is also valid SCSS, so you can use this to check your CSS at
-/// compile time as well.
-///
-/// It uses the [Grass] compiler, so has the same [outstanding issues].
-///
-/// Any imports are relative to `$CARGO_MANIFEST_DIR`.
-///
-/// # Example
-///
-/// ```
-/// # use silkenweb_macros::css;
-/// let css_text: &str = css!(
-///     "
-///     .text-color {
-///         color: limegreen;
-///     }
-///     "
-/// );
-/// ```
-///
-/// [grass]: https://github.com/connorskees/grass
-/// [outstanding issues]: https://github.com/connorskees/grass/issues/19
-#[proc_macro]
-#[proc_macro_error]
-pub fn css(input: TokenStream) -> TokenStream {
-    let css_input: LitStr = parse_macro_input!(input);
-
-    let root_dir = cargo_manifest_dir();
-    let css_text = grass::from_string(
-        css_input.value(),
-        &grass::Options::default()
-            .quiet(true)
-            .load_path(&PathBuf::from(root_dir)),
-    )
-    .unwrap_or_else(|e| abort_call_site!("Error: {}", e));
-
-    quote!(#css_text).into()
-}
-
 mod kw {
     use syn::custom_keyword;
 
     custom_keyword!(path);
+    custom_keyword!(inline);
     custom_keyword!(visibility);
     custom_keyword!(prefix);
     custom_keyword!(include_prefixes);
@@ -244,34 +200,51 @@ mod kw {
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
 /// `$CARGO_MANIFEST_DIR` environment variable.
 ///
-/// Alternatively, named parameters can be specified:
-/// - `path` (mandatory) is the path to the CSS /SCSS/SASS file.
-/// - `visibility` (optional) is any visibility modifier, and controls the
-///   visibility of class constants.
-/// - `prefix` (optional) specifies that only classes starting with `prefix`
-///   should be included. Their Rust names will have the prefix stripped.
-/// - `include_prefixes` (optional) specifies a list of prefixes to include,
-///   without stripping the prefix. Rust constants will only be defined for
-///   classes starting with one or more of these prefixes.
-/// - `exclude_prefixes` (optional) specifies a list of prefixes to exclude. No
-///   Rust constants will be defined for a class starting with any of these
-///   prefixes. `exclude_prefixes` takes precedence over `include_prefixes`.
+/// Alternatively, named parameters can be specified. All are optional, either
+/// `path` or `inline` must be specified:
+///
+/// - `path` is the path to the CSS /SCSS/SASS file.
+/// - `inline` is the css content.
+/// - `visibility` is any visibility modifier, and controls the visibility of
+///   class constants. Private is the default.
+/// - `prefix` specifies that only classes starting with `prefix` should be
+///   included. Their Rust names will have the prefix stripped.
+/// - `include_prefixes` specifies a list of prefixes to include, without
+///   stripping the prefix. Rust constants will only be defined for classes
+///   starting with one or more of these prefixes.
+/// - `exclude_prefixes` specifies a list of prefixes to exclude. No Rust
+///   constants will be defined for a class starting with any of these prefixes.
+///   `exclude_prefixes` takes precedence over `include_prefixes`.
 ///
 /// # Examples
 ///
 /// Define private constants for all CSS classes:
 ///
 ///  ```
-/// # use silkenweb_macros::css_classes;
-/// css_classes!("my-sass-file.scss");
+/// # use silkenweb_macros::css;
+/// css!("my-sass-file.scss");
 /// assert_eq!(MY_CLASS, "my-class");
 /// ```
 /// 
-/// Include classes starting with `border-`, except classes starting with `border-excluded-`:
+/// Define private constants for all inline CSS classes:
+///
+///  ```
+/// # use silkenweb_macros::css;
+/// css!(inline: r#"
+///     .my-class {
+///         color: hotpink;
+///     }
+/// "#);
+/// assert_eq!(MY_CLASS, "my-class");
+/// ```
+///
+/// Include classes starting with `border-`, except classes starting with
+/// `border-excluded-`:
+///
 /// ```
 /// mod border {
-///     # use silkenweb_macros::css_classes;
-///     css_classes!(
+///     # use silkenweb_macros::css;
+///     css!(
 ///         visibility: pub,
 ///         path: "my-sass-file.scss",
 ///         prefix:"border-",
@@ -281,12 +254,12 @@ mod kw {
 ///
 /// assert_eq!(border::SMALL, "border-small");
 /// ```
-/// 
+///
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
-///     # use silkenweb_macros::css_classes;
-///     css_classes!(
+///     # use silkenweb_macros::css;
+///     css!(
 ///         path: "my-sass-file.scss",
 ///         include_prefixes: ["border-"]
 ///         exclude_prefixes: ["border-excluded-"]
@@ -296,40 +269,31 @@ mod kw {
 /// ```
 #[proc_macro]
 #[proc_macro_error]
-pub fn css_classes(input: TokenStream) -> TokenStream {
+pub fn css(input: TokenStream) -> TokenStream {
     let Input {
         visibility,
-        path,
+        source,
         prefix,
         include_prefixes,
         exclude_prefixes,
     } = parse_macro_input!(input);
 
-    let root_dir = cargo_manifest_dir();
-    let path = PathBuf::from(root_dir)
-        .join(path)
-        .into_os_string()
-        .into_string()
-        .expect("Expected path to be convertible to string");
+    let classes = css::class_names(&source).filter(|class| {
+        let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
+            any_prefix_matches(class, include_prefixes)
+        } else {
+            true
+        };
 
-    let classes = css::class_names(&path)
-        .unwrap_or_else(|e| abort_call_site!("'{}': {}", path, e.to_string()))
-        .filter(|class| {
-            let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
-                any_prefix_matches(class, include_prefixes)
-            } else {
-                true
-            };
+        let exclude = any_prefix_matches(class, &exclude_prefixes);
 
-            let exclude = any_prefix_matches(class, &exclude_prefixes);
-
-            include && !exclude
-        });
+        include && !exclude
+    });
 
     if let Some(prefix) = prefix {
         code_gen(
             visibility,
-            &path,
+            &source,
             classes.filter_map(|class| {
                 let class_ident = class.strip_prefix(&prefix).map(str::to_string);
                 class_ident.map(|class_ident| {
@@ -341,14 +305,14 @@ pub fn css_classes(input: TokenStream) -> TokenStream {
     } else {
         code_gen(
             visibility,
-            &path,
+            &source,
             classes.map(|class| (class.clone(), class)),
         )
     }
 }
 
 struct Input {
-    path: String,
+    source: Source,
     visibility: Option<Visibility>,
     prefix: Option<String>,
     include_prefixes: Option<Vec<String>>,
@@ -398,7 +362,8 @@ impl Parse for Input {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(LitStr) {
             return Ok(Self {
-                path: input.parse::<LitStr>()?.value(),
+                source: Source::path(input.parse::<LitStr>()?.value())
+                    .unwrap_or_else(|e| abort_call_site!(e)),
                 visibility: None,
                 prefix: None,
                 include_prefixes: None,
@@ -407,6 +372,7 @@ impl Parse for Input {
         }
 
         let mut path = None;
+        let mut inline = None;
         let mut visibility = None;
         let mut prefix = None;
         let mut include_prefixes = None;
@@ -422,6 +388,8 @@ impl Parse for Input {
 
             if Self::parameter(kw::path, &lookahead, input, path.is_some())? {
                 path = Some(input.parse::<LitStr>()?.value());
+            } else if Self::parameter(kw::inline, &lookahead, input, inline.is_some())? {
+                inline = Some(input.parse::<LitStr>()?.value());
             } else if Self::parameter(kw::visibility, &lookahead, input, visibility.is_some())? {
                 visibility = Some(input.parse()?);
             } else if Self::parameter(kw::prefix, &lookahead, input, prefix.is_some())? {
@@ -451,17 +419,22 @@ impl Parse for Input {
             }
         }
 
-        if let Some(path) = path {
-            Ok(Self {
-                visibility,
-                path,
-                prefix,
-                include_prefixes,
-                exclude_prefixes,
-            })
-        } else {
-            abort_call_site!("Missing 'path' parameter");
-        }
+        let source = match (path, inline) {
+            (None, None) => abort_call_site!("Must specify either 'path' or `inline` parameter"),
+            (None, Some(inline)) => Source::inline(inline),
+            (Some(path), None) => Source::path(path).unwrap_or_else(|e| abort_call_site!(e)),
+            (Some(_), Some(_)) => {
+                abort_call_site!("Only one of 'path' or `inline` can be specified")
+            }
+        };
+
+        Ok(Self {
+            visibility,
+            source,
+            prefix,
+            include_prefixes,
+            exclude_prefixes,
+        })
     }
 }
 
@@ -471,7 +444,7 @@ fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
 
 fn code_gen(
     visibility: Option<Visibility>,
-    path: &str,
+    source: &Source,
     classes: impl Iterator<Item = (String, String)>,
 ) -> TokenStream {
     let classes = classes.map(|(class_ident, class_name)| {
@@ -491,19 +464,13 @@ fn code_gen(
         quote!(#visibility const #class_ident: &str = #class_name;)
     });
 
+    let dependency = source.dependency().iter();
+
     quote!(
-        const _: &[u8] = ::std::include_bytes!(#path);
+        #(const _: &[u8] = ::std::include_bytes!(#dependency);)*
         #(#classes)*
     )
     .into()
-}
-
-fn cargo_manifest_dir() -> String {
-    const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
-
-    env::var(CARGO_MANIFEST_DIR).unwrap_or_else(|_| {
-        abort_call_site!("Unable to read {} from environment", CARGO_MANIFEST_DIR)
-    })
 }
 
 /// Convert a rust ident to an html ident by stripping any "r#" prefix and
