@@ -22,6 +22,7 @@ jobs:
     - run: cargo doc
     - run: cargo test
     - run: cargo test --benches --tests --release
+    - run: cargo xtask test-features
 
   browser-tests:
     strategy:
