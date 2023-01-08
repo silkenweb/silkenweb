@@ -42,6 +42,10 @@ impl Source {
     pub fn dependency(&self) -> &Option<String> {
         &self.dependency
     }
+
+    pub fn content(&self) -> &str {
+        &self.content
+    }
 }
 
 pub fn class_names(css: &Source) -> impl Iterator<Item = String> {

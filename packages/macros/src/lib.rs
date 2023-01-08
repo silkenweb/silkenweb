@@ -196,6 +196,9 @@ mod kw {
 /// For a CSS class called `my-css-class`, a constant called `MY_CSS_CLASS` will
 /// be defined.
 ///
+/// An `fn stylesheet() -> &'static str` will also be defined, which gets the
+/// content of the stylesheet.
+///
 /// The macro takes two forms. Firstly it can take a single string literal which
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
 /// `$CARGO_MANIFEST_DIR` environment variable.
@@ -236,6 +239,11 @@ mod kw {
 ///     }
 /// "#);
 /// assert_eq!(MY_CLASS, "my-class");
+/// assert_eq!(stylesheet(), r#"
+///     .my-class {
+///         color: hotpink;
+///     }
+/// "#);
 /// ```
 ///
 /// Include classes starting with `border-`, except classes starting with
@@ -465,10 +473,14 @@ fn code_gen(
     });
 
     let dependency = source.dependency().iter();
+    let content = source.content();
 
     quote!(
         #(const _: &[u8] = ::std::include_bytes!(#dependency);)*
         #(#classes)*
+        #visibility fn stylesheet() -> &'static str {
+            #content
+        }
     )
     .into()
 }
