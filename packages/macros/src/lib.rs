@@ -237,7 +237,7 @@ mod kw {
 ///
 ///  ```
 /// # use silkenweb_macros::css;
-/// css!("my-sass-file.css");
+/// css!("my-css-file.css");
 /// assert_eq!(MY_CLASS, "my-class");
 /// ```
 /// 
@@ -266,7 +266,7 @@ mod kw {
 ///     # use silkenweb_macros::css;
 ///     css!(
 ///         visibility: pub,
-///         path: "my-sass-file.css",
+///         path: "my-css-file.css",
 ///         prefix:"border-",
 ///         exclude_prefixes: ["border-excluded-"]
 ///     );
@@ -280,7 +280,7 @@ mod kw {
 /// ```compile_fail
 ///     # use silkenweb_macros::css;
 ///     css!(
-///         path: "my-sass-file.css",
+///         path: "my-css-file.css",
 ///         include_prefixes: ["border-"]
 ///         exclude_prefixes: ["border-excluded-"]
 ///     );
