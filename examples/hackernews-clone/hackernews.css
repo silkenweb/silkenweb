@@ -1,0 +1,74 @@
+:root {
+    --color: YellowGreen;
+    --foreground-color: Black;
+    --de-emphasize-color: Grey;
+    --background-color: WhiteSmoke;
+    --small-gap: 8px;
+    --large-gap: 32px;
+}
+
+body {
+    color: var(--foreground-color);
+    background-color: var(--background-color);
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul ul {
+    padding-inline-start: var(--large-gap);
+}
+
+.de-emphasize {
+    color: var(--de-emphasize-color);
+}
+
+.page {
+    margin-inline: auto;
+    margin-block-end: var(--large-gap);
+    inline-size: 90%;
+}
+
+.page-banner {
+    display: flex;
+    gap: var(--small-gap);
+    background: var(--color);
+    padding: var(--small-gap);
+}
+
+.page-content {
+    padding-inline: var(--small-gap);
+}
+
+.story-title {
+    margin-bottom: 0;
+}
+
+.comment,
+.user-submitted-stories {
+    border-block-start: 1px solid var(--de-emphasize-color);
+    margin-block-start: var(--small-gap);
+}
+
+.user-content {
+    padding-block: var(--small-gap);
+}
+
+.user-content a {
+    text-decoration: underline;
+}
+
+.user-content ul {
+    list-style-type: disc;
+}
