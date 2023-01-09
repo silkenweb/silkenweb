@@ -1990,6 +1990,7 @@ name = "silkenweb-macros"
 version = "0.3.0"
 dependencies = [
  "cssparser",
+ "lightningcss",
  "proc-macro-error",
  "proc-macro2",
  "quote",

@@ -7,7 +7,10 @@ use std::{
 
 use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
-use lightningcss::stylesheet::{ParserOptions, PrinterOptions, StyleSheet};
+use lightningcss::{
+    stylesheet::{ParserOptions, PrinterOptions, StyleSheet},
+    targets::Browsers,
+};
 
 #[derive(Debug)]
 pub struct Source {
@@ -42,8 +45,14 @@ impl Source {
         })
     }
 
-    pub fn transpile(&mut self, validate: bool, minify: bool, nesting: bool) -> Result<(), String> {
-        if validate || minify || nesting {
+    pub fn transpile(
+        &mut self,
+        validate: bool,
+        minify: bool,
+        nesting: bool,
+        targets: Option<Browsers>,
+    ) -> Result<(), String> {
+        if validate || minify || nesting || targets.is_some() {
             let content = self.content.clone();
             let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
             let filename = self
@@ -81,8 +90,7 @@ impl Source {
                         minify,
                         source_map: None,
                         project_root: None,
-                        // TODO:
-                        targets: None,
+                        targets,
                         analyze_dependencies: None,
                         pseudo_classes: None,
                     })
