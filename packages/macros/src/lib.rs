@@ -189,6 +189,9 @@ mod kw {
     custom_keyword!(prefix);
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
+    custom_keyword!(validate);
+    custom_keyword!(minify);
+    custom_keyword!(nesting);
 }
 
 /// Define `&str` constants for each class in a SASS file.
@@ -203,8 +206,11 @@ mod kw {
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
 /// `$CARGO_MANIFEST_DIR` environment variable.
 ///
-/// Alternatively, named parameters can be specified. All are optional, either
-/// `path` or `inline` must be specified:
+/// Alternatively, named parameters can be specified.
+///
+/// # Parameters
+///
+/// All are optional, but either `path` or `inline` must be specified:
 ///
 /// - `path` is the path to the CSS /SCSS/SASS file.
 /// - `inline` is the css content.
@@ -219,13 +225,19 @@ mod kw {
 ///   constants will be defined for a class starting with any of these prefixes.
 ///   `exclude_prefixes` takes precedence over `include_prefixes`.
 ///
+/// ## Flags
+///
+/// - `validate`: Validate the CSS.
+/// - `minify`: Minify the CSS returned by `stylesheet()`.
+/// - `nesting`: Allow CSS nesting.
+///
 /// # Examples
 ///
 /// Define private constants for all CSS classes:
 ///
 ///  ```
 /// # use silkenweb_macros::css;
-/// css!("my-sass-file.scss");
+/// css!("my-sass-file.css");
 /// assert_eq!(MY_CLASS, "my-class");
 /// ```
 /// 
@@ -254,7 +266,7 @@ mod kw {
 ///     # use silkenweb_macros::css;
 ///     css!(
 ///         visibility: pub,
-///         path: "my-sass-file.scss",
+///         path: "my-sass-file.css",
 ///         prefix:"border-",
 ///         exclude_prefixes: ["border-excluded-"]
 ///     );
@@ -268,7 +280,7 @@ mod kw {
 /// ```compile_fail
 ///     # use silkenweb_macros::css;
 ///     css!(
-///         path: "my-sass-file.scss",
+///         path: "my-sass-file.css",
 ///         include_prefixes: ["border-"]
 ///         exclude_prefixes: ["border-excluded-"]
 ///     );
@@ -280,11 +292,18 @@ mod kw {
 pub fn css(input: TokenStream) -> TokenStream {
     let Input {
         visibility,
-        source,
+        mut source,
         prefix,
         include_prefixes,
         exclude_prefixes,
+        minify,
+        validate,
+        nesting,
     } = parse_macro_input!(input);
+
+    source
+        .transpile(validate, minify, nesting)
+        .unwrap_or_else(|e| abort_call_site!(e));
 
     let classes = css::class_names(&source).filter(|class| {
         let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
@@ -325,10 +344,31 @@ struct Input {
     prefix: Option<String>,
     include_prefixes: Option<Vec<String>>,
     exclude_prefixes: Vec<String>,
+    validate: bool,
+    minify: bool,
+    nesting: bool,
 }
 
 impl Input {
     fn parameter<Keyword, KeywordToken, T>(
+        keyword: Keyword,
+        lookahead: &Lookahead1,
+        input: ParseStream,
+        exists: bool,
+    ) -> syn::Result<bool>
+    where
+        Keyword: Peek + FnOnce(T) -> KeywordToken,
+        KeywordToken: Parse + CustomToken,
+    {
+        Ok(if Self::flag(keyword, lookahead, input, exists)? {
+            input.parse::<Colon>()?;
+            true
+        } else {
+            false
+        })
+    }
+
+    fn flag<Keyword, KeywordToken, T>(
         keyword: Keyword,
         lookahead: &Lookahead1,
         input: ParseStream,
@@ -348,7 +388,6 @@ impl Input {
             }
 
             input.parse::<KeywordToken>()?;
-            input.parse::<Colon>()?;
 
             true
         } else {
@@ -376,6 +415,9 @@ impl Parse for Input {
                 prefix: None,
                 include_prefixes: None,
                 exclude_prefixes: Vec::new(),
+                minify: false,
+                validate: false,
+                nesting: false,
             });
         }
 
@@ -386,6 +428,9 @@ impl Parse for Input {
         let mut include_prefixes = None;
         let mut exclude_prefixes = Vec::new();
         let mut trailing_comma = true;
+        let mut validate = false;
+        let mut minify = false;
+        let mut nesting = false;
 
         while !input.is_empty() {
             if !trailing_comma {
@@ -416,6 +461,12 @@ impl Parse for Input {
                 !exclude_prefixes.is_empty(),
             )? {
                 exclude_prefixes = Self::parse_prefix_list(input)?;
+            } else if Self::flag(kw::validate, &lookahead, input, validate)? {
+                validate = true;
+            } else if Self::flag(kw::minify, &lookahead, input, minify)? {
+                minify = true;
+            } else if Self::flag(kw::nesting, &lookahead, input, nesting)? {
+                nesting = true;
             } else {
                 return Err(lookahead.error());
             }
@@ -442,6 +493,9 @@ impl Parse for Input {
             prefix,
             include_prefixes,
             exclude_prefixes,
+            validate,
+            minify,
+            nesting,
         })
     }
 }

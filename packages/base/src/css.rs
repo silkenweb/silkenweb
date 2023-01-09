@@ -2,9 +2,12 @@ use std::{
     collections::HashSet,
     env, fs,
     path::{Path, PathBuf},
+    sync::{Arc, RwLock},
 };
 
 use cssparser::{Parser, ParserInput, Token};
+use itertools::Itertools;
+use lightningcss::stylesheet::{ParserOptions, PrinterOptions, StyleSheet};
 
 #[derive(Debug)]
 pub struct Source {
@@ -37,6 +40,58 @@ impl Source {
                 .map_err(|e| format!("Failed to read '{path}': {e}"))?,
             dependency: Some(path),
         })
+    }
+
+    pub fn transpile(&mut self, validate: bool, minify: bool, nesting: bool) -> Result<(), String> {
+        if validate || minify || nesting {
+            let content = self.content.clone();
+            let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
+            let filename = self
+                .dependency
+                .as_ref()
+                .map_or_else(|| "<inline>".to_string(), String::clone);
+            let stylesheet: StyleSheet = StyleSheet::parse(
+                &content,
+                ParserOptions {
+                    filename,
+                    nesting,
+                    custom_media: false,
+                    css_modules: None,
+                    source_index: 0,
+                    error_recovery: !validate,
+                    warnings: warnings.as_ref().map(Arc::clone),
+                    at_rule_parser: None,
+                },
+            )
+            .map_err(|e| e.to_string())?;
+
+            if let Some(warnings) = warnings {
+                let warnings = warnings.read().unwrap();
+
+                if !warnings.is_empty() {
+                    let warnings_text = warnings.iter().map(|w| w.to_string()).join("\n");
+
+                    return Err(warnings_text);
+                }
+            }
+
+            if minify {
+                self.content = stylesheet
+                    .to_css(PrinterOptions {
+                        minify,
+                        source_map: None,
+                        project_root: None,
+                        // TODO:
+                        targets: None,
+                        analyze_dependencies: None,
+                        pseudo_classes: None,
+                    })
+                    .map_err(|e| e.to_string())?
+                    .code;
+            }
+        };
+
+        Ok(())
     }
 
     pub fn dependency(&self) -> &Option<String> {
