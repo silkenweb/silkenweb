@@ -3,7 +3,7 @@ use proc_macro_error::{abort, abort_call_site};
 use silkenweb_base::css::{self, Source};
 use syn::{
     braced, bracketed,
-    parse::{Lookahead1, Parse, ParseStream, Peek},
+    parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
     punctuated::Punctuated,
     token::{Colon, Comma, CustomToken},
     LitInt, LitStr, Visibility,
@@ -125,10 +125,7 @@ impl Parse for Transpile {
         let mut nesting = false;
         let mut browsers = None;
 
-        let body;
-
-        braced!(body in input);
-        parse_comma_delimited(&body, |lookahead, input| {
+        parse_comma_delimited(&braced(input)?, |lookahead, input| {
             if flag(kw::minify, lookahead, input, minify)? {
                 minify = true;
             } else if flag(kw::pretty, lookahead, input, pretty)? {
@@ -196,11 +193,8 @@ impl Browsers {
 impl Parse for Browsers {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut browsers = lightningcss::targets::Browsers::default();
-        let body;
 
-        braced!(body in input);
-
-        parse_comma_delimited(&body, |lookahead, input| {
+        parse_comma_delimited(&braced(input)?, |lookahead, input| {
             Ok(
                 Self::browser(browsers::android, lookahead, input, &mut browsers.android)?
                     || Self::browser(browsers::chrome, lookahead, input, &mut browsers.chrome)?
@@ -322,6 +316,12 @@ where
     } else {
         false
     })
+}
+
+fn braced(input: ParseStream) -> syn::Result<ParseBuffer> {
+    let body;
+    braced!(body in input);
+    Ok(body)
 }
 
 fn parse_prefix_list(input: &syn::parse::ParseBuffer) -> Result<Vec<String>, syn::Error> {
