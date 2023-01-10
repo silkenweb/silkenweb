@@ -1,4 +1,4 @@
-use parse::Browsers;
+use parse::Transpile;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
@@ -196,40 +196,61 @@ fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -
 ///
 /// # Parameters
 ///
-/// All are optional, but either `path` or `inline` must be specified:
+/// Parameters take the form:
+///
+/// ```
+/// # use silkenweb_macros::css;
+/// css!(
+///     path: "my-css-file.css",
+///     visibility: pub,
+///     prefix: "prefix",
+///     include_prefixes: ["included-"],
+///     exclude_prefixes: ["excluded-"],
+///     validate,
+///     transpile: {
+///         minify,
+///         nesting,
+///         browsers: {
+///             android: 1:0:0,
+///             chrome: 1:0:0,
+///             edge: 1:0:0,
+///             firefox: 1:0:0,
+///             ie: 1:0:0,
+///             ios_saf: 1:0:0,
+///             opera: 1:0:0,
+///             safari: 1:0:0,
+///             samsung: 1:0:0,
+///         }
+///     }
+/// );
+/// ```
+///
+/// All are optional, one of `path` or `inline` must be specified.
 ///
 /// - `path` is the path to the CSS /SCSS/SASS file.
 /// - `inline` is the css content.
 /// - `visibility` is any visibility modifier, and controls the visibility of
 ///   class constants. Private is the default.
-/// - `prefix` specifies that only classes starting with `prefix` should be
-///   included. Their Rust names will have the prefix stripped.
-/// - `include_prefixes` specifies a list of prefixes to include, without
-///   stripping the prefix. Rust constants will only be defined for classes
-///   starting with one or more of these prefixes.
-/// - `exclude_prefixes` specifies a list of prefixes to exclude. No Rust
-///   constants will be defined for a class starting with any of these prefixes.
+/// - `prefix`: only classes starting with `prefix` should be included. Their
+///   Rust names will have the prefix stripped.
+/// - `include_prefixes`: a list of prefixes to include, without stripping the
+///   prefix. Rust constants will only be defined for classes starting with one
+///   or more of these prefixes.
+/// - `exclude_prefixes`: a list of prefixes to exclude. No Rust constants will
+///   be defined for a class starting with any of these prefixes.
 ///   `exclude_prefixes` takes precedence over `include_prefixes`.
+/// - `validate`: validate the CSS.
+/// - `transpile`: transpile the CSS with [lightningcss].
+///
+/// ## `transpile`
+///
+/// - `minify`: Minify the CSS returned by `stylesheet()`.
+/// - `nesting`: Allow CSS nesting.
 /// - `browsers` is a comma seperated list of the minimum supported browser
 ///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.
 ///   The version is a `:` seperated string of major, minor, and patch versions.
 ///   For example, to support firefox 110  + and chrome 111+, use `browsers: {
-///   firefox: 110:0:0, chrome: 111:0:0 }`. Supported browsers:
-///     - android
-///     - chrome
-///     - edge
-///     - firefox
-///     - ie
-///     - ios_saf
-///     - opera
-///     - safari
-///     - samsung
-///
-/// ## Flags
-///
-/// - `validate`: Validate the CSS.
-/// - `minify`: Minify the CSS returned by `stylesheet()`.
-/// - `nesting`: Allow CSS nesting.
+///   firefox: 110:0:0, chrome: 111:0:0 }`.
 ///
 /// # Examples
 ///
@@ -287,6 +308,8 @@ fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -
 ///
 ///     assert_eq!(BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
+///
+/// [lightningcss]: https://lightningcss.dev/
 #[proc_macro]
 #[proc_macro_error]
 pub fn css(input: TokenStream) -> TokenStream {
@@ -297,13 +320,11 @@ pub fn css(input: TokenStream) -> TokenStream {
         include_prefixes,
         exclude_prefixes,
         validate,
-        minify,
-        nesting,
-        browsers,
+        transpile,
     } = parse_macro_input!(input);
 
     source
-        .transpile(validate, minify, nesting, browsers.map(Browsers::into))
+        .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
     let classes = css::class_names(&source).filter(|class| {

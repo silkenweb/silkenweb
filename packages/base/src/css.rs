@@ -48,11 +48,14 @@ impl Source {
     pub fn transpile(
         &mut self,
         validate: bool,
-        minify: bool,
-        nesting: bool,
-        targets: Option<Browsers>,
+        transpile: Option<Transpile>,
     ) -> Result<(), String> {
-        if validate || minify || nesting || targets.is_some() {
+        let write_content = transpile.is_some();
+        if validate || write_content {
+            let minify = transpile.as_ref().map_or(false, |t| t.minify);
+            let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
+            let targets = transpile.and_then(|t| t.browsers);
+
             let content = self.content.clone();
             let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
             let filename = self
@@ -84,7 +87,7 @@ impl Source {
                 }
             }
 
-            if minify {
+            if write_content {
                 self.content = stylesheet
                     .to_css(PrinterOptions {
                         minify,
@@ -109,6 +112,12 @@ impl Source {
     pub fn content(&self) -> &str {
         &self.content
     }
+}
+
+pub struct Transpile {
+    pub minify: bool,
+    pub nesting: bool,
+    pub browsers: Option<Browsers>,
 }
 
 pub fn class_names(css: &Source) -> impl Iterator<Item = String> {

@@ -1,6 +1,6 @@
 use derive_more::Into;
 use proc_macro_error::{abort, abort_call_site};
-use silkenweb_base::css::Source;
+use silkenweb_base::css::{self, Source};
 use syn::{
     braced, bracketed,
     parse::{Lookahead1, Parse, ParseStream, Peek},
@@ -19,6 +19,7 @@ mod kw {
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
     custom_keyword!(validate);
+    custom_keyword!(transpile);
     custom_keyword!(minify);
     custom_keyword!(nesting);
     custom_keyword!(browsers);
@@ -31,9 +32,7 @@ pub struct Input {
     pub include_prefixes: Option<Vec<String>>,
     pub exclude_prefixes: Vec<String>,
     pub validate: bool,
-    pub minify: bool,
-    pub nesting: bool,
-    pub browsers: Option<Browsers>,
+    pub transpile: Option<Transpile>,
 }
 
 impl Parse for Input {
@@ -46,10 +45,8 @@ impl Parse for Input {
                 prefix: None,
                 include_prefixes: None,
                 exclude_prefixes: Vec::new(),
-                minify: false,
                 validate: false,
-                nesting: false,
-                browsers: None,
+                transpile: None,
             });
         }
 
@@ -60,9 +57,7 @@ impl Parse for Input {
         let mut include_prefixes = None;
         let mut exclude_prefixes = Vec::new();
         let mut validate = false;
-        let mut minify = false;
-        let mut nesting = false;
-        let mut browsers = None;
+        let mut transpile = None;
 
         parse_comma_delimited(input, |lookahead, input| {
             if parameter(kw::path, lookahead, input, path.is_some())? {
@@ -89,12 +84,8 @@ impl Parse for Input {
                 exclude_prefixes = parse_prefix_list(input)?;
             } else if flag(kw::validate, lookahead, input, validate)? {
                 validate = true;
-            } else if flag(kw::minify, lookahead, input, minify)? {
-                minify = true;
-            } else if flag(kw::nesting, lookahead, input, nesting)? {
-                nesting = true;
-            } else if parameter(kw::browsers, lookahead, input, include_prefixes.is_some())? {
-                browsers = Some(input.parse::<Browsers>()?);
+            } else if parameter(kw::transpile, lookahead, input, transpile.is_some())? {
+                transpile = Some(input.parse()?);
             } else {
                 return Ok(false);
             }
@@ -118,10 +109,42 @@ impl Parse for Input {
             include_prefixes,
             exclude_prefixes,
             validate,
+            transpile,
+        })
+    }
+}
+
+#[derive(Into)]
+pub struct Transpile(css::Transpile);
+
+impl Parse for Transpile {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let mut minify = false;
+        let mut nesting = false;
+        let mut browsers = None;
+
+        let body;
+
+        braced!(body in input);
+        parse_comma_delimited(&body, |lookahead, input| {
+            if flag(kw::minify, lookahead, input, minify)? {
+                minify = true;
+            } else if flag(kw::nesting, lookahead, input, nesting)? {
+                nesting = true;
+            } else if parameter(kw::browsers, lookahead, input, browsers.is_some())? {
+                browsers = Some(input.parse::<Browsers>()?);
+            } else {
+                return Ok(false);
+            }
+
+            Ok(true)
+        })?;
+
+        Ok(Self(css::Transpile {
             minify,
             nesting,
-            browsers,
-        })
+            browsers: browsers.map(Browsers::into),
+        }))
     }
 }
 
