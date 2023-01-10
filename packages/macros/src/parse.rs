@@ -21,6 +21,7 @@ mod kw {
     custom_keyword!(validate);
     custom_keyword!(transpile);
     custom_keyword!(minify);
+    custom_keyword!(pretty);
     custom_keyword!(nesting);
     custom_keyword!(browsers);
 }
@@ -120,6 +121,7 @@ pub struct Transpile(css::Transpile);
 impl Parse for Transpile {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut minify = false;
+        let mut pretty = false;
         let mut nesting = false;
         let mut browsers = None;
 
@@ -129,6 +131,8 @@ impl Parse for Transpile {
         parse_comma_delimited(&body, |lookahead, input| {
             if flag(kw::minify, lookahead, input, minify)? {
                 minify = true;
+            } else if flag(kw::pretty, lookahead, input, pretty)? {
+                pretty = true;
             } else if flag(kw::nesting, lookahead, input, nesting)? {
                 nesting = true;
             } else if parameter(kw::browsers, lookahead, input, browsers.is_some())? {
@@ -142,6 +146,7 @@ impl Parse for Transpile {
 
         Ok(Self(css::Transpile {
             minify,
+            pretty,
             nesting,
             browsers: browsers.map(Browsers::into),
         }))

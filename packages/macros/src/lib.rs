@@ -177,6 +177,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///     validate,
 ///     transpile: {
 ///         minify,
+///         pretty,
 ///         nesting,
 ///         browsers: {
 ///             android: 1:0:0,
@@ -212,7 +213,12 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///
 /// ## `transpile`
 ///
-/// - `minify`: Minify the CSS returned by `stylesheet()`.
+/// - `minify`: Minify the CSS returned by `stylesheet()`. Minification also
+///   adds/removes vendor prefixes, so it's a good idea to keep this the same
+///   between debug and release builds. Use `pretty` if you want legible CSS in
+///   debug.
+/// - `pretty`: Pretty print the final output. This is the default unless minify
+///   is specified.
 /// - `nesting`: Allow CSS nesting.
 /// - `browsers` is a comma seperated list of the minimum supported browser
 ///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.

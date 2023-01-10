@@ -8,7 +8,7 @@ use std::{
 use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
 use lightningcss::{
-    stylesheet::{ParserOptions, PrinterOptions, StyleSheet},
+    stylesheet::{MinifyOptions, ParserOptions, PrinterOptions, StyleSheet},
     targets::Browsers,
 };
 
@@ -53,6 +53,7 @@ impl Source {
         let write_content = transpile.is_some();
         if validate || write_content {
             let minify = transpile.as_ref().map_or(false, |t| t.minify);
+            let pretty = transpile.as_ref().map_or(false, |t| t.pretty);
             let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
             let targets = transpile.and_then(|t| t.browsers);
 
@@ -62,7 +63,7 @@ impl Source {
                 .dependency
                 .as_ref()
                 .map_or_else(|| "<inline>".to_string(), String::clone);
-            let stylesheet: StyleSheet = StyleSheet::parse(
+            let mut stylesheet: StyleSheet = StyleSheet::parse(
                 &content,
                 ParserOptions {
                     filename,
@@ -88,9 +89,21 @@ impl Source {
             }
 
             if write_content {
+                if minify {
+                    // This does the structural minification and add/removes vendor prefixes.
+                    stylesheet
+                        .minify(MinifyOptions {
+                            targets,
+                            unused_symbols: HashSet::new(),
+                        })
+                        .map_err(|e| e.to_string())?;
+                }
+
                 self.content = stylesheet
                     .to_css(PrinterOptions {
-                        minify,
+                        // `minify` just controls the output format without doing more structural
+                        // minification.
+                        minify: !pretty && minify,
                         source_map: None,
                         project_root: None,
                         targets,
@@ -116,6 +129,7 @@ impl Source {
 
 pub struct Transpile {
     pub minify: bool,
+    pub pretty: bool,
     pub nesting: bool,
     pub browsers: Option<Browsers>,
 }
