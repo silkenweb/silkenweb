@@ -36,62 +36,6 @@ pub struct Input {
     pub browsers: Option<Browsers>,
 }
 
-impl Input {
-    fn parameter<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        lookahead: &Lookahead1,
-        input: ParseStream,
-        exists: bool,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        Ok(if Self::flag(keyword, lookahead, input, exists)? {
-            input.parse::<Colon>()?;
-            true
-        } else {
-            false
-        })
-    }
-
-    fn flag<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        lookahead: &Lookahead1,
-        input: ParseStream,
-        exists: bool,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        Ok(if lookahead.peek(keyword) {
-            if exists {
-                abort!(
-                    input.span(),
-                    "{} is defined multiple times",
-                    KeywordToken::display()
-                );
-            }
-
-            input.parse::<KeywordToken>()?;
-
-            true
-        } else {
-            false
-        })
-    }
-
-    fn parse_prefix_list(input: &syn::parse::ParseBuffer) -> Result<Vec<String>, syn::Error> {
-        let list;
-        bracketed!(list in input);
-        Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
-            .iter()
-            .map(|prefix| prefix.value())
-            .collect())
-    }
-}
-
 impl Parse for Input {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(LitStr) {
@@ -121,35 +65,35 @@ impl Parse for Input {
         let mut browsers = None;
 
         parse_comma_delimited(input, |lookahead, input| {
-            if Self::parameter(kw::path, lookahead, input, path.is_some())? {
+            if parameter(kw::path, lookahead, input, path.is_some())? {
                 path = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(kw::inline, lookahead, input, inline.is_some())? {
+            } else if parameter(kw::inline, lookahead, input, inline.is_some())? {
                 inline = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(kw::visibility, lookahead, input, visibility.is_some())? {
+            } else if parameter(kw::visibility, lookahead, input, visibility.is_some())? {
                 visibility = Some(input.parse()?);
-            } else if Self::parameter(kw::prefix, lookahead, input, prefix.is_some())? {
+            } else if parameter(kw::prefix, lookahead, input, prefix.is_some())? {
                 prefix = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(
+            } else if parameter(
                 kw::include_prefixes,
                 lookahead,
                 input,
                 include_prefixes.is_some(),
             )? {
-                include_prefixes = Some(Self::parse_prefix_list(input)?);
-            } else if Self::parameter(
+                include_prefixes = Some(parse_prefix_list(input)?);
+            } else if parameter(
                 kw::exclude_prefixes,
                 lookahead,
                 input,
                 !exclude_prefixes.is_empty(),
             )? {
-                exclude_prefixes = Self::parse_prefix_list(input)?;
-            } else if Self::flag(kw::validate, lookahead, input, validate)? {
+                exclude_prefixes = parse_prefix_list(input)?;
+            } else if flag(kw::validate, lookahead, input, validate)? {
                 validate = true;
-            } else if Self::flag(kw::minify, lookahead, input, minify)? {
+            } else if flag(kw::minify, lookahead, input, minify)? {
                 minify = true;
-            } else if Self::flag(kw::nesting, lookahead, input, nesting)? {
+            } else if flag(kw::nesting, lookahead, input, nesting)? {
                 nesting = true;
-            } else if Self::parameter(kw::browsers, lookahead, input, include_prefixes.is_some())? {
+            } else if parameter(kw::browsers, lookahead, input, include_prefixes.is_some())? {
                 browsers = Some(input.parse::<Browsers>()?);
             } else {
                 return Ok(false);
@@ -209,23 +153,15 @@ impl Browsers {
         Keyword: Peek + FnOnce(T) -> KeywordToken,
         KeywordToken: Parse + CustomToken,
     {
-        Ok(if lookahead.peek(keyword) {
-            if version.is_some() {
-                abort!(
-                    input.span(),
-                    "{} is defined multiple times",
-                    KeywordToken::display()
-                );
-            }
+        Ok(
+            if parameter(keyword, lookahead, input, version.is_some())? {
+                *version = Some(input.parse::<Version>()?.encode_for_lightning());
 
-            input.parse::<KeywordToken>()?;
-            input.parse::<Colon>()?;
-            *version = Some(input.parse::<Version>()?.encode_for_lightning());
-
-            true
-        } else {
-            false
-        })
+                true
+            } else {
+                false
+            },
+        )
     }
 }
 
@@ -313,4 +249,58 @@ impl Parse for Version {
             patch,
         })
     }
+}
+
+fn parameter<Keyword, KeywordToken, T>(
+    keyword: Keyword,
+    lookahead: &Lookahead1,
+    input: ParseStream,
+    exists: bool,
+) -> syn::Result<bool>
+where
+    Keyword: Peek + FnOnce(T) -> KeywordToken,
+    KeywordToken: Parse + CustomToken,
+{
+    Ok(if flag(keyword, lookahead, input, exists)? {
+        input.parse::<Colon>()?;
+        true
+    } else {
+        false
+    })
+}
+
+fn flag<Keyword, KeywordToken, T>(
+    keyword: Keyword,
+    lookahead: &Lookahead1,
+    input: ParseStream,
+    exists: bool,
+) -> syn::Result<bool>
+where
+    Keyword: Peek + FnOnce(T) -> KeywordToken,
+    KeywordToken: Parse + CustomToken,
+{
+    Ok(if lookahead.peek(keyword) {
+        if exists {
+            abort!(
+                input.span(),
+                "{} is defined multiple times",
+                KeywordToken::display()
+            );
+        }
+
+        input.parse::<KeywordToken>()?;
+
+        true
+    } else {
+        false
+    })
+}
+
+fn parse_prefix_list(input: &syn::parse::ParseBuffer) -> Result<Vec<String>, syn::Error> {
+    let list;
+    bracketed!(list in input);
+    Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
+        .iter()
+        .map(|prefix| prefix.value())
+        .collect())
 }
