@@ -17,7 +17,6 @@ use silkenweb::{
 use crate::{button::Button, css};
 
 #[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-#[element_target(Dropdown)]
 pub struct Dropdown<D: Dom = DefaultDom>(Div<D>);
 
 pub fn dropdown<D: Dom>(button: Button<D>, menu: impl Into<Menu<D>>) -> Dropdown<D> {
