@@ -5,8 +5,8 @@ use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
-    parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
-    FieldsUnnamed, Ident, Index, Meta, NestedMeta, Path, Visibility,
+    parse_macro_input, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed,
+    Ident, Index, Visibility,
 };
 
 use crate::parse::Input;
@@ -46,13 +46,10 @@ derive_empty!(
     derive_element_events(elements, ElementEvents);
 );
 
-#[proc_macro_derive(Element, attributes(element_target, element_dom_type))]
+#[proc_macro_derive(Element)]
 #[proc_macro_error]
 pub fn derive_element(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
-    let dom_type = extract_attr_type(&new_type.attrs, "element_dom_type", || {
-        abort_call_site!("Use `element_dom_type(DomType)`")
-    });
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
@@ -92,15 +89,10 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
         quote!(0)
     };
 
-    let dom_type = match dom_type {
-        None => quote!(<#derive_from as ::silkenweb::node::element::Element>::DomType),
-        Some(dom_type) => quote!(#dom_type),
-    };
-
     quote!(
         impl #impl_generics ::silkenweb::node::element::Element
         for #name #ty_generics #where_clause {
-            type DomType = #dom_type;
+            type DomType = <#derive_from as ::silkenweb::node::element::Element>::DomType;
 
             fn class<'a, T>(self, class: impl ::silkenweb::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
@@ -154,30 +146,6 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
         }
     )
     .into()
-}
-
-fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -> Option<Path> {
-    for attr in attrs {
-        if attr.path.is_ident(name) {
-            if let Meta::List(list) = attr.parse_meta().unwrap() {
-                let mut target_list = list.nested.into_iter();
-
-                if let Some(NestedMeta::Meta(Meta::Path(target_path))) = target_list.next() {
-                    if target_list.next().is_some() {
-                        syntax_error();
-                    }
-
-                    return Some(target_path);
-                } else {
-                    syntax_error();
-                }
-            } else {
-                syntax_error();
-            }
-        }
-    }
-
-    None
 }
 
 /// Define `&str` constants for each class in a SASS file.
