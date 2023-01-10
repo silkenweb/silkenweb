@@ -438,14 +438,20 @@ macro_rules! parent_element {
                 Self(self.0.optional_child(child))
             }
 
-            fn children(self, children: impl IntoIterator<Item = impl Into<$crate::node::Node<Dom>>>) -> Self {
+            fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+            where
+                N: Into<$crate::node::Node<Dom>>
+            {
                 Self(self.0.children(children))
             }
 
-            fn children_signal(
+            fn children_signal<N>(
                 self,
-                children: impl $crate::macros::SignalVec<Item = impl Into<$crate::node::Node<Dom>>> + 'static,
-            ) -> Self {
+                children: impl $crate::macros::SignalVec<Item = N> + 'static,
+            ) -> Self
+            where
+                N: Into<$crate::node::Node<Dom>>
+            {
                 Self(self.0.children_signal(children))
             }
         }
@@ -460,10 +466,13 @@ macro_rules! shadow_parent_element {
             impl<Dom: $crate::dom::InstantiableDom> $crate::node::element::ShadowRootParent<Dom>
             for [< $name:camel >]<Dom>
             {
-                fn attach_shadow_children(
+                fn attach_shadow_children<N>(
                     self,
-                    children: impl IntoIterator<Item = impl Into<$crate::node::Node<Dom>>> + 'static
-                ) -> Self {
+                    children: impl IntoIterator<Item = N> + 'static
+                ) -> Self
+                where
+                    N: Into<$crate::node::Node<Dom>>
+                {
                     [< $name:camel >] (self.0.attach_shadow_children(children))
                 }
             }

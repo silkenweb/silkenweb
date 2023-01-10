@@ -232,7 +232,10 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         )
     }
 
-    fn children(mut self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self {
+    fn children<N>(mut self, children: impl IntoIterator<Item = N>) -> Self
+    where
+        N: Into<Node<D>>,
+    {
         if self.child_vec.is_some() {
             let children = children
                 .into_iter()
@@ -248,10 +251,10 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         self
     }
 
-    fn children_signal(
-        mut self,
-        children: impl SignalVec<Item = impl Into<Node<D>>> + 'static,
-    ) -> Self {
+    fn children_signal<N>(mut self, children: impl SignalVec<Item = N> + 'static) -> Self
+    where
+        N: Into<Node<D>>,
+    {
         let new_children = children.map(|child| child.into());
 
         let boxed_children = if let Some(child_vec) = self.child_vec.take() {
@@ -302,10 +305,10 @@ impl<Mutability> GenericElement<Hydro, Mutability> {
 }
 
 impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
-    fn attach_shadow_children(
-        mut self,
-        children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
-    ) -> Self {
+    fn attach_shadow_children<N>(mut self, children: impl IntoIterator<Item = N> + 'static) -> Self
+    where
+        N: Into<Node<D>>,
+    {
         self.element
             .attach_shadow_children(children.into_iter().map(|child| child.into().into_node()));
         self
@@ -730,14 +733,17 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let div: Div =
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
-    fn children(self, children: impl IntoIterator<Item = impl Into<Node<D>>>) -> Self;
+    fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+    where
+        N: Into<Node<D>>;
 
     /// Add children from a [`SignalVec`] to the element.
     ///
     /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
     /// for an example
-    fn children_signal(self, children: impl SignalVec<Item = impl Into<Node<D>>> + 'static)
-        -> Self;
+    fn children_signal<N>(self, children: impl SignalVec<Item = N> + 'static) -> Self
+    where
+        N: Into<Node<D>>;
 }
 
 /// An element that can be a shadow host.
@@ -747,10 +753,9 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
     /// If there's already a shadow root, the `children` are appended to it.
     ///
     /// See [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow)
-    fn attach_shadow_children(
-        self,
-        children: impl IntoIterator<Item = impl Into<Node<D>>> + 'static,
-    ) -> Self;
+    fn attach_shadow_children<N>(self, children: impl IntoIterator<Item = N> + 'static) -> Self
+    where
+        N: Into<Node<D>>;
 }
 
 impl<D> ::std::fmt::Display for GenericElement<D, Const>

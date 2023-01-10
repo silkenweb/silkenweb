@@ -70,7 +70,10 @@ impl<Base> TabBar<Base> {
         )
     }
 
-    pub fn children(self, children: impl IntoIterator<Item = impl Into<TabBarItem<Base>>>) -> Self {
+    pub fn children<T>(self, children: impl IntoIterator<Item = T>) -> Self
+    where
+        T: Into<TabBarItem<Base>>,
+    {
         Self(
             self.0
                 .children(children.into_iter().map(|child| child.into().0)),

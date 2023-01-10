@@ -67,7 +67,10 @@ impl<D: Dom> Menu<D> {
         )
     }
 
-    pub fn children(self, children: impl IntoIterator<Item = impl Into<MenuItem<D>>>) -> Self {
+    pub fn children<M>(self, children: impl IntoIterator<Item = M>) -> Self
+    where
+        M: Into<MenuItem<D>>,
+    {
         Self(
             self.0
                 .children(children.into_iter().map(|child| child.into().0)),
