@@ -1,17 +1,17 @@
+use parse::Browsers;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
-    braced, bracketed,
-    parse::{Lookahead1, Parse, ParseStream, Peek},
-    parse_macro_input,
-    punctuated::Punctuated,
-    token::{Colon, Comma, CustomToken},
-    Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed, Ident,
-    Index, LitInt, LitStr, Meta, NestedMeta, Path, Visibility,
+    parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
+    FieldsUnnamed, Ident, Index, Meta, NestedMeta, Path, Visibility,
 };
+
+use crate::parse::Input;
+
+mod parse;
 
 macro_rules! derive_empty(
     (
@@ -180,21 +180,6 @@ fn extract_attr_type(attrs: &[Attribute], name: &str, syntax_error: impl Fn()) -
     None
 }
 
-mod kw {
-    use syn::custom_keyword;
-
-    custom_keyword!(path);
-    custom_keyword!(inline);
-    custom_keyword!(visibility);
-    custom_keyword!(prefix);
-    custom_keyword!(include_prefixes);
-    custom_keyword!(exclude_prefixes);
-    custom_keyword!(validate);
-    custom_keyword!(minify);
-    custom_keyword!(nesting);
-    custom_keyword!(browsers);
-}
-
 /// Define `&str` constants for each class in a SASS file.
 ///
 /// For a CSS class called `my-css-class`, a constant called `MY_CSS_CLASS` will
@@ -311,14 +296,14 @@ pub fn css(input: TokenStream) -> TokenStream {
         prefix,
         include_prefixes,
         exclude_prefixes,
-        minify,
         validate,
+        minify,
         nesting,
         browsers,
     } = parse_macro_input!(input);
 
     source
-        .transpile(validate, minify, nesting, browsers.map(|b| b.0))
+        .transpile(validate, minify, nesting, browsers.map(Browsers::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
     let classes = css::class_names(&source).filter(|class| {
@@ -351,296 +336,6 @@ pub fn css(input: TokenStream) -> TokenStream {
             &source,
             classes.map(|class| (class.clone(), class)),
         )
-    }
-}
-
-struct Input {
-    source: Source,
-    visibility: Option<Visibility>,
-    prefix: Option<String>,
-    include_prefixes: Option<Vec<String>>,
-    exclude_prefixes: Vec<String>,
-    validate: bool,
-    minify: bool,
-    nesting: bool,
-    browsers: Option<Browsers>,
-}
-
-impl Input {
-    fn parameter<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        lookahead: &Lookahead1,
-        input: ParseStream,
-        exists: bool,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        Ok(if Self::flag(keyword, lookahead, input, exists)? {
-            input.parse::<Colon>()?;
-            true
-        } else {
-            false
-        })
-    }
-
-    fn flag<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        lookahead: &Lookahead1,
-        input: ParseStream,
-        exists: bool,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        Ok(if lookahead.peek(keyword) {
-            if exists {
-                abort!(
-                    input.span(),
-                    "{} is defined multiple times",
-                    KeywordToken::display()
-                );
-            }
-
-            input.parse::<KeywordToken>()?;
-
-            true
-        } else {
-            false
-        })
-    }
-
-    fn parse_prefix_list(input: &syn::parse::ParseBuffer) -> Result<Vec<String>, syn::Error> {
-        let list;
-        bracketed!(list in input);
-        Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
-            .iter()
-            .map(|prefix| prefix.value())
-            .collect())
-    }
-}
-
-impl Parse for Input {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        if input.peek(LitStr) {
-            return Ok(Self {
-                source: Source::path(input.parse::<LitStr>()?.value())
-                    .unwrap_or_else(|e| abort_call_site!(e)),
-                visibility: None,
-                prefix: None,
-                include_prefixes: None,
-                exclude_prefixes: Vec::new(),
-                minify: false,
-                validate: false,
-                nesting: false,
-                browsers: None,
-            });
-        }
-
-        let mut path = None;
-        let mut inline = None;
-        let mut visibility = None;
-        let mut prefix = None;
-        let mut include_prefixes = None;
-        let mut exclude_prefixes = Vec::new();
-        let mut validate = false;
-        let mut minify = false;
-        let mut nesting = false;
-        let mut browsers = None;
-
-        parse_comma_delimited(input, |lookahead, input| {
-            if Self::parameter(kw::path, lookahead, input, path.is_some())? {
-                path = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(kw::inline, lookahead, input, inline.is_some())? {
-                inline = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(kw::visibility, lookahead, input, visibility.is_some())? {
-                visibility = Some(input.parse()?);
-            } else if Self::parameter(kw::prefix, lookahead, input, prefix.is_some())? {
-                prefix = Some(input.parse::<LitStr>()?.value());
-            } else if Self::parameter(
-                kw::include_prefixes,
-                lookahead,
-                input,
-                include_prefixes.is_some(),
-            )? {
-                include_prefixes = Some(Self::parse_prefix_list(input)?);
-            } else if Self::parameter(
-                kw::exclude_prefixes,
-                lookahead,
-                input,
-                !exclude_prefixes.is_empty(),
-            )? {
-                exclude_prefixes = Self::parse_prefix_list(input)?;
-            } else if Self::flag(kw::validate, lookahead, input, validate)? {
-                validate = true;
-            } else if Self::flag(kw::minify, lookahead, input, minify)? {
-                minify = true;
-            } else if Self::flag(kw::nesting, lookahead, input, nesting)? {
-                nesting = true;
-            } else if Self::parameter(kw::browsers, lookahead, input, include_prefixes.is_some())? {
-                browsers = Some(input.parse::<Browsers>()?);
-            } else {
-                return Ok(false);
-            }
-
-            Ok(true)
-        })?;
-
-        let source = match (path, inline) {
-            (None, None) => abort_call_site!("Must specify either 'path' or `inline` parameter"),
-            (None, Some(inline)) => Source::inline(inline),
-            (Some(path), None) => Source::path(path).unwrap_or_else(|e| abort_call_site!(e)),
-            (Some(_), Some(_)) => {
-                abort_call_site!("Only one of 'path' or `inline` can be specified")
-            }
-        };
-
-        Ok(Self {
-            visibility,
-            source,
-            prefix,
-            include_prefixes,
-            exclude_prefixes,
-            validate,
-            minify,
-            nesting,
-            browsers,
-        })
-    }
-}
-
-mod browsers {
-    use syn::custom_keyword;
-
-    custom_keyword!(android);
-    custom_keyword!(chrome);
-    custom_keyword!(edge);
-    custom_keyword!(firefox);
-    custom_keyword!(ie);
-    custom_keyword!(ios_saf);
-    custom_keyword!(opera);
-    custom_keyword!(safari);
-    custom_keyword!(samsung);
-}
-
-struct Browsers(lightningcss::targets::Browsers);
-
-impl Browsers {
-    fn browser<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        lookahead: &Lookahead1,
-        input: ParseStream,
-        version: &mut Option<u32>,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        Ok(if lookahead.peek(keyword) {
-            if version.is_some() {
-                abort!(
-                    input.span(),
-                    "{} is defined multiple times",
-                    KeywordToken::display()
-                );
-            }
-
-            input.parse::<KeywordToken>()?;
-            input.parse::<Colon>()?;
-            *version = Some(input.parse::<Version>()?.encode_for_lightning());
-
-            true
-        } else {
-            false
-        })
-    }
-}
-
-impl Parse for Browsers {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut browsers = lightningcss::targets::Browsers::default();
-        let body;
-
-        braced!(body in input);
-
-        parse_comma_delimited(&body, |lookahead, input| {
-            Ok(
-                Self::browser(browsers::android, lookahead, input, &mut browsers.android)?
-                    || Self::browser(browsers::chrome, lookahead, input, &mut browsers.chrome)?
-                    || Self::browser(browsers::edge, lookahead, input, &mut browsers.edge)?
-                    || Self::browser(browsers::firefox, lookahead, input, &mut browsers.firefox)?
-                    || Self::browser(browsers::ie, lookahead, input, &mut browsers.ie)?
-                    || Self::browser(browsers::ios_saf, lookahead, input, &mut browsers.ios_saf)?
-                    || Self::browser(browsers::opera, lookahead, input, &mut browsers.opera)?
-                    || Self::browser(browsers::safari, lookahead, input, &mut browsers.safari)?
-                    || Self::browser(browsers::samsung, lookahead, input, &mut browsers.samsung)?,
-            )
-        })?;
-
-        Ok(Self(browsers))
-    }
-}
-
-fn parse_comma_delimited(
-    input: ParseStream,
-    mut parser: impl FnMut(&Lookahead1, &ParseStream) -> syn::Result<bool>,
-) -> syn::Result<()> {
-    let mut trailing_comma = true;
-
-    while !input.is_empty() {
-        let lookahead = input.lookahead1();
-
-        if !trailing_comma {
-            abort!(input.span(), "Expected ','");
-        }
-
-        let matched = parser(&lookahead, &input)?;
-
-        if !matched {
-            return Err(lookahead.error());
-        }
-
-        trailing_comma = input.peek(Comma);
-
-        if trailing_comma {
-            input.parse::<Comma>()?;
-        }
-    }
-
-    Ok(())
-}
-
-struct Version {
-    major: u8,
-    minor: u8,
-    patch: u8,
-}
-
-impl Version {
-    fn encode_for_lightning(&self) -> u32 {
-        u32::from_be_bytes([0, self.major, self.minor, self.patch])
-    }
-
-    fn component(input: &syn::parse::ParseBuffer) -> Result<u8, syn::Error> {
-        input.parse::<LitInt>()?.base10_parse()
-    }
-}
-
-impl Parse for Version {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let major = Self::component(input)?;
-        input.parse::<Colon>()?;
-        let minor = Self::component(input)?;
-        input.parse::<Colon>()?;
-        let patch = Self::component(input)?;
-
-        Ok(Self {
-            major,
-            minor,
-            patch,
-        })
     }
 }
 
