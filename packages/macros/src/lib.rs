@@ -193,7 +193,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 /// );
 /// ```
 ///
-/// All are optional, one of `path` or `inline` must be specified.
+/// All are optional, but one of `path` or `inline` must be specified.
 ///
 /// - `path` is the path to the CSS /SCSS/SASS file.
 /// - `inline` is the css content.
