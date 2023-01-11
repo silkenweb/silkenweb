@@ -53,21 +53,11 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
-    let fields = match new_type.data {
-        Data::Struct(DataStruct { fields, .. }) => fields,
-        _ => abort_call_site!("Only structs are supported"),
-    };
-
-    let mut fields = match fields {
-        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
-        Fields::Named(FieldsNamed { named, .. }) => named,
-        Fields::Unit => abort!(fields, "There must be at least one field"),
-    }
-    .into_iter();
+    let mut fields = fields(new_type.data);
 
     // TODO: If there's only 1 field, use it. Otherwise require the field to be
-    // specified by name. TODO: Specify dom_type
-    // TODO: Combine with `derive_element`
+    // specified by name. 
+    // TODO: Specify dom_type
     let Field {
         ident: derive_ident,
         ..
@@ -75,11 +65,7 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
         .next()
         .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
 
-    let derive_field = if let Some(derive_ident) = derive_ident {
-        quote!(#derive_ident)
-    } else {
-        quote!(0)
-    };
+    let derive_field = field_token(0, derive_ident);
 
     quote!(
         impl #impl_generics ::std::convert::From<#name #ty_generics>
@@ -116,17 +102,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
-    let fields = match new_type.data {
-        Data::Struct(DataStruct { fields, .. }) => fields,
-        _ => abort_call_site!("Only structs are supported"),
-    };
-
-    let mut fields = match fields {
-        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
-        Fields::Named(FieldsNamed { named, .. }) => named,
-        _ => abort!(fields, "There must be at least one field"),
-    }
-    .into_iter();
+    let mut fields = fields(new_type.data);
 
     let Field {
         ty: derive_from,
@@ -136,21 +112,12 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
         .next()
         .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
 
-    let field_tail_names = (1..).zip(fields).map(|(index, field)| {
-        if let Some(ident) = field.ident {
-            quote!(#ident)
-        } else {
-            let index = Index::from(index);
-            quote!(#index)
-        }
-    });
+    let field_tail_names = (1..)
+        .zip(fields)
+        .map(|(index, field)| field_token(index, field.ident));
     let fields_tail = quote!(#(, #field_tail_names: self.#field_tail_names)*);
 
-    let derive_field = if let Some(derive_ident) = derive_ident {
-        quote!(#derive_ident)
-    } else {
-        quote!(0)
-    };
+    let derive_field = field_token(0, derive_ident);
 
     quote!(
         impl #impl_generics ::silkenweb::node::element::Element
@@ -211,7 +178,30 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Define `&str` constants for each class in a SASS file.
+fn fields(struct_data: Data) -> impl Iterator<Item = Field> {
+    let fields = match struct_data {
+        Data::Struct(DataStruct { fields, .. }) => fields,
+        _ => abort_call_site!("Only structs are supported"),
+    };
+
+    match fields {
+        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
+        Fields::Named(FieldsNamed { named, .. }) => named,
+        Fields::Unit => abort!(fields, "There must be at least one field"),
+    }
+    .into_iter()
+}
+
+fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
+    if let Some(ident) = ident {
+        quote!(#ident)
+    } else {
+        let index = Index::from(index);
+        quote!(#index)
+    }
+}
+
+/// Define `&str` constants for each class in a CSS file.
 ///
 /// For a CSS class called `my-css-class`, a constant called `MY_CSS_CLASS` will
 /// be defined.
