@@ -11,7 +11,6 @@ use crate::{
     value::Value,
 };
 
-// TODO: Test
 /// A lightweight type to encapsulate HTML and CSS using shadow DOM.
 ///
 /// See [Using Shadow DOM] for some background on shadow DOM.
