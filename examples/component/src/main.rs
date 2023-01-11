@@ -1,4 +1,5 @@
 use silkenweb::{
+    css,
     elements::html::{dd, dl, dt, span},
     mount,
     node::{
@@ -6,10 +7,10 @@ use silkenweb::{
         element::{GenericElement, ParentElement},
         ChildNode,
     },
-    prelude::HtmlElement,
+    prelude::{html::div, HtmlElement},
 };
 
-// TODO: Stylesheet
+css!(inline: "span {border: 3px solid red}");
 
 struct Term(Component);
 
@@ -18,10 +19,16 @@ impl Term {
         name: impl HtmlElement + ChildNode,
         description: impl HtmlElement + ChildNode,
     ) -> Self {
-        let mut term = Component::new();
+        let mut term = Component::styled(stylesheet());
         let name = term.slot(name);
         let description = term.slot(description);
-        Self(term.child(dl().child(dt().child(name)).child(dd().child(description))))
+        Self(
+            term.child(
+                div()
+                    .child(span().text("Term Definition"))
+                    .child(dl().child(dt().child(name)).child(dd().child(description))),
+            ),
+        )
     }
 }
 
