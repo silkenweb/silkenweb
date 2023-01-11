@@ -29,10 +29,7 @@ impl<D: InstantiableDom> Component<D> {
 
     // TODO: Docs
     pub fn styled(css: &str) -> Self {
-        Self {
-            element: Some(div().attach_shadow_children([style().text(css)])),
-            id: 0,
-        }
+        Self::new().child(style().text(css))
     }
 
     // TODO: Docs
