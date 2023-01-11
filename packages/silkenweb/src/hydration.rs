@@ -9,7 +9,7 @@ use std::fmt;
 
 use wasm_bindgen::JsCast;
 
-use crate::{dom::Hydro, insert_element, mount_point, node::element::GenericElement};
+use crate::{dom::Hydro, insert_element, mount_point, node::element::{GenericElement, Const}};
 
 /// Statistics about the hydration process.
 #[derive(Default)]
@@ -167,7 +167,7 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
-pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro>>) -> HydrationStats {
+pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
     let element = element.into();
     let mut stats = HydrationStats::default();
 

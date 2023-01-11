@@ -351,6 +351,13 @@ macro_rules! dom_element {
             }
         }
 
+        impl<Dom: $crate::dom::Dom> From<$camel_name<Dom, $crate::node::element::Mut>>
+        for $crate::node::element::GenericElement<Dom, $crate::node::element::Const> {
+            fn from(elem: $camel_name<Dom, $crate::node::element::Mut>) -> Self {
+                elem.0.freeze()
+            }
+        }
+
         impl<Dom: $crate::dom::Dom, Mutability> From<$camel_name<Dom, Mutability>>
         for $crate::node::Node<Dom> {
             fn from(elem: $camel_name<Dom, Mutability>) -> Self {

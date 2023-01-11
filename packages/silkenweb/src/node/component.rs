@@ -1,6 +1,6 @@
 use super::{
-    element::{GenericElement, ParentElement, ShadowRootParent},
-    ChildNode,
+    element::{Const, GenericElement, ParentElement, ShadowRootParent},
+    ChildNode, Node,
 };
 use crate::{
     dom::{DefaultDom, InstantiableDom},
@@ -11,6 +11,7 @@ use crate::{
     value::Value,
 };
 
+// TODO: Test
 /// A lightweight type to encapsulate HTML and CSS using shadow DOM.
 ///
 /// See [Using Shadow DOM] for some background on shadow DOM.
@@ -135,6 +136,18 @@ impl<D: InstantiableDom> Default for Component<D> {
 impl<D: InstantiableDom> Value for Component<D> {}
 
 impl<D: InstantiableDom> From<Component<D>> for GenericElement<D> {
+    fn from(value: Component<D>) -> Self {
+        value.element.unwrap().into()
+    }
+}
+
+impl<D: InstantiableDom> From<Component<D>> for GenericElement<D, Const> {
+    fn from(value: Component<D>) -> Self {
+        value.element.unwrap().into()
+    }
+}
+
+impl<D: InstantiableDom> From<Component<D>> for Node<D> {
     fn from(value: Component<D>) -> Self {
         value.element.unwrap().into()
     }

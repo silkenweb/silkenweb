@@ -285,7 +285,7 @@ impl<Mutability> GenericElement<Hydro, Mutability> {
         mut self,
         element: &web_sys::Element,
         tracker: &mut HydrationStats,
-    ) -> GenericElement<Wet> {
+    ) -> GenericElement<Wet, Const> {
         self.build();
 
         GenericElement {
@@ -438,6 +438,19 @@ impl<D: Dom, Mutability> From<GenericElement<D, Mutability>> for Node<D> {
             events: elem.events,
         }
     }
+}
+
+/// Trait alias for elements that can be used as a child
+pub trait ChildElement<D: Dom = DefaultDom>:
+    Into<GenericElement<D, Const>> + Into<Node<D>> + Value + 'static
+{
+}
+
+impl<D, T> ChildElement<D> for T
+where
+    D: Dom,
+    T: Into<GenericElement<D, Const>> + Into<Node<D>> + Value + 'static,
+{
 }
 
 /// An HTML element.

@@ -65,11 +65,13 @@
 use std::{cell::RefCell, collections::HashMap};
 
 use dom::Wet;
-use node::element::GenericElement;
+use node::element::{Const, GenericElement};
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
 pub use silkenweb_macros::css;
+// TODO: Doc
+pub use silkenweb_macros::ChildElement;
 /// Derive [`Element`] for a [newtype] wrapper.
 ///
 /// Only non empty structs are supported. The first field must implement
@@ -124,7 +126,7 @@ pub use silkenweb_signals_ext::value;
 /// mount point. The returned `MountHandle` should usually just be discarded,
 /// but it can be used to restore the mount point if required. This can be
 /// useful for testing.
-pub fn mount(id: &str, element: impl Into<GenericElement<Wet>>) -> MountHandle {
+pub fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
     let mut element = element.into();
 
     let mount_point = mount_point(id);
@@ -152,7 +154,7 @@ pub struct MountHandle {
 }
 
 impl MountHandle {
-    fn new(mount_point: web_sys::Element, element: GenericElement<Wet>) -> Self {
+    fn new(mount_point: web_sys::Element, element: GenericElement<Wet, Const>) -> Self {
         Self {
             id: insert_element(element),
             mount_point,
@@ -214,13 +216,13 @@ fn mount_point(id: &str) -> web_sys::Element {
         .unwrap_or_else(|| panic!("DOM node id = '{id}' must exist"))
 }
 
-fn insert_element(element: GenericElement<Wet>) -> u128 {
+fn insert_element(element: GenericElement<Wet, Const>) -> u128 {
     let id = next_node_handle_id();
     ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
     id
 }
 
-fn remove_element(id: u128) -> Option<GenericElement<Wet>> {
+fn remove_element(id: u128) -> Option<GenericElement<Wet, Const>> {
     ELEMENTS.with(|elements| elements.borrow_mut().remove(&id))
 }
 
@@ -230,5 +232,6 @@ fn next_node_handle_id() -> u128 {
 
 thread_local!(
     static ELEMENT_HANDLE_ID: RefCell<u128> = RefCell::new(0);
-    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet>>> = RefCell::new(HashMap::new());
+    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> =
+        RefCell::new(HashMap::new());
 );

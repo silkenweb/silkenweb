@@ -6,7 +6,7 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
-    node::element::{GenericElement, ShadowRootParent},
+    node::element::{GenericElement, ShadowRootParent, Const},
     prelude::ParentElement,
     task::render_now,
     value::Sig,
@@ -284,7 +284,7 @@ async fn app_container(id: &str, inner_html: &str) {
     query_element(id).set_inner_html(inner_html);
 }
 
-async fn test_hydrate(id: &str, app: impl Into<GenericElement<Hydro>>, expected_html: &str) {
+async fn test_hydrate(id: &str, app: impl Into<GenericElement<Hydro, Const>>, expected_html: &str) {
     render_now().await;
     hydrate(id, app).await;
 

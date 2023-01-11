@@ -1,19 +1,15 @@
-use derive_more::Into;
 use silkenweb::{
     css,
     elements::html::{dd, dl, dt, span},
     mount,
-    node::{
-        element::{GenericElement, ParentElement},
-        ChildNode, Component,
-    },
+    node::{element::ParentElement, ChildNode, Component},
     prelude::{html::div, HtmlElement},
+    ChildElement,
 };
 
 css!(inline: "span {border: 3px solid red}");
 
-#[derive(Into)]
-#[into(types(GenericElement))]
+#[derive(ChildElement)]
 struct Term(Component);
 
 impl Term {

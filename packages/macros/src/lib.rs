@@ -46,6 +46,69 @@ derive_empty!(
     derive_element_events(elements, ElementEvents);
 );
 
+#[proc_macro_derive(ChildElement)]
+#[proc_macro_error]
+pub fn derive_child_element(item: TokenStream) -> TokenStream {
+    let new_type: DeriveInput = parse_macro_input!(item);
+    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
+    let name = new_type.ident;
+
+    let fields = match new_type.data {
+        Data::Struct(DataStruct { fields, .. }) => fields,
+        _ => abort_call_site!("Only structs are supported"),
+    };
+
+    let mut fields = match fields {
+        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
+        Fields::Named(FieldsNamed { named, .. }) => named,
+        Fields::Unit => abort!(fields, "There must be at least one field"),
+    }
+    .into_iter();
+
+    // TODO: If there's only 1 field, use it. Otherwise require the field to be
+    // specified by name. TODO: Specify dom_type
+    // TODO: Combine with `derive_element`
+    let Field {
+        ident: derive_ident,
+        ..
+    } = fields
+        .next()
+        .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
+
+    let derive_field = if let Some(derive_ident) = derive_ident {
+        quote!(#derive_ident)
+    } else {
+        quote!(0)
+    };
+
+    quote!(
+        impl #impl_generics ::std::convert::From<#name #ty_generics>
+        for ::silkenweb::node::element::GenericElement<
+            ::silkenweb::dom::DefaultDom,
+            ::silkenweb::node::element::Const
+        >
+        #where_clause
+        {
+            fn from(value: #name #ty_generics) -> Self {
+                value.#derive_field.into()
+            }
+        }
+
+        impl #impl_generics ::std::convert::From<#name #ty_generics>
+        for ::silkenweb::node::Node<::silkenweb::dom::DefaultDom>
+        #where_clause
+        {
+            fn from(value: #name #ty_generics) -> Self {
+                value.#derive_field.into()
+            }
+        }
+
+        impl #impl_generics ::silkenweb::value::Value
+        for #name #ty_generics #where_clause {}
+    )
+    .into()
+}
+
 #[proc_macro_derive(Element)]
 #[proc_macro_error]
 pub fn derive_element(item: TokenStream) -> TokenStream {
