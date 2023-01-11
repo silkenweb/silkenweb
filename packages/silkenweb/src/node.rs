@@ -49,6 +49,11 @@ impl<D: Dom> fmt::Display for Node<D> {
     }
 }
 
+// TODO: Doc
+pub trait ChildNode<D: Dom = DefaultDom>: Into<Node<D>> + Value + 'static {}
+
+impl<D: Dom, T: Into<Node<D>> + Value + 'static> ChildNode<D> for T {}
+
 /// A text DOM node
 pub struct Text<D: Dom>(D::Text);
 

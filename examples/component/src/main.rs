@@ -4,9 +4,9 @@ use silkenweb::{
     node::{
         component::Component,
         element::{GenericElement, ParentElement},
+        ChildNode,
     },
-    prelude::{HtmlElement, Node},
-    value::Value,
+    prelude::HtmlElement,
 };
 
 // TODO: Wrap in a struct with constructor
@@ -15,9 +15,8 @@ struct Term(Component);
 
 impl Term {
     pub fn new(
-        // TODO: `trait ChildNode: Into<Node> + Value + 'static`
-        name: impl HtmlElement + Into<Node> + Value + 'static,
-        description: impl HtmlElement + Into<Node> + Value + 'static,
+        name: impl HtmlElement + ChildNode,
+        description: impl HtmlElement + ChildNode,
     ) -> Self {
         let mut term = Component::new();
         let name = term.slot(name);

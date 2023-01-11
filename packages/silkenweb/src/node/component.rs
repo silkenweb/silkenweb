@@ -1,6 +1,6 @@
 use super::{
     element::{GenericElement, ParentElement, ShadowRootParent},
-    Node,
+    ChildNode,
 };
 use crate::{
     dom::{DefaultDom, InstantiableDom},
@@ -11,6 +11,7 @@ use crate::{
     value::Value,
 };
 
+// TODO: Changelog
 // TODO: Docs
 pub struct Component<D: InstantiableDom = DefaultDom> {
     element: Option<Div<D>>,
@@ -35,7 +36,7 @@ impl<D: InstantiableDom> Component<D> {
     }
 
     // TODO: Docs
-    pub fn slot(&mut self, child: impl HtmlElement + Into<Node<D>> + Value + 'static) -> Slot {
+    pub fn slot(&mut self, child: impl HtmlElement + ChildNode<D>) -> Slot {
         let id = self.id.to_string();
         self.id += 1;
         self.element = Some(self.element.take().unwrap().child(child.slot(&id)));
@@ -46,7 +47,7 @@ impl<D: InstantiableDom> Component<D> {
     // TODO: `chidlren`
 
     // TODO: Docs
-    pub fn child(self, child: impl Into<Node<D>> + Value + 'static) -> Self {
+    pub fn child(self, child: impl ChildNode<D>) -> Self {
         Self {
             element: self
                 .element

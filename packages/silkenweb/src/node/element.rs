@@ -15,7 +15,7 @@ use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Va
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use self::child_vec::ChildVec;
-use super::{Node, Resource};
+use super::{ChildNode, Node, Resource};
 use crate::{
     attribute::Attribute,
     dom::{
@@ -201,10 +201,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         self
     }
 
-    fn optional_child(
-        self,
-        child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
-    ) -> Self {
+    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self {
         child.select(
             |mut parent, child| {
                 if let Some(child) = child {
@@ -680,7 +677,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let d: Div =
     /// div().child(Sig(text.signal().map(|text| div().text(text))));
     /// ```
-    fn child(self, child: impl SignalOrValue<Item = impl Value + Into<Node<D>> + 'static>) -> Self {
+    fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
         self.optional_child(child.map(|child| Some(child)))
     }
 
@@ -718,10 +715,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     ///     }
     /// })));
     /// ```
-    fn optional_child(
-        self,
-        child: impl SignalOrValue<Item = Option<impl Value + Into<Node<D>> + 'static>>,
-    ) -> Self;
+    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self;
 
     /// Add children to the element.
     ///

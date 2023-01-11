@@ -8,10 +8,10 @@ use silkenweb::{
     },
     node::{
         element::{Element, GenericElement},
-        Node,
+        ChildNode, Node,
     },
     prelude::ParentElement,
-    value::{SignalOrValue, Value},
+    value::SignalOrValue,
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
@@ -150,9 +150,6 @@ impl<L: List> TabBarItem<L> {
     }
 }
 
-pub trait TabBarElement:
-    Element + AriaElement + ParentElement + Into<Node> + Value + 'static
-{
-}
+pub trait TabBarElement: Element + AriaElement + ParentElement + ChildNode {}
 impl TabBarElement for html::A {}
 impl TabBarElement for html::Button {}
