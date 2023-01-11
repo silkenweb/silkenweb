@@ -9,7 +9,7 @@ use silkenweb::{
     prelude::HtmlElement,
 };
 
-// TODO: Wrap in a struct with constructor
+// TODO: Stylesheet
 
 struct Term(Component);
 
