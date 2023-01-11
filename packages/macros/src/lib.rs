@@ -56,7 +56,7 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
     let mut fields = fields(new_type.data);
 
     // TODO: If there's only 1 field, use it. Otherwise require the field to be
-    // specified by name. 
+    // specified by name.
     // TODO: Specify dom_type
     let Field {
         ident: derive_ident,
