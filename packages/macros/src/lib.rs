@@ -230,7 +230,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///
 /// Define private constants for all CSS classes:
 ///
-///  ```
+/// ```
 /// # use silkenweb_macros::css;
 /// css!("my-css-file.css");
 /// assert_eq!(MY_CLASS, "my-class");
