@@ -11,6 +11,7 @@ use crate::dom::{
     DefaultDom, Dom,
 };
 
+pub mod component;
 pub mod element;
 
 /// A DOM Node

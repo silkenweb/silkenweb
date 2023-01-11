@@ -1870,6 +1870,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-component"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-example-counter"
 version = "0.1.0"
 dependencies = [
