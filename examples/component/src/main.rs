@@ -1,3 +1,4 @@
+use derive_more::Into;
 use silkenweb::{
     css,
     elements::html::{dd, dl, dt, span},
@@ -11,6 +12,8 @@ use silkenweb::{
 
 css!(inline: "span {border: 3px solid red}");
 
+#[derive(Into)]
+#[into(types(GenericElement))]
 struct Term(Component);
 
 impl Term {
@@ -28,12 +31,6 @@ impl Term {
                     .child(dl().child(dt().child(name)).child(dd().child(description))),
             ),
         )
-    }
-}
-
-impl From<Term> for GenericElement {
-    fn from(value: Term) -> Self {
-        value.0.into()
     }
 }
 

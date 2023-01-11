@@ -7,3 +7,4 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
+derive_more = "0.99.17"
