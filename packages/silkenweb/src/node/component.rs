@@ -29,8 +29,8 @@ use crate::{
 /// slots for the light DOM elements. HTML `id` attributes and CSS are
 /// encapsulated by the shadow DOM.
 ///
-/// ```no_run
-/// # use silkenweb::{prelude::*, css, node::Component};
+/// ```
+/// # use silkenweb::{prelude::*, css, node::Component, dom::Dry};
 /// # use html::{dd, div, dl, dt, span};
 /// #
 /// let name = span().text("HTML");
@@ -38,7 +38,7 @@ use crate::{
 ///
 /// css!(inline: "span {border: 3px solid red}");
 ///
-/// let mut term = Component::styled(stylesheet());
+/// let mut term = Component::<Dry>::styled(stylesheet());
 /// let name_slot = term.slot(name);
 /// let description_slot = term.slot(description);
 ///
@@ -73,7 +73,7 @@ impl<D: InstantiableDom> Component<D> {
     /// Add `child` to the light DOM.
     ///
     /// See [`Component`] documentation for more details.
-    pub fn slot(&mut self, child: impl HtmlElement + ChildNode<D>) -> Slot {
+    pub fn slot(&mut self, child: impl HtmlElement + ChildNode<D>) -> Slot<D> {
         let id = self.new_id();
         self.element = Some(self.element.take().unwrap().child(child.slot(&id)));
         slot().name(id)
@@ -82,7 +82,7 @@ impl<D: InstantiableDom> Component<D> {
     /// Add `children` to the light DOM.
     ///
     /// See [`Component`] documentation for more details.
-    pub fn multi_slot<E>(&mut self, children: impl IntoIterator<Item = E>) -> Slot
+    pub fn multi_slot<E>(&mut self, children: impl IntoIterator<Item = E>) -> Slot<D>
     where
         E: HtmlElement + ChildNode<D>,
     {
