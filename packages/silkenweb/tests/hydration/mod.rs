@@ -6,7 +6,7 @@ use silkenweb::{
         ElementEvents, HtmlElement,
     },
     hydration::hydrate,
-    node::element::{GenericElement, ShadowRootParent, Const},
+    node::element::{Const, GenericElement, ShadowRootParent},
     prelude::ParentElement,
     task::render_now,
     value::Sig,

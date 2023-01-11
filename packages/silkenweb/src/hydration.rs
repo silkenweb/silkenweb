@@ -9,7 +9,11 @@ use std::fmt;
 
 use wasm_bindgen::JsCast;
 
-use crate::{dom::Hydro, insert_element, mount_point, node::element::{GenericElement, Const}};
+use crate::{
+    dom::Hydro,
+    insert_element, mount_point,
+    node::element::{Const, GenericElement},
+};
 
 /// Statistics about the hydration process.
 #[derive(Default)]
