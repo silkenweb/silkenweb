@@ -3,9 +3,8 @@ use silkenweb::{
     elements::html::{dd, dl, dt, span},
     mount,
     node::{
-        component::Component,
         element::{GenericElement, ParentElement},
-        ChildNode,
+        ChildNode, Component,
     },
     prelude::{html::div, HtmlElement},
 };

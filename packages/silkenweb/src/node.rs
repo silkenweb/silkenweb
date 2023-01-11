@@ -11,8 +11,11 @@ use crate::dom::{
     DefaultDom, Dom,
 };
 
-pub mod component;
+mod component;
+
 pub mod element;
+
+pub use component::Component;
 
 /// A DOM Node
 pub struct Node<D: Dom = DefaultDom> {
