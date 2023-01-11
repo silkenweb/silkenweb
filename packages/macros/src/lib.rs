@@ -235,7 +235,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 /// css!("my-css-file.css");
 /// assert_eq!(MY_CLASS, "my-class");
 /// ```
-/// 
+///
 /// Define private constants for all inline CSS classes:
 ///
 ///  ```
@@ -252,10 +252,9 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///     }
 /// "#);
 /// ```
-///
+/// 
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
-///
 /// ```
 /// mod border {
 ///     # use silkenweb_macros::css;
@@ -269,7 +268,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///
 /// assert_eq!(border::SMALL, "border-small");
 /// ```
-///
+/// 
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
@@ -282,7 +281,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 ///
 ///     assert_eq!(BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
-///
+/// 
 /// [lightningcss]: https://lightningcss.dev/
 #[proc_macro]
 #[proc_macro_error]
