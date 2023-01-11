@@ -52,7 +52,7 @@ impl<D: Dom> fmt::Display for Node<D> {
     }
 }
 
-// TODO: Doc
+/// Trait alias for nodes that can be used as a child
 pub trait ChildNode<D: Dom = DefaultDom>: Into<Node<D>> + Value + 'static {}
 
 impl<D: Dom, T: Into<Node<D>> + Value + 'static> ChildNode<D> for T {}
