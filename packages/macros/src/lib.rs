@@ -67,20 +67,7 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
                 value.#ident.into()
             }
         }
-    )
-    .into()
-}
 
-#[proc_macro_derive(ChildNode, attributes(child_node))]
-#[proc_macro_error]
-pub fn derive_child_node(item: TokenStream) -> TokenStream {
-    let new_type: DeriveInput = parse_macro_input!(item);
-    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
-    let name = new_type.ident;
-
-    let TargetField { ident, dom_type } = TargetField::new(new_type.data, "child_node");
-
-    quote!(
         impl #impl_generics ::std::convert::From<#name #ty_generics>
         for ::silkenweb::node::Node<#dom_type>
         #where_clause
@@ -89,6 +76,9 @@ pub fn derive_child_node(item: TokenStream) -> TokenStream {
                 value.#ident.into()
             }
         }
+
+        impl #impl_generics ::silkenweb::value::Value
+        for #name #ty_generics #where_clause {}
     )
     .into()
 }

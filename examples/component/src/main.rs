@@ -4,12 +4,12 @@ use silkenweb::{
     mount,
     node::{element::ParentElement, ChildNode, Component},
     prelude::{html::div, HtmlElement},
-    ChildElement, ChildNode,
+    ChildElement,
 };
 
 css!(inline: "span {border: 3px solid red}");
 
-#[derive(ChildElement, ChildNode)]
+#[derive(ChildElement)]
 struct Term(Component);
 
 impl Term {
