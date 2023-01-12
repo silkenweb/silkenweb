@@ -20,7 +20,7 @@ use crate::{
     attribute::Attribute,
     dom::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
-        DefaultDom, Dom, Hydro, InstantiableDom, Template, Wet,
+        DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet,
     },
     hydration::HydrationStats,
     node::text,
@@ -427,6 +427,10 @@ impl<D: Dom> Executor for GenericElement<D> {
 }
 
 impl<D: Dom, Mutability> Value for GenericElement<D, Mutability> {}
+
+impl<D: Dom, Mutability> InDom for GenericElement<D, Mutability> {
+    type Dom = D;
+}
 
 impl<D: Dom, Mutability> From<GenericElement<D, Mutability>> for Node<D> {
     fn from(mut elem: GenericElement<D, Mutability>) -> Self {

@@ -8,7 +8,7 @@ use silkenweb_signals_ext::value::Value;
 
 use crate::dom::{
     private::{DomText, EventStore},
-    DefaultDom, Dom,
+    DefaultDom, Dom, InDom,
 };
 
 mod component;
@@ -35,6 +35,10 @@ impl<D: Dom> Node<D> {
 }
 
 impl<D: Dom> Value for Node<D> {}
+
+impl<D: Dom> InDom for Node<D> {
+    type Dom = D;
+}
 
 impl<D: Dom> From<Text<D>> for Node<D> {
     fn from(text: Text<D>) -> Self {

@@ -57,20 +57,21 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
 
     // TODO: If there's only 1 field, use it. Otherwise require the field to be
     // specified by name.
-    // TODO: Specify dom_type
     let Field {
         ident: derive_ident,
+        ty: derive_from,
         ..
     } = fields
         .next()
         .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
 
     let derive_field = field_token(0, derive_ident);
+    let dom_type = quote!(<#derive_from as ::silkenweb::dom::InDom>::Dom);
 
     quote!(
         impl #impl_generics ::std::convert::From<#name #ty_generics>
         for ::silkenweb::node::element::GenericElement<
-            ::silkenweb::dom::DefaultDom,
+            #dom_type,
             ::silkenweb::node::element::Const
         >
         #where_clause
@@ -81,7 +82,7 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
         }
 
         impl #impl_generics ::std::convert::From<#name #ty_generics>
-        for ::silkenweb::node::Node<::silkenweb::dom::DefaultDom>
+        for ::silkenweb::node::Node<#dom_type>
         #where_clause
         {
             fn from(value: #name #ty_generics) -> Self {
@@ -91,6 +92,11 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
 
         impl #impl_generics ::silkenweb::value::Value
         for #name #ty_generics #where_clause {}
+
+        impl #impl_generics ::silkenweb::dom::InDom
+        for #name #ty_generics #where_clause {
+            type Dom = #dom_type;
+        }
     )
     .into()
 }

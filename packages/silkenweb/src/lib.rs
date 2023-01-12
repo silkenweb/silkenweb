@@ -70,7 +70,20 @@ use node::element::{Const, GenericElement};
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
 pub use silkenweb_macros::css;
-// TODO: Doc
+/// Derive [`ChildElement`], [`ChildNode`], [`Value`] and [`InDom`].
+///
+/// # Example
+///
+/// ```
+/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
+/// #[derive(ChildElement)]
+/// struct MyComponent<D: InstantiableDom>(Component<D>);
+/// ```
+///
+/// [`ChildElement`]: crate::node::element::ChildElement
+/// [`ChildNode`]: crate::node::ChildNode
+/// [`Value`]: crate::value::Value
+/// [`InDom`]: crate::dom::InDom
 pub use silkenweb_macros::ChildElement;
 /// Derive [`Element`] for a [newtype] wrapper.
 ///

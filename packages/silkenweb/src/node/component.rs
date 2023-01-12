@@ -3,7 +3,7 @@ use super::{
     ChildNode, Node,
 };
 use crate::{
-    dom::{DefaultDom, InstantiableDom},
+    dom::{DefaultDom, InDom, InstantiableDom},
     elements::{
         html::{div, slot, style, Div, Slot},
         HtmlElement,
@@ -133,6 +133,10 @@ impl<D: InstantiableDom> Default for Component<D> {
 }
 
 impl<D: InstantiableDom> Value for Component<D> {}
+
+impl<D: InstantiableDom> InDom for Component<D> {
+    type Dom = D;
+}
 
 impl<D: InstantiableDom> From<Component<D>> for GenericElement<D> {
     fn from(value: Component<D>) -> Self {

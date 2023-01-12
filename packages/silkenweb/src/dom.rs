@@ -33,6 +33,11 @@ pub trait Dom: private::Dom {}
 /// A DOM that can be instantiated from a [`Template`] DOM.
 pub trait InstantiableDom: Dom + private::InstantiableDom {}
 
+/// The [`Dom`] type to which a node belongs.
+pub trait InDom {
+    type Dom: Dom;
+}
+
 pub type DefaultDom = Wet;
 
 /// A DOM that can only be rendered on the server

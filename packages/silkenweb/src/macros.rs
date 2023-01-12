@@ -344,6 +344,11 @@ macro_rules! dom_element {
         impl<Dom: $crate::dom::Dom, Mutability> $crate::value::Value
         for $camel_name<Dom, Mutability> {}
 
+        impl<Dom: $crate::dom::Dom, Mutability> $crate::dom::InDom
+        for $camel_name<Dom, Mutability> {
+            type Dom = Dom;
+        }
+
         impl<Dom: $crate::dom::Dom, Mutability> From<$camel_name<Dom, Mutability>>
         for $crate::node::element::GenericElement<Dom, Mutability> {
             fn from(elem: $camel_name<Dom, Mutability>) -> Self {
