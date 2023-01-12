@@ -30,7 +30,7 @@ pub fn tab_bar_ordered() -> TabBar<Ol> {
 }
 
 #[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct TabBar<Base = Nav>(GenericElement, PhantomData<Base>);
+pub struct TabBar<Base = Nav>(#[element(target)] GenericElement, PhantomData<Base>);
 
 impl<Base> TabBar<Base> {
     pub fn style(self, style: impl SignalOrValue<Item = Style>) -> Self {

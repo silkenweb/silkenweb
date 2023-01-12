@@ -5,8 +5,8 @@ use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
-    parse_macro_input, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, FieldsUnnamed,
-    Ident, Index, Visibility,
+    parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
+    FieldsUnnamed, Ident, Index, Meta, NestedMeta, Visibility,
 };
 
 use crate::parse::Input;
@@ -46,26 +46,23 @@ derive_empty!(
     derive_element_events(elements, ElementEvents);
 );
 
-#[proc_macro_derive(ChildElement)]
+#[proc_macro_derive(ChildElement, attributes(child_element))]
 #[proc_macro_error]
 pub fn derive_child_element(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
-    let mut fields = fields(new_type.data);
+    let fields = fields(new_type.data);
+    let target_index = target_index("child_element", &fields);
 
-    // TODO: If there's only 1 field, use it. Otherwise require the field to be
-    // specified by name.
     let Field {
         ident: derive_ident,
         ty: derive_from,
         ..
-    } = fields
-        .next()
-        .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
+    } = fields[target_index].clone();
 
-    let derive_field = field_token(0, derive_ident);
+    let derive_field = field_token(target_index, derive_ident);
     let dom_type = quote!(<#derive_from as ::silkenweb::dom::InDom>::Dom);
 
     quote!(
@@ -89,38 +86,29 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
                 value.#derive_field.into()
             }
         }
-
-        impl #impl_generics ::silkenweb::value::Value
-        for #name #ty_generics #where_clause {}
-
-        impl #impl_generics ::silkenweb::dom::InDom
-        for #name #ty_generics #where_clause {
-            type Dom = #dom_type;
-        }
     )
     .into()
 }
 
-#[proc_macro_derive(Element)]
+#[proc_macro_derive(Element, attributes(element))]
 #[proc_macro_error]
 pub fn derive_element(item: TokenStream) -> TokenStream {
     let new_type: DeriveInput = parse_macro_input!(item);
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
-    let mut fields = fields(new_type.data);
+    let fields = fields(new_type.data);
+    let target_index = target_index("element", &fields);
 
     let Field {
         ty: derive_from,
         ident: derive_ident,
         ..
-    } = fields
-        .next()
-        .unwrap_or_else(|| abort_call_site!("There must be at least one field"));
+    } = fields[target_index].clone();
 
-    let field_tail_names = (1..)
-        .zip(fields)
-        .map(|(index, field)| field_token(index, field.ident));
+    let field_tail_names = fields.into_iter().enumerate().filter_map(|(index, field)| {
+        (index != target_index).then(|| field_token(index, field.ident))
+    });
     let fields_tail = quote!(#(, #field_tail_names: self.#field_tail_names)*);
 
     let derive_field = field_token(0, derive_ident);
@@ -184,7 +172,61 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
     .into()
 }
 
-fn fields(struct_data: Data) -> impl Iterator<Item = Field> {
+/// Find the index of the field with `#[<attr_name>(target)]`
+fn target_index(attr_name: &str, fields: &[Field]) -> usize {
+    let mut target_index = None;
+
+    for (index, field) in fields.iter().enumerate() {
+        for attr in &field.attrs {
+            if target_index.is_some() {
+                abort!(attr, "Only one target field can be specified");
+            }
+
+            check_attr_matches(attr, attr_name, "target");
+            target_index = Some(index);
+        }
+    }
+
+    target_index.unwrap_or_else(|| {
+        if fields.len() != 1 {
+            abort_call_site!(
+                "There must be exactly one field, or specify `#[{}(target)]` on a single field",
+                attr_name
+            );
+        }
+
+        0
+    })
+}
+
+/// Make sure an attribute matches #[<name>(<value>)]
+fn check_attr_matches(attr: &Attribute, name: &str, value: &str) {
+    if !attr.path.is_ident(name) {
+        abort!(attr.path, "Expected `{}`", name);
+    }
+
+    if let Meta::List(list) = attr.parse_meta().unwrap() {
+        let mut target_list = list.nested.iter();
+
+        if let Some(NestedMeta::Meta(Meta::Path(target_path))) = target_list.next() {
+            if !target_path.is_ident(value) {
+                abort!(target_path, "Expected `{}`", value);
+            }
+
+            if target_list.next().is_some() {
+                abort!(list, "Expected `{}({})`", name, value);
+            }
+
+            return;
+        } else {
+            abort!(list, "Expected `{}({})`", name, value);
+        }
+    }
+
+    abort!(attr, "Expected `{}({})`", name, value);
+}
+
+fn fields(struct_data: Data) -> Vec<Field> {
     let fields = match struct_data {
         Data::Struct(DataStruct { fields, .. }) => fields,
         _ => abort_call_site!("Only structs are supported"),
@@ -196,6 +238,7 @@ fn fields(struct_data: Data) -> impl Iterator<Item = Field> {
         Fields::Unit => abort!(fields, "There must be at least one field"),
     }
     .into_iter()
+    .collect()
 }
 
 fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {

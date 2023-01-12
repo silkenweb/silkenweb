@@ -70,9 +70,15 @@ use node::element::{Const, GenericElement};
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
 pub use silkenweb_macros::css;
-/// Derive [`ChildElement`], [`ChildNode`], [`Value`] and [`InDom`].
+/// Derive [`ChildElement`] and [`ChildNode`].
+///
+/// This only works for structs. It will defer to one field for the
+/// implementation of the traits. If multiple fields are present, a target field
+/// must be specified with `#[child_element(target)]`.
 ///
 /// # Example
+///
+/// Derive traits for a newtype struct:
 ///
 /// ```
 /// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
@@ -80,17 +86,51 @@ pub use silkenweb_macros::css;
 /// struct MyComponent<D: InstantiableDom>(Component<D>);
 /// ```
 ///
+/// Derive traits when the struct has more than 1 field:
+///
+/// ```
+/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
+/// #[derive(ChildElement)]
+/// struct MyComponent<D: InstantiableDom, Data> {
+///     #[child_element(target)]
+///     component: Component<D>,
+///     data: Data,
+/// }
+/// ```
+///
 /// [`ChildElement`]: crate::node::element::ChildElement
 /// [`ChildNode`]: crate::node::ChildNode
-/// [`Value`]: crate::value::Value
-/// [`InDom`]: crate::dom::InDom
 pub use silkenweb_macros::ChildElement;
-/// Derive [`Element`] for a [newtype] wrapper.
+/// Derive [`Element`].
 ///
-/// Only non empty structs are supported. The first field must implement
-/// [`Element`].
+/// This only works for structs. It will defer to one field for the
+/// implementation. If multiple fields are present, a target field must be
+/// specified with `#[element(target)]`.
 ///
-/// [newtype]: https://doc.rust-lang.org/rust-by-example/generics/new_types.html
+/// # Example
+///
+/// Derive traits for a newtype struct:
+///
+/// ```
+/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
+/// #
+/// #[derive(Element)]
+/// struct MyElement<D: Dom>(Div<D>);
+/// ```
+///
+/// When the struct has more than 1 field:
+///
+/// ```
+/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
+/// #
+/// #[derive(Element)]
+/// struct MyElement<D: Dom, Data> {
+///     #[element(target)]
+///     element: Div<D>,
+///     data: Data,
+/// }
+/// ```
+///
 /// [`Element`]: crate::node::element::Element
 pub use silkenweb_macros::Element;
 #[doc(inline)]
