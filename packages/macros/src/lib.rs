@@ -26,9 +26,9 @@ macro_rules! derive_empty(
         #[doc = "Types with generic parameters are supported."]
         #[proc_macro_derive($type_name)]
         pub fn $proc_name(item: TokenStream) -> TokenStream {
-            let new_type: DeriveInput = parse_macro_input!(item);
-            let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
-            let name = new_type.ident;
+            let item: DeriveInput = parse_macro_input!(item);
+            let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+            let name = item.ident;
 
             quote!(
                 impl #impl_generics ::silkenweb::$type_path::$type_name
@@ -49,96 +49,76 @@ derive_empty!(
 #[proc_macro_derive(ChildElement, attributes(child_element))]
 #[proc_macro_error]
 pub fn derive_child_element(item: TokenStream) -> TokenStream {
-    let new_type: DeriveInput = parse_macro_input!(item);
-    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
-    let name = new_type.ident;
+    let item: DeriveInput = parse_macro_input!(item);
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+    let item_name = item.ident;
 
-    let TargetField { ident, dom_type } = TargetField::new(new_type.data, "child_element");
+    let fields = fields(item.data);
+    let target_index = target_field_index("child_element", &fields);
+
+    let target_field = fields[target_index].clone();
+    let target_type = target_field.ty;
+    let target = field_token(target_index, target_field.ident);
+    let dom_type = quote!(<#target_type as ::silkenweb::dom::InDom>::Dom);
 
     quote!(
-        impl #impl_generics ::std::convert::From<#name #ty_generics>
+        impl #impl_generics ::std::convert::From<#item_name #ty_generics>
         for ::silkenweb::node::element::GenericElement<
             #dom_type,
             ::silkenweb::node::element::Const
         >
         #where_clause
         {
-            fn from(value: #name #ty_generics) -> Self {
-                value.#ident.into()
+            fn from(value: #item_name #ty_generics) -> Self {
+                value.#target.into()
             }
         }
 
-        impl #impl_generics ::std::convert::From<#name #ty_generics>
+        impl #impl_generics ::std::convert::From<#item_name #ty_generics>
         for ::silkenweb::node::Node<#dom_type>
         #where_clause
         {
-            fn from(value: #name #ty_generics) -> Self {
-                value.#ident.into()
+            fn from(value: #item_name #ty_generics) -> Self {
+                value.#target.into()
             }
         }
 
         impl #impl_generics ::silkenweb::value::Value
-        for #name #ty_generics #where_clause {}
+        for #item_name #ty_generics #where_clause {}
     )
     .into()
-}
-
-struct TargetField {
-    ident: proc_macro2::TokenStream,
-    dom_type: proc_macro2::TokenStream,
-}
-
-impl TargetField {
-    fn new(data: Data, attr_name: &str) -> Self {
-        let fields = fields(data);
-        let target_index = target_field_index(attr_name, &fields);
-
-        let Field {
-            ident: derive_ident,
-            ty: derive_from,
-            ..
-        } = fields[target_index].clone();
-
-        Self {
-            ident: field_token(target_index, derive_ident),
-            dom_type: quote!(<#derive_from as ::silkenweb::dom::InDom>::Dom),
-        }
-    }
 }
 
 #[proc_macro_derive(Element, attributes(element))]
 #[proc_macro_error]
 pub fn derive_element(item: TokenStream) -> TokenStream {
-    let new_type: DeriveInput = parse_macro_input!(item);
-    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
-    let name = new_type.ident;
+    let item: DeriveInput = parse_macro_input!(item);
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+    let item_name = item.ident;
 
-    let fields = fields(new_type.data);
+    let fields = fields(item.data);
     let target_index = target_field_index("element", &fields);
 
-    let Field {
-        ty: derive_from,
-        ident: derive_ident,
-        ..
-    } = fields[target_index].clone();
+    let field = fields[target_index].clone();
+    let target_type = field.ty;
 
-    let field_tail_names = fields.into_iter().enumerate().filter_map(|(index, field)| {
+    let other_field_idents = fields.into_iter().enumerate().filter_map(|(index, field)| {
         (index != target_index).then(|| field_token(index, field.ident))
     });
-    let fields_tail = quote!(#(, #field_tail_names: self.#field_tail_names)*);
+    let other_fields = quote!(#(, #other_field_idents: self.#other_field_idents)*);
 
-    let derive_field = field_token(0, derive_ident);
+    let target = field_token(0, field.ident);
 
     quote!(
         impl #impl_generics ::silkenweb::node::element::Element
-        for #name #ty_generics #where_clause {
-            type DomType = <#derive_from as ::silkenweb::node::element::Element>::DomType;
+        for #item_name #ty_generics #where_clause {
+            type DomType = <#target_type as ::silkenweb::node::element::Element>::DomType;
 
             fn class<'a, T>(self, class: impl ::silkenweb::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
                 T: 'a + AsRef<str>
             {
-                Self {#derive_field: self.#derive_field.class(class) #fields_tail}
+                Self {#target: self.#target.class(class) #other_fields}
             }
 
             fn classes<'a, T, Iter>(
@@ -149,7 +129,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 T: 'a + AsRef<str>,
                 Iter: 'a + IntoIterator<Item = T>,
             {
-                    Self {#derive_field: self.#derive_field.classes(classes) #fields_tail}
+                    Self {#target: self.#target.classes(classes) #other_fields}
             }
 
             fn attribute<'a>(
@@ -157,11 +137,11 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 name: &str,
                 value: impl ::silkenweb::value::RefSignalOrValue<'a, Item = impl ::silkenweb::attribute::Attribute>,
             ) -> Self {
-                Self{#derive_field: self.#derive_field.attribute(name, value) #fields_tail}
+                Self{#target: self.#target.attribute(name, value) #other_fields}
             }
 
             fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
-                Self{#derive_field: self.#derive_field.effect(f) #fields_tail}
+                Self{#target: self.#target.effect(f) #other_fields}
             }
 
             fn effect_signal<T: 'static>(
@@ -169,19 +149,19 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 sig: impl ::silkenweb::macros::Signal<Item = T> + 'static,
                 f: impl Fn(&Self::DomType, T) + Clone + 'static,
             ) -> Self {
-                Self{#derive_field: self.#derive_field.effect_signal(sig, f) #fields_tail}
+                Self{#target: self.#target.effect_signal(sig, f) #other_fields}
             }
 
             fn handle(&self) -> ::silkenweb::node::element::ElementHandle<Self::DomType> {
-                self.#derive_field.handle()
+                self.#target.handle()
             }
 
             fn spawn_future(self, future: impl ::std::future::Future<Output = ()> + 'static) -> Self {
-                Self{#derive_field: self.#derive_field.spawn_future(future) #fields_tail}
+                Self{#target: self.#target.spawn_future(future) #other_fields}
             }
 
             fn on(self, name: &'static str, f: impl FnMut(::silkenweb::macros::JsValue) + 'static) -> Self {
-                Self{#derive_field: self.#derive_field.on(name, f) #fields_tail}
+                Self{#target: self.#target.on(name, f) #other_fields}
             }
         }
     )
