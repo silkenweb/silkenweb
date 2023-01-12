@@ -53,17 +53,7 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
     let name = new_type.ident;
 
-    let fields = fields(new_type.data);
-    let target_index = target_index("child_element", &fields);
-
-    let Field {
-        ident: derive_ident,
-        ty: derive_from,
-        ..
-    } = fields[target_index].clone();
-
-    let derive_field = field_token(target_index, derive_ident);
-    let dom_type = quote!(<#derive_from as ::silkenweb::dom::InDom>::Dom);
+    let TargetField { ident, dom_type } = TargetField::new(new_type.data, "child_element");
 
     quote!(
         impl #impl_generics ::std::convert::From<#name #ty_generics>
@@ -74,20 +64,56 @@ pub fn derive_child_element(item: TokenStream) -> TokenStream {
         #where_clause
         {
             fn from(value: #name #ty_generics) -> Self {
-                value.#derive_field.into()
+                value.#ident.into()
             }
         }
+    )
+    .into()
+}
 
+#[proc_macro_derive(ChildNode, attributes(child_node))]
+#[proc_macro_error]
+pub fn derive_child_node(item: TokenStream) -> TokenStream {
+    let new_type: DeriveInput = parse_macro_input!(item);
+    let (impl_generics, ty_generics, where_clause) = new_type.generics.split_for_impl();
+    let name = new_type.ident;
+
+    let TargetField { ident, dom_type } = TargetField::new(new_type.data, "child_node");
+
+    quote!(
         impl #impl_generics ::std::convert::From<#name #ty_generics>
         for ::silkenweb::node::Node<#dom_type>
         #where_clause
         {
             fn from(value: #name #ty_generics) -> Self {
-                value.#derive_field.into()
+                value.#ident.into()
             }
         }
     )
     .into()
+}
+
+struct TargetField {
+    ident: proc_macro2::TokenStream,
+    dom_type: proc_macro2::TokenStream,
+}
+
+impl TargetField {
+    fn new(data: Data, attr_name: &str) -> Self {
+        let fields = fields(data);
+        let target_index = target_field_index(attr_name, &fields);
+
+        let Field {
+            ident: derive_ident,
+            ty: derive_from,
+            ..
+        } = fields[target_index].clone();
+
+        Self {
+            ident: field_token(target_index, derive_ident),
+            dom_type: quote!(<#derive_from as ::silkenweb::dom::InDom>::Dom),
+        }
+    }
 }
 
 #[proc_macro_derive(Element, attributes(element))]
@@ -98,7 +124,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
     let name = new_type.ident;
 
     let fields = fields(new_type.data);
-    let target_index = target_index("element", &fields);
+    let target_index = target_field_index("element", &fields);
 
     let Field {
         ty: derive_from,
@@ -173,7 +199,7 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
 }
 
 /// Find the index of the field with `#[<attr_name>(target)]`
-fn target_index(attr_name: &str, fields: &[Field]) -> usize {
+fn target_field_index(attr_name: &str, fields: &[Field]) -> usize {
     let mut target_index = None;
 
     for (index, field) in fields.iter().enumerate() {

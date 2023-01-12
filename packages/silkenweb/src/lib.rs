@@ -70,7 +70,7 @@ use node::element::{Const, GenericElement};
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
 pub use silkenweb_macros::css;
-/// Derive [`ChildElement`] and [`ChildNode`].
+/// Derive [`ChildElement`].
 ///
 /// This only works for structs. It will defer to one field for the
 /// implementation of the traits. If multiple fields are present, a target field
@@ -99,8 +99,9 @@ pub use silkenweb_macros::css;
 /// ```
 ///
 /// [`ChildElement`]: crate::node::element::ChildElement
-/// [`ChildNode`]: crate::node::ChildNode
 pub use silkenweb_macros::ChildElement;
+// TODO: Doc
+pub use silkenweb_macros::ChildNode;
 /// Derive [`Element`].
 ///
 /// This only works for structs. It will defer to one field for the
