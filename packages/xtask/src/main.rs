@@ -110,6 +110,7 @@ fn build_website() -> WorkflowResult<()> {
         "animation",
         "async-http-request",
         "bootstrap",
+        "component",
         "counter",
         "counter-list",
         "element-handle",
