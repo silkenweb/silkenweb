@@ -259,11 +259,12 @@ impl Version {
 
 impl Parse for Version {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let major = Self::component(input)?;
-        input.parse::<Colon>()?;
-        let minor = Self::component(input)?;
-        input.parse::<Colon>()?;
-        let patch = Self::component(input)?;
+        let input = parenthesized(input)?;
+        let major = Self::component(&input)?;
+        input.parse::<Comma>()?;
+        let minor = Self::component(&input)?;
+        input.parse::<Comma>()?;
+        let patch = Self::component(&input)?;
 
         Ok(Self {
             major,
