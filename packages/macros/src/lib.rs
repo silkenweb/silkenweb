@@ -273,11 +273,11 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///     include_prefixes: ["included-"],
 ///     exclude_prefixes: ["excluded-"],
 ///     validate,
-///     transpile: {
+///     transpile: (
 ///         minify,
 ///         pretty,
 ///         nesting,
-///         browsers: {
+///         browsers: (
 ///             android: 1:0:0,
 ///             chrome: 1:0:0,
 ///             edge: 1:0:0,
@@ -287,8 +287,8 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///             opera: 1:0:0,
 ///             safari: 1:0:0,
 ///             samsung: 1:0:0,
-///         }
-///     }
+///         )
+///     )
 /// );
 /// ```
 ///
@@ -321,8 +321,8 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// - `browsers` is a comma seperated list of the minimum supported browser
 ///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.
 ///   The version is a `:` seperated string of major, minor, and patch versions.
-///   For example, to support firefox 110  + and chrome 111+, use `browsers: {
-///   firefox: 110:0:0, chrome: 111:0:0 }`.
+///   For example, to support firefox 110  + and chrome 111+, use `browsers: (
+///   firefox: 110:0:0, chrome: 111:0:0 )`.
 ///
 /// # Examples
 ///

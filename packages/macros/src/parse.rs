@@ -2,7 +2,7 @@ use derive_more::Into;
 use proc_macro_error::{abort, abort_call_site};
 use silkenweb_base::css::{self, Source};
 use syn::{
-    braced, bracketed,
+    bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
     punctuated::Punctuated,
     token::{Colon, Comma, CustomToken},
@@ -125,7 +125,7 @@ impl Parse for Transpile {
         let mut nesting = false;
         let mut browsers = None;
 
-        parse_comma_delimited(&braced(input)?, |lookahead, input| {
+        parse_comma_delimited(&parenthesized(input)?, |lookahead, input| {
             if flag(kw::minify, lookahead, input, minify)? {
                 minify = true;
             } else if flag(kw::pretty, lookahead, input, pretty)? {
@@ -194,7 +194,7 @@ impl Parse for Browsers {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut browsers = lightningcss::targets::Browsers::default();
 
-        parse_comma_delimited(&braced(input)?, |lookahead, input| {
+        parse_comma_delimited(&parenthesized(input)?, |lookahead, input| {
             Ok(
                 Self::browser(browsers::android, lookahead, input, &mut browsers.android)?
                     || Self::browser(browsers::chrome, lookahead, input, &mut browsers.chrome)?
@@ -318,9 +318,9 @@ where
     })
 }
 
-fn braced(input: ParseStream) -> syn::Result<ParseBuffer> {
+fn parenthesized(input: ParseStream) -> syn::Result<ParseBuffer> {
     let body;
-    braced!(body in input);
+    parenthesized!(body in input);
     Ok(body)
 }
 
