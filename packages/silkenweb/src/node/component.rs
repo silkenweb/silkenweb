@@ -35,7 +35,7 @@ use crate::{
 /// let name = span().text("HTML");
 /// let description = span().text("HyperText Markup Language");
 ///
-/// css!(inline: "span {border: 3px solid red}");
+/// css!(inline = "span {border: 3px solid red}");
 ///
 /// let mut term = Component::<Dry>::styled(stylesheet());
 /// let name_slot = term.slot(name);

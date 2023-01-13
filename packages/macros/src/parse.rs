@@ -5,7 +5,7 @@ use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
     punctuated::Punctuated,
-    token::{Colon, Comma, CustomToken},
+    token::{self, Comma, CustomToken},
     LitInt, LitStr, Visibility,
 };
 
@@ -285,7 +285,7 @@ where
     KeywordToken: Parse + CustomToken,
 {
     Ok(if flag(keyword, lookahead, input, exists)? {
-        input.parse::<Colon>()?;
+        input.parse::<token::Eq>()?;
         true
     } else {
         false

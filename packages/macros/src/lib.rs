@@ -267,26 +267,26 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// ```
 /// # use silkenweb_macros::css;
 /// css!(
-///     path: "my-css-file.css",
-///     visibility: pub,
-///     prefix: "prefix",
-///     include_prefixes: ["included-"],
-///     exclude_prefixes: ["excluded-"],
+///     path = "my-css-file.css",
+///     visibility = pub,
+///     prefix = "prefix",
+///     include_prefixes = ["included-"],
+///     exclude_prefixes = ["excluded-"],
 ///     validate,
-///     transpile: (
+///     transpile = (
 ///         minify,
 ///         pretty,
 ///         nesting,
-///         browsers: (
-///             android: (1, 0, 0),
-///             chrome: (1, 0, 0),
-///             edge: (1, 0, 0),
-///             firefox: (1, 0, 0),
-///             ie: (1, 0, 0),
-///             ios_saf: (1, 0, 0),
-///             opera: (1, 0, 0),
-///             safari: (1, 0, 0),
-///             samsung: (1, 0, 0),
+///         browsers = (
+///             android = (1, 0, 0),
+///             chrome = (1, 0, 0),
+///             edge = (1, 0, 0),
+///             firefox = (1, 0, 0),
+///             ie = (1, 0, 0),
+///             ios_saf = (1, 0, 0),
+///             opera = (1, 0, 0),
+///             safari = (1, 0, 0),
+///             samsung = (1, 0, 0),
 ///         )
 ///     )
 /// );
@@ -322,7 +322,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.
 ///   The version is a paranthesized `,` seperated string of major, minor, and
 ///   patch versions. For example, to support firefox 110  + and chrome 111+,
-///   use `browsers: ( firefox: (110, 0, 0), chrome: (111, 0, 0) )`.
+///   use `browsers =( firefox = (110, 0, 0), chrome = (111, 0, 0) )`.
 ///
 /// # Examples
 ///
@@ -338,7 +338,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///
 ///  ```
 /// # use silkenweb_macros::css;
-/// css!(inline: r#"
+/// css!(inline = r#"
 ///     .my-class {
 ///         color: hotpink;
 ///     }
@@ -357,10 +357,10 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// mod border {
 ///     # use silkenweb_macros::css;
 ///     css!(
-///         visibility: pub,
-///         path: "my-css-file.css",
-///         prefix:"border-",
-///         exclude_prefixes: ["border-excluded-"]
+///         visibility = pub,
+///         path = "my-css-file.css",
+///         prefix = "border-",
+///         exclude_prefixes = ["border-excluded-"]
 ///     );
 /// }
 ///
@@ -372,9 +372,9 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// ```compile_fail
 ///     # use silkenweb_macros::css;
 ///     css!(
-///         path: "my-css-file.css",
-///         include_prefixes: ["border-"]
-///         exclude_prefixes: ["border-excluded-"]
+///         path = "my-css-file.css",
+///         include_prefixes = ["border-"]
+///         exclude_prefixes = ["border-excluded-"]
 ///     );
 ///
 ///     assert_eq!(BORDER_EXCLUDED_HUGE, "border-excluded-huge");

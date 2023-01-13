@@ -17,7 +17,7 @@ use silkenweb::{
 };
 use timeago::Formatter;
 
-css!(path: "hackernews.css", validate);
+css!(path = "hackernews.css", validate);
 
 type Result<T> = result::Result<T, reqwasm::Error>;
 
