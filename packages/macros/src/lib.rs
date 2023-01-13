@@ -292,10 +292,10 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// );
 /// ```
 ///
-/// All are optional, but one of `path` or `inline` must be specified.
+/// All are optional, but one of `path` or `content` must be specified.
 ///
 /// - `path` is the path to the CSS /SCSS/SASS file.
-/// - `inline` is the css content.
+/// - `content` is the css content.
 /// - `prefix`: only classes starting with `prefix` should be included. Their
 ///   Rust names will have the prefix stripped.
 /// - `include_prefixes`: a list of prefixes to include, without stripping the
@@ -332,11 +332,11 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// assert_eq!(class::MY_CLASS, "my-class");
 /// ```
 ///
-/// Define private constants for all inline CSS classes:
+/// Define private constants for all content CSS classes:
 ///
 ///  ```
 /// # use silkenweb_macros::css;
-/// css!(inline = r#"
+/// css!(content = r#"
 ///     .my-class {
 ///         color: hotpink;
 ///     }

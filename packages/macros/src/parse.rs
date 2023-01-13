@@ -13,7 +13,7 @@ mod kw {
     use syn::custom_keyword;
 
     custom_keyword!(path);
-    custom_keyword!(inline);
+    custom_keyword!(content);
     custom_keyword!(prefix);
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
@@ -38,7 +38,7 @@ impl Parse for Input {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(LitStr) {
             return Ok(Self {
-                source: Source::path(input.parse::<LitStr>()?.value())
+                source: Source::from_path(input.parse::<LitStr>()?.value())
                     .unwrap_or_else(|e| abort_call_site!(e)),
                 prefix: None,
                 include_prefixes: None,
@@ -49,7 +49,7 @@ impl Parse for Input {
         }
 
         let mut path = None;
-        let mut inline = None;
+        let mut content = None;
         let mut prefix = None;
         let mut include_prefixes = None;
         let mut exclude_prefixes = Vec::new();
@@ -59,8 +59,8 @@ impl Parse for Input {
         parse_comma_delimited(input, |lookahead, input| {
             if parameter(kw::path, lookahead, input, path.is_some())? {
                 path = Some(input.parse::<LitStr>()?.value());
-            } else if parameter(kw::inline, lookahead, input, inline.is_some())? {
-                inline = Some(input.parse::<LitStr>()?.value());
+            } else if parameter(kw::content, lookahead, input, content.is_some())? {
+                content = Some(input.parse::<LitStr>()?.value());
             } else if parameter(kw::prefix, lookahead, input, prefix.is_some())? {
                 prefix = Some(input.parse::<LitStr>()?.value());
             } else if parameter(
@@ -88,12 +88,12 @@ impl Parse for Input {
             Ok(true)
         })?;
 
-        let source = match (path, inline) {
-            (None, None) => abort_call_site!("Must specify either 'path' or `inline` parameter"),
-            (None, Some(inline)) => Source::inline(inline),
-            (Some(path), None) => Source::path(path).unwrap_or_else(|e| abort_call_site!(e)),
+        let source = match (path, content) {
+            (None, None) => abort_call_site!("Must specify either 'path' or `content` parameter"),
+            (None, Some(content)) => Source::from_content(content),
+            (Some(path), None) => Source::from_path(path).unwrap_or_else(|e| abort_call_site!(e)),
             (Some(_), Some(_)) => {
-                abort_call_site!("Only one of 'path' or `inline` can be specified")
+                abort_call_site!("Only one of 'path' or `content` can be specified")
             }
         };
 

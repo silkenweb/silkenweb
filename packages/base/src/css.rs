@@ -19,14 +19,14 @@ pub struct Source {
 }
 
 impl Source {
-    pub fn inline(content: impl Into<String>) -> Self {
+    pub fn from_content(content: impl Into<String>) -> Self {
         Self {
             content: content.into(),
             dependency: None,
         }
     }
 
-    pub fn path(path: impl AsRef<Path>) -> Result<Self, String> {
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, String> {
         const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 
         let root_dir = env::var(CARGO_MANIFEST_DIR).map_err(|e| {
@@ -62,7 +62,7 @@ impl Source {
             let filename = self
                 .dependency
                 .as_ref()
-                .map_or_else(|| "<inline>".to_string(), String::clone);
+                .map_or_else(|| "<content>".to_string(), String::clone);
             let mut stylesheet: StyleSheet = StyleSheet::parse(
                 &content,
                 ParserOptions {
