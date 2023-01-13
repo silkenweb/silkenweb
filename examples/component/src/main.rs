@@ -7,7 +7,7 @@ use silkenweb::{
     ChildElement,
 };
 
-css!(inline = "span {border: 3px solid red}");
+css!(content = "span {border: 3px solid red}");
 
 #[derive(ChildElement)]
 struct Term(Component);
