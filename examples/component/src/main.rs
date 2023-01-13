@@ -17,7 +17,7 @@ impl Term {
         name: impl HtmlElement + ChildNode,
         description: impl HtmlElement + ChildNode,
     ) -> Self {
-        let mut term = Component::styled(stylesheet());
+        let mut term = Component::styled(stylesheet::text());
         let name = term.slot(name);
         let description = term.slot(description);
         Self(

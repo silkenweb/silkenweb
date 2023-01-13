@@ -37,7 +37,7 @@ use crate::{
 ///
 /// css!(inline = "span {border: 3px solid red}");
 ///
-/// let mut term = Component::<Dry>::styled(stylesheet());
+/// let mut term = Component::<Dry>::styled(stylesheet::text());
 /// let name_slot = term.slot(name);
 /// let description_slot = term.slot(description);
 ///

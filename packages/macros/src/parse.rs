@@ -6,7 +6,7 @@ use syn::{
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
     punctuated::Punctuated,
     token::{self, Comma, CustomToken},
-    LitInt, LitStr, Visibility,
+    LitInt, LitStr,
 };
 
 mod kw {
@@ -14,7 +14,6 @@ mod kw {
 
     custom_keyword!(path);
     custom_keyword!(inline);
-    custom_keyword!(visibility);
     custom_keyword!(prefix);
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
@@ -28,7 +27,6 @@ mod kw {
 
 pub struct Input {
     pub source: Source,
-    pub visibility: Option<Visibility>,
     pub prefix: Option<String>,
     pub include_prefixes: Option<Vec<String>>,
     pub exclude_prefixes: Vec<String>,
@@ -42,7 +40,6 @@ impl Parse for Input {
             return Ok(Self {
                 source: Source::path(input.parse::<LitStr>()?.value())
                     .unwrap_or_else(|e| abort_call_site!(e)),
-                visibility: None,
                 prefix: None,
                 include_prefixes: None,
                 exclude_prefixes: Vec::new(),
@@ -53,7 +50,6 @@ impl Parse for Input {
 
         let mut path = None;
         let mut inline = None;
-        let mut visibility = None;
         let mut prefix = None;
         let mut include_prefixes = None;
         let mut exclude_prefixes = Vec::new();
@@ -65,8 +61,6 @@ impl Parse for Input {
                 path = Some(input.parse::<LitStr>()?.value());
             } else if parameter(kw::inline, lookahead, input, inline.is_some())? {
                 inline = Some(input.parse::<LitStr>()?.value());
-            } else if parameter(kw::visibility, lookahead, input, visibility.is_some())? {
-                visibility = Some(input.parse()?);
             } else if parameter(kw::prefix, lookahead, input, prefix.is_some())? {
                 prefix = Some(input.parse::<LitStr>()?.value());
             } else if parameter(
@@ -104,7 +98,6 @@ impl Parse for Input {
         };
 
         Ok(Self {
-            visibility,
             source,
             prefix,
             include_prefixes,

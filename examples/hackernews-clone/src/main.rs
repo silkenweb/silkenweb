@@ -19,6 +19,8 @@ use timeago::Formatter;
 
 css!(path = "hackernews.css", validate);
 
+use class::*;
+
 type Result<T> = result::Result<T, reqwasm::Error>;
 
 #[derive(Clone)]

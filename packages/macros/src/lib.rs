@@ -6,7 +6,7 @@ use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
-    FieldsUnnamed, Ident, Index, Meta, NestedMeta, Visibility,
+    FieldsUnnamed, Ident, Index, Meta, NestedMeta,
 };
 
 use crate::parse::Input;
@@ -248,11 +248,12 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 
 /// Define `&str` constants for each class in a CSS file.
 ///
-/// For a CSS class called `my-css-class`, a constant called `MY_CSS_CLASS` will
-/// be defined.
+/// This defines 2 modules:
 ///
-/// An `fn stylesheet() -> &'static str` will also be defined, which gets the
-/// content of the stylesheet.
+/// - `mod class` with constants for each CSS class. For a CSS class called
+///   `my-css-class`, a constant called `MY_CSS_CLASS` will be defined.
+/// - `mod stylesheet` with an `fn text() -> &'static str` that gets the content
+///   of the stylesheet.
 ///
 /// The macro takes two forms. Firstly it can take a single string literal which
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
@@ -268,7 +269,6 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// # use silkenweb_macros::css;
 /// css!(
 ///     path = "my-css-file.css",
-///     visibility = pub,
 ///     prefix = "prefix",
 ///     include_prefixes = ["included-"],
 ///     exclude_prefixes = ["excluded-"],
@@ -296,8 +296,6 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///
 /// - `path` is the path to the CSS /SCSS/SASS file.
 /// - `inline` is the css content.
-/// - `visibility` is any visibility modifier, and controls the visibility of
-///   class constants. Private is the default.
 /// - `prefix`: only classes starting with `prefix` should be included. Their
 ///   Rust names will have the prefix stripped.
 /// - `include_prefixes`: a list of prefixes to include, without stripping the
@@ -331,7 +329,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// ```
 /// # use silkenweb_macros::css;
 /// css!("my-css-file.css");
-/// assert_eq!(MY_CLASS, "my-class");
+/// assert_eq!(class::MY_CLASS, "my-class");
 /// ```
 ///
 /// Define private constants for all inline CSS classes:
@@ -343,8 +341,8 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///         color: hotpink;
 ///     }
 /// "#);
-/// assert_eq!(MY_CLASS, "my-class");
-/// assert_eq!(stylesheet(), r#"
+/// assert_eq!(class::MY_CLASS, "my-class");
+/// assert_eq!(stylesheet::text(), r#"
 ///     .my-class {
 ///         color: hotpink;
 ///     }
@@ -354,30 +352,27 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
 /// ```
-/// mod border {
-///     # use silkenweb_macros::css;
-///     css!(
-///         visibility = pub,
-///         path = "my-css-file.css",
-///         prefix = "border-",
-///         exclude_prefixes = ["border-excluded-"]
-///     );
-/// }
+/// # use silkenweb_macros::css;
+/// css!(
+///     path = "my-css-file.css",
+///     prefix = "border-",
+///     exclude_prefixes = ["border-excluded-"]
+/// );
 ///
-/// assert_eq!(border::SMALL, "border-small");
+/// assert_eq!(class::SMALL, "border-small");
 /// ```
 /// 
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
-///     # use silkenweb_macros::css;
-///     css!(
-///         path = "my-css-file.css",
-///         include_prefixes = ["border-"]
-///         exclude_prefixes = ["border-excluded-"]
-///     );
+/// # use silkenweb_macros::css;
+/// css!(
+///     path = "my-css-file.css",
+///     include_prefixes = ["border-"]
+///     exclude_prefixes = ["border-excluded-"]
+/// );
 ///
-///     assert_eq!(BORDER_EXCLUDED_HUGE, "border-excluded-huge");
+/// assert_eq!(class::BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
 /// 
 /// [lightningcss]: https://lightningcss.dev/
@@ -385,7 +380,6 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 #[proc_macro_error]
 pub fn css(input: TokenStream) -> TokenStream {
     let Input {
-        visibility,
         mut source,
         prefix,
         include_prefixes,
@@ -412,7 +406,6 @@ pub fn css(input: TokenStream) -> TokenStream {
 
     if let Some(prefix) = prefix {
         code_gen(
-            visibility,
             &source,
             classes.filter_map(|class| {
                 let class_ident = class.strip_prefix(&prefix).map(str::to_string);
@@ -423,11 +416,7 @@ pub fn css(input: TokenStream) -> TokenStream {
             }),
         )
     } else {
-        code_gen(
-            visibility,
-            &source,
-            classes.map(|class| (class.clone(), class)),
-        )
+        code_gen(&source, classes.map(|class| (class.clone(), class)))
     }
 }
 
@@ -435,11 +424,7 @@ fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
     prefixes.iter().any(|prefix| x.starts_with(prefix))
 }
 
-fn code_gen(
-    visibility: Option<Visibility>,
-    source: &Source,
-    classes: impl Iterator<Item = (String, String)>,
-) -> TokenStream {
+fn code_gen(source: &Source, classes: impl Iterator<Item = (String, String)>) -> TokenStream {
     let classes = classes.map(|(class_ident, class_name)| {
         if !class_ident.starts_with(char::is_alphabetic) {
             abort_call_site!(
@@ -454,7 +439,7 @@ fn code_gen(
                 .to_uppercase(),
             Span::call_site(),
         );
-        quote!(#visibility const #class_ident: &str = #class_name;)
+        quote!(pub const #class_ident: &str = #class_name;)
     });
 
     let dependency = source.dependency().iter();
@@ -462,9 +447,15 @@ fn code_gen(
 
     quote!(
         #(const _: &[u8] = ::std::include_bytes!(#dependency);)*
-        #(#classes)*
-        #visibility fn stylesheet() -> &'static str {
-            #content
+
+        mod class {
+            #(#classes)*
+        }
+
+        mod stylesheet {
+            pub fn text() -> &'static str {
+                #content
+            }
         }
     )
     .into()

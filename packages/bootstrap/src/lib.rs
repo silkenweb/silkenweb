@@ -15,7 +15,9 @@ pub mod tab_bar;
 pub mod utility;
 
 pub mod css {
-    silkenweb::css!(visibility = pub, path = "bootstrap-5.2.2/css/bootstrap.min.css");
+    silkenweb::css!("bootstrap-5.2.2/css/bootstrap.min.css");
+
+    pub use class::*;
 }
 
 pub type Class = &'static str;
