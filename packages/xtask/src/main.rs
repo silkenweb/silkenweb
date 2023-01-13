@@ -118,6 +118,7 @@ fn build_website() -> WorkflowResult<()> {
         "hello-world",
         "hydration",
         "router",
+        "shadow-root",
         "todomvc",
         "web-components-wrapper",
     ] {
