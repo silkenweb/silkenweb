@@ -25,6 +25,27 @@ mod kw {
     custom_keyword!(browsers);
 }
 
+trait ParseValue: Sized {
+    fn parse(input: ParseStream) -> syn::Result<Self>;
+}
+
+impl ParseValue for String {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(input.parse::<LitStr>()?.value())
+    }
+}
+
+impl ParseValue for Vec<String> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let list;
+        bracketed!(list in input);
+        Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
+            .into_iter()
+            .map(|x| x.value())
+            .collect())
+    }
+}
+
 pub struct Input {
     pub source: Source,
     pub prefix: Option<String>,
@@ -48,44 +69,22 @@ impl Parse for Input {
             });
         }
 
-        let mut path = None;
-        let mut content = None;
+        let mut path: Option<String> = None;
+        let mut content: Option<String> = None;
         let mut prefix = None;
         let mut include_prefixes = None;
-        let mut exclude_prefixes = Vec::new();
+        let mut exclude_prefixes = None;
         let mut validate = false;
         let mut transpile = None;
 
-        parse_comma_delimited(input, |lookahead, input| {
-            if parameter(kw::path, lookahead, input, path.is_some())? {
-                path = Some(input.parse::<LitStr>()?.value());
-            } else if parameter(kw::content, lookahead, input, content.is_some())? {
-                content = Some(input.parse::<LitStr>()?.value());
-            } else if parameter(kw::prefix, lookahead, input, prefix.is_some())? {
-                prefix = Some(input.parse::<LitStr>()?.value());
-            } else if parameter(
-                kw::include_prefixes,
-                lookahead,
-                input,
-                include_prefixes.is_some(),
-            )? {
-                include_prefixes = Some(parse_prefix_list(input)?);
-            } else if parameter(
-                kw::exclude_prefixes,
-                lookahead,
-                input,
-                !exclude_prefixes.is_empty(),
-            )? {
-                exclude_prefixes = parse_prefix_list(input)?;
-            } else if flag(kw::validate, lookahead, input, validate)? {
-                validate = true;
-            } else if parameter(kw::transpile, lookahead, input, transpile.is_some())? {
-                transpile = Some(input.parse()?);
-            } else {
-                return Ok(false);
-            }
-
-            Ok(true)
+        parse_comma_delimited(input, |field, input| {
+            Ok(parameter(kw::path, field, input, &mut path)?
+                || parameter(kw::content, field, input, &mut content)?
+                || parameter(kw::prefix, field, input, &mut prefix)?
+                || parameter(kw::include_prefixes, field, input, &mut include_prefixes)?
+                || parameter(kw::exclude_prefixes, field, input, &mut exclude_prefixes)?
+                || flag(kw::validate, field, input, &mut validate)?
+                || parameter(kw::transpile, field, input, &mut transpile)?)
         })?;
 
         let source = match (path, content) {
@@ -101,7 +100,7 @@ impl Parse for Input {
             source,
             prefix,
             include_prefixes,
-            exclude_prefixes,
+            exclude_prefixes: exclude_prefixes.unwrap_or_default(),
             validate,
             transpile,
         })
@@ -111,27 +110,18 @@ impl Parse for Input {
 #[derive(Into)]
 pub struct Transpile(css::Transpile);
 
-impl Parse for Transpile {
+impl ParseValue for Transpile {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut minify = false;
         let mut pretty = false;
         let mut nesting = false;
         let mut browsers = None;
 
-        parse_comma_delimited(&parenthesized(input)?, |lookahead, input| {
-            if flag(kw::minify, lookahead, input, minify)? {
-                minify = true;
-            } else if flag(kw::pretty, lookahead, input, pretty)? {
-                pretty = true;
-            } else if flag(kw::nesting, lookahead, input, nesting)? {
-                nesting = true;
-            } else if parameter(kw::browsers, lookahead, input, browsers.is_some())? {
-                browsers = Some(input.parse::<Browsers>()?);
-            } else {
-                return Ok(false);
-            }
-
-            Ok(true)
+        parse_comma_delimited(&parenthesized(input)?, |field, input| {
+            Ok(flag(kw::minify, field, input, &mut minify)?
+                || flag(kw::pretty, field, input, &mut pretty)?
+                || flag(kw::nesting, field, input, &mut nesting)?
+                || parameter(kw::browsers, field, input, &mut browsers)?)
         })?;
 
         Ok(Self(css::Transpile {
@@ -163,7 +153,7 @@ pub struct Browsers(lightningcss::targets::Browsers);
 impl Browsers {
     fn browser<Keyword, KeywordToken, T>(
         keyword: Keyword,
-        lookahead: &Lookahead1,
+        field: &Lookahead1,
         input: ParseStream,
         version: &mut Option<u32>,
     ) -> syn::Result<bool>
@@ -171,67 +161,38 @@ impl Browsers {
         Keyword: Peek + FnOnce(T) -> KeywordToken,
         KeywordToken: Parse + CustomToken,
     {
-        Ok(
-            if parameter(keyword, lookahead, input, version.is_some())? {
-                *version = Some(input.parse::<Version>()?.encode_for_lightning());
+        let mut exists = version.is_some();
 
-                true
-            } else {
-                false
-            },
-        )
+        Ok(if flag(keyword, field, input, &mut exists)? {
+            input.parse::<token::Eq>()?;
+            version.replace(Version::parse(input)?.encode_for_lightning());
+            true
+        } else {
+            false
+        })
     }
 }
 
-impl Parse for Browsers {
+impl ParseValue for Browsers {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut browsers = lightningcss::targets::Browsers::default();
 
-        parse_comma_delimited(&parenthesized(input)?, |lookahead, input| {
+        parse_comma_delimited(&parenthesized(input)?, |field, input| {
             Ok(
-                Self::browser(browsers::android, lookahead, input, &mut browsers.android)?
-                    || Self::browser(browsers::chrome, lookahead, input, &mut browsers.chrome)?
-                    || Self::browser(browsers::edge, lookahead, input, &mut browsers.edge)?
-                    || Self::browser(browsers::firefox, lookahead, input, &mut browsers.firefox)?
-                    || Self::browser(browsers::ie, lookahead, input, &mut browsers.ie)?
-                    || Self::browser(browsers::ios_saf, lookahead, input, &mut browsers.ios_saf)?
-                    || Self::browser(browsers::opera, lookahead, input, &mut browsers.opera)?
-                    || Self::browser(browsers::safari, lookahead, input, &mut browsers.safari)?
-                    || Self::browser(browsers::samsung, lookahead, input, &mut browsers.samsung)?,
+                Self::browser(browsers::android, field, input, &mut browsers.android)?
+                    || Self::browser(browsers::chrome, field, input, &mut browsers.chrome)?
+                    || Self::browser(browsers::edge, field, input, &mut browsers.edge)?
+                    || Self::browser(browsers::firefox, field, input, &mut browsers.firefox)?
+                    || Self::browser(browsers::ie, field, input, &mut browsers.ie)?
+                    || Self::browser(browsers::ios_saf, field, input, &mut browsers.ios_saf)?
+                    || Self::browser(browsers::opera, field, input, &mut browsers.opera)?
+                    || Self::browser(browsers::safari, field, input, &mut browsers.safari)?
+                    || Self::browser(browsers::samsung, field, input, &mut browsers.samsung)?,
             )
         })?;
 
         Ok(Self(browsers))
     }
-}
-
-fn parse_comma_delimited(
-    input: ParseStream,
-    mut parser: impl FnMut(&Lookahead1, &ParseStream) -> syn::Result<bool>,
-) -> syn::Result<()> {
-    let mut trailing_comma = true;
-
-    while !input.is_empty() {
-        let lookahead = input.lookahead1();
-
-        if !trailing_comma {
-            abort!(input.span(), "Expected ','");
-        }
-
-        let matched = parser(&lookahead, &input)?;
-
-        if !matched {
-            return Err(lookahead.error());
-        }
-
-        trailing_comma = input.peek(Comma);
-
-        if trailing_comma {
-            input.parse::<Comma>()?;
-        }
-    }
-
-    Ok(())
 }
 
 struct Version {
@@ -250,7 +211,7 @@ impl Version {
     }
 }
 
-impl Parse for Version {
+impl ParseValue for Version {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let input = parenthesized(input)?;
         let major = Self::component(&input)?;
@@ -267,18 +228,22 @@ impl Parse for Version {
     }
 }
 
-fn parameter<Keyword, KeywordToken, T>(
+fn parameter<Keyword, KeywordToken, T, V>(
     keyword: Keyword,
-    lookahead: &Lookahead1,
+    field: &Lookahead1,
     input: ParseStream,
-    exists: bool,
+    value: &mut Option<V>,
 ) -> syn::Result<bool>
 where
     Keyword: Peek + FnOnce(T) -> KeywordToken,
     KeywordToken: Parse + CustomToken,
+    V: ParseValue,
 {
-    Ok(if flag(keyword, lookahead, input, exists)? {
+    let mut exists = value.is_some();
+
+    Ok(if flag(keyword, field, input, &mut exists)? {
         input.parse::<token::Eq>()?;
+        value.replace(V::parse(input)?);
         true
     } else {
         false
@@ -287,16 +252,16 @@ where
 
 fn flag<Keyword, KeywordToken, T>(
     keyword: Keyword,
-    lookahead: &Lookahead1,
+    field: &Lookahead1,
     input: ParseStream,
-    exists: bool,
+    value: &mut bool,
 ) -> syn::Result<bool>
 where
     Keyword: Peek + FnOnce(T) -> KeywordToken,
     KeywordToken: Parse + CustomToken,
 {
-    Ok(if lookahead.peek(keyword) {
-        if exists {
+    Ok(if field.peek(keyword) {
+        if *value {
             abort!(
                 input.span(),
                 "{} is defined multiple times",
@@ -304,6 +269,7 @@ where
             );
         }
 
+        *value = true;
         input.parse::<KeywordToken>()?;
 
         true
@@ -312,17 +278,37 @@ where
     })
 }
 
+fn parse_comma_delimited(
+    input: ParseStream,
+    mut parser: impl FnMut(&Lookahead1, &ParseStream) -> syn::Result<bool>,
+) -> syn::Result<()> {
+    let mut trailing_comma = true;
+
+    while !input.is_empty() {
+        let field = input.lookahead1();
+
+        if !trailing_comma {
+            abort!(input.span(), "Expected ','");
+        }
+
+        let matched = parser(&field, &input)?;
+
+        if !matched {
+            return Err(field.error());
+        }
+
+        trailing_comma = input.peek(Comma);
+
+        if trailing_comma {
+            input.parse::<Comma>()?;
+        }
+    }
+
+    Ok(())
+}
+
 fn parenthesized(input: ParseStream) -> syn::Result<ParseBuffer> {
     let body;
     parenthesized!(body in input);
     Ok(body)
-}
-
-fn parse_prefix_list(input: &syn::parse::ParseBuffer) -> Result<Vec<String>, syn::Error> {
-    let list;
-    bracketed!(list in input);
-    Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
-        .iter()
-        .map(|prefix| prefix.value())
-        .collect())
 }
