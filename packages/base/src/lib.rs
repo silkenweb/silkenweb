@@ -39,7 +39,7 @@ pub mod window {
 }
 
 pub mod document {
-    use wasm_bindgen::UnwrapThrowExt;
+    use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
     use super::DOCUMENT;
 
@@ -78,6 +78,18 @@ pub mod document {
             doc.remove_event_listener_with_callback(name, listener)
                 .unwrap_throw()
         })
+    }
+
+    pub fn query_selector(selectors: &str) -> Result<Option<web_sys::Element>, JsValue> {
+        DOCUMENT.with(|doc| doc.query_selector(selectors))
+    }
+
+    pub fn head() -> Option<web_sys::HtmlHeadElement> {
+        DOCUMENT.with(|doc| doc.head())
+    }
+
+    pub fn body() -> Option<web_sys::HtmlElement> {
+        DOCUMENT.with(|doc| doc.body())
     }
 }
 
