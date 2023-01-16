@@ -246,7 +246,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
     }
 }
 
-// TODO: Doc auto_mount + fn mount
+// TODO: Doc auto_mount + fn mount + transpile::modules
 /// Define `&str` constants for each class in a CSS file.
 ///
 /// This defines 2 modules:
@@ -278,6 +278,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///     transpile = (
 ///         minify,
 ///         pretty,
+///         modules,
 ///         nesting,
 ///         browsers = (
 ///             android = (1, 0, 0),
@@ -391,18 +392,35 @@ pub fn css(input: TokenStream) -> TokenStream {
         transpile,
     } = parse_macro_input!(input);
 
-    source
+    let name_mappings = source
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let classes = css::class_names(&source).filter(|class| {
+    let class_names: Vec<(String, String)> = if let Some(name_mappings) = name_mappings {
+        name_mappings
+            .into_iter()
+            .map(|(class_ident, class)| {
+                if !class.composes.is_empty() {
+                    abort_call_site!("`composes` is unsupported");
+                }
+
+                (class_ident, class.name.clone())
+            })
+            .collect()
+    } else {
+        css::class_names(&source)
+            .map(|class| (class.clone(), class))
+            .collect()
+    };
+
+    let classes = class_names.into_iter().filter(|(class_ident, _css_class)| {
         let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
-            any_prefix_matches(class, include_prefixes)
+            any_prefix_matches(class_ident, include_prefixes)
         } else {
             true
         };
 
-        let exclude = any_prefix_matches(class, &exclude_prefixes);
+        let exclude = any_prefix_matches(class_ident, &exclude_prefixes);
 
         include && !exclude
     });
@@ -411,17 +429,13 @@ pub fn css(input: TokenStream) -> TokenStream {
         code_gen(
             &source,
             auto_mount,
-            classes.filter_map(|class| {
-                let class_ident = class.strip_prefix(&prefix).map(str::to_string);
-                class_ident.map(|class_ident| (class_ident, class))
+            classes.filter_map(|(class_ident, css_class)| {
+                let class_ident = class_ident.strip_prefix(&prefix).map(str::to_string);
+                class_ident.map(|class_ident| (class_ident, css_class))
             }),
         )
     } else {
-        code_gen(
-            &source,
-            auto_mount,
-            classes.map(|class| (class.clone(), class)),
-        )
+        code_gen(&source, auto_mount, classes)
     }
 }
 

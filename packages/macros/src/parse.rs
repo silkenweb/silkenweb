@@ -22,6 +22,7 @@ mod kw {
     custom_keyword!(transpile);
     custom_keyword!(minify);
     custom_keyword!(pretty);
+    custom_keyword!(modules);
     custom_keyword!(nesting);
     custom_keyword!(browsers);
 }
@@ -120,12 +121,14 @@ impl ParseValue for Transpile {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut minify = false;
         let mut pretty = false;
+        let mut modules = false;
         let mut nesting = false;
         let mut browsers = None;
 
         parse_comma_delimited(&parenthesized(input)?, |field, input| {
             Ok(flag(kw::minify, field, input, &mut minify)?
                 || flag(kw::pretty, field, input, &mut pretty)?
+                || flag(kw::modules, field, input, &mut modules)?
                 || flag(kw::nesting, field, input, &mut nesting)?
                 || parameter(kw::browsers, field, input, &mut browsers)?)
         })?;
@@ -133,6 +136,7 @@ impl ParseValue for Transpile {
         Ok(Self(css::Transpile {
             minify,
             pretty,
+            modules,
             nesting,
             browsers: browsers.map(Browsers::into),
         }))

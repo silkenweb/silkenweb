@@ -8,6 +8,7 @@ use std::{
 use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
 use lightningcss::{
+    css_modules::{self, CssModuleExports},
     stylesheet::{MinifyOptions, ParserOptions, PrinterOptions, StyleSheet},
     targets::Browsers,
 };
@@ -49,11 +50,13 @@ impl Source {
         &mut self,
         validate: bool,
         transpile: Option<Transpile>,
-    ) -> Result<(), String> {
+    ) -> Result<Option<CssModuleExports>, String> {
         let write_content = transpile.is_some();
+
         if validate || write_content {
             let minify = transpile.as_ref().map_or(false, |t| t.minify);
             let pretty = transpile.as_ref().map_or(false, |t| t.pretty);
+            let modules = transpile.as_ref().map_or(false, |t| t.modules);
             let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
             let targets = transpile.and_then(|t| t.browsers);
 
@@ -63,13 +66,17 @@ impl Source {
                 .dependency
                 .as_ref()
                 .map_or_else(|| "<content>".to_string(), String::clone);
+            let css_modules = modules.then(|| css_modules::Config {
+                pattern: css_modules::Pattern::default(),
+                dashed_idents: false,
+            });
             let mut stylesheet: StyleSheet = StyleSheet::parse(
                 &content,
                 ParserOptions {
                     filename,
                     nesting,
                     custom_media: false,
-                    css_modules: None,
+                    css_modules,
                     source_index: 0,
                     error_recovery: !validate,
                     warnings: warnings.as_ref().map(Arc::clone),
@@ -99,7 +106,7 @@ impl Source {
                         .map_err(|e| e.to_string())?;
                 }
 
-                self.content = stylesheet
+                let css = stylesheet
                     .to_css(PrinterOptions {
                         // `minify` just controls the output format without doing more structural
                         // minification.
@@ -110,12 +117,14 @@ impl Source {
                         analyze_dependencies: None,
                         pseudo_classes: None,
                     })
-                    .map_err(|e| e.to_string())?
-                    .code;
-            }
-        };
+                    .map_err(|e| e.to_string())?;
+                self.content = css.code;
 
-        Ok(())
+                return Ok(css.exports);
+            }
+        }
+
+        Ok(None)
     }
 
     pub fn dependency(&self) -> &Option<String> {
@@ -130,6 +139,7 @@ impl Source {
 pub struct Transpile {
     pub minify: bool,
     pub pretty: bool,
+    pub modules: bool,
     pub nesting: bool,
     pub browsers: Option<Browsers>,
 }
