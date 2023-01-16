@@ -1,13 +1,13 @@
 //! Document utilities.
-use std::cell::RefCell;
+use std::{cell::RefCell, collections::HashMap};
 
 use paste::paste;
-use silkenweb_base::{document, intern_str};
+use silkenweb_base::document;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
-    dom::{Dom, Wet},
-    node::element::{Const, GenericElement},
+    dom::{Dom, Dry, Wet},
+    node::element::{Const, Element, GenericElement, Mut},
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -117,15 +117,18 @@ events! {
 
 pub trait Document: Dom + Sized {
     // TODO: Doc
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Const>>) -> bool;
+    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
 }
 
-// TODO: impl for Dry
 impl Document for Wet {
     // TODO: Move mount and unmount_all into here
-    // TODO: unmouint_all should unmount from head as well
 
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Const>>) -> bool {
+    // TODO: unmount_all should unmount from head as well
+
+    // TODO: Change DefaultDom to use `Dry` on non wasm platforms, so
+    // stylesheet::mount works for SSR
+
+    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
         if document::query_selector(&format!("#{}", web_sys::css::escape(id)))
             .unwrap_throw()
             .is_some()
@@ -133,11 +136,8 @@ impl Document for Wet {
             return false;
         }
 
-        let element = element.into();
+        let element = element.into().attribute("id", id).freeze();
         let dom_element = element.dom_element();
-        dom_element
-            .set_attribute(intern_str("id"), id)
-            .unwrap_throw();
         document::head()
             .map(|head| {
                 head.append_with_node_1(&dom_element).unwrap_throw();
@@ -147,8 +147,25 @@ impl Document for Wet {
     }
 }
 
+// TODO: Test
+impl Document for Dry {
+    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
+        MOUNTED_IN_DRY_HEAD.with(|mounted| {
+            let mut mounted = mounted.borrow_mut();
+
+            if mounted.contains_key(id) {
+                return false;
+            }
+
+            mounted.insert(id.to_string(), element.into().attribute("id", id).freeze());
+            true
+        })
+    }
+}
+
 // TODO: Provide a way to serialize `Dry` mounted stylesheets
 
 thread_local! {
     static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
+    static MOUNTED_IN_DRY_HEAD: RefCell<HashMap<String, GenericElement<Dry, Const>>> = RefCell::new(HashMap::new());
 }
