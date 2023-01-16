@@ -37,6 +37,7 @@ features = [
     "AnimationEvent",
     "Attr",
     "CompositionEvent",
+    "css",
     "CustomEvent",
     "Document",
     "DomTokenList",

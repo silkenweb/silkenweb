@@ -179,10 +179,12 @@ pub use silkenweb_signals_ext::value;
 /// but it can be used to restore the mount point if required. This can be
 /// useful for testing.
 pub fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
-    let mut element = element.into();
+    let element = element.into();
 
     let mount_point = mount_point(id);
-    element.mount(&mount_point);
+    mount_point
+        .replace_with_with_node_1(&element.dom_element())
+        .unwrap_throw();
     MountHandle::new(mount_point, element)
 }
 

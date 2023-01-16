@@ -1,6 +1,14 @@
 //! Document utilities.
+use std::cell::RefCell;
+
 use paste::paste;
-use wasm_bindgen::JsCast;
+use silkenweb_base::{document, intern_str};
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
+
+use crate::{
+    dom::{Dom, Wet},
+    node::element::{Const, GenericElement},
+};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod arch {
@@ -105,4 +113,40 @@ events! {
     touchmove: web_sys::TouchEvent,
     touchstart: web_sys::TouchEvent,
     wheel: web_sys::WheelEvent
+}
+
+pub trait Document: Dom + Sized {
+    // TODO: Doc
+    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Const>>) -> bool;
+}
+
+// TODO: impl for Dry
+impl Document for Wet {
+    // TODO: Move mount and unmount_all into here
+    // TODO: unmouint_all should unmount from head as well
+
+    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Const>>) -> bool {
+        if document::query_selector(&format!("#{}", web_sys::css::escape(id)))
+            .unwrap_throw()
+            .is_some()
+        {
+            return false;
+        }
+
+        let element = element.into();
+        let dom_element = element.dom_element();
+        dom_element
+            .set_attribute(intern_str("id"), id)
+            .unwrap_throw();
+        document::head()
+            .map(|head| {
+                head.append_with_node_1(&dom_element).unwrap_throw();
+                MOUNTED_IN_WET_HEAD.with(|mounted| mounted.borrow_mut().push(element));
+            })
+            .is_some()
+    }
+}
+
+thread_local! {
+    static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
 }

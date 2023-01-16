@@ -12,7 +12,7 @@ use futures_signals::{
 };
 use silkenweb_base::{clone, document, empty_str, intern_str};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
-use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+use wasm_bindgen::{JsCast, JsValue};
 
 use self::child_vec::ChildVec;
 use super::{ChildNode, Node, Resource};
@@ -269,14 +269,6 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 impl<Mutability> GenericElement<Wet, Mutability> {
     pub(crate) fn dom_element(&self) -> web_sys::Element {
         self.element.dom_element()
-    }
-
-    pub(crate) fn mount(&mut self, mount_point: &web_sys::Element) {
-        self.build();
-
-        mount_point
-            .replace_with_with_node_1(&self.dom_element())
-            .unwrap_throw();
     }
 }
 

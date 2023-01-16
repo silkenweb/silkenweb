@@ -9,6 +9,7 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
+use silkenweb_base::document;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
@@ -176,15 +177,14 @@ async fn create_app_container(app_id: &str) {
     // Clear the render queue
     render_now().await;
     remove_all_mounted();
-    let app_container = document().create_element("div").unwrap_throw();
+    let app_container = document::create_element("div");
     app_container.set_id(app_id);
-    let body = document().body().unwrap_throw();
+    let body = document::body().unwrap_throw();
     body.append_child(&app_container).unwrap_throw();
 }
 
 fn query_element(id: &str) -> web_sys::HtmlElement {
-    document()
-        .query_selector(&format!("#{}", id))
+    document::query_selector(&format!("#{}", id))
         .unwrap_throw()
         .unwrap_throw()
         .dyn_into()
@@ -193,10 +193,6 @@ fn query_element(id: &str) -> web_sys::HtmlElement {
 
 fn app_html(id: &str) -> String {
     query_element(id).outer_html()
-}
-
-fn document() -> web_sys::Document {
-    web_sys::window().unwrap_throw().document().unwrap_throw()
 }
 
 const APP_ID: &str = "app";
