@@ -18,6 +18,7 @@ mod kw {
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
     custom_keyword!(validate);
+    custom_keyword!(auto_mount);
     custom_keyword!(transpile);
     custom_keyword!(minify);
     custom_keyword!(pretty);
@@ -52,6 +53,7 @@ pub struct Input {
     pub include_prefixes: Option<Vec<String>>,
     pub exclude_prefixes: Vec<String>,
     pub validate: bool,
+    pub auto_mount: bool,
     pub transpile: Option<Transpile>,
 }
 
@@ -65,6 +67,7 @@ impl Parse for Input {
                 include_prefixes: None,
                 exclude_prefixes: Vec::new(),
                 validate: false,
+                auto_mount: false,
                 transpile: None,
             });
         }
@@ -75,6 +78,7 @@ impl Parse for Input {
         let mut include_prefixes = None;
         let mut exclude_prefixes = None;
         let mut validate = false;
+        let mut auto_mount = false;
         let mut transpile = None;
 
         parse_comma_delimited(input, |field, input| {
@@ -84,6 +88,7 @@ impl Parse for Input {
                 || parameter(kw::include_prefixes, field, input, &mut include_prefixes)?
                 || parameter(kw::exclude_prefixes, field, input, &mut exclude_prefixes)?
                 || flag(kw::validate, field, input, &mut validate)?
+                || flag(kw::auto_mount, field, input, &mut auto_mount)?
                 || parameter(kw::transpile, field, input, &mut transpile)?)
         })?;
 
@@ -102,6 +107,7 @@ impl Parse for Input {
             include_prefixes,
             exclude_prefixes: exclude_prefixes.unwrap_or_default(),
             validate,
+            auto_mount,
             transpile,
         })
     }

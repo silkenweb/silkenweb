@@ -246,6 +246,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
     }
 }
 
+// TODO: Doc auto_mount + fn mount
 /// Define `&str` constants for each class in a CSS file.
 ///
 /// This defines 2 modules:
@@ -273,6 +274,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 ///     include_prefixes = ["included-"],
 ///     exclude_prefixes = ["excluded-"],
 ///     validate,
+///     auto_mount,
 ///     transpile = (
 ///         minify,
 ///         pretty,
@@ -385,6 +387,7 @@ pub fn css(input: TokenStream) -> TokenStream {
         include_prefixes,
         exclude_prefixes,
         validate,
+        auto_mount,
         transpile,
     } = parse_macro_input!(input);
 
@@ -407,16 +410,18 @@ pub fn css(input: TokenStream) -> TokenStream {
     if let Some(prefix) = prefix {
         code_gen(
             &source,
+            auto_mount,
             classes.filter_map(|class| {
                 let class_ident = class.strip_prefix(&prefix).map(str::to_string);
-                class_ident.map(|class_ident| {
-                    println!("{}, {}", class_ident, class);
-                    (class_ident, class)
-                })
+                class_ident.map(|class_ident| (class_ident, class))
             }),
         )
     } else {
-        code_gen(&source, classes.map(|class| (class.clone(), class)))
+        code_gen(
+            &source,
+            auto_mount,
+            classes.map(|class| (class.clone(), class)),
+        )
     }
 }
 
@@ -424,7 +429,11 @@ fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
     prefixes.iter().any(|prefix| x.starts_with(prefix))
 }
 
-fn code_gen(source: &Source, classes: impl Iterator<Item = (String, String)>) -> TokenStream {
+fn code_gen(
+    source: &Source,
+    auto_mount: bool,
+    classes: impl Iterator<Item = (String, String)>,
+) -> TokenStream {
     let classes = classes.map(|(class_ident, class_name)| {
         if !class_ident.starts_with(char::is_alphabetic) {
             abort_call_site!(
@@ -433,13 +442,25 @@ fn code_gen(source: &Source, classes: impl Iterator<Item = (String, String)>) ->
             );
         }
 
-        let class_ident = Ident::new(
-            &class_ident
-                .replace(|c: char| !c.is_alphanumeric(), "_")
-                .to_uppercase(),
-            Span::call_site(),
-        );
-        quote!(pub const #class_ident: &str = #class_name;)
+        let class_ident = class_ident.replace(|c: char| !c.is_alphanumeric(), "_");
+
+        if auto_mount {
+            let class_ident = Ident::new(&class_ident.to_lowercase(), Span::call_site());
+            quote!(pub fn #class_ident() -> &'static str {
+                use ::std::{panic::Location, sync::Once};
+
+                static INIT: Once = Once::new();
+
+                INIT.call_once(|| {
+                    super::stylesheet::mount()
+                });
+
+                #class_name
+            })
+        } else {
+            let class_ident = Ident::new(&class_ident.to_uppercase(), Span::call_site());
+            quote!(pub const #class_ident: &str = #class_name;)
+        }
     });
 
     let dependency = source.dependency().iter();
@@ -453,6 +474,25 @@ fn code_gen(source: &Source, classes: impl Iterator<Item = (String, String)>) ->
         }
 
         mod stylesheet {
+            pub fn mount() {
+                use ::std::panic::Location;
+                use silkenweb::{
+                    document::Document,
+                    dom::DefaultDom,
+                    node::element::ParentElement,
+                    elements::html::style,
+                };
+
+                let location = Location::caller();
+                DefaultDom::mount_in_head(
+                    &format!(
+                        "silkenweb-style:{}:{}",
+                        location.file(),
+                        location.line()),
+                    style().text(text())
+                );
+            }
+
             pub fn text() -> &'static str {
                 #content
             }
