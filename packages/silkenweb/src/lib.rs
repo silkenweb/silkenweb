@@ -69,6 +69,139 @@ use node::element::{Const, GenericElement};
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
+// TODO: Doc auto_mount + fn mount + transpile::modules
+/// Define `&str` constants for each class in a CSS file.
+///
+/// This defines 2 modules:
+///
+/// - `mod class` with constants for each CSS class. For a CSS class called
+///   `my-css-class`, a constant called `MY_CSS_CLASS` will be defined.
+/// - `mod stylesheet` with an `fn text() -> &'static str` that gets the content
+///   of the stylesheet.
+///
+/// The macro takes two forms. Firstly it can take a single string literal which
+/// is the path to the CSS/SCSS/SASS file. The path is relative to the
+/// `$CARGO_MANIFEST_DIR` environment variable.
+///
+/// Alternatively, named parameters can be specified.
+///
+/// # Parameters
+///
+/// Parameters take the form:
+///
+/// ```
+/// # use silkenweb_macros::css;
+/// css!(
+///     path = "my-css-file.css",
+///     prefix = "prefix",
+///     include_prefixes = ["included-"],
+///     exclude_prefixes = ["excluded-"],
+///     validate,
+///     auto_mount,
+///     transpile = (
+///         minify,
+///         pretty,
+///         modules,
+///         nesting,
+///         browsers = (
+///             android = (1, 0, 0),
+///             chrome = (1, 0, 0),
+///             edge = (1, 0, 0),
+///             firefox = (1, 0, 0),
+///             ie = (1, 0, 0),
+///             ios_saf = (1, 0, 0),
+///             opera = (1, 0, 0),
+///             safari = (1, 0, 0),
+///             samsung = (1, 0, 0),
+///         )
+///     )
+/// );
+/// ```
+///
+/// All are optional, but one of `path` or `content` must be specified.
+///
+/// - `path` is the path to the CSS /SCSS/SASS file.
+/// - `content` is the css content.
+/// - `prefix`: only classes starting with `prefix` should be included. Their
+///   Rust names will have the prefix stripped.
+/// - `include_prefixes`: a list of prefixes to include, without stripping the
+///   prefix. Rust constants will only be defined for classes starting with one
+///   or more of these prefixes.
+/// - `exclude_prefixes`: a list of prefixes to exclude. No Rust constants will
+///   be defined for a class starting with any of these prefixes.
+///   `exclude_prefixes` takes precedence over `include_prefixes`.
+/// - `validate`: validate the CSS.
+/// - `transpile`: transpile the CSS with [lightningcss].
+///
+/// ## `transpile`
+///
+/// - `minify`: Minify the CSS returned by `stylesheet()`. Minification also
+///   adds/removes vendor prefixes, so it's a good idea to keep this the same
+///   between debug and release builds. Use `pretty` if you want legible CSS in
+///   debug.
+/// - `pretty`: Pretty print the final output. This is the default unless minify
+///   is specified.
+/// - `nesting`: Allow CSS nesting.
+/// - `browsers` is a comma seperated list of the minimum supported browser
+///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.
+///   The version is a paranthesized `,` seperated string of major, minor, and
+///   patch versions. For example, to support firefox 110  + and chrome 111+,
+///   use `browsers =( firefox = (110, 0, 0), chrome = (111, 0, 0) )`.
+///
+/// # Examples
+///
+/// Define private constants for all CSS classes:
+///
+/// ```
+/// # use silkenweb_macros::css;
+/// css!("my-css-file.css");
+/// assert_eq!(class::MY_CLASS, "my-class");
+/// ```
+///
+/// Define private constants for all content CSS classes:
+///
+///  ```
+/// # use silkenweb_macros::css;
+/// css!(content = r#"
+///     .my-class {
+///         color: hotpink;
+///     }
+/// "#);
+/// assert_eq!(class::MY_CLASS, "my-class");
+/// assert_eq!(stylesheet::text(), r#"
+///     .my-class {
+///         color: hotpink;
+///     }
+/// "#);
+/// ```
+/// 
+/// Include classes starting with `border-`, except classes starting with
+/// `border-excluded-`:
+/// ```
+/// # use silkenweb_macros::css;
+/// css!(
+///     path = "my-css-file.css",
+///     prefix = "border-",
+///     exclude_prefixes = ["border-excluded-"]
+/// );
+///
+/// assert_eq!(class::SMALL, "border-small");
+/// ```
+/// 
+/// This won't compile because `exclude_prefixes` takes precedence over
+/// `include_prefixes`:
+/// ```compile_fail
+/// # use silkenweb_macros::css;
+/// css!(
+///     path = "my-css-file.css",
+///     include_prefixes = ["border-"]
+///     exclude_prefixes = ["border-excluded-"]
+/// );
+///
+/// assert_eq!(class::BORDER_EXCLUDED_HUGE, "border-excluded-huge");
+/// ```
+/// 
+/// [lightningcss]: https://lightningcss.dev/
 pub use silkenweb_macros::css;
 /// Derive the traits needed for a blanket implmenetation of [`ChildElement`].
 ///
