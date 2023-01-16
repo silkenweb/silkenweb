@@ -404,7 +404,7 @@ pub fn css(input: TokenStream) -> TokenStream {
                     abort_call_site!("`composes` is unsupported");
                 }
 
-                (class_ident, class.name.clone())
+                (class_ident, class.name)
             })
             .collect()
     } else {
