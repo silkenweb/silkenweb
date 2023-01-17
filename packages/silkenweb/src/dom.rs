@@ -38,7 +38,12 @@ pub trait InDom {
     type Dom: Dom;
 }
 
+// TODO: Doc
+#[cfg(target_arch = "wasm32")]
 pub type DefaultDom = Wet;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub type DefaultDom = Dry;
 
 /// A DOM that can only be rendered on the server
 ///
@@ -111,10 +116,10 @@ impl private::InstantiableDom for Hydro {
 ///
 /// ```no_run
 /// # use html::{p, P};
-/// # use silkenweb::{dom::Wet, prelude::*};
+/// # use silkenweb::{dom::Wet, document::Document, prelude::*};
 /// let app: P<Wet> = p().text("Hello, world!");
 ///
-/// mount("app-id", app);
+/// Wet::mount("app-id", app);
 /// ```
 pub struct Wet;
 

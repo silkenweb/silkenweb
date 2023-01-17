@@ -124,7 +124,7 @@ pub trait Document: Dom + Sized {
     /// the mount point. The returned `MountHandle` should usually just be
     /// discarded, but it can be used to restore the mount point if
     /// required. This can be useful for testing.
-    fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle;
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> MountHandle;
 
     /// Remove all mounted elements.
     ///
@@ -140,7 +140,7 @@ pub trait Document: Dom + Sized {
 }
 
 impl Document for Wet {
-    fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
         let element = element.into();
 
         let mount_point = mount_point(id);
@@ -161,9 +161,6 @@ impl Document for Wet {
             element.dom_element().remove()
         }
     }
-
-    // TODO: Change DefaultDom to use `Dry` on non wasm platforms, so
-    // stylesheet::mount works for SSR
 
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
         if document::query_selector(&format!("#{}", web_sys::css::escape(id)))
@@ -198,7 +195,7 @@ impl Document for Wet {
 
 // TODO: Test
 impl Document for Dry {
-    fn mount(_id: &str, _element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
+    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
