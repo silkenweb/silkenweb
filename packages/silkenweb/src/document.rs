@@ -7,7 +7,9 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
     dom::{Dom, Dry, Wet},
+    insert_element, mount_point,
     node::element::{Const, Element, GenericElement, Mut},
+    remove_element, ELEMENTS,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -116,6 +118,20 @@ events! {
 }
 
 pub trait Document: Dom + Sized {
+    /// Mount an element on the document.
+    ///
+    /// `id` is the html element id of the mount point. The element will replace
+    /// the mount point. The returned `MountHandle` should usually just be
+    /// discarded, but it can be used to restore the mount point if
+    /// required. This can be useful for testing.
+    fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle;
+
+    /// Remove all mounted elements.
+    ///
+    /// Mount points will not be restored. This is useful to ensure a clean
+    /// environment for testing.
+    fn remove_all_mounted();
+
     // TODO: Doc
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
 
@@ -124,7 +140,23 @@ pub trait Document: Dom + Sized {
 }
 
 impl Document for Wet {
-    // TODO: Move mount and unmount_all into here
+    fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
+        let element = element.into();
+
+        let mount_point = mount_point(id);
+        mount_point
+            .replace_with_with_node_1(&element.dom_element())
+            .unwrap_throw();
+        MountHandle::new(mount_point, element)
+    }
+
+    fn remove_all_mounted() {
+        ELEMENTS.with(|elements| {
+            for element in elements.take().into_values() {
+                element.dom_element().remove()
+            }
+        });
+    }
 
     // TODO: unmount_all should unmount from head as well
 
@@ -164,6 +196,14 @@ impl Document for Wet {
 
 // TODO: Test
 impl Document for Dry {
+    fn mount(_id: &str, _element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
+        panic!("`mount` is not supported on `Dry` DOMs")
+    }
+
+    fn remove_all_mounted() {
+        MOUNTED_IN_DRY_HEAD.with(|mounted| mounted.take());
+    }
+
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
         MOUNTED_IN_DRY_HEAD.with(|mounted| {
             let mut mounted = mounted.borrow_mut();
@@ -187,6 +227,31 @@ impl Document for Dry {
         });
 
         html
+    }
+}
+
+/// Manage a mount point
+pub struct MountHandle {
+    id: u128,
+    mount_point: web_sys::Element,
+}
+
+impl MountHandle {
+    fn new(mount_point: web_sys::Element, element: GenericElement<Wet, Const>) -> Self {
+        Self {
+            id: insert_element(element),
+            mount_point,
+        }
+    }
+
+    /// Remove the mounted element and restore the mount point.
+    pub fn unmount(self) {
+        if let Some(element) = remove_element(self.id) {
+            element
+                .dom_element()
+                .replace_with_with_node_1(&self.mount_point)
+                .unwrap_throw();
+        }
     }
 }
 

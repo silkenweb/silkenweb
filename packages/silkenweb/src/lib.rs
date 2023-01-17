@@ -64,7 +64,8 @@
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
 use std::{cell::RefCell, collections::HashMap};
 
-use dom::Wet;
+use document::{Document, MountHandle};
+use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
 #[doc(inline)]
 pub use silkenweb_base::clone;
@@ -267,7 +268,6 @@ pub use silkenweb_macros::ChildElement;
 pub use silkenweb_macros::Element;
 #[doc(inline)]
 pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};
-use wasm_bindgen::UnwrapThrowExt;
 
 #[doc(hidden)]
 #[macro_use]
@@ -305,57 +305,9 @@ pub mod prelude {
 
 pub use silkenweb_signals_ext::value;
 
-/// Mount an element on the document.
-///
-/// `id` is the html element id of the mount point. The element will replace the
-/// mount point. The returned `MountHandle` should usually just be discarded,
-/// but it can be used to restore the mount point if required. This can be
-/// useful for testing.
-pub fn mount(id: &str, element: impl Into<GenericElement<Wet, Const>>) -> MountHandle {
-    let element = element.into();
-
-    let mount_point = mount_point(id);
-    mount_point
-        .replace_with_with_node_1(&element.dom_element())
-        .unwrap_throw();
-    MountHandle::new(mount_point, element)
-}
-
-/// Remove all mounted elements.
-///
-/// Mount points will not be restored. This is useful to ensure a clean
-/// environment for testing.
-pub fn remove_all_mounted() {
-    ELEMENTS.with(|elements| {
-        for element in elements.take().into_values() {
-            element.dom_element().remove()
-        }
-    });
-}
-
-/// Manage a mount point
-pub struct MountHandle {
-    id: u128,
-    mount_point: web_sys::Element,
-}
-
-impl MountHandle {
-    fn new(mount_point: web_sys::Element, element: GenericElement<Wet, Const>) -> Self {
-        Self {
-            id: insert_element(element),
-            mount_point,
-        }
-    }
-
-    /// Remove the mounted element and restore the mount point.
-    pub fn unmount(self) {
-        if let Some(element) = remove_element(self.id) {
-            element
-                .dom_element()
-                .replace_with_with_node_1(&self.mount_point)
-                .unwrap_throw();
-        }
-    }
+/// Shorthand for [`DefaultDom::mount`]
+pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) -> MountHandle {
+    DefaultDom::mount(id, element)
 }
 
 fn mount_point(id: &str) -> web_sys::Element {

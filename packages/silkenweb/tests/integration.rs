@@ -1,11 +1,11 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    dom::{self, Wet},
+    document::Document,
+    dom::{self, DefaultDom, Wet},
     elements::html::{button, div, p, P},
     mount,
     node::element::ParentElement,
     prelude::{ElementEvents, HtmlElement},
-    remove_all_mounted,
     task::render_now,
     value::Sig,
 };
@@ -176,7 +176,7 @@ async fn verify_reactive_text(paragraph: P<Wet>, text_id: &str, text: &mut Mutab
 async fn create_app_container(app_id: &str) {
     // Clear the render queue
     render_now().await;
-    remove_all_mounted();
+    DefaultDom::remove_all_mounted();
     let app_container = document::create_element("div");
     app_container.set_id(app_id);
     let body = document::body().unwrap_throw();
