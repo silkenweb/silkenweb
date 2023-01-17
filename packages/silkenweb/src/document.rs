@@ -164,7 +164,6 @@ impl Document for Dry {
 }
 
 // TODO: Provide a way to serialize `Dry` mounted stylesheets
-// TODO: Simplify `MountHandle`
 
 thread_local! {
     static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());

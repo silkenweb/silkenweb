@@ -337,7 +337,6 @@ pub fn remove_all_mounted() {
 pub struct MountHandle {
     id: u128,
     mount_point: web_sys::Element,
-    on_drop: Option<DropAction>,
 }
 
 impl MountHandle {
@@ -345,57 +344,18 @@ impl MountHandle {
         Self {
             id: insert_element(element),
             mount_point,
-            on_drop: None,
         }
-    }
-
-    /// Stop the mounted element being reactive. This will free up any resources
-    /// that are providing reactivity for the mounted element.
-    pub fn stop(mut self) {
-        self.stop_on_drop();
-    }
-
-    /// [`stop`][`Self::stop`] when `self` is dropped.
-    pub fn stop_on_drop(&mut self) {
-        self.on_drop = Some(DropAction::Stop);
     }
 
     /// Remove the mounted element and restore the mount point.
-    ///
-    /// Equivalent to calling [`stop`][`Self::stop`] and replacing the mounted
-    /// element with the original mount point.
-    pub fn unmount(mut self) {
-        self.unmount_on_drop();
-    }
-
-    /// [`unmount`][`Self::unmount`] when `self` is dropped.
-    pub fn unmount_on_drop(&mut self) {
-        self.on_drop = Some(DropAction::Unmount);
-    }
-}
-
-impl Drop for MountHandle {
-    fn drop(&mut self) {
-        match self.on_drop {
-            Some(DropAction::Stop) => {
-                remove_element(self.id);
-            }
-            Some(DropAction::Unmount) => {
-                if let Some(element) = remove_element(self.id) {
-                    element
-                        .dom_element()
-                        .replace_with_with_node_1(&self.mount_point)
-                        .unwrap_throw();
-                }
-            }
-            None => (),
+    pub fn unmount(self) {
+        if let Some(element) = remove_element(self.id) {
+            element
+                .dom_element()
+                .replace_with_with_node_1(&self.mount_point)
+                .unwrap_throw();
         }
     }
-}
-
-enum DropAction {
-    Stop,
-    Unmount,
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
