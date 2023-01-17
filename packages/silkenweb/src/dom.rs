@@ -38,11 +38,12 @@ pub trait InDom {
     type Dom: Dom;
 }
 
-// TODO: Doc
 #[cfg(target_arch = "wasm32")]
+/// The default DOM for the current platform.
 pub type DefaultDom = Wet;
 
 #[cfg(not(target_arch = "wasm32"))]
+/// The default DOM for the current platform.
 pub type DefaultDom = Dry;
 
 /// A DOM that can only be rendered on the server
