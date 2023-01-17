@@ -118,6 +118,9 @@ events! {
 pub trait Document: Dom + Sized {
     // TODO: Doc
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
+
+    // TODO: Doc
+    fn head_inner_html() -> String;
 }
 
 impl Document for Wet {
@@ -145,6 +148,18 @@ impl Document for Wet {
             })
             .is_some()
     }
+
+    fn head_inner_html() -> String {
+        let mut html = String::new();
+
+        MOUNTED_IN_WET_HEAD.with(|mounted| {
+            for elem in &*mounted.borrow() {
+                html.push_str(&elem.to_string());
+            }
+        });
+
+        html
+    }
 }
 
 // TODO: Test
@@ -161,9 +176,19 @@ impl Document for Dry {
             true
         })
     }
-}
 
-// TODO: Provide a way to serialize `Dry` mounted stylesheets
+    fn head_inner_html() -> String {
+        let mut html = String::new();
+
+        MOUNTED_IN_DRY_HEAD.with(|mounted| {
+            for elem in mounted.borrow().values() {
+                html.push_str(&elem.to_string());
+            }
+        });
+
+        html
+    }
+}
 
 thread_local! {
     static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
