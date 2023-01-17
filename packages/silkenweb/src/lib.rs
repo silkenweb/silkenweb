@@ -80,8 +80,8 @@ use silkenweb_base::document as base_document;
 /// - `mod stylesheet` with:
 ///     - An `fn text() -> &'static str` that gets the content of the
 ///       stylesheet.
-///     - An `fn mount()` that lazily calls [`DefaultDom::mount_in_head`] once, to
-///       ensure the stylesheet is in the head.
+///     - An `fn mount()` that lazily calls [`DefaultDom::mount_in_head`] once,
+///       to ensure the stylesheet is in the head.
 ///
 /// The macro takes two forms. Firstly it can take a single string literal which
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
