@@ -3,12 +3,6 @@ use silkenweb::{elements::html::*, prelude::*};
 mod red {
     silkenweb::css!(path = "red.css", auto_mount, transpile = (modules));
 
-    // TODO: What if we wanted to export the `mod class` as `pub`?
-    // modules = {
-    // pub use classes as my_mod;
-    // pub use stylesheet as my_mod2;
-    // },
-
     pub use class::*;
 }
 

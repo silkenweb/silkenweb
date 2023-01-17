@@ -14,6 +14,7 @@ mod kw {
 
     custom_keyword!(path);
     custom_keyword!(content);
+    custom_keyword!(public);
     custom_keyword!(prefix);
     custom_keyword!(include_prefixes);
     custom_keyword!(exclude_prefixes);
@@ -50,6 +51,7 @@ impl ParseValue for Vec<String> {
 
 pub struct Input {
     pub source: Source,
+    pub public: bool,
     pub prefix: Option<String>,
     pub include_prefixes: Option<Vec<String>>,
     pub exclude_prefixes: Vec<String>,
@@ -64,6 +66,7 @@ impl Parse for Input {
             return Ok(Self {
                 source: Source::from_path(input.parse::<LitStr>()?.value())
                     .unwrap_or_else(|e| abort_call_site!(e)),
+                public: false,
                 prefix: None,
                 include_prefixes: None,
                 exclude_prefixes: Vec::new(),
@@ -74,6 +77,7 @@ impl Parse for Input {
         }
 
         let mut path: Option<String> = None;
+        let mut public = false;
         let mut content: Option<String> = None;
         let mut prefix = None;
         let mut include_prefixes = None;
@@ -84,6 +88,7 @@ impl Parse for Input {
 
         parse_comma_delimited(input, |field, input| {
             Ok(parameter(kw::path, field, input, &mut path)?
+                || flag(kw::public, field, input, &mut public)?
                 || parameter(kw::content, field, input, &mut content)?
                 || parameter(kw::prefix, field, input, &mut prefix)?
                 || parameter(kw::include_prefixes, field, input, &mut include_prefixes)?
@@ -104,6 +109,7 @@ impl Parse for Input {
 
         Ok(Self {
             source,
+            public,
             prefix,
             include_prefixes,
             exclude_prefixes: exclude_prefixes.unwrap_or_default(),

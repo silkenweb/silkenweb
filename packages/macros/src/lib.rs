@@ -251,6 +251,7 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
 pub fn css(input: TokenStream) -> TokenStream {
     let Input {
         mut source,
+        public,
         prefix,
         include_prefixes,
         exclude_prefixes,
@@ -295,6 +296,7 @@ pub fn css(input: TokenStream) -> TokenStream {
     if let Some(prefix) = prefix {
         code_gen(
             &source,
+            public,
             auto_mount,
             classes.filter_map(|(class_ident, css_class)| {
                 let class_ident = class_ident.strip_prefix(&prefix).map(str::to_string);
@@ -302,7 +304,7 @@ pub fn css(input: TokenStream) -> TokenStream {
             }),
         )
     } else {
-        code_gen(&source, auto_mount, classes)
+        code_gen(&source, public, auto_mount, classes)
     }
 }
 
@@ -312,6 +314,7 @@ fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
 
 fn code_gen(
     source: &Source,
+    public: bool,
     auto_mount: bool,
     classes: impl Iterator<Item = (String, String)>,
 ) -> TokenStream {
@@ -346,15 +349,16 @@ fn code_gen(
 
     let dependency = source.dependency().iter();
     let content = source.content();
+    let visibility = if public { quote!(pub) } else { quote!() };
 
     quote!(
         #(const _: &[u8] = ::std::include_bytes!(#dependency);)*
 
-        mod class {
+        #visibility mod class {
             #(#classes)*
         }
 
-        mod stylesheet {
+        #visibility mod stylesheet {
             pub fn mount() {
                 use ::std::panic::Location;
                 use silkenweb::{
