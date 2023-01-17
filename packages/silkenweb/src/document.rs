@@ -120,7 +120,7 @@ events! {
 pub trait Document: Dom + Sized {
     /// Mount an element on the document.
     ///
-    /// `id` is the html element id of the mount point. The element will replace
+    /// `id` is the id of the mount point element. The element will replace
     /// the mount point. The returned `MountHandle` should usually just be
     /// discarded, but it can be used to restore the mount point if
     /// required. This can be useful for testing.
@@ -132,10 +132,24 @@ pub trait Document: Dom + Sized {
     /// environment for testing.
     fn unmount_all();
 
-    // TODO: Doc
+    /// Mount an element as a child of `<head>`
+    ///
+    /// This will search for `id` in the document. If it's found, no action is
+    /// taken and `false` is returned. If there's no matching `id` in the
+    /// document:
+    ///
+    /// - The `id` attribute  is set on `element`.
+    /// - `element` is added as a child of `head`.
+    /// - `true` is returned.
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
 
-    // TODO: Doc
+    /// Get the inner HTML of `<head>`.
+    ///
+    /// This only includes elements added with `mount_in_head`. It's useful for
+    /// server side rendering, where it can be used to add any stylesheets
+    /// required for the HTML. The `id` attributes will be set on each element,
+    /// so hydration can avoid adding duplicate stylesheets with
+    /// [`Self::mount_in_head`].
     fn head_inner_html() -> String;
 }
 

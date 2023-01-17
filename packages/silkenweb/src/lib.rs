@@ -70,15 +70,18 @@ use node::element::{Const, GenericElement};
 #[doc(inline)]
 pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
-// TODO: Doc auto_mount + fn mount + transpile::modules
 /// Define `&str` constants for each class in a CSS file.
 ///
 /// This defines 2 modules:
 ///
-/// - `mod class` with constants for each CSS class. For a CSS class called
-///   `my-css-class`, a constant called `MY_CSS_CLASS` will be defined.
-/// - `mod stylesheet` with an `fn text() -> &'static str` that gets the content
-///   of the stylesheet.
+/// - `mod class` with constants or functions (depending on `auto_mount`) for
+///   each CSS class. For a CSS class called `my-css-class`, a constant called
+///   `MY_CSS_CLASS` or a function called `my_css_class` will be defined.
+/// - `mod stylesheet` with:
+///     - An `fn text() -> &'static str` that gets the content of the
+///       stylesheet.
+///     - An `fn mount()` that lazily calls [`DefaultDom::mount_in_head`] once, to
+///       ensure the stylesheet is in the head.
 ///
 /// The macro takes two forms. Firstly it can take a single string literal which
 /// is the path to the CSS/SCSS/SASS file. The path is relative to the
@@ -132,6 +135,8 @@ use silkenweb_base::document as base_document;
 ///   be defined for a class starting with any of these prefixes.
 ///   `exclude_prefixes` takes precedence over `include_prefixes`.
 /// - `validate`: validate the CSS.
+/// - `auto_mount`: Generate a function for each CSS class that will call
+///   `stylesheet::mount` before returning the class name.
 /// - `transpile`: transpile the CSS with [lightningcss].
 ///
 /// ## `transpile`
@@ -142,6 +147,8 @@ use silkenweb_base::document as base_document;
 ///   debug.
 /// - `pretty`: Pretty print the final output. This is the default unless minify
 ///   is specified.
+/// - `modules`: Enable [CSS Modules] to locally scope class identifiers, via
+///   [lightningcss]. Composition is unsupported.
 /// - `nesting`: Allow CSS nesting.
 /// - `browsers` is a comma seperated list of the minimum supported browser
 ///   versions. This will add vendor prefixes to the CSS from `stylesheet()`.
@@ -203,6 +210,8 @@ use silkenweb_base::document as base_document;
 /// ```
 /// 
 /// [lightningcss]: https://lightningcss.dev/
+/// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
+/// [CSS Modules]: https://github.com/css-modules/css-modules
 pub use silkenweb_macros::css;
 /// Derive the traits needed for a blanket implmenetation of [`ChildElement`].
 ///
