@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     document::Document,
-    dom::{self, DefaultDom},
+    dom::DefaultDom,
     elements::html::{button, div, p, P},
     mount,
     node::element::ParentElement,
@@ -36,12 +36,6 @@ mod hydration;
 mod template;
 
 wasm_bindgen_test_configure!(run_in_browser);
-
-#[cfg(target_arch = "wasm32")]
-type PlatformDom = dom::Wet;
-
-#[cfg(not(target_arch = "wasm32"))]
-type PlatformDom = dom::Dry;
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {

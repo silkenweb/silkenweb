@@ -3,6 +3,7 @@ use futures_signals::{
     signal_vec::{MutableVec, MutableVecLockMut, SignalVecExt},
 };
 use silkenweb::{
+    dom::DefaultDom,
     elements::{
         html::{div, p, Div},
         HtmlElement,
@@ -13,13 +14,11 @@ use silkenweb::{
     value::Sig,
 };
 
-use super::PlatformDom;
-
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
         isomorphic_test! {
             async fn $name() {
-                assert_eq!(Node::<PlatformDom>::from($node).to_string(), $expected)
+                assert_eq!(Node::<DefaultDom>::from($node).to_string(), $expected)
             }
         }
     };
@@ -232,7 +231,7 @@ children_signal_test!(
 isomorphic_test! {
     async fn text_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node<PlatformDom> = p().text(Sig(text.signal())).into();
+        let elem: Node = p().text(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), "<p>Initial text</p>");
         text.set("Updated text");
@@ -245,7 +244,7 @@ isomorphic_test! {
     async fn classes_signal() {
         let test_class1 = Mutable::new(Some("test-class-1"));
         let test_class2 = Mutable::new(Some("test-class-2"));
-        let elem: Node<PlatformDom> =
+        let elem: Node =
             div()
                 .classes(Sig(test_class1.signal()))
                 .classes(Sig(test_class2.signal()))
@@ -272,7 +271,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn attribute_signal() {
         let text = Mutable::new("Initial text");
-        let elem: Node<PlatformDom> = div().title(Sig(text.signal())).into();
+        let elem: Node = div().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set("Updated text");
@@ -284,7 +283,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn optional_attribute_signal() {
         let text = Mutable::new(Some("Initial text"));
-        let elem: Node<PlatformDom> = div().title(Sig(text.signal())).into();
+        let elem: Node = div().title(Sig(text.signal())).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div title="Initial text"></div>"#);
         text.set(None);
@@ -295,7 +294,7 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn text_node() {
-        let elem: Node<PlatformDom> = div().child(text("Hello, world!")).into();
+        let elem: Node = div().child(text("Hello, world!")).into();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div>Hello, world!</div>"#);
     }
@@ -307,14 +306,14 @@ pub async fn children_signal_test(
     expected: &[usize],
 ) {
     async fn with_existing_children(
-        initial_elem: Div<PlatformDom>,
+        initial_elem: Div<DefaultDom>,
         initial_child_text: &str,
         initial: &[usize],
         f: impl FnOnce(MutableVecLockMut<usize>),
         expected: &[usize],
     ) {
         let children = MutableVec::<usize>::new_with_values(initial.to_vec());
-        let element: Node<PlatformDom> = initial_elem
+        let element: Node = initial_elem
             .children_signal(children.signal_vec().map(|i| p().text(format!("{}", i))))
             .into();
 

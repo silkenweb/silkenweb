@@ -14,21 +14,19 @@ use silkenweb::{
     value::Sig,
 };
 
-use super::PlatformDom;
-
 async fn check<Param: 'static>(
-    template: &Div<Template<Param, PlatformDom>, Const>,
+    template: &Div<Template<Param>, Const>,
     param: Param,
     expected: &str,
 ) {
     render_now().await;
-    let node: Node<PlatformDom> = template.instantiate(&param).into();
+    let node: Node = template.instantiate(&param).into();
     assert_eq!(node.to_string(), expected);
 }
 
 isomorphic_test! {
     async fn template_text() {
-        let template: Div<Template<String, PlatformDom>, Const> = div().on_instantiate(|div, s| div.text(s)).freeze();
+        let template: Div<Template<String>, Const> = div().on_instantiate(|div, s| div.text(s)).freeze();
         check(&template, "Hello, world!".to_string(), r#"<div>Hello, world!</div>"#).await;
         check(&template, "Goodbye!".to_string(), r#"<div>Goodbye!</div>"#).await;
     }
@@ -36,7 +34,7 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn template_attribute() {
-        let template: Div<Template<String, PlatformDom>, Const> = div().on_instantiate(|div, s| div.id(s)).freeze();
+        let template: Div<Template<String>, Const> = div().on_instantiate(|div, s| div.id(s)).freeze();
         check(&template, "my-id".to_string(), r#"<div id="my-id"></div>"#).await;
         check(&template, "my-other-id".to_string(), r#"<div id="my-other-id"></div>"#).await;
     }
@@ -44,7 +42,7 @@ isomorphic_test! {
 
 isomorphic_test! {
     async fn template_child() {
-        let template: Div<Template<String, PlatformDom>, Const> = div().on_instantiate(|d, s| d.child(div().id(s))).freeze();
+        let template: Div<Template<String>, Const> = div().on_instantiate(|d, s| d.child(div().id(s))).freeze();
         check(&template, "my-id".to_string(), r#"<div><div id="my-id"></div></div>"#).await;
         check(&template, "my-other-id".to_string(), r#"<div><div id="my-other-id"></div></div>"#).await;
     }
@@ -53,7 +51,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn template_text_signal() {
         let text = Mutable::new("Hello, world!".to_string());
-        let template: Div<Template<(), PlatformDom>, Const> = div().text(Sig(text.signal_cloned())).freeze();
+        let template: Div<Template<()>, Const> = div().text(Sig(text.signal_cloned())).freeze();
         check(&template, (), r#"<div>Hello, world!</div>"#).await;
         text.set("Goodbye!".to_string());
         check(&template, (), r#"<div>Goodbye!</div>"#).await;
@@ -63,7 +61,7 @@ isomorphic_test! {
 isomorphic_test! {
     async fn template_attribute_signal() {
         let text = Mutable::new("my-id".to_string());
-        let template: Div<Template<(), PlatformDom>, Const> = div().id(Sig(text.signal_cloned())).freeze();
+        let template: Div<Template<()>, Const> = div().id(Sig(text.signal_cloned())).freeze();
         check(&template, (), r#"<div id="my-id"></div>"#).await;
         text.set("my-other-id".to_string());
         check(&template, (), r#"<div id="my-other-id"></div>"#).await;
@@ -74,7 +72,7 @@ isomorphic_test! {
     async fn template_children_signal() {
         let children: MutableVec<usize> = MutableVec::new();
         let children_signal = children.signal_vec().map(|i| div().text(i.to_string()));
-        let template: Div<Template<(), PlatformDom>, Const> = div().children_signal(children_signal).freeze();
+        let template: Div<Template<()>, Const> = div().children_signal(children_signal).freeze();
         children.lock_mut().push(0);
         check(&template, (), r#"<div><div>0</div></div>"#).await;
         children.lock_mut().push(1);
