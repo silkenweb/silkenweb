@@ -130,7 +130,7 @@ pub trait Document: Dom + Sized {
     ///
     /// Mount points will not be restored. This is useful to ensure a clean
     /// environment for testing.
-    fn remove_all_mounted();
+    fn unmount_all();
 
     // TODO: Doc
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
@@ -150,7 +150,7 @@ impl Document for Wet {
         MountHandle::new(mount_point, element)
     }
 
-    fn remove_all_mounted() {
+    fn unmount_all() {
         ELEMENTS.with(|elements| {
             for element in elements.take().into_values() {
                 element.dom_element().remove()
@@ -202,7 +202,7 @@ impl Document for Dry {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
-    fn remove_all_mounted() {
+    fn unmount_all() {
         MOUNTED_IN_DRY_HEAD.with(|mounted| mounted.take());
     }
 
