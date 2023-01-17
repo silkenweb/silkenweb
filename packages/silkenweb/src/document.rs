@@ -207,7 +207,6 @@ impl Document for Wet {
     }
 }
 
-// TODO: Test
 impl Document for Dry {
     fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
         panic!("`mount` is not supported on `Dry` DOMs")

@@ -31,11 +31,28 @@ macro_rules! isomorphic_test {
 
 mod children;
 mod component;
+mod css;
 mod element;
 mod hydration;
 mod template;
 
 wasm_bindgen_test_configure!(run_in_browser);
+
+isomorphic_test! {
+    async fn head_inner_html() {
+        DefaultDom::unmount_all();
+
+        assert_eq!(DefaultDom::head_inner_html(), "");
+
+        // Test escaping
+        let id = "my-id:0:1";
+        DefaultDom::mount_in_head(id, div());
+        let head_html = r#"<div id="my-id:0:1"></div>"#;
+        assert_eq!(DefaultDom::head_inner_html(), head_html);
+        DefaultDom::mount_in_head(id, div());
+        assert_eq!(DefaultDom::head_inner_html(), head_html);
+    }
+}
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {
