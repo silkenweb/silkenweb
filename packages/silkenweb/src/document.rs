@@ -156,9 +156,11 @@ impl Document for Wet {
                 element.dom_element().remove()
             }
         });
-    }
 
-    // TODO: unmount_all should unmount from head as well
+        for element in MOUNTED_IN_WET_HEAD.with(|mounted| mounted.take()) {
+            element.dom_element().remove()
+        }
+    }
 
     // TODO: Change DefaultDom to use `Dry` on non wasm platforms, so
     // stylesheet::mount works for SSR
