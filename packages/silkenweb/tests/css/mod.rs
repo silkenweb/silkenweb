@@ -13,6 +13,7 @@ use silkenweb::{
 
 isomorphic_test! {
     async fn css_auto_mount() {
+        DefaultDom::unmount_all();
         assert_eq!(DefaultDom::head_inner_html(), "");
         let elem: Div<DefaultDom, Const> = div().class(class::red()).freeze();
         render_now().await;
