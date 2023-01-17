@@ -371,9 +371,11 @@ fn code_gen(
                 let location = Location::caller();
                 DefaultDom::mount_in_head(
                     &format!(
-                        "silkenweb-style:{}:{}",
+                        "silkenweb-style:{}:{}:{}",
                         location.file(),
-                        location.line()),
+                        location.line(),
+                        location.column()
+                    ),
                     style().text(text())
                 );
             }
