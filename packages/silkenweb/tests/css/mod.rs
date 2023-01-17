@@ -1,6 +1,8 @@
 // We put this at the top so line numbers are consistent in `stylesheet::mount`.
 silkenweb::css!(content = ".red { color: red }", auto_mount);
 
+use std::panic::Location;
+
 use silkenweb::{
     document::Document,
     dom::DefaultDom,
@@ -15,8 +17,9 @@ isomorphic_test! {
         let elem: Div<DefaultDom, Const> = div().class(class::red()).freeze();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="red"></div>"#);
+        let file = Location::caller().file();
         let style_html =
-            r#"<style id="silkenweb-style:packages/silkenweb/tests/css/mod.rs:2:1">.red { color: red }</style>"#;
+            format!(r#"<style id="silkenweb-style:{file}:2:1">.red {{ color: red }}</style>"#);
         assert_eq!(
             DefaultDom::head_inner_html(),
             style_html
