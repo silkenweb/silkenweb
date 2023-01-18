@@ -321,7 +321,7 @@ fn parse_comma_delimited<T>(
             abort!(input.span(), "Expected ','");
         }
 
-        result.push(parser(&input)?);
+        result.push(parser(input)?);
 
         trailing_comma = input.peek(Comma);
 
@@ -339,7 +339,7 @@ fn parse_fields(
 ) -> syn::Result<()> {
     parse_comma_delimited(input, |input| {
         let field = input.lookahead1();
-        let matched = parser(&field, &input)?;
+        let matched = parser(&field, input)?;
 
         if matched {
             Ok(())
