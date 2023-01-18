@@ -28,13 +28,28 @@ mod kw {
     custom_keyword!(browsers);
 }
 
+mod functions {
+    use syn::custom_keyword;
+
+    custom_keyword!(concat);
+}
+
 trait ParseValue: Sized {
     fn parse(input: ParseStream) -> syn::Result<Self>;
 }
 
 impl ParseValue for String {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(input.parse::<LitStr>()?.value())
+        let first = input.lookahead1();
+
+        if first.peek(LitStr) {
+            Ok(input.parse::<LitStr>()?.value())
+        } else if first.peek(functions::concat) {
+            input.parse::<functions::concat>()?;
+            Ok(parse_comma_delimited(&parenthesized(input)?, String::parse)?.concat())
+        } else {
+            Err(first.error())
+        }
     }
 }
 
@@ -86,7 +101,7 @@ impl Parse for Input {
         let mut auto_mount = false;
         let mut transpile = None;
 
-        parse_comma_delimited(input, |field, input| {
+        parse_fields(input, |field, input| {
             Ok(parameter(kw::path, field, input, &mut path)?
                 || flag(kw::public, field, input, &mut public)?
                 || parameter(kw::content, field, input, &mut content)?
@@ -131,7 +146,7 @@ impl ParseValue for Transpile {
         let mut nesting = false;
         let mut browsers = None;
 
-        parse_comma_delimited(&parenthesized(input)?, |field, input| {
+        parse_fields(&parenthesized(input)?, |field, input| {
             Ok(flag(kw::minify, field, input, &mut minify)?
                 || flag(kw::pretty, field, input, &mut pretty)?
                 || flag(kw::modules, field, input, &mut modules)?
@@ -193,7 +208,7 @@ impl ParseValue for Browsers {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut browsers = lightningcss::targets::Browsers::default();
 
-        parse_comma_delimited(&parenthesized(input)?, |field, input| {
+        parse_fields(&parenthesized(input)?, |field, input| {
             Ok(
                 Self::browser(browsers::android, field, input, &mut browsers.android)?
                     || Self::browser(browsers::chrome, field, input, &mut browsers.chrome)?
@@ -294,24 +309,19 @@ where
     })
 }
 
-fn parse_comma_delimited(
+fn parse_comma_delimited<T>(
     input: ParseStream,
-    mut parser: impl FnMut(&Lookahead1, &ParseStream) -> syn::Result<bool>,
-) -> syn::Result<()> {
+    mut parser: impl FnMut(ParseStream) -> syn::Result<T>,
+) -> syn::Result<Vec<T>> {
     let mut trailing_comma = true;
+    let mut result = Vec::new();
 
     while !input.is_empty() {
-        let field = input.lookahead1();
-
         if !trailing_comma {
             abort!(input.span(), "Expected ','");
         }
 
-        let matched = parser(&field, &input)?;
-
-        if !matched {
-            return Err(field.error());
-        }
+        result.push(parser(&input)?);
 
         trailing_comma = input.peek(Comma);
 
@@ -319,6 +329,24 @@ fn parse_comma_delimited(
             input.parse::<Comma>()?;
         }
     }
+
+    Ok(result)
+}
+
+fn parse_fields(
+    input: ParseStream,
+    mut parser: impl FnMut(&Lookahead1, ParseStream) -> syn::Result<bool>,
+) -> syn::Result<()> {
+    parse_comma_delimited(input, |input| {
+        let field = input.lookahead1();
+        let matched = parser(&field, &input)?;
+
+        if matched {
+            Ok(())
+        } else {
+            Err(field.error())
+        }
+    })?;
 
     Ok(())
 }
