@@ -5,8 +5,9 @@
 ### New Features
 
 - CSS Modules support. See `examples/css-modules`.
-- Components are a lightweight way to encapsulate HTML and CSS using shadow DOM. See `silkenweb::node::Component`.
-- Event handlers can be installed on the document.
+- Components: A lightweight way to encapsulate HTML and CSS using shadow DOM. See `silkenweb::node::Component`.
+- Event handlers can be installed at the document level.
+- Elements can be mounted as a child of `<head>`.
 - Templates, which allow you to pre render the DOM structure and instantiate it with more detail later. This can improve the performance of hot code paths.
 - `css!` optionally supports nesting, validation, minification and vendor prefixes.
 - `declarative-shadow-dom` feature flag to support [Declarative Shadow DOM](https://web.dev/declarative-shadow-dom/) with SSR.
@@ -14,7 +15,6 @@
 - `UrlPath` can extract the URL's hash.
 - `impl From<String> for UrlPath`
 - A `handle` method on `Element`
-- `#[derive(Element)]` accepts an `element_dom_type` parameter to specify the dom type.
 - `#[derive(...)]` macros for `Value`, `HtmlElement`, `AriaElement`, `HtmlElementEvents`, and `ElementEvents`.
 - `weak-refs` cargo feature flag to enable event handling optimizations when weak refs are available.
 - A work-in-progress bootstrap component library.
