@@ -12,6 +12,7 @@ A library for building reactive web apps.
 
 - No VDOM. Fine grained reactivity using signals to minimize DOM API calls.
 - Uses plain Rust syntax rather than a macro DSL.
+- CSS encapsulation via [CSS Modules](https://github.com/css-modules/css-modules).
 - Routing.
 - [Tauri support](https://github.com/silkenweb/tauri-example)
 - Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
