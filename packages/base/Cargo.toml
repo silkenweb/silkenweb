@@ -29,4 +29,7 @@ features = [
     "Storage",
     "Text",
     "Window",
+
+    "HtmlHeadElement",
+    "HtmlElement",
 ]
