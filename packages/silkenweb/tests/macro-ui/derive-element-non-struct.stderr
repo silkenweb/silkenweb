@@ -1,0 +1,7 @@
+error: Only structs are supported
+ --> tests/macro-ui/derive-element-non-struct.rs:3:10
+  |
+3 | #[derive(Element)]
+  |          ^^^^^^^
+  |
+  = note: this error originates in the derive macro `Element` (in Nightly builds, run with -Z macro-backtrace for more info)

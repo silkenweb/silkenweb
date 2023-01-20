@@ -1,0 +1,7 @@
+error: There must be exactly one field, or specify `#[element(target)]` on a single field
+ --> tests/macro-ui/derive-element-no-fields.rs:3:10
+  |
+3 | #[derive(Element)]
+  |          ^^^^^^^
+  |
+  = note: this error originates in the derive macro `Element` (in Nightly builds, run with -Z macro-backtrace for more info)

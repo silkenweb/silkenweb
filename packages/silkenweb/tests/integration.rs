@@ -206,4 +206,10 @@ fn app_html(id: &str) -> String {
     query_element(id).outer_html()
 }
 
+#[test]
+fn macro_ui() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/macro-ui/*.rs");
+}
+
 const APP_ID: &str = "app";

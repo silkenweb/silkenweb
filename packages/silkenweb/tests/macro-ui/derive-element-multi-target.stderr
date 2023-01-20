@@ -1,0 +1,5 @@
+error: Only one target field can be specified
+ --> tests/macro-ui/derive-element-multi-target.rs:4:42
+  |
+4 | struct MyElement(#[element(target)] Div, #[element(target)] Div);
+  |                                          ^^^^^^^^^^^^^^^^^^
