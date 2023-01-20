@@ -14,6 +14,7 @@ use arch::{wait_for_microtasks, Raf};
 use futures::Future;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use silkenweb_base::window;
+use silkenweb_macros::cfg_browser;
 
 /// Spawn a future on the microtask queue.
 pub fn spawn_local<F>(future: F)
@@ -23,7 +24,7 @@ where
     arch::spawn_local(future)
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 mod arch {
     use std::{cell::RefCell, future::Future};
 
@@ -68,7 +69,7 @@ mod arch {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg_browser(true)]
 mod arch {
     use std::future::Future;
 
@@ -139,7 +140,7 @@ pub async fn render_now() {
 /// Server only tools.
 ///
 /// Not available on wasm32 targets.
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 pub mod server {
     use std::{
         sync::Arc,
@@ -212,7 +213,7 @@ impl Render {
         }
     }
 
-    #[cfg(target_arch = "wasm32")]
+    #[cfg_browser(true)]
     fn on_raf(&self, time_stamp: f64) {
         self.raf_pending.set(false);
         self.animation_timestamp_millis.set(time_stamp);

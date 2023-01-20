@@ -15,13 +15,13 @@ use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 macro_rules! isomorphic_test {
     (async fn $name:ident() $body:block) => {
-        #[cfg(not(target_arch = "wasm32"))]
+        #[silkenweb_macros::cfg_browser(false)]
         #[test]
         fn $name() {
             silkenweb::task::server::block_on(async { $body });
         }
 
-        #[cfg(target_arch = "wasm32")]
+        #[silkenweb_macros::cfg_browser(true)]
         #[wasm_bindgen_test::wasm_bindgen_test]
         async fn $name() {
             $body

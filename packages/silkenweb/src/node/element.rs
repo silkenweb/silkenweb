@@ -10,7 +10,7 @@ use futures_signals::{
     signal_vec::{always, SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use silkenweb_base::{clone, document, empty_str, intern_str};
+use silkenweb_base::{clone, document};
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -22,7 +22,9 @@ use crate::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
         DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet,
     },
+    empty_str,
     hydration::HydrationStats,
+    intern_str,
     node::text,
     task,
 };

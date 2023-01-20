@@ -27,6 +27,7 @@
 use std::{collections::HashMap, fmt::Display};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use silkenweb_macros::cfg_browser;
 
 use crate::{
     dom::Dom,
@@ -258,7 +259,7 @@ pub fn link_clicked(
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 mod arch {
     use futures_signals::signal::Mutable;
 
@@ -273,7 +274,7 @@ mod arch {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg_browser(true)]
 mod arch {
     use futures_signals::signal::Mutable;
     use silkenweb_base::{document, window};

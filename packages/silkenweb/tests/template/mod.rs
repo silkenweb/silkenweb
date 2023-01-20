@@ -13,6 +13,7 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
+use silkenweb_macros::cfg_browser;
 
 async fn check<Param: 'static>(
     template: &Div<Template<Param>, Const>,
@@ -88,7 +89,7 @@ isomorphic_test! {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 mod dry {
     use silkenweb::{
         dom::{Dry, Template},

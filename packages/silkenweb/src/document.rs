@@ -3,6 +3,7 @@ use std::{cell::RefCell, collections::HashMap};
 
 use paste::paste;
 use silkenweb_base::document;
+use silkenweb_macros::cfg_browser;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
@@ -12,7 +13,7 @@ use crate::{
     remove_element, ELEMENTS,
 };
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 mod arch {
     use wasm_bindgen::JsCast;
 
@@ -32,7 +33,7 @@ mod arch {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg_browser(true)]
 mod arch {
     use silkenweb_base::document;
     use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};

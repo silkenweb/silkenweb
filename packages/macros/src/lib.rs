@@ -6,7 +6,7 @@ use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
-    FieldsUnnamed, Ident, Index, Meta, NestedMeta,
+    FieldsUnnamed, Ident, Index, LitBool, Meta, NestedMeta,
 };
 
 use crate::parse::Input;
@@ -244,6 +244,25 @@ fn field_token(index: usize, ident: Option<Ident>) -> proc_macro2::TokenStream {
         let index = Index::from(index);
         quote!(#index)
     }
+}
+
+#[proc_macro_attribute]
+#[proc_macro_error]
+pub fn cfg_browser(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let in_browser: LitBool = parse_macro_input!(attr);
+
+    let cfg_check = if in_browser.value() {
+        quote!(#[cfg(all(target_arch = "wasm32", target_os = "unknown"))])
+    } else {
+        quote!(#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))])
+    };
+    let item = proc_macro2::TokenStream::from(item);
+
+    quote!(
+        #cfg_check
+        #item
+    )
+    .into()
 }
 
 #[proc_macro]

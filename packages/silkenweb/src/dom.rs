@@ -11,6 +11,8 @@
 //! See the concrete DOM types for some examples.
 use std::marker::PhantomData;
 
+use silkenweb_macros::cfg_browser;
+
 use self::{
     dry::{DryElement, DryNode, DryText},
     hydro::{HydroElement, HydroNode, HydroText},
@@ -38,11 +40,11 @@ pub trait InDom {
     type Dom: Dom;
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg_browser(true)]
 /// The default DOM for the current platform.
 pub type DefaultDom = Wet;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 /// The default DOM for the current platform.
 pub type DefaultDom = Dry;
 

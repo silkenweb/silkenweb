@@ -93,30 +93,6 @@ pub mod document {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn intern_str(s: &str) -> &str {
-    wasm_bindgen::intern(s)
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn empty_str() -> &'static str {
-    thread_local! {
-        static EMPTY: &'static str = intern_str("");
-    }
-
-    EMPTY.with(|empty| *empty)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn intern_str(s: &str) -> &str {
-    s
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn empty_str() -> &'static str {
-    ""
-}
-
 thread_local!(
     static WINDOW: web_sys::Window = web_sys::window().expect_throw("Window must be available");
     static DOCUMENT: web_sys::Document = WINDOW.with(|win| {

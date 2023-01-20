@@ -1,9 +1,10 @@
 pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
 pub use paste::paste;
-pub use silkenweb_base::intern_str;
 pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 pub use web_sys;
+
+pub use crate::intern_str;
 
 /// Define a custom html element.
 ///

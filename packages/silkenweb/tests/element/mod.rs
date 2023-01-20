@@ -13,6 +13,7 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
+use silkenweb_macros::cfg_browser;
 
 macro_rules! render_test {
     ($name:ident, $node:expr, $expected:expr) => {
@@ -24,7 +25,7 @@ macro_rules! render_test {
     };
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 #[test]
 #[should_panic]
 fn block_on() {
@@ -65,7 +66,7 @@ render_test!(
 );
 
 // Make sure the test is actually run
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg_browser(false)]
 #[test]
 #[should_panic]
 fn test_children_signal_test() {

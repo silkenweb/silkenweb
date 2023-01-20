@@ -274,7 +274,7 @@ pub use silkenweb_macros::ChildElement;
 /// ```
 ///
 /// [`Element`]: crate::node::element::Element
-pub use silkenweb_macros::Element;
+pub use silkenweb_macros::{cfg_browser, Element};
 #[doc(inline)]
 pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};
 
@@ -343,3 +343,27 @@ thread_local!(
     static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> =
         RefCell::new(HashMap::new());
 );
+
+#[cfg_browser(true)]
+pub fn intern_str(s: &str) -> &str {
+    wasm_bindgen::intern(s)
+}
+
+#[cfg_browser(true)]
+pub fn empty_str() -> &'static str {
+    thread_local! {
+        static EMPTY: &'static str = intern_str("");
+    }
+
+    EMPTY.with(|empty| *empty)
+}
+
+#[cfg_browser(false)]
+pub fn intern_str(s: &str) -> &str {
+    s
+}
+
+#[cfg_browser(false)]
+pub fn empty_str() -> &'static str {
+    ""
+}
