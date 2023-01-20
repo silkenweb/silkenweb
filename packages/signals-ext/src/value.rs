@@ -145,6 +145,7 @@ impl<'a> RefValue<'a> for &'a str {}
 impl<'a> RefValue<'a> for &'a String {}
 impl<'a, T: 'a> RefValue<'a> for Option<T> {}
 impl<'a, T: 'a> RefValue<'a> for [T] {}
+impl<'a, T: 'a> RefValue<'a> for &'a [T] {}
 impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
 
 impl<'a> RefValue<'a> for () {}
