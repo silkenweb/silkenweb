@@ -20,3 +20,10 @@ wasm-bindgen = "=0.2.83"
 [dependencies.web-sys]
 version = "0.3.60"
 features = ["console"]
+
+[dev-dependencies]
+criterion = { version = "0.4.0", default-features = false }
+
+[[bench]]
+name = "ssr"
+harness = false

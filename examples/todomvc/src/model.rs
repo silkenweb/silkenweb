@@ -16,20 +16,28 @@ pub struct TodoApp {
 }
 
 impl TodoApp {
+    pub fn with_todos(todos: impl IntoIterator<Item = String>) -> Rc<Self> {
+        let items: Vec<_> = todos
+            .into_iter()
+            .enumerate()
+            .map(|(id, text)| TodoItem::new(id as u128, text))
+            .collect();
+
+        Rc::new(Self {
+            todo_id: Cell::new(items.len() as u128),
+            items: MutableVec::new_with_values(items),
+        })
+    }
+
     pub fn load() -> Rc<Self> {
-        Rc::new(
-            if let Some(app_str) = Storage::local()
-                .ok()
-                .and_then(|storage| storage.get(STORAGE_KEY))
-            {
-                serde_json::from_str(&app_str).unwrap_throw()
-            } else {
-                Self {
-                    todo_id: Cell::new(0),
-                    items: MutableVec::new(),
-                }
-            },
-        )
+        if let Some(app_str) = Storage::local()
+            .ok()
+            .and_then(|storage| storage.get(STORAGE_KEY))
+        {
+            Rc::new(serde_json::from_str(&app_str).unwrap_throw())
+        } else {
+            Self::with_todos([])
+        }
     }
 
     pub fn save(&self) {

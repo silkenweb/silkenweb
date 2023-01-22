@@ -16,6 +16,7 @@ use silkenweb::{
     },
     node::{element::Element, Node},
     prelude::ParentElement,
+    router::url_path,
     value::Sig,
 };
 use silkenweb_signals_ext::SignalProduct;
@@ -30,7 +31,15 @@ pub struct TodoAppView {
 }
 
 impl TodoAppView {
-    pub fn render(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {
+    pub fn render(&self) -> Section {
+        let item_filter = url_path().signal_ref({
+            |url_path| match url_path.as_str() {
+                "#/active" => Filter::Active,
+                "#/completed" => Filter::Completed,
+                _ => Filter::All,
+            }
+        });
+
         let app = &self.app;
         let input_elem = input()
             .class("new-todo")
