@@ -4,7 +4,6 @@ use silkenweb_base::css::{self, Source};
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
-    punctuated::Punctuated,
     token::{self, Comma, CustomToken},
     LitInt, LitStr,
 };
@@ -53,14 +52,11 @@ impl ParseValue for String {
     }
 }
 
-impl ParseValue for Vec<String> {
+impl<T: ParseValue> ParseValue for Vec<T> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let list;
         bracketed!(list in input);
-        Ok(Punctuated::<LitStr, Comma>::parse_terminated(&list)?
-            .into_iter()
-            .map(|x| x.value())
-            .collect())
+        parse_comma_delimited(&list, T::parse)
     }
 }
 
