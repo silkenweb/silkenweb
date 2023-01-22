@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use derive_more::Constructor;
 use futures_signals::{
     signal::{not, Broadcaster, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},

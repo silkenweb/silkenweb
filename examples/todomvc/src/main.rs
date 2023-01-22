@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate derive_more;
-
 use model::{Filter, TodoApp};
 use silkenweb::{mount, router::url_path};
 use view::TodoAppView;
