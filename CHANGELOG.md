@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+### Fixes
+
+- SSR now escapes text.
+
 ## 0.4.0 - 2023-01-19
 
 ### New Features
