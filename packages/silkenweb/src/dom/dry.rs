@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
 
 use caseless::default_caseless_match_str;
-use html_escape::encode_double_quoted_attribute;
+use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
 use indexmap::IndexMap;
 use itertools::Itertools;
 use silkenweb_base::clone;
@@ -119,6 +119,12 @@ impl DryText {
     }
 }
 
+impl fmt::Display for DryText {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.borrow().fmt(f)
+    }
+}
+
 impl private::DomText for DryText {
     fn new(text: &str) -> Self {
         Self(Rc::new(RefCell::new(SharedDryText::new(text.to_string()))))
@@ -190,8 +196,8 @@ impl From<DryText> for DryNode {
 impl fmt::Display for DryNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            DryNode::Element(element) => element.0.borrow().fmt(f),
-            DryNode::Text(text) => text.0.borrow().text.fmt(f),
+            DryNode::Element(element) => element.fmt(f),
+            DryNode::Text(text) => text.fmt(f),
         }
     }
 }
@@ -667,6 +673,12 @@ impl<Node> SharedDryText<Node> {
             text: self.text.clone(),
             next_sibling: None,
         }
+    }
+}
+
+impl<Node> fmt::Display for SharedDryText<Node> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        encode_text_minimal(&self.text).fmt(f)
     }
 }
 
