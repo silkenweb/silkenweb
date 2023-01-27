@@ -40,22 +40,18 @@ impl TodoAppView {
             }
         });
 
-        let app = &self.app;
+        let app = self.app.clone();
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
-            .on_keyup({
-                clone!(app);
+            .on_keyup(move |keyup, input| {
+                if keyup.key() == "Enter" {
+                    let text = input.value();
+                    let text = text.trim().to_string();
 
-                move |keyup, input| {
-                    if keyup.key() == "Enter" {
-                        let text = input.value();
-                        let text = text.trim().to_string();
-
-                        if !text.is_empty() {
-                            app.new_todo(text);
-                            input.set_value("");
-                        }
+                    if !text.is_empty() {
+                        app.new_todo(text);
+                        input.set_value("");
                     }
                 }
             })
