@@ -53,7 +53,7 @@ trunk serve --open
 
 [Sycamore] and [Leptos] are 2 other signals based Rust frameworks. They are evolving quickly at the time of writing this comparison, as is [Silkenweb]. Also bear in mind I'm not that familiar with [Sycamore] or [Leptos].
 
-- [Silkenweb] uses plain, non-macro Rust as much as possible, and a lot of effort has been put into making this ergonomic. I believe [Sycamore] has a builder API.
+- [Silkenweb] uses plain, non-macro Rust as much as possible, and a lot of effort has been put into making this ergonomic. [Sycamore] and [Leptos] primarily use a macro DSL to define components. I believe [Sycamore] also has a builder API.
 - Ecosystem: [Leptos] and [Sycamore] have [`cargo-leptos`] and [Perseus] respectively, whereas [Silkenweb] doesn't have an ecosystem at this point.
 - CSS Scoping: Silkenweb supports [CSS Modules]. See this [example](https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules). [CSS Modules] support is integrated with SSR and Hydration so that only the CSS required to render the initial page is sent from the server, then progressively enhanced as required on the client. I'm not aware of any CSS scoping support in [Leptos] or [Sycamore].
 - Server Functions: [Leptos] supports server functions to seamlessly divide your app between client and server. [Silkenweb] doesn't directly support anything like this, but similar functionality is provided with [Arpy].
