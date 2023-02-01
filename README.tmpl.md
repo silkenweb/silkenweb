@@ -33,6 +33,22 @@ cd examples/counter
 trunk serve --open
 ```
 
+## Comparison With Other Frameworks
+
+[Sycamore] and [Leptos] are 2 other signals based Rust frameworks. They are evolving quickly at the time of writing this comparison, as is [Silkenweb]. Also bear in mind I'm not that familiar with [Sycamore] or [Leptos].
+
+- [Silkenweb] uses plain, non-macro Rust as much as possible, and a lot of effort has been put into making this ergonomic. I believe [Sycamore] has a builder API.
+- Ecosystem: [Leptos] and [Sycamore] both have an ecosystem (see [`cargo-leptos`] and [Perseus] respectively), whereas [Silkenweb] doesn't have an ecosystem at this point.
+- CSS: Silkenweb supports [CSS Modules]. See this [example](https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules). [CSS Modules] support is integrated with SSR and Hydration so that only the CSS required to render the initial page is sent from the server, then progressively enhanced as required on the client. I'm not aware of any CSS scoping in [Leptos] or [Sycamore].
+- Server Functions: [Leptos] supports server functions to seamlessly divide your app between client and server. [Silkenweb] doesn't directly support anything like this, but similar functionality is provided with [Arpy].
+- [Sycamore] and [Leptos] both go to some effort to make cloning signals into closures more ergonomic. [Silkenweb] provides a `clone!` macro to make things a little easier, but otherwise doesn't address the problem. I'm not sure what the tradeoffs are for the [Sycamore]/[Leptos] solutions. Does it make cleaning up after derived signals harder? Does it mean more complex lifetime annotations? Do contexts need to be pass around everywhere?
+- [Silkenweb] has support for using [third party web components](https://github.com/silkenweb/silkenweb/tree/main/examples/web-components-wrapper). I'm not sure about [Sycamore] or [Leptos].
+- [Silkenweb] has support for [shadow roots](https://github.com/silkenweb/silkenweb/tree/main/examples/shadow-root), including Hydration and SSR support with the experimental [Declarative Shadow DOM](https://web.dev/declarative-shadow-dom/). It also has a simple [Component](https://github.com/silkenweb/silkenweb/tree/main/examples/component) wrapper to manage slots. Again, I'm not sure about [Leptos] and [Sycamore] here.
+- [Silkenweb] doesn't use any unsafe Rust directly. Some of the underlying Crates do use unsafe, but at least you don't have to put as much trust in my coding skills!
+- All of these frameworks support:
+  - Static site generation.
+  - Progressive enhancement using SSR and hydration.
+
 ## Design Tradeoffs
 
 ### No VDOM
@@ -77,3 +93,11 @@ The advantage of using a macro DSL is that syntax is tailored to defining docume
 - [router](https://silkenweb.netlify.app/examples/router)
 - [todomvc](https://silkenweb.netlify.app/examples/todomvc)
 - [web-components-wrapper](https://silkenweb.netlify.app/examples/web-components-wrapper)
+
+[Silkenweb]: https://github.com/silkenweb/silkenweb
+[Sycamore]: https://github.com/sycamore-rs/sycamore
+[Leptos]: https://github.com/leptos-rs/leptos
+[`cargo-leptos`]: https://github.com/leptos-rs/cargo-leptos
+[Perseus]: https://github.com/framesurge/perseus
+[Arpy]: https://github.com/simon-bourne/arpy
+[CSS Modules]: https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules
