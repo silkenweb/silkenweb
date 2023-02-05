@@ -154,7 +154,7 @@ async fn event() {
     .await;
 
     let count = Mutable::new(0);
-    let count_text = count.signal_ref(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{i}"));
 
     render_now().await;
 

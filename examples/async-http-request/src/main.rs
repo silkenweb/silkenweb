@@ -33,11 +33,7 @@ fn main() {
                 text.set("Loading...".to_owned());
 
                 task::spawn_local(async move {
-                    text.set(
-                        get_ip()
-                            .await
-                            .unwrap_or_else(|err| format!("Error: {}", err)),
-                    );
+                    text.set(get_ip().await.unwrap_or_else(|err| format!("Error: {err}")));
                 });
             }))
             .child(p().text(Sig(text_signal))),

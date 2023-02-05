@@ -24,7 +24,7 @@ fn main() {
             .child(
                 div()
                     .child(pop_button(list.clone()))
-                    .text(Sig(list.signal_vec().len().map(|len| format!("{}", len))))
+                    .text(Sig(list.signal_vec().len().map(|len| format!("{len}"))))
                     .child(push_button(list.clone())),
             )
             .child(hr())
@@ -51,7 +51,7 @@ fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
 
 pub fn define_counter() -> Div {
     let count = Rc::new(Mutable::new(0));
-    let count_text = count.signal_ref(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{i}"));
 
     div()
         .child(define_button("-", -1, count.clone()))

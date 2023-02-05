@@ -23,7 +23,7 @@ fn main() {
 }
 
 fn app(count: Mutable<i32>) -> Div {
-    let count_text = count.signal_ref(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{i}"));
     let inc = move |_, _| {
         count.replace_with(|i| *i + 1);
     };

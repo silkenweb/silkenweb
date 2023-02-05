@@ -112,7 +112,7 @@ impl TodoAppView {
             .child(Sig(self.active_count().map(move |active_count| {
                 span()
                     .class("todo-count")
-                    .child(strong().text(format!("{}", active_count)))
+                    .child(strong().text(format!("{active_count}")))
                     .text(format!(
                         " item{} left",
                         if active_count == 1 { "" } else { "s" }
@@ -128,7 +128,7 @@ impl TodoAppView {
         item_filter: impl Signal<Item = Filter> + 'static,
         seperator: &str,
     ) -> Li {
-        let filter_name = format!("{}", filter);
+        let filter_name = format!("{filter}");
 
         li().child(
             a().classes(Sig(

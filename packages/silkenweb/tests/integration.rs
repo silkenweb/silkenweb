@@ -61,7 +61,7 @@ async fn mount_unmount() {
     let message = "Hello, world!";
     let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p id="app">{}</p>"#, message), app_html(APP_ID));
+    assert_eq!(format!(r#"<p id="app">{message}</p>"#), app_html(APP_ID));
     mount_handle.unmount();
     assert_eq!(r#"<div id="app"></div>"#, app_html(APP_ID));
 }
@@ -74,7 +74,7 @@ async fn simple_counter() {
     create_app_container(APP_ID).await;
 
     let count = Mutable::new(0);
-    let count_text = count.signal_ref(|i| format!("{}", i));
+    let count_text = count.signal_ref(|i| format!("{i}"));
 
     mount(
         APP_ID,
@@ -195,7 +195,7 @@ async fn create_app_container(app_id: &str) {
 }
 
 fn query_element(id: &str) -> web_sys::HtmlElement {
-    document::query_selector(&format!("#{}", id))
+    document::query_selector(&format!("#{id}"))
         .unwrap_throw()
         .unwrap_throw()
         .dyn_into()

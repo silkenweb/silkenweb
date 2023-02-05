@@ -315,20 +315,20 @@ pub async fn children_signal_test(
     ) {
         let children = MutableVec::<usize>::new_with_values(initial.to_vec());
         let element: Node = initial_elem
-            .children_signal(children.signal_vec().map(|i| p().text(format!("{}", i))))
+            .children_signal(children.signal_vec().map(|i| p().text(format!("{i}"))))
             .into();
 
         f(children.lock_mut());
         let mut expected_html = String::new();
 
         for i in expected {
-            expected_html.push_str(&format!("<p>{}</p>", i));
+            expected_html.push_str(&format!("<p>{i}</p>"));
         }
 
         render_now().await;
         assert_eq!(
             element.to_string(),
-            format!("<div>{}{}</div>", initial_child_text, expected_html)
+            format!("<div>{initial_child_text}{expected_html}</div>")
         );
     }
 
