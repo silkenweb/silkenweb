@@ -4,11 +4,14 @@
 <head profile="http://www.w3.org/2005/10/profile">
     <meta charset="utf-8" />
     <title>Silkenweb Example: Client Server</title>
-	<link rel="rust" data-trunk data-wasm-opt="z" data-weak-refs />
-    <base data-trunk-public-url/>
+    <link rel="rust" data-trunk data-wasm-opt="z" data-weak-refs />
+    <base data-trunk-public-url />
 </head>
 
 <body>
+    <p>This example shows a client/server app, where the server keeps track of a shared counter.</p>
+    <p>Try opening multiple browser windows, and you should see the counter update in all of them.</p>
+    <p>Don't forget to run the server with <code>cargo run</code></p>
     <div id="app"></div>
 </body>
 
