@@ -9,6 +9,6 @@ publish = false
 silkenweb = { path = "../../packages/silkenweb", features = ["weak-refs"] }
 futures-signals = "0.3.31"
 js-sys = "0.3.60"
-wasm-bindgen = { version = "=0.2.83", features = ["enable-interning"] }
+wasm-bindgen = { version = "=0.2.84", features = ["enable-interning"] }
 rand = { version = "0.8.5", features = ["small_rng"] }
 getrandom = { version = "0.2.7", features = ["js"] }

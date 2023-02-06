@@ -55,7 +55,7 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: wasm-bindgen-cli
-        version: 0.2.83
+        version: 0.2.84
     - name: Browser Tests
       # Browser tests intermittantly hang with windows github actions.
       if: matrix.os != 'windows-latest'
