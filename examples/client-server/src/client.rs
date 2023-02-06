@@ -17,8 +17,6 @@ use silkenweb::{
 use crate::api::{self, Update};
 
 pub fn counter() {
-    // TODO: Keepalive
-    // TODO: Reconnect after a timeout on error
     let conn = websocket::Connection::new(WebSocket::open("ws://localhost:9090/api").unwrap());
     let count = Mutable::new(Count::Connecting);
     spawn_local(get_value(conn.clone(), count.clone()));
