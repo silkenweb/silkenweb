@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use arpy::FnRemote;
+use arpy::{ConcurrentRpcClient, FnRemote};
 use arpy_reqwasm::websocket;
 use futures::StreamExt;
 use futures_signals::signal::{Mutable, SignalExt};

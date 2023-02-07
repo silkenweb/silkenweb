@@ -44,7 +44,7 @@ pub mod server {
                     value.replace_with(|v| *v + update.delta);
                 }
             });
-        let app = Router::new().ws_rpc_route("/api", ws);
+        let app = Router::new().ws_rpc_route("/api", ws, 1000);
 
         Server::bind(&SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9090))
             .serve(app.into_make_service())

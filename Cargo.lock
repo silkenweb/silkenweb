@@ -49,7 +49,7 @@ checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
 [[package]]
 name = "arpy"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/arpy#fb1e498a82334634e26f6491ecc1908cfaee446f"
+source = "git+https://github.com/simon-bourne/arpy#1b9dcb0ab7d0566ebb1585fa707a8170d9d2fe3c"
 dependencies = [
  "arpy-macros",
  "async-trait",
@@ -62,7 +62,7 @@ dependencies = [
 [[package]]
 name = "arpy-axum"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/arpy#fb1e498a82334634e26f6491ecc1908cfaee446f"
+source = "git+https://github.com/simon-bourne/arpy#1b9dcb0ab7d0566ebb1585fa707a8170d9d2fe3c"
 dependencies = [
  "arpy",
  "arpy-server",
@@ -82,7 +82,7 @@ dependencies = [
 [[package]]
 name = "arpy-macros"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/arpy#fb1e498a82334634e26f6491ecc1908cfaee446f"
+source = "git+https://github.com/simon-bourne/arpy#1b9dcb0ab7d0566ebb1585fa707a8170d9d2fe3c"
 dependencies = [
  "heck",
  "quote",
@@ -92,7 +92,7 @@ dependencies = [
 [[package]]
 name = "arpy-reqwasm"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/arpy#fb1e498a82334634e26f6491ecc1908cfaee446f"
+source = "git+https://github.com/simon-bourne/arpy#1b9dcb0ab7d0566ebb1585fa707a8170d9d2fe3c"
 dependencies = [
  "arpy",
  "async-trait",
@@ -117,7 +117,7 @@ dependencies = [
 [[package]]
 name = "arpy-server"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/arpy#fb1e498a82334634e26f6491ecc1908cfaee446f"
+source = "git+https://github.com/simon-bourne/arpy#1b9dcb0ab7d0566ebb1585fa707a8170d9d2fe3c"
 dependencies = [
  "arpy",
  "bincode",
