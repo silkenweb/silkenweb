@@ -69,24 +69,22 @@ trunk serve --open
 
 ### No VDOM
 
-There are potential performance advantages to using a signals based approach, as you're telling the compiler explicitly what the dependencies within your app are, at compile time. With a simple VDOM based approach, you have to figure out what changed at runtime. The tradeoff here is slightly more complex code when using a signals based approach.
+The use of a signals-based approach can provide better performance because it allows the compiler to know the data dependencies within your application at compile time. This allows changes to be efficiently calculated at runtime. On the other hand, with a basic VDOM based approach, the changes need to be identified at runtime.
 
-What tends to happen in practice is that VDOM based approaches will add some mechanism so that every time someting changes, your app doesn't need to completely re-render the VDOM. This inevitably adds some complexity to VDOM based approaches.
+The drawback of a signals-based approach is that the code tends to be more complicated. However, in actual implementation, VDOM-based approaches often implement mechanisms to prevent complete re-rendering of the VDOM every time a change occurs, which adds some level of complexity to code using the VDOM approach.
 
 ### No Macro DSL
 
-There are many advantages to using plain Rust syntax:
+Using plain Rust syntax has numerous benefits, such as:
 
-- No macro DSL to learn.
-- Code completion with `rust-analyser`.
-- The documentation is structured in a familiar manner, courtesy of `rustdoc`.
-- Code formatting with `rustfmt`.
-- Excellent compiler errors, courtesy of `rustc`.
-- Use Rust's well thought out, composable abstractions. Need control flow in your components? Use `if`, `match`, `dyn traits`, or whatever else Rust provides.
+- No need to learn a macro Domain Specific Language (DSL).
+- Improved code completion through `rust-analyser`.
+- Familiar documentation structure, thanks to `rustdoc`.
+- Code formatting with `rustfmt`. While macro DSLs can be formatted with `rustfmt` if designed with care, the syntax is limited by `rustfmt`'s capabilities.
+- Exceptional compiler errors from `rustc`: Although macro DSLs can produce informative errors, a lot of work has been put into making `rustc` error messsages great.
+- The ability to utilize Rust's composable, well-designed abstractions.
 
-There's nothing to stop a macro DSL being built on top of Silkenweb, to complement the builder APIs.
-
-The advantage of using a macro DSL is that syntax is tailored to defining document structure. Rust syntax is fairly well suited to this, so it's not much of a benefit in reality.
+While a macro DSL could be developed to work with Silkenweb, the syntax in Rust is already well suited for defining document structure.
 
 ## Learning
 
