@@ -12,11 +12,11 @@ A library for building reactive web apps.
 
 - No VDOM. Fine grained reactivity using signals to minimize DOM API calls.
 - Uses plain Rust syntax rather than a macro DSL.
-- CSS encapsulation via [CSS Modules](https://github.com/css-modules/css-modules).
-- Routing.
+- CSS scoping via [CSS Modules](https://github.com/css-modules/css-modules). See the [CSS modules example].
+- [Routing][router example] that works on the client or server.
 - [Tauri support](https://github.com/silkenweb/tauri-example)
 - Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
-- Downcasts Js objects for you, where the type is known at compile time. For example, `button().on_click(...)` passes your event handler a `web_sys::HtmlInputElement` and a `web_sys::MouseEvent`.
+- Full stack apps using [Arpy]. See the [client-server example].
 
 ## Example: A Simple Counter
 
@@ -55,7 +55,7 @@ trunk serve --open
 
 - [Silkenweb] uses plain, non-macro Rust as much as possible, and a lot of effort has been put into making this ergonomic. [Sycamore] and [Leptos] primarily use a macro DSL to define components. I believe [Sycamore] also has a builder API.
 - Ecosystem: [Leptos] and [Sycamore] have [`cargo-leptos`] and [Perseus] respectively, whereas [Silkenweb] doesn't have an ecosystem at this point.
-- CSS Scoping: Silkenweb supports [CSS Modules]. See this [example](https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules). [CSS Modules] support is integrated with SSR and Hydration so that only the CSS required to render the initial page is sent from the server, then progressively enhanced as required on the client. I'm not aware of any CSS scoping support in [Leptos] or [Sycamore].
+- CSS Scoping: Silkenweb supports [CSS Modules]. See the [CSS modules example]. [CSS Modules] support is integrated with SSR and Hydration so that only the CSS required to render the initial page is sent from the server, then progressively enhanced as required on the client. I'm not aware of any CSS scoping support in [Leptos] or [Sycamore].
 - Server Functions: [Leptos] supports server functions to seamlessly divide your app between client and server. [Silkenweb] doesn't directly support anything like this, but similar functionality is provided with [Arpy].
 - [Sycamore] and [Leptos] both go to some effort to make cloning signals into closures more ergonomic. [Silkenweb] provides a `clone!` macro to make things a little easier, but otherwise doesn't address the problem. I'm not sure what the tradeoffs are for the [Sycamore]/[Leptos] approaches. Do they make cleaning up after derived signals harder? Do they mean more complex lifetime annotations? Do contexts need to be passed around everywhere?
 - [Silkenweb] has support for using [third party web components](https://github.com/silkenweb/silkenweb/tree/main/examples/web-components-wrapper). I'm not sure about [Sycamore] or [Leptos].
@@ -117,3 +117,6 @@ The advantage of using a macro DSL is that syntax is tailored to defining docume
 [Perseus]: https://github.com/framesurge/perseus
 [Arpy]: https://github.com/simon-bourne/arpy
 [CSS Modules]: https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules
+[CSS modules example]: https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules
+[router example]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
+[client-server example]: https://github.com/silkenweb/silkenweb/tree/main/examples/client-server
