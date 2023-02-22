@@ -188,6 +188,9 @@ features = [
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 wasm-bindgen-futures = "0.4.33"
 
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { version = "1.25.0", features = ["rt"] }
+
 [dev-dependencies]
 wasm-bindgen-test = "0.3.28"
 itertools = "0.10.3"

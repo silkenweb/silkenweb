@@ -5,7 +5,7 @@ use silkenweb::{
     elements::html::{self, button, div, h1, p, span, Div},
     node::element::Const,
     prelude::{html::Main, ElementEvents, ParentElement},
-    task::server::render_now_sync,
+    task::server::{self, render_now_sync},
     value::Sig,
 };
 use web_sys::{HtmlButtonElement, MouseEvent};
@@ -30,7 +30,7 @@ fn counter<D: Dom>(initial: isize) -> Div<D> {
 /// <https://github.com/gbj/leptos/blob/a68d276c90f0273999ba52fc2a34268c4453dd1c/benchmarks/src/ssr.rs>
 pub fn ssr(c: &mut Criterion) {
     c.bench_function("ssr", |b| {
-        b.iter(|| {
+        b.iter(|| server::sync_scope(|| {
             let node: Main<Dry, Const> = html::main()
                 .child(h1().text("Welcome to our benchmark page."))
                 .child(p().text("Here's some introductory text."))
@@ -41,7 +41,7 @@ pub fn ssr(c: &mut Criterion) {
             let rendered = node.to_string();
 
             assert_eq!(rendered, "<main><h1>Welcome to our benchmark page.</h1><p>Here's some introductory text.</p><div><button>-1</button><span>Value: 1!</span><button>+1</button></div><div><button>-1</button><span>Value: 2!</span><button>+1</button></div><div><button>-1</button><span>Value: 3!</span><button>+1</button></div></main>");
-        })
+        }))
     });
 }
 

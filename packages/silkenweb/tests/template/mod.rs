@@ -96,24 +96,26 @@ mod dry {
         elements::html::{div, Div},
         node::element::Const,
         prelude::ParentElement,
-        task::server::render_now_sync,
+        task::server::{self, render_now_sync},
     };
 
     #[test]
     fn dry_clone_node_is_deep() {
-        let template: Div<Template<String, Dry>, Const> = div()
-            .child(div().on_instantiate(|div, s| div.text(s)))
-            .freeze();
-        render_now_sync();
-        let node1 = template.instantiate(&"Hello, world!".to_string()).freeze();
-        let expected_node1 = r#"<div><div>Hello, world!</div></div>"#;
-        assert_eq!(node1.to_string(), expected_node1);
+        server::sync_scope(|| {
+            let template: Div<Template<String, Dry>, Const> = div()
+                .child(div().on_instantiate(|div, s| div.text(s)))
+                .freeze();
+            render_now_sync();
+            let node1 = template.instantiate(&"Hello, world!".to_string()).freeze();
+            let expected_node1 = r#"<div><div>Hello, world!</div></div>"#;
+            assert_eq!(node1.to_string(), expected_node1);
 
-        render_now_sync();
-        let node2 = template.instantiate(&"Goodbye!".to_string()).freeze();
-        assert_eq!(node2.to_string(), r#"<div><div>Goodbye!</div></div>"#);
+            render_now_sync();
+            let node2 = template.instantiate(&"Goodbye!".to_string()).freeze();
+            assert_eq!(node2.to_string(), r#"<div><div>Goodbye!</div></div>"#);
 
-        // If the dry clone isn't deep, this will fail.
-        assert_eq!(node1.to_string(), expected_node1);
+            // If the dry clone isn't deep, this will fail.
+            assert_eq!(node1.to_string(), expected_node1);
+        })
     }
 }

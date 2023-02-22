@@ -2612,6 +2612,7 @@ dependencies = [
  "silkenweb-base",
  "silkenweb-macros",
  "silkenweb-signals-ext",
+ "tokio",
  "trybuild",
  "wasm-bindgen",
  "wasm-bindgen-futures",
