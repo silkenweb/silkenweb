@@ -183,7 +183,7 @@ pub mod server {
     /// #
     /// block_on(scope(async {
     ///     let text = Mutable::new("Hello!");
-    ///     let app: Node = div().text(Sig(text.signal())).freeze().into();
+    ///     let app: Node = div().text(Sig(text.signal())).into();
     ///     assert_eq!(app.to_string(), "<div></div>");
     ///     render_now().await;
     ///     assert_eq!(app.to_string(), "<div>Hello!</div>");
