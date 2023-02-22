@@ -80,7 +80,6 @@ impl Source {
                     source_index: 0,
                     error_recovery: !validate,
                     warnings: warnings.as_ref().map(Arc::clone),
-                    at_rule_parser: None,
                 },
             )
             .map_err(|e| e.to_string())?;
