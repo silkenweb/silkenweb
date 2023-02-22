@@ -1,25 +1,32 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    css, document::Document, dom::DefaultDom, elements::html::*, prelude::*,
-    task::server::render_now_sync, value::Sig,
+    css,
+    document::Document,
+    dom::DefaultDom,
+    elements::html::*,
+    prelude::*,
+    task::server::{self, render_now_sync},
+    value::Sig,
 };
 
 css!(content = ".red { color: red }", auto_mount);
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>
 fn main() {
-    let count = Mutable::new(0);
-    let element = app(count.clone()).freeze();
+    server::sync_scope(|| {
+        let count = Mutable::new(0);
+        let element = app(count.clone()).freeze();
 
-    println!("Style: {}", DefaultDom::head_inner_html());
-    println!("App: {}", &element);
+        println!("Style: {}", DefaultDom::head_inner_html());
+        println!("App: {}", &element);
 
-    render_now_sync();
-    println!("App (count = 0): {}", &element);
+        render_now_sync();
+        println!("App (count = 0): {}", &element);
 
-    count.set(100);
-    render_now_sync();
-    println!("App (count = 100): {}", &element);
+        count.set(100);
+        render_now_sync();
+        println!("App (count = 100): {}", &element);
+    });
 }
 
 fn app(count: Mutable<i32>) -> Div {

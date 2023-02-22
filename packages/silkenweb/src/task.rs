@@ -32,6 +32,7 @@ mod arch {
         executor::{LocalPool, LocalSpawner},
         task::LocalSpawnExt,
     };
+    use tokio::task_local;
 
     pub struct Raf;
 
@@ -43,18 +44,11 @@ mod arch {
         pub fn request_animation_frame(&self) {}
     }
 
-    thread_local!(
-        static EXECUTOR: RefCell<LocalPool> = RefCell::new(LocalPool::new());
-        static SPAWNER: LocalSpawner = EXECUTOR.with(|executor| executor.borrow().spawner());
-    );
-
     pub fn spawn_local<F>(future: F)
     where
         F: Future<Output = ()> + 'static,
     {
-        SPAWNER.with(|spawner| {
-            spawner.spawn_local(future).unwrap();
-        });
+        with_runtime(|rt| rt.spawner.spawn_local(future).unwrap())
     }
 
     /// Run futures queued with `spawn_local`, until no more progress can be
@@ -65,7 +59,32 @@ mod arch {
     }
 
     pub fn run() {
-        EXECUTOR.with(|executor| executor.borrow_mut().run_until_stalled())
+        with_runtime(|rt| rt.executor.borrow_mut().run_until_stalled())
+    }
+
+    task_local! {
+        pub static RUNTIME: Runtime;
+    }
+
+    pub struct Runtime {
+        executor: RefCell<LocalPool>,
+        spawner: LocalSpawner,
+    }
+
+    impl Default for Runtime {
+        fn default() -> Self {
+            let executor = RefCell::new(LocalPool::new());
+            let spawner = executor.borrow().spawner();
+
+            Self { executor, spawner }
+        }
+    }
+
+    fn with_runtime<R>(f: impl FnOnce(&Runtime) -> R) -> R {
+        match RUNTIME.try_with(f) {
+            Ok(r) => r,
+            Err(_) => panic!("Must be run from within `silkenweb::task::server::scope`"),
+        }
     }
 }
 
@@ -152,6 +171,41 @@ pub mod server {
     use futures::Future;
 
     use super::{arch, Render, RENDER};
+
+    /// Run a future with a local task queue.
+    ///
+    /// This creates a [`tokio`] task local queue for any futures spawned with
+    /// [`spawn_local`].
+    ///
+    /// ```
+    /// # use silkenweb::{prelude::*, task::{render_now, server::{block_on, scope}}};
+    /// # use html::div;
+    /// #
+    /// block_on(scope(async {
+    ///     let text = Mutable::new("Hello!");
+    ///     let app: Node = div().text(Sig(text.signal())).freeze().into();
+    ///     assert_eq!(app.to_string(), "<div></div>");
+    ///     render_now().await;
+    ///     assert_eq!(app.to_string(), "<div>Hello!</div>");
+    /// }))
+    /// ```
+    ///
+    /// [`spawn_local`]: super::spawn_local
+    /// [`Signal`]: futures_signals::signal::Signal
+    pub fn scope<Fut>(f: Fut) -> impl Future<Output = Fut::Output>
+    where
+        Fut: Future,
+    {
+        arch::RUNTIME.scope(arch::Runtime::default(), f)
+    }
+
+    /// Synchronous version of [`scope`].
+    pub fn sync_scope<F, R>(f: F) -> R
+    where
+        F: FnOnce() -> R,
+    {
+        arch::RUNTIME.sync_scope(arch::Runtime::default(), f)
+    }
 
     /// Synchronous version of [render_now].
     ///

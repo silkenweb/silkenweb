@@ -487,7 +487,8 @@ pub trait Element: Sized {
     ///
     /// ```
     /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::server::render_now_sync};
+    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, server}};
+    /// # server::block_on(server::scope(async {
     /// let my_class = Mutable::new("my-class");
     /// let my_other_class = Mutable::new("my-other-class");
     /// let app: Div<Dry> = div()
@@ -495,7 +496,7 @@ pub trait Element: Sized {
     ///     .class(Sig(my_other_class.signal()));
     /// let app = app.freeze();
     ///
-    /// render_now_sync();
+    /// render_now().await;
     /// assert_eq!(
     ///     app.to_string(),
     ///     r#"<div class="my-class my-other-class"></div>"#
@@ -503,11 +504,12 @@ pub trait Element: Sized {
     ///
     /// my_other_class.set("my-other-class-updated");
     ///
-    /// render_now_sync();
+    /// render_now().await;
     /// assert_eq!(
     ///     app.to_string(),
     ///     r#"<div class="my-class my-other-class-updated"></div>"#
     /// );
+    /// # }))
     /// ```
     fn class<'a, T>(self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
@@ -543,18 +545,20 @@ pub trait Element: Sized {
     ///
     /// ```
     /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::server::render_now_sync};
+    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, server}};
+    /// # server::block_on(server::scope(async {
     /// let my_classes = Mutable::new(vec!["class0", "class1"]);
     /// let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
     /// let app = app.freeze();
     ///
-    /// render_now_sync();
+    /// render_now().await;
     /// assert_eq!(app.to_string(), r#"<div class="class0 class1"></div>"#);
     ///
     /// my_classes.set(vec![]);
     ///
-    /// render_now_sync();
+    /// render_now().await;
     /// assert_eq!(app.to_string(), r#"<div class=""></div>"#);
+    /// # }))
     /// ```
     fn classes<'a, T, Iter>(self, classes: impl RefSignalOrValue<'a, Item = Iter>) -> Self
     where
