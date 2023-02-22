@@ -2,6 +2,8 @@
 
 ## Next
 
+- SSR Scopes: Each tokio task now has a local task queue to emulate the browsers microtask queue.
+
 ### Fixes
 
 - SSR now escapes text.
