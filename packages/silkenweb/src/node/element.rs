@@ -1,7 +1,7 @@
 //! Traits and types for building elements.
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{self, cell::Cell, future::Future, marker::PhantomData, pin::Pin, rc::Rc};
+use std::{self, cell::Cell, fmt, future::Future, marker::PhantomData, pin::Pin, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -767,11 +767,11 @@ pub trait ShadowRootParent<D: InstantiableDom = DefaultDom>: Element {
         N: Into<Node<D>>;
 }
 
-impl<D> ::std::fmt::Display for GenericElement<D, Const>
+impl<D> fmt::Display for GenericElement<D, Const>
 where
     D: Dom,
 {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.element.fmt(f)
     }
 }
