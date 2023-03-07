@@ -1,7 +1,15 @@
 //! Traits and types for building elements.
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{self, cell::Cell, fmt, future::Future, marker::PhantomData, pin::Pin, rc::Rc};
+use std::{
+    self,
+    cell::{Cell, RefCell},
+    fmt,
+    future::Future,
+    marker::PhantomData,
+    pin::Pin,
+    rc::Rc,
+};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -15,7 +23,7 @@ use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Va
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::child_vec::ChildVec;
-use super::{ChildNode, Node, Resource};
+use super::{ChildNode, Node, ResourceVec};
 use crate::{
     attribute::Attribute,
     dom::{
@@ -40,7 +48,7 @@ mod child_vec;
 pub struct GenericElement<D: Dom = DefaultDom, Mutability = Mut> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
-    resources: Vec<Resource>,
+    resources: ResourceVec,
     events: EventStore,
     element: D::Element,
     #[cfg(debug_assertions)]
@@ -142,14 +150,23 @@ impl<D: Dom> GenericElement<D> {
 impl<D: Dom, Mutability> GenericElement<D, Mutability> {
     fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
-            let mut child_vec = ChildVec::new(self.element.clone(), self.static_child_count);
+            let child_vec = Rc::new(RefCell::new(ChildVec::new(
+                self.element.clone(),
+                self.static_child_count,
+            )));
 
-            let future = children.for_each(move |update| {
-                child_vec.apply_update(update);
-                async {}
+            let future = children.for_each({
+                clone!(child_vec);
+                move |update| {
+                    child_vec.borrow_mut().apply_update(update);
+                    async {}
+                }
             });
 
-            self.resources.push(spawn_cancelable_future(future));
+            // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
+            // keep a hold of `child_vec`, as it may own signals that need updating.
+            let resource = (child_vec, spawn_cancelable_future(future));
+            self.resources.push(Box::new(resource));
         }
 
         // This improves memory usage, and doesn't detectably impact performance
@@ -416,7 +433,8 @@ impl<D: Dom> Element for GenericElement<D> {
 
 impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
-        self.resources.push(spawn_cancelable_future(future));
+        self.resources
+            .push(Box::new(spawn_cancelable_future(future)));
     }
 }
 
