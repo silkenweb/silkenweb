@@ -2,8 +2,6 @@
 
 use std::fmt;
 
-use discard::DiscardOnDrop;
-use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
 use crate::dom::{
@@ -20,7 +18,7 @@ pub use component::Component;
 /// A DOM Node
 pub struct Node<D: Dom = DefaultDom> {
     node: D::Node,
-    resources: Vec<Resource>,
+    resources: ResourceVec,
     events: EventStore,
 }
 
@@ -77,5 +75,8 @@ pub fn text<D: Dom>(text: &str) -> Text<D> {
     Text(D::Text::new(text))
 }
 
-/// A resource that needs to be held
-type Resource = DiscardOnDrop<CancelableFutureHandle>;
+trait Resource {}
+
+impl<T> Resource for T {}
+
+type ResourceVec = Vec<Box<dyn Resource>>;
