@@ -17,6 +17,7 @@ A library for building reactive web apps.
 - [Tauri support](https://github.com/silkenweb/tauri-example)
 - Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
 - Full stack apps using [Arpy]. See the [client-server example].
+- [htmx] integration. See the [htmx-axum example].
 
 ## Example: A Simple Counter
 
@@ -114,7 +115,9 @@ While a macro DSL could be developed to work with Silkenweb, the syntax in Rust 
 [`cargo-leptos`]: https://github.com/leptos-rs/cargo-leptos
 [Perseus]: https://github.com/framesurge/perseus
 [Arpy]: https://github.com/simon-bourne/arpy
+[htmx]: https://htmx.org
 [CSS Modules]: https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules
 [CSS modules example]: https://github.com/silkenweb/silkenweb/tree/main/examples/css-modules
 [router example]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
 [client-server example]: https://github.com/silkenweb/silkenweb/tree/main/examples/client-server
+[htmx-axum example]: https://github.com/silkenweb/silkenweb/tree/main/examples/htmx-axum

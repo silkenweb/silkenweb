@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head profile="http://www.w3.org/2005/10/profile">
+    <meta charset="utf-8" />
+    <script src="https://unpkg.com/htmx.org@1.8.6"
+        integrity="sha384-Bj8qm/6B+71E6FQSySofJOUjA/gq330vEqjFx9LakWybUySyI1IQHwPtbTU7bNwx"
+        crossorigin="anonymous"></script>
+    <title>Silkenweb Example: Htmx using Axum</title>
+</head>
+
+<body>
+    <form hx-post="/form-submit" hx-target="#form-response">
+        <label for="first">First name:</label>
+        <input type="text" id="first" name="first"><br><br>
+        <label for="last">Last name:</label>
+        <input type="text" id="last" name="last">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="form-response"></div>
+</body>
+
+</html>
