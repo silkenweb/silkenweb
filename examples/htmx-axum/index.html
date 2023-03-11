@@ -10,10 +10,14 @@
 </head>
 
 <body>
-    <button hx-post="/button-clicked" hx-trigger="click" hx-target="#button-clicked">
-        Click Me!
-    </button>
-    <div id="button-clicked"></div>
+    <form hx-post="/form-submit" hx-target="#form-response">
+        <label for="first">First name:</label>
+        <input type="text" id="first" name="first"><br><br>
+        <label for="last">Last name:</label>
+        <input type="text" id="last" name="last">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="form-response"></div>
 </body>
 
 </html>

@@ -1,12 +1,11 @@
-use std::io;
-
 use async_trait::async_trait;
 use axum::{
+    body::{Bytes, HttpBody},
     extract::FromRequest,
     headers::ContentType,
     http::{self, Request},
     response::{IntoResponse, Response},
-    TypedHeader,
+    BoxError, TypedHeader,
 };
 use serde::de::DeserializeOwned;
 use silkenweb::{dom::Dry, prelude::Node};
@@ -25,20 +24,24 @@ impl IntoResponse for HtmxResponse {
     }
 }
 
-pub struct HtmxPostRequest<T>(T);
+pub struct HtmxPostRequest<T>(pub T);
 
 #[async_trait]
 impl<State, Body, T> FromRequest<State, Body> for HtmxPostRequest<T>
 where
     State: Send + Sync,
-    Body: Send + 'static,
-    for<'a> &'a Body: io::Read,
+    Body: HttpBody + Send + 'static,
+    Body::Data: Send,
+    Body::Error: Into<BoxError>,
     T: DeserializeOwned,
 {
     type Rejection = http::StatusCode;
 
-    async fn from_request(req: Request<Body>, _state: &State) -> Result<Self, Self::Rejection> {
-        serde_urlencoded::from_reader(req.body())
+    async fn from_request(req: Request<Body>, state: &State) -> Result<Self, Self::Rejection> {
+        let bytes = Bytes::from_request(req, state)
+            .await
+            .map_err(|_| http::StatusCode::BAD_REQUEST)?;
+        serde_urlencoded::from_bytes(&bytes)
             .map_err(|_| http::StatusCode::BAD_REQUEST)
             .map(HtmxPostRequest)
     }

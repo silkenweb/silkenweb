@@ -6,8 +6,9 @@ use axum::{
     routing::{get, post},
     Router, Server, TypedHeader,
 };
+use serde::Deserialize;
 use silkenweb::prelude::{html::div, ParentElement};
-use silkenweb_htmx_axum::HtmxResponse;
+use silkenweb_htmx_axum::{HtmxPostRequest, HtmxResponse};
 use tracing::info;
 
 async fn index() -> impl IntoResponse {
@@ -17,10 +18,16 @@ async fn index() -> impl IntoResponse {
     )
 }
 
-// TODO: Read some data from the post request
-async fn button_clicked() -> impl IntoResponse {
-    info!("Button clicked");
-    HtmxResponse::new(div().text("Button clicked"))
+#[derive(Deserialize)]
+struct Name {
+    first: String,
+    last: String,
+}
+
+async fn form_submit(
+    HtmxPostRequest(Name { first, last }): HtmxPostRequest<Name>,
+) -> impl IntoResponse {
+    HtmxResponse::new(div().text(format!("Hello, {} {}!", first, last)))
 }
 
 #[tokio::main]
@@ -33,7 +40,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(index))
-        .route("/button-clicked", post(button_clicked));
+        .route("/form-submit", post(form_submit));
 
     let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9090);
     let server = Server::bind(&address);
