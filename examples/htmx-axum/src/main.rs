@@ -1,7 +1,10 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 use axum::{
-    headers::ContentType, response::IntoResponse, routing::{get, post}, Router, Server, TypedHeader,
+    headers::ContentType,
+    response::IntoResponse,
+    routing::{get, post},
+    Router, Server, TypedHeader,
 };
 use silkenweb::prelude::{html::div, ParentElement};
 use silkenweb_htmx_axum::HtmxResponse;

@@ -3,8 +3,10 @@ use std::io;
 use async_trait::async_trait;
 use axum::{
     extract::FromRequest,
+    headers::ContentType,
     http::{self, Request},
-    response::{IntoResponse, Response}, TypedHeader, headers::ContentType,
+    response::{IntoResponse, Response},
+    TypedHeader,
 };
 use serde::de::DeserializeOwned;
 use silkenweb::{dom::Dry, prelude::Node};
