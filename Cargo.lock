@@ -2768,6 +2768,7 @@ dependencies = [
  "axum",
  "serde",
  "silkenweb",
+ "silkenweb-htmx-axum",
  "tokio",
  "tracing",
  "tracing-subscriber",

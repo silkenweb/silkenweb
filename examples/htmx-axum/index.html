@@ -3,12 +3,17 @@
 
 <head profile="http://www.w3.org/2005/10/profile">
     <meta charset="utf-8" />
-    <script src="https://unpkg.com/htmx.org@1.8.6" integrity="sha384-Bj8qm/6B+71E6FQSySofJOUjA/gq330vEqjFx9LakWybUySyI1IQHwPtbTU7bNwx" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@1.8.6"
+        integrity="sha384-Bj8qm/6B+71E6FQSySofJOUjA/gq330vEqjFx9LakWybUySyI1IQHwPtbTU7bNwx"
+        crossorigin="anonymous"></script>
     <title>Silkenweb Example: Htmx using Axum</title>
 </head>
 
 <body>
-    Hello, world!
+    <button hx-post="/button-clicked" hx-trigger="click" hx-target="#button-clicked">
+        Click Me!
+    </button>
+    <div id="button-clicked"></div>
 </body>
 
 </html>

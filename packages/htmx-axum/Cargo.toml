@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 async-trait = "0.1.66"
-axum = "0.6.10"
+axum = { version = "0.6.10", features = ["headers"] }
 serde = "1.0.154"
 serde_urlencoded = "0.7.1"
 silkenweb = { path = "../silkenweb" }
