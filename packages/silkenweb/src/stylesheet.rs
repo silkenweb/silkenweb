@@ -101,8 +101,11 @@ impl StyleDeclaration {
 
 #[cfg(test)]
 mod tests {
+    use silkenweb_macros::cfg_browser;
+
     use super::*;
 
+    #[cfg_browser(false)]
     #[tokio::test]
     async fn stylesheet() {
         let sheet = StyleSheet::new().rule(
