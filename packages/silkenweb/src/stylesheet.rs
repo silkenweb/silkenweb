@@ -2,14 +2,20 @@ use std::pin::Pin;
 
 use futures_signals::signal::{always, Signal, SignalExt};
 use silkenweb_base::clone;
-use silkenweb_signals_ext::{value::SignalOrValue, SignalProduct};
+use silkenweb_signals_ext::{
+    value::{Sig, SignalOrValue},
+    SignalProduct,
+};
 
 use crate::{
     dom::{private::DomElement, Dom},
     node::element::{Element, GenericElement},
 };
 
+// TODO: Add a way to update stylesheets using CSS Object Model
+
 // TODO: Doc and examples
+// TODO: impl SignalOrValue instead of this
 #[derive(Default)]
 pub struct StyleSheet {
     rules: Vec<StyleRule>,
@@ -25,7 +31,7 @@ impl StyleSheet {
         self
     }
 
-    pub fn into_string_signal(self) -> impl Signal<Item = String> {
+    pub fn into_string_signal(self) -> Pin<Box<dyn Signal<Item = String>>> {
         let mut result = always(String::new()).boxed_local();
 
         for rule in self.rules {
@@ -35,6 +41,10 @@ impl StyleSheet {
         }
 
         result
+    }
+
+    pub fn sig(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
+        Sig(self.into_string_signal())
     }
 }
 
@@ -64,6 +74,10 @@ impl StyleRule {
         self.properties
             .into_string_signal()
             .map(move |props| format!("{} {{\n{props}}}\n", self.selector))
+    }
+
+    pub fn sig(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
+        Sig(self.into_string_signal().boxed_local())
     }
 }
 
