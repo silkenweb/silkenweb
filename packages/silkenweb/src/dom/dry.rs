@@ -380,7 +380,8 @@ impl<Node: DryChild> SharedDryElement<Node> {
 
     pub fn style_property(&mut self, _name: &str, _value: &str) {
         // TODO: Maintain a map of style properties. Apply the style with this method
-        // and render the styles to the style attribute.
+        // and render the styles to the style attribute. The styles need to be
+        // transferred to the wet element when hydrating.
         todo!()
     }
 
