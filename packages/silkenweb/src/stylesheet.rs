@@ -1,4 +1,4 @@
-use std::{collections::HashMap, pin::Pin};
+use std::pin::Pin;
 
 use futures_signals::signal::{always, Signal, SignalExt};
 use silkenweb_signals_ext::{value::SignalOrValue, SignalProduct};
@@ -23,7 +23,7 @@ impl StyleSheet {
 
         for rule in self.rules {
             result = (result, rule.into_string_signal())
-                .signal_ref(move |result, rule| format!("{result}{rule}\n"))
+                .signal_ref(move |result, rule| format!("{result}{rule}"))
                 .boxed_local();
         }
 
@@ -37,9 +37,9 @@ pub struct StyleRule {
 }
 
 impl StyleRule {
-    pub fn new(selector: String) -> Self {
+    pub fn new(selector: impl Into<String>) -> Self {
         Self {
-            selector,
+            selector: selector.into(),
             properties: StyleDeclaration::new(),
         }
     }
@@ -62,8 +62,10 @@ impl StyleRule {
 
 #[derive(Default)]
 pub struct StyleDeclaration {
-    property_map: HashMap<String, Pin<Box<dyn Signal<Item = String>>>>,
+    property_map: Vec<(String, PropValue)>,
 }
+
+type PropValue = Pin<Box<dyn Signal<Item = String>>>;
 
 impl StyleDeclaration {
     pub fn new() -> Self {
@@ -80,7 +82,7 @@ impl StyleDeclaration {
             |(), val| val.map(|x| x.into()).boxed_local(),
             (),
         );
-        self.property_map.insert(name.into(), value_sig);
+        self.property_map.push((name.into(), value_sig));
         self
     }
 
@@ -94,5 +96,33 @@ impl StyleDeclaration {
         }
 
         result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn stylesheet() {
+        let sheet = StyleSheet::new().rule(
+            StyleRule::new(":root")
+                .style("--test0", "value0")
+                .style("--test1", "value1"),
+        );
+
+        sheet
+            .into_string_signal()
+            .for_each(|value| async move {
+                assert_eq!(
+                    value,
+                    r#":root {
+  --test0: value0;
+  --test1: value1;
+}
+"#
+                );
+            })
+            .await;
     }
 }
