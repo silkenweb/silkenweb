@@ -303,6 +303,13 @@ macro_rules! dom_element {
                 Self(self.0.attribute(name, value))
             }
 
+            fn style_property(
+                self,
+                style: $crate::stylesheet::StyleDeclaration,
+            ) -> Self {
+                Self(self.0.style_property(style))
+            }
+
             fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
                 Self(self.0.effect(|elem| {
                     f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))

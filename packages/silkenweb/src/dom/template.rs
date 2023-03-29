@@ -109,6 +109,10 @@ where
         self.element.try_dom_element()
     }
 
+    fn style_property(&mut self, name: &str, value: &str) {
+        self.element.style_property(name, value)
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
     }

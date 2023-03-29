@@ -89,6 +89,10 @@ impl private::DomElement for DryElement {
         self.0.borrow().try_dom_element()
     }
 
+    fn style_property(&mut self, name: &str, value: &str) {
+        self.0.borrow_mut().style_property(name, value)
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
     }
@@ -372,6 +376,12 @@ impl<Node: DryChild> SharedDryElement<Node> {
 
     pub fn try_dom_element(&self) -> Option<web_sys::Element> {
         None
+    }
+
+    pub fn style_property(&mut self, _name: &str, _value: &str) {
+        // TODO: Maintain a map of style properties. Apply the style with this method
+        // and render the styles to the style attribute.
+        todo!()
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {

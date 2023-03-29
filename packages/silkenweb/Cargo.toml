@@ -38,6 +38,7 @@ features = [
     "Attr",
     "CompositionEvent",
     "css",
+    "CssStyleDeclaration",
     "CustomEvent",
     "Document",
     "DomTokenList",

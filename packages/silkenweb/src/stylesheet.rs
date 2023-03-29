@@ -1,8 +1,15 @@
 use std::pin::Pin;
 
 use futures_signals::signal::{always, Signal, SignalExt};
+use silkenweb_base::clone;
 use silkenweb_signals_ext::{value::SignalOrValue, SignalProduct};
 
+use crate::{
+    dom::{private::DomElement, Dom},
+    node::element::{Element, GenericElement},
+};
+
+// TODO: Doc and examples
 #[derive(Default)]
 pub struct StyleSheet {
     rules: Vec<StyleRule>,
@@ -72,6 +79,7 @@ impl StyleDeclaration {
         Self::default()
     }
 
+    // TODO: `important!` styles
     pub fn style(
         mut self,
         name: impl Into<String>,
@@ -96,6 +104,25 @@ impl StyleDeclaration {
         }
 
         result
+    }
+
+    pub(crate) fn onto_element<D>(self, mut dest_elem: GenericElement<D>) -> GenericElement<D>
+    where
+        D: Dom,
+    {
+        let dom_elem = dest_elem.element().clone();
+
+        for (name, value) in self.property_map {
+            clone!(mut dom_elem);
+            let future = value.for_each(move |value| {
+                dom_elem.style_property(&name, &value);
+                async {}
+            });
+
+            dest_elem = dest_elem.spawn_future(future);
+        }
+
+        dest_elem
     }
 }
 
