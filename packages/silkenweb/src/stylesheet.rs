@@ -46,6 +46,29 @@ impl StyleSheet {
     pub fn sig(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
         Sig(self.into_string_signal())
     }
+
+    pub(crate) fn onto_element<D>(self, mut dest_elem: GenericElement<D>) -> GenericElement<D>
+    where
+        D: Dom,
+    {
+        let dom_elem = dest_elem.element().clone();
+
+        for (rule_index, rule) in self.rules.into_iter().enumerate() {
+            let selector = rule.selector;
+
+            for (name, value) in rule.properties.property_map {
+                clone!(mut dom_elem, selector);
+                let future = value.for_each(move |value| {
+                    dom_elem.sheet_property(rule_index as u32, &selector, &name, &value);
+                    async {}
+                });
+
+                dest_elem = dest_elem.spawn_future(future);
+            }
+        }
+
+        dest_elem
+    }
 }
 
 pub struct StyleRule {

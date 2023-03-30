@@ -119,6 +119,29 @@ impl DomElement for WetElement {
         style_props.set_property(name, value).unwrap_throw();
     }
 
+    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
+        let rule_list = self
+            .element
+            .dyn_ref::<web_sys::HtmlStyleElement>()
+            .expect("Expected `HtmlStyleElement`")
+            .sheet()
+            .expect("Expected stylesheet on `HtmlStyleElement`")
+            .dyn_into::<web_sys::CssStyleSheet>()
+            .expect("Expected CssStyleSheet")
+            .css_rules()
+            .unwrap_throw();
+        // TODO: Create rule if it doesn't exist
+        let rule = rule_list
+            .item(rule_index)
+            .expect("Rule index out of range")
+            .dyn_into::<web_sys::CssStyleRule>()
+            .expect("Expected `CssStyleRule`");
+        debug_assert_eq!(rule.selector_text(), selector);
+        let style_props = rule.style();
+        style_props.remove_property(property).unwrap_throw();
+        style_props.set_property(property, value).unwrap_throw();
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));

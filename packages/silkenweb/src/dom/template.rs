@@ -113,6 +113,11 @@ where
         self.element.style_property(name, value)
     }
 
+    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
+        self.element
+            .sheet_property(rule_index, selector, property, value)
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
     }

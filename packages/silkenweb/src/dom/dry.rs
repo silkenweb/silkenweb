@@ -93,6 +93,12 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().style_property(name, value)
     }
 
+    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
+        self.0
+            .borrow_mut()
+            .sheet_property(rule_index, selector, property, value)
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
     }
@@ -382,6 +388,18 @@ impl<Node: DryChild> SharedDryElement<Node> {
         // TODO: Maintain a map of style properties. Apply the style with this method
         // and render the styles to the style attribute. The styles need to be
         // transferred to the wet element when hydrating.
+        todo!()
+    }
+
+    pub fn sheet_property(
+        &mut self,
+        _rule_index: u32,
+        _selector: &str,
+        _property: &str,
+        _value: &str,
+    ) {
+        // TODO: Maintain stylesheet data. Render the sheet to text, and transfer to the
+        // wet element when hydrating.
         todo!()
     }
 

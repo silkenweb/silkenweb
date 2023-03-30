@@ -1,6 +1,8 @@
 #![allow(rustdoc::invalid_html_tags)]
 //! HTML elements
 
+use crate::{dom::Dom, stylesheet::StyleSheet};
+
 // This code is derived from [Moxie DOM] under MIT/Apache-2.0 license on
 // 2021-04-23
 //
@@ -2741,6 +2743,12 @@ html_element!(
 );
 
 parent_element!(style);
+
+impl<D: Dom> Style<D> {
+    pub fn sheet_property(self, sheet: StyleSheet) -> Self {
+        Self(sheet.onto_element(self.0))
+    }
+}
 
 html_element!(
     /// The [HTML Title element (`<title>`)][mdn] defines the document's title
