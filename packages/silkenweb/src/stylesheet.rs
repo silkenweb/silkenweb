@@ -43,7 +43,7 @@ impl StyleSheet {
         result
     }
 
-    pub fn sig(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
+    pub fn text(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
         Sig(self.into_string_signal())
     }
 
@@ -99,10 +99,6 @@ impl StyleRule {
             .into_string_signal()
             .map(move |props| format!("{} {{\n{props}}}\n", self.selector))
     }
-
-    pub fn sig(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
-        Sig(self.into_string_signal().boxed_local())
-    }
 }
 
 #[derive(Default)]
@@ -142,6 +138,10 @@ impl StyleDeclaration {
         }
 
         result
+    }
+
+    pub fn into_attr(self) -> Sig<Pin<Box<dyn Signal<Item = String>>>> {
+        Sig(self.into_string_signal().boxed_local())
     }
 
     pub(crate) fn onto_element<D>(self, mut dest_elem: GenericElement<D>) -> GenericElement<D>
