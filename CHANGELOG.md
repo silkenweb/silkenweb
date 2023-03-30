@@ -4,6 +4,7 @@
 
 - SSR Scopes: Each tokio task now has a local task queue to emulate the browsers microtask queue.
 - htmx integration using Axum.
+- Reactive stylesheets.
 
 ### Fixes
 
