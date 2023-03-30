@@ -27,6 +27,16 @@ impl WetElement {
                 .unwrap_throw()
         })
     }
+
+    fn css_style_sheet(&self) -> web_sys::CssStyleSheet {
+        self.element
+            .dyn_ref::<web_sys::HtmlStyleElement>()
+            .expect("Expected `HtmlStyleElement`")
+            .sheet()
+            .expect("Expected stylesheet on `HtmlStyleElement`")
+            .dyn_into::<web_sys::CssStyleSheet>()
+            .expect("Expected CssStyleSheet")
+    }
 }
 
 impl fmt::Display for WetElement {
@@ -119,19 +129,17 @@ impl DomElement for WetElement {
         style_props.set_property(name, value).unwrap_throw();
     }
 
+    fn append_sheet_rule(&mut self, selector: &str) -> u32 {
+        self.css_style_sheet()
+            .insert_rule(&format!("{selector} {{}}"))
+            .unwrap_throw()
+    }
+
     fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
-        let rule_list = self
-            .element
-            .dyn_ref::<web_sys::HtmlStyleElement>()
-            .expect("Expected `HtmlStyleElement`")
-            .sheet()
-            .expect("Expected stylesheet on `HtmlStyleElement`")
-            .dyn_into::<web_sys::CssStyleSheet>()
-            .expect("Expected CssStyleSheet")
+        let rule = self
+            .css_style_sheet()
             .css_rules()
-            .unwrap_throw();
-        // TODO: Create rule if it doesn't exist
-        let rule = rule_list
+            .unwrap_throw()
             .item(rule_index)
             .expect("Rule index out of range")
             .dyn_into::<web_sys::CssStyleRule>()

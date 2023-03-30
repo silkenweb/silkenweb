@@ -51,15 +51,16 @@ impl StyleSheet {
     where
         D: Dom,
     {
-        let dom_elem = dest_elem.element().clone();
+        let mut dom_elem = dest_elem.element().clone();
 
-        for (rule_index, rule) in self.rules.into_iter().enumerate() {
+        for rule in self.rules {
             let selector = rule.selector;
+            let rule_index = dom_elem.append_sheet_rule(&selector);
 
             for (name, value) in rule.properties.property_map {
                 clone!(mut dom_elem, selector);
                 let future = value.for_each(move |value| {
-                    dom_elem.sheet_property(rule_index as u32, &selector, &name, &value);
+                    dom_elem.sheet_property(rule_index, &selector, &name, &value);
                     async {}
                 });
 

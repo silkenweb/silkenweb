@@ -93,6 +93,10 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().style_property(name, value)
     }
 
+    fn append_sheet_rule(&mut self, selector: &str) -> u32 {
+        self.0.borrow_mut().append_sheet_rule(selector)
+    }
+
     fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
         self.0
             .borrow_mut()
@@ -388,6 +392,10 @@ impl<Node: DryChild> SharedDryElement<Node> {
         // TODO: Maintain a map of style properties. Apply the style with this method
         // and render the styles to the style attribute. The styles need to be
         // transferred to the wet element when hydrating.
+        todo!()
+    }
+
+    pub fn append_sheet_rule(&mut self, _selector: &str) -> u32 {
         todo!()
     }
 
