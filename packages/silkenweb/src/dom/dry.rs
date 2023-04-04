@@ -234,6 +234,7 @@ pub struct SharedDryElement<Node> {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
+    styles: IndexMap<String, String>,
     children: Vec<Node>,
     shadow_children: Vec<Node>,
     hydrate_actions: Vec<LazyElementAction>,
@@ -246,6 +247,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
             namespace,
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
+            styles: IndexMap::new(),
             children: Vec::new(),
             shadow_children: Vec::new(),
             hydrate_actions: Vec::new(),
@@ -378,12 +380,8 @@ impl<Node: DryChild> SharedDryElement<Node> {
         None
     }
 
-    pub fn style_property(&mut self, _name: &str, _value: &str) {
-        todo!(
-            "Maintain a map of style properties. Apply the style with this method
-            and render the styles to the style attribute. The styles need to be
-            transferred to the wet element when hydrating."
-        )
+    pub fn style_property(&mut self, name: &str, value: &str) {
+        self.styles.insert(name.to_owned(), value.to_owned());
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
@@ -396,6 +394,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
             namespace: self.namespace,
             tag: self.tag.clone(),
             attributes: self.attributes.clone(),
+            styles: self.styles.clone(),
             children: Self::clone_children(&self.children),
             shadow_children: Self::clone_children(&self.shadow_children),
             hydrate_actions: Vec::new(),
@@ -553,18 +552,11 @@ impl SharedDryElement<HydroNode> {
         }
 
         for (name, value) in &self.attributes {
-            let value = value.as_ref();
+            Self::set_attribute(&mut dom_attr_map, name, value, dom_elem, tracker);
+        }
 
-            let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
-                value != existing_value
-            } else {
-                true
-            };
-
-            if set_attr {
-                dom_elem.set_attribute(name, value).unwrap_throw();
-                tracker.attribute_set(dom_elem, name, value);
-            }
+        if let Some(style) = self.style_attribute() {
+            Self::set_attribute(&mut dom_attr_map, "style", &style, dom_elem, tracker)
         }
 
         for name in dom_attr_map.into_keys() {
@@ -573,6 +565,38 @@ impl SharedDryElement<HydroNode> {
                 dom_elem.remove_attribute(&name).unwrap_throw();
             }
         }
+    }
+
+    fn set_attribute(
+        dom_attr_map: &mut HashMap<String, String>,
+        name: &str,
+        value: &str,
+        dom_elem: &web_sys::Element,
+        tracker: &mut HydrationStats,
+    ) {
+        let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
+            value != existing_value
+        } else {
+            true
+        };
+
+        if set_attr {
+            dom_elem.set_attribute(name, value).unwrap_throw();
+            tracker.attribute_set(dom_elem, name, value);
+        }
+    }
+
+    fn style_attribute(&self) -> Option<String> {
+        if self.styles.is_empty() {
+            return None;
+        }
+
+        Some(
+            self.styles
+                .iter()
+                .map(|(name, value)| format!("{name}: {value};"))
+                .join(" "),
+        )
     }
 }
 
@@ -604,6 +628,7 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<{}", self.tag)?;
 
+        // TODO: styles
         for (name, value) in &self.attributes {
             write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
         }
@@ -631,6 +656,7 @@ impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
     fn from(dry: SharedDryElement<Node>) -> Self {
         let mut wet = WetElement::new(dry.namespace, &dry.tag);
 
+        // TODO: styles
         for (name, value) in dry.attributes {
             wet.attribute(&name, value);
         }
