@@ -386,20 +386,6 @@ impl<Node: DryChild> SharedDryElement<Node> {
         )
     }
 
-    pub fn append_sheet_rule(&mut self, _selector: &str) -> u32 {
-        todo!()
-    }
-
-    pub fn sheet_property(
-        &mut self,
-        _rule_index: u32,
-        _selector: &str,
-        _property: &str,
-        _value: &str,
-    ) {
-        todo!("Maintain stylesheet data. Render the sheet to text, and transfer to the wet element when hydrating.")
-    }
-
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.hydrate_actions
             .push(Box::new(move |element| element.effect(f)))
