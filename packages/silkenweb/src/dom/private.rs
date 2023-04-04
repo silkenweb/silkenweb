@@ -55,10 +55,6 @@ pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
 
     fn style_property(&mut self, name: &str, value: &str);
 
-    fn append_sheet_rule(&mut self, selector: &str) -> u32;
-
-    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str);
-
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
 }
 

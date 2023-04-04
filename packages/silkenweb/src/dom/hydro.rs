@@ -223,26 +223,6 @@ impl DomElement for HydroElement {
         }
     }
 
-    fn append_sheet_rule(&mut self, selector: &str) -> u32 {
-        match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.append_sheet_rule(selector),
-            SharedHydroElement::Wet(wet) => wet.append_sheet_rule(selector),
-            SharedHydroElement::Unreachable => unreachable!(),
-        }
-    }
-
-    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
-        match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => {
-                dry.sheet_property(rule_index, selector, property, value)
-            }
-            SharedHydroElement::Wet(wet) => {
-                wet.sheet_property(rule_index, selector, property, value)
-            }
-            SharedHydroElement::Unreachable => unreachable!(),
-        }
-    }
-
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         match &mut *self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.effect(f),

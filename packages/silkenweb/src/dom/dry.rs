@@ -93,16 +93,6 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().style_property(name, value)
     }
 
-    fn append_sheet_rule(&mut self, selector: &str) -> u32 {
-        self.0.borrow_mut().append_sheet_rule(selector)
-    }
-
-    fn sheet_property(&mut self, rule_index: u32, selector: &str, property: &str, value: &str) {
-        self.0
-            .borrow_mut()
-            .sheet_property(rule_index, selector, property, value)
-    }
-
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
     }
