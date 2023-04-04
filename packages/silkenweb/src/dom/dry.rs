@@ -752,7 +752,13 @@ const STYLE_ATTR: &str = "style";
 
 #[cfg(test)]
 mod tests {
-    use crate::{dom::Dry, elements::html::*, prelude::*};
+    use crate::{
+        dom::Dry,
+        elements::html::*,
+        prelude::*,
+        stylesheet::StyleDeclaration,
+        task::{render_now, server},
+    };
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -778,5 +784,21 @@ mod tests {
             .child(h2().text("Light content"))
     }
 
-    // TODO: style property test
+    #[tokio::test]
+    async fn style_property() {
+        server::scope(async {
+            let app: Div<Dry> = div().style_property(
+                StyleDeclaration::new()
+                    .style("--test0", "value0")
+                    .style("--test1", "value1"),
+            );
+
+            render_now().await;
+
+            assert_eq!(
+                app.freeze().to_string(),
+                r#"<div style="--test0: value0; --test1: value1;"></div>"#
+            );
+        }).await
+    }
 }
