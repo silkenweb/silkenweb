@@ -752,13 +752,11 @@ const STYLE_ATTR: &str = "style";
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        dom::Dry,
-        elements::html::*,
-        prelude::*,
-        stylesheet::StyleDeclaration,
-        task::{render_now, server},
-    };
+    use silkenweb_macros::cfg_browser;
+
+    use crate::{dom::Dry, elements::html::*, prelude::*};
+    #[cfg_browser(false)]
+    use crate::{stylesheet::StyleDeclaration, task::render_now, task::server};
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -784,6 +782,7 @@ mod tests {
             .child(h2().text("Light content"))
     }
 
+    #[cfg_browser(false)]
     #[tokio::test]
     async fn style_property() {
         server::scope(async {
@@ -799,6 +798,7 @@ mod tests {
                 app.freeze().to_string(),
                 r#"<div style="--test0: value0; --test1: value1;"></div>"#
             );
-        }).await
+        })
+        .await
     }
 }
