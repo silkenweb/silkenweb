@@ -241,6 +241,23 @@ pub struct SharedDryElement<Node> {
     next_sibling: Option<Node>,
 }
 
+impl<Node> SharedDryElement<Node> {
+    fn style_prop_text(&self) -> Option<String> {
+        if self.styles.is_empty() {
+            return None;
+        }
+
+        debug_assert!(!self.attributes.contains_key(STYLE_ATTR));
+
+        Some(
+            self.styles
+                .iter()
+                .map(|(name, value)| format!("{name}: {value};"))
+                .join(" "),
+        )
+    }
+}
+
 impl<Node: DryChild> SharedDryElement<Node> {
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self {
@@ -555,8 +572,8 @@ impl SharedDryElement<HydroNode> {
             Self::set_attribute(&mut dom_attr_map, name, value, dom_elem, tracker);
         }
 
-        if let Some(style) = self.style_attribute() {
-            Self::set_attribute(&mut dom_attr_map, "style", &style, dom_elem, tracker)
+        if let Some(style) = self.style_prop_text() {
+            Self::set_attribute(&mut dom_attr_map, STYLE_ATTR, &style, dom_elem, tracker)
         }
 
         for name in dom_attr_map.into_keys() {
@@ -584,19 +601,6 @@ impl SharedDryElement<HydroNode> {
             dom_elem.set_attribute(name, value).unwrap_throw();
             tracker.attribute_set(dom_elem, name, value);
         }
-    }
-
-    fn style_attribute(&self) -> Option<String> {
-        if self.styles.is_empty() {
-            return None;
-        }
-
-        Some(
-            self.styles
-                .iter()
-                .map(|(name, value)| format!("{name}: {value};"))
-                .join(" "),
-        )
     }
 }
 
@@ -628,9 +632,12 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "<{}", self.tag)?;
 
-        // TODO: styles
         for (name, value) in &self.attributes {
-            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+            fmt_attr(f, name, value)?;
+        }
+
+        if let Some(style) = self.style_prop_text() {
+            fmt_attr(f, STYLE_ATTR, &style)?;
         }
 
         f.write_str(">")?;
@@ -652,11 +659,19 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     }
 }
 
+fn fmt_attr(f: &mut fmt::Formatter, name: &str, value: &str) -> Result<(), fmt::Error> {
+    write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+    Ok(())
+}
+
 impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
     fn from(dry: SharedDryElement<Node>) -> Self {
         let mut wet = WetElement::new(dry.namespace, &dry.tag);
 
-        // TODO: styles
+        if let Some(style) = dry.style_prop_text() {
+            wet.attribute(STYLE_ATTR, &style);
+        }
+
         for (name, value) in dry.attributes {
             wet.attribute(&name, value);
         }
@@ -733,6 +748,8 @@ const NO_CLOSING_TAG: &[&str] = &[
     "source", "track", "wbr",
 ];
 
+const STYLE_ATTR: &str = "style";
+
 #[cfg(test)]
 mod tests {
     use crate::{dom::Dry, elements::html::*, prelude::*};
@@ -760,4 +777,6 @@ mod tests {
             .attach_shadow_children([slot()])
             .child(h2().text("Light content"))
     }
+
+    // TODO: style property test
 }
