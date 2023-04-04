@@ -389,10 +389,11 @@ impl<Node: DryChild> SharedDryElement<Node> {
     }
 
     pub fn style_property(&mut self, _name: &str, _value: &str) {
-        // TODO: Maintain a map of style properties. Apply the style with this method
-        // and render the styles to the style attribute. The styles need to be
-        // transferred to the wet element when hydrating.
-        todo!()
+        todo!(
+            "Maintain a map of style properties. Apply the style with this method
+            and render the styles to the style attribute. The styles need to be
+            transferred to the wet element when hydrating."
+        )
     }
 
     pub fn append_sheet_rule(&mut self, _selector: &str) -> u32 {
@@ -406,9 +407,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
         _property: &str,
         _value: &str,
     ) {
-        // TODO: Maintain stylesheet data. Render the sheet to text, and transfer to the
-        // wet element when hydrating.
-        todo!()
+        todo!("Maintain stylesheet data. Render the sheet to text, and transfer to the wet element when hydrating.")
     }
 
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {

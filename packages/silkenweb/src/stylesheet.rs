@@ -12,10 +12,7 @@ use crate::{
     node::element::{Element, GenericElement},
 };
 
-// TODO: Add a way to update stylesheets using CSS Object Model
-
 // TODO: Doc and examples
-// TODO: impl SignalOrValue instead of this
 #[derive(Default)]
 pub struct StyleSheet {
     rules: Vec<StyleRule>,
