@@ -38,6 +38,7 @@ features = [
     "Attr",
     "CompositionEvent",
     "css",
+    "CssStyleDeclaration",
     "CustomEvent",
     "Document",
     "DomTokenList",
@@ -189,7 +190,7 @@ features = [
 wasm-bindgen-futures = "0.4.33"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { version = "1.25.0", features = ["rt"] }
+tokio = { version = "1.25.0", features = ["rt", "macros"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.28"

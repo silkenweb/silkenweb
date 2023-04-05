@@ -392,6 +392,34 @@ impl<D: Dom> Element for GenericElement<D> {
         self
     }
 
+    fn style_property<'a>(
+        mut self,
+        name: impl Into<String>,
+        value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
+    ) -> Self {
+        #[cfg(debug_assertions)]
+        debug_assert!(!self.attributes.contains("style"));
+
+        let name = name.into();
+
+        value.for_each(
+            |elem, value| elem.element.style_property(&name, value.as_ref()),
+            |elem| {
+                clone!(name);
+                let mut element = elem.element.clone();
+
+                move |new_value| {
+                    element.style_property(&name, new_value.as_ref());
+
+                    async {}
+                }
+            },
+            &mut self,
+        );
+
+        self
+    }
+
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
         self.element.effect(f);
         self
@@ -594,6 +622,18 @@ pub trait Element: Sized {
         self,
         name: &str,
         value: impl RefSignalOrValue<'a, Item = impl Attribute>,
+    ) -> Self;
+
+    /// Set an inline style property
+    ///
+    /// The property can be a value or a signal. Signals should be wrapped in
+    /// the [`Sig`] newtype.
+    ///
+    /// [`Sig`]: crate::value::Sig
+    fn style_property<'a>(
+        self,
+        name: impl Into<String>,
+        value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
     ) -> Self;
 
     /// Apply an effect after the next render.

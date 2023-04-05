@@ -106,6 +106,18 @@ impl DomElement for WetElement {
         Some(self.element.clone())
     }
 
+    fn style_property(&mut self, name: &str, value: &str) {
+        let style_props = if let Some(elem) = self.element.dyn_ref::<web_sys::HtmlElement>() {
+            elem.style()
+        } else if let Some(elem) = self.element.dyn_ref::<web_sys::SvgElement>() {
+            elem.style()
+        } else {
+            panic!("Unknown element type");
+        };
+
+        style_props.set_property(name, value).unwrap_throw();
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         let element = self.element.clone();
         on_animation_frame(move || f(&element));

@@ -7,7 +7,7 @@ use silkenweb::{
     },
     hydration::hydrate,
     node::element::{Const, GenericElement, ShadowRootParent},
-    prelude::ParentElement,
+    prelude::{Element, ParentElement},
     task::render_now,
     value::Sig,
 };
@@ -185,6 +185,20 @@ async fn event() {
         app_html(COUNTER_ID),
         r#"<div id="counter"><button id="increment" data-silkenweb="button-data">+</button>1</div>"#
     );
+}
+
+#[wasm_bindgen_test]
+async fn style_property() {
+    let html = r#"<div data-silkenweb="1" style="--test0: value0; --test1: value1;"></div>"#;
+    app_container(APP_ID, html).await;
+
+    let app = div().id(APP_ID).child(
+        div()
+            .style_property("--test0", "value0")
+            .style_property("--test1", "value1"),
+    );
+
+    test_hydrate(APP_ID, app, &format!(r#"<div id="{APP_ID}">{html}</div>"#)).await;
 }
 
 #[wasm_bindgen_test]

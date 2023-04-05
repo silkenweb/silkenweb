@@ -140,6 +140,14 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 Self{#target: self.#target.attribute(name, value) #other_fields}
             }
 
+            fn style_property<'a>(
+                self,
+                name: impl Into<String>,
+                value: impl ::silkenweb::value::RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>
+            ) -> Self {
+                Self{#target: self.#target.style_property(name, value) #other_fields}
+            }
+
             fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
                 Self{#target: self.#target.effect(f) #other_fields}
             }

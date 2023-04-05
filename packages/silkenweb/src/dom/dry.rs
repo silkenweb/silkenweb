@@ -89,6 +89,10 @@ impl private::DomElement for DryElement {
         self.0.borrow().try_dom_element()
     }
 
+    fn style_property(&mut self, name: &str, value: &str) {
+        self.0.borrow_mut().style_property(name, value)
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
     }
@@ -230,10 +234,28 @@ pub struct SharedDryElement<Node> {
     namespace: Namespace,
     tag: String,
     attributes: IndexMap<String, String>,
+    styles: IndexMap<String, String>,
     children: Vec<Node>,
     shadow_children: Vec<Node>,
     hydrate_actions: Vec<LazyElementAction>,
     next_sibling: Option<Node>,
+}
+
+impl<Node> SharedDryElement<Node> {
+    fn style_prop_text(&self) -> Option<String> {
+        if self.styles.is_empty() {
+            return None;
+        }
+
+        debug_assert!(!self.attributes.contains_key(STYLE_ATTR));
+
+        Some(
+            self.styles
+                .iter()
+                .map(|(name, value)| format!("{name}: {value};"))
+                .join(" "),
+        )
+    }
 }
 
 impl<Node: DryChild> SharedDryElement<Node> {
@@ -242,6 +264,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
             namespace,
             tag: tag.to_owned(),
             attributes: IndexMap::new(),
+            styles: IndexMap::new(),
             children: Vec::new(),
             shadow_children: Vec::new(),
             hydrate_actions: Vec::new(),
@@ -374,6 +397,10 @@ impl<Node: DryChild> SharedDryElement<Node> {
         None
     }
 
+    pub fn style_property(&mut self, name: &str, value: &str) {
+        self.styles.insert(name.to_owned(), value.to_owned());
+    }
+
     pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.hydrate_actions
             .push(Box::new(move |element| element.effect(f)))
@@ -384,6 +411,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
             namespace: self.namespace,
             tag: self.tag.clone(),
             attributes: self.attributes.clone(),
+            styles: self.styles.clone(),
             children: Self::clone_children(&self.children),
             shadow_children: Self::clone_children(&self.shadow_children),
             hydrate_actions: Vec::new(),
@@ -541,18 +569,11 @@ impl SharedDryElement<HydroNode> {
         }
 
         for (name, value) in &self.attributes {
-            let value = value.as_ref();
+            Self::set_attribute(&mut dom_attr_map, name, value, dom_elem, tracker);
+        }
 
-            let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
-                value != existing_value
-            } else {
-                true
-            };
-
-            if set_attr {
-                dom_elem.set_attribute(name, value).unwrap_throw();
-                tracker.attribute_set(dom_elem, name, value);
-            }
+        if let Some(style) = self.style_prop_text() {
+            Self::set_attribute(&mut dom_attr_map, STYLE_ATTR, &style, dom_elem, tracker)
         }
 
         for name in dom_attr_map.into_keys() {
@@ -560,6 +581,25 @@ impl SharedDryElement<HydroNode> {
                 tracker.attribute_removed(dom_elem, &name);
                 dom_elem.remove_attribute(&name).unwrap_throw();
             }
+        }
+    }
+
+    fn set_attribute(
+        dom_attr_map: &mut HashMap<String, String>,
+        name: &str,
+        value: &str,
+        dom_elem: &web_sys::Element,
+        tracker: &mut HydrationStats,
+    ) {
+        let set_attr = if let Some(existing_value) = dom_attr_map.remove(name) {
+            value != existing_value
+        } else {
+            true
+        };
+
+        if set_attr {
+            dom_elem.set_attribute(name, value).unwrap_throw();
+            tracker.attribute_set(dom_elem, name, value);
         }
     }
 }
@@ -593,7 +633,11 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
         write!(f, "<{}", self.tag)?;
 
         for (name, value) in &self.attributes {
-            write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+            fmt_attr(f, name, value)?;
+        }
+
+        if let Some(style) = self.style_prop_text() {
+            fmt_attr(f, STYLE_ATTR, &style)?;
         }
 
         f.write_str(">")?;
@@ -615,9 +659,18 @@ impl<Node: fmt::Display> fmt::Display for SharedDryElement<Node> {
     }
 }
 
+fn fmt_attr(f: &mut fmt::Formatter, name: &str, value: &str) -> Result<(), fmt::Error> {
+    write!(f, " {}=\"{}\"", name, encode_double_quoted_attribute(value))?;
+    Ok(())
+}
+
 impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
     fn from(dry: SharedDryElement<Node>) -> Self {
         let mut wet = WetElement::new(dry.namespace, &dry.tag);
+
+        if let Some(style) = dry.style_prop_text() {
+            wet.attribute(STYLE_ATTR, &style);
+        }
 
         for (name, value) in dry.attributes {
             wet.attribute(&name, value);
@@ -695,9 +748,15 @@ const NO_CLOSING_TAG: &[&str] = &[
     "source", "track", "wbr",
 ];
 
+const STYLE_ATTR: &str = "style";
+
 #[cfg(test)]
 mod tests {
+    use silkenweb_macros::cfg_browser;
+
     use crate::{dom::Dry, elements::html::*, prelude::*};
+    #[cfg_browser(false)]
+    use crate::{task::render_now, task::server};
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -721,5 +780,23 @@ mod tests {
         div()
             .attach_shadow_children([slot()])
             .child(h2().text("Light content"))
+    }
+
+    #[cfg_browser(false)]
+    #[tokio::test]
+    async fn style_property() {
+        server::scope(async {
+            let app: Div<Dry> = div()
+                .style_property("--test0", "value0")
+                .style_property("--test1", "value1");
+
+            render_now().await;
+
+            assert_eq!(
+                app.freeze().to_string(),
+                r#"<div style="--test0: value0; --test1: value1;"></div>"#
+            );
+        })
+        .await
     }
 }

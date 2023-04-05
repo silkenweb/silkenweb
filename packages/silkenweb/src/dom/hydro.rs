@@ -215,6 +215,14 @@ impl DomElement for HydroElement {
         }
     }
 
+    fn style_property(&mut self, name: &str, value: &str) {
+        match &mut *self.borrow_mut() {
+            SharedHydroElement::Dry(dry) => dry.style_property(name, value),
+            SharedHydroElement::Wet(wet) => wet.style_property(name, value),
+            SharedHydroElement::Unreachable => unreachable!(),
+        }
+    }
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         match &mut *self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.effect(f),

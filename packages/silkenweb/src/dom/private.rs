@@ -53,6 +53,8 @@ pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
 
     fn try_dom_element(&self) -> Option<web_sys::Element>;
 
+    fn style_property(&mut self, name: &str, value: &str);
+
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
 }
 
