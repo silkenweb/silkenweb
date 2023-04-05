@@ -397,6 +397,9 @@ impl<D: Dom> Element for GenericElement<D> {
         name: impl Into<String>,
         value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
     ) -> Self {
+        #[cfg(debug_assertions)]
+        debug_assert!(!self.attributes.contains("style"));
+
         let name = name.into();
 
         value.for_each(
