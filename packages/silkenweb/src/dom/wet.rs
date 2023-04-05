@@ -115,7 +115,6 @@ impl DomElement for WetElement {
             panic!("Unknown element type");
         };
 
-        style_props.remove_property(name).unwrap_throw();
         style_props.set_property(name, value).unwrap_throw();
     }
 
