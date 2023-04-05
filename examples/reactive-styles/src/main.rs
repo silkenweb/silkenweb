@@ -1,4 +1,4 @@
-use silkenweb::{elements::html::*, prelude::*, stylesheet::StyleDeclaration};
+use silkenweb::{elements::html::*, prelude::*};
 
 silkenweb::css!("color.css");
 
@@ -16,7 +16,7 @@ fn change_color(
 fn main() {
     let color = Mutable::new("green");
     let app = div()
-        .style_property(StyleDeclaration::new().style("--color", Sig(color.signal_cloned())))
+        .style_property("--color", Sig(color.signal_cloned()))
         .child(change_color(&color, "Red", "red"))
         .child(change_color(&color, "Green", "green"))
         .child(

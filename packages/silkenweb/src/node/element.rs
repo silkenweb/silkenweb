@@ -34,7 +34,6 @@ use crate::{
     hydration::HydrationStats,
     intern_str,
     node::text,
-    stylesheet::StyleDeclaration,
     task,
 };
 
@@ -61,10 +60,6 @@ impl<D: Dom> GenericElement<D> {
     /// Construct an element with type `tag` in `namespace`.
     pub fn new(namespace: Namespace, tag: &str) -> Self {
         Self::from_dom(D::Element::new(namespace, tag), 0)
-    }
-
-    pub(crate) fn element(&self) -> &D::Element {
-        &self.element
     }
 
     /// Make this element immutable.
@@ -397,9 +392,30 @@ impl<D: Dom> Element for GenericElement<D> {
         self
     }
 
-    fn style_property(mut self, style: StyleDeclaration) -> Self {
-        self.check_attribute_unique("style");
-        style.onto_element(self)
+    fn style_property<'a>(
+        mut self,
+        name: impl Into<String>,
+        value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
+    ) -> Self
+    {
+        let name = name.into();
+
+        value.for_each(
+            |elem, value| elem.element.style_property(&name, value.as_ref()),
+            |elem| {
+                clone!(name);
+                let mut element = elem.element.clone();
+
+                move |new_value| {
+                    element.style_property(&name, new_value.as_ref());
+
+                    async {}
+                }
+            },
+            &mut self,
+        );
+
+        self
     }
 
     fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
@@ -607,7 +623,11 @@ pub trait Element: Sized {
     ) -> Self;
 
     // TODO: Doc
-    fn style_property(self, style: StyleDeclaration) -> Self;
+    fn style_property<'a>(
+        self,
+        name: impl Into<String>,
+        value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
+    ) -> Self;
 
     /// Apply an effect after the next render.
     ///

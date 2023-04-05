@@ -303,11 +303,13 @@ macro_rules! dom_element {
                 Self(self.0.attribute(name, value))
             }
 
-            fn style_property(
+            fn style_property<'a>(
                 self,
-                style: $crate::stylesheet::StyleDeclaration,
-            ) -> Self {
-                Self(self.0.style_property(style))
+                name: impl Into<String>,
+                value: impl $crate::value::RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>
+            ) -> Self
+            {
+                Self(self.0.style_property(name, value))
             }
 
             fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {

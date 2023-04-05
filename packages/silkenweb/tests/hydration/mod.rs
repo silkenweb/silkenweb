@@ -8,7 +8,6 @@ use silkenweb::{
     hydration::hydrate,
     node::element::{Const, GenericElement, ShadowRootParent},
     prelude::{Element, ParentElement},
-    stylesheet::StyleDeclaration,
     task::render_now,
     value::Sig,
 };
@@ -194,11 +193,9 @@ async fn style_property() {
     app_container(APP_ID, html).await;
 
     let app = div().id(APP_ID).child(
-        div().style_property(
-            StyleDeclaration::new()
-                .style("--test0", "value0")
-                .style("--test1", "value1"),
-        ),
+        div()
+            .style_property("--test0", "value0")
+            .style_property("--test1", "value1"),
     );
 
     test_hydrate(APP_ID, app, &format!(r#"<div id="{APP_ID}">{html}</div>"#)).await;

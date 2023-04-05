@@ -756,7 +756,7 @@ mod tests {
 
     use crate::{dom::Dry, elements::html::*, prelude::*};
     #[cfg_browser(false)]
-    use crate::{stylesheet::StyleDeclaration, task::render_now, task::server};
+    use crate::{task::render_now, task::server};
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -786,11 +786,9 @@ mod tests {
     #[tokio::test]
     async fn style_property() {
         server::scope(async {
-            let app: Div<Dry> = div().style_property(
-                StyleDeclaration::new()
-                    .style("--test0", "value0")
-                    .style("--test1", "value1"),
-            );
+            let app: Div<Dry> = div()
+                .style_property("--test0", "value0")
+                .style_property("--test1", "value1");
 
             render_now().await;
 
