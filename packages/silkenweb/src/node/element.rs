@@ -624,7 +624,11 @@ pub trait Element: Sized {
         value: impl RefSignalOrValue<'a, Item = impl Attribute>,
     ) -> Self;
 
-    // TODO: Doc
+    /// Set an inline style property
+    /// 
+    /// The property can be a value or a signal. Signals should be wrapped in the [`Sig`] newtype.
+    /// 
+    /// [`Sig`]: crate::value::Sig
     fn style_property<'a>(
         self,
         name: impl Into<String>,
