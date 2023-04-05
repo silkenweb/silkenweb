@@ -1,4 +1,4 @@
-use silkenweb::{elements::html::*, prelude::*};
+use silkenweb::{elements::html::*, log_panics, prelude::*};
 
 silkenweb::css!("color.css");
 
@@ -14,6 +14,8 @@ fn change_color(
 }
 
 fn main() {
+    log_panics();
+
     let color = Mutable::new("green");
     let app = div()
         .style_property("--color", Sig(color.signal_cloned()))

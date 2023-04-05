@@ -3,13 +3,15 @@ use silkenweb::{
         html::{button, div, p, Button},
         ElementEvents,
     },
-    mount,
+    log_panics, mount,
     prelude::ParentElement,
     router::{self, UrlPath},
     value::Sig,
 };
 
 fn main() {
+    log_panics();
+
     mount("app", {
         div()
             .child(route_button("", "Root route"))

@@ -7,7 +7,7 @@ use reqwasm::http::Request;
 use silkenweb::{
     clone,
     elements::html::{button, div, p},
-    mount,
+    log_panics, mount,
     prelude::{ElementEvents, ParentElement},
     task,
     value::Sig,
@@ -22,6 +22,7 @@ async fn get_ip() -> Result<String, reqwasm::Error> {
 }
 
 fn main() {
+    log_panics();
     let text = Mutable::new("Press the button to get your IP address".to_owned());
     let text_signal = text.signal_cloned();
 

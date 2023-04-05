@@ -9,7 +9,7 @@ use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
     clone, css,
     elements::html::{self, a, div, h1, h2, header, li, nav, p, span, ul, Div, Li, A},
-    mount,
+    log_panics, mount,
     node::element::{Element, GenericElement, ParentElement},
     router,
     task::spawn_local,
@@ -307,6 +307,8 @@ fn plural(count: u64) -> &'static str {
 }
 
 fn main() {
+    log_panics();
+
     let app = App::new();
 
     spawn_local(router::url_path().signal_cloned().for_each({

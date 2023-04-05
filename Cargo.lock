@@ -2600,6 +2600,7 @@ name = "silkenweb"
 version = "0.4.0"
 dependencies = [
  "caseless",
+ "console_error_panic_hook",
  "criterion",
  "discard",
  "futures",
@@ -2690,7 +2691,6 @@ dependencies = [
  "arpy-reqwasm",
  "arpy-server",
  "axum",
- "console_error_panic_hook",
  "futures",
  "futures-signals",
  "reqwasm 0.5.0",
@@ -2828,7 +2828,6 @@ dependencies = [
 name = "silkenweb-examples-todomvc"
 version = "0.1.0"
 dependencies = [
- "console_error_panic_hook",
  "criterion",
  "derive_more",
  "discard",

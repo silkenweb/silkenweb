@@ -1,11 +1,13 @@
 use silkenweb::{
     elements::html::{dd, div, dl, dt, slot, span},
-    mount,
+    log_panics, mount,
     node::element::{ParentElement, ShadowRootParent},
     prelude::HtmlElement,
 };
 
 fn main() {
+    log_panics();
+
     const TERM_SLOT: &str = "term";
     const DESCRIPTION_SLOT: &str = "description";
 

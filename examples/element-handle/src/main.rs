@@ -1,7 +1,9 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, node::element::Element, prelude::*, value::Sig};
+use silkenweb::{elements::html::*, log_panics, node::element::Element, prelude::*, value::Sig};
 
 fn main() {
+    log_panics();
+
     let text = Mutable::new("".to_string());
     let input = input();
     let input_handle = input.handle();

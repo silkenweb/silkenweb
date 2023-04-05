@@ -1,6 +1,6 @@
 use silkenweb::{
     elements::html::{a, div, A},
-    mount,
+    log_panics, mount,
     prelude::ParentElement,
 };
 use silkenweb_bootstrap::{
@@ -14,6 +14,8 @@ use silkenweb_bootstrap::{
 };
 
 fn main() {
+    log_panics();
+
     let margin = Some(Size::Size3);
     let app = column()
         .align_items(Align::Start)

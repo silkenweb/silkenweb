@@ -9,7 +9,6 @@ publish = false
 silkenweb = { path = "../../packages/silkenweb" }
 silkenweb-signals-ext = { path = "../../packages/signals-ext" }
 futures-signals = "0.3.31"
-console_error_panic_hook = "0.1.7"
 js-sys = "0.3.60"
 derive_more = "0.99.17"
 serde = { version = "1.0.145", features = ["derive", "rc"] }

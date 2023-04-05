@@ -2,7 +2,7 @@ use silkenweb::cfg_browser;
 
 #[cfg_browser(true)]
 fn main() {
-    console_error_panic_hook::set_once();
+    silkenweb::log_panics();
     silkenweb_example_client_server::client::counter();
 }
 

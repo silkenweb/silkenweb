@@ -12,7 +12,7 @@ use silkenweb::{
             Offset::{Abs, Rel},
         },
     },
-    mount,
+    log_panics, mount,
     node::element::ParentElement,
     value::Sig,
 };
@@ -43,6 +43,7 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
 }
 
 fn main() {
+    log_panics();
     let ts = Broadcaster::new(infinite_animation());
     let mut svg = svg::svg().width(WIDTH).height(HEIGHT);
 

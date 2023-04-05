@@ -1,4 +1,4 @@
-use silkenweb::{elements::html::*, prelude::*};
+use silkenweb::{elements::html::*, log_panics, prelude::*};
 
 mod red {
     silkenweb::css!(path = "red.css", auto_mount, transpile = (modules));
@@ -13,6 +13,8 @@ mod green {
 }
 
 fn main() {
+    log_panics();
+
     // "red.css" and "green.css" use the same class name for text color, but this is
     // scoped using `modules`.
     let app = div().children([

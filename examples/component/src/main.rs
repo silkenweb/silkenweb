@@ -1,7 +1,7 @@
 use silkenweb::{
     css,
     elements::html::{dd, dl, dt, span},
-    mount,
+    log_panics, mount,
     node::{element::ParentElement, ChildNode, Component},
     prelude::{html::div, HtmlElement},
     ChildElement,
@@ -31,6 +31,8 @@ impl Term {
 }
 
 fn main() {
+    log_panics();
+
     let term = Term::new(
         span().text("HTML"),
         span().text("HyperText Markup Language"),

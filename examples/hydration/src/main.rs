@@ -1,11 +1,13 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    elements::html::*, hydration::hydrate, node::element::Element, prelude::*, task::spawn_local,
-    value::Sig,
+    elements::html::*, hydration::hydrate, log_panics, node::element::Element, prelude::*,
+    task::spawn_local, value::Sig,
 };
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>
 fn main() {
+    log_panics();
+
     let count = Mutable::new(0);
     let count_text = count.signal_ref(|i| format!("{i}"));
     let inc = move |_, _| {

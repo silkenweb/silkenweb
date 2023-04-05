@@ -1,7 +1,7 @@
-use silkenweb::mount;
+use silkenweb::{log_panics, mount};
 use silkenweb_examples_todomvc::{model::TodoApp, view::TodoAppView};
 
 fn main() {
-    console_error_panic_hook::set_once();
+    log_panics();
     mount("app", TodoAppView::new(TodoApp::load()).render());
 }

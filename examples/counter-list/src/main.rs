@@ -9,12 +9,14 @@ use silkenweb::{
         html::{button, div, hr, Button, Div},
         ElementEvents,
     },
-    mount,
+    log_panics, mount,
     prelude::ParentElement,
     value::Sig,
 };
 
 fn main() {
+    log_panics();
+
     let list = Rc::new(MutableVec::new());
 
     mount(

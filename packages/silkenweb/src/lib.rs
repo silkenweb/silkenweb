@@ -316,7 +316,16 @@ pub use silkenweb_signals_ext::value;
 
 /// Shorthand for [`DefaultDom::mount`]
 pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) -> MountHandle {
+    #[cfg(debug_assertions)]
+    log_panics();
     DefaultDom::mount(id, element)
+}
+
+/// Log any `panic!`s to the browser console. This should ideally be the very
+/// first thing that is called, but can be omitted safely. See
+/// [`console_error_panic_hook`] docs for more information.
+pub fn log_panics() {
+    console_error_panic_hook::set_once();
 }
 
 fn mount_point(id: &str) -> web_sys::Element {
