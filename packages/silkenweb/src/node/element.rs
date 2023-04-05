@@ -396,8 +396,7 @@ impl<D: Dom> Element for GenericElement<D> {
         mut self,
         name: impl Into<String>,
         value: impl RefSignalOrValue<'a, Item = impl AsRef<str> + 'a>,
-    ) -> Self
-    {
+    ) -> Self {
         let name = name.into();
 
         value.for_each(
