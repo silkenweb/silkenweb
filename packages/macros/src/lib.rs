@@ -291,34 +291,50 @@ pub fn css(input: TokenStream) -> TokenStream {
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let class_names: Vec<(String, String)> = if let Some(name_mappings) = name_mappings {
-        name_mappings
-            .into_iter()
-            .map(|(class_ident, class)| {
-                if !class.composes.is_empty() {
-                    abort_call_site!("`composes` is unsupported");
-                }
+    let names = if let Some(name_mappings) = name_mappings {
+        let mut classes = Vec::new();
+        let mut variables = Vec::new();
 
-                (class_ident, class.name)
-            })
-            .collect()
+        for (ident, mapping) in name_mappings {
+            if !mapping.composes.is_empty() {
+                abort_call_site!("`composes` is unsupported");
+            }
+
+            if let Some(var_name) = ident.strip_prefix("--") {
+                // TODO: Flag to rename variables.
+                // TODO: What if variables aren't renamed?
+                variables.push((var_name.to_string(), mapping.name));
+            } else {
+                classes.push((ident, mapping.name));
+            }
+        }
+
+        NameMappings { classes, variables }
     } else {
-        css::class_names(&source)
+        let classes = css::class_names(&source)
             .map(|class| (class.clone(), class))
-            .collect()
+            .collect();
+        let variables = css::variable_names(&source)
+            .map(|variable| (variable.clone(), format!("--{variable}")))
+            .collect();
+
+        NameMappings { classes, variables }
     };
 
-    let classes = class_names.into_iter().filter(|(class_ident, _css_class)| {
-        let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
-            any_prefix_matches(class_ident, include_prefixes)
-        } else {
-            true
-        };
+    let classes = names
+        .classes
+        .into_iter()
+        .filter(|(class_ident, _css_class)| {
+            let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
+                any_prefix_matches(class_ident, include_prefixes)
+            } else {
+                true
+            };
 
-        let exclude = any_prefix_matches(class_ident, &exclude_prefixes);
+            let exclude = any_prefix_matches(class_ident, &exclude_prefixes);
 
-        include && !exclude
-    });
+            include && !exclude
+        });
 
     if let Some(prefix) = prefix {
         code_gen(
@@ -335,7 +351,7 @@ pub fn css(input: TokenStream) -> TokenStream {
     }
 }
 
-struct NameMapping {
+struct NameMappings {
     classes: Vec<(String, String)>,
     variables: Vec<(String, String)>,
 }

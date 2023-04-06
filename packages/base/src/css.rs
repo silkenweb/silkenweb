@@ -161,3 +161,19 @@ pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
 
     classes.into_iter()
 }
+
+pub fn variable_names(css: &Source) -> impl Iterator<Item = String> {
+    let mut parser_input = ParserInput::new(&css.content);
+    let mut input = Parser::new(&mut parser_input);
+    let mut variables = HashSet::new();
+
+    while let Ok(token) = input.next_including_whitespace_and_comments() {
+        if let Token::Ident(ident) = token {
+            if let Some(variable) = ident.strip_prefix("--") {
+                variables.insert(variable.to_string());
+            }
+        }
+    }
+
+    variables.into_iter()
+}
