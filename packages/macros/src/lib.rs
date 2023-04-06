@@ -335,6 +335,11 @@ pub fn css(input: TokenStream) -> TokenStream {
     }
 }
 
+struct NameMapping {
+    classes: Vec<(String, String)>,
+    variables: Vec<(String, String)>,
+}
+
 fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
     prefixes.iter().any(|prefix| x.starts_with(prefix))
 }
