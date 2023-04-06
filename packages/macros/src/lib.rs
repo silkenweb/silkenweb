@@ -321,39 +321,59 @@ pub fn css(input: TokenStream) -> TokenStream {
         NameMappings { classes, variables }
     };
 
-    let classes = names
-        .classes
-        .into_iter()
-        .filter(|(class_ident, _css_class)| {
-            let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
-                any_prefix_matches(class_ident, include_prefixes)
-            } else {
-                true
-            };
-
-            let exclude = any_prefix_matches(class_ident, &exclude_prefixes);
-
-            include && !exclude
-        });
+    let classes = only_matching_prefixes(
+        &include_prefixes,
+        &exclude_prefixes,
+        names.classes.into_iter(),
+    );
+    let variables = only_matching_prefixes(
+        &include_prefixes,
+        &exclude_prefixes,
+        names.variables.into_iter(),
+    );
 
     if let Some(prefix) = prefix {
-        code_gen(
-            &source,
-            public,
-            auto_mount,
-            classes.filter_map(|(class_ident, css_class)| {
-                let class_ident = class_ident.strip_prefix(&prefix).map(str::to_string);
-                class_ident.map(|class_ident| (class_ident, css_class))
-            }),
-        )
+        let classes = strip_prefixes(&prefix, classes);
+        let variables = strip_prefixes(&prefix, variables);
+        code_gen(&source, public, auto_mount, classes, variables)
     } else {
-        code_gen(&source, public, auto_mount, classes)
+        code_gen(&source, public, auto_mount, classes, variables)
     }
 }
 
 struct NameMappings {
     classes: Vec<(String, String)>,
     variables: Vec<(String, String)>,
+}
+
+fn only_matching_prefixes<'a>(
+    include_prefixes: &'a Option<Vec<String>>,
+    exclude_prefixes: &'a [String],
+    names: impl Iterator<Item = (String, String)> + 'a,
+) -> impl Iterator<Item = (String, String)> + 'a {
+    names.filter(move |(class_ident, _css_class)| {
+        let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
+            any_prefix_matches(class_ident, include_prefixes)
+        } else {
+            true
+        };
+
+        let exclude = any_prefix_matches(class_ident, exclude_prefixes);
+
+        include && !exclude
+    })
+}
+
+fn strip_prefixes<'a>(
+    prefix: &'a str,
+    names: impl Iterator<Item = (String, String)> + 'a,
+) -> impl Iterator<Item = (String, String)> + 'a {
+    names.filter_map(move |(ident, mapping)| {
+        ident
+            .strip_prefix(prefix)
+            .map(str::to_string)
+            .map(|ident| (ident, mapping))
+    })
 }
 
 fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
@@ -365,7 +385,9 @@ fn code_gen(
     public: bool,
     auto_mount: bool,
     classes: impl Iterator<Item = (String, String)>,
+    variables: impl Iterator<Item = (String, String)>,
 ) -> TokenStream {
+    // TODO: Factor this out into a function, and apply to variables.
     let classes = classes.map(|(class_ident, class_name)| {
         if !class_ident.starts_with(char::is_alphabetic) {
             abort_call_site!(
