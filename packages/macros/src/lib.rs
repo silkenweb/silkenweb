@@ -291,46 +291,29 @@ pub fn css(input: TokenStream) -> TokenStream {
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let names = if let Some(name_mappings) = name_mappings {
+    let variables =
+        css::variable_names(&source).map(|variable| (variable.clone(), format!("--{variable}")));
+
+    let classes = if let Some(name_mappings) = name_mappings {
         let mut classes = Vec::new();
-        let mut variables = Vec::new();
 
         for (ident, mapping) in name_mappings {
             if !mapping.composes.is_empty() {
                 abort_call_site!("`composes` is unsupported");
             }
 
-            if let Some(var_name) = ident.strip_prefix("--") {
-                // TODO: Flag to rename variables.
-                // TODO: What if variables aren't renamed?
-                variables.push((var_name.to_string(), mapping.name));
-            } else {
-                classes.push((ident, mapping.name));
-            }
+            classes.push((ident, mapping.name));
         }
 
-        NameMappings { classes, variables }
+        classes
     } else {
-        let classes = css::class_names(&source)
+        css::class_names(&source)
             .map(|class| (class.clone(), class))
-            .collect();
-        let variables = css::variable_names(&source)
-            .map(|variable| (variable.clone(), format!("--{variable}")))
-            .collect();
-
-        NameMappings { classes, variables }
+            .collect()
     };
 
-    let classes = only_matching_prefixes(
-        &include_prefixes,
-        &exclude_prefixes,
-        names.classes.into_iter(),
-    );
-    let variables = only_matching_prefixes(
-        &include_prefixes,
-        &exclude_prefixes,
-        names.variables.into_iter(),
-    );
+    let classes = only_matching_prefixes(&include_prefixes, &exclude_prefixes, classes.into_iter());
+    let variables = only_matching_prefixes(&include_prefixes, &exclude_prefixes, variables);
 
     if let Some(prefix) = prefix {
         let classes = strip_prefixes(&prefix, classes);
@@ -339,11 +322,6 @@ pub fn css(input: TokenStream) -> TokenStream {
     } else {
         code_gen(&source, public, auto_mount, classes, variables)
     }
-}
-
-struct NameMappings {
-    classes: Vec<(String, String)>,
-    variables: Vec<(String, String)>,
 }
 
 fn only_matching_prefixes<'a>(
