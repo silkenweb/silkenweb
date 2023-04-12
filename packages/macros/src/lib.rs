@@ -387,35 +387,8 @@ fn code_gen(
     classes: impl Iterator<Item = (String, String)>,
     variables: impl Iterator<Item = (String, String)>,
 ) -> TokenStream {
-    // TODO: Factor this out into a function, and apply to variables.
-    let classes = classes.map(|(class_ident, class_name)| {
-        if !class_ident.starts_with(char::is_alphabetic) {
-            abort_call_site!(
-                "Identifier '{}' doesn't start with an alphabetic character",
-                class_ident
-            );
-        }
-
-        let class_ident = class_ident.replace(|c: char| !c.is_alphanumeric(), "_");
-
-        if auto_mount {
-            let class_ident = Ident::new(&class_ident.to_lowercase(), Span::call_site());
-            quote!(pub fn #class_ident() -> &'static str {
-                use ::std::{panic::Location, sync::Once};
-
-                static INIT: Once = Once::new();
-
-                INIT.call_once(|| {
-                    super::stylesheet::mount()
-                });
-
-                #class_name
-            })
-        } else {
-            let class_ident = Ident::new(&class_ident.to_uppercase(), Span::call_site());
-            quote!(pub const #class_ident: &str = #class_name;)
-        }
-    });
+    let classes = classes.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
+    let variables = variables.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
 
     let dependency = source.dependency().iter();
     let content = source.content();
@@ -426,6 +399,10 @@ fn code_gen(
 
         #visibility mod class {
             #(#classes)*
+        }
+
+        #visibility mod var {
+            #(#variables)*
         }
 
         #visibility mod stylesheet {
@@ -456,6 +433,35 @@ fn code_gen(
         }
     )
     .into()
+}
+
+fn define_css_entity(ident: String, name: String, auto_mount: bool) -> proc_macro2::TokenStream {
+    if !ident.starts_with(char::is_alphabetic) {
+        abort_call_site!(
+            "Identifier '{}' doesn't start with an alphabetic character",
+            ident
+        );
+    }
+
+    let ident = ident.replace(|c: char| !c.is_alphanumeric(), "_");
+
+    if auto_mount {
+        let ident = Ident::new(&ident.to_lowercase(), Span::call_site());
+        quote!(pub fn #ident() -> &'static str {
+            use ::std::{panic::Location, sync::Once};
+
+            static INIT: Once = Once::new();
+
+            INIT.call_once(|| {
+                super::stylesheet::mount()
+            });
+
+            #name
+        })
+    } else {
+        let ident = Ident::new(&ident.to_uppercase(), Span::call_site());
+        quote!(pub const #ident: &str = #name;)
+    }
 }
 
 /// Convert a rust ident to an html ident by stripping any "r#" prefix and
