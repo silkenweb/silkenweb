@@ -161,3 +161,43 @@ pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
 
     classes.into_iter()
 }
+
+pub fn variable_names(css: &Source) -> impl Iterator<Item = String> {
+    let mut parser_input = ParserInput::new(&css.content);
+    let mut input = Parser::new(&mut parser_input);
+    let mut variables = HashSet::new();
+    let mut tokens = Vec::new();
+
+    flattened_tokens(&mut tokens, &mut input);
+
+    for token in tokens {
+        if let Token::Ident(ident) = token {
+            if let Some(var) = ident.strip_prefix("--") {
+                variables.insert(var.to_string());
+            }
+        }
+    }
+
+    variables.into_iter()
+}
+
+fn flattened_tokens<'i>(tokens: &mut Vec<Token<'i>>, input: &mut Parser<'i, '_>) {
+    while let Ok(token) = input.next_including_whitespace_and_comments() {
+        tokens.push(token.clone());
+
+        match token {
+            Token::ParenthesisBlock
+            | Token::CurlyBracketBlock
+            | Token::SquareBracketBlock
+            | Token::Function(_) => {
+                input
+                    .parse_nested_block(|parser| -> Result<(), cssparser::ParseError<()>> {
+                        flattened_tokens(tokens, parser);
+                        Ok(())
+                    })
+                    .unwrap();
+            }
+            _ => (),
+        }
+    }
+}

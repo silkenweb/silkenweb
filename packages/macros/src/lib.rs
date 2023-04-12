@@ -291,48 +291,67 @@ pub fn css(input: TokenStream) -> TokenStream {
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let class_names: Vec<(String, String)> = if let Some(name_mappings) = name_mappings {
-        name_mappings
-            .into_iter()
-            .map(|(class_ident, class)| {
-                if !class.composes.is_empty() {
-                    abort_call_site!("`composes` is unsupported");
-                }
+    let variables =
+        css::variable_names(&source).map(|variable| (variable.clone(), format!("--{variable}")));
 
-                (class_ident, class.name)
-            })
-            .collect()
+    let classes = if let Some(name_mappings) = name_mappings {
+        let mut classes = Vec::new();
+
+        for (ident, mapping) in name_mappings {
+            if !mapping.composes.is_empty() {
+                abort_call_site!("`composes` is unsupported");
+            }
+
+            classes.push((ident, mapping.name));
+        }
+
+        classes
     } else {
         css::class_names(&source)
             .map(|class| (class.clone(), class))
             .collect()
     };
 
-    let classes = class_names.into_iter().filter(|(class_ident, _css_class)| {
+    let classes = only_matching_prefixes(&include_prefixes, &exclude_prefixes, classes.into_iter());
+    let variables = only_matching_prefixes(&include_prefixes, &exclude_prefixes, variables);
+
+    if let Some(prefix) = prefix {
+        let classes = strip_prefixes(&prefix, classes);
+        let variables = strip_prefixes(&prefix, variables);
+        code_gen(&source, public, auto_mount, classes, variables)
+    } else {
+        code_gen(&source, public, auto_mount, classes, variables)
+    }
+}
+
+fn only_matching_prefixes<'a>(
+    include_prefixes: &'a Option<Vec<String>>,
+    exclude_prefixes: &'a [String],
+    names: impl Iterator<Item = (String, String)> + 'a,
+) -> impl Iterator<Item = (String, String)> + 'a {
+    names.filter(move |(class_ident, _css_class)| {
         let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
             any_prefix_matches(class_ident, include_prefixes)
         } else {
             true
         };
 
-        let exclude = any_prefix_matches(class_ident, &exclude_prefixes);
+        let exclude = any_prefix_matches(class_ident, exclude_prefixes);
 
         include && !exclude
-    });
+    })
+}
 
-    if let Some(prefix) = prefix {
-        code_gen(
-            &source,
-            public,
-            auto_mount,
-            classes.filter_map(|(class_ident, css_class)| {
-                let class_ident = class_ident.strip_prefix(&prefix).map(str::to_string);
-                class_ident.map(|class_ident| (class_ident, css_class))
-            }),
-        )
-    } else {
-        code_gen(&source, public, auto_mount, classes)
-    }
+fn strip_prefixes<'a>(
+    prefix: &'a str,
+    names: impl Iterator<Item = (String, String)> + 'a,
+) -> impl Iterator<Item = (String, String)> + 'a {
+    names.filter_map(move |(ident, mapping)| {
+        ident
+            .strip_prefix(prefix)
+            .map(str::to_string)
+            .map(|ident| (ident, mapping))
+    })
 }
 
 fn any_prefix_matches(x: &str, prefixes: &[String]) -> bool {
@@ -344,35 +363,10 @@ fn code_gen(
     public: bool,
     auto_mount: bool,
     classes: impl Iterator<Item = (String, String)>,
+    variables: impl Iterator<Item = (String, String)>,
 ) -> TokenStream {
-    let classes = classes.map(|(class_ident, class_name)| {
-        if !class_ident.starts_with(char::is_alphabetic) {
-            abort_call_site!(
-                "Identifier '{}' doesn't start with an alphabetic character",
-                class_ident
-            );
-        }
-
-        let class_ident = class_ident.replace(|c: char| !c.is_alphanumeric(), "_");
-
-        if auto_mount {
-            let class_ident = Ident::new(&class_ident.to_lowercase(), Span::call_site());
-            quote!(pub fn #class_ident() -> &'static str {
-                use ::std::{panic::Location, sync::Once};
-
-                static INIT: Once = Once::new();
-
-                INIT.call_once(|| {
-                    super::stylesheet::mount()
-                });
-
-                #class_name
-            })
-        } else {
-            let class_ident = Ident::new(&class_ident.to_uppercase(), Span::call_site());
-            quote!(pub const #class_ident: &str = #class_name;)
-        }
-    });
+    let classes = classes.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
+    let variables = variables.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
 
     let dependency = source.dependency().iter();
     let content = source.content();
@@ -383,6 +377,10 @@ fn code_gen(
 
         #visibility mod class {
             #(#classes)*
+        }
+
+        #visibility mod var {
+            #(#variables)*
         }
 
         #visibility mod stylesheet {
@@ -413,6 +411,35 @@ fn code_gen(
         }
     )
     .into()
+}
+
+fn define_css_entity(ident: String, name: String, auto_mount: bool) -> proc_macro2::TokenStream {
+    if !ident.starts_with(char::is_alphabetic) {
+        abort_call_site!(
+            "Identifier '{}' doesn't start with an alphabetic character",
+            ident
+        );
+    }
+
+    let ident = ident.replace(|c: char| !c.is_alphanumeric(), "_");
+
+    if auto_mount {
+        let ident = Ident::new(&ident.to_lowercase(), Span::call_site());
+        quote!(pub fn #ident() -> &'static str {
+            use ::std::{panic::Location, sync::Once};
+
+            static INIT: Once = Once::new();
+
+            INIT.call_once(|| {
+                super::stylesheet::mount()
+            });
+
+            #name
+        })
+    } else {
+        let ident = Ident::new(&ident.to_uppercase(), Span::call_site());
+        quote!(pub const #ident: &str = #name;)
+    }
 }
 
 /// Convert a rust ident to an html ident by stripping any "r#" prefix and
