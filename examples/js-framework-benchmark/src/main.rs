@@ -252,5 +252,5 @@ impl App {
 }
 
 pub fn main() {
-    mount("main", App::new().render());
+    mount("app", App::new().render());
 }
