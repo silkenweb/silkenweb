@@ -130,12 +130,10 @@ impl App {
         );
         let row_template = tr()
             .on_instantiate(|tr, RowParams { app, row }| {
-                let row_id = row.id;
                 tr.classes(Sig(app
                     .selected_row
-                    .signal_cloned()
-                    .map(move |selected_row| selected_row == Some(row_id))
-                    .dedupe()
+                    .signal()
+                    .eq(Some(row.id))
                     .map(|selected| selected.then_some("danger"))))
             })
             .children([id_cell, label_cell, remove_cell, td().class("col-md-6")])
