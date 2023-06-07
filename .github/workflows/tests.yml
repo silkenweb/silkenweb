@@ -89,7 +89,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        rust: [nightly-2022-09-29]
+        rust: [nightly-2023-06-06]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
