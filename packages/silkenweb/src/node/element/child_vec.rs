@@ -50,7 +50,7 @@ impl<D: Dom> ChildVec<D> {
         let mut parent = self.parent.clone();
 
         for child in &self.children {
-            parent.append_child(child.as_node());
+            parent.append_child(&child.node);
         }
     }
 
@@ -66,8 +66,8 @@ impl<D: Dom> ChildVec<D> {
 
         self.parent.insert_child_before(
             index + self.static_child_count,
-            new_child.as_node(),
-            Some(self.children[index].as_node()),
+            &new_child.node,
+            Some(&self.children[index].node),
         );
 
         self.children.insert(index, new_child);
@@ -79,8 +79,8 @@ impl<D: Dom> ChildVec<D> {
 
         self.parent.replace_child(
             index + self.static_child_count,
-            new_child.as_node(),
-            old_child.as_node(),
+            &new_child.node,
+            &old_child.node,
         );
 
         *old_child = new_child;
@@ -89,7 +89,7 @@ impl<D: Dom> ChildVec<D> {
     fn remove(&mut self, index: usize) -> Node<D> {
         let old_child = self.children.remove(index);
         self.parent
-            .remove_child(index + self.static_child_count, old_child.as_node());
+            .remove_child(index + self.static_child_count, &old_child.node);
 
         old_child
     }
@@ -101,7 +101,7 @@ impl<D: Dom> ChildVec<D> {
 
     fn push(&mut self, new_child: impl Into<Node<D>>) {
         let new_child = new_child.into();
-        self.parent.append_child(new_child.as_node());
+        self.parent.append_child(&new_child.node);
         self.children.push(new_child);
     }
 
@@ -111,7 +111,7 @@ impl<D: Dom> ChildVec<D> {
         if let Some(removed_child) = removed_child {
             self.parent.remove_child(
                 self.children.len() + self.static_child_count,
-                removed_child.as_node(),
+                &removed_child.node,
             );
         }
     }
@@ -122,7 +122,7 @@ impl<D: Dom> ChildVec<D> {
             let children = mem::take(&mut self.children);
 
             for (index, child) in children.into_iter().enumerate().rev() {
-                parent.remove_child(index + self.static_child_count, child.as_node());
+                parent.remove_child(index + self.static_child_count, &child.node);
             }
         } else {
             self.children.clear();

@@ -231,7 +231,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                     parent.static_child_count += 1;
                     let child = child.into();
 
-                    parent.element.append_child(child.as_node());
+                    parent.element.append_child(&child.node);
                     parent.resources.extend(child.resources);
                     parent.events.combine(child.events);
                 }

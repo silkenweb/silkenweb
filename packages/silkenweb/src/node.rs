@@ -22,16 +22,6 @@ pub struct Node<D: Dom = DefaultDom> {
     events: EventStore,
 }
 
-impl<D: Dom> Node<D> {
-    fn as_node(&self) -> &D::Node {
-        &self.node
-    }
-
-    fn into_node(self) -> D::Node {
-        self.node
-    }
-}
-
 impl<D: Dom> Value for Node<D> {}
 
 impl<D: Dom> InDom for Node<D> {
