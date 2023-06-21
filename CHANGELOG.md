@@ -9,7 +9,7 @@
 ### Fixes
 
 - SSR now escapes text.
-- Event handlers working on children of `Component`
+- Event handlers work for children of `Component`.
 
 ## 0.4.0 - 2023-01-19
 
