@@ -317,8 +317,18 @@ impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
     where
         N: Into<Node<D>>,
     {
-        self.element
-            .attach_shadow_children(children.into_iter().map(|child| child.into().into_node()));
+        let children: Vec<_> = children
+            .into_iter()
+            .map(|child| {
+                let mut child = child.into();
+                let child_node = child.node;
+                self.resources.append(&mut child.resources);
+                self.events.combine(child.events);
+                child_node
+            })
+            .collect();
+
+        self.element.attach_shadow_children(children);
         self
     }
 }
