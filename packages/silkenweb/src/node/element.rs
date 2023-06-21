@@ -231,7 +231,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                     parent.static_child_count += 1;
                     let child = child.into();
 
-                    parent.element.append_child(child.as_node());
+                    parent.element.append_child(&child.node);
                     parent.resources.extend(child.resources);
                     parent.events.combine(child.events);
                 }
@@ -317,8 +317,18 @@ impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
     where
         N: Into<Node<D>>,
     {
-        self.element
-            .attach_shadow_children(children.into_iter().map(|child| child.into().into_node()));
+        let children: Vec<_> = children
+            .into_iter()
+            .map(|child| {
+                let mut child = child.into();
+                let child_node = child.node;
+                self.resources.append(&mut child.resources);
+                self.events.combine(child.events);
+                child_node
+            })
+            .collect();
+
+        self.element.attach_shadow_children(children);
         self
     }
 }
