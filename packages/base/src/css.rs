@@ -9,8 +9,8 @@ use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
 use lightningcss::{
     css_modules::{self, CssModuleExports},
-    stylesheet::{MinifyOptions, ParserOptions, PrinterOptions, StyleSheet},
-    targets::Browsers,
+    stylesheet::{MinifyOptions, ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
+    targets::{Browsers, Features, Targets},
 };
 
 #[derive(Debug)]
@@ -51,14 +51,9 @@ impl Source {
         validate: bool,
         transpile: Option<Transpile>,
     ) -> Result<Option<CssModuleExports>, String> {
-        let write_content = transpile.is_some();
-
-        if validate || write_content {
-            let minify = transpile.as_ref().map_or(false, |t| t.minify);
-            let pretty = transpile.as_ref().map_or(false, |t| t.pretty);
+        if validate || transpile.is_some() {
             let modules = transpile.as_ref().map_or(false, |t| t.modules);
             let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
-            let targets = transpile.and_then(|t| t.browsers);
 
             let content = self.content.clone();
             let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
@@ -70,16 +65,18 @@ impl Source {
                 pattern: css_modules::Pattern::default(),
                 dashed_idents: false,
             });
+            let mut flags = ParserFlags::empty();
+            flags.set(ParserFlags::NESTING, nesting);
+
             let mut stylesheet: StyleSheet = StyleSheet::parse(
                 &content,
                 ParserOptions {
                     filename,
-                    nesting,
-                    custom_media: false,
                     css_modules,
                     source_index: 0,
                     error_recovery: !validate,
                     warnings: warnings.as_ref().map(Arc::clone),
+                    flags,
                 },
             )
             .map_err(|e| e.to_string())?;
@@ -94,7 +91,19 @@ impl Source {
                 }
             }
 
-            if write_content {
+            if let Some(Transpile {
+                minify,
+                pretty,
+                browsers,
+                ..
+            }) = transpile
+            {
+                let targets = Targets {
+                    browsers,
+                    include: Features::empty(),
+                    exclude: Features::empty(),
+                };
+
                 if minify {
                     // This does the structural minification and add/removes vendor prefixes.
                     stylesheet

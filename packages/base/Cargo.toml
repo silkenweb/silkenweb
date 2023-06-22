@@ -15,7 +15,7 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 wasm-bindgen = "=0.2.84"
 js-sys = "0.3.60"
 cssparser = "0.29.6"
-lightningcss = "=1.0.0-alpha.41"
+lightningcss = "=1.0.0-alpha.42"
 itertools = "0.10.5"
 
 [dependencies.web-sys]
