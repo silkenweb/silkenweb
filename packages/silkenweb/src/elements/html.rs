@@ -3526,6 +3526,7 @@ html_element!(
 
         events {
             invalid: web_sys::Event,
+            select: web_sys::Event,
         };
     }
 );
