@@ -303,6 +303,7 @@ pub mod prelude {
     pub use crate::{
         clone,
         elements::{html, svg, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents},
+        log_panics,
         mount,
         node::{
             element::{Element, ParentElement, ShadowRootParent},
