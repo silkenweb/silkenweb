@@ -3,17 +3,7 @@ use html::{div, img, p};
 use silkenweb::{css, prelude::*};
 use web_sys::DragEvent;
 
-css!(
-    auto_mount,
-    content = "
-        .boxed {
-            width: 350px;
-            height: 70px;
-            padding: 10px;
-            border: 1px solid #aaaaaa;
-        }
-"
-);
+css!(path = "style.css");
 
 fn main() {
     log_panics();
@@ -22,7 +12,7 @@ fn main() {
         .child(p().text("Drag the kitten into the box and check the console"))
         .child(
             div()
-                .class(class::boxed())
+                .class(class::BOXED)
                 .on_drop(log_drop)
                 .on_dragover(|ev, _| ev.prevent_default()),
         )
@@ -39,7 +29,7 @@ fn main() {
 
 fn log_drop(ev: DragEvent, _target: impl Sized) {
     info!(
-        "Received ",
+        "Received",
         ev.data_transfer().unwrap().get_data("text").unwrap()
     )
 }
