@@ -1,6 +1,7 @@
 use gloo_console::info;
 use html::{div, img, p};
 use silkenweb::{css, prelude::*};
+use web_sys::DragEvent;
 
 css!(
     auto_mount,
@@ -22,12 +23,7 @@ fn main() {
         .child(
             div()
                 .class(class::boxed())
-                .on_drop(|ev, _| {
-                    info!(
-                        "Received ",
-                        ev.data_transfer().unwrap().get_data("text").unwrap()
-                    )
-                })
+                .on_drop(log_drop)
                 .on_dragover(|ev, _| ev.prevent_default()),
         )
         .child(
@@ -36,12 +32,21 @@ fn main() {
                 .width("200")
                 .height("300")
                 .draggable("true")
-                .on_dragstart(|ev, _| {
-                    ev.data_transfer()
-                        .unwrap()
-                        .set_data("text", "Kitty")
-                        .unwrap()
-                }),
+                .on_dragstart(set_drag_id),
         );
     mount("app", app);
+}
+
+fn log_drop(ev: DragEvent, _target: impl Sized) {
+    info!(
+        "Received ",
+        ev.data_transfer().unwrap().get_data("text").unwrap()
+    )
+}
+
+fn set_drag_id(ev: DragEvent, _target: impl Sized) {
+    ev.data_transfer()
+        .unwrap()
+        .set_data("text", "Kitty")
+        .unwrap()
 }
