@@ -97,23 +97,18 @@ mod sass {
 mod sass {
     use proc_macro_error::abort_call_site;
 
+    #[derive(Default)]
     pub struct CssSyntax(());
-
-    impl Default for CssSyntax {
-        fn default() -> Self {
-            Self(())
-        }
-    }
 
     impl CssSyntax {
         pub fn from_str(syntax: &str) -> Option<Self> {
-            let syntax = match syntax {
+            match syntax {
                 "css" => (),
                 "scss" | "sass" => abort_call_site!("`sass` feature must be enabled"),
                 _ => return None,
-            };
+            }
 
-            Some(Self(syntax))
+            Some(Self(()))
         }
     }
 }
