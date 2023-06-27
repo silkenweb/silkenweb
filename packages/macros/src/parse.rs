@@ -63,7 +63,8 @@ impl<T: ParseValue> ParseValue for Vec<T> {
     }
 }
 
-// TODO: Once grass supports stable rustdoc, remove the "sass" feature.
+// TODO: Once grass supports stable rustdoc, remove the "sass" feature, and add
+// a test for sass.
 #[cfg(feature = "sass")]
 mod sass {
     use derive_more::Into;
