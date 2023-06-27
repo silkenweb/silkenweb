@@ -14,6 +14,9 @@ keywords = ["css"]
 [lib]
 proc-macro = true
 
+[features]
+sass = ["dep:grass"]
+
 [dependencies]
 silkenweb-base = { path = "../base", version = "0.4.0" }
 syn = { version = "1.0.86", features = ["full"] }
@@ -22,5 +25,5 @@ proc-macro-error = "1.0.4"
 quote = "1.0.15"
 proc-macro2 = "1.0.36"
 lightningcss = "=1.0.0-alpha.42"
-grass = "0.12.4"
+grass = { version = "0.12.4", optional = true }
 derive_more = "0.99.17"

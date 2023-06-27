@@ -288,14 +288,22 @@ pub fn css(input: TokenStream) -> TokenStream {
         transpile,
     } = parse_macro_input!(input);
 
-    source = source
-        .map_content(|content| {
-            grass::from_string(
-                content,
-                &grass::Options::default().input_syntax(syntax.into()),
-            )
-        })
-        .unwrap_or_else(|e| abort_call_site!(e));
+    #[cfg(feature = "sass")]
+    {
+        source = source
+            .map_content(|content| {
+                grass::from_string(
+                    content,
+                    &grass::Options::default().input_syntax(syntax.into()),
+                )
+            })
+            .unwrap_or_else(|e| abort_call_site!(e));
+    }
+
+    #[cfg(not(feature = "sass"))]
+    {
+        let _ = syntax;
+    }
 
     let name_mappings = source
         .transpile(validate, transpile.map(Transpile::into))

@@ -1,7 +1,6 @@
 use std::{ffi::OsStr, path::Path};
 
 use derive_more::Into;
-use grass::InputSyntax;
 use proc_macro_error::{abort, abort_call_site};
 use silkenweb_base::css::{self, Source};
 use syn::{
@@ -64,8 +63,61 @@ impl<T: ParseValue> ParseValue for Vec<T> {
     }
 }
 
-#[derive(Into)]
-pub struct CssSyntax(InputSyntax);
+// TODO: Once grass supports stable rustdoc, remove the "sass" feature.
+#[cfg(feature = "sass")]
+mod sass {
+    use derive_more::Into;
+    use grass::InputSyntax;
+
+    #[derive(Into)]
+    pub struct CssSyntax(InputSyntax);
+
+    impl Default for CssSyntax {
+        fn default() -> Self {
+            Self(InputSyntax::Css)
+        }
+    }
+
+    impl CssSyntax {
+        pub fn from_str(syntax: &str) -> Option<Self> {
+            let syntax = match syntax {
+                "css" => InputSyntax::Css,
+                "scss" => InputSyntax::Scss,
+                "sass" => InputSyntax::Sass,
+                _ => return None,
+            };
+
+            Some(Self(syntax))
+        }
+    }
+}
+
+#[cfg(not(feature = "sass"))]
+mod sass {
+    use proc_macro_error::abort_call_site;
+
+    pub struct CssSyntax(());
+
+    impl Default for CssSyntax {
+        fn default() -> Self {
+            Self(())
+        }
+    }
+
+    impl CssSyntax {
+        pub fn from_str(syntax: &str) -> Option<Self> {
+            let syntax = match syntax {
+                "css" => (),
+                "scss" | "sass" => abort_call_site!("`sass` feature must be enabled"),
+                _ => return None,
+            };
+
+            Some(Self(syntax))
+        }
+    }
+}
+
+pub use sass::CssSyntax;
 
 impl CssSyntax {
     fn from_path(path: impl AsRef<Path>) -> Self {
@@ -73,18 +125,7 @@ impl CssSyntax {
             .extension()
             .and_then(OsStr::to_str)
             .and_then(|ext| Self::from_str(ext.to_lowercase().as_str()))
-            .unwrap_or(Self(InputSyntax::Css))
-    }
-
-    fn from_str(syntax: &str) -> Option<Self> {
-        let syntax = match syntax {
-            "css" => InputSyntax::Css,
-            "scss" => InputSyntax::Scss,
-            "sass" => InputSyntax::Sass,
-            _ => return None,
-        };
-
-        Some(Self(syntax))
+            .unwrap_or_default()
     }
 }
 
@@ -162,8 +203,8 @@ impl Parse for Input {
             }
         };
 
-        let syntax = syntax
-            .unwrap_or_else(|| path.map_or(CssSyntax(InputSyntax::Css), CssSyntax::from_path));
+        let syntax =
+            syntax.unwrap_or_else(|| path.map_or(CssSyntax::default(), CssSyntax::from_path));
 
         Ok(Self {
             source,
