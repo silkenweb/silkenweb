@@ -288,8 +288,13 @@ pub fn css(input: TokenStream) -> TokenStream {
         transpile,
     } = parse_macro_input!(input);
 
-    source
-        .convert_to_css(syntax.into())
+    source = source
+        .map_content(|content| {
+            grass::from_string(
+                content,
+                &grass::Options::default().input_syntax(syntax.into()),
+            )
+        })
         .unwrap_or_else(|e| abort_call_site!(e));
 
     let name_mappings = source

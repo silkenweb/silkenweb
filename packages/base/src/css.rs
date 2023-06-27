@@ -1,12 +1,11 @@
 use std::{
     collections::HashSet,
-    env, fs, mem,
+    env, fs,
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
 };
 
 use cssparser::{Parser, ParserInput, Token};
-use grass::InputSyntax;
 use itertools::Itertools;
 use lightningcss::{
     css_modules::{self, CssModuleExports},
@@ -47,14 +46,11 @@ impl Source {
         })
     }
 
-    pub fn convert_to_css(&mut self, syntax: InputSyntax) -> grass::Result<()> {
-        if syntax != InputSyntax::Css {
-            let content = mem::take(&mut self.content);
-            self.content =
-                grass::from_string(content, &grass::Options::default().input_syntax(syntax))?;
-        }
-
-        Ok(())
+    pub fn map_content<E>(self, f: impl FnOnce(String) -> Result<String, E>) -> Result<Self, E> {
+        Ok(Self {
+            content: f(self.content)?,
+            dependency: self.dependency,
+        })
     }
 
     pub fn transpile(
