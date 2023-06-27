@@ -72,31 +72,31 @@ impl CssSyntax {
         path.as_ref()
             .extension()
             .and_then(OsStr::to_str)
-            .map(|ext| match ext.to_lowercase().as_str() {
-                "sass" => Self(InputSyntax::Sass),
-                "scss" => Self(InputSyntax::Scss),
-                _ => Self(InputSyntax::Css),
-            })
+            .and_then(|ext| Self::from_str(ext.to_lowercase().as_str()))
             .unwrap_or(Self(InputSyntax::Css))
+    }
+
+    fn from_str(syntax: &str) -> Option<Self> {
+        let syntax = match syntax {
+            "css" => InputSyntax::Css,
+            "scss" => InputSyntax::Scss,
+            "sass" => InputSyntax::Sass,
+            _ => return None,
+        };
+
+        Some(Self(syntax))
     }
 }
 
 impl ParseValue for CssSyntax {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let syntax_lit = &input.parse::<LitStr>()?;
-        let syntax = match syntax_lit.value().as_str() {
-            "css" => InputSyntax::Css,
-            "scss" => InputSyntax::Scss,
-            "sass" => InputSyntax::Sass,
-            _ => {
-                return Err(syn::Error::new(
-                    syntax_lit.span(),
-                    r#"expected one of  "css", "scss" or "sass" "#,
-                ))
-            }
-        };
-
-        Ok(CssSyntax(syntax))
+        Self::from_str(syntax_lit.value().as_str()).ok_or_else(|| {
+            syn::Error::new(
+                syntax_lit.span(),
+                r#"expected one of  "css", "scss" or "sass" "#,
+            )
+        })
     }
 }
 
