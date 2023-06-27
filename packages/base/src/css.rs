@@ -1,11 +1,12 @@
 use std::{
     collections::HashSet,
-    env, fs,
+    env, fs, mem,
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
 };
 
 use cssparser::{Parser, ParserInput, Token};
+use grass::InputSyntax;
 use itertools::Itertools;
 use lightningcss::{
     css_modules::{self, CssModuleExports},
@@ -44,6 +45,16 @@ impl Source {
                 .map_err(|e| format!("Failed to read '{path}': {e}"))?,
             dependency: Some(path),
         })
+    }
+
+    pub fn convert_to_css(&mut self, syntax: InputSyntax) -> grass::Result<()> {
+        if syntax != InputSyntax::Css {
+            let content = mem::take(&mut self.content);
+            self.content =
+                grass::from_string(content, &grass::Options::default().input_syntax(syntax))?;
+        }
+
+        Ok(())
     }
 
     pub fn transpile(

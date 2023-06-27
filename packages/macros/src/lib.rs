@@ -278,6 +278,7 @@ pub fn cfg_browser(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn css(input: TokenStream) -> TokenStream {
     let Input {
         mut source,
+        syntax,
         public,
         prefix,
         include_prefixes,
@@ -286,6 +287,10 @@ pub fn css(input: TokenStream) -> TokenStream {
         auto_mount,
         transpile,
     } = parse_macro_input!(input);
+
+    source
+        .convert_to_css(syntax.into())
+        .unwrap_or_else(|e| abort_call_site!(e));
 
     let name_mappings = source
         .transpile(validate, transpile.map(Transpile::into))

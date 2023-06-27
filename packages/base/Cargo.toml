@@ -17,6 +17,7 @@ js-sys = "0.3.60"
 cssparser = "0.29.6"
 lightningcss = "=1.0.0-alpha.42"
 itertools = "0.10.5"
+grass = "0.12.4"
 
 [dependencies.web-sys]
 version = "0.3.60"

@@ -97,6 +97,7 @@ use silkenweb_base::document as base_document;
 /// # use silkenweb_macros::css;
 /// css!(
 ///     path = "my-css-file.css",
+///     syntax = "css",
 ///     prefix = "prefix",
 ///     include_prefixes = ["included-"],
 ///     exclude_prefixes = ["excluded-"],
@@ -124,7 +125,11 @@ use silkenweb_base::document as base_document;
 ///
 /// All are optional, but one of `path` or `content` must be specified.
 ///
-/// - `path` is the path to the CSS /SCSS/SASS file.
+/// - `path` is the path to the CSS/SCSS/SASS file. The syntax is determined
+///   from the extension.
+/// - `syntax` explicitly specifies the syntax. It must be one of "css", "scss",
+///   or "sass". The default is "css". It overrides any syntax inferred from
+///   `path`.
 /// - `content` is the css content.
 /// - `prefix`: only classes starting with `prefix` should be included. Their
 ///   Rust names will have the prefix stripped.
