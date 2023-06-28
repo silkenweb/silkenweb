@@ -1,5 +1,5 @@
 //! Document utilities.
-use std::cell::RefCell;
+use std::{cell::RefCell, collections::HashMap};
 
 use paste::paste;
 use silkenweb_base::document;
@@ -214,12 +214,12 @@ impl Document for Dry {
     }
 
     fn unmount_all() {
-        task::local::with(|local| local.mounted_in_dry_head.take());
+        task::local::with(|local| local.document.mounted_in_dry_head.take());
     }
 
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
         task::local::with(|local| {
-            let mut mounted = local.mounted_in_dry_head.borrow_mut();
+            let mut mounted = local.document.mounted_in_dry_head.borrow_mut();
 
             if mounted.contains_key(id) {
                 return false;
@@ -234,7 +234,7 @@ impl Document for Dry {
         let mut html = String::new();
 
         task::local::with(|local| {
-            for elem in local.mounted_in_dry_head.borrow().values() {
+            for elem in local.document.mounted_in_dry_head.borrow().values() {
                 html.push_str(&elem.to_string());
             }
         });
@@ -270,4 +270,9 @@ impl MountHandle {
 
 thread_local! {
     static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
+}
+
+#[derive(Default)]
+pub(crate) struct TaskLocal {
+    mounted_in_dry_head: RefCell<HashMap<String, GenericElement<Dry, Const>>>,
 }
