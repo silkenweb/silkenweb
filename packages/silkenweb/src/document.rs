@@ -10,7 +10,7 @@ use crate::{
     dom::{Dom, Dry, Wet},
     insert_element, mount_point,
     node::element::{Const, Element, GenericElement, Mut},
-    remove_element, task,
+    remove_element, task, ELEMENTS,
 };
 
 #[cfg_browser(false)]
@@ -166,8 +166,8 @@ impl Document for Wet {
     }
 
     fn unmount_all() {
-        task::local::with(|local| {
-            for element in local.elements.take().into_values() {
+        ELEMENTS.with(|elements| {
+            for element in elements.take().into_values() {
                 element.dom_element().remove()
             }
         });

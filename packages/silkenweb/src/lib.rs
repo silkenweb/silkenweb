@@ -62,6 +62,8 @@
 //! [Server Side Rendering]: https://github.com/silkenweb/ssr-example
 //! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
+use std::{cell::RefCell, collections::HashMap};
+
 use document::{Document, MountHandle};
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
@@ -340,16 +342,16 @@ fn mount_point(id: &str) -> web_sys::Element {
 
 fn insert_element(element: GenericElement<Wet, Const>) -> u128 {
     let id = next_node_handle_id();
-    task::local::with(|local| local.elements.borrow_mut().insert(id, element));
+    ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
     id
 }
 
 fn remove_element(id: u128) -> Option<GenericElement<Wet, Const>> {
-    task::local::with(|local| local.elements.borrow_mut().remove(&id))
+    ELEMENTS.with(|elements| elements.borrow_mut().remove(&id))
 }
 
 fn next_node_handle_id() -> u128 {
-    task::local::with(|local| local.element_handle_id.replace_with(|id| *id + 1))
+    ELEMENT_HANDLE_IDS.with(|ids| ids.replace_with(|id| *id + 1))
 }
 
 #[cfg_browser(true)]
@@ -374,4 +376,9 @@ pub fn intern_str(s: &str) -> &str {
 #[cfg_browser(false)]
 pub fn empty_str() -> &'static str {
     ""
+}
+
+thread_local! {
+    static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
+    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
 }

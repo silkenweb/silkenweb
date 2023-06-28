@@ -1,20 +1,11 @@
-use std::{cell::RefCell, collections::HashMap};
-
 use silkenweb_macros::cfg_browser;
 
-use crate::{
-    document,
-    dom::Wet,
-    node::element::{Const, GenericElement},
-    router,
-};
+use crate::{document, router};
 
 #[derive(Default)]
 pub struct TaskLocal {
     pub(crate) task: super::TaskLocal,
     pub(crate) document: document::TaskLocal,
-    pub(crate) element_handle_id: RefCell<u128>,
-    pub(crate) elements: RefCell<HashMap<u128, GenericElement<Wet, Const>>>,
     pub(crate) router: router::TaskLocal,
 }
 
