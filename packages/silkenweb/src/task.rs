@@ -13,7 +13,6 @@ use std::cell::{Cell, RefCell};
 use arch::{wait_for_microtasks, Raf};
 use futures::Future;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use silkenweb_base::window;
 use silkenweb_macros::cfg_browser;
 
 pub(crate) mod local;
@@ -281,7 +280,7 @@ impl Render {
         // The first timestamp will be from the previous animation or 0.0,
         // `animation_timestamp_millis` will yield 1 timestamp before `base` and the
         // next timestamp after `base`.
-        let base = window::performance().unwrap().now();
+        let base = self.base_timestamp();
 
         self.animation_timestamp_millis.signal().map(move |ts| {
             let relative_ts = ts - base;
@@ -292,6 +291,16 @@ impl Render {
                 0.0
             }
         })
+    }
+
+    #[cfg_browser(true)]
+    fn base_timestamp(&self) -> f64 {
+        silkenweb_base::window::performance().unwrap().now();
+    }
+
+    #[cfg_browser(false)]
+    fn base_timestamp(&self) -> f64 {
+        self.animation_timestamp_millis.get()
     }
 
     pub fn render_effects(&self) {
