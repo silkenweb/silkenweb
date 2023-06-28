@@ -1,35 +1,20 @@
 use std::{cell::RefCell, collections::HashMap};
 
-use futures_signals::signal::Mutable;
 use silkenweb_macros::cfg_browser;
 
-use super::{arch::Runtime, Render};
 use crate::{
     dom::{Dry, Wet},
     node::element::{Const, GenericElement},
-    router::{self, UrlPath},
+    router,
 };
 
+#[derive(Default)]
 pub struct TaskLocal {
-    pub mounted_in_dry_head: RefCell<HashMap<String, GenericElement<Dry, Const>>>,
-    pub runtime: Runtime,
-    pub element_handle_id: RefCell<u128>,
-    pub elements: RefCell<HashMap<u128, GenericElement<Wet, Const>>>,
-    pub url_path: Mutable<UrlPath>,
-    pub(super) render: Render,
-}
-
-impl Default for TaskLocal {
-    fn default() -> Self {
-        Self {
-            mounted_in_dry_head: Default::default(),
-            runtime: Default::default(),
-            element_handle_id: Default::default(),
-            elements: Default::default(),
-            render: Render::new(),
-            url_path: router::new_url_path(),
-        }
-    }
+    pub(crate) task: super::TaskLocal,
+    pub(crate) mounted_in_dry_head: RefCell<HashMap<String, GenericElement<Dry, Const>>>,
+    pub(crate) element_handle_id: RefCell<u128>,
+    pub(crate) elements: RefCell<HashMap<u128, GenericElement<Wet, Const>>>,
+    pub(crate) router: router::TaskLocal,
 }
 
 #[cfg_browser(true)]

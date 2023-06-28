@@ -50,7 +50,7 @@ mod arch {
     where
         F: Future<Output = ()> + 'static,
     {
-        local::with(|local| local.runtime.spawner.spawn_local(future).unwrap())
+        local::with(|local| local.task.runtime.spawner.spawn_local(future).unwrap())
     }
 
     /// Run futures queued with `spawn_local`, until no more progress can be
@@ -61,7 +61,7 @@ mod arch {
     }
 
     pub fn run() {
-        local::with(|local| local.runtime.executor.borrow_mut().run_until_stalled())
+        local::with(|local| local.task.runtime.executor.borrow_mut().run_until_stalled())
     }
 
     pub struct Runtime {
@@ -88,7 +88,7 @@ mod arch {
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
     use wasm_bindgen_futures::JsFuture;
 
-    use crate::task;
+    use super::Render;
 
     pub struct Raf {
         on_raf: Closure<dyn FnMut(JsValue)>,
@@ -98,9 +98,7 @@ mod arch {
         pub fn new() -> Self {
             Self {
                 on_raf: Closure::wrap(Box::new(|time_stamp: JsValue| {
-                    task::local::with(|local| {
-                        local.render.on_raf(time_stamp.as_f64().unwrap_throw())
-                    });
+                    Render::with(|render| render.on_raf(time_stamp.as_f64().unwrap_throw()));
                 })),
             }
         }
@@ -132,15 +130,15 @@ mod arch {
 ///
 /// An animation frame will be requested with `requestAnimationFrame`.
 pub fn on_animation_frame(f: impl FnOnce() + 'static) {
-    local::with(|local| local.render.on_animation_frame(f));
+    Render::with(|render| render.on_animation_frame(f));
 }
 
 pub(super) fn animation_timestamp() -> impl Signal<Item = f64> {
-    local::with(|local| local.render.animation_timestamp())
+    Render::with(Render::animation_timestamp)
 }
 
 pub(super) fn request_animation_frame() {
-    local::with(|local| local.render.request_animation_frame());
+    Render::with(Render::request_animation_frame);
 }
 
 /// Render any pending updates.
@@ -149,7 +147,7 @@ pub(super) fn request_animation_frame() {
 /// will be processed. This is mostly useful for testing.
 pub async fn render_now() {
     wait_for_microtasks().await;
-    local::with(|local| local.render.render_effects());
+    Render::with(Render::render_effects);
 }
 
 /// Server only tools.
@@ -169,6 +167,7 @@ pub mod server {
     use super::{
         arch,
         local::{TaskLocal, TASK_LOCAL},
+        Render,
     };
 
     /// Run a future with a local task queue.
@@ -211,7 +210,7 @@ pub mod server {
     /// [render_now]: super::render_now
     pub fn render_now_sync() {
         arch::run();
-        super::local::with(|local| local.render.render_effects());
+        Render::with(Render::render_effects);
     }
 
     struct ThreadWaker(Thread);
@@ -249,6 +248,20 @@ pub mod server {
     }
 }
 
+pub(crate) struct TaskLocal {
+    runtime: arch::Runtime,
+    render: Render,
+}
+
+impl Default for TaskLocal {
+    fn default() -> Self {
+        Self {
+            runtime: arch::Runtime::default(),
+            render: Render::new(),
+        }
+    }
+}
+
 struct Render {
     raf: Raf,
     raf_pending: Cell<bool>,
@@ -264,6 +277,10 @@ impl Render {
             pending_effects: RefCell::new(Vec::new()),
             animation_timestamp_millis: Mutable::new(0.0),
         }
+    }
+
+    fn with<R>(f: impl FnOnce(&Self) -> R) -> R {
+        local::with(|local| f(&local.task.render))
     }
 
     #[cfg_browser(true)]

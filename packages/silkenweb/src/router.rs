@@ -26,7 +26,7 @@
 //! ```
 use std::{collections::HashMap, fmt::Display};
 
-use futures_signals::signal::ReadOnlyMutable;
+use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use silkenweb_macros::cfg_browser;
 
 use crate::{
@@ -198,7 +198,7 @@ impl From<String> for UrlPath {
 ///
 /// The path will never start with a '/'.
 pub fn url_path() -> ReadOnlyMutable<UrlPath> {
-    task::local::with(|local| local.url_path.read_only())
+    task::local::with(|local| local.router.0.read_only())
 }
 
 /// Set the path portion of the URL.
@@ -260,36 +260,41 @@ pub fn link_clicked(
     }
 }
 
+pub(crate) struct TaskLocal(Mutable<UrlPath>);
+
+impl Default for TaskLocal {
+    fn default() -> Self {
+        Self(Mutable::new(arch::new_url_path()))
+    }
+}
+
 #[cfg_browser(false)]
 mod arch {
-    use futures_signals::signal::Mutable;
-
     use super::UrlPath;
     use crate::task;
 
-    pub fn new_url_path() -> Mutable<UrlPath> {
-        Mutable::new(UrlPath::new(""))
+    pub fn new_url_path() -> UrlPath {
+        UrlPath::new("")
     }
 
     pub fn set_url_path(path: impl Into<UrlPath>) {
-        task::local::with(move |local| local.url_path.set(path.into()));
+        task::local::with(move |local| local.router.0.set(path.into()));
     }
 }
 
 #[cfg_browser(true)]
 mod arch {
-    use futures_signals::signal::Mutable;
     use silkenweb_base::{document, window};
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
     use super::UrlPath;
     use crate::task;
 
-    pub fn new_url_path() -> Mutable<UrlPath> {
+    pub fn new_url_path() -> UrlPath {
         ON_POPSTATE
             .with(|on_popstate| window::set_onpopstate(Some(on_popstate.as_ref().unchecked_ref())));
 
-        Mutable::new(local_pathname())
+        local_pathname()
     }
 
     pub fn set_url_path(path: impl Into<UrlPath>) {
@@ -301,7 +306,7 @@ mod arch {
             window::history()
                 .push_state_with_url(&JsValue::null(), "", Some(&url))
                 .unwrap_throw();
-            local.url_path.set(path);
+            local.router.0.set(path);
         });
     }
 
@@ -332,9 +337,7 @@ mod arch {
 
         static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
             Closure::wrap(Box::new(move |_event: JsValue|
-                task::local::with(|local| local.url_path.set(local_pathname()))
+                task::local::with(|local| local.router.0.set(local_pathname()))
             ));
     }
 }
-
-pub(crate) use arch::new_url_path;
