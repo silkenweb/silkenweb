@@ -22,7 +22,7 @@ pub fn spawn_local<F>(future: F)
 where
     F: Future<Output = ()> + 'static,
 {
-    arch::spawn_local(future)
+    local::with(|local| local.task.runtime.spawn_local(future))
 }
 
 #[cfg_browser(false)]
@@ -44,13 +44,6 @@ mod arch {
         }
 
         pub fn request_animation_frame(&self) {}
-    }
-
-    pub fn spawn_local<F>(future: F)
-    where
-        F: Future<Output = ()> + 'static,
-    {
-        local::with(|local| local.task.runtime.spawner.spawn_local(future).unwrap())
     }
 
     /// Run futures queued with `spawn_local`, until no more progress can be
@@ -75,6 +68,15 @@ mod arch {
             let spawner = executor.borrow().spawner();
 
             Self { executor, spawner }
+        }
+    }
+
+    impl Runtime {
+        pub fn spawn_local<F>(&self, future: F)
+        where
+            F: Future<Output = ()> + 'static,
+        {
+            self.spawner.spawn_local(future).unwrap()
         }
     }
 }
@@ -108,13 +110,6 @@ mod arch {
         }
     }
 
-    pub fn spawn_local<F>(future: F)
-    where
-        F: Future<Output = ()> + 'static,
-    {
-        wasm_bindgen_futures::spawn_local(future)
-    }
-
     // Microtasks are run in the order they were queued in Javascript, so we just
     // put a task on the queue and `await` it.
     pub async fn wait_for_microtasks() {
@@ -124,6 +119,15 @@ mod arch {
 
     #[derive(Default)]
     pub struct Runtime;
+
+    impl Runtime {
+        pub fn spawn_local<F>(&self, future: F)
+        where
+            F: Future<Output = ()> + 'static,
+        {
+            wasm_bindgen_futures::spawn_local(future)
+        }
+    }
 }
 
 /// Run a closure on the next animation frame.
