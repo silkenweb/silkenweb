@@ -1,3 +1,5 @@
+use std::{ffi::OsStr, path::Path};
+
 use derive_more::Into;
 use proc_macro_error::{abort, abort_call_site};
 use silkenweb_base::css::{self, Source};
@@ -12,6 +14,7 @@ mod kw {
     use syn::custom_keyword;
 
     custom_keyword!(path);
+    custom_keyword!(syntax);
     custom_keyword!(content);
     custom_keyword!(public);
     custom_keyword!(prefix);
@@ -60,8 +63,83 @@ impl<T: ParseValue> ParseValue for Vec<T> {
     }
 }
 
+// TODO: Once grass supports stable rustdoc, remove the "sass" feature, and add
+// a test for sass.
+#[cfg(feature = "sass")]
+mod sass {
+    use derive_more::Into;
+    use grass::InputSyntax;
+
+    #[derive(Into)]
+    pub struct CssSyntax(InputSyntax);
+
+    impl Default for CssSyntax {
+        fn default() -> Self {
+            Self(InputSyntax::Css)
+        }
+    }
+
+    impl CssSyntax {
+        pub fn from_str(syntax: &str) -> Option<Self> {
+            let syntax = match syntax {
+                "css" => InputSyntax::Css,
+                "scss" => InputSyntax::Scss,
+                "sass" => InputSyntax::Sass,
+                _ => return None,
+            };
+
+            Some(Self(syntax))
+        }
+    }
+}
+
+#[cfg(not(feature = "sass"))]
+mod sass {
+    use proc_macro_error::abort_call_site;
+
+    #[derive(Default)]
+    pub struct CssSyntax(());
+
+    impl CssSyntax {
+        pub fn from_str(syntax: &str) -> Option<Self> {
+            match syntax {
+                "css" => (),
+                "scss" | "sass" => abort_call_site!("`sass` feature must be enabled"),
+                _ => return None,
+            }
+
+            Some(Self(()))
+        }
+    }
+}
+
+pub use sass::CssSyntax;
+
+impl CssSyntax {
+    fn from_path(path: impl AsRef<Path>) -> Self {
+        path.as_ref()
+            .extension()
+            .and_then(OsStr::to_str)
+            .and_then(|ext| Self::from_str(ext.to_lowercase().as_str()))
+            .unwrap_or_default()
+    }
+}
+
+impl ParseValue for CssSyntax {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let syntax_lit = &input.parse::<LitStr>()?;
+        Self::from_str(syntax_lit.value().as_str()).ok_or_else(|| {
+            syn::Error::new(
+                syntax_lit.span(),
+                r#"expected one of  "css", "scss" or "sass" "#,
+            )
+        })
+    }
+}
+
 pub struct Input {
     pub source: Source,
+    pub syntax: CssSyntax,
     pub public: bool,
     pub prefix: Option<String>,
     pub include_prefixes: Option<Vec<String>>,
@@ -74,9 +152,10 @@ pub struct Input {
 impl Parse for Input {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(LitStr) {
+            let path = input.parse::<LitStr>()?.value();
             return Ok(Self {
-                source: Source::from_path(input.parse::<LitStr>()?.value())
-                    .unwrap_or_else(|e| abort_call_site!(e)),
+                source: Source::from_path(&path).unwrap_or_else(|e| abort_call_site!(e)),
+                syntax: CssSyntax::from_path(path),
                 public: false,
                 prefix: None,
                 include_prefixes: None,
@@ -88,6 +167,7 @@ impl Parse for Input {
         }
 
         let mut path: Option<String> = None;
+        let mut syntax: Option<CssSyntax> = None;
         let mut public = false;
         let mut content: Option<String> = None;
         let mut prefix = None;
@@ -99,6 +179,7 @@ impl Parse for Input {
 
         parse_fields(input, |field, input| {
             Ok(parameter(kw::path, field, input, &mut path)?
+                || parameter(kw::syntax, field, input, &mut syntax)?
                 || flag(kw::public, field, input, &mut public)?
                 || parameter(kw::content, field, input, &mut content)?
                 || parameter(kw::prefix, field, input, &mut prefix)?
@@ -109,7 +190,7 @@ impl Parse for Input {
                 || parameter(kw::transpile, field, input, &mut transpile)?)
         })?;
 
-        let source = match (path, content) {
+        let source = match (&path, content) {
             (None, None) => abort_call_site!("Must specify either 'path' or `content` parameter"),
             (None, Some(content)) => Source::from_content(content),
             (Some(path), None) => Source::from_path(path).unwrap_or_else(|e| abort_call_site!(e)),
@@ -118,8 +199,12 @@ impl Parse for Input {
             }
         };
 
+        let syntax =
+            syntax.unwrap_or_else(|| path.map_or(CssSyntax::default(), CssSyntax::from_path));
+
         Ok(Self {
             source,
+            syntax,
             public,
             prefix,
             include_prefixes,

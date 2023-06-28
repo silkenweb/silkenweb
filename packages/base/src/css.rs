@@ -46,6 +46,13 @@ impl Source {
         })
     }
 
+    pub fn map_content<E>(self, f: impl FnOnce(String) -> Result<String, E>) -> Result<Self, E> {
+        Ok(Self {
+            content: f(self.content)?,
+            dependency: self.dependency,
+        })
+    }
+
     pub fn transpile(
         &mut self,
         validate: bool,
