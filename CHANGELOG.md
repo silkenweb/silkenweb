@@ -6,6 +6,7 @@
 - htmx integration using Axum.
 - Reactive stylesheets.
 - Drag and drop events.
+- `css!` supports Sass.
 
 ### Fixes
 
