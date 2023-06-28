@@ -1,5 +1,5 @@
 //! Document utilities.
-use std::{cell::RefCell, collections::HashMap};
+use std::cell::RefCell;
 
 use paste::paste;
 use silkenweb_base::document;
@@ -10,7 +10,7 @@ use crate::{
     dom::{Dom, Dry, Wet},
     insert_element, mount_point,
     node::element::{Const, Element, GenericElement, Mut},
-    remove_element, ELEMENTS,
+    remove_element, task,
 };
 
 #[cfg_browser(false)]
@@ -166,8 +166,8 @@ impl Document for Wet {
     }
 
     fn unmount_all() {
-        ELEMENTS.with(|elements| {
-            for element in elements.take().into_values() {
+        task::local::with(|local| {
+            for element in local.elements.take().into_values() {
                 element.dom_element().remove()
             }
         });
@@ -214,12 +214,12 @@ impl Document for Dry {
     }
 
     fn unmount_all() {
-        MOUNTED_IN_DRY_HEAD.with(|mounted| mounted.take());
+        task::local::with(|local| local.mounted_in_dry_head.take());
     }
 
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
-        MOUNTED_IN_DRY_HEAD.with(|mounted| {
-            let mut mounted = mounted.borrow_mut();
+        task::local::with(|local| {
+            let mut mounted = local.mounted_in_dry_head.borrow_mut();
 
             if mounted.contains_key(id) {
                 return false;
@@ -233,8 +233,8 @@ impl Document for Dry {
     fn head_inner_html() -> String {
         let mut html = String::new();
 
-        MOUNTED_IN_DRY_HEAD.with(|mounted| {
-            for elem in mounted.borrow().values() {
+        task::local::with(|local| {
+            for elem in local.mounted_in_dry_head.borrow().values() {
                 html.push_str(&elem.to_string());
             }
         });
@@ -270,5 +270,4 @@ impl MountHandle {
 
 thread_local! {
     static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
-    static MOUNTED_IN_DRY_HEAD: RefCell<HashMap<String, GenericElement<Dry, Const>>> = RefCell::new(HashMap::new());
 }

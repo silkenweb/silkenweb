@@ -16,6 +16,8 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use silkenweb_base::window;
 use silkenweb_macros::cfg_browser;
 
+pub(crate) mod local;
+
 /// Spawn a future on the microtask queue.
 pub fn spawn_local<F>(future: F)
 where
@@ -32,7 +34,8 @@ mod arch {
         executor::{LocalPool, LocalSpawner},
         task::LocalSpawnExt,
     };
-    use tokio::task_local;
+
+    use super::local;
 
     pub struct Raf;
 
@@ -48,7 +51,7 @@ mod arch {
     where
         F: Future<Output = ()> + 'static,
     {
-        with_runtime(|rt| rt.spawner.spawn_local(future).unwrap())
+        local::with(|local| local.runtime.spawner.spawn_local(future).unwrap())
     }
 
     /// Run futures queued with `spawn_local`, until no more progress can be
@@ -59,11 +62,7 @@ mod arch {
     }
 
     pub fn run() {
-        with_runtime(|rt| rt.executor.borrow_mut().run_until_stalled())
-    }
-
-    task_local! {
-        pub static RUNTIME: Runtime;
+        local::with(|local| local.runtime.executor.borrow_mut().run_until_stalled())
     }
 
     pub struct Runtime {
@@ -79,18 +78,11 @@ mod arch {
             Self { executor, spawner }
         }
     }
-
-    fn with_runtime<R>(f: impl FnOnce(&Runtime) -> R) -> R {
-        match RUNTIME.try_with(f) {
-            Ok(r) => r,
-            Err(_) => panic!("Must be run from within `silkenweb::task::server::scope`"),
-        }
-    }
 }
 
 #[cfg_browser(true)]
 mod arch {
-    use std::future::Future;
+    use std::{future::Future, thread};
 
     use js_sys::Promise;
     use silkenweb_base::window;
@@ -130,21 +122,24 @@ mod arch {
         let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
         JsFuture::from(wait_for_microtasks).await.unwrap_throw();
     }
+
+    #[derive(Default)]
+    pub struct Runtime;
 }
 
 /// Run a closure on the next animation frame.
 ///
 /// An animation frame will be requested with `requestAnimationFrame`.
 pub fn on_animation_frame(f: impl FnOnce() + 'static) {
-    RENDER.with(|r| r.on_animation_frame(f));
+    local::with(|local| local.render.on_animation_frame(f));
 }
 
 pub(super) fn animation_timestamp() -> impl Signal<Item = f64> {
-    RENDER.with(Render::animation_timestamp)
+    local::with(|local| local.render.animation_timestamp())
 }
 
 pub(super) fn request_animation_frame() {
-    RENDER.with(Render::request_animation_frame);
+    local::with(|local| local.render.request_animation_frame());
 }
 
 /// Render any pending updates.
@@ -153,7 +148,7 @@ pub(super) fn request_animation_frame() {
 /// will be processed. This is mostly useful for testing.
 pub async fn render_now() {
     wait_for_microtasks().await;
-    RENDER.with(Render::render_effects);
+    local::with(|local| local.render.render_effects());
 }
 
 /// Server only tools.
@@ -170,7 +165,10 @@ pub mod server {
 
     use futures::Future;
 
-    use super::{arch, Render, RENDER};
+    use super::{
+        arch,
+        local::{TaskLocal, TASK_LOCAL},
+    };
 
     /// Run a future with a local task queue.
     ///
@@ -196,7 +194,7 @@ pub mod server {
     where
         Fut: Future,
     {
-        arch::RUNTIME.scope(arch::Runtime::default(), f)
+        TASK_LOCAL.scope(TaskLocal::default(), f)
     }
 
     /// Synchronous version of [`scope`].
@@ -204,7 +202,7 @@ pub mod server {
     where
         F: FnOnce() -> R,
     {
-        arch::RUNTIME.sync_scope(arch::Runtime::default(), f)
+        TASK_LOCAL.sync_scope(TaskLocal::default(), f)
     }
 
     /// Synchronous version of [render_now].
@@ -212,7 +210,7 @@ pub mod server {
     /// [render_now]: super::render_now
     pub fn render_now_sync() {
         arch::run();
-        RENDER.with(Render::render_effects);
+        super::local::with(|local| local.render.render_effects());
     }
 
     struct ThreadWaker(Thread);
@@ -309,7 +307,3 @@ impl Render {
         }
     }
 }
-
-thread_local!(
-    static RENDER: Render = Render::new();
-);
