@@ -37,7 +37,7 @@ mod arch {
     use super::TaskLocal;
 
     thread_local! {
-        static TASK_LOCAL: TaskLocal = TaskLocal::default();
+        pub static TASK_LOCAL: TaskLocal = TaskLocal::default();
     }
 
     pub fn with<R>(f: impl FnOnce(&TaskLocal) -> R) -> R {

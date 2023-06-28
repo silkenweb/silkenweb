@@ -81,14 +81,14 @@ mod arch {
 
 #[cfg_browser(true)]
 mod arch {
-    use std::{future::Future, thread};
+    use std::future::Future;
 
     use js_sys::Promise;
     use silkenweb_base::window;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
     use wasm_bindgen_futures::JsFuture;
 
-    use super::RENDER;
+    use crate::task;
 
     pub struct Raf {
         on_raf: Closure<dyn FnMut(JsValue)>,
@@ -98,7 +98,9 @@ mod arch {
         pub fn new() -> Self {
             Self {
                 on_raf: Closure::wrap(Box::new(|time_stamp: JsValue| {
-                    RENDER.with(|render| render.on_raf(time_stamp.as_f64().unwrap_throw()));
+                    task::local::with(|local| {
+                        local.render.on_raf(time_stamp.as_f64().unwrap_throw())
+                    });
                 })),
             }
         }
@@ -295,7 +297,7 @@ impl Render {
 
     #[cfg_browser(true)]
     fn base_timestamp(&self) -> f64 {
-        silkenweb_base::window::performance().unwrap().now();
+        silkenweb_base::window::performance().unwrap().now()
     }
 
     #[cfg_browser(false)]
