@@ -26,13 +26,14 @@
 //! ```
 use std::{collections::HashMap, fmt::Display};
 
-use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use futures_signals::signal::ReadOnlyMutable;
 use silkenweb_macros::cfg_browser;
 
 use crate::{
     dom::Dom,
     elements::html::{a, A},
     prelude::ElementEvents,
+    task,
 };
 
 /// Represent the path portion of a URL (including any query string)
@@ -197,7 +198,7 @@ impl From<String> for UrlPath {
 ///
 /// The path will never start with a '/'.
 pub fn url_path() -> ReadOnlyMutable<UrlPath> {
-    URL_PATH.with(|url_path| url_path.read_only())
+    task::local::with(|local| local.url_path.read_only())
 }
 
 /// Set the path portion of the URL.
@@ -263,14 +264,15 @@ pub fn link_clicked(
 mod arch {
     use futures_signals::signal::Mutable;
 
-    use super::{UrlPath, URL_PATH};
+    use super::UrlPath;
+    use crate::task;
 
     pub fn new_url_path() -> Mutable<UrlPath> {
         Mutable::new(UrlPath::new(""))
     }
 
     pub fn set_url_path(path: impl Into<UrlPath>) {
-        URL_PATH.with(move |url_path| url_path.set(path.into()));
+        task::local::with(move |local| local.url_path.set(path.into()));
     }
 }
 
@@ -280,7 +282,8 @@ mod arch {
     use silkenweb_base::{document, window};
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
-    use super::{UrlPath, URL_PATH};
+    use super::UrlPath;
+    use crate::task;
 
     pub fn new_url_path() -> Mutable<UrlPath> {
         ON_POPSTATE
@@ -294,11 +297,11 @@ mod arch {
         let mut url = BASE_URI.with(String::clone);
         url.push_str(path.as_str());
 
-        URL_PATH.with(move |url_path| {
+        task::local::with(move |local| {
             window::history()
                 .push_state_with_url(&JsValue::null(), "", Some(&url))
                 .unwrap_throw();
-            url_path.set(path);
+            local.url_path.set(path);
         });
     }
 
@@ -329,11 +332,9 @@ mod arch {
 
         static ON_POPSTATE: Closure<dyn FnMut(JsValue)> =
             Closure::wrap(Box::new(move |_event: JsValue|
-                URL_PATH.with(|url_path| url_path.set(local_pathname()))
+                task::local::with(|local| local.url_path.set(local_pathname()))
             ));
     }
 }
 
-thread_local! {
-    static URL_PATH: Mutable<UrlPath> = arch::new_url_path();
-}
+pub(crate) use arch::new_url_path;
