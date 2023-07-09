@@ -8,7 +8,5 @@ publish = false
 [dependencies]
 silkenweb = { workspace = true, features = ["weak-refs"] }
 futures-signals = { workspace = true }
-js-sys = { workspace = true }
 wasm-bindgen = { workspace = true, features = ["enable-interning"] }
 rand = { workspace = true, features = ["small_rng"] }
-getrandom = { workspace = true, features = ["js"] }

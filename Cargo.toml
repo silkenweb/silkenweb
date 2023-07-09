@@ -67,7 +67,6 @@ async-recursion = "1.0.0"
 silkenweb-htmx-axum = { path = "packages/htmx-axum" }
 web-log = "1.0.1"
 rand = "0.8.5"
-getrandom = "0.2.7"
 serde_json = "1.0.85"
 parse-display = "0.8.0"
 silkenweb-bootstrap = { path = "packages/bootstrap" }
