@@ -8,4 +8,83 @@ lto = true
 opt-level = "z"
 
 [profile.bench]
-opt-level=3
+opt-level = 3
+
+# Defines the versions for all the workspace dependencies, including examples
+# but does not specify features, which is done in each crate as needed
+[workspace.dependencies]
+
+# main dependencies
+js-sys = "0.3.60"
+web-sys = "0.3.60"
+wasm-bindgen = "=0.2.84"
+wasm-bindgen-futures = "0.4.33"
+cssparser = "0.29.6"
+lightningcss = "=1.0.0-alpha.42"
+itertools = "0.10.5"
+silkenweb = { path = "packages/silkenweb" }
+silkenweb-base = { path = "packages/base", version = "0.4.0" }
+silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.4.0" }
+silkenweb-macros = { path = "packages/macros", version = "0.4.0" }
+silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.4.0" }
+async-trait = "0.1.66"
+axum = "0.6.10"
+serde = "1.0.154"
+serde_urlencoded = "0.7.1"
+serde-wasm-bindgen = "0.4.5"
+futures-signals = "0.3.31"
+pin-project = "1.0.12"
+paste = "1.0.9"
+discard = "1.0.4"
+futures = "0.3.24"
+caseless = "0.2.1"
+html-escape = "0.2.9"
+indexmap = "1.8.0"
+console_error_panic_hook = "0.1.7"
+static_assertions = "1.1.0"
+tokio = "1.25.0"
+
+# macro dependencies
+syn = "1.0.86"
+proc-macro-error = "1.0.4"
+quote = "1.0.15"
+proc-macro2 = "1.0.36"
+heck = "0.4.0"
+derive_more = "0.99.17"
+grass = "0.12.4"
+
+# xtask dependencies
+clap = "4.1.8"
+xtask-base = { git = "https://github.com/simon-bourne/rust-xtask-base" }
+xshell = "0.1.17"
+duct = "0.13.5"
+scopeguard = "1.1.0"
+
+# Example dependencies
+chrono = "0.4.19"
+timeago = "0.3.0"
+async-recursion = "1.0.0"
+silkenweb-htmx-axum = { path = "packages/htmx-axum" }
+web-log = "1.0.1"
+rand = "0.8.5"
+getrandom = "0.2.7"
+serde_json = "1.0.85"
+parse-display = "0.8.0"
+silkenweb-bootstrap = { path = "packages/bootstrap" }
+silkenweb-bootstrap-macros = { path = "packages/bootstrap/macros" }
+gloo-console = "0.2.3"
+# TODO: upgrade to 0.5 and update examples/client-server
+reqwasm = "0.4.1"
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
+num-traits = "0.2.15"
+
+arpy = { git = "https://github.com/simon-bourne/arpy" }
+arpy-reqwasm = { git = "https://github.com/simon-bourne/arpy" }
+arpy-server = { git = "https://github.com/simon-bourne/arpy" }
+arpy-axum = { git = "https://github.com/simon-bourne/arpy" }
+
+# test dependencies
+wasm-bindgen-test = "0.3.28"
+criterion = "0.4.0"
+trybuild = "1.0.76"

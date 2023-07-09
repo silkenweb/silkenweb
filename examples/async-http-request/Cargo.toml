@@ -6,6 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-futures-signals = "0.3.24"
-reqwasm = "0.4.1"
-silkenweb = { path = "../../packages/silkenweb" }
+futures-signals = { workspace = true }
+reqwasm = { workspace = true }
+silkenweb = { workspace = true }

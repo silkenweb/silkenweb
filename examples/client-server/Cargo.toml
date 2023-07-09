@@ -6,18 +6,19 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb" }
-futures-signals = "0.3.31"
-arpy = { git = "https://github.com/simon-bourne/arpy" }
-serde = "1.0.152"
-futures = "0.3.26"
+silkenweb = { workspace = true }
+futures-signals = { workspace = true }
+arpy = { workspace = true }
+serde = { workspace = true }
+futures = { workspace = true }
+# TODO: unify with workspace version
 reqwasm = "0.5.0"
-arpy-reqwasm = { git = "https://github.com/simon-bourne/arpy" }
+arpy-reqwasm = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tracing = "0.1.37"
-tracing-subscriber = "0.3.16"
-axum = "0.6.4"
-tokio = "1.25.0"
-arpy-server = { git = "https://github.com/simon-bourne/arpy" }
-arpy-axum = { git = "https://github.com/simon-bourne/arpy" }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+arpy-server = { workspace = true }
+arpy-axum = { workspace = true }
