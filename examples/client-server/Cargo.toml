@@ -11,8 +11,7 @@ futures-signals = { workspace = true }
 arpy = { workspace = true }
 serde = { workspace = true }
 futures = { workspace = true }
-# TODO: unify with workspace version
-reqwasm = "0.5.0"
+reqwasm = { workspace = true }
 arpy-reqwasm = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

@@ -72,8 +72,7 @@ parse-display = "0.8.0"
 silkenweb-bootstrap = { path = "packages/bootstrap" }
 silkenweb-bootstrap-macros = { path = "packages/bootstrap/macros" }
 gloo-console = "0.2.3"
-# TODO: upgrade to 0.5 and update examples/client-server
-reqwasm = "0.4.1"
+reqwasm = "0.5.0"
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
 num-traits = "0.2.15"
