@@ -10,11 +10,22 @@ opt-level = "z"
 [profile.bench]
 opt-level = 3
 
+[workspace.package]
+# The version is used by all published crates however it is not updated for the
+# internal silkenweb dependencies where it has to be updated manually.
+version = "0.4.0"
+
 # Defines the versions for all the workspace dependencies, including examples
 # but does not specify features, which is done in each crate as needed
 [workspace.dependencies]
 
 # main dependencies
+silkenweb = { path = "packages/silkenweb" }
+silkenweb-base = { path = "packages/base", version = "0.4.0" }
+silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.4.0" }
+silkenweb-macros = { path = "packages/macros", version = "0.4.0" }
+silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.4.0" }
+
 js-sys = "0.3.60"
 web-sys = "0.3.60"
 wasm-bindgen = "=0.2.84"
@@ -22,11 +33,6 @@ wasm-bindgen-futures = "0.4.33"
 cssparser = "0.29.6"
 lightningcss = "=1.0.0-alpha.42"
 itertools = "0.10.5"
-silkenweb = { path = "packages/silkenweb" }
-silkenweb-base = { path = "packages/base", version = "0.4.0" }
-silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.4.0" }
-silkenweb-macros = { path = "packages/macros", version = "0.4.0" }
-silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.4.0" }
 async-trait = "0.1.66"
 axum = "0.6.10"
 serde = "1.0.154"

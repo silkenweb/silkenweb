@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-tauri"
-version = "0.4.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "Silkenweb Tauri integration"

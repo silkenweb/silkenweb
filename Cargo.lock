@@ -2616,7 +2616,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-bootstrap"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "derive_more",
  "futures-signals",
@@ -2828,7 +2828,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-htmx-axum"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "axum",
