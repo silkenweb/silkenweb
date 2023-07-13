@@ -264,7 +264,7 @@ macro_rules! dom_element {
         {
             pub fn on_instantiate(
                 self,
-                f: impl 'static + Fn($camel_name<Dom>, &InitParam) -> $camel_name<Dom>,
+                f: impl 'static + $crate::dom::InitializeElemFn<InitParam, $camel_name<Dom>>,
             ) -> Self {
                 $camel_name(self.0.on_instantiate(
                     move |elem, param| {

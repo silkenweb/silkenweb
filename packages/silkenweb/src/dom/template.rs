@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fmt};
 
 use wasm_bindgen::JsValue;
 
-use super::private::EventStore;
+use super::{private::EventStore, Dom, InitializeElemFn};
 use crate::{
     dom::{
         private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
@@ -10,6 +10,7 @@ use crate::{
     },
     node::element::{GenericElement, Namespace},
     shared_ref::SharedRef,
+    ServerSend, ServerSync,
 };
 
 pub struct TemplateElement<Param, D: InstantiableDom> {
@@ -27,10 +28,7 @@ where
             .initialize(self.element.clone_node(), param)
     }
 
-    pub fn on_instantiate(
-        &mut self,
-        f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>,
-    ) {
+    pub fn on_instantiate(&mut self, f: impl 'static + InitializeElemFn<Param, GenericElement<D>>) {
         self.initialization_fns.add_fn(f)
     }
 }
@@ -209,7 +207,7 @@ where
         Self(SharedRef::new(SharedInitializationFns::new()))
     }
 
-    fn add_fn(&mut self, f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>) {
+    fn add_fn(&mut self, f: impl 'static + InitializeElemFn<Param, GenericElement<D>>) {
         self.0.write().initialization_fns.push(Box::new(f))
     }
 
@@ -333,4 +331,4 @@ where
     }
 }
 
-type InitializeElem<Param, D> = Box<dyn Fn(GenericElement<D>, &Param) -> GenericElement<D>>;
+type InitializeElem<Param, D> = Box<dyn InitializeElemFn<Param, GenericElement<D>>>;

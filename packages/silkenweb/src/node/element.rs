@@ -28,7 +28,7 @@ use crate::{
     attribute::Attribute,
     dom::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
-        DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet,
+        DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet, InitializeElemFn,
     },
     empty_str,
     hydration::HydrationStats,
@@ -181,7 +181,7 @@ where
 {
     pub fn on_instantiate(
         mut self,
-        f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>,
+        f: impl 'static + InitializeElemFn<Param, GenericElement<D>>,
     ) -> Self {
         self.element.on_instantiate(f);
         self

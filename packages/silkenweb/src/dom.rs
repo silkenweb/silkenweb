@@ -19,6 +19,7 @@ use self::{
     template::{TemplateElement, TemplateNode, TemplateText},
     wet::{WetElement, WetNode, WetText},
 };
+use crate::{ServerSend, ServerSync};
 
 pub(super) mod private;
 
@@ -175,4 +176,15 @@ impl<Param: 'static, D: InstantiableDom> private::Dom for Template<Param, D> {
     type Element = TemplateElement<Param, D>;
     type Node = TemplateNode<Param, D>;
     type Text = TemplateText<D>;
+}
+
+// TODO: Doc
+pub trait InitializeElemFn<Param, Elem>:
+    Fn(Elem, &Param) -> Elem + ServerSend + ServerSync
+{
+}
+
+impl<T, Param, Elem> InitializeElemFn<Param, Elem> for T where
+    T: Fn(Elem, &Param) -> Elem + ServerSend + ServerSync
+{
 }
