@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
+use std::{collections::HashMap, fmt};
 
 use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
@@ -13,15 +13,15 @@ use super::{
     wet::{WetElement, WetNode},
     Dry,
 };
-use crate::{hydration::HydrationStats, node::element::Namespace};
+use crate::{hydration::HydrationStats, node::element::Namespace, shared_ref::SharedRef};
 
 #[derive(Clone)]
 
-pub struct DryElement(Rc<RefCell<SharedDryElement<DryNode>>>);
+pub struct DryElement(SharedRef<SharedDryElement<DryNode>>);
 
 impl DryElement {
     fn from_shared(shared: SharedDryElement<DryNode>) -> Self {
-        Self(Rc::new(RefCell::new(shared)))
+        Self(SharedRef::new(shared))
     }
 }
 
@@ -33,7 +33,7 @@ impl private::DomElement for DryElement {
     }
 
     fn append_child(&mut self, child: &Self::Node) {
-        self.0.borrow_mut().append_child(child)
+        self.0.write().append_child(child)
     }
 
     fn insert_child_before(
@@ -42,38 +42,34 @@ impl private::DomElement for DryElement {
         child: &Self::Node,
         next_child: Option<&Self::Node>,
     ) {
-        self.0
-            .borrow_mut()
-            .insert_child_before(index, child, next_child)
+        self.0.write().insert_child_before(index, child, next_child)
     }
 
     fn replace_child(&mut self, index: usize, new_child: &Self::Node, old_child: &Self::Node) {
-        self.0
-            .borrow_mut()
-            .replace_child(index, new_child, old_child)
+        self.0.write().replace_child(index, new_child, old_child)
     }
 
     fn remove_child(&mut self, index: usize, child: &Self::Node) {
-        self.0.borrow_mut().remove_child(index, child)
+        self.0.write().remove_child(index, child)
     }
 
     fn clear_children(&mut self) {
-        self.0.borrow_mut().clear_children()
+        self.0.write().clear_children()
     }
 
     fn add_class(&mut self, name: &str) {
-        self.0.borrow_mut().add_class(name)
+        self.0.write().add_class(name)
     }
 
     fn remove_class(&mut self, name: &str) {
-        self.0.borrow_mut().remove_class(name)
+        self.0.write().remove_class(name)
     }
 
     fn attribute<A>(&mut self, name: &str, value: A)
     where
         A: crate::attribute::Attribute,
     {
-        self.0.borrow_mut().attribute(name, value)
+        self.0.write().attribute(name, value)
     }
 
     fn on(
@@ -82,60 +78,60 @@ impl private::DomElement for DryElement {
         f: impl FnMut(JsValue) + 'static,
         events: &mut EventStore,
     ) {
-        self.0.borrow_mut().on(name, f, events)
+        self.0.write().on(name, f, events)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
-        self.0.borrow().try_dom_element()
+        self.0.read().try_dom_element()
     }
 
     fn style_property(&mut self, name: &str, value: &str) {
-        self.0.borrow_mut().style_property(name, value)
+        self.0.write().style_property(name, value)
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.0.borrow_mut().effect(f)
+        self.0.write().effect(f)
     }
 }
 
 impl private::InstantiableDomElement for DryElement {
     fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
-        self.0.borrow_mut().attach_shadow_children(children)
+        self.0.write().attach_shadow_children(children)
     }
 
     fn clone_node(&self) -> Self {
-        Self::from_shared(self.0.borrow().clone_node())
+        Self::from_shared(self.0.read().clone_node())
     }
 }
 
 impl fmt::Display for DryElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.borrow().fmt(f)
+        self.0.read().fmt(f)
     }
 }
 
 #[derive(Clone)]
-pub struct DryText(Rc<RefCell<SharedDryText<DryNode>>>);
+pub struct DryText(SharedRef<SharedDryText<DryNode>>);
 
 impl DryText {
     pub fn clone_node(&self) -> Self {
-        Self(Rc::new(RefCell::new(self.0.borrow().clone_node())))
+        Self(SharedRef::new(self.0.read().clone_node()))
     }
 }
 
 impl fmt::Display for DryText {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.borrow().fmt(f)
+        self.0.read().fmt(f)
     }
 }
 
 impl private::DomText for DryText {
     fn new(text: &str) -> Self {
-        Self(Rc::new(RefCell::new(SharedDryText::new(text.to_string()))))
+        Self(SharedRef::new(SharedDryText::new(text.to_string())))
     }
 
     fn set_text(&mut self, text: &str) {
-        self.0.borrow_mut().set_text(text.to_string())
+        self.0.write().set_text(text.to_string())
     }
 }
 
@@ -157,12 +153,9 @@ impl private::InstantiableDomNode for DryNode {
 
     fn first_child(&self) -> Self {
         match self {
-            DryNode::Element(element) => element
-                .0
-                .borrow()
-                .first_child()
-                .expect("No children")
-                .clone(),
+            DryNode::Element(element) => {
+                element.0.read().first_child().expect("No children").clone()
+            }
             DryNode::Text(_) => panic!("Text nodes can't have children"),
         }
     }
@@ -171,13 +164,13 @@ impl private::InstantiableDomNode for DryNode {
         match self {
             DryNode::Element(element) => element
                 .0
-                .borrow()
+                .read()
                 .next_sibling()
                 .expect("This is the last child")
                 .clone(),
             DryNode::Text(text) => text
                 .0
-                .borrow()
+                .read()
                 .next_sibling()
                 .expect("This is the last child")
                 .clone(),
@@ -218,8 +211,8 @@ impl DryChild for DryNode {
         let next_sibling = next_sibling.cloned();
 
         match self {
-            DryNode::Element(element) => element.0.borrow_mut().set_next_sibling(next_sibling),
-            DryNode::Text(text) => text.0.borrow_mut().set_next_sibling(next_sibling),
+            DryNode::Element(element) => element.0.write().set_next_sibling(next_sibling),
+            DryNode::Text(text) => text.0.write().set_next_sibling(next_sibling),
         }
     }
 }

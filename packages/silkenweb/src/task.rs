@@ -27,7 +27,7 @@ where
 
 #[cfg_browser(false)]
 mod arch {
-    use std::{cell::RefCell, future::Future};
+    use std::{future::Future, sync::RwLock};
 
     use futures::{
         executor::{LocalPool, LocalSpawner},
@@ -54,18 +54,26 @@ mod arch {
     }
 
     pub fn run() {
-        local::with(|local| local.task.runtime.executor.borrow_mut().run_until_stalled())
+        local::with(|local| {
+            local
+                .task
+                .runtime
+                .executor
+                .write()
+                .unwrap()
+                .run_until_stalled()
+        })
     }
 
     pub struct Runtime {
-        executor: RefCell<LocalPool>,
+        executor: RwLock<LocalPool>,
         spawner: LocalSpawner,
     }
 
     impl Default for Runtime {
         fn default() -> Self {
-            let executor = RefCell::new(LocalPool::new());
-            let spawner = executor.borrow().spawner();
+            let executor = RwLock::new(LocalPool::new());
+            let spawner = executor.read().unwrap().spawner();
 
             Self { executor, spawner }
         }

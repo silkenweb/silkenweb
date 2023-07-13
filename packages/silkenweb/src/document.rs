@@ -4,6 +4,7 @@ use std::{cell::RefCell, collections::HashMap};
 use paste::paste;
 use silkenweb_base::document;
 use silkenweb_macros::cfg_browser;
+use std::sync::RwLock;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
@@ -214,12 +215,12 @@ impl Document for Dry {
     }
 
     fn unmount_all() {
-        task::local::with(|local| local.document.mounted_in_dry_head.take());
+        task::local::with(|local| local.document.mounted_in_dry_head.write().unwrap().clear());
     }
 
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
         task::local::with(|local| {
-            let mut mounted = local.document.mounted_in_dry_head.borrow_mut();
+            let mut mounted = local.document.mounted_in_dry_head.write().unwrap();
 
             if mounted.contains_key(id) {
                 return false;
@@ -234,7 +235,7 @@ impl Document for Dry {
         let mut html = String::new();
 
         task::local::with(|local| {
-            for elem in local.document.mounted_in_dry_head.borrow().values() {
+            for elem in local.document.mounted_in_dry_head.read().unwrap().values() {
                 html.push_str(&elem.to_string());
             }
         });
@@ -274,5 +275,5 @@ thread_local! {
 
 #[derive(Default)]
 pub(crate) struct TaskLocal {
-    mounted_in_dry_head: RefCell<HashMap<String, GenericElement<Dry, Const>>>,
+    mounted_in_dry_head: RwLock<HashMap<String, GenericElement<Dry, Const>>>,
 }

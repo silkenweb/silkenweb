@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::BTreeMap, fmt, rc::Rc};
+use std::{collections::BTreeMap, fmt};
 
 use wasm_bindgen::JsValue;
 
@@ -9,6 +9,7 @@ use crate::{
         InstantiableDom,
     },
     node::element::{GenericElement, Namespace},
+    shared_ref::SharedRef,
 };
 
 pub struct TemplateElement<Param, D: InstantiableDom> {
@@ -197,7 +198,7 @@ where
     }
 }
 
-struct InitializationFns<Param, D: InstantiableDom>(Rc<RefCell<SharedInitializationFns<Param, D>>>);
+struct InitializationFns<Param, D: InstantiableDom>(SharedRef<SharedInitializationFns<Param, D>>);
 
 impl<Param, D> InitializationFns<Param, D>
 where
@@ -205,15 +206,15 @@ where
     Param: 'static,
 {
     fn new() -> Self {
-        Self(Rc::new(RefCell::new(SharedInitializationFns::new())))
+        Self(SharedRef::new(SharedInitializationFns::new()))
     }
 
     fn add_fn(&mut self, f: impl 'static + Fn(GenericElement<D>, &Param) -> GenericElement<D>) {
-        self.0.borrow_mut().initialization_fns.push(Box::new(f))
+        self.0.write().initialization_fns.push(Box::new(f))
     }
 
     fn append_child(&mut self, child: TemplateNode<Param, D>) {
-        let mut data = self.0.borrow_mut();
+        let mut data = self.0.write();
 
         if !child.initialization_fns.is_empty() {
             let child_count = data.child_count;
@@ -225,7 +226,7 @@ where
     }
 
     fn insert_child(&mut self, index: usize, child: TemplateNode<Param, D>) {
-        let mut data = self.0.borrow_mut();
+        let mut data = self.0.write();
         let later_children = data.children.split_off(&index);
 
         for (i, existing_child) in later_children.into_iter() {
@@ -240,7 +241,7 @@ where
     }
 
     fn replace_child(&mut self, index: usize, child: TemplateNode<Param, D>) {
-        let mut data = self.0.borrow_mut();
+        let mut data = self.0.write();
 
         if !child.initialization_fns.is_empty() {
             data.children.insert(index, child);
@@ -248,7 +249,7 @@ where
     }
 
     fn remove_child(&mut self, index: usize) {
-        let mut data = self.0.borrow_mut();
+        let mut data = self.0.write();
         data.children.remove(&index);
 
         let later_children = data.children.split_off(&index);
@@ -261,17 +262,17 @@ where
     }
 
     fn clear_children(&mut self) {
-        let mut data = self.0.borrow_mut();
+        let mut data = self.0.write();
         data.children.clear();
         data.child_count = 0;
     }
 
     fn initialize(&self, element: D::InstantiableElement, param: &Param) -> GenericElement<D> {
-        self.0.borrow().initialize(element, param)
+        self.0.read().initialize(element, param)
     }
 
     fn is_empty(&self) -> bool {
-        let data = self.0.borrow();
+        let data = self.0.read();
 
         data.initialization_fns.is_empty() && data.children.is_empty()
     }

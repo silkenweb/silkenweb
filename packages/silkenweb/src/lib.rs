@@ -287,6 +287,8 @@ pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementE
 #[macro_use]
 pub mod macros;
 
+mod shared_ref;
+
 pub mod animation;
 pub mod attribute;
 pub mod document;
