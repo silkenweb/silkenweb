@@ -4,6 +4,7 @@ use std::{
     rc::Rc,
 };
 
+use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -20,8 +21,8 @@ pub struct HydroElement(Rc<RefCell<SharedHydroElement>>);
 impl fmt::Display for HydroElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self.borrow() {
-            SharedHydroElement::Dry(dry) => dry.fmt(f),
-            SharedHydroElement::Wet(wet) => wet.fmt(f),
+            SharedHydroElement::Dry { elem, .. } => elem.fmt(f),
+            SharedHydroElement::Wet(elem) => elem.fmt(f),
             SharedHydroElement::Unreachable => Ok(()),
         }
     }
@@ -30,8 +31,11 @@ impl fmt::Display for HydroElement {
 impl HydroElement {
     pub fn hydrate(self, element: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
         let wet = match self.0.replace(SharedHydroElement::Unreachable) {
-            SharedHydroElement::Dry(dry) => dry.hydrate(element, tracker),
-            SharedHydroElement::Wet(wet) => wet,
+            SharedHydroElement::Dry {
+                elem,
+                hydrate_actions,
+            } => elem.hydrate(element, hydrate_actions, tracker),
+            SharedHydroElement::Wet(elem) => elem,
             SharedHydroElement::Unreachable => unreachable!(),
         };
 
@@ -45,7 +49,7 @@ impl HydroElement {
 
     fn first_child(&self) -> HydroNode {
         match &*self.borrow() {
-            SharedHydroElement::Dry(dry) => dry.first_child().unwrap().clone(),
+            SharedHydroElement::Dry { elem, .. } => elem.first_child().unwrap().clone(),
             SharedHydroElement::Wet(wet) => {
                 HydroNode::Wet(WetNode::from(wet.clone()).first_child())
             }
@@ -55,7 +59,9 @@ impl HydroElement {
 
     fn next_sibling(&self) -> HydroNode {
         match &*self.borrow() {
-            SharedHydroElement::Dry(dry) => dry.next_sibling().expect("No more siblings").clone(),
+            SharedHydroElement::Dry { elem, .. } => {
+                elem.next_sibling().expect("No more siblings").clone()
+            }
             SharedHydroElement::Wet(wet) => {
                 HydroNode::Wet(WetNode::from(wet.clone()).next_sibling())
             }
@@ -65,7 +71,7 @@ impl HydroElement {
 
     fn set_next_sibling(&self, next_sibling: Option<HydroNode>) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.set_next_sibling(next_sibling),
+            SharedHydroElement::Dry { elem, .. } => elem.set_next_sibling(next_sibling),
             SharedHydroElement::Wet(_) => (),
             SharedHydroElement::Unreachable => unreachable!(),
         }
@@ -78,8 +84,11 @@ impl HydroElement {
         tracker: &mut HydrationStats,
     ) -> WetNode {
         let wet = match self.0.replace(SharedHydroElement::Unreachable) {
-            SharedHydroElement::Dry(dry) => dry.hydrate_child(parent, child, tracker),
-            SharedHydroElement::Wet(wet) => wet,
+            SharedHydroElement::Dry {
+                elem,
+                hydrate_actions,
+            } => elem.hydrate_child(parent, child, hydrate_actions, tracker),
+            SharedHydroElement::Wet(elem) => elem,
             SharedHydroElement::Unreachable => unreachable!(),
         };
 
@@ -98,7 +107,10 @@ impl HydroElement {
 
 enum SharedHydroElement {
     /// Box is used to keep the enum variant small
-    Dry(Box<SharedDryElement<HydroNode>>),
+    Dry {
+        elem: Box<SharedDryElement<HydroNode>>,
+        hydrate_actions: Vec<HydrateAction>,
+    },
     Wet(WetElement),
     /// Used only for swapping from `Dry` to `Wet`
     Unreachable,
@@ -108,15 +120,16 @@ impl DomElement for HydroElement {
     type Node = HydroNode;
 
     fn new(namespace: Namespace, tag: &str) -> Self {
-        Self::from_shared(SharedHydroElement::Dry(Box::new(SharedDryElement::new(
-            namespace, tag,
-        ))))
+        Self::from_shared(SharedHydroElement::Dry {
+            elem: Box::new(SharedDryElement::new(namespace, tag)),
+            hydrate_actions: Vec::new(),
+        })
     }
 
     fn append_child(&mut self, child: &HydroNode) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.append_child(child),
-            SharedHydroElement::Wet(wet) => wet.append_child(&child.wet()),
+            SharedHydroElement::Dry { elem, .. } => elem.append_child(child),
+            SharedHydroElement::Wet(elem) => elem.append_child(&child.wet()),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -128,9 +141,11 @@ impl DomElement for HydroElement {
         next_child: Option<&HydroNode>,
     ) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.insert_child_before(index, child, next_child),
-            SharedHydroElement::Wet(wet) => {
-                wet.insert_child_before(index, &child.wet(), next_child.map(|c| c.wet()).as_ref())
+            SharedHydroElement::Dry { elem, .. } => {
+                elem.insert_child_before(index, child, next_child)
+            }
+            SharedHydroElement::Wet(elem) => {
+                elem.insert_child_before(index, &child.wet(), next_child.map(|c| c.wet()).as_ref())
             }
             SharedHydroElement::Unreachable => unreachable!(),
         }
@@ -138,9 +153,9 @@ impl DomElement for HydroElement {
 
     fn replace_child(&mut self, index: usize, new_child: &HydroNode, old_child: &HydroNode) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.replace_child(index, new_child, old_child),
-            SharedHydroElement::Wet(wet) => {
-                wet.replace_child(index, &new_child.wet(), &old_child.wet())
+            SharedHydroElement::Dry { elem, .. } => elem.replace_child(index, new_child, old_child),
+            SharedHydroElement::Wet(elem) => {
+                elem.replace_child(index, &new_child.wet(), &old_child.wet())
             }
             SharedHydroElement::Unreachable => unreachable!(),
         }
@@ -148,32 +163,32 @@ impl DomElement for HydroElement {
 
     fn remove_child(&mut self, index: usize, child: &HydroNode) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.remove_child(index, child),
-            SharedHydroElement::Wet(wet) => wet.remove_child(index, &child.wet()),
+            SharedHydroElement::Dry { elem, .. } => elem.remove_child(index, child),
+            SharedHydroElement::Wet(elem) => elem.remove_child(index, &child.wet()),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn clear_children(&mut self) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.clear_children(),
-            SharedHydroElement::Wet(wet) => wet.clear_children(),
+            SharedHydroElement::Dry { elem, .. } => elem.clear_children(),
+            SharedHydroElement::Wet(elem) => elem.clear_children(),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn add_class(&mut self, name: &str) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.add_class(name),
-            SharedHydroElement::Wet(wet) => wet.add_class(name),
+            SharedHydroElement::Dry { elem, .. } => elem.add_class(name),
+            SharedHydroElement::Wet(elem) => elem.add_class(name),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn remove_class(&mut self, name: &str) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.remove_class(name),
-            SharedHydroElement::Wet(wet) => wet.remove_class(name),
+            SharedHydroElement::Dry { elem, .. } => elem.remove_class(name),
+            SharedHydroElement::Wet(elem) => elem.remove_class(name),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -188,8 +203,8 @@ impl DomElement for HydroElement {
         );
 
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.attribute(name, value),
-            SharedHydroElement::Wet(wet) => wet.attribute(name, value),
+            SharedHydroElement::Dry { elem, .. } => elem.attribute(name, value),
+            SharedHydroElement::Wet(elem) => elem.attribute(name, value),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -201,32 +216,40 @@ impl DomElement for HydroElement {
         events: &mut EventStore,
     ) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.on(name, f, events),
-            SharedHydroElement::Wet(wet) => wet.on(name, f, events),
+            SharedHydroElement::Dry {
+                hydrate_actions, ..
+            } => {
+                clone!(mut events);
+
+                hydrate_actions.push(Box::new(move |element| element.on(name, f, &mut events)))
+            }
+            SharedHydroElement::Wet(elem) => elem.on(name, f, events),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
         match &*self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.try_dom_element(),
-            SharedHydroElement::Wet(wet) => wet.try_dom_element(),
+            SharedHydroElement::Dry { .. } => None,
+            SharedHydroElement::Wet(elem) => elem.try_dom_element(),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn style_property(&mut self, name: &str, value: &str) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.style_property(name, value),
-            SharedHydroElement::Wet(wet) => wet.style_property(name, value),
+            SharedHydroElement::Dry { elem, .. } => elem.style_property(name, value),
+            SharedHydroElement::Wet(elem) => elem.style_property(name, value),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.effect(f),
-            SharedHydroElement::Wet(wet) => wet.effect(f),
+            SharedHydroElement::Dry {
+                hydrate_actions, ..
+            } => hydrate_actions.push(Box::new(move |element| element.effect(f))),
+            SharedHydroElement::Wet(elem) => elem.effect(f),
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
@@ -235,7 +258,7 @@ impl DomElement for HydroElement {
 impl InstantiableDomElement for HydroElement {
     fn attach_shadow_children(&mut self, children: impl IntoIterator<Item = Self::Node>) {
         match &mut *self.borrow_mut() {
-            SharedHydroElement::Dry(dry) => dry.attach_shadow_children(children),
+            SharedHydroElement::Dry { elem, .. } => elem.attach_shadow_children(children),
             SharedHydroElement::Wet(wet) => {
                 wet.attach_shadow_children(children.into_iter().map(Self::Node::into))
             }
@@ -245,7 +268,10 @@ impl InstantiableDomElement for HydroElement {
 
     fn clone_node(&self) -> Self {
         Self::from_shared(match &*self.borrow() {
-            SharedHydroElement::Dry(dry) => SharedHydroElement::Dry(Box::new(dry.clone_node())),
+            SharedHydroElement::Dry { elem, .. } => SharedHydroElement::Dry {
+                elem: Box::new(elem.clone_node()),
+                hydrate_actions: Vec::new(),
+            },
             SharedHydroElement::Wet(wet) => SharedHydroElement::Wet(wet.clone_node()),
             SharedHydroElement::Unreachable => unreachable!(),
         })
@@ -255,8 +281,11 @@ impl InstantiableDomElement for HydroElement {
 impl From<HydroElement> for WetNode {
     fn from(elem: HydroElement) -> Self {
         let wet = match elem.0.replace(SharedHydroElement::Unreachable) {
-            SharedHydroElement::Dry(dry) => (*dry).into(),
-            SharedHydroElement::Wet(wet) => wet,
+            SharedHydroElement::Dry {
+                elem,
+                hydrate_actions,
+            } => (*elem).into_wet(hydrate_actions),
+            SharedHydroElement::Wet(elem) => elem,
             SharedHydroElement::Unreachable => unreachable!(),
         };
 
@@ -264,6 +293,8 @@ impl From<HydroElement> for WetNode {
         wet.into()
     }
 }
+
+pub type HydrateAction = Box<dyn FnOnce(&mut WetElement)>;
 
 #[derive(Clone)]
 pub struct HydroText(Rc<RefCell<SharedHydroText>>);

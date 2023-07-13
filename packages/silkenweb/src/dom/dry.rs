@@ -8,7 +8,7 @@ use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
-    hydro::HydroNode,
+    hydro::{HydrateAction, HydroNode},
     private::{self, DomElement, EventStore, InstantiableDomElement},
     wet::{WetElement, WetNode},
     Dry,
@@ -74,24 +74,21 @@ impl private::DomElement for DryElement {
 
     fn on(
         &mut self,
-        name: &'static str,
-        f: impl FnMut(JsValue) + 'static,
-        events: &mut EventStore,
+        _name: &'static str,
+        _f: impl FnMut(JsValue) + 'static,
+        _events: &mut EventStore,
     ) {
-        self.0.write().on(name, f, events)
     }
 
     fn try_dom_element(&self) -> Option<web_sys::Element> {
-        self.0.read().try_dom_element()
+        None
     }
 
     fn style_property(&mut self, name: &str, value: &str) {
         self.0.write().style_property(name, value)
     }
 
-    fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.0.write().effect(f)
-    }
+    fn effect(&mut self, _f: impl FnOnce(&web_sys::Element) + 'static) {}
 }
 
 impl private::InstantiableDomElement for DryElement {
@@ -230,7 +227,6 @@ pub struct SharedDryElement<Node> {
     styles: IndexMap<String, String>,
     children: Vec<Node>,
     shadow_children: Vec<Node>,
-    hydrate_actions: Vec<LazyElementAction>,
     next_sibling: Option<Node>,
 }
 
@@ -260,7 +256,6 @@ impl<Node: DryChild> SharedDryElement<Node> {
             styles: IndexMap::new(),
             children: Vec::new(),
             shadow_children: Vec::new(),
-            hydrate_actions: Vec::new(),
             next_sibling: None,
         }
     }
@@ -374,29 +369,8 @@ impl<Node: DryChild> SharedDryElement<Node> {
         }
     }
 
-    pub fn on(
-        &mut self,
-        name: &'static str,
-        f: impl FnMut(JsValue) + 'static,
-        events: &mut EventStore,
-    ) {
-        clone!(mut events);
-
-        self.hydrate_actions
-            .push(Box::new(move |element| element.on(name, f, &mut events)))
-    }
-
-    pub fn try_dom_element(&self) -> Option<web_sys::Element> {
-        None
-    }
-
     pub fn style_property(&mut self, name: &str, value: &str) {
         self.styles.insert(name.to_owned(), value.to_owned());
-    }
-
-    pub fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        self.hydrate_actions
-            .push(Box::new(move |element| element.effect(f)))
     }
 
     pub fn clone_node(&self) -> Self {
@@ -407,7 +381,6 @@ impl<Node: DryChild> SharedDryElement<Node> {
             styles: self.styles.clone(),
             children: Self::clone_children(&self.children),
             shadow_children: Self::clone_children(&self.shadow_children),
-            hydrate_actions: Vec::new(),
             next_sibling: None,
         }
     }
@@ -428,6 +401,7 @@ impl SharedDryElement<HydroNode> {
         self,
         parent: &web_sys::Node,
         child: &web_sys::Node,
+        hydrate_actions: Vec<HydrateAction>,
         tracker: &mut HydrationStats,
     ) -> WetElement {
         clone!(mut child);
@@ -440,7 +414,7 @@ impl SharedDryElement<HydroNode> {
                 if dry_namespace == dom_namespace
                     && default_caseless_match_str(&elem_child.tag_name(), &self.tag)
                 {
-                    return self.hydrate_element(elem_child, tracker);
+                    return self.hydrate_element(elem_child, hydrate_actions, tracker);
                 }
             }
 
@@ -455,7 +429,7 @@ impl SharedDryElement<HydroNode> {
             }
         }
 
-        let wet_child: WetElement = self.into();
+        let wet_child: WetElement = self.into_wet(hydrate_actions);
         let new_element = wet_child.dom_element();
         parent.append_child(&new_element).unwrap_throw();
         tracker.node_added(&new_element);
@@ -463,7 +437,12 @@ impl SharedDryElement<HydroNode> {
         wet_child
     }
 
-    pub fn hydrate(self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
+    pub fn hydrate(
+        self,
+        dom_elem: &web_sys::Element,
+        hydrate_actions: Vec<HydrateAction>,
+        tracker: &mut HydrationStats,
+    ) -> WetElement {
         let existing_namespace = dom_elem.namespace_uri().unwrap_or_default();
         let new_namespace = self.namespace;
         let new_tag = &self.tag;
@@ -471,7 +450,7 @@ impl SharedDryElement<HydroNode> {
         if new_namespace.as_str() == existing_namespace
             && default_caseless_match_str(&dom_elem.tag_name(), new_tag)
         {
-            self.hydrate_element(dom_elem, tracker)
+            self.hydrate_element(dom_elem, hydrate_actions, tracker)
         } else {
             let new_dom_elem = new_namespace.create_element(new_tag);
 
@@ -482,13 +461,40 @@ impl SharedDryElement<HydroNode> {
             dom_elem
                 .replace_with_with_node_1(&new_dom_elem)
                 .unwrap_throw();
-            self.hydrate_element(&new_dom_elem, tracker)
+            self.hydrate_element(&new_dom_elem, hydrate_actions, tracker)
         }
+    }
+
+    pub fn into_wet(self, hydrate_actions: Vec<HydrateAction>) -> WetElement {
+        let mut wet = WetElement::new(self.namespace, &self.tag);
+
+        if let Some(style) = self.style_prop_text() {
+            wet.attribute(STYLE_ATTR, &style);
+        }
+
+        for (name, value) in self.attributes {
+            wet.attribute(&name, value);
+        }
+
+        for child in self.children {
+            wet.append_child(&child.into());
+        }
+
+        if !self.shadow_children.is_empty() {
+            wet.attach_shadow_children(self.shadow_children.into_iter().map(|child| child.into()));
+        }
+
+        for action in hydrate_actions {
+            action(&mut wet);
+        }
+
+        wet
     }
 
     fn hydrate_element(
         self,
         dom_elem: &web_sys::Element,
+        hydrate_actions: Vec<HydrateAction>,
         tracker: &mut HydrationStats,
     ) -> WetElement {
         self.reconcile_attributes(dom_elem, tracker);
@@ -501,7 +507,7 @@ impl SharedDryElement<HydroNode> {
             Self::hydrate_children(&shadow_root, self.shadow_children, tracker);
         }
 
-        for event in self.hydrate_actions {
+        for event in hydrate_actions {
             event(&mut elem);
         }
 
@@ -657,34 +663,6 @@ fn fmt_attr(f: &mut fmt::Formatter, name: &str, value: &str) -> Result<(), fmt::
     Ok(())
 }
 
-impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
-    fn from(dry: SharedDryElement<Node>) -> Self {
-        let mut wet = WetElement::new(dry.namespace, &dry.tag);
-
-        if let Some(style) = dry.style_prop_text() {
-            wet.attribute(STYLE_ATTR, &style);
-        }
-
-        for (name, value) in dry.attributes {
-            wet.attribute(&name, value);
-        }
-
-        for child in dry.children {
-            wet.append_child(&child.into());
-        }
-
-        if !dry.shadow_children.is_empty() {
-            wet.attach_shadow_children(dry.shadow_children.into_iter().map(|child| child.into()));
-        }
-
-        for action in dry.hydrate_actions {
-            action(&mut wet);
-        }
-
-        wet
-    }
-}
-
 pub struct SharedDryText<Node> {
     text: String,
     next_sibling: Option<Node>,
@@ -733,8 +711,6 @@ impl<Node> From<SharedDryText<Node>> for String {
         value.text
     }
 }
-
-type LazyElementAction = Box<dyn FnOnce(&mut WetElement)>;
 
 const NO_CLOSING_TAG: &[&str] = &[
     "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
