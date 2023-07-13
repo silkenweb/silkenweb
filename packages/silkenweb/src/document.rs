@@ -1,10 +1,9 @@
 //! Document utilities.
-use std::{cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, sync::RwLock};
 
 use paste::paste;
 use silkenweb_base::document;
 use silkenweb_macros::cfg_browser;
-use std::sync::RwLock;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
