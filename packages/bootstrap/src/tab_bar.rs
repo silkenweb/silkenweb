@@ -12,7 +12,7 @@ use silkenweb::{
     },
     prelude::ParentElement,
     value::SignalOrValue,
-    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, ServerSend, Value,
 };
 
 use crate::{css, dropdown::Menu, List};
@@ -30,9 +30,9 @@ pub fn tab_bar_ordered() -> TabBar<Ol> {
 }
 
 #[derive(Value, Element, HtmlElement, AriaElement, HtmlElementEvents, ElementEvents)]
-pub struct TabBar<Base = Nav>(#[element(target)] GenericElement, PhantomData<Base>);
+pub struct TabBar<Base: ServerSend = Nav>(#[element(target)] GenericElement, PhantomData<Base>);
 
-impl<Base> TabBar<Base> {
+impl<Base: ServerSend> TabBar<Base> {
     pub fn style(self, style: impl SignalOrValue<Item = Style>) -> Self {
         TabBar(
             self.0.classes(style.map(|s| match s {
@@ -70,8 +70,9 @@ impl<Base> TabBar<Base> {
         )
     }
 
-    pub fn children<T>(self, children: impl IntoIterator<Item = T>) -> Self
+    pub fn children<Iter, T>(self, children: impl IntoIterator<Item = T, IntoIter = Iter> + ServerSend) -> Self
     where
+        Iter: Iterator<Item = T> + ServerSend,
         T: Into<TabBarItem<Base>>,
     {
         Self(
@@ -83,7 +84,7 @@ impl<Base> TabBar<Base> {
 
     pub fn children_signal(
         self,
-        children: impl SignalVec<Item = impl Into<TabBarItem<Base>>> + 'static,
+        children: impl SignalVec<Item = impl Into<TabBarItem<Base>>> + ServerSend + 'static,
     ) -> Self {
         Self(
             self.0.children_signal(children.map(|child| child.into().0)),
@@ -92,7 +93,7 @@ impl<Base> TabBar<Base> {
     }
 }
 
-impl<Base> From<TabBar<Base>> for Node {
+impl<Base: ServerSend> From<TabBar<Base>> for Node {
     fn from(elem: TabBar<Base>) -> Self {
         elem.0.into()
     }
@@ -113,7 +114,7 @@ pub enum Fill {
 }
 
 #[derive(Value)]
-pub struct TabBarItem<Base = Nav>(Node, PhantomData<Base>);
+pub struct TabBarItem<Base: ServerSend = Nav>(Node, PhantomData<Base>);
 
 impl<A: TabBarElement> From<A> for TabBarItem<Nav> {
     fn from(elem: A) -> Self {

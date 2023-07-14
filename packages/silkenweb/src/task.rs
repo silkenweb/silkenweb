@@ -70,6 +70,9 @@ mod arch {
         spawner: LocalSpawner,
     }
 
+    // TODO:
+    unsafe impl Send for Runtime {}
+
     impl Default for Runtime {
         fn default() -> Self {
             let executor = RwLock::new(LocalPool::new());
@@ -202,9 +205,9 @@ pub mod server {
     ///
     /// [`spawn_local`]: super::spawn_local
     /// [`Signal`]: futures_signals::signal::Signal
-    pub fn scope<Fut>(f: Fut) -> impl Future<Output = Fut::Output>
+    pub fn scope<Fut>(f: Fut) -> impl Future<Output = Fut::Output> + Send
     where
-        Fut: Future,
+        Fut: Future + Send,
     {
         TASK_LOCAL.scope(TaskLocal::default(), f)
     }
@@ -280,6 +283,9 @@ struct Render {
     pending_effects: RefCell<Vec<Box<dyn FnOnce()>>>,
     animation_timestamp_millis: Mutable<f64>,
 }
+
+// TODO:
+unsafe impl Send for Render {}
 
 impl Render {
     fn new() -> Self {

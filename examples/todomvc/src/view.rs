@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use derive_more::Constructor;
 use futures_signals::{
@@ -17,7 +17,7 @@ use silkenweb::{
     node::{element::Element, Node},
     prelude::ParentElement,
     router::url_path,
-    value::Sig,
+    value::Sig, ServerSend,
 };
 use silkenweb_signals_ext::SignalProduct;
 use wasm_bindgen::UnwrapThrowExt;
@@ -27,7 +27,7 @@ use crate::model::{Filter, TodoApp, TodoItem};
 
 #[derive(Constructor, Clone)]
 pub struct TodoAppView {
-    app: Rc<TodoApp>,
+    app: Arc<TodoApp>,
 }
 
 impl TodoAppView {
@@ -125,7 +125,7 @@ impl TodoAppView {
     fn render_filter_link(
         &self,
         filter: Filter,
-        item_filter: impl Signal<Item = Filter> + 'static,
+        item_filter: impl Signal<Item = Filter> + ServerSend + 'static,
         seperator: &str,
     ) -> Li {
         let filter_name = format!("{filter}");
@@ -149,7 +149,7 @@ impl TodoAppView {
         ])
     }
 
-    fn render_clear_completed(&self) -> impl Signal<Item = Option<Button>> {
+    fn render_clear_completed(&self) -> impl Signal<Item = Option<Button>> + ServerSend {
         let app = self.app.clone();
 
         self.any_completed().map(move |any_completed| {
@@ -167,7 +167,7 @@ impl TodoAppView {
     fn visible_items_signal(
         &self,
         item_filter: impl Signal<Item = Filter>,
-    ) -> impl SignalVec<Item = Rc<TodoItem>> {
+    ) -> impl SignalVec<Item = Arc<TodoItem>> {
         let item_filter = Broadcaster::new(item_filter);
 
         self.app.items_signal().filter_signal_cloned(move |item| {
@@ -181,11 +181,11 @@ impl TodoAppView {
         })
     }
 
-    fn is_empty(&self) -> impl Signal<Item = bool> {
+    fn is_empty(&self) -> impl Signal<Item = bool> + ServerSend {
         self.app.items_signal().is_empty().dedupe()
     }
 
-    fn completed(&self) -> impl SignalVec<Item = bool> {
+    fn completed(&self) -> impl SignalVec<Item = bool>+ ServerSend {
         self.app.items_signal().map_signal(|todo| todo.completed())
     }
 
@@ -210,12 +210,12 @@ impl TodoAppView {
 }
 
 pub struct TodoItemView {
-    todo: Rc<TodoItem>,
-    app: Rc<TodoApp>,
+    todo: Arc<TodoItem>,
+    app: Arc<TodoApp>,
 }
 
 impl TodoItemView {
-    pub fn render(todo: Rc<TodoItem>, app: Rc<TodoApp>) -> Li {
+    pub fn render(todo: Arc<TodoItem>, app: Arc<TodoApp>) -> Li {
         let view = TodoItemView { todo, app };
         li().classes(Sig(view.class()))
             .child(view.render_edit())

@@ -351,7 +351,7 @@ macro_rules! dom_element {
             }
         }
 
-        impl<Dom: $crate::dom::Dom, Mutability> $crate::value::Value
+        impl<Dom: $crate::dom::Dom, Mutability: $crate::ServerSend> $crate::value::Value
         for $camel_name<Dom, Mutability> {}
 
         impl<Dom: $crate::dom::Dom, Mutability> $crate::dom::InDom
@@ -460,7 +460,7 @@ macro_rules! parent_element {
                 Self(self.0.optional_child(child))
             }
 
-            fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+            fn children<N>(self, children: impl IntoIterator<Item = N> + $crate::ServerSend) -> Self
             where
                 N: Into<$crate::node::Node<Dom>>
             {
@@ -469,7 +469,7 @@ macro_rules! parent_element {
 
             fn children_signal<N>(
                 self,
-                children: impl $crate::macros::SignalVec<Item = N> + 'static,
+                children: impl $crate::macros::SignalVec<Item = N> + $crate::ServerSend + 'static,
             ) -> Self
             where
                 N: Into<$crate::node::Node<Dom>>

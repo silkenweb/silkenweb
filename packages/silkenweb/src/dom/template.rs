@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fmt};
 
 use wasm_bindgen::JsValue;
 
-use super::{private::EventStore, Dom, InitializeElemFn};
+use super::{private::EventStore, InitializeElemFn};
 use crate::{
     dom::{
         private::{DomElement, DomText, InstantiableDomElement, InstantiableDomNode},
@@ -10,7 +10,6 @@ use crate::{
     },
     node::element::{GenericElement, Namespace},
     shared_ref::SharedRef,
-    ServerSend, ServerSync,
 };
 
 pub struct TemplateElement<Param, D: InstantiableDom> {

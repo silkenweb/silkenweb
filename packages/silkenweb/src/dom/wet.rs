@@ -15,6 +15,10 @@ pub struct WetElement {
     element: web_sys::Element,
 }
 
+// TODO:
+unsafe impl Send for WetElement {}
+unsafe impl Sync for WetElement {}
+
 impl WetElement {
     pub fn from_element(element: web_sys::Element) -> Self {
         Self { element }
@@ -147,6 +151,10 @@ impl InstantiableDomElement for WetElement {
 #[derive(Clone)]
 pub struct WetText(web_sys::Text);
 
+// TODO:
+unsafe impl Send for WetText {}
+unsafe impl Sync for WetText {}
+
 impl WetText {
     pub fn from_dom(text: web_sys::Text) -> Self {
         Self(text)
@@ -177,6 +185,10 @@ impl DomText for WetText {
 
 #[derive(Clone)]
 pub struct WetNode(web_sys::Node);
+
+// TODO:
+unsafe impl Send for WetNode {}
+unsafe impl Sync for WetNode {}
 
 impl WetNode {
     pub fn dom_node(&self) -> &web_sys::Node {

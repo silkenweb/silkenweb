@@ -2,19 +2,19 @@ use std::fmt::Display;
 
 use wasm_bindgen::JsValue;
 
-use crate::{attribute::Attribute, node::element::Namespace};
+use crate::{attribute::Attribute, node::element::Namespace, ServerSend};
 
 pub trait Dom: 'static {
-    type Element: DomElement<Node = Self::Node>;
-    type Text: DomText + Into<Self::Node>;
-    type Node: Clone + Display + 'static;
+    type Element: DomElement<Node = Self::Node> + ServerSend;
+    type Text: DomText + Into<Self::Node> + ServerSend;
+    type Node: Clone + Display + ServerSend + 'static;
 }
 
 pub trait InstantiableDom:
     Dom<Element = Self::InstantiableElement, Node = Self::InstantiableNode>
 {
-    type InstantiableElement: InstantiableDomElement<Node = Self::InstantiableNode>;
-    type InstantiableNode: InstantiableDomNode<DomType = Self>;
+    type InstantiableElement: InstantiableDomElement<Node = Self::InstantiableNode> + ServerSend;
+    type InstantiableNode: InstantiableDomNode<DomType = Self> + ServerSend;
 }
 
 pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {

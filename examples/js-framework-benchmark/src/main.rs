@@ -1,7 +1,6 @@
 use std::{
-    cell::{Cell, RefCell},
     ops::DerefMut,
-    rc::Rc,
+    sync::{Arc, Mutex},
 };
 
 use futures_signals::{
@@ -81,7 +80,7 @@ impl Row {
         }
     }
 
-    fn render(&self, app: Rc<App>) -> Tr {
+    fn render(&self, app: Arc<App>) -> Tr {
         app.row_template.instantiate(&RowParams {
             app: app.clone(),
             row: self.clone(),
@@ -90,20 +89,20 @@ impl Row {
 }
 
 struct RowParams {
-    app: Rc<App>,
+    app: Arc<App>,
     row: Row,
 }
 
 struct App {
     data: MutableVec<Row>,
     selected_row: Mutable<Option<usize>>,
-    next_row_id: Cell<usize>,
-    rng: RefCell<SmallRng>,
+    next_row_id: Mutex<usize>,
+    rng: Mutex<SmallRng>,
     row_template: Tr<Template<RowParams>, Const>,
 }
 
 impl App {
-    fn new() -> Rc<Self> {
+    fn new() -> Arc<Self> {
         let id_cell = td()
             .class("col-md-1")
             .on_instantiate(|td, RowParams { row, .. }| td.text(row.id.to_string()));
@@ -139,11 +138,11 @@ impl App {
             .children([id_cell, label_cell, remove_cell, td().class("col-md-6")])
             .freeze();
 
-        Rc::new(Self {
+        Arc::new(Self {
             data: MutableVec::new(),
             selected_row: Mutable::new(None),
-            next_row_id: Cell::new(1),
-            rng: RefCell::new(SmallRng::seed_from_u64(0)),
+            next_row_id: Mutex::new(1),
+            rng: Mutex::new(SmallRng::seed_from_u64(0)),
             row_template,
         })
     }
@@ -185,12 +184,12 @@ impl App {
     }
 
     fn new_row(&self) -> Row {
-        let next_row_id = self.next_row_id.get();
-        self.next_row_id.set(next_row_id + 1);
-        Row::new(next_row_id, self.rng.borrow_mut().deref_mut())
+        let mut next_row_id = self.next_row_id.lock().unwrap();
+        *next_row_id = *next_row_id + 1;
+        Row::new(*next_row_id, self.rng.lock().unwrap().deref_mut())
     }
 
-    fn render(self: Rc<Self>) -> Div {
+    fn render(self: Arc<Self>) -> Div {
         div()
             .class("container")
             .child(self.clone().render_jumbotron())
@@ -202,14 +201,14 @@ impl App {
             )
     }
 
-    fn render_jumbotron(self: Rc<Self>) -> Div {
+    fn render_jumbotron(self: Arc<Self>) -> Div {
         div().class("jumbotron").child(div().class("row").children([
             div().class("col-md-6").child(h1().text("Silkenweb keyed")),
             div().class("col-md-6").child(self.render_action_buttons()),
         ]))
     }
 
-    fn render_action_buttons(self: &Rc<Self>) -> Div {
+    fn render_action_buttons(self: &Arc<Self>) -> Div {
         div().class("row").children([
             self.render_button("run", "Create 1,000 rows", |app| app.create(1_000)),
             self.render_button("runlots", "Create 10,000 rows", |app| app.create(10_000)),
@@ -220,7 +219,7 @@ impl App {
         ])
     }
 
-    fn render_button<F>(self: &Rc<Self>, id: &str, title: &str, mut on_click: F) -> Div
+    fn render_button<F>(self: &Arc<Self>, id: &str, title: &str, mut on_click: F) -> Div
     where
         F: FnMut(&Self) + 'static,
     {
@@ -236,7 +235,7 @@ impl App {
         )
     }
 
-    fn render_table(self: Rc<Self>) -> Table {
+    fn render_table(self: Arc<Self>) -> Table {
         table()
             .classes(["table", "table-hover", "table-striped", "test-data"])
             .child(

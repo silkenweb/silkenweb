@@ -18,6 +18,10 @@ use crate::{hydration::HydrationStats, node::element::Namespace};
 #[derive(Clone)]
 pub struct HydroElement(Rc<RefCell<SharedHydroElement>>);
 
+// TODO:
+unsafe impl Send for HydroElement {}
+unsafe impl Sync for HydroElement {}
+
 impl fmt::Display for HydroElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &*self.borrow() {
@@ -299,6 +303,10 @@ pub type HydrateAction = Box<dyn FnOnce(&mut WetElement)>;
 #[derive(Clone)]
 pub struct HydroText(Rc<RefCell<SharedHydroText>>);
 
+// TODO:
+unsafe impl Send for HydroText {}
+unsafe impl Sync for HydroText {}
+
 impl HydroText {
     fn borrow(&self) -> Ref<SharedHydroText> {
         self.0.as_ref().borrow()
@@ -438,6 +446,10 @@ pub enum HydroNode {
     Element(HydroElement),
     Wet(WetNode),
 }
+
+// TODO:
+unsafe impl Send for HydroNode {}
+unsafe impl Sync for HydroNode {}
 
 impl HydroNode {
     pub fn wet(&self) -> WetNode {

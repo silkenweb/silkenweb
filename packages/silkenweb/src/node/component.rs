@@ -8,7 +8,7 @@ use crate::{
         html::{div, slot, style, Div, Slot},
         HtmlElement,
     },
-    value::Value,
+    value::Value, ServerSend,
 };
 
 /// A lightweight type to encapsulate HTML and CSS using shadow DOM.
@@ -81,9 +81,10 @@ impl<D: InstantiableDom> Component<D> {
     /// Add `children` to the light DOM.
     ///
     /// See [`Component`] documentation for more details.
-    pub fn multi_slot<E>(&mut self, children: impl IntoIterator<Item = E>) -> Slot<D>
+    pub fn multi_slot<E, Iter>(&mut self, children: impl IntoIterator<Item = E, IntoIter = Iter>) -> Slot<D>
     where
-        E: HtmlElement + ChildNode<D>,
+        E: HtmlElement + ChildNode<D> + ServerSend,
+        Iter: Iterator<Item = E> + ServerSend,
     {
         let id = self.new_id();
 

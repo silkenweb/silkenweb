@@ -2,7 +2,7 @@ use silkenweb::{
     dom::Dom,
     elements::html::{div, Div, Ol, Ul},
     node::{element::GenericElement, Node},
-    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value, ServerSend,
 };
 use utility::SetDisplay;
 
@@ -53,7 +53,7 @@ pub fn column<D: Dom>() -> Div<D> {
 }
 
 /// Marker trait for lists
-pub trait List {}
+pub trait List: ServerSend {}
 
 impl List for Ol {}
 impl List for Ul {}

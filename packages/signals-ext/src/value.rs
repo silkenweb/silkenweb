@@ -55,24 +55,38 @@ pub struct Sig<T>(pub T);
 /// implement [`Value`] for a type.
 pub struct Val<T>(pub T);
 
+// TODO: Doc and put in `sync` module with sharedref?
+// TODO: Unify ServerSend and silkenweb::ServerSend
+#[cfg(target_arch = "wasm32")]
+pub trait ServerSend {}
+
+#[cfg(target_arch = "wasm32")]
+impl<T: ?Sized> ServerSend for T {}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub trait ServerSend: Send {}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<T: Send + ?Sized> ServerSend for T {}
+
 /// Abstract over a type that can be a value or a signal of an underlying type.
-pub trait RefSignalOrValue<'a> {
+pub trait RefSignalOrValue<'a>: ServerSend {
     /// The underlying type of the value or signal.
-    type Item: 'a;
+    type Item: ServerSend + 'a;
     /// The signal type. Use [`Always`] for value types.
-    type Signal: Signal<Item = Self::Item> + 'a;
+    type Signal: Signal<Item = Self::Item> + ServerSend + 'a;
     /// The return type for [`Self::map`].
     type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
     where
         'b: 'a,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
 
     /// Map a function over this signal/value to produce a new signal/value.
     fn map<'b: 'a, F, R>(self, callback: F) -> Self::Map<'b, F, R>
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
-        F: FnMut(Self::Item) -> R + 'b;
+        F: FnMut(Self::Item) -> R + ServerSend + 'b;
 
     /// Apply a function over the value or each value of a signal.
     ///
@@ -121,7 +135,7 @@ pub trait Executor {
 }
 
 /// Marker trait for values that can be used with [`RefSignalOrValue`].
-pub trait RefValue<'a> {}
+pub trait RefValue<'a>: ServerSend {}
 
 /// Marker trait for values that can be used with [`SignalOrValue`].
 pub trait Value: RefValue<'static> {}
@@ -143,17 +157,21 @@ static_values!(bool, String);
 
 impl<'a> RefValue<'a> for &'a str {}
 impl<'a> RefValue<'a> for &'a String {}
-impl<'a, T: 'a> RefValue<'a> for Option<T> {}
-impl<'a, T: 'a> RefValue<'a> for [T] {}
-impl<'a, T: 'a> RefValue<'a> for &'a [T] {}
-impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
+impl<'a, T: ServerSend + 'a> RefValue<'a> for Option<T> {}
+impl<'a, T: ServerSend + 'a> RefValue<'a> for [T] {}
+impl<'a, T> RefValue<'a> for &'a [T]
+where 
+    &'a [T]: ServerSend,
+    T: ServerSend + 'a 
+{}
+impl<'a, const COUNT: usize, T: ServerSend + 'a> RefValue<'a> for [T; COUNT] {}
 
 impl<'a> RefValue<'a> for () {}
 
 macro_rules! tuple_values {
     ($t:ident $(,)?) => {};
     ($t0:ident, $t1:ident $(, $tail:ident)* $(,)?) => {
-        impl<'a, $t0, $t1 $(, $tail)*> RefValue<'a> for ($t0, $t1 $(, $tail)*) {}
+        impl<'a, $t0: $crate::value::ServerSend, $t1: $crate::value::ServerSend $(, $tail: $crate::value::ServerSend)*> RefValue<'a> for ($t0, $t1 $(, $tail)*) {}
 
         tuple_values!($t1, $($tail),*);
     }
@@ -169,14 +187,14 @@ where
     type Map<'b, F, R> = R
     where
         'b: 'a,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
     type Signal = Always<Self::Item>;
 
     fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
     {
         callback(self)
     }
@@ -207,20 +225,20 @@ where
 
 impl<'a, T> RefSignalOrValue<'a> for Val<T>
 where
-    T: 'static,
+    T: ServerSend + 'static,
 {
     type Item = T;
     type Map<'b, F, R> = R
     where
         'b: 'a,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
     type Signal = Always<Self::Item>;
 
     fn map<'b: 'a, F, R>(self, mut callback: F) -> Self::Map<'b, F, R>
     where
         R: RefSignalOrValue<'b, Item = R> + 'b,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
     {
         callback(self.0)
     }
@@ -251,14 +269,14 @@ where
 
 impl<T, S> RefSignalOrValue<'static> for Sig<S>
 where
-    T: 'static,
-    S: Signal<Item = T> + 'static,
+    T: ServerSend + 'static,
+    S: Signal<Item = T> + ServerSend + 'static,
 {
     type Item = T;
     type Map<'b, F, R> = Sig<signal::Map<S, F>>
     where
         'b: 'static,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
         R: RefSignalOrValue<'b, Item = R> + 'b;
     type Signal = S;
 
@@ -266,7 +284,7 @@ where
     where
         'b: 'static,
         R: RefSignalOrValue<'b, Item = R> + 'b,
-        F: FnMut(Self::Item) -> R + 'b,
+        F: FnMut(Self::Item) -> R + ServerSend + 'b,
     {
         Sig(self.0.map(callback))
     }

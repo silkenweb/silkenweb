@@ -4,9 +4,12 @@ use std::fmt;
 
 use silkenweb_signals_ext::value::Value;
 
-use crate::dom::{
-    private::{DomText, EventStore},
-    DefaultDom, Dom, InDom,
+use crate::{
+    dom::{
+        private::{DomText, EventStore},
+        DefaultDom, Dom, InDom,
+    },
+    ServerSend,
 };
 
 mod component;
@@ -45,9 +48,17 @@ impl<D: Dom> fmt::Display for Node<D> {
 }
 
 /// Trait alias for nodes that can be used as a child
-pub trait ChildNode<D: Dom = DefaultDom>: Into<Node<D>> + Value + 'static {}
+pub trait ChildNode<D: Dom = DefaultDom>:
+    Into<Node<D>> + Value + ServerSend + 'static
+{
+}
 
-impl<D: Dom, T: Into<Node<D>> + Value + 'static> ChildNode<D> for T {}
+impl<D, T> ChildNode<D> for T
+where
+    D: Dom,
+    T: Into<Node<D>> + Value + ServerSend + 'static,
+{
+}
 
 /// A text DOM node
 pub struct Text<D: Dom>(D::Text);
@@ -65,8 +76,8 @@ pub fn text<D: Dom>(text: &str) -> Text<D> {
     Text(D::Text::new(text))
 }
 
-trait Resource {}
+trait Resource: ServerSend {}
 
-impl<T> Resource for T {}
+impl<T: ServerSend> Resource for T {}
 
 type ResourceVec = Vec<Box<dyn Resource>>;

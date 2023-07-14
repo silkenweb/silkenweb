@@ -1,4 +1,4 @@
-use std::{cell::Cell, rc::Rc};
+use std::{cell::Cell, sync::Arc};
 
 use derive_more::Display;
 use futures_signals::{
@@ -12,29 +12,29 @@ use wasm_bindgen::UnwrapThrowExt;
 #[derive(Serialize, Deserialize)]
 pub struct TodoApp {
     todo_id: Cell<u128>,
-    items: MutableVec<Rc<TodoItem>>,
+    items: MutableVec<Arc<TodoItem>>,
 }
 
 impl TodoApp {
-    pub fn with_todos(todos: impl IntoIterator<Item = String>) -> Rc<Self> {
+    pub fn with_todos(todos: impl IntoIterator<Item = String>) -> Arc<Self> {
         let items: Vec<_> = todos
             .into_iter()
             .enumerate()
             .map(|(id, text)| TodoItem::new(id as u128, text))
             .collect();
 
-        Rc::new(Self {
+        Arc::new(Self {
             todo_id: Cell::new(items.len() as u128),
             items: MutableVec::new_with_values(items),
         })
     }
 
-    pub fn load() -> Rc<Self> {
+    pub fn load() -> Arc<Self> {
         if let Some(app_str) = Storage::local()
             .ok()
             .and_then(|storage| storage.get(STORAGE_KEY))
         {
-            Rc::new(serde_json::from_str(&app_str).unwrap_throw())
+            Arc::new(serde_json::from_str(&app_str).unwrap_throw())
         } else {
             Self::with_todos([])
         }
@@ -81,7 +81,7 @@ impl TodoApp {
         self.save();
     }
 
-    pub fn items_signal(&self) -> impl SignalVec<Item = Rc<TodoItem>> + 'static {
+    pub fn items_signal(&self) -> impl SignalVec<Item = Arc<TodoItem>> + 'static {
         self.items.signal_vec_cloned()
     }
 }
@@ -96,8 +96,8 @@ pub struct TodoItem {
 }
 
 impl TodoItem {
-    pub fn new(id: u128, text: String) -> Rc<Self> {
-        Rc::new(Self {
+    pub fn new(id: u128, text: String) -> Arc<Self> {
+        Arc::new(Self {
             id,
             text: Mutable::new(text),
             completed: Mutable::new(false),

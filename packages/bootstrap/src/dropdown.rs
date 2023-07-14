@@ -11,7 +11,7 @@ use silkenweb::{
     },
     prelude::ParentElement,
     value::SignalOrValue,
-    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+    AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value, ServerSend,
 };
 
 use crate::{button::Button, css};
@@ -67,9 +67,10 @@ impl<D: Dom> Menu<D> {
         )
     }
 
-    pub fn children<M>(self, children: impl IntoIterator<Item = M>) -> Self
+    pub fn children<Iter, M>(self, children: impl IntoIterator<Item = M, IntoIter = Iter>) -> Self
     where
         M: Into<MenuItem<D>>,
+        Iter: Iterator<Item = M> + ServerSend,
     {
         Self(
             self.0
@@ -79,7 +80,7 @@ impl<D: Dom> Menu<D> {
 
     pub fn children_signal(
         self,
-        children: impl SignalVec<Item = impl Into<MenuItem<D>>> + 'static,
+        children: impl SignalVec<Item = impl Into<MenuItem<D>>> + ServerSend + 'static,
     ) -> Self {
         Self(self.0.children_signal(children.map(|child| child.into().0)))
     }

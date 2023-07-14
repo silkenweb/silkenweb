@@ -15,13 +15,18 @@ use silkenweb::{
     log_panics, mount,
     node::element::ParentElement,
     value::Sig,
+    ServerSend,
 };
 use wasm_bindgen::UnwrapThrowExt;
 
 const WIDTH: f64 = 600.0;
 const HEIGHT: f64 = 300.0;
 
-fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> svg::Path {
+fn path(
+    time: impl Signal<Item = f64> + ServerSend + 'static,
+    humps: usize,
+    speed: f64,
+) -> svg::Path {
     let path = time.map(move |time| {
         let multiplier = (time / speed).sin();
         let control_point = 150.0 * multiplier + 150.0;

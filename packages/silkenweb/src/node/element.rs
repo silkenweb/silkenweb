@@ -1,15 +1,7 @@
 //! Traits and types for building elements.
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
-use std::{
-    self,
-    cell::{Cell, RefCell},
-    fmt,
-    future::Future,
-    marker::PhantomData,
-    pin::Pin,
-    rc::Rc,
-};
+use std::{self, cell::Cell, fmt, future::Future, marker::PhantomData, pin::Pin, rc::Rc};
 
 use discard::DiscardOnDrop;
 use futures_signals::{
@@ -28,16 +20,22 @@ use crate::{
     attribute::Attribute,
     dom::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
-        DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet, InitializeElemFn,
+        DefaultDom, Dom, Hydro, InDom, InitializeElemFn, InstantiableDom, Template, Wet,
     },
     empty_str,
     hydration::HydrationStats,
     intern_str,
     node::text,
-    task,
+    shared_ref::SharedRef,
+    task, ServerSend,
 };
 
 mod child_vec;
+
+// TODO: Doc
+pub trait SyncSignalVec<I>: SignalVec<Item = I> + ServerSend {}
+
+impl<I, T> SyncSignalVec<I> for T where T: SignalVec<Item = I> + ServerSend {}
 
 /// A generic HTML element.
 ///
@@ -47,7 +45,7 @@ mod child_vec;
 /// `Mutability` should be one of [`Mut`] or [`Const`].
 pub struct GenericElement<D: Dom = DefaultDom, Mutability = Mut> {
     static_child_count: usize,
-    child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
+    child_vec: Option<Pin<Box<dyn SyncSignalVec<Node<D>>>>>,
     resources: ResourceVec,
     events: EventStore,
     element: D::Element,
@@ -150,15 +148,13 @@ impl<D: Dom> GenericElement<D> {
 impl<D: Dom, Mutability> GenericElement<D, Mutability> {
     fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
-            let child_vec = Rc::new(RefCell::new(ChildVec::new(
-                self.element.clone(),
-                self.static_child_count,
-            )));
+            let child_vec =
+                SharedRef::new(ChildVec::new(self.element.clone(), self.static_child_count));
 
             let future = children.for_each({
                 clone!(child_vec);
                 move |update| {
-                    child_vec.borrow_mut().apply_update(update);
+                    child_vec.write().apply_update(update);
                     async {}
                 }
             });
@@ -189,7 +185,7 @@ where
 }
 
 impl<D: Dom> ParentElement<D> for GenericElement<D> {
-    fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
+    fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T> + ServerSend) -> Self
     where
         T: 'a + AsRef<str> + Into<String>,
     {
@@ -220,7 +216,10 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         self
     }
 
-    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self {
+    fn optional_child(
+        self,
+        child: impl SignalOrValue<Item = Option<impl ChildNode<D>>> + ServerSend,
+    ) -> Self {
         child.select(
             |mut parent, child| {
                 if let Some(child) = child {
@@ -248,7 +247,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         )
     }
 
-    fn children<N>(mut self, children: impl IntoIterator<Item = N>) -> Self
+    fn children<N>(mut self, children: impl IntoIterator<Item = N> + ServerSend) -> Self
     where
         N: Into<Node<D>>,
     {
@@ -267,17 +266,21 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
         self
     }
 
-    fn children_signal<N>(mut self, children: impl SignalVec<Item = N> + 'static) -> Self
+    fn children_signal<N>(
+        mut self,
+        children: impl SignalVec<Item = N> + ServerSend + 'static,
+    ) -> Self
     where
         N: Into<Node<D>>,
     {
         let new_children = children.map(|child| child.into());
 
-        let boxed_children = if let Some(child_vec) = self.child_vec.take() {
-            child_vec.chain(new_children).boxed_local()
-        } else {
-            new_children.boxed_local()
-        };
+        let boxed_children: Pin<Box<dyn SyncSignalVec<Node<D>>>> =
+            if let Some(child_vec) = self.child_vec.take() {
+                Box::pin(child_vec.chain(new_children))
+            } else {
+                Box::pin(new_children)
+            };
 
         self.child_vec = Some(boxed_children);
 
@@ -476,7 +479,7 @@ impl<D: Dom> Executor for GenericElement<D> {
     }
 }
 
-impl<D: Dom, Mutability> Value for GenericElement<D, Mutability> {}
+impl<D: Dom, Mutability: ServerSend> Value for GenericElement<D, Mutability> {}
 
 impl<D: Dom, Mutability> InDom for GenericElement<D, Mutability> {
     type Dom = D;
@@ -733,7 +736,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let d: Div =
     /// div().text(Sig(text.signal()));
     /// ```
-    fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
+    fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T> + ServerSend) -> Self
     where
         T: 'a + AsRef<str> + Into<String>;
 
@@ -760,7 +763,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let d: Div =
     /// div().child(Sig(text.signal().map(|text| div().text(text))));
     /// ```
-    fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
+    fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>> + ServerSend) -> Self {
         self.optional_child(child.map(|child| Some(child)))
     }
 
@@ -798,7 +801,10 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     ///     }
     /// })));
     /// ```
-    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self;
+    fn optional_child(
+        self,
+        child: impl SignalOrValue<Item = Option<impl ChildNode<D>>> + ServerSend,
+    ) -> Self;
 
     /// Add children to the element.
     ///
@@ -810,7 +816,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// # let div: Div =
     /// div().children([p().text("Hello,"), p().text("world!")]);
     /// ```
-    fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+    fn children<N>(self, children: impl IntoIterator<Item = N> + ServerSend) -> Self
     where
         N: Into<Node<D>>;
 
@@ -818,7 +824,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     ///
     /// See [counter_list](https://github.com/silkenweb/silkenweb/tree/main/examples/counter-list/src/main.rs)
     /// for an example
-    fn children_signal<N>(self, children: impl SignalVec<Item = N> + 'static) -> Self
+    fn children_signal<N>(self, children: impl SignalVec<Item = N> + ServerSend + 'static) -> Self
     where
         N: Into<Node<D>>;
 }

@@ -391,18 +391,6 @@ pub trait ServerSend {}
 #[cfg_browser(true)]
 impl<T> ServerSend for T {}
 
-#[cfg_browser(false)]
-pub trait ServerSync: Sync {}
-
-#[cfg_browser(false)]
-impl<T: Sync> ServerSync for T {}
-
-#[cfg_browser(true)]
-pub trait ServerSync {}
-
-#[cfg_browser(true)]
-impl<T> ServerSync for T {}
-
 thread_local! {
     static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
     static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
