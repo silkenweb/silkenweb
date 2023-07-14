@@ -279,9 +279,11 @@ pub use silkenweb_macros::ChildElement;
 /// ```
 ///
 /// [`Element`]: crate::node::element::Element
-pub use silkenweb_macros::{cfg_browser, Element};
+pub use silkenweb_macros::Element;
 #[doc(inline)]
-pub use silkenweb_macros::{AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value};
+pub use silkenweb_macros::{
+    cfg_browser, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+};
 
 #[doc(hidden)]
 #[macro_use]
