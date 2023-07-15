@@ -3,84 +3,36 @@ use std::{cell::RefCell, collections::HashMap};
 
 use paste::paste;
 use silkenweb_base::document;
-use silkenweb_macros::cfg_browser;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
     dom::{Dom, Dry, Wet},
+    event::GlobalEventCallback,
     insert_element, mount_point,
     node::element::{Const, Element, GenericElement, Mut},
     remove_element, task, ELEMENTS,
 };
 
-#[cfg_browser(false)]
-mod arch {
-    use wasm_bindgen::JsCast;
-
-    pub struct EventCallback;
-
-    impl EventCallback {
-        pub fn new<Event: JsCast>(
-            _name: &'static str,
-            mut _f: impl FnMut(Event) + 'static,
-        ) -> Self {
-            Self
-        }
-    }
-
-    impl Drop for EventCallback {
-        fn drop(&mut self) {}
-    }
-}
-
-#[cfg_browser(true)]
-mod arch {
-    use silkenweb_base::document;
-    use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};
-
-    pub struct EventCallback {
-        name: &'static str,
-        callback: Closure<dyn FnMut(JsValue)>,
-    }
-
-    impl EventCallback {
-        pub fn new<Event: JsCast>(name: &'static str, mut f: impl FnMut(Event) + 'static) -> Self {
-            let name = intern(name);
-            let callback = Closure::wrap(Box::new(move |js_ev: JsValue| {
-                // I *think* we can assume event and event.current_target aren't null
-                f(js_ev.unchecked_into());
-            }) as Box<dyn FnMut(JsValue)>);
-
-            document::add_event_listener_with_callback(name, callback.as_ref().unchecked_ref());
-
-            Self { name, callback }
-        }
-    }
-
-    impl Drop for EventCallback {
-        fn drop(&mut self) {
-            document::remove_event_listener_with_callback(
-                self.name,
-                self.callback.as_ref().as_ref().unchecked_ref(),
-            );
-        }
-    }
-}
-
 /// Manage an event handler.
 ///
 /// This will remove the event handler when dropped.
-pub struct EventCallback(arch::EventCallback);
+#[must_use]
+pub struct EventCallback(GlobalEventCallback<silkenweb_base::Document>);
 
 impl EventCallback {
     fn new<Event: JsCast>(name: &'static str, f: impl FnMut(Event) + 'static) -> Self {
-        Self(arch::EventCallback::new(name, f))
+        Self(GlobalEventCallback::new(name, f))
+    }
+
+    /// Make this event permanent.
+    pub fn perpetual(self) {
+        self.0.perpetual()
     }
 }
 
 macro_rules! events{
     ($($name:ident: $typ:ty),* $(,)?) => { paste!{ $(
-        #[doc = "Add an `" $name "` event handler at the document level." ]
+        #[doc = "Add a `" $name "` event handler at the document level." ]
         ///
         /// This only has an effect on WASM targets.
         pub fn [< on_ $name >] (f: impl FnMut($typ) + 'static) -> EventCallback {

@@ -289,6 +289,8 @@ pub use silkenweb_macros::{
 #[macro_use]
 pub mod macros;
 
+mod event;
+
 pub mod animation;
 pub mod attribute;
 pub mod document;
@@ -300,6 +302,7 @@ pub mod router;
 pub mod storage;
 pub mod task;
 pub mod time;
+pub mod window;
 
 /// Commonly used imports, all in one place.
 pub mod prelude {

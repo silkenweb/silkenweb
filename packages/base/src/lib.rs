@@ -66,20 +66,6 @@ pub mod document {
             .unwrap_throw()
     }
 
-    pub fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
-        DOCUMENT.with(|doc| {
-            doc.add_event_listener_with_callback(name, listener)
-                .unwrap_throw()
-        })
-    }
-
-    pub fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
-        DOCUMENT.with(|doc| {
-            doc.remove_event_listener_with_callback(name, listener)
-                .unwrap_throw()
-        })
-    }
-
     pub fn query_selector(selectors: &str) -> Result<Option<web_sys::Element>, JsValue> {
         DOCUMENT.with(|doc| doc.query_selector(selectors))
     }
@@ -90,6 +76,48 @@ pub mod document {
 
     pub fn body() -> Option<web_sys::HtmlElement> {
         DOCUMENT.with(|doc| doc.body())
+    }
+}
+
+pub trait GlobalEventTarget {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function);
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function);
+}
+
+pub struct Document;
+
+impl GlobalEventTarget for Document {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| {
+            doc.add_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| {
+            doc.remove_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+}
+
+pub struct Window;
+
+impl GlobalEventTarget for Window {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        WINDOW.with(|win| {
+            win.add_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        WINDOW.with(|win| {
+            win.remove_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
     }
 }
 

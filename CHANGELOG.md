@@ -8,6 +8,7 @@
 - Drag and drop events.
 - `css!` supports Sass.
 - Portable timers with `time::{sleep, interval}`
+- Window events.
 
 ### Fixes
 
