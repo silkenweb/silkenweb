@@ -1,0 +1,16 @@
+[package]
+name = "silkenweb-example-testing"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+silkenweb = { workspace = true }
+silkenweb-base = { workspace = true }
+futures-signals = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+
+[dev-dependencies]
+wasm-bindgen-test = { workspace = true }

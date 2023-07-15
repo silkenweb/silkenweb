@@ -2819,6 +2819,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-testing"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "silkenweb",
+ "silkenweb-base",
+ "wasm-bindgen",
+ "wasm-bindgen-test",
+ "web-sys",
+]
+
+[[package]]
 name = "silkenweb-example-timers"
 version = "0.1.0"
 dependencies = [
