@@ -15,7 +15,7 @@ pub fn app(count: Mutable<i32>) -> Div {
 #[cfg(test)]
 mod tests {
     use futures_signals::signal::Mutable;
-    use silkenweb::{cfg_browser, mount, task::render_now};
+    use silkenweb::{mount, task::render_now};
     use silkenweb_test::{mounted_html, new_mount_point};
     use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
@@ -39,9 +39,6 @@ mod tests {
         assert_eq!(r#"<div><button>+</button><p>1</p></div>"#, mounted_html());
     }
 
-    // TODO: Stubs for `render_now_sync` and `sync_scope` on browser, so we can
-    // compile this on browser.
-    #[cfg_browser(false)]
     #[test]
     fn sync_test() {
         use silkenweb::task::server;
