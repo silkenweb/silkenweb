@@ -325,11 +325,11 @@ pub trait ElementEvents: Element {
         touchmove: web_sys::TouchEvent,
         touchstart: web_sys::TouchEvent,
         wheel: web_sys::WheelEvent,
-        // The events are currently marked as unstable in web_sys:
-        //
-        // copy: web_sys::ClipboardEvent,
-        // cut: web_sys::ClipboardEvent,
-        // paste: web_sys::ClipboardEvent,
+
+        // These generate a `ClipboardEvent`, but that is currently unstable in `web_sys`.
+        copy: web_sys::Event,
+        cut: web_sys::Event,
+        paste: web_sys::Event,
     });
 }
 
