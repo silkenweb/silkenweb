@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb"
-version = "0.4.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "A library for building web apps"
@@ -18,23 +18,23 @@ declarative-shadow-dom = []
 sass = ["silkenweb-macros/sass"]
 
 [dependencies]
-discard = "1.0.4"
-js-sys = "0.3.60"
-futures = "0.3.24"
-caseless = "0.2.1"
-html-escape = "0.2.9"
-indexmap = "1.8.0"
-itertools = "0.10.5"
-silkenweb-base = { path = "../base", version = "0.4.0" }
-silkenweb-signals-ext = { path = "../signals-ext", version = "0.4.0" }
-silkenweb-macros = { path = "../macros", version = "0.4.0" }
-paste = "1.0.9"
-wasm-bindgen = "=0.2.84"
-futures-signals = "0.3.31"
-console_error_panic_hook = "0.1.7"
+discard = { workspace = true }
+js-sys = { workspace = true }
+futures = { workspace = true }
+caseless = { workspace = true }
+html-escape = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+silkenweb-base = { workspace = true }
+silkenweb-signals-ext = { workspace = true }
+silkenweb-macros = { workspace = true }
+paste = { workspace = true }
+wasm-bindgen = { workspace = true }
+futures-signals = { workspace = true }
+console_error_panic_hook = { workspace = true }
 
 [dependencies.web-sys]
-version = "0.3.60"
+workspace = true
 features = [
     "AnimationEvent",
     "Attr",
@@ -191,16 +191,16 @@ features = [
 ]
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
-wasm-bindgen-futures = "0.4.33"
+wasm-bindgen-futures = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { version = "1.25.0", features = ["rt", "macros"] }
+tokio = { workspace = true, features = ["rt", "macros"] }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.28"
-itertools = "0.10.3"
-criterion = { version = "0.4.0", default-features = false }
-trybuild = "1.0.76"
+wasm-bindgen-test = { workspace = true }
+itertools = { workspace = true }
+criterion = { workspace = true, default-features = false }
+trybuild = { workspace = true }
 
 [[bench]]
 name = "ssr"

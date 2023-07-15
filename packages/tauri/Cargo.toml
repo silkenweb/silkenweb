@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-tauri"
-version = "0.4.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "Silkenweb Tauri integration"
@@ -12,9 +12,9 @@ categories = ["gui"]
 keywords = ["silkenweb", "tauri"]
 
 [dependencies]
-silkenweb-tauri-proc-macro = { version = "0.4.0", path = "../tauri-proc-macro" }
-js-sys = "0.3.60"
-wasm-bindgen = "=0.2.84"
-wasm-bindgen-futures = "0.4.33"
-static_assertions = "1.1.0"
-serde-wasm-bindgen = "0.4.5"
+silkenweb-tauri-proc-macro = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+static_assertions = { workspace = true }
+serde-wasm-bindgen = { workspace = true }

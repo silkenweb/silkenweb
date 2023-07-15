@@ -1,6 +1,6 @@
 [package]
 name = "silkenweb-tauri-proc-macro"
-version = "0.4.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 description = "Silkenweb Tauri integration"
@@ -15,7 +15,6 @@ keywords = ["silkenweb", "tauri"]
 proc-macro = true
 
 [dependencies]
-syn = { version = "1.0.86", features = ["full"] }
-proc-macro-error = "1.0.4"
-quote = "1.0.15"
-proc-macro2 = "1.0.36"
+syn = { workspace = true, features = ["full"] }
+proc-macro-error = { workspace = true }
+quote = { workspace = true }

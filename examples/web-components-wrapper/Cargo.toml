@@ -8,7 +8,7 @@ edition = "2021"
 readme = true
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb" }
-futures-signals = "0.3.31"
-web-sys = "0.3.60"
-parse-display = "0.8.0"
+silkenweb = { workspace = true }
+futures-signals = { workspace = true }
+web-sys = { workspace = true }
+parse-display = { workspace = true }

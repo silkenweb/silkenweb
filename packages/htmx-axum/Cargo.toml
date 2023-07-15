@@ -1,13 +1,13 @@
 [package]
 name = "silkenweb-htmx-axum"
-version = "0.1.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 publish = false
 
 [dependencies]
-async-trait = "0.1.66"
-axum = { version = "0.6.10", features = ["headers"] }
-serde = "1.0.154"
-serde_urlencoded = "0.7.1"
-silkenweb = { path = "../silkenweb" }
+async-trait = { workspace = true }
+axum = { workspace = true, features = ["headers"] }
+serde = { workspace = true }
+serde_urlencoded = { workspace = true }
+silkenweb = { workspace = true }

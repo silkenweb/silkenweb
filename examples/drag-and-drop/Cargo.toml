@@ -6,6 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-gloo-console = "0.2.3"
-silkenweb = { path = "../../packages/silkenweb" }
+gloo-console = { workspace = true }
+silkenweb = { workspace = true }
 web-sys = { version = "0.3.60", features = ["DataTransfer"] }
