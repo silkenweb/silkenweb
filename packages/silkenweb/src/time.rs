@@ -101,21 +101,22 @@ mod arch {
 }
 
 /// A stream that yields `()` periodically.
-/// 
-/// Yield `()` every `period`. The first value will be produced after a delay of `period`.
+///
+/// Yield `()` every `period`. The first value will be produced after a delay of
+/// `period`.
 ///
 /// # Panics
-/// 
+///
 /// If `duration` can't be converted into a [`u32`] in milliseconds.
 pub use arch::interval;
 /// Sleep for `duration`.
-/// 
+///
 /// # Panics
-/// 
+///
 /// If `duration` can't be converted into a [`u32`] in milliseconds.
 pub use arch::sleep;
 /// [`Stream`] for [`interval`]
-/// 
+///
 /// [`Stream`]: futures::Stream
 pub use arch::Interval;
 /// [`Future`] for [`sleep`]
