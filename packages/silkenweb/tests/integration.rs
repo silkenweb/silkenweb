@@ -10,7 +10,7 @@ use silkenweb::{
     value::Sig,
 };
 use silkenweb_base::document;
-use silkenweb_test::{mounted_html, setup_test};
+use silkenweb_test::{setup_test, test_html};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
@@ -57,14 +57,14 @@ isomorphic_test! {
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {
-    setup_test(APP_ID).await;
+    setup_test([APP_ID]).await;
 
     let message = "Hello, world!";
     let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p id="app">{message}</p>"#), mounted_html());
+    assert_eq!(format!(r#"<p id="app">{message}</p>"#), test_html());
     mount_handle.unmount();
-    assert_eq!(r#"<div id="app"></div>"#, mounted_html());
+    assert_eq!(r#"<div id="app"></div>"#, test_html());
 }
 
 #[wasm_bindgen_test]
