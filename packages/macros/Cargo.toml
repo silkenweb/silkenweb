@@ -14,9 +14,6 @@ keywords = ["css"]
 [lib]
 proc-macro = true
 
-[features]
-sass = ["dep:grass"]
-
 [dependencies]
 silkenweb-base = { workspace = true }
 syn = { workspace = true, features = ["full"] }
@@ -24,5 +21,5 @@ proc-macro-error = { workspace = true }
 quote = { workspace = true }
 proc-macro2 = { workspace = true }
 lightningcss = { workspace = true }
-grass = { workspace = true, optional = true }
+grass = { workspace = true }
 derive_more = { workspace = true }

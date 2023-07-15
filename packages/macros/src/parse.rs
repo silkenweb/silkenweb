@@ -1,6 +1,7 @@
 use std::{ffi::OsStr, path::Path};
 
 use derive_more::Into;
+use grass::InputSyntax;
 use proc_macro_error::{abort, abort_call_site};
 use silkenweb_base::css::{self, Source};
 use syn::{
@@ -63,57 +64,27 @@ impl<T: ParseValue> ParseValue for Vec<T> {
     }
 }
 
-// TODO: Once grass supports stable rustdoc, remove the "sass" feature, and add
-// a test for sass.
-#[cfg(feature = "sass")]
-mod sass {
-    use derive_more::Into;
-    use grass::InputSyntax;
+#[derive(Into)]
+pub struct CssSyntax(InputSyntax);
 
-    #[derive(Into)]
-    pub struct CssSyntax(InputSyntax);
-
-    impl Default for CssSyntax {
-        fn default() -> Self {
-            Self(InputSyntax::Css)
-        }
-    }
-
-    impl CssSyntax {
-        pub fn from_str(syntax: &str) -> Option<Self> {
-            let syntax = match syntax {
-                "css" => InputSyntax::Css,
-                "scss" => InputSyntax::Scss,
-                "sass" => InputSyntax::Sass,
-                _ => return None,
-            };
-
-            Some(Self(syntax))
-        }
+impl Default for CssSyntax {
+    fn default() -> Self {
+        Self(InputSyntax::Css)
     }
 }
 
-#[cfg(not(feature = "sass"))]
-mod sass {
-    use proc_macro_error::abort_call_site;
+impl CssSyntax {
+    pub fn from_str(syntax: &str) -> Option<Self> {
+        let syntax = match syntax {
+            "css" => InputSyntax::Css,
+            "scss" => InputSyntax::Scss,
+            "sass" => InputSyntax::Sass,
+            _ => return None,
+        };
 
-    #[derive(Default)]
-    pub struct CssSyntax(());
-
-    impl CssSyntax {
-        pub fn from_str(syntax: &str) -> Option<Self> {
-            match syntax {
-                "css" => (),
-                "scss" | "sass" => abort_call_site!("`sass` feature must be enabled"),
-                _ => return None,
-            }
-
-            Some(Self(()))
-        }
+        Some(Self(syntax))
     }
 }
-
-pub use sass::CssSyntax;
 
 impl CssSyntax {
     fn from_path(path: impl AsRef<Path>) -> Self {

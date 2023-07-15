@@ -15,7 +15,6 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 [features]
 weak-refs = []
 declarative-shadow-dom = []
-sass = ["silkenweb-macros/sass"]
 
 [dependencies]
 discard = { workspace = true }
