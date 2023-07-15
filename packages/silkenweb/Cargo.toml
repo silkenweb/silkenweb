@@ -32,6 +32,7 @@ paste = { workspace = true }
 wasm-bindgen = { workspace = true }
 futures-signals = { workspace = true }
 console_error_panic_hook = { workspace = true }
+pin-project = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true
@@ -192,9 +193,11 @@ features = [
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 wasm-bindgen-futures = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { workspace = true, features = ["rt", "macros"] }
+tokio = { workspace = true, features = ["rt", "macros", "time"] }
+tokio-stream = { workspace = true, features = ["time"] }
 
 [dev-dependencies]
 wasm-bindgen-test = { workspace = true }

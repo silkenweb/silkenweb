@@ -49,6 +49,8 @@ indexmap = "1.8.0"
 console_error_panic_hook = "0.1.7"
 static_assertions = "1.1.0"
 tokio = "1.25.0"
+tokio-stream = "0.1.14"
+gloo-timers = "0.2.6"
 
 # macro dependencies
 syn = "1.0.86"
