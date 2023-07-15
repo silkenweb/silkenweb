@@ -7,6 +7,7 @@
 - Reactive stylesheets.
 - Drag and drop events.
 - `css!` supports Sass.
+- Portable timers with `time::{sleep, interval}`
 
 ### Fixes
 
