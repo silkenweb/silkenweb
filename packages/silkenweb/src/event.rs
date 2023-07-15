@@ -1,34 +1,47 @@
 use silkenweb_macros::cfg_browser;
 
-// TODO: Make sure this list is complete.
 // Events that might bubble.
+//
+// The best sources I could find are:
+// - <https://w3c.github.io/uievents/>
+// - <https://en.wikipedia.org/wiki/DOM_event>
 macro_rules! bubbling_events {
     () => {
         events! {
             auxclick: web_sys::MouseEvent,
+            beforeinput: web_sys::InputEvent,
+            change: web_sys::Event,
             click: web_sys::MouseEvent,
             compositionend: web_sys::CompositionEvent,
             compositionstart: web_sys::CompositionEvent,
             compositionupdate: web_sys::CompositionEvent,
             contextmenu: web_sys::MouseEvent,
             dblclick: web_sys::MouseEvent,
+            drag: web_sys::DragEvent,
+            dragend: web_sys::DragEvent,
+            dragenter: web_sys::DragEvent,
+            dragleave: web_sys::DragEvent,
+            dragover: web_sys::DragEvent,
+            dragstart: web_sys::DragEvent,
+            drop: web_sys::DragEvent,
             focusin: web_sys::FocusEvent,
             focusout: web_sys::FocusEvent,
+            input: web_sys::InputEvent,
             keydown: web_sys::KeyboardEvent,
             keyup: web_sys::KeyboardEvent,
             mousedown: web_sys::MouseEvent,
-            mouseenter: web_sys::MouseEvent,
-            mouseleave: web_sys::MouseEvent,
             mousemove: web_sys::MouseEvent,
             mouseout: web_sys::MouseEvent,
             mouseover: web_sys::MouseEvent,
             mouseup: web_sys::MouseEvent,
+            reset: web_sys::Event,
             select: web_sys::Event,
+            submit: web_sys::Event,
             touchcancel: web_sys::TouchEvent,
             touchend: web_sys::TouchEvent,
             touchmove: web_sys::TouchEvent,
             touchstart: web_sys::TouchEvent,
-            wheel: web_sys::WheelEvent
+            wheel: web_sys::WheelEvent,
         }
     };
 }
