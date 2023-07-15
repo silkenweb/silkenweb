@@ -2819,6 +2819,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-timers"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "futures-signals",
+ "silkenweb",
+ "tokio",
+]
+
+[[package]]
 name = "silkenweb-example-web-components-wrapper"
 version = "0.1.0"
 dependencies = [
