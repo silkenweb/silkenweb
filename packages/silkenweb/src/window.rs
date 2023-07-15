@@ -4,7 +4,7 @@ use paste::paste;
 use silkenweb_base::Window;
 use wasm_bindgen::JsCast;
 
-use crate::event::GlobalEventCallback;
+use crate::event::{GlobalEventCallback, bubbling_events};
 
 /// Manage an event handler.
 ///
@@ -23,7 +23,7 @@ impl EventCallback {
     }
 }
 
-/// Add a `" $name "` event handler at the window level." ]
+/// Add a `DOMCContentLoaded` event handler at the window level." ]
 ///
 /// This only has an effect on WASM targets.
 pub fn on_dom_content_loaded(f: impl FnMut(web_sys::Event) + 'static) -> EventCallback {
@@ -48,12 +48,6 @@ events! {
     beforeprint: web_sys::Event,
     beforeunload: web_sys::BeforeUnloadEvent,
     blur: web_sys::FocusEvent,
-
-    // These generate a `ClipboardEvent`, but that is currently unstable in `web_sys`.
-    copy: web_sys::Event,
-    cut: web_sys::Event,
-    paste: web_sys::Event,
-
     devicemotion: web_sys::DeviceMotionEvent,
     deviceorientation: web_sys::DeviceOrientationEvent,
     deviceorientationabsolute: web_sys::DeviceOrientationEvent,
@@ -76,4 +70,11 @@ events! {
     storage: web_sys::StorageEvent,
     unhandledrejection: web_sys::PromiseRejectionEvent,
     unload: web_sys::Event,
+
+    // These generate a `ClipboardEvent`, but that is currently unstable in `web_sys`.
+    copy: web_sys::Event,
+    cut: web_sys::Event,
+    paste: web_sys::Event,
 }
+
+bubbling_events!();

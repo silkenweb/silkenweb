@@ -1,5 +1,40 @@
 use silkenweb_macros::cfg_browser;
 
+// TODO: Make sure this list is complete.
+// Events that might bubble.
+macro_rules! bubbling_events {
+    () => {
+        events! {
+            auxclick: web_sys::MouseEvent,
+            click: web_sys::MouseEvent,
+            compositionend: web_sys::CompositionEvent,
+            compositionstart: web_sys::CompositionEvent,
+            compositionupdate: web_sys::CompositionEvent,
+            contextmenu: web_sys::MouseEvent,
+            dblclick: web_sys::MouseEvent,
+            focusin: web_sys::FocusEvent,
+            focusout: web_sys::FocusEvent,
+            keydown: web_sys::KeyboardEvent,
+            keyup: web_sys::KeyboardEvent,
+            mousedown: web_sys::MouseEvent,
+            mouseenter: web_sys::MouseEvent,
+            mouseleave: web_sys::MouseEvent,
+            mousemove: web_sys::MouseEvent,
+            mouseout: web_sys::MouseEvent,
+            mouseover: web_sys::MouseEvent,
+            mouseup: web_sys::MouseEvent,
+            select: web_sys::Event,
+            touchcancel: web_sys::TouchEvent,
+            touchend: web_sys::TouchEvent,
+            touchmove: web_sys::TouchEvent,
+            touchstart: web_sys::TouchEvent,
+            wheel: web_sys::WheelEvent
+        }
+    };
+}
+
+pub(crate) use bubbling_events;
+
 #[cfg_browser(false)]
 mod arch {
     use std::marker::PhantomData;

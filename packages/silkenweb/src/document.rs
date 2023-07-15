@@ -7,7 +7,7 @@ use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
     dom::{Dom, Dry, Wet},
-    event::GlobalEventCallback,
+    event::{bubbling_events, GlobalEventCallback},
     insert_element, mount_point,
     node::element::{Const, Element, GenericElement, Mut},
     remove_element, task, ELEMENTS,
@@ -41,34 +41,32 @@ macro_rules! events{
     )*}}
 }
 
+/// Add a `DOMCContentLoaded` event handler at the document level." ]
+///
+/// This only has an effect on WASM targets.
+pub fn on_dom_content_loaded(f: impl FnMut(web_sys::Event) + 'static) -> EventCallback {
+    EventCallback::new("DOMContentLoaded", f)
+}
+
 events! {
-    auxclick: web_sys::MouseEvent,
-    click: web_sys::MouseEvent,
-    compositionend: web_sys::CompositionEvent,
-    compositionstart: web_sys::CompositionEvent,
-    compositionupdate: web_sys::CompositionEvent,
-    contextmenu: web_sys::MouseEvent,
-    dblclick: web_sys::MouseEvent,
-    focusin: web_sys::FocusEvent,
-    focusout: web_sys::FocusEvent,
     fullscreenchange: web_sys::Event,
     fullscreenerror: web_sys::Event,
-    keydown: web_sys::KeyboardEvent,
-    keyup: web_sys::KeyboardEvent,
-    mousedown: web_sys::MouseEvent,
-    mouseenter: web_sys::MouseEvent,
-    mouseleave: web_sys::MouseEvent,
-    mousemove: web_sys::MouseEvent,
-    mouseout: web_sys::MouseEvent,
-    mouseover: web_sys::MouseEvent,
-    mouseup: web_sys::MouseEvent,
-    select: web_sys::Event,
-    touchcancel: web_sys::TouchEvent,
-    touchend: web_sys::TouchEvent,
-    touchmove: web_sys::TouchEvent,
-    touchstart: web_sys::TouchEvent,
-    wheel: web_sys::WheelEvent
+    lostpointercapture: web_sys::PointerEvent,
+    pointerlockchange: web_sys::Event,
+    pointerlockerror: web_sys::Event,
+    readystatechange: web_sys::Event,
+    scroll: web_sys::Event,
+    scrollend: web_sys::Event,
+    selectionchange: web_sys::Event,
+    visibilitychange: web_sys::Event,
+
+    // These generate a `ClipboardEvent`, but that is currently unstable in `web_sys`.
+    copy: web_sys::Event,
+    cut: web_sys::Event,
+    paste: web_sys::Event,
 }
+
+bubbling_events!();
 
 pub trait Document: Dom + Sized {
     /// Mount an element on the document.
