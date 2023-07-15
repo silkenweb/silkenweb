@@ -25,6 +25,7 @@ silkenweb-base = { path = "packages/base", version = "0.4.0" }
 silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.4.0" }
 silkenweb-macros = { path = "packages/macros", version = "0.4.0" }
 silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.4.0" }
+silkenweb-test = { path = "packages/test", version = "0.4.0" }
 
 js-sys = "0.3.60"
 web-sys = "0.3.60"

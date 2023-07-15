@@ -1,0 +1,18 @@
+[package]
+name = "silkenweb-test"
+version = { workspace = true }
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Testing utilities"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui"]
+keywords = ["reactive"]
+
+[dependencies]
+silkenweb = { workspace = true }
+silkenweb-base = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }

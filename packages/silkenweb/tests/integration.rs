@@ -10,6 +10,7 @@ use silkenweb::{
     value::Sig,
 };
 use silkenweb_base::document;
+use silkenweb_test::{mounted_html, setup_test};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
@@ -56,14 +57,14 @@ isomorphic_test! {
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {
-    create_app_container(APP_ID).await;
+    setup_test(APP_ID).await;
 
     let message = "Hello, world!";
     let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p id="app">{message}</p>"#), app_html(APP_ID));
+    assert_eq!(format!(r#"<p id="app">{message}</p>"#), mounted_html());
     mount_handle.unmount();
-    assert_eq!(r#"<div id="app"></div>"#, app_html(APP_ID));
+    assert_eq!(r#"<div id="app"></div>"#, mounted_html());
 }
 
 #[wasm_bindgen_test]
@@ -184,6 +185,8 @@ async fn verify_reactive_text(paragraph: P, text_id: &str, text: &mut Mutable<&'
     );
 }
 
+// TODO: Replace `create_app_container`, `query_element`, `app_html` with
+// `silkenweb-test` equivalents.
 async fn create_app_container(app_id: &str) {
     // Clear the render queue
     render_now().await;

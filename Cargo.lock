@@ -2610,6 +2610,7 @@ dependencies = [
  "silkenweb-base",
  "silkenweb-macros",
  "silkenweb-signals-ext",
+ "silkenweb-test",
  "tokio",
  "tokio-stream",
  "trybuild",
@@ -2824,10 +2825,8 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "silkenweb",
- "silkenweb-base",
- "wasm-bindgen",
+ "silkenweb-test",
  "wasm-bindgen-test",
- "web-sys",
 ]
 
 [[package]]
@@ -2929,6 +2928,16 @@ dependencies = [
  "proc-macro-error",
  "quote",
  "syn 1.0.107",
+]
+
+[[package]]
+name = "silkenweb-test"
+version = "0.4.0"
+dependencies = [
+ "silkenweb",
+ "silkenweb-base",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
