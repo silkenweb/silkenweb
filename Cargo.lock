@@ -112,7 +112,7 @@ dependencies = [
  "include-doc",
  "js-sys",
  "pin-project",
- "reqwasm 0.5.0",
+ "reqwasm",
  "serde",
  "serde_json",
  "slotmap",
@@ -2340,26 +2340,6 @@ dependencies = [
 
 [[package]]
 name = "reqwasm"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee625fb8e28ee1dac344e1d135c3b9815ddd5b44b3062cb69fe83168e5225a10"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-sink",
- "gloo-utils",
- "js-sys",
- "pin-project",
- "serde",
- "serde_json",
- "thiserror",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "reqwasm"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05b89870d729c501fa7a68c43bf4d938bbb3a8c156d333d90faa0e8b3e3212fb"
@@ -2653,7 +2633,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-bootstrap"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "derive_more",
  "futures-signals",
@@ -2696,7 +2676,7 @@ name = "silkenweb-example-async-http-request"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "reqwasm 0.4.1",
+ "reqwasm",
  "silkenweb",
 ]
 
@@ -2711,7 +2691,7 @@ dependencies = [
  "axum",
  "futures",
  "futures-signals",
- "reqwasm 0.5.0",
+ "reqwasm",
  "serde",
  "silkenweb",
  "tokio",
@@ -2746,7 +2726,6 @@ dependencies = [
 name = "silkenweb-example-css-modules"
 version = "0.1.0"
 dependencies = [
- "futures-signals",
  "silkenweb",
 ]
 
@@ -2775,7 +2754,7 @@ dependencies = [
  "chrono",
  "futures",
  "futures-signals",
- "reqwasm 0.4.1",
+ "reqwasm",
  "serde",
  "silkenweb",
  "timeago",
@@ -2814,7 +2793,6 @@ dependencies = [
 name = "silkenweb-example-reactive-styles"
 version = "0.1.0"
 dependencies = [
- "futures-signals",
  "silkenweb",
 ]
 
@@ -2822,7 +2800,6 @@ dependencies = [
 name = "silkenweb-example-router"
 version = "0.1.0"
 dependencies = [
- "futures-signals",
  "silkenweb",
 ]
 
@@ -2857,9 +2834,7 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "derive_more",
- "discard",
  "futures-signals",
- "js-sys",
  "serde",
  "serde_json",
  "silkenweb",
@@ -2870,7 +2845,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-htmx-axum"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "axum",
@@ -2885,7 +2860,6 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "getrandom",
- "js-sys",
  "rand 0.8.5",
  "silkenweb",
  "wasm-bindgen",
@@ -2895,7 +2869,6 @@ dependencies = [
 name = "silkenweb-macros"
 version = "0.4.0"
 dependencies = [
- "cssparser",
  "derive_more",
  "grass",
  "lightningcss",
@@ -2932,7 +2905,6 @@ name = "silkenweb-tauri-proc-macro"
 version = "0.4.0"
 dependencies = [
  "proc-macro-error",
- "proc-macro2",
  "quote",
  "syn 1.0.107",
 ]

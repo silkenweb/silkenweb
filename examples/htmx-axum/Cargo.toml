@@ -6,10 +6,10 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb" }
-silkenweb-htmx-axum = { path = "../../packages/htmx-axum" }
-serde = "1.0.152"
-tracing = "0.1.37"
-tracing-subscriber = "0.3.16"
-axum = { version = "0.6.4", features = ["headers"] }
-tokio = { version = "1.25.0", features = ["full"] }
+silkenweb = { workspace = true }
+silkenweb-htmx-axum = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+axum = { workspace = true, features = ["headers"] }
+tokio = { workspace = true, features = ["full"] }

@@ -6,5 +6,5 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../../packages/silkenweb" }
-silkenweb-bootstrap = { path = "../../packages/bootstrap"}
+silkenweb = { workspace = true }
+silkenweb-bootstrap = { workspace = true }

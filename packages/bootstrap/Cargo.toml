@@ -1,12 +1,12 @@
 [package]
 name = "silkenweb-bootstrap"
-version = "0.1.0"
+version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { path = "../silkenweb" }
-silkenweb-bootstrap-macros = { path = "macros" }
-futures-signals = "0.3.31"
-derive_more = "0.99.17"
+silkenweb = { workspace = true }
+silkenweb-bootstrap-macros = { workspace = true }
+futures-signals = { workspace = true }
+derive_more = { workspace = true }
