@@ -10,3 +10,4 @@ silkenweb = { workspace = true, features = ["weak-refs"] }
 futures-signals = { workspace = true }
 wasm-bindgen = { workspace = true, features = ["enable-interning"] }
 rand = { workspace = true, features = ["small_rng"] }
+getrandom = { workspace = true, features = ["js"] }
