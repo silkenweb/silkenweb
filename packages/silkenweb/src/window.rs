@@ -4,7 +4,7 @@ use paste::paste;
 use silkenweb_base::Window;
 use wasm_bindgen::JsCast;
 
-use crate::event::{GlobalEventCallback, bubbling_events};
+use crate::event::{bubbling_events, GlobalEventCallback};
 
 /// Manage an event handler.
 ///
