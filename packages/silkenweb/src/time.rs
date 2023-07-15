@@ -1,3 +1,4 @@
+//! Utilities for tacking time.
 use silkenweb_macros::cfg_browser;
 
 #[cfg_browser(true)]
@@ -21,8 +22,8 @@ mod arch {
         }
     }
 
-    pub fn sleep(dur: Duration) -> Sleep {
-        Sleep(gloo_timers::future::sleep(dur))
+    pub fn sleep(duration: Duration) -> Sleep {
+        Sleep(gloo_timers::future::sleep(duration))
     }
 
     #[derive(Debug)]
@@ -71,8 +72,8 @@ mod arch {
         }
     }
 
-    pub fn sleep(dur: Duration) -> Sleep {
-        Sleep(tokio::time::sleep(dur))
+    pub fn sleep(duration: Duration) -> Sleep {
+        Sleep(tokio::time::sleep(duration))
     }
 
     #[derive(Debug)]
@@ -99,5 +100,25 @@ mod arch {
     }
 }
 
-// TODO: Doc
-pub use arch::{interval, sleep, Interval, Sleep};
+/// A stream that yields `()` periodically.
+/// 
+/// Yield `()` every `period`. The first value will be produced after a delay of `period`.
+///
+/// # Panics
+/// 
+/// If `duration` can't be converted into a [`u32`] in milliseconds.
+pub use arch::interval;
+/// Sleep for `duration`.
+/// 
+/// # Panics
+/// 
+/// If `duration` can't be converted into a [`u32`] in milliseconds.
+pub use arch::sleep;
+/// [`Stream`] for [`interval`]
+/// 
+/// [`Stream`]: futures::Stream
+pub use arch::Interval;
+/// [`Future`] for [`sleep`]
+///
+/// [`Future`]: std::future::Future
+pub use arch::Sleep;
