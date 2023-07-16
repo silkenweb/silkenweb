@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: ./.github/workflows/rust-env.yml
+    - uses: ./.github/workflows/rust-env
       with:
         rust-version: ${{ matrix.rust }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
