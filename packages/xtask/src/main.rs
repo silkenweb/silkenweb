@@ -150,11 +150,13 @@ fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
 
 fn test_features() -> WorkflowResult<()> {
     for features in ["declarative-shadow-dom"].into_iter().powerset() {
-        clippy(None, &features)?;
+        if !features.is_empty() {
+            clippy(None, &features)?;
 
-        let features = features.join(",");
+            let features = features.join(",");
 
-        cmd!("cargo test --package silkenweb --features {features}").run()?;
+            cmd!("cargo test --package silkenweb --features {features}").run()?;
+        }
     }
 
     Ok(())
