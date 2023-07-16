@@ -8,6 +8,7 @@ jobs:
         rust: [1.65]
     runs-on: ${{ matrix.os }}
     steps:
+    - uses: actions/checkout@v2
     - uses: ./.github/workflows/rust-env.yml
       with:
         rust-version: ${{ matrix.rust }}
