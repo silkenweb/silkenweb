@@ -16,7 +16,7 @@ pub async fn setup_test(mount_point_ids: impl IntoIterator<Item = &str>) {
     render_now().await;
     DefaultDom::unmount_all();
 
-    if let Some(existing) = try_find_html_element(APP_CONTAINER_ID) {
+    if let Some(existing) = try_html_element(APP_CONTAINER_ID) {
         existing.remove()
     }
 
@@ -42,7 +42,7 @@ pub async fn setup_test(mount_point_ids: impl IntoIterator<Item = &str>) {
 ///
 /// This panics if [`setup_test`] wasn't called.
 pub fn test_html() -> String {
-    find_html_element(APP_CONTAINER_ID).inner_html()
+    html_element(APP_CONTAINER_ID).inner_html()
 }
 
 /// Find an element by `id`
@@ -52,8 +52,8 @@ pub fn test_html() -> String {
 /// This panics if the element is not found, or is not an [`HtmlElement`]
 ///
 /// [`HtmlElement`]: web_sys::HtmlElement
-pub fn find_html_element(id: &str) -> web_sys::HtmlElement {
-    try_find_html_element(id).expect_throw("Element not found")
+pub fn html_element(id: &str) -> web_sys::HtmlElement {
+    try_html_element(id).expect_throw("Element not found")
 }
 
 /// Find an element by `id`
@@ -65,7 +65,7 @@ pub fn find_html_element(id: &str) -> web_sys::HtmlElement {
 /// This panics if the element is found, and is not an [`HtmlElement`]
 ///
 /// [`HtmlElement`]: web_sys::HtmlElement
-pub fn try_find_html_element(id: &str) -> Option<web_sys::HtmlElement> {
+pub fn try_html_element(id: &str) -> Option<web_sys::HtmlElement> {
     document::query_selector(&format!("#{id}"))
         .expect_throw("Error searching for element")
         .map(|elem| {
