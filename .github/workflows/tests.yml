@@ -8,15 +8,9 @@ jobs:
         rust: [1.65]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
+    - uses: ./.github/workflows/rust-env.yml
       with:
-        profile: minimal
-        toolchain: ${{ matrix.rust }}
-        default: true
-        components: clippy
-    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
-      if: ${{ !env.ACT }}
+        rust-version: ${{ matrix.rust }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo build --all-targets
     - run: cargo doc

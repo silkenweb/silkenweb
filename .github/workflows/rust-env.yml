@@ -1,0 +1,20 @@
+name: Setup Rust Environment
+
+on:
+  workflow_call:
+    inputs:
+      rust-version:
+        required: true
+        type: string
+jobs:
+  setup:
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ inputs.rust-version }}
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+      if: ${{ !env.ACT }}
