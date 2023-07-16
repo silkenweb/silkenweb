@@ -7,11 +7,10 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
         rust: [1.65]
     runs-on: ${{ matrix.os }}
-    steps:
-    - uses: actions/checkout@v2
     - uses: ./.github/workflows/rust-env.yml
       with:
         rust-version: ${{ matrix.rust }}
+    steps:
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo build --all-targets
     - run: cargo doc
