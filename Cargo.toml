@@ -94,5 +94,5 @@ arpy-axum = { git = "https://github.com/simon-bourne/arpy" }
 
 # test dependencies
 wasm-bindgen-test = "0.3.28"
-criterion = { version = "0.4.0", default-features = false }
+criterion = { version = "0.5.1", default-features = false }
 trybuild = "1.0.76"
