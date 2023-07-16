@@ -56,6 +56,8 @@ jobs:
       with:
         crate: wasm-bindgen-cli
         version: 0.2.84
+    - name: Trunk Build
+      run: cargo xtask trunk-build
     - name: Browser Tests
       # Browser tests intermittantly hang with windows github actions.
       if: matrix.os != 'windows-latest'

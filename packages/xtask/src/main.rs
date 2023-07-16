@@ -1,9 +1,13 @@
-use std::fmt::Write;
+use std::{
+    ffi::OsStr,
+    fmt::Write,
+    path::{Path, PathBuf},
+};
 
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
 use scopeguard::defer;
-use xshell::{cmd, mkdir_p, pushd, rm_rf, write_file};
+use xshell::{cmd, mkdir_p, pushd, read_dir, rm_rf, write_file};
 use xtask_base::{
     build_readme, ci_nightly, clippy, generate_open_source_files, run, CommonCmds, WorkflowResult,
 };
@@ -23,6 +27,7 @@ enum Commands {
     },
     TestFeatures,
     WasmPackTest,
+    TrunkBuild,
     /// Run TodoMVC with `trunk`
     TodomvcRun,
     /// Run the TodoMVC Cypress tests
@@ -75,6 +80,7 @@ fn main() {
             }
             Commands::TestFeatures => test_features()?,
             Commands::WasmPackTest => wasm_pack_test()?,
+            Commands::TrunkBuild => trunk_build()?,
             Commands::TodomvcRun => {
                 let _dir = pushd("examples/todomvc")?;
                 cmd!("trunk serve --open").run()?;
@@ -106,23 +112,8 @@ fn build_website() -> WorkflowResult<()> {
     mkdir_p(&examples_dest_dir)?;
     let mut redirects = String::new();
 
-    for example in [
-        "animation",
-        "async-http-request",
-        "bootstrap",
-        "component",
-        "counter",
-        "counter-list",
-        "element-handle",
-        "hackernews-clone",
-        "hello-world",
-        "hydration",
-        "router",
-        "shadow-root",
-        "todomvc",
-        "web-components-wrapper",
-    ] {
-        let examples_dir = format!("examples/{example}");
+    for example in browser_examples()? {
+        let examples_dir: PathBuf = [Path::new("examples"), &example].iter().collect();
 
         {
             let _dir = pushd(&examples_dir);
@@ -130,10 +121,14 @@ fn build_website() -> WorkflowResult<()> {
         }
 
         cmd!("cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}").run()?;
-        writeln!(
-            &mut redirects,
-            "/examples/{example}/* /examples/{example}/index.html 200"
-        )?;
+
+        {
+            let example = example.display();
+            writeln!(
+                &mut redirects,
+                "/examples/{example}/* /examples/{example}/index.html 200"
+            )?;
+        }
     }
 
     write_file(format!("{dest_dir}/_redirects"), redirects)?;
@@ -142,7 +137,8 @@ fn build_website() -> WorkflowResult<()> {
 }
 
 fn ci_browser() -> WorkflowResult<()> {
-    cypress("ci", "run", None)
+    cypress("ci", "run", None)?;
+    trunk_build()
 }
 
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
@@ -185,5 +181,40 @@ fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> W
 fn wasm_pack_test() -> WorkflowResult<()> {
     let _dir = pushd("packages/silkenweb")?;
     cmd!("wasm-pack test --headless --firefox").run()?;
+    Ok(())
+}
+
+fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
+    let _dir = pushd("examples");
+    let examples = read_dir(".")?;
+    let non_browser = ["htmx-axum"];
+    let non_browser: Vec<_> = non_browser
+        .into_iter()
+        .map(|x| Some(OsStr::new(x)))
+        .collect();
+    let mut browser_examples = Vec::new();
+
+    for example in examples {
+        if !non_browser.contains(&example.file_name()) {
+            for file in read_dir(&example)? {
+                if file.extension() == Some(OsStr::new("html")) {
+                    browser_examples.push(example);
+                    break;
+                }
+            }
+        }
+    }
+
+    Ok(browser_examples)
+}
+
+fn trunk_build() -> WorkflowResult<()> {
+    let _dir = pushd("examples");
+
+    for example in browser_examples()? {
+        let _dir = pushd(example)?;
+        cmd!("trunk build").run()?;
+    }
+
     Ok(())
 }
