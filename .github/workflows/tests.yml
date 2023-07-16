@@ -15,7 +15,7 @@ jobs:
         toolchain: ${{ matrix.rust }}
         default: true
         components: clippy
-    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+    - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo build --all-targets
@@ -42,7 +42,7 @@ jobs:
         profile: minimal
         toolchain: ${{ matrix.rust }}
         target: wasm32-unknown-unknown
-    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+    - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
     - uses: actions-rs/install@v0.1
       with:
@@ -103,7 +103,7 @@ jobs:
         toolchain: ${{ matrix.rust }}
         default: true
         components: rustfmt
-    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+    - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
     - uses: actions-rs/install@v0.1
       with:
