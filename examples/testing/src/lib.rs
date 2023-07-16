@@ -16,7 +16,7 @@ pub fn app(count: Mutable<i32>) -> Div {
 mod tests {
     use futures_signals::signal::Mutable;
     use silkenweb::{mount, task::render_now};
-    use silkenweb_test::{setup_test, test_html};
+    use silkenweb_test::BrowserTest;
     use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
     use crate::app;
@@ -25,7 +25,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn browser_test() {
-        setup_test(["app"]).await;
+        let test = BrowserTest::new("app").await;
         let count = Mutable::new(0);
 
         let app = app(count.clone());
@@ -33,10 +33,10 @@ mod tests {
         mount("app", app);
         render_now().await;
 
-        assert_eq!(r#"<div><button>+</button><p>0</p></div>"#, test_html());
+        assert_eq!(r#"<div><button>+</button><p>0</p></div>"#, test.html());
         count.set(1);
         render_now().await;
-        assert_eq!(r#"<div><button>+</button><p>1</p></div>"#, test_html());
+        assert_eq!(r#"<div><button>+</button><p>1</p></div>"#, test.html());
     }
 
     #[test]

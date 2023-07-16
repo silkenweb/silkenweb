@@ -9,9 +9,7 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
-use silkenweb_base::document;
-use silkenweb_test::{setup_test, test_html};
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use silkenweb_test::{html_element, BrowserTest};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 macro_rules! isomorphic_test {
@@ -57,14 +55,14 @@ isomorphic_test! {
 
 #[wasm_bindgen_test]
 async fn mount_unmount() {
-    setup_test([APP_ID]).await;
+    let test = BrowserTest::new(APP_ID).await;
 
     let message = "Hello, world!";
     let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
     render_now().await;
-    assert_eq!(format!(r#"<p id="app">{message}</p>"#), test_html());
+    assert_eq!(format!(r#"<p id="app">{message}</p>"#), test.html());
     mount_handle.unmount();
-    assert_eq!(r#"<div id="app"></div>"#, test_html());
+    assert_eq!(r#"<div id="app"></div>"#, test.html());
 }
 
 #[wasm_bindgen_test]
@@ -72,7 +70,7 @@ async fn simple_counter() {
     const BUTTON_ID: &str = "increment";
     const COUNTER_ID: &str = "counter";
 
-    create_app_container(APP_ID).await;
+    let _test = BrowserTest::new(APP_ID).await;
 
     let count = Mutable::new(0);
     let count_text = count.signal_ref(|i| format!("{i}"));
@@ -93,9 +91,9 @@ async fn simple_counter() {
     );
 
     render_now().await;
-    let counter_text = || query_element(COUNTER_ID).inner_text();
+    let counter_text = || html_element(COUNTER_ID).inner_text();
     assert_eq!("+0", counter_text(), "Counter is initially zero");
-    query_element(BUTTON_ID).click();
+    html_element(BUTTON_ID).click();
     assert_eq!("+0", counter_text(), "Counter unchanged before render");
     render_now().await;
     assert_eq!("+1", counter_text(), "Counter incremented after render");
@@ -104,12 +102,12 @@ async fn simple_counter() {
 const TEXT_ID: &str = "text";
 
 fn text_content(text_id: &str) -> String {
-    query_element(text_id).inner_text()
+    html_element(text_id).inner_text()
 }
 
 #[wasm_bindgen_test]
 async fn reactive_text() {
-    create_app_container(APP_ID).await;
+    let _test = BrowserTest::new(APP_ID).await;
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
@@ -123,7 +121,7 @@ async fn reactive_text() {
 // Verify reactive text when passing the signal by reference.
 #[wasm_bindgen_test]
 async fn reactive_text_reference() {
-    create_app_container(APP_ID).await;
+    let _test = BrowserTest::new(APP_ID).await;
 
     let mut text_signal = Mutable::new("0");
     verify_reactive_text(
@@ -137,7 +135,7 @@ async fn reactive_text_reference() {
 // Make we support multiple reactive text children
 #[wasm_bindgen_test]
 async fn multiple_reactive_text() {
-    create_app_container(APP_ID).await;
+    let _test = BrowserTest::new(APP_ID).await;
 
     let first_text = Mutable::new("{First 0}");
     let second_text = Mutable::new("{Second 0}");
@@ -183,30 +181,6 @@ async fn verify_reactive_text(paragraph: P, text_id: &str, text: &mut Mutable<&'
         text_content(text_id),
         "Text updated by signal after render"
     );
-}
-
-// TODO: Replace `create_app_container`, `query_element`, `app_html` with
-// `silkenweb-test` equivalents.
-async fn create_app_container(app_id: &str) {
-    // Clear the render queue
-    render_now().await;
-    DefaultDom::unmount_all();
-    let app_container = document::create_element("div");
-    app_container.set_id(app_id);
-    let body = document::body().unwrap_throw();
-    body.append_child(&app_container).unwrap_throw();
-}
-
-fn query_element(id: &str) -> web_sys::HtmlElement {
-    document::query_selector(&format!("#{id}"))
-        .unwrap_throw()
-        .unwrap_throw()
-        .dyn_into()
-        .unwrap_throw()
-}
-
-fn app_html(id: &str) -> String {
-    query_element(id).outer_html()
 }
 
 #[test]

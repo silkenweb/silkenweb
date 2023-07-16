@@ -3,46 +3,58 @@ use silkenweb::{document::Document, dom::DefaultDom, task::render_now};
 use silkenweb_base::document;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
-/// Setup a test.
+/// Setup a browser test.
 ///
-/// This:
-///
-/// - Clears the render queue.
-/// - Unmounts any mounted elements.
-/// - Removes any existing mount points.
-/// - Creates new mount points with `id`s from `mount_point_ids`.
-pub async fn setup_test(mount_point_ids: impl IntoIterator<Item = &str>) {
-    // Clear the render queue
-    render_now().await;
-    DefaultDom::unmount_all();
+/// This will cleanup the test when `drop`ed.
+#[must_use]
+pub struct BrowserTest;
 
-    if let Some(existing) = try_html_element(APP_CONTAINER_ID) {
-        existing.remove()
-    }
+impl BrowserTest {
+    /// Setup a test.
+    ///
+    /// Actions:
+    ///
+    /// - Clear the render queue.
+    /// - Check this isn't a nested browser test.
+    /// - Unmount any mounted elements.
+    /// - Create a new mount point with `id` = `mount_point_id`.
+    pub async fn new(mount_point_id: &str) -> Self {
+        // Clear the render queue
+        render_now().await;
 
-    let app_container = document::create_element("div");
-    app_container.set_id(APP_CONTAINER_ID);
+        if try_html_element(APP_CONTAINER_ID).is_some() {
+            panic!("`Test` cannot be nested")
+        }
 
-    for mount_point_id in mount_point_ids {
+        DefaultDom::unmount_all();
+
+        let app_container = document::create_element("div");
+        app_container.set_id(APP_CONTAINER_ID);
+
         let mount_point = document::create_element("div");
         mount_point.set_id(mount_point_id);
         app_container
             .append_child(&mount_point)
             .expect_throw("Couldn't add mount point to app container");
+
+        let body = document::body().expect_throw("Couldn't get document body");
+        body.append_child(&app_container)
+            .expect_throw("Couldn't add app container to body");
+
+        Self
     }
 
-    let body = document::body().expect_throw("Couldn't get document body");
-    body.append_child(&app_container)
-        .expect_throw("Couldn't add app container to body");
+    /// Get the HTML of a test.
+    pub fn html(&self) -> String {
+        html_element(APP_CONTAINER_ID).inner_html()
+    }
 }
 
-/// Get the HTML of a test.
-///
-/// # Panics
-///
-/// This panics if [`setup_test`] wasn't called.
-pub fn test_html() -> String {
-    html_element(APP_CONTAINER_ID).inner_html()
+impl Drop for BrowserTest {
+    fn drop(&mut self) {
+        DefaultDom::unmount_all();
+        html_element(APP_CONTAINER_ID).remove();
+    }
 }
 
 /// Find an element by `id`

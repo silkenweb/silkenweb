@@ -19,8 +19,9 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
+use silkenweb_test::BrowserTest;
 
-use crate::{app_html, create_app_container, APP_ID};
+use crate::APP_ID;
 
 #[wasm_bindgen_test::wasm_bindgen_test]
 async fn test_all_children() {
@@ -87,7 +88,7 @@ async fn test_children(
     children_vec_len: usize,
     children_mutator: impl FnOnce(&mut MutableVecLockMut<usize>),
 ) {
-    create_app_container(APP_ID).await;
+    let test = BrowserTest::new(APP_ID).await;
 
     let mut parent = div().id(APP_ID);
     let optional_child_mutables: Vec<Mutable<bool>> = optional_children
@@ -108,6 +109,7 @@ async fn test_children(
 
     mount(APP_ID, parent);
     check(
+        &test,
         optional_children.iter().map(|state| state.initial),
         0..children_vec_len,
     )
@@ -123,6 +125,7 @@ async fn test_children(
     children_mutator(&mut children_vec.lock_mut());
 
     check(
+        &test,
         optional_children.iter().map(|state| state.updated),
         children_vec.lock_ref().as_slice().iter().cloned(),
     )
@@ -130,6 +133,7 @@ async fn test_children(
 }
 
 async fn check(
+    test: &BrowserTest,
     optional_children: impl IntoIterator<Item = bool>,
     children: impl IntoIterator<Item = usize>,
 ) {
@@ -142,10 +146,7 @@ async fn check(
     let children_html = children.into_iter().map(div_html);
     let inner_html = optional_children_html.chain(children_html).join("");
 
-    assert_eq!(
-        app_html(APP_ID),
-        format!(r#"<div id="app">{inner_html}</div>"#)
-    )
+    assert_eq!(test.html(), format!(r#"<div id="app">{inner_html}</div>"#))
 }
 
 fn child<D: Dom>(index: usize) -> Div<D> {
