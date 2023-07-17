@@ -23,6 +23,7 @@ mod tests {
 
     wasm_bindgen_test_configure!(run_in_browser);
 
+    // Run this with `wasm-pack test --firefox --headless`
     #[wasm_bindgen_test]
     async fn browser_test() {
         let test = BrowserTest::new("app").await;
@@ -39,6 +40,7 @@ mod tests {
         assert_eq!(r#"<div><button>+</button><p>1</p></div>"#, test.html());
     }
 
+    // Run this with `cargo test`
     #[test]
     fn sync_test() {
         use silkenweb::task::server;
