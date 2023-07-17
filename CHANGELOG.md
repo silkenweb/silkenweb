@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.5.0 - 2023-07-17
 
 - SSR Scopes: Each tokio task now has a local task queue to emulate the browsers microtask queue.
 - htmx integration using Axum.
