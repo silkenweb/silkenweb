@@ -7,8 +7,9 @@
 - Reactive stylesheets.
 - Drag and drop events.
 - `css!` supports Sass.
-- Portable timers with `time::{sleep, interval}`
+- Portable timers with `time::{sleep, interval}`.
 - Window events.
+- Better support for testing via `silkenweb-test`.
 
 ### Fixes
 
