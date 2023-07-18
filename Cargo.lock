@@ -2720,7 +2720,7 @@ dependencies = [
  "proc-macro2 1.0.66",
  "quote 1.0.31",
  "silkenweb-base",
- "syn 1.0.109",
+ "syn 2.0.26",
 ]
 
 [[package]]
@@ -2958,7 +2958,7 @@ dependencies = [
  "proc-macro2 1.0.66",
  "quote 1.0.31",
  "silkenweb-base",
- "syn 1.0.109",
+ "syn 2.0.26",
 ]
 
 [[package]]
@@ -2988,7 +2988,7 @@ version = "0.5.0"
 dependencies = [
  "proc-macro-error",
  "quote 1.0.31",
- "syn 1.0.109",
+ "syn 2.0.26",
 ]
 
 [[package]]
