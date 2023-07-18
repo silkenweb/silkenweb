@@ -25,7 +25,7 @@ jobs:
     - name: Build Website
       run: cargo xtask build-website
     - name: Deploy to Netlify
-      uses: nwtgck/actions-netlify@v1.2
+      uses: nwtgck/actions-netlify@v2.0
       with:
         publish-dir: 'target/website'
         production-deploy: true
