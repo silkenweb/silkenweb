@@ -16,10 +16,6 @@ jobs:
         toolchain: ${{ env.rust }}
         default: true
         components: clippy
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ env.rust }}
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
     - uses: actions-rs/install@v0.1
