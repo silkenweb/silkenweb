@@ -1,5 +1,5 @@
-error: Expected `element(target)`
- --> tests/macro-ui/derive-element-unknown-attr.rs:4:20
+error: Unexpected token
+ --> tests/macro-ui/derive-element-unknown-attr.rs:4:34
   |
 4 | struct MyElement(#[element(target, xyz)] Div);
-  |                    ^^^^^^^^^^^^^^^^^^^^
+  |                                  ^
