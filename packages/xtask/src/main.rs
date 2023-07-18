@@ -1,4 +1,5 @@
 use std::{
+    env,
     ffi::OsStr,
     fmt::Write,
     path::{Path, PathBuf},
@@ -69,28 +70,28 @@ fn main() {
             Commands::Ci { command } => {
                 if let Some(command) = command {
                     match command {
-                        CiCommand::Stable { fast, toolchain } => ci_stable(&sh, fast, toolchain)?,
+                        CiCommand::Stable { fast, toolchain } => ci_stable(fast, toolchain)?,
                         CiCommand::Nightly { toolchain } => ci_nightly(toolchain.as_deref())?,
-                        CiCommand::Browser => ci_browser(&sh)?,
+                        CiCommand::Browser => ci_browser()?,
                     }
                 } else {
-                    ci_stable(&sh, false, None)?;
+                    ci_stable(false, None)?;
                     ci_nightly(Some("nightly"))?;
-                    ci_browser(&sh)?;
-                    wasm_pack_test(&sh)?;
+                    ci_browser()?;
+                    wasm_pack_test()?;
                 }
             }
-            Commands::TestFeatures => test_features(&sh)?,
-            Commands::WasmPackTest => wasm_pack_test(&sh)?,
-            Commands::TrunkBuild => trunk_build(&sh)?,
+            Commands::TestFeatures => test_features()?,
+            Commands::WasmPackTest => wasm_pack_test()?,
+            Commands::TrunkBuild => trunk_build()?,
             Commands::TodomvcRun => {
                 let _dir = sh.push_dir("examples/todomvc");
                 cmd!(sh, "trunk serve --open").run()?;
             }
             Commands::TodomvcCypress { gui } => {
-                cypress(&sh, "install", if gui { "open" } else { "run" }, None)?;
+                cypress("install", if gui { "open" } else { "run" }, None)?;
             }
-            Commands::BuildWebsite => build_website(&sh)?,
+            Commands::BuildWebsite => build_website()?,
             Commands::GithubActions { full } => {
                 let reuse = (!full).then_some("--reuse");
 
@@ -107,14 +108,15 @@ fn main() {
     });
 }
 
-fn build_website(sh: &Shell) -> WorkflowResult<()> {
+fn build_website() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
     let dest_dir = "target/website";
     sh.remove_path(dest_dir)?;
     let examples_dest_dir = format!("{dest_dir}/examples");
     sh.create_dir(&examples_dest_dir)?;
     let mut redirects = String::new();
 
-    for example in browser_examples(sh)? {
+    for example in browser_examples()? {
         let examples_dir: PathBuf = [Path::new("examples"), &example].iter().collect();
 
         {
@@ -142,19 +144,21 @@ fn build_website(sh: &Shell) -> WorkflowResult<()> {
     Ok(())
 }
 
-fn ci_browser(sh: &Shell) -> WorkflowResult<()> {
-    cypress(sh, "ci", "run", None)?;
-    trunk_build(sh)
+fn ci_browser() -> WorkflowResult<()> {
+    cypress("ci", "run", None)?;
+    trunk_build()
 }
 
-fn ci_stable(sh: &Shell, fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
+fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
     xtask_base::ci_stable(fast, toolchain.as_deref(), &[])?;
-    test_features(sh)
+    test_features()
 }
 
-fn test_features(sh: &Shell) -> WorkflowResult<()> {
+fn test_features() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
+
     for features in ["declarative-shadow-dom"].into_iter().powerset() {
         if !features.is_empty() {
             clippy(None, &features)?;
@@ -168,15 +172,14 @@ fn test_features(sh: &Shell) -> WorkflowResult<()> {
     Ok(())
 }
 
-fn cypress(
-    sh: &Shell,
-    npm_install_cmd: &str,
-    cypress_cmd: &str,
-    browser: Option<&str>,
-) -> WorkflowResult<()> {
+fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
+    let sh = Shell::new()?;
     let _dir = sh.push_dir("examples/todomvc");
     cmd!(sh, "trunk build").run()?;
+    let dir = env::current_dir()?;
+    env::set_current_dir(sh.current_dir())?;
     let trunk = duct::cmd("trunk", ["serve", "--no-autoreload", "--ignore=."]).start()?;
+    env::set_current_dir(dir)?;
     defer! { let _ = trunk.kill(); };
 
     let _dir = sh.push_dir("e2e");
@@ -191,13 +194,15 @@ fn cypress(
     Ok(())
 }
 
-fn wasm_pack_test(sh: &Shell) -> WorkflowResult<()> {
+fn wasm_pack_test() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
     let _dir = sh.push_dir("packages/silkenweb");
     cmd!(sh, "wasm-pack test --headless --firefox").run()?;
     Ok(())
 }
 
-fn browser_examples(sh: &Shell) -> WorkflowResult<Vec<PathBuf>> {
+fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
+    let sh = Shell::new()?;
     let _dir = sh.push_dir("examples");
     let examples = sh.read_dir(".")?;
     let non_browser = ["htmx-axum"];
@@ -221,10 +226,11 @@ fn browser_examples(sh: &Shell) -> WorkflowResult<Vec<PathBuf>> {
     Ok(browser_examples)
 }
 
-fn trunk_build(sh: &Shell) -> WorkflowResult<()> {
+fn trunk_build() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
     let _dir = sh.push_dir("examples");
 
-    for example in browser_examples(sh)? {
+    for example in browser_examples()? {
         let _dir = sh.push_dir(example);
         cmd!(sh, "trunk build").run()?;
     }
