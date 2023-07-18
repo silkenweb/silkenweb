@@ -104,5 +104,6 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: cargo-udeps
+        version: 0.1.40
     - run: cargo fmt --all -- --check
     - run: cargo udeps --all-targets
