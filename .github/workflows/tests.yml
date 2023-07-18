@@ -37,10 +37,6 @@ jobs:
         profile: minimal
         toolchain: ${{ matrix.rust }}
         default: true
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.rust }}
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
