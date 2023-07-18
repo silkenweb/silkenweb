@@ -1,5 +1,13 @@
 # Changelog
 
+## Next
+
+- `Element::DomType` was renamed to `Element::DomElement`.
+
+### Fixes
+
+- `ElementHandle` works with `Hydro` DOM.
+
 ## 0.5.0 - 2023-07-17
 
 - SSR Scopes: Each tokio task now has a local task queue to emulate the browsers microtask queue.

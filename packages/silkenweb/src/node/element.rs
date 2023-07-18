@@ -334,7 +334,8 @@ impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
 }
 
 impl<D: Dom> Element for GenericElement<D> {
-    type DomType = web_sys::Element;
+    type Dom = D;
+    type DomElement = web_sys::Element;
 
     fn class<'a, T>(mut self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
@@ -430,7 +431,7 @@ impl<D: Dom> Element for GenericElement<D> {
         self
     }
 
-    fn effect(mut self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+    fn effect(mut self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self {
         self.element.effect(f);
         self
     }
@@ -438,7 +439,7 @@ impl<D: Dom> Element for GenericElement<D> {
     fn effect_signal<T>(
         self,
         sig: impl Signal<Item = T> + 'static,
-        f: impl Clone + Fn(&Self::DomType, T) + 'static,
+        f: impl Clone + Fn(&Self::DomElement, T) + 'static,
     ) -> Self
     where
         T: 'static,
@@ -454,8 +455,8 @@ impl<D: Dom> Element for GenericElement<D> {
         self.spawn_future(future)
     }
 
-    fn handle(&self) -> ElementHandle<Self::DomType> {
-        ElementHandle(self.element.try_dom_element()).cast()
+    fn handle(&self) -> ElementHandle<Self::Dom, Self::DomElement> {
+        ElementHandle(self.element.clone(), PhantomData)
     }
 
     fn spawn_future(mut self, future: impl Future<Output = ()> + 'static) -> Self {
@@ -509,7 +510,8 @@ where
 
 /// An HTML element.
 pub trait Element: Sized {
-    type DomType: JsCast + 'static;
+    type Dom: Dom;
+    type DomElement: JsCast + 'static;
 
     /// Add a class to the element.
     ///
@@ -661,14 +663,14 @@ pub trait Element: Sized {
     /// # let input: Input =
     /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
     /// ```
-    fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self;
+    fn effect(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self;
 
     /// Apply an effect after the next render each time a singal yields a new
     /// value.
     fn effect_signal<T: 'static>(
         self,
         sig: impl Signal<Item = T> + 'static,
-        f: impl Fn(&Self::DomType, T) + Clone + 'static,
+        f: impl Fn(&Self::DomElement, T) + Clone + 'static,
     ) -> Self;
 
     /// Get a handle to the element.
@@ -691,7 +693,7 @@ pub trait Element: Sized {
     ///     }))
     ///     .text(Sig(text.signal_cloned()));
     /// ```
-    fn handle(&self) -> ElementHandle<Self::DomType>;
+    fn handle(&self) -> ElementHandle<Self::Dom, Self::DomElement>;
 
     /// Spawn a future on the element.
     ///
@@ -874,33 +876,37 @@ fn spawn_cancelable_future(
 ///
 /// See [`Element::handle`] for an example.
 #[derive(Clone)]
-pub struct ElementHandle<DomType>(Option<DomType>);
+pub struct ElementHandle<D: Dom, DomElement>(D::Element, PhantomData<DomElement>);
 
-impl<DomType: JsCast + Clone> ElementHandle<DomType> {
+impl<D: Dom, DomElement: JsCast + Clone> ElementHandle<D, DomElement> {
     /// Get the associated DOM element, if it is a [`Wet`] element.
     ///
-    /// If the referenced element is not [`Wet`], this will return [`None`].
-    pub fn try_dom_element(&self) -> Option<DomType> {
-        self.0.clone()
+    /// If the referenced element is not [`Wet`] or a hydrated [`Hydro`]
+    /// element, this will return [`None`].
+    pub fn try_dom_element(&self) -> Option<DomElement> {
+        self.0
+            .try_dom_element()
+            .map(|elem| elem.dyn_into().unwrap())
     }
 
     /// Get the associated DOM element, or panic.
     ///
     /// # Panics
     ///
-    /// This will panic if [`Self::try_dom_element`] would return [`None`].
-    pub fn dom_element(&self) -> DomType {
+    /// This will panic if [`Self::try_dom_element`] would return [`None`], or
+    /// `self` was created from an invalid [`ElementHandle::cast`].
+    pub fn dom_element(&self) -> DomElement {
         self.try_dom_element()
             .expect("Dom type doesn't support element handles")
     }
 }
 
-impl ElementHandle<web_sys::Element> {
+impl<D: Dom> ElementHandle<D, web_sys::Element> {
     /// Cast the dom type of an [`ElementHandle`].
     ///
     /// It is the clients responsibility to ensure the new type is correct.
-    pub fn cast<T: JsCast>(self) -> ElementHandle<T> {
-        ElementHandle(self.0.map(|elem| elem.unchecked_into()))
+    pub fn cast<T: JsCast>(self) -> ElementHandle<D, T> {
+        ElementHandle(self.0, PhantomData)
     }
 }
 

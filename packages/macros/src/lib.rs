@@ -113,7 +113,8 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
     quote!(
         impl #impl_generics ::silkenweb::node::element::Element
         for #item_name #ty_generics #where_clause {
-            type DomType = <#target_type as ::silkenweb::node::element::Element>::DomType;
+            type Dom = <#target_type as ::silkenweb::node::element::Element>::Dom;
+            type DomElement = <#target_type as ::silkenweb::node::element::Element>::DomElement;
 
             fn class<'a, T>(self, class: impl ::silkenweb::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
@@ -149,19 +150,19 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 Self{#target: self.#target.style_property(name, value) #other_fields}
             }
 
-            fn effect(self, f: impl FnOnce(&Self::DomType) + 'static) -> Self {
+            fn effect(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self {
                 Self{#target: self.#target.effect(f) #other_fields}
             }
 
             fn effect_signal<T: 'static>(
                 self,
                 sig: impl ::silkenweb::macros::Signal<Item = T> + 'static,
-                f: impl Fn(&Self::DomType, T) + Clone + 'static,
+                f: impl Fn(&Self::DomElement, T) + Clone + 'static,
             ) -> Self {
                 Self{#target: self.#target.effect_signal(sig, f) #other_fields}
             }
 
-            fn handle(&self) -> ::silkenweb::node::element::ElementHandle<Self::DomType> {
+            fn handle(&self) -> ::silkenweb::node::element::ElementHandle<Self::Dom, Self::DomElement> {
                 self.#target.handle()
             }
 

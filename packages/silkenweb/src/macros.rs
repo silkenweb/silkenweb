@@ -275,7 +275,8 @@ macro_rules! dom_element {
         }
 
         impl<Dom: $crate::dom::Dom> $crate::node::element::Element for $camel_name<Dom> {
-            type DomType = $elem_type;
+            type Dom = Dom;
+            type DomElement = $elem_type;
 
             fn class<'a, T>(self, class: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
             where
@@ -312,7 +313,7 @@ macro_rules! dom_element {
                 Self(self.0.style_property(name, value))
             }
 
-            fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomType) + 'static) -> Self {
+            fn effect(self, f: impl ::std::ops::FnOnce(&Self::DomElement) + 'static) -> Self {
                 Self(self.0.effect(|elem| {
                     f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))
                 }))
@@ -321,7 +322,7 @@ macro_rules! dom_element {
             fn effect_signal<T: 'static>(
                 self,
                 sig: impl $crate::macros::Signal<Item = T> + 'static,
-                f: impl Fn(&Self::DomType, T) + Clone + 'static,
+                f: impl Fn(&Self::DomElement, T) + Clone + 'static,
             ) -> Self {
                 Self(self.0.effect_signal(
                     sig,
@@ -334,7 +335,7 @@ macro_rules! dom_element {
                 ))
             }
 
-            fn handle(&self) -> $crate::node::element::ElementHandle<Self::DomType> {
+            fn handle(&self) -> $crate::node::element::ElementHandle<Self::Dom, Self::DomElement> {
                 self.0.handle().cast()
             }
 

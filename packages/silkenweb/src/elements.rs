@@ -257,7 +257,7 @@ pub trait HtmlElement: Element {
 
 /// Events common to all HTML elements
 pub trait HtmlElementEvents: Element {
-    events!(Self::DomType {
+    events!(Self::DomElement {
         beforeinput: web_sys::InputEvent,
         change: web_sys::Event,
         error: web_sys::Event,
@@ -275,7 +275,7 @@ pub trait HtmlElementEvents: Element {
 
 /// Events common to all elements
 pub trait ElementEvents: Element {
-    events!(Self::DomType {
+    events!(Self::DomElement {
         animationcancel: web_sys::AnimationEvent,
         animationend: web_sys::AnimationEvent,
         animationiteration: web_sys::AnimationEvent,
