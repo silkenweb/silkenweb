@@ -65,7 +65,7 @@ grass = "0.13.1"
 # xtask dependencies
 clap = "4.1.8"
 xtask-base = { git = "https://github.com/simon-bourne/rust-xtask-base" }
-xshell = "0.1.17"
+xshell = "0.2.5"
 duct = "0.13.5"
 scopeguard = "1.1.0"
 

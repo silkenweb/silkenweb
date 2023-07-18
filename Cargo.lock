@@ -3845,7 +3845,16 @@ version = "0.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eaad2035244c56da05573d4d7fda5f903c60a5f35b9110e157a14a1df45a9f14"
 dependencies = [
- "xshell-macros",
+ "xshell-macros 0.1.17",
+]
+
+[[package]]
+name = "xshell"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce2107fe03e558353b4c71ad7626d58ed82efaf56c54134228608893c77023ad"
+dependencies = [
+ "xshell-macros 0.2.5",
 ]
 
 [[package]]
@@ -3855,6 +3864,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4916a4a3cad759e499a3620523bf9545cc162d7a06163727dde97ce9aaa4cf39"
 
 [[package]]
+name = "xshell-macros"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e2c411759b501fb9501aac2b1b2d287a6e93e5bdcf13c25306b23e1b716dd0e"
+
+[[package]]
 name = "xtask"
 version = "0.1.0"
 dependencies = [
@@ -3862,7 +3877,7 @@ dependencies = [
  "duct",
  "itertools 0.11.0",
  "scopeguard",
- "xshell",
+ "xshell 0.2.5",
  "xtask-base",
 ]
 
@@ -3880,5 +3895,5 @@ dependencies = [
  "handlebars",
  "itertools 0.10.5",
  "serde_json",
- "xshell",
+ "xshell 0.1.17",
 ]
