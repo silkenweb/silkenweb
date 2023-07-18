@@ -21,7 +21,7 @@ jobs:
     - uses: actions-rs/install@v0.1
       with:
         crate: trunk
-        version: 0.16.0
+        version: 0.17.2
     - name: Build Website
       run: cargo xtask build-website
     - name: Deploy to Netlify
