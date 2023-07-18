@@ -2,6 +2,11 @@
 resolver = "2"
 members = ["packages/*", "examples/*"]
 
+[profile.dev]
+# Debug info isn't useful most of the time. It slows down builds and uses up disk space.
+# Disk space is particularly a problem for CI builds.
+debug = 0
+
 [profile.release]
 codegen-units = 1
 lto = true
