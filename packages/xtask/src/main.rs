@@ -206,18 +206,17 @@ fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
     let _dir = sh.push_dir("examples");
     let examples = sh.read_dir(".")?;
     let non_browser = ["htmx-axum"];
-    let non_browser: Vec<_> = non_browser
-        .into_iter()
-        .map(|x| Some(OsStr::new(x)))
-        .collect();
+    let non_browser: Vec<_> = non_browser.into_iter().map(OsStr::new).collect();
     let mut browser_examples = Vec::new();
 
     for example in examples {
-        if !non_browser.contains(&example.file_name()) {
-            for file in sh.read_dir(&example)? {
-                if file.extension() == Some(OsStr::new("html")) {
-                    browser_examples.push(example);
-                    break;
+        if let Some(example) = example.file_name() {
+            if !non_browser.contains(&example) {
+                for file in sh.read_dir(example)? {
+                    if file.extension() == Some(OsStr::new("html")) {
+                        browser_examples.push(example.into());
+                        break;
+                    }
                 }
             }
         }
