@@ -8,4 +8,4 @@ publish = false
 [dependencies]
 gloo-console = { workspace = true }
 silkenweb = { workspace = true }
-web-sys = { version = "0.3.60", features = ["DataTransfer"] }
+web-sys = { workspace = true, features = ["DataTransfer"] }

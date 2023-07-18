@@ -7,7 +7,7 @@ use quote::quote;
 use silkenweb_base::css::{self, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
-    FieldsUnnamed, Ident, Index, LitBool, Meta, NestedMeta,
+    FieldsUnnamed, Ident, Index, LitBool,
 };
 
 use crate::parse::Input;
@@ -206,29 +206,24 @@ fn target_field_index(attr_name: &str, fields: &[Field]) -> usize {
 
 /// Make sure an attribute matches #[<name>(<value>)]
 fn check_attr_matches(attr: &Attribute, name: &str, value: &str) {
-    if !attr.path.is_ident(name) {
-        abort!(attr.path, "Expected `{}`", name);
+    let path = attr.path();
+
+    if !path.is_ident(name) {
+        abort!(path, "Expected `{}`", name);
     }
 
-    if let Meta::List(list) = attr.parse_meta().unwrap() {
-        let mut target_list = list.nested.iter();
-
-        if let Some(NestedMeta::Meta(Meta::Path(target_path))) = target_list.next() {
-            if !target_path.is_ident(value) {
-                abort!(target_path, "Expected `{}`", value);
-            }
-
-            if target_list.next().is_some() {
-                abort!(list, "Expected `{}({})`", name, value);
-            }
-
-            return;
-        } else {
-            abort!(list, "Expected `{}({})`", name, value);
+    attr.parse_nested_meta(|meta| {
+        if !meta.path.is_ident(value) {
+            abort!(meta.path, "Expected `{}`", value);
         }
-    }
 
-    abort!(attr, "Expected `{}({})`", name, value);
+        if !meta.input.is_empty() {
+            abort!(meta.input.span(), "Unexpected token");
+        }
+
+        Ok(())
+    })
+    .unwrap()
 }
 
 fn fields(struct_data: Data) -> Vec<Field> {

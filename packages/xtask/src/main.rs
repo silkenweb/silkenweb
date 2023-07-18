@@ -1,4 +1,5 @@
 use std::{
+    env,
     ffi::OsStr,
     fmt::Write,
     path::{Path, PathBuf},
@@ -7,7 +8,7 @@ use std::{
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
 use scopeguard::defer;
-use xshell::{cmd, mkdir_p, pushd, read_dir, rm_rf, write_file};
+use xshell::{cmd, Shell};
 use xtask_base::{
     build_readme, ci_nightly, clippy, generate_open_source_files, run, CommonCmds, WorkflowResult,
 };
@@ -59,6 +60,8 @@ enum CiCommand {
 
 fn main() {
     run(|workspace| {
+        let sh = Shell::new()?;
+
         match Commands::parse() {
             Commands::Codegen { check } => {
                 build_readme(".", check)?;
@@ -82,8 +85,8 @@ fn main() {
             Commands::WasmPackTest => wasm_pack_test()?,
             Commands::TrunkBuild => trunk_build()?,
             Commands::TodomvcRun => {
-                let _dir = pushd("examples/todomvc")?;
-                cmd!("trunk serve --open").run()?;
+                let _dir = sh.push_dir("examples/todomvc");
+                cmd!(sh, "trunk serve --open").run()?;
             }
             Commands::TodomvcCypress { gui } => {
                 cypress("install", if gui { "open" } else { "run" }, None)?;
@@ -92,8 +95,8 @@ fn main() {
             Commands::GithubActions { full } => {
                 let reuse = (!full).then_some("--reuse");
 
-                cmd!("docker build . -t silkenweb-github-actions").run()?;
-                cmd!(
+                cmd!(sh, "docker build . -t silkenweb-github-actions").run()?;
+                cmd!(sh,
                     "act -P ubuntu-latest=silkenweb-github-actions:latest --use-gitignore {reuse...}"
                 )
                 .run()?;
@@ -106,21 +109,26 @@ fn main() {
 }
 
 fn build_website() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
     let dest_dir = "target/website";
-    rm_rf(dest_dir)?;
+    sh.remove_path(dest_dir)?;
     let examples_dest_dir = format!("{dest_dir}/examples");
-    mkdir_p(&examples_dest_dir)?;
+    sh.create_dir(&examples_dest_dir)?;
     let mut redirects = String::new();
 
     for example in browser_examples()? {
         let examples_dir: PathBuf = [Path::new("examples"), &example].iter().collect();
 
         {
-            let _dir = pushd(&examples_dir);
-            cmd!("trunk build --release --public-url examples/{example}").run()?;
+            let _dir = sh.push_dir(&examples_dir);
+            cmd!(sh, "trunk build --release --public-url examples/{example}").run()?;
         }
 
-        cmd!("cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}").run()?;
+        cmd!(
+            sh,
+            "cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}"
+        )
+        .run()?;
 
         {
             let example = example.display();
@@ -131,7 +139,7 @@ fn build_website() -> WorkflowResult<()> {
         }
     }
 
-    write_file(format!("{dest_dir}/_redirects"), redirects)?;
+    sh.write_file(format!("{dest_dir}/_redirects"), redirects)?;
 
     Ok(())
 }
@@ -149,13 +157,15 @@ fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
 }
 
 fn test_features() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
+
     for features in ["declarative-shadow-dom"].into_iter().powerset() {
         if !features.is_empty() {
             clippy(None, &features)?;
 
             let features = features.join(",");
 
-            cmd!("cargo test --package silkenweb --features {features}").run()?;
+            cmd!(sh, "cargo test --package silkenweb --features {features}").run()?;
         }
     }
 
@@ -163,32 +173,38 @@ fn test_features() -> WorkflowResult<()> {
 }
 
 fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
-    let _dir = pushd("examples/todomvc")?;
-    cmd!("trunk build").run()?;
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples/todomvc");
+    cmd!(sh, "trunk build").run()?;
+    let dir = env::current_dir()?;
+    env::set_current_dir(sh.current_dir())?;
     let trunk = duct::cmd("trunk", ["serve", "--no-autoreload", "--ignore=."]).start()?;
+    env::set_current_dir(dir)?;
     defer! { let _ = trunk.kill(); };
 
-    let _dir = pushd("e2e")?;
-    cmd!("npm {npm_install_cmd}").run()?;
+    let _dir = sh.push_dir("e2e");
+    cmd!(sh, "npm {npm_install_cmd}").run()?;
 
     if let Some(browser) = browser {
-        cmd!("npx cypress {cypress_cmd} --browser {browser}").run()?;
+        cmd!(sh, "npx cypress {cypress_cmd} --browser {browser}").run()?;
     } else {
-        cmd!("npx cypress {cypress_cmd}").run()?;
+        cmd!(sh, "npx cypress {cypress_cmd}").run()?;
     }
 
     Ok(())
 }
 
 fn wasm_pack_test() -> WorkflowResult<()> {
-    let _dir = pushd("packages/silkenweb")?;
-    cmd!("wasm-pack test --headless --firefox").run()?;
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("packages/silkenweb");
+    cmd!(sh, "wasm-pack test --headless --firefox").run()?;
     Ok(())
 }
 
 fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
-    let _dir = pushd("examples");
-    let examples = read_dir(".")?;
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples");
+    let examples = sh.read_dir(".")?;
     let non_browser = ["htmx-axum"];
     let non_browser: Vec<_> = non_browser
         .into_iter()
@@ -198,7 +214,7 @@ fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
 
     for example in examples {
         if !non_browser.contains(&example.file_name()) {
-            for file in read_dir(&example)? {
+            for file in sh.read_dir(&example)? {
                 if file.extension() == Some(OsStr::new("html")) {
                     browser_examples.push(example);
                     break;
@@ -211,11 +227,12 @@ fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
 }
 
 fn trunk_build() -> WorkflowResult<()> {
-    let _dir = pushd("examples");
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples");
 
     for example in browser_examples()? {
-        let _dir = pushd(example)?;
-        cmd!("trunk build").run()?;
+        let _dir = sh.push_dir(example);
+        cmd!(sh, "trunk build").run()?;
     }
 
     Ok(())

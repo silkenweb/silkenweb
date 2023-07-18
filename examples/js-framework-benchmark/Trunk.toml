@@ -3,8 +3,8 @@ target = "trunk-target.html"
 public_url = "/frameworks/keyed/silkenweb/dist/"
 
 [tools]
-wasm_bindgen = "0.2.84"
-wasm_opt = "version_111"
+wasm_bindgen = "0.2.87"
+wasm_opt = "version_114"
 
 [[hooks]]
 stage = "post_build"
