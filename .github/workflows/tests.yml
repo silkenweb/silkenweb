@@ -67,19 +67,19 @@ jobs:
       run: trunk build
     - name: Cypress
       if: matrix.os != 'macos-latest'
-      uses: cypress-io/github-action@v4.1.0
+      uses: cypress-io/github-action@v5
       with:
         working-directory: examples/todomvc/e2e
         start: npm start
         wait-on: 'http://localhost:8080'
     # Screenshots are only generated on failure
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: todomvc-cypress-screenshots
         path: examples/todomvc/e2e/cypress/screenshots
     # Videos are generated regardless of success or failure
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: always()
       with:
         name: todomvc-cypress-videos
