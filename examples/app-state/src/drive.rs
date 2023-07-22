@@ -20,7 +20,7 @@ where
 }
 
 #[allow(dead_code)]
-pub fn drive_value<T,S>(sig: S, start_value: T) -> Mutable<T>
+pub fn drive_value<T, S>(sig: S, start_value: T) -> Mutable<T>
 where
     T: 'static,
     S: Signal<Item = T> + 'static,

@@ -4,15 +4,14 @@ mod state;
 #[cfg(test)]
 mod test_utils;
 
+pub use app::app;
 #[cfg_browser(true)]
 use app::hydrate_app;
-#[cfg_browser(true)]
-use wasm_bindgen::prelude::wasm_bindgen;
-
-pub use app::app;
 use drive::drive_vector;
 use futures_util::Future;
 use silkenweb::cfg_browser;
+#[cfg_browser(true)]
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[cfg_browser(true)]
 #[wasm_bindgen]

@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use super::state::CounterState;
 use silkenweb::{
     dom::Dom,
     elements::html::{div, Div},
@@ -12,6 +11,8 @@ use silkenweb::{
     task::spawn_local,
     value::Sig,
 };
+
+use super::state::CounterState;
 
 #[allow(dead_code)]
 pub fn hydrate_app() {

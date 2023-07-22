@@ -1,10 +1,11 @@
 #![allow(dead_code)]
 
-use crate::drive_vector;
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
+
+use crate::drive_vector;
 
 pub struct CounterState {
     count: Mutable<isize>,

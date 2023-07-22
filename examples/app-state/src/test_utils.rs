@@ -1,9 +1,10 @@
+use std::sync::{Arc, RwLock};
+
 use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
 use silkenweb::clone;
-use std::sync::{Arc, RwLock};
 
 pub struct SigValue<T>(Arc<RwLock<T>>);
 
