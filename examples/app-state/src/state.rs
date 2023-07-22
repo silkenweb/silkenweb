@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::signal_drive_vector;
+use crate::drive_vector;
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
@@ -20,7 +20,7 @@ impl Default for CounterState {
 impl CounterState {
     fn new() -> Self {
         let count = Mutable::new(0);
-        let list = signal_drive_vector(count.signal(), |vec, value| vec.lock_mut().push(value));
+        let list = drive_vector(count.signal(), |vec, value| vec.lock_mut().push(value));
         Self { count, list }
     }
 

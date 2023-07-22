@@ -10,7 +10,7 @@ use app::hydrate_app;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 pub use app::app;
-use drive::signal_drive_vector;
+use drive::drive_vector;
 use futures_util::Future;
 use silkenweb::cfg_browser;
 
