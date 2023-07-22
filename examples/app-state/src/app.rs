@@ -25,12 +25,16 @@ pub fn hydrate_app() {
 pub fn app<D: Dom>() -> Div<D> {
     let count = Rc::new(CounterState::default());
 
+    let text_sig = Sig(count.text());
+    let list_sig = Sig(count.list());
+
     div()
         .id("body")
         .child(h1().text("Counter"))
-        .child(div().text(Sig(count.text())))
+        .child(div().text(text_sig))
         .child(count_button("+", 1, count.clone()))
         .child(count_button("-", -1, count))
+        .child(div().text(list_sig))
 }
 
 pub fn count_button<D: Dom>(label: &str, delta: isize, count: Rc<CounterState>) -> Button<D> {

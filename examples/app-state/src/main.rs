@@ -48,6 +48,7 @@ async fn render(uri: Uri) -> impl IntoResponse {
 
     let page_html = format!(
         include_str!("page.tmpl.html"),
+        style = r#"div, button { margin: 8px; }"#,
         body_html = body.freeze(),
         init_script = r#"
             import init, {js_main} from '/pkg/app_state.js';

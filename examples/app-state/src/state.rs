@@ -3,7 +3,7 @@
 use crate::signal_drive_vector;
 use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
-    signal_vec::MutableVec,
+    signal_vec::{MutableVec, SignalVecExt},
 };
 
 pub struct CounterState {
@@ -35,10 +35,18 @@ impl CounterState {
     pub fn text(&self) -> impl Signal<Item = String> {
         self.count.signal().map(|i| i.to_string())
     }
+
+    pub fn list(&self) -> impl Signal<Item = String> {
+        self.list
+            .signal_vec()
+            .to_signal_cloned()
+            .map(|vec| format!("{vec:?}"))
+    }
 }
 
 #[cfg(test)]
 mod test {
+
     use super::CounterState;
     use crate::test_utils::{SigValue, VecValue};
 
