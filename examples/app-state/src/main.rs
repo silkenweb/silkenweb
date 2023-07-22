@@ -1,20 +1,13 @@
-mod app;
-mod drive;
-mod state;
 use axum::{
     error_handling::HandleError,
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},
     Extension, Router, Server,
 };
-use drive::signal_drive_vector;
 use silkenweb::{dom::Dry, router, task};
 use std::io;
 use tokio_util::task::LocalPoolHandle;
 use tower_http::services::ServeDir;
-
-#[cfg(test)]
-mod test_utils;
 
 #[tokio::main]
 async fn main() {
@@ -42,7 +35,7 @@ async fn handler(Extension(local_pool): Extension<LocalPoolHandle>, uri: Uri) ->
 }
 
 async fn render(uri: Uri) -> impl IntoResponse {
-    let body = app::app::<Dry>();
+    let body = app_state::app::<Dry>();
     router::set_url_path(uri.path());
     task::render_now().await;
 
