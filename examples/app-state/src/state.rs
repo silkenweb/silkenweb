@@ -1,9 +1,14 @@
 #![allow(dead_code)]
 
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use crate::signal_drive_vector;
+use futures_signals::{
+    signal::{Mutable, Signal, SignalExt},
+    signal_vec::MutableVec,
+};
 
 pub struct CounterState {
     count: Mutable<isize>,
+    list: MutableVec<isize>,
 }
 
 impl Default for CounterState {
@@ -15,7 +20,8 @@ impl Default for CounterState {
 impl CounterState {
     fn new() -> Self {
         let count = Mutable::new(0);
-        Self { count }
+        let list = signal_drive_vector(count.signal(), |vec, value| vec.lock_mut().push(value));
+        Self { count, list }
     }
 
     pub fn count(&self) -> Mutable<isize> {
@@ -34,48 +40,25 @@ impl CounterState {
 #[cfg(test)]
 mod test {
     use super::CounterState;
-    use futures_signals::signal::{Signal, SignalExt};
-    use silkenweb::clone;
-    use std::sync::{Arc, RwLock};
+    use crate::test_utils::{SigValue, VecValue};
 
     #[tokio::test]
     async fn test_counter() {
         let state = CounterState::default();
-        let val = Value::new(state.text());
-        assert_eq!(state.count().get(), 0);
 
-        assert_eq!(val.get().await, "0");
+        let text = SigValue::new(state.text());
+        let list = VecValue::new(state.list.signal_vec());
+
+        assert_eq!(state.count().get(), 0);
+        assert_eq!(list.get().await, [0]);
+        assert_eq!(text.get().await, "0");
 
         state.add(1);
-        assert_eq!(val.get().await, "1");
+        assert_eq!(text.get().await, "1");
+        assert_eq!(list.get().await, [0, 1]);
 
         state.add(-2);
-        assert_eq!(val.get().await, "-1");
-    }
-
-    struct Value<T>(Arc<RwLock<T>>);
-
-    impl<T> Value<T>
-    where
-        T: Clone + Default + Sync + Send + 'static,
-    {
-        pub fn new<S: Signal<Item = T> + Sync + Send + 'static>(sig: S) -> Self {
-            let val = Arc::new(RwLock::new(T::default()));
-
-            tokio::spawn(sig.for_each({
-                clone!(val);
-                move |t| {
-                    let mut v = val.write().unwrap();
-                    *v = t;
-                    async {}
-                }
-            }));
-            Self(val)
-        }
-
-        pub async fn get(&self) -> T {
-            tokio::task::yield_now().await;
-            self.0.read().unwrap().clone()
-        }
+        assert_eq!(text.get().await, "-1");
+        assert_eq!(list.get().await, [0, 1, -1]);
     }
 }

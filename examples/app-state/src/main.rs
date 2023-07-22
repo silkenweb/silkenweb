@@ -1,16 +1,20 @@
 mod app;
+mod drive;
 mod state;
-
 use axum::{
     error_handling::HandleError,
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},
     Extension, Router, Server,
 };
+use drive::signal_drive_vector;
 use silkenweb::{dom::Dry, router, task};
 use std::io;
 use tokio_util::task::LocalPoolHandle;
 use tower_http::services::ServeDir;
+
+#[cfg(test)]
+mod test_utils;
 
 #[tokio::main]
 async fn main() {
