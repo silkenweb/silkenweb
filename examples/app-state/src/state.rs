@@ -46,27 +46,31 @@ impl CounterState {
 
 #[cfg(test)]
 mod test {
+    use silkenweb::task::server;
 
     use super::CounterState;
     use crate::test_utils::{SigValue, VecValue};
 
     #[tokio::test]
     async fn test_counter() {
-        let state = CounterState::default();
+        server::scope(async {
+            let state = CounterState::default();
 
-        let text = SigValue::new(state.text());
-        let list = VecValue::new(state.list.signal_vec());
+            let text = SigValue::new(state.text());
+            let list = VecValue::new(state.list.signal_vec());
 
-        assert_eq!(state.count().get(), 0);
-        assert_eq!(list.get().await, [0]);
-        assert_eq!(text.get().await, "0");
+            assert_eq!(state.count().get(), 0);
+            assert_eq!(list.get().await, [0]);
+            assert_eq!(text.get().await, "0");
 
-        state.add(1);
-        assert_eq!(text.get().await, "1");
-        assert_eq!(list.get().await, [0, 1]);
+            state.add(1);
+            assert_eq!(text.get().await, "1");
+            assert_eq!(list.get().await, [0, 1]);
 
-        state.add(-2);
-        assert_eq!(text.get().await, "-1");
-        assert_eq!(list.get().await, [0, 1, -1]);
+            state.add(-2);
+            assert_eq!(text.get().await, "-1");
+            assert_eq!(list.get().await, [0, 1, -1]);
+        })
+        .await;
     }
 }

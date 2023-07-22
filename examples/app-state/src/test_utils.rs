@@ -2,19 +2,19 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use silkenweb::clone;
+use silkenweb::{clone, task::spawn_local};
 use std::sync::{Arc, RwLock};
 
 pub struct SigValue<T>(Arc<RwLock<T>>);
 
 impl<T> SigValue<T>
 where
-    T: Clone + Default + Sync + Send + 'static,
+    T: Clone + Default + 'static,
 {
-    pub fn new<S: Signal<Item = T> + Sync + Send + 'static>(sig: S) -> Self {
+    pub fn new<S: Signal<Item = T> + 'static>(sig: S) -> Self {
         let val = Arc::new(RwLock::new(T::default()));
 
-        tokio::spawn(sig.for_each({
+        spawn_local(sig.for_each({
             clone!(val);
             move |t| {
                 let mut v = val.write().unwrap();
@@ -35,12 +35,12 @@ pub struct VecValue<T>(Arc<RwLock<Vec<T>>>);
 
 impl<T> VecValue<T>
 where
-    T: Clone + Default + Sync + Send + 'static,
+    T: Clone + Default + 'static,
 {
-    pub fn new<S: SignalVec<Item = T> + Sync + Send + 'static>(sig: S) -> Self {
+    pub fn new<S: SignalVec<Item = T> + 'static>(sig: S) -> Self {
         let val = Arc::new(RwLock::new(Vec::default()));
 
-        tokio::spawn(sig.for_each({
+        spawn_local(sig.for_each({
             clone!(val);
             move |t| {
                 let mut vec = val.write().unwrap();
