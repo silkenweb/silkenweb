@@ -2,7 +2,7 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use silkenweb::{clone, task::spawn_local};
+use silkenweb::clone;
 use std::sync::{Arc, RwLock};
 
 pub struct SigValue<T>(Arc<RwLock<T>>);
@@ -14,7 +14,7 @@ where
     pub fn new<S: Signal<Item = T> + 'static>(sig: S) -> Self {
         let val = Arc::new(RwLock::new(T::default()));
 
-        spawn_local(sig.for_each({
+        crate::spawn_local(sig.for_each({
             clone!(val);
             move |t| {
                 let mut v = val.write().unwrap();
@@ -40,7 +40,7 @@ where
     pub fn new<S: SignalVec<Item = T> + 'static>(sig: S) -> Self {
         let val = Arc::new(RwLock::new(Vec::default()));
 
-        spawn_local(sig.for_each({
+        crate::spawn_local(sig.for_each({
             clone!(val);
             move |t| {
                 let mut vec = val.write().unwrap();

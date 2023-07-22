@@ -12,12 +12,10 @@ crate-type = ["cdylib", "rlib"]
 silkenweb = { workspace = true }
 futures-signals = "0.3.31"
 wasm-bindgen = { workspace = true }
+futures-util = "0.3.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 axum = { version = "0.6.1", features = ["headers"] }
 tokio = { version = "1.21.2", features = ["full"] }
 tower-http = { version = "0.3.4", features = ["fs"] }
 tokio-util = { version = "0.7.8", features = ["rt"] }
-
-[dev-dependencies]
-futures-util = "0.3.0"

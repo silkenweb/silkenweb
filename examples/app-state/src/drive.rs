@@ -2,7 +2,6 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use silkenweb::task::spawn_local;
 
 pub fn signal_drive_vector<TSig, TVec, S, F>(sig: S, mut fun: F) -> MutableVec<TVec>
 where
@@ -13,7 +12,7 @@ where
 {
     let vec = MutableVec::<TVec>::new();
     let vect = vec.clone();
-    spawn_local(sig.for_each(move |value| {
+    crate::spawn_local(sig.for_each(move |value| {
         fun(&vect, value);
         async {}
     }));
