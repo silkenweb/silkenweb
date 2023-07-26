@@ -651,7 +651,7 @@ pub trait Element: Sized {
     /// ```
     fn effect(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self;
 
-    /// Apply an effect after the next render each time a singal yields a new
+    /// Apply an effect after the next render each time a signal yields a new
     /// value.
     fn effect_signal<T: 'static>(
         self,
