@@ -3,15 +3,16 @@
 use std::collections::HashSet;
 use std::{
     self,
-    cell::{Cell, RefCell},
+    cell::RefCell,
     fmt,
     future::Future,
     marker::PhantomData,
-    pin::Pin,
+    pin::{pin, Pin},
     rc::Rc,
 };
 
 use discard::DiscardOnDrop;
+use futures::StreamExt;
 use futures_signals::{
     cancelable_future,
     signal::{Signal, SignalExt},
@@ -102,48 +103,43 @@ impl<D: Dom> GenericElement<D> {
         let _ = name;
     }
 
-    fn class_signal<T>(
-        element: &mut D::Element,
-        class: T,
-        previous_value: &Rc<Cell<Option<T>>>,
-    ) -> impl Future<Output = ()>
+    async fn class_signal<T>(mut element: D::Element, class: impl Signal<Item = T>)
     where
         T: AsRef<str>,
     {
-        if let Some(previous) = previous_value.replace(None) {
-            element.remove_class(previous.as_ref());
+        let mut class = pin!(class.to_stream());
+
+        if let Some(new_value) = class.next().await {
+            element.add_class(intern_str(new_value.as_ref()));
+            let mut previous_value = new_value;
+
+            while let Some(new_value) = class.next().await {
+                element.remove_class(previous_value.as_ref());
+                element.add_class(intern_str(new_value.as_ref()));
+                previous_value = new_value;
+            }
         }
-
-        element.add_class(intern_str(class.as_ref()));
-        previous_value.set(Some(class));
-
-        async {}
     }
 
-    fn classes_signal<T>(
-        element: &mut D::Element,
-        classes: impl IntoIterator<Item = T>,
-        previous_values: &Rc<Cell<Vec<T>>>,
-    ) -> impl Future<Output = ()>
-    where
+    async fn classes_signal<T>(
+        mut element: D::Element,
+        classes: impl Signal<Item = impl IntoIterator<Item = T>>,
+    ) where
         T: AsRef<str>,
     {
-        let mut previous = previous_values.replace(Vec::new());
+        let mut classes = pin!(classes.to_stream());
+        let mut previous_classes: Vec<T> = Vec::new();
 
-        for to_remove in &previous {
-            element.remove_class(to_remove.as_ref());
+        while let Some(new_classes) = classes.next().await {
+            for to_remove in previous_classes.drain(..) {
+                element.remove_class(to_remove.as_ref());
+            }
+
+            for to_add in new_classes {
+                element.add_class(intern_str(to_add.as_ref()));
+                previous_classes.push(to_add);
+            }
         }
-
-        previous.clear();
-
-        for to_add in classes {
-            element.add_class(intern_str(to_add.as_ref()));
-            previous.push(to_add);
-        }
-
-        previous_values.set(previous);
-
-        async {}
     }
 }
 
@@ -199,20 +195,20 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
         self.static_child_count += 1;
 
-        child.for_each(
+        child.select_spawn(
             |parent, child| {
                 parent
                     .element
                     .append_child(&D::Text::new(child.as_ref()).into());
             },
-            |parent| {
+            |parent, child_signal| {
                 let mut text_node = D::Text::new(empty_str());
                 parent.element.append_child(&text_node.clone().into());
 
-                move |new_value| {
+                child_signal.for_each(move |new_value| {
                     text_node.set_text(new_value.as_ref());
                     async {}
-                }
+                })
             },
             &mut self,
         );
@@ -341,14 +337,9 @@ impl<D: Dom> Element for GenericElement<D> {
     where
         T: 'a + AsRef<str>,
     {
-        class.for_each(
+        class.select_spawn(
             |elem, class| elem.element.add_class(intern_str(class.as_ref())),
-            |elem| {
-                let mut element = elem.element.clone();
-                let previous_value = Rc::new(Cell::new(None));
-
-                move |class: T| Self::class_signal(&mut element, class, &previous_value)
-            },
+            |elem, class| Self::class_signal(elem.element.clone(), class),
             &mut self,
         );
 
@@ -360,18 +351,13 @@ impl<D: Dom> Element for GenericElement<D> {
         T: 'a + AsRef<str>,
         Iter: 'a + IntoIterator<Item = T>,
     {
-        classes.for_each(
+        classes.select_spawn(
             |elem, classes| {
                 for class in classes {
                     elem.element.add_class(intern_str(class.as_ref()));
                 }
             },
-            |elem| {
-                let mut element = elem.element.clone();
-                let previous_values = Rc::new(Cell::new(Vec::<T>::new()));
-
-                move |classes| Self::classes_signal(&mut element, classes, &previous_values)
-            },
+            |elem, classes| Self::classes_signal(elem.element.clone(), classes),
             &mut self,
         );
 
@@ -385,17 +371,17 @@ impl<D: Dom> Element for GenericElement<D> {
     ) -> Self {
         self.check_attribute_unique(name);
 
-        value.for_each(
+        value.select_spawn(
             |elem, value| elem.element.attribute(name, value),
-            |elem| {
+            |elem, value| {
                 let name = name.to_owned();
                 let mut element = elem.element.clone();
 
-                move |new_value| {
+                value.for_each(move |new_value| {
                     element.attribute(&name, new_value);
 
                     async {}
-                }
+                })
             },
             &mut self,
         );
@@ -413,17 +399,17 @@ impl<D: Dom> Element for GenericElement<D> {
 
         let name = name.into();
 
-        value.for_each(
+        value.select_spawn(
             |elem, value| elem.element.style_property(&name, value.as_ref()),
-            |elem| {
+            |elem, value| {
                 clone!(name);
                 let mut element = elem.element.clone();
 
-                move |new_value| {
+                value.for_each(move |new_value| {
                     element.style_property(&name, new_value.as_ref());
 
                     async {}
-                }
+                })
             },
             &mut self,
         );

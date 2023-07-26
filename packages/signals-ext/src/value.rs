@@ -6,7 +6,7 @@
 //! # Example
 //!
 //! ```
-//! # use futures_signals::signal::Mutable;
+//! # use futures_signals::signal::{Mutable, SignalExt};
 //! # use silkenweb_signals_ext::value::*;
 //! # use std::future::Future;
 //! #
@@ -20,15 +20,13 @@
 //! }
 //!
 //! fn increment_and_print(x: impl SignalOrValue<Item = i32>) {
-//!     x.map(|x| x + 1).for_each(
+//!     x.map(|x| x + 1).select_spawn(
 //!         |_exec, x| println!("{x}"),
-//!         |_exec| {
-//!             |x| {
-//!                 // We use `println` for brevity, but this should really do
-//!                 // `async` IO as it'll be executed in a future.
+//!         |exec, x| {
+//!             x.for_each(|x| {
 //!                 println!("{x}");
 //!                 async {}
-//!             }
+//!             })
 //!         },
 //!         &mut Exec,
 //!     );
@@ -74,27 +72,6 @@ pub trait RefSignalOrValue<'a> {
         R: RefSignalOrValue<'b, Item = R> + 'b,
         F: FnMut(Self::Item) -> R + 'b;
 
-    /// Apply a function over the value or each value of a signal.
-    ///
-    /// # Params
-    ///
-    /// - `fn_val`: The function to apply if [`Self`] is a value type.
-    /// - `fn_init_sig`: The function to generate a function to apply if
-    ///   [`Self`] is signal type.
-    /// - `executor`: Where to run the future returned from
-    ///   [`SignalExt::for_each`], if this is a signal.
-    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
-        self,
-        fn_val: FVal,
-        fn_init_sig: FInitSig,
-        executor: &mut Exec,
-    ) where
-        FVal: FnOnce(&mut Exec, Self::Item),
-        FInitSig: FnOnce(&mut Exec) -> FSig,
-        FSig: FnMut(Self::Item) -> Task + 'a,
-        Task: Future<Output = ()> + 'a,
-        Exec: Executor;
-
     /// Select a function based on whether this is a signal or value.
     ///
     /// # Params
@@ -108,6 +85,23 @@ pub trait RefSignalOrValue<'a> {
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self::Signal) -> Out,
         Self: Sized;
+
+    /// Select a function based on whether this is a signal or value.
+    ///
+    /// For signal types, this will spawn the task produced by `fn_sig` with
+    /// `exec`.
+    ///
+    /// # Params
+    ///
+    /// - `fn_val`: The function to call if this is a value.
+    /// - `fn_sig`: The function to call if this is a signal.
+    /// - `executor`: An [`Executor`] to spawn the task from `fn_sig`.
+    fn select_spawn<FVal, FSig, Task, Exec>(self, fn_val: FVal, fn_sig: FSig, executor: &mut Exec)
+    where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FSig: FnOnce(&mut Exec, Self::Signal) -> Task,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor;
 }
 
 /// Like [`RefSignalOrValue`], when you know the type is `'static`.
@@ -181,27 +175,22 @@ where
         callback(self)
     }
 
-    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
-        self,
-        fn_val: FVal,
-        _fn_init_sig: FInitSig,
-        executor: &mut Exec,
-    ) where
-        FVal: FnOnce(&mut Exec, Self::Item),
-        FInitSig: FnOnce(&mut Exec) -> FSig,
-        FSig: FnMut(Self::Item) -> Task + 'a,
-        Task: Future<Output = ()> + 'a,
-        Exec: Executor,
-    {
-        fn_val(executor, self);
-    }
-
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self::Signal) -> Out,
     {
         fn_val(data, self)
+    }
+
+    fn select_spawn<FVal, FSig, Task, Exec>(self, fn_val: FVal, _fn_sig: FSig, executor: &mut Exec)
+    where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FSig: FnOnce(&mut Exec, Self::Signal) -> Task,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor,
+    {
+        fn_val(executor, self)
     }
 }
 
@@ -225,27 +214,22 @@ where
         callback(self.0)
     }
 
-    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
-        self,
-        fn_val: FVal,
-        _fn_init_sig: FInitSig,
-        executor: &mut Exec,
-    ) where
-        FVal: FnOnce(&mut Exec, Self::Item),
-        FInitSig: FnOnce(&mut Exec) -> FSig,
-        FSig: FnMut(Self::Item) -> Task + 'a,
-        Task: Future<Output = ()> + 'a,
-        Exec: Executor,
-    {
-        fn_val(executor, self.0);
-    }
-
     fn select<FVal, FSig, Data, Out>(self, fn_val: FVal, _fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self::Signal) -> Out,
     {
         fn_val(data, self.0)
+    }
+
+    fn select_spawn<FVal, FSig, Task, Exec>(self, fn_val: FVal, _fn_sig: FSig, executor: &mut Exec)
+    where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FSig: FnOnce(&mut Exec, Self::Signal) -> Task,
+        Task: Future<Output = ()> + 'a,
+        Exec: Executor,
+    {
+        fn_val(executor, self.0)
     }
 }
 
@@ -271,27 +255,22 @@ where
         Sig(self.0.map(callback))
     }
 
-    fn for_each<FVal, FInitSig, FSig, Task, Exec>(
-        self,
-        _fn_val: FVal,
-        fn_init_sig: FInitSig,
-        executor: &mut Exec,
-    ) where
-        FVal: FnOnce(&mut Exec, Self::Item),
-        FInitSig: FnOnce(&mut Exec) -> FSig,
-        FSig: FnMut(Self::Item) -> Task + 'static,
-        Task: Future<Output = ()> + 'static,
-        Exec: Executor,
-    {
-        let fn_sig = fn_init_sig(executor);
-        executor.spawn(self.0.for_each(fn_sig));
-    }
-
     fn select<FVal, FSig, Data, Out>(self, _fn_val: FVal, fn_sig: FSig, data: Data) -> Out
     where
         FVal: FnOnce(Data, Self::Item) -> Out,
         FSig: FnOnce(Data, Self::Signal) -> Out,
     {
         fn_sig(data, self.0)
+    }
+
+    fn select_spawn<FVal, FSig, Task, Exec>(self, _fn_val: FVal, fn_sig: FSig, executor: &mut Exec)
+    where
+        FVal: FnOnce(&mut Exec, Self::Item),
+        FSig: FnOnce(&mut Exec, Self::Signal) -> Task,
+        Task: Future<Output = ()> + 'static,
+        Exec: Executor,
+    {
+        let future = fn_sig(executor, self.0);
+        executor.spawn(future)
     }
 }
