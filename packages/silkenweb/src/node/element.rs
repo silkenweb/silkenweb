@@ -110,10 +110,12 @@ impl<D: Dom> GenericElement<D> {
         let mut class = pin!(class.to_stream());
 
         if let Some(new_value) = class.next().await {
+            Self::check_class(&new_value);
             element.add_class(intern_str(new_value.as_ref()));
             let mut previous_value = new_value;
 
             while let Some(new_value) = class.next().await {
+                Self::check_class(&new_value);
                 element.remove_class(previous_value.as_ref());
                 element.add_class(intern_str(new_value.as_ref()));
                 previous_value = new_value;
@@ -136,10 +138,22 @@ impl<D: Dom> GenericElement<D> {
             }
 
             for to_add in new_classes {
+                Self::check_class(&to_add);
                 element.add_class(intern_str(to_add.as_ref()));
                 previous_classes.push(to_add);
             }
         }
+    }
+
+    fn check_class(name: &impl AsRef<str>) {
+        assert!(
+            !name.as_ref().is_empty(),
+            "Class names must not be empty. Use `.classes` with `Option::None` to unset an optional class."
+        );
+        debug_assert!(
+            !name.as_ref().contains(char::is_whitespace),
+            "Class names must not contain whitespace."
+        )
     }
 }
 
@@ -338,7 +352,10 @@ impl<D: Dom> Element for GenericElement<D> {
         T: 'a + AsRef<str>,
     {
         class.select_spawn(
-            |elem, class| elem.element.add_class(intern_str(class.as_ref())),
+            |elem, class| {
+                Self::check_class(&class);
+                elem.element.add_class(intern_str(class.as_ref()))
+            },
             |elem, class| Self::class_signal(elem.element.clone(), class),
             &mut self,
         );
@@ -354,6 +371,7 @@ impl<D: Dom> Element for GenericElement<D> {
         classes.select_spawn(
             |elem, classes| {
                 for class in classes {
+                    Self::check_class(&class);
                     elem.element.add_class(intern_str(class.as_ref()));
                 }
             },
@@ -501,8 +519,11 @@ pub trait Element: Sized {
 
     /// Add a class to the element.
     ///
-    /// `class` must not contain whitespace. This method can be called multiple
+    /// This method can be called multiple
     /// times to add multiple classes.
+    ///
+    /// `class` must not be the empty string, or contain whitespace. Use
+    /// [`Self::classes`] with an `Option` for optional classes.
     ///
     /// Classes must be unique across all
     /// invocations of this method and [`Self::classes`], otherwise the results
@@ -511,7 +532,7 @@ pub trait Element: Sized {
     ///
     /// # Panics
     ///
-    /// This panics if `class` contains whitespace.
+    /// This panics if `class` is the empty string, or contains whitespace.
     ///
     /// # Examples
     ///
@@ -561,8 +582,9 @@ pub trait Element: Sized {
 
     /// Set the classes on an element
     ///
-    /// All `classes` must not contain spaces. This method can be called
-    /// multiple times and will add to existing classes.
+    /// All `classes` must not contain spaces, or be the empty string. This
+    /// method can be called multiple times and will add to existing
+    /// classes.
     ///
     /// Classes must be unique across all invocations of this method and
     /// [`Self::class`], otherwise the results are undefined. Any class signal
@@ -570,7 +592,9 @@ pub trait Element: Sized {
     ///
     /// # Panics
     ///
-    /// Panics if any of the items in `classes` contain whitespace.
+    /// Panics if any of the items in `classes` contain whitespace, or are empty
+    /// strings.
+    /// 
     /// # Examples
     ///
     /// Add static class names:
