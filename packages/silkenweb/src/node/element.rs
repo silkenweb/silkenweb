@@ -594,7 +594,7 @@ pub trait Element: Sized {
     ///
     /// Panics if any of the items in `classes` contain whitespace, or are empty
     /// strings.
-    /// 
+    ///
     /// # Examples
     ///
     /// Add static class names:
