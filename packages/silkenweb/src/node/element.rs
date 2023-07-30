@@ -394,7 +394,7 @@ impl<D: Dom> Element for GenericElement<D> {
             |elem, value| elem.element.attribute(name, value),
             |elem, value| {
                 let name = name.to_owned();
-                let mut element = elem.element.clone();
+                clone!(mut elem.element);
 
                 value.for_each(move |new_value| {
                     element.attribute(&name, new_value);
@@ -421,8 +421,7 @@ impl<D: Dom> Element for GenericElement<D> {
         value.select_spawn(
             |elem, value| elem.element.style_property(&name, value.as_ref()),
             |elem, value| {
-                clone!(name);
-                let mut element = elem.element.clone();
+                clone!(name, mut elem.element);
 
                 value.for_each(move |new_value| {
                     element.style_property(&name, new_value.as_ref());
@@ -449,7 +448,7 @@ impl<D: Dom> Element for GenericElement<D> {
     where
         T: 'static,
     {
-        let mut element = self.element.clone();
+        clone!(mut self.element);
 
         let future = sig.for_each(move |x| {
             clone!(f);

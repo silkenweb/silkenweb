@@ -5,6 +5,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use clonelet::clone;
 use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
 use lightningcss::{
@@ -62,7 +63,7 @@ impl Source {
             let modules = transpile.as_ref().map_or(false, |t| t.modules);
             let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
 
-            let content = self.content.clone();
+            clone!(self.content);
             let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
             let filename = self
                 .dependency
