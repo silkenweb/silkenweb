@@ -19,7 +19,7 @@ use futures_signals::{
     signal_vec::{always, SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
-use silkenweb_base::{clone, document};
+use silkenweb_base::document;
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
@@ -27,6 +27,7 @@ use self::child_vec::ChildVec;
 use super::{ChildNode, Node, ResourceVec};
 use crate::{
     attribute::Attribute,
+    clone,
     dom::{
         private::{DomElement, DomText, EventStore, InstantiableDomElement},
         DefaultDom, Dom, Hydro, InDom, InstantiableDom, Template, Wet,

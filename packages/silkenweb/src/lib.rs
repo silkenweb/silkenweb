@@ -68,7 +68,7 @@ use document::{Document, MountHandle};
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
 #[doc(inline)]
-pub use silkenweb_base::clone;
+pub use clonelet::clone;
 use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
 ///
