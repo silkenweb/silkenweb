@@ -7,7 +7,6 @@ mod test_utils;
 pub use app::app;
 #[cfg_browser(true)]
 use app::hydrate_app;
-use drive::drive_vector;
 use futures_util::Future;
 use silkenweb::cfg_browser;
 #[cfg_browser(true)]

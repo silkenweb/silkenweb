@@ -5,7 +5,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 
-use crate::drive_vector;
+use crate::drive::SignalToMutable;
 
 pub struct CounterState {
     count: Mutable<isize>,
@@ -21,7 +21,9 @@ impl Default for CounterState {
 impl CounterState {
     fn new() -> Self {
         let count = Mutable::new(0);
-        let list = drive_vector(count.signal(), |vec, value| vec.lock_mut().push(value));
+        let list = count
+            .signal()
+            .to_mutable_vec(|vec, value| vec.lock_mut().push(value));
         Self { count, list }
     }
 
