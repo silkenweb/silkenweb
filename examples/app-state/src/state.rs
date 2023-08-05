@@ -50,7 +50,7 @@ impl CounterState {
 #[cfg(test)]
 mod test {
     use super::CounterState;
-    use crate::test_utils::{SigValue, VecValue};
+    use crate::test_utils::{SignalToValue, SignalVecToValue};
 
     #[tokio::test]
     async fn test_counter() {
@@ -59,20 +59,20 @@ mod test {
             .run_until(async {
                 let state = CounterState::default();
 
-                let text = SigValue::new(state.text());
-                let list = VecValue::new(state.list.signal_vec());
+                let text = state.text().to_value();
+                let list = state.list.signal_vec().to_value();
 
                 assert_eq!(state.count().get(), 0);
-                assert_eq!(list.get().await, [0]);
-                assert_eq!(text.get().await, "0");
+                assert_eq!(list.cloned().await, [0]);
+                assert_eq!(text.cloned().await, "0");
 
                 state.add(1);
-                assert_eq!(text.get().await, "1");
-                assert_eq!(list.get().await, [0, 1]);
+                assert_eq!(text.cloned().await, "1");
+                assert_eq!(list.cloned().await, [0, 1]);
 
                 state.add(-2);
-                assert_eq!(text.get().await, "-1");
-                assert_eq!(list.get().await, [0, 1, -1]);
+                assert_eq!(text.cloned().await, "-1");
+                assert_eq!(list.cloned().await, [0, 1, -1]);
             })
             .await;
     }
