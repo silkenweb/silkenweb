@@ -50,7 +50,7 @@ impl CounterState {
 #[cfg(test)]
 mod test {
     use super::CounterState;
-    use crate::test_utils::{SignalToValue, SignalVecToValue};
+    use crate::value::{SignalToValue, SignalVecToValue};
 
     #[tokio::test]
     async fn test_counter() {
