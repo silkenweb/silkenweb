@@ -272,7 +272,7 @@ fn user_link(user: &str) -> A {
 }
 
 async fn join_ok<T>(items: impl IntoIterator<Item = impl Future<Output = Result<T>>>) -> Vec<T> {
-    join_all(items.into_iter())
+    join_all(items)
         .await
         .into_iter()
         .filter_map(Result::ok)

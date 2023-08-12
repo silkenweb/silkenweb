@@ -142,7 +142,8 @@ async fn check(
     let optional_children_html = optional_children
         .into_iter()
         .enumerate()
-        .filter_map(|(index, is_some)| is_some.then(|| div_html(index)));
+        .filter(|(_, is_some)| *is_some)
+        .map(|(index, _)| div_html(index));
     let children_html = children.into_iter().map(div_html);
     let inner_html = optional_children_html.chain(children_html).join("");
 

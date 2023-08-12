@@ -109,11 +109,11 @@ fn text_content(text_id: &str) -> String {
 async fn reactive_text() {
     let _test = BrowserTest::new(APP_ID).await;
 
-    let mut text_signal = Mutable::new("0");
+    let text_signal = Mutable::new("0");
     verify_reactive_text(
         p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
-        &mut text_signal,
+        &text_signal,
     )
     .await;
 }
@@ -123,11 +123,11 @@ async fn reactive_text() {
 async fn reactive_text_reference() {
     let _test = BrowserTest::new(APP_ID).await;
 
-    let mut text_signal = Mutable::new("0");
+    let text_signal = Mutable::new("0");
     verify_reactive_text(
         p().id("text").text(Sig(text_signal.signal())),
         TEXT_ID,
-        &mut text_signal,
+        &text_signal,
     )
     .await;
 }
@@ -165,7 +165,7 @@ async fn multiple_reactive_text() {
     );
 }
 
-async fn verify_reactive_text(paragraph: P, text_id: &str, text: &mut Mutable<&'static str>) {
+async fn verify_reactive_text(paragraph: P, text_id: &str, text: &Mutable<&'static str>) {
     mount(APP_ID, paragraph);
     render_now().await;
     assert_eq!("0", text_content(text_id));

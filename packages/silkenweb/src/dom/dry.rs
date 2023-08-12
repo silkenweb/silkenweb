@@ -384,7 +384,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
         &mut self,
         name: &'static str,
         f: impl FnMut(JsValue) + 'static,
-        events: &mut EventStore,
+        events: &EventStore,
     ) {
         clone!(mut events);
 
