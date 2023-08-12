@@ -187,7 +187,7 @@ use silkenweb_base::document as base_document;
 ///     }
 /// "#);
 /// ```
-///
+/// 
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
 /// ```
@@ -200,7 +200,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::SMALL, "border-small");
 /// ```
-///
+/// 
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
@@ -213,7 +213,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
-///
+/// 
 /// [lightningcss]: https://lightningcss.dev/
 /// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
 /// [CSS Modules]: https://github.com/css-modules/css-modules
