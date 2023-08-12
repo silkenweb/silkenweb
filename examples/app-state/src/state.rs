@@ -4,8 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-
-use crate::drive::SignalToMutable;
+use silkenweb::SignalToMutable;
 
 pub struct CounterState {
     count: Mutable<isize>,
@@ -49,10 +48,9 @@ impl CounterState {
 
 #[cfg(test)]
 mod test {
-    use silkenweb::task::server;
+    use silkenweb::{task::server, SignalToValue, SignalVecToValue};
 
     use super::CounterState;
-    use crate::value::{SignalToValue, SignalVecToValue};
 
     #[tokio::test]
     async fn test_counter() {

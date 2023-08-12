@@ -1,8 +1,8 @@
+use crate::task::spawn_local;
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
-use silkenweb::task::spawn_local;
 
 pub trait SignalToMutable<TSig: Default + 'static>: Signal<Item = TSig> + Sized {
     fn to_mutable(self) -> ReadOnlyMutable<TSig>;

@@ -1,14 +1,12 @@
-#![allow(dead_code)]
-
 use std::sync::{Arc, RwLock};
 
+use crate::{
+    clone,
+    task::{render_now, spawn_local},
+};
 use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
-};
-use silkenweb::{
-    clone,
-    task::{render_now, spawn_local},
 };
 
 pub trait SignalToValue<T: Default + 'static> {
