@@ -2947,7 +2947,6 @@ dependencies = [
 name = "silkenweb-macros"
 version = "0.5.0"
 dependencies = [
- "derive_more",
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
@@ -2970,9 +2969,7 @@ dependencies = [
  "clonelet",
  "cssparser 0.31.2",
  "itertools 0.11.0",
- "js-sys",
  "lightningcss",
- "wasm-bindgen",
  "web-sys",
 ]
 
@@ -2980,7 +2977,6 @@ dependencies = [
 name = "silkenweb-style-macros"
 version = "0.5.0"
 dependencies = [
- "cssparser 0.31.2",
  "derive_more",
  "grass",
  "lightningcss",
@@ -3017,7 +3013,6 @@ name = "silkenweb-test"
 version = "0.5.0"
 dependencies = [
  "silkenweb",
- "silkenweb-style",
  "wasm-bindgen",
  "web-sys",
 ]

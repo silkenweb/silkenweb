@@ -12,8 +12,6 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [dependencies]
-wasm-bindgen = { workspace = true }
-js-sys = { workspace = true }
 cssparser = { workspace = true }
 lightningcss = { workspace = true }
 itertools = { workspace = true }

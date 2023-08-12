@@ -16,7 +16,6 @@ proc-macro = true
 
 [dependencies]
 silkenweb-style = { workspace = true }
-cssparser = { workspace = true }
 lightningcss = { workspace = true }
 proc-macro-error = { workspace = true }
 proc-macro2 = { workspace = true }
