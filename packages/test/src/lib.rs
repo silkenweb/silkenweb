@@ -1,5 +1,5 @@
 //! Utilities for writing tests for Silkenweb apps.
-use silkenweb::{document::Document, dom::DefaultDom, task::render_now};
+use silkenweb::{dom::DefaultDom, render::DocumentRender, task::render_now};
 use silkenweb_base::document;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 

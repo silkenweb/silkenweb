@@ -1,11 +1,11 @@
 use silkenweb_macros::cfg_browser;
 
-use crate::{document, router};
+use crate::{render, router};
 
 #[derive(Default)]
 pub struct TaskLocal {
     pub(crate) task: super::TaskLocal,
-    pub(crate) document: document::TaskLocal,
+    pub(crate) document: render::TaskLocal,
     pub(crate) router: router::TaskLocal,
 }
 

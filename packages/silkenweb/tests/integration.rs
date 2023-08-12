@@ -1,11 +1,11 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    document::Document,
     dom::DefaultDom,
     elements::html::{button, div, p, P},
     mount,
     node::element::ParentElement,
     prelude::{ElementEvents, HtmlElement},
+    render::DocumentRender,
     task::render_now,
     value::Sig,
 };

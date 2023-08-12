@@ -395,7 +395,7 @@ fn code_gen(
             pub fn mount() {
                 use ::std::panic::Location;
                 use silkenweb::{
-                    document::Document,
+                    render::DocumentRender,
                     dom::DefaultDom,
                     node::element::ParentElement,
                     elements::html::style,

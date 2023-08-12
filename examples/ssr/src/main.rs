@@ -1,10 +1,10 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     css,
-    document::Document,
     dom::DefaultDom,
     elements::html::*,
     prelude::*,
+    render::DocumentRender,
     task::server::{self, render_now_sync},
     value::Sig,
 };

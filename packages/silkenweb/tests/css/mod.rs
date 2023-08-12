@@ -4,10 +4,10 @@ silkenweb::css!(content = ".red { color: red }", auto_mount);
 use std::panic::Location;
 
 use silkenweb::{
-    document::Document,
     dom::DefaultDom,
     elements::html::{div, Div},
     node::element::{Const, Element},
+    render::DocumentRender,
     task::render_now,
 };
 

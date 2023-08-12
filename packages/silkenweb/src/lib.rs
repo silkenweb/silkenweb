@@ -66,9 +66,9 @@ use std::{cell::RefCell, collections::HashMap};
 
 #[doc(inline)]
 pub use clonelet::clone;
-use document::{Document, MountHandle};
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
+use render::{DocumentRender, MountHandle};
 use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
 ///
@@ -298,6 +298,7 @@ pub mod dom;
 pub mod elements;
 pub mod hydration;
 pub mod node;
+pub mod render;
 pub mod router;
 pub mod storage;
 pub mod task;

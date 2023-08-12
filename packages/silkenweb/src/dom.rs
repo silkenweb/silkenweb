@@ -119,7 +119,7 @@ impl private::InstantiableDom for Hydro {
 ///
 /// ```no_run
 /// # use html::{p, P};
-/// # use silkenweb::{dom::Wet, document::Document, prelude::*};
+/// # use silkenweb::{dom::Wet, render::DocumentRender, prelude::*};
 /// let app: P<Wet> = p().text("Hello, world!");
 ///
 /// Wet::mount("app-id", app);
