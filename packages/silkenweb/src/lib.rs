@@ -69,7 +69,6 @@ pub use clonelet::clone;
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
 use render::{DocumentRender, MountHandle};
-use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
 ///
 /// This defines 2 modules:
@@ -285,6 +284,8 @@ pub use silkenweb_macros::{
     cfg_browser, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
 
+use crate::document as base_document;
+
 #[doc(hidden)]
 #[macro_use]
 pub mod macros;
@@ -325,6 +326,7 @@ pub mod prelude {
 }
 
 pub use silkenweb_signals_ext::value;
+use wasm_bindgen::UnwrapThrowExt;
 
 /// Shorthand for [`DefaultDom::mount`]
 pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) -> MountHandle {
@@ -383,7 +385,19 @@ pub fn empty_str() -> &'static str {
     ""
 }
 
+pub trait GlobalEventTarget {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function);
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function);
+}
+
 thread_local! {
     static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
     static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
+    static WINDOW: web_sys::Window = web_sys::window().expect_throw("Window must be available");
+    static DOCUMENT: web_sys::Document = WINDOW.with(|win| {
+        win.document()
+            .expect_throw("Window must contain a document")
+    });
+
 }

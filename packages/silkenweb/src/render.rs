@@ -69,7 +69,7 @@ impl DocumentRender for Wet {
     }
 
     fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
-        if silkenweb_base::document::query_selector(&format!("#{}", web_sys::css::escape(id)))
+        if crate::document::query_selector(&format!("#{}", web_sys::css::escape(id)))
             .unwrap_throw()
             .is_some()
         {
@@ -78,7 +78,7 @@ impl DocumentRender for Wet {
 
         let element = element.into().attribute("id", id).freeze();
         let dom_element = element.dom_element();
-        silkenweb_base::document::head()
+        crate::document::head()
             .map(|head| {
                 head.append_with_node_1(&dom_element).unwrap_throw();
                 MOUNTED_IN_WET_HEAD.with(|mounted| mounted.borrow_mut().push(element));

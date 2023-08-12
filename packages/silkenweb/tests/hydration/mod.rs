@@ -1,5 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
+    document::create_element,
     dom::Hydro,
     elements::{
         html::{self, button, div, p},
@@ -11,7 +12,6 @@ use silkenweb::{
     task::render_now,
     value::Sig,
 };
-use silkenweb_base::document::create_element;
 use silkenweb_test::{html_element, BrowserTest};
 use wasm_bindgen_test::wasm_bindgen_test;
 use web_sys::{ShadowRootInit, ShadowRootMode};

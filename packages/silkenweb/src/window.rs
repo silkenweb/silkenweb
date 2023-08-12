@@ -1,10 +1,13 @@
 //! Window utilities.
 
+use js_sys::Function;
 use paste::paste;
-use silkenweb_base::Window;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
-use crate::event::{bubbling_events, GlobalEventCallback};
+use crate::{
+    event::{bubbling_events, GlobalEventCallback},
+    GlobalEventTarget,
+};
 
 /// Manage an event handler.
 ///
@@ -30,6 +33,33 @@ pub fn on_dom_content_loaded(f: impl FnMut(web_sys::Event) + 'static) -> EventCa
     EventCallback::new("DOMContentLoaded", f)
 }
 
+pub fn request_animation_frame(callback: &::js_sys::Function) {
+    WINDOW.with(|win| win.request_animation_frame(callback).unwrap_throw());
+}
+
+pub fn history() -> web_sys::History {
+    WINDOW.with(|win| win.history().unwrap_throw())
+}
+
+pub fn location() -> web_sys::Location {
+    WINDOW.with(|win| win.location())
+}
+
+pub fn set_onpopstate(value: Option<&Function>) {
+    WINDOW.with(|win| win.set_onpopstate(value));
+}
+
+pub fn local_storage() -> Result<web_sys::Storage, JsValue> {
+    WINDOW.with(|w| w.local_storage().map(|w| w.unwrap_throw()))
+}
+
+pub fn session_storage() -> Result<web_sys::Storage, JsValue> {
+    WINDOW.with(|w| w.session_storage().map(|w| w.unwrap_throw()))
+}
+
+pub fn performance() -> Option<web_sys::Performance> {
+    WINDOW.with(|w| w.performance())
+}
 macro_rules! events{
     ($($name:ident: $typ:ty),* $(,)?) => { paste!{ $(
         #[doc = "Add a `" $name "` event handler at the window level." ]
@@ -78,3 +108,29 @@ events! {
 }
 
 bubbling_events!();
+
+pub struct Window;
+
+impl GlobalEventTarget for Window {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        WINDOW.with(|win| {
+            win.add_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        WINDOW.with(|win| {
+            win.remove_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+}
+
+thread_local!(
+    static WINDOW: web_sys::Window = web_sys::window().expect_throw("Window must be available");
+    static DOCUMENT: web_sys::Document = WINDOW.with(|win| {
+        win.document()
+            .expect_throw("Window must contain a document")
+    });
+);

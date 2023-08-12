@@ -1,7 +1,6 @@
 use std::fmt;
 
 use clonelet::clone;
-use silkenweb_base::document;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
 
@@ -9,7 +8,7 @@ use super::{
     private::{DomElement, DomText, EventStore, InstantiableDomElement, InstantiableDomNode},
     Wet,
 };
-use crate::{node::element::Namespace, task::on_animation_frame};
+use crate::{document, node::element::Namespace, task::on_animation_frame};
 
 #[derive(Clone)]
 pub struct WetElement {

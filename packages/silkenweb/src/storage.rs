@@ -1,6 +1,7 @@
 //! Local and session storage.
-use silkenweb_base::window;
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
+
+use crate::window;
 
 macro_rules! unexpected_exception {
     ($name:literal) => {

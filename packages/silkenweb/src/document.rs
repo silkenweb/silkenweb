@@ -1,18 +1,19 @@
 //! Document utilities.
 
 use paste::paste;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
+use super::DOCUMENT;
 use crate::{
-    dom::Dom,
     event::{bubbling_events, GlobalEventCallback},
+    GlobalEventTarget,
 };
 
 /// Manage an event handler.
 ///
 /// This will remove the event handler when dropped.
 #[must_use]
-pub struct EventCallback(GlobalEventCallback<silkenweb_base::Document>);
+pub struct EventCallback(GlobalEventCallback<Document>);
 
 impl EventCallback {
     fn new<Event: JsCast>(name: &'static str, f: impl FnMut(Event) + 'static) -> Self {
@@ -63,5 +64,55 @@ events! {
 
 bubbling_events!();
 
-#[deprecated(note = "Use render::Document instead")]
-pub trait Document: Dom + Sized {}
+pub fn get_element_by_id(id: &str) -> Option<web_sys::Element> {
+    DOCUMENT.with(|doc| doc.get_element_by_id(id))
+}
+
+pub fn create_element(tag: &str) -> web_sys::Element {
+    DOCUMENT.with(|doc| doc.create_element(tag).unwrap_throw())
+}
+
+pub fn create_element_ns(namespace: &str, tag: &str) -> web_sys::Element {
+    DOCUMENT.with(|doc| doc.create_element_ns(Some(namespace), tag).unwrap_throw())
+}
+
+pub fn create_text_node(text: &str) -> web_sys::Text {
+    DOCUMENT.with(|doc| doc.create_text_node(text))
+}
+
+pub fn base_uri() -> String {
+    DOCUMENT
+        .with(|doc| doc.base_uri())
+        .unwrap_throw()
+        .unwrap_throw()
+}
+
+pub fn query_selector(selectors: &str) -> Result<Option<web_sys::Element>, JsValue> {
+    DOCUMENT.with(|doc| doc.query_selector(selectors))
+}
+
+pub fn head() -> Option<web_sys::HtmlHeadElement> {
+    DOCUMENT.with(|doc| doc.head())
+}
+
+pub fn body() -> Option<web_sys::HtmlElement> {
+    DOCUMENT.with(|doc| doc.body())
+}
+
+pub struct Document;
+
+impl GlobalEventTarget for Document {
+    fn add_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| {
+            doc.add_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+
+    fn remove_event_listener_with_callback(name: &'static str, listener: &::js_sys::Function) {
+        DOCUMENT.with(|doc| {
+            doc.remove_event_listener_with_callback(name, listener)
+                .unwrap_throw()
+        })
+    }
+}

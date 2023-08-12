@@ -52,8 +52,9 @@ pub(crate) use bubbling_events;
 mod arch {
     use std::marker::PhantomData;
 
-    use silkenweb_base::GlobalEventTarget;
     use wasm_bindgen::JsCast;
+
+    use crate::GlobalEventTarget;
 
     pub struct GlobalEventCallback<T: GlobalEventTarget>(PhantomData<T>);
 
