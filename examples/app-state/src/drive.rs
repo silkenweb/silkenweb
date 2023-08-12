@@ -2,6 +2,7 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::MutableVec,
 };
+use silkenweb::task::spawn_local;
 
 pub trait SignalToMutable<TSig: Default + 'static>: Signal<Item = TSig> + Sized {
     fn to_mutable(self) -> ReadOnlyMutable<TSig>;
@@ -19,7 +20,7 @@ where
     fn to_mutable(self) -> ReadOnlyMutable<TSig> {
         let mutable = Mutable::new(TSig::default());
         let m = mutable.clone();
-        crate::spawn_local(self.for_each(move |value| {
+        spawn_local(self.for_each(move |value| {
             m.set(value);
             async {}
         }));
@@ -33,7 +34,7 @@ where
     {
         let vec = MutableVec::<TVec>::new();
         let vect = vec.clone();
-        crate::spawn_local(self.for_each(move |value| {
+        spawn_local(self.for_each(move |value| {
             update(&vect, value);
             async {}
         }));

@@ -49,31 +49,31 @@ impl CounterState {
 
 #[cfg(test)]
 mod test {
+    use silkenweb::task::server;
+
     use super::CounterState;
     use crate::value::{SignalToValue, SignalVecToValue};
 
     #[tokio::test]
     async fn test_counter() {
-        let local = tokio::task::LocalSet::new();
-        local
-            .run_until(async {
-                let state = CounterState::default();
+        server::scope(async {
+            let state = CounterState::default();
 
-                let text = state.text().to_value();
-                let list = state.list.signal_vec().to_value();
+            let text = state.text().to_value();
+            let list = state.list.signal_vec().to_value();
 
-                assert_eq!(state.count().get(), 0);
-                assert_eq!(list.cloned().await, [0]);
-                assert_eq!(text.cloned().await, "0");
+            assert_eq!(state.count().get(), 0);
+            assert_eq!(list.cloned().await, [0]);
+            assert_eq!(text.cloned().await, "0");
 
-                state.add(1);
-                assert_eq!(text.cloned().await, "1");
-                assert_eq!(list.cloned().await, [0, 1]);
+            state.add(1);
+            assert_eq!(text.cloned().await, "1");
+            assert_eq!(list.cloned().await, [0, 1]);
 
-                state.add(-2);
-                assert_eq!(text.cloned().await, "-1");
-                assert_eq!(list.cloned().await, [0, 1, -1]);
-            })
-            .await;
+            state.add(-2);
+            assert_eq!(text.cloned().await, "-1");
+            assert_eq!(list.cloned().await, [0, 1, -1]);
+        })
+        .await;
     }
 }

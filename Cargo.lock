@@ -122,7 +122,6 @@ version = "0.5.0"
 dependencies = [
  "axum",
  "futures-signals",
- "futures-util",
  "silkenweb",
  "tokio",
  "tokio-util",
