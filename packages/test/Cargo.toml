@@ -13,6 +13,6 @@ keywords = ["reactive"]
 
 [dependencies]
 silkenweb = { workspace = true }
-silkenweb-base = { workspace = true }
+silkenweb-style = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true }

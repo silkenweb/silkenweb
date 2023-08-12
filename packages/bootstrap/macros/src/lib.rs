@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css::{self, Source};
+use silkenweb_style::css::{self, Source};
 use syn::{parse_macro_input, Ident, LitStr};
 
 #[proc_macro]

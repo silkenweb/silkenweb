@@ -1,9 +1,9 @@
 [package]
-name = "silkenweb-base"
+name = "silkenweb-style"
 version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
-description = "Base crate for Silkenweb"
+description = "Styling crate for Silkenweb"
 homepage = "https://github.com/silkenweb/silkenweb"
 repository = "https://github.com/silkenweb/silkenweb"
 license = "MIT OR Apache-2.0"

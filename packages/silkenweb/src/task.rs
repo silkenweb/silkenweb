@@ -86,7 +86,7 @@ mod arch {
     use std::future::Future;
 
     use js_sys::Promise;
-    use silkenweb_base::window;
+    use silkenweb_style::window;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
     use wasm_bindgen_futures::JsFuture;
 
@@ -223,7 +223,7 @@ impl Render {
 
     #[cfg_browser(true)]
     fn base_timestamp(&self) -> f64 {
-        silkenweb_base::window::performance().unwrap().now()
+        silkenweb_style::window::performance().unwrap().now()
     }
 
     #[cfg_browser(false)]

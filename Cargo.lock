@@ -2675,7 +2675,6 @@ dependencies = [
  "js-sys",
  "paste",
  "pin-project",
- "silkenweb-base",
  "silkenweb-macros",
  "silkenweb-signals-ext",
  "silkenweb-test",
@@ -2685,19 +2684,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
- "web-sys",
-]
-
-[[package]]
-name = "silkenweb-base"
-version = "0.5.0"
-dependencies = [
- "clonelet",
- "cssparser 0.31.2",
- "itertools 0.11.0",
- "js-sys",
- "lightningcss",
- "wasm-bindgen",
  "web-sys",
 ]
 
@@ -2727,7 +2713,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
- "silkenweb-base",
+ "silkenweb-style",
  "syn 2.0.26",
 ]
 
@@ -2965,7 +2951,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
- "silkenweb-base",
+ "silkenweb-style",
  "syn 2.0.26",
 ]
 
@@ -2976,6 +2962,19 @@ dependencies = [
  "futures-signals",
  "paste",
  "pin-project",
+]
+
+[[package]]
+name = "silkenweb-style"
+version = "0.5.0"
+dependencies = [
+ "clonelet",
+ "cssparser 0.31.2",
+ "itertools 0.11.0",
+ "js-sys",
+ "lightningcss",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -3004,7 +3003,7 @@ name = "silkenweb-test"
 version = "0.5.0"
 dependencies = [
  "silkenweb",
- "silkenweb-base",
+ "silkenweb-style",
  "wasm-bindgen",
  "web-sys",
 ]
