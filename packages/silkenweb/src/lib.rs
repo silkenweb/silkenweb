@@ -69,6 +69,70 @@ pub use clonelet::clone;
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
 use render::{DocumentRender, MountHandle};
+/// Derive the traits needed for a blanket implmenetation of [`ChildElement`].
+///
+/// This only works for structs. It will defer to one field for the
+/// implementation of the traits. If multiple fields are present, a target field
+/// must be specified with `#[child_element(target)]`.
+///
+/// # Example
+///
+/// Derive traits for a newtype struct:
+/// ```
+/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
+/// #[derive(ChildElement)]
+/// struct MyComponent<D: InstantiableDom>(Component<D>);
+/// ```
+///
+/// Derive traits when the struct has more than 1 field:
+/// ```
+/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
+/// #[derive(ChildElement)]
+/// struct MyComponent<D: InstantiableDom, Data> {
+///     #[child_element(target)]
+///     component: Component<D>,
+///     data: Data,
+/// }
+/// ```
+///
+/// [`ChildElement`]: crate::node::element::ChildElement
+pub use silkenweb_macros::ChildElement;
+/// Derive [`Element`].
+///
+/// This only works for structs. It will defer to one field for the
+/// implementation. If multiple fields are present, a target field must be
+/// specified with `#[element(target)]`.
+///
+/// # Example
+///
+/// Derive traits for a newtype struct:
+///
+/// ```
+/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
+/// #
+/// #[derive(Element)]
+/// struct MyElement<D: Dom>(Div<D>);
+/// ```
+///
+/// When the struct has more than 1 field:
+///
+/// ```
+/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
+/// #
+/// #[derive(Element)]
+/// struct MyElement<D: Dom, Data> {
+///     #[element(target)]
+///     element: Div<D>,
+///     data: Data,
+/// }
+/// ```
+///
+/// [`Element`]: crate::node::element::Element
+pub use silkenweb_macros::Element;
+#[doc(inline)]
+pub use silkenweb_macros::{
+    cfg_browser, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value,
+};
 /// Define `&str` constants for each class in a CSS file.
 ///
 /// This defines 2 modules:
@@ -93,7 +157,7 @@ use render::{DocumentRender, MountHandle};
 /// Parameters take the form:
 ///
 /// ```
-/// # use silkenweb_macros::css;
+/// # use silkenweb::css;
 /// css!(
 ///     path = "my-css-file.css",
 ///     syntax = "css",
@@ -165,7 +229,7 @@ use render::{DocumentRender, MountHandle};
 /// Define private constants for all CSS classes:
 ///
 /// ```
-/// # use silkenweb_macros::css;
+/// # use silkenweb::css;
 /// css!("my-css-file.css");
 /// assert_eq!(class::MY_CLASS, "my-class");
 /// ```
@@ -173,7 +237,7 @@ use render::{DocumentRender, MountHandle};
 /// Define private constants for all content CSS classes:
 ///
 ///  ```
-/// # use silkenweb_macros::css;
+/// # use silkenweb::css;
 /// css!(content = r#"
 ///     .my-class {
 ///         color: hotpink;
@@ -190,7 +254,7 @@ use render::{DocumentRender, MountHandle};
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
 /// ```
-/// # use silkenweb_macros::css;
+/// # use silkenweb::css;
 /// css!(
 ///     path = "my-css-file.css",
 ///     prefix = "border-",
@@ -216,73 +280,8 @@ use render::{DocumentRender, MountHandle};
 /// [lightningcss]: https://lightningcss.dev/
 /// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
 /// [CSS Modules]: https://github.com/css-modules/css-modules
-pub use silkenweb_macros::css;
-/// Derive the traits needed for a blanket implmenetation of [`ChildElement`].
-///
-/// This only works for structs. It will defer to one field for the
-/// implementation of the traits. If multiple fields are present, a target field
-/// must be specified with `#[child_element(target)]`.
-///
-/// # Example
-///
-/// Derive traits for a newtype struct:
-///
-/// ```
-/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
-/// #[derive(ChildElement)]
-/// struct MyComponent<D: InstantiableDom>(Component<D>);
-/// ```
-///
-/// Derive traits when the struct has more than 1 field:
-///
-/// ```
-/// # use silkenweb::{ChildElement, dom::InstantiableDom, node::Component};
-/// #[derive(ChildElement)]
-/// struct MyComponent<D: InstantiableDom, Data> {
-///     #[child_element(target)]
-///     component: Component<D>,
-///     data: Data,
-/// }
-/// ```
-///
-/// [`ChildElement`]: crate::node::element::ChildElement
-pub use silkenweb_macros::ChildElement;
-/// Derive [`Element`].
-///
-/// This only works for structs. It will defer to one field for the
-/// implementation. If multiple fields are present, a target field must be
-/// specified with `#[element(target)]`.
-///
-/// # Example
-///
-/// Derive traits for a newtype struct:
-///
-/// ```
-/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
-/// #
-/// #[derive(Element)]
-/// struct MyElement<D: Dom>(Div<D>);
-/// ```
-///
-/// When the struct has more than 1 field:
-///
-/// ```
-/// # use silkenweb::{dom::Dom, elements::html::Div, Element};
-/// #
-/// #[derive(Element)]
-/// struct MyElement<D: Dom, Data> {
-///     #[element(target)]
-///     element: Div<D>,
-///     data: Data,
-/// }
-/// ```
-///
-/// [`Element`]: crate::node::element::Element
-pub use silkenweb_macros::Element;
-#[doc(inline)]
-pub use silkenweb_macros::{
-    cfg_browser, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value,
-};
+#[cfg(feature = "style")]
+pub use silkenweb_style_macros::css;
 
 use crate::document as base_document;
 

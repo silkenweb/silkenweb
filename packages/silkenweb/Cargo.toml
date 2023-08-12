@@ -13,10 +13,17 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [features]
+default = ["style"]
 weak-refs = []
 declarative-shadow-dom = []
+style = ["dep:silkenweb-style", "dep:silkenweb-style-macros"]
 
 [dependencies]
+silkenweb-signals-ext = { workspace = true }
+silkenweb-macros = { workspace = true }
+silkenweb-style = { workspace = true, optional = true }
+silkenweb-style-macros = { workspace = true, optional = true }
+
 discard = { workspace = true }
 js-sys = { workspace = true }
 futures = { workspace = true }
@@ -24,8 +31,6 @@ caseless = { workspace = true }
 html-escape = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-silkenweb-signals-ext = { workspace = true }
-silkenweb-macros = { workspace = true }
 paste = { workspace = true }
 wasm-bindgen = { workspace = true }
 futures-signals = { workspace = true }

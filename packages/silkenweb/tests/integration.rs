@@ -30,7 +30,6 @@ macro_rules! isomorphic_test {
 
 mod children;
 mod component;
-mod css;
 mod element;
 mod hydration;
 mod template;

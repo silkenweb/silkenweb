@@ -2677,6 +2677,8 @@ dependencies = [
  "pin-project",
  "silkenweb-macros",
  "silkenweb-signals-ext",
+ "silkenweb-style",
+ "silkenweb-style-macros",
  "silkenweb-test",
  "tokio",
  "tokio-stream",
@@ -2946,12 +2948,9 @@ name = "silkenweb-macros"
 version = "0.5.0"
 dependencies = [
  "derive_more",
- "grass",
- "lightningcss",
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
- "silkenweb-style",
  "syn 2.0.26",
 ]
 
@@ -2975,6 +2974,21 @@ dependencies = [
  "lightningcss",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "silkenweb-style-macros"
+version = "0.5.0"
+dependencies = [
+ "cssparser 0.31.2",
+ "derive_more",
+ "grass",
+ "lightningcss",
+ "proc-macro-error",
+ "proc-macro2 1.0.66",
+ "quote 1.0.31",
+ "silkenweb-style",
+ "syn 2.0.26",
 ]
 
 [[package]]
