@@ -86,11 +86,11 @@ mod arch {
     use std::future::Future;
 
     use js_sys::Promise;
-    use silkenweb_style::window;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
     use wasm_bindgen_futures::JsFuture;
 
     use super::Render;
+    use crate::window;
 
     pub struct Raf {
         on_raf: Closure<dyn FnMut(JsValue)>,
@@ -223,7 +223,7 @@ impl Render {
 
     #[cfg_browser(true)]
     fn base_timestamp(&self) -> f64 {
-        silkenweb_style::window::performance().unwrap().now()
+        crate::window::performance().unwrap().now()
     }
 
     #[cfg_browser(false)]

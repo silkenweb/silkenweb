@@ -78,8 +78,9 @@ mod arch {
 mod arch {
     use std::{cell::RefCell, marker::PhantomData};
 
-    use silkenweb_style::GlobalEventTarget;
     use wasm_bindgen::{intern, prelude::Closure, JsCast, JsValue};
+
+    use crate::GlobalEventTarget;
 
     pub struct GlobalEventCallback<T: GlobalEventTarget> {
         name: &'static str,

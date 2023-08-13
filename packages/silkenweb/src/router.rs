@@ -284,11 +284,10 @@ mod arch {
 
 #[cfg_browser(true)]
 mod arch {
-    use silkenweb_style::{document, window};
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
 
     use super::UrlPath;
-    use crate::task;
+    use crate::{document, task, window};
 
     pub fn new_url_path() -> UrlPath {
         ON_POPSTATE
