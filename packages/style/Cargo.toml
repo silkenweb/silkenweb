@@ -16,19 +16,3 @@ cssparser = { workspace = true }
 lightningcss = { workspace = true }
 itertools = { workspace = true }
 clonelet = { workspace = true }
-
-[dependencies.web-sys]
-workspace = true
-features = [
-    "Document",
-    "Element",
-    "History",
-    "Location",
-    "Performance",
-    "Storage",
-    "Text",
-    "Window",
-
-    "HtmlHeadElement",
-    "HtmlElement",
-]

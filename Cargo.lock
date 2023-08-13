@@ -2677,7 +2677,6 @@ dependencies = [
  "pin-project",
  "silkenweb-macros",
  "silkenweb-signals-ext",
- "silkenweb-style",
  "silkenweb-style-macros",
  "silkenweb-test",
  "tokio",
@@ -2882,7 +2881,6 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "silkenweb",
- "silkenweb-test",
  "wasm-bindgen-test",
 ]
 
@@ -2970,7 +2968,6 @@ dependencies = [
  "cssparser 0.31.2",
  "itertools 0.11.0",
  "lightningcss",
- "web-sys",
 ]
 
 [[package]]

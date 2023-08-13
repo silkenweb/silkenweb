@@ -16,12 +16,11 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 default = ["style"]
 weak-refs = []
 declarative-shadow-dom = []
-style = ["dep:silkenweb-style", "dep:silkenweb-style-macros"]
+style = ["dep:silkenweb-style-macros"]
 
 [dependencies]
 silkenweb-signals-ext = { workspace = true }
 silkenweb-macros = { workspace = true }
-silkenweb-style = { workspace = true, optional = true }
 silkenweb-style-macros = { workspace = true, optional = true }
 
 discard = { workspace = true }

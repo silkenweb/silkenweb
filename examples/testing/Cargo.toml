@@ -7,7 +7,6 @@ publish = false
 
 [dependencies]
 silkenweb = { workspace = true }
-silkenweb-test = { workspace = true }
 futures-signals = { workspace = true }
 
 [dev-dependencies]
