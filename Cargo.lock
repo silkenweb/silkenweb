@@ -2881,6 +2881,7 @@ version = "0.1.0"
 dependencies = [
  "futures-signals",
  "silkenweb",
+ "silkenweb-test",
  "wasm-bindgen-test",
 ]
 

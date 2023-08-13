@@ -11,3 +11,4 @@ futures-signals = { workspace = true }
 
 [dev-dependencies]
 wasm-bindgen-test = { workspace = true }
+silkenweb-test = { workspace = true }
