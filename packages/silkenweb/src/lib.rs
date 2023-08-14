@@ -64,11 +64,11 @@
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
 use std::{cell::RefCell, collections::HashMap};
 
+#[doc(inline)]
+pub use clonelet::clone;
 use document::{Document, MountHandle};
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
-#[doc(inline)]
-pub use silkenweb_base::clone;
 use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
 ///

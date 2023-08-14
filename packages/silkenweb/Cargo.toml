@@ -33,6 +33,7 @@ futures-signals = { workspace = true }
 console_error_panic_hook = { workspace = true }
 pin-project = { workspace = true }
 async-trait = { workspace = true }
+clonelet = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

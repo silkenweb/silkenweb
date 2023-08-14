@@ -4,7 +4,6 @@ use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
 use indexmap::IndexMap;
 use itertools::Itertools;
-use silkenweb_base::clone;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 
 use super::{
@@ -13,7 +12,7 @@ use super::{
     wet::{WetElement, WetNode},
     Dry,
 };
-use crate::{hydration::HydrationStats, node::element::Namespace};
+use crate::{clone, hydration::HydrationStats, node::element::Namespace};
 
 #[derive(Clone)]
 

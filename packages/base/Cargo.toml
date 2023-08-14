@@ -17,6 +17,7 @@ js-sys = { workspace = true }
 cssparser = { workspace = true }
 lightningcss = { workspace = true }
 itertools = { workspace = true }
+clonelet = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

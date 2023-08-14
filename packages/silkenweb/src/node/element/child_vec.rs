@@ -1,5 +1,6 @@
 use std::mem;
 
+use clonelet::clone;
 use futures_signals::signal_vec::VecDiff;
 
 use crate::{
@@ -47,7 +48,7 @@ impl<D: Dom> ChildVec<D> {
             .map(Into::<Node<D>>::into)
             .collect();
 
-        let mut parent = self.parent.clone();
+        clone!(mut self.parent);
 
         for child in &self.children {
             parent.append_child(&child.node);
@@ -118,7 +119,7 @@ impl<D: Dom> ChildVec<D> {
 
     fn clear(&mut self) {
         if self.static_child_count > 0 {
-            let mut parent = self.parent.clone();
+            clone!(mut self.parent);
             let children = mem::take(&mut self.children);
 
             for (index, child) in children.into_iter().enumerate().rev() {

@@ -40,7 +40,7 @@ impl TodoAppView {
             }
         });
 
-        let app = self.app.clone();
+        clone!(self.app);
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
@@ -80,7 +80,7 @@ impl TodoAppView {
     }
 
     fn render_main(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {
-        let app = self.app.clone();
+        clone!(self.app);
         section()
             .class("main")
             .child(
@@ -150,7 +150,7 @@ impl TodoAppView {
     }
 
     fn render_clear_completed(&self) -> impl Signal<Item = Option<Button>> {
-        let app = self.app.clone();
+        clone!(self.app);
 
         self.any_completed().map(move |any_completed| {
             any_completed.then(|| {

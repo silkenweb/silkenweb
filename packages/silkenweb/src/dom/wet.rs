@@ -1,5 +1,6 @@
 use std::fmt;
 
+use clonelet::clone;
 use silkenweb_base::document;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
 use web_sys::{ShadowRootInit, ShadowRootMode};
@@ -119,7 +120,7 @@ impl DomElement for WetElement {
     }
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
-        let element = self.element.clone();
+        clone!(self.element);
         on_animation_frame(move || f(&element));
     }
 }
