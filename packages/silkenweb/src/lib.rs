@@ -294,7 +294,7 @@ mod to_mutable;
 mod to_value;
 
 pub use to_mutable::SignalToMutable;
-pub use to_value::{SignalToValue, SignalVecToValue};
+pub use to_value::SignalVecToValue;
 
 pub mod animation;
 pub mod attribute;

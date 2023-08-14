@@ -48,7 +48,10 @@ impl CounterState {
 
 #[cfg(test)]
 mod test {
-    use silkenweb::{task::server, SignalToValue, SignalVecToValue};
+    use silkenweb::{
+        task::{render_now, server},
+        SignalToMutable, SignalVecToValue,
+    };
 
     use super::CounterState;
 
@@ -56,20 +59,21 @@ mod test {
     async fn test_counter() {
         server::scope(async {
             let state = CounterState::default();
-
-            let text = state.text().to_value();
+            let text = state.text().to_mutable().await.unwrap();
             let list = state.list.signal_vec().to_value();
 
             assert_eq!(state.count().get(), 0);
             assert_eq!(list.cloned().await, [0]);
-            assert_eq!(text.cloned().await, "0");
+            assert_eq!(text.get_cloned(), "0");
 
             state.add(1);
-            assert_eq!(text.cloned().await, "1");
+            render_now().await;
+            assert_eq!(text.get_cloned(), "1");
             assert_eq!(list.cloned().await, [0, 1]);
 
             state.add(-2);
-            assert_eq!(text.cloned().await, "-1");
+            render_now().await;
+            assert_eq!(text.get_cloned(), "-1");
             assert_eq!(list.cloned().await, [0, 1, -1]);
         })
         .await;
