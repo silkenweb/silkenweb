@@ -7,7 +7,7 @@ use crate::task::spawn_local;
 
 pub trait SignalToMutable<TSig: Default + 'static>: Signal<Item = TSig> + Sized {
     fn to_mutable(self) -> ReadOnlyMutable<TSig>;
-    fn to_mutable_vec<TVec, F>(self, update: F) -> MutableVec<TVec>
+    fn spawn_for_each<TVec, F>(self, update: F) -> MutableVec<TVec>
     where
         TVec: 'static,
         F: FnMut(&MutableVec<TVec>, TSig) + 'static;
@@ -28,7 +28,7 @@ where
         mutable.read_only()
     }
 
-    fn to_mutable_vec<TVec, F>(self, mut update: F) -> MutableVec<TVec>
+    fn spawn_for_each<TVec, F>(self, mut update: F) -> MutableVec<TVec>
     where
         TVec: 'static,
         F: FnMut(&MutableVec<TVec>, TSig) + 'static,

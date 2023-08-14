@@ -22,7 +22,7 @@ impl CounterState {
         let count = Mutable::new(0);
         let list = count
             .signal()
-            .to_mutable_vec(|vec, value| vec.lock_mut().push(value));
+            .spawn_for_each(|vec, value| vec.lock_mut().push(value));
         Self { count, list }
     }
 
