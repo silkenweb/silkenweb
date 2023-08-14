@@ -8,7 +8,7 @@ use futures_signals::{
 use crate::task::spawn_local;
 
 #[async_trait(?Send)]
-pub trait SignalToMutable<TSig: 'static>: Signal<Item = TSig> + Sized {
+pub trait TaskSignal<TSig: 'static>: Signal<Item = TSig> + Sized {
     async fn to_mutable(self) -> Option<ReadOnlyMutable<TSig>>;
     fn spawn_for_each<TVec, F>(self, update: F) -> MutableVec<TVec>
     where
@@ -17,7 +17,7 @@ pub trait SignalToMutable<TSig: 'static>: Signal<Item = TSig> + Sized {
 }
 
 #[async_trait(?Send)]
-impl<TSig, Sig> SignalToMutable<TSig> for Sig
+impl<TSig, Sig> TaskSignal<TSig> for Sig
 where
     TSig: 'static,
     Sig: Signal<Item = TSig> + Sized + 'static,
