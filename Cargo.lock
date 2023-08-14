@@ -2675,9 +2675,9 @@ dependencies = [
  "js-sys",
  "paste",
  "pin-project",
+ "silkenweb-css-macros",
  "silkenweb-macros",
  "silkenweb-signals-ext",
- "silkenweb-style-macros",
  "silkenweb-test",
  "tokio",
  "tokio-stream",
@@ -2714,7 +2714,31 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
- "silkenweb-style",
+ "silkenweb-css",
+ "syn 2.0.26",
+]
+
+[[package]]
+name = "silkenweb-css"
+version = "0.5.0"
+dependencies = [
+ "clonelet",
+ "cssparser 0.31.2",
+ "itertools 0.11.0",
+ "lightningcss",
+]
+
+[[package]]
+name = "silkenweb-css-macros"
+version = "0.5.0"
+dependencies = [
+ "derive_more",
+ "grass",
+ "lightningcss",
+ "proc-macro-error",
+ "proc-macro2 1.0.66",
+ "quote 1.0.31",
+ "silkenweb-css",
  "syn 2.0.26",
 ]
 
@@ -2959,30 +2983,6 @@ dependencies = [
  "futures-signals",
  "paste",
  "pin-project",
-]
-
-[[package]]
-name = "silkenweb-style"
-version = "0.5.0"
-dependencies = [
- "clonelet",
- "cssparser 0.31.2",
- "itertools 0.11.0",
- "lightningcss",
-]
-
-[[package]]
-name = "silkenweb-style-macros"
-version = "0.5.0"
-dependencies = [
- "derive_more",
- "grass",
- "lightningcss",
- "proc-macro-error",
- "proc-macro2 1.0.66",
- "quote 1.0.31",
- "silkenweb-style",
- "syn 2.0.26",
 ]
 
 [[package]]

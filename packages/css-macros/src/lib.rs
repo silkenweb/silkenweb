@@ -6,7 +6,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_style::{css, css::Source};
+use silkenweb_css::{css, css::Source};
 use syn::{parse_macro_input, Ident};
 
 use crate::parse::Input;
@@ -145,7 +145,7 @@ fn code_gen(
                 let location = Location::caller();
                 DefaultDom::mount_in_head(
                     &format!(
-                        "silkenweb-style:{}:{}:{}",
+                        "silkenweb-css:{}:{}:{}",
                         location.file(),
                         location.line(),
                         location.column()

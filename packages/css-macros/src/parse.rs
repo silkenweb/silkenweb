@@ -3,7 +3,7 @@ use std::{ffi::OsStr, path::Path};
 use derive_more::Into;
 use grass::InputSyntax;
 use proc_macro_error::{abort, abort_call_site};
-use silkenweb_style::css::{self, Source};
+use silkenweb_css::css::{self, Source};
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},

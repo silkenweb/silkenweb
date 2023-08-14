@@ -13,15 +13,15 @@ categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
 [features]
-default = ["style"]
+default = ["css"]
 weak-refs = []
 declarative-shadow-dom = []
-style = ["dep:silkenweb-style-macros"]
+css = ["dep:silkenweb-css-macros"]
 
 [dependencies]
 silkenweb-signals-ext = { workspace = true }
 silkenweb-macros = { workspace = true }
-silkenweb-style-macros = { workspace = true, optional = true }
+silkenweb-css-macros = { workspace = true, optional = true }
 
 discard = { workspace = true }
 js-sys = { workspace = true }

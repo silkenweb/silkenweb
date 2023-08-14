@@ -1,9 +1,9 @@
 [package]
-name = "silkenweb-style"
+name = "silkenweb-css-macros"
 version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
-description = "Styling crate for Silkenweb"
+description = "Macros for silkenweb-css"
 homepage = "https://github.com/silkenweb/silkenweb"
 repository = "https://github.com/silkenweb/silkenweb"
 license = "MIT OR Apache-2.0"
@@ -11,8 +11,15 @@ license = "MIT OR Apache-2.0"
 categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
+[lib]
+proc-macro = true
+
 [dependencies]
-cssparser = { workspace = true }
+silkenweb-css = { workspace = true }
 lightningcss = { workspace = true }
-itertools = { workspace = true }
-clonelet = { workspace = true }
+proc-macro-error = { workspace = true }
+proc-macro2 = { workspace = true }
+syn = { workspace = true, features = ["full"] }
+quote = { workspace = true }
+grass = { workspace = true }
+derive_more = { workspace = true }

@@ -20,7 +20,7 @@ isomorphic_test! {
         assert_eq!(elem.to_string(), r#"<div class="red"></div>"#);
         let file = Location::caller().file();
         let style_html =
-            format!(r#"<style id="silkenweb-style:{file}:2:1">.red {{ color: red }}</style>"#);
+            format!(r#"<style id="silkenweb-css:{file}:2:1">.red {{ color: red }}</style>"#);
         assert_eq!(
             DefaultDom::head_inner_html(),
             style_html
