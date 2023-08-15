@@ -10,6 +10,7 @@ use crate::task::spawn_local;
 #[async_trait(?Send)]
 pub trait TaskSignal: Signal + Sized {
     async fn try_to_mutable(self) -> Option<ReadOnlyMutable<Self::Item>>;
+    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
     fn spawn_for_each<TVec, F>(self, update: F) -> MutableVec<TVec>
     where
         TVec: 'static,
@@ -34,6 +35,10 @@ where
             }
         });
         Some(mutable.read_only())
+    }
+
+    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item> {
+        self.try_to_mutable().await.expect("missing value")
     }
 
     fn spawn_for_each<TVec, F>(self, mut update: F) -> MutableVec<TVec>
