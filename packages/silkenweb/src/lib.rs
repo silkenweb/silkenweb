@@ -290,10 +290,10 @@ pub use silkenweb_macros::{
 pub mod macros;
 
 mod event;
-mod task_signal;
+mod runtime;
 mod to_value;
 
-pub use task_signal::TaskSignal;
+pub use runtime::TaskSignal;
 pub use to_value::SignalVecToValue;
 
 pub mod animation;
