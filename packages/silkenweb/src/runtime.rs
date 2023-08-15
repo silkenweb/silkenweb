@@ -9,7 +9,6 @@ use crate::task::spawn_local;
 
 #[async_trait(?Send)]
 pub trait TaskSignal: Signal + Sized {
-    async fn try_to_mutable(self) -> Option<ReadOnlyMutable<Self::Item>>;
     async fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
     fn spawn_for_each<TVec, F>(self, update: F) -> MutableVec<TVec>
     where
@@ -22,9 +21,12 @@ impl<Sig> TaskSignal for Sig
 where
     Sig: Signal + Sized + 'static,
 {
-    async fn try_to_mutable(self) -> Option<ReadOnlyMutable<Self::Item>> {
+    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item> {
         let mut s = Box::pin(self.to_stream());
-        let first_value = s.next().await?;
+        let first_value = s
+            .next()
+            .await
+            .expect("a signal should always have an initial value");
         let mutable = Mutable::new(first_value);
         spawn_local({
             let mutable = mutable.clone();
@@ -34,11 +36,7 @@ where
                 }
             }
         });
-        Some(mutable.read_only())
-    }
-
-    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item> {
-        self.try_to_mutable().await.expect("missing value")
+        mutable.read_only()
     }
 
     fn spawn_for_each<TVec, F>(self, mut update: F) -> MutableVec<TVec>
