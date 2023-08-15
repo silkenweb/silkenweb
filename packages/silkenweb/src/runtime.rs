@@ -26,11 +26,11 @@ where
         let mut s = Box::pin(self.to_stream());
         let first_value = s.next().await?;
         let mutable = Mutable::new(first_value);
-        let m = mutable.clone();
         spawn_local({
+            let mutable = mutable.clone();
             async move {
                 while let Some(value) = s.next().await {
-                    m.set(value);
+                    mutable.set(value);
                 }
             }
         });
@@ -47,10 +47,12 @@ where
         F: FnMut(&MutableVec<TVec>, Self::Item) + 'static,
     {
         let vec = MutableVec::<TVec>::new();
-        let vect = vec.clone();
-        spawn_local(self.for_each(move |value| {
-            update(&vect, value);
-            async {}
+        spawn_local(self.for_each({
+            let vec = vec.clone();
+            move |value| {
+                update(&vec, value);
+                async {}
+            }
         }));
         vec
     }
