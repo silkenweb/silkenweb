@@ -62,22 +62,20 @@ mod test {
             let text = state.text().to_mutable().await;
             let list = state.list.signal_vec().to_mutable().await;
 
+            render_now().await;
             assert_eq!(state.count().get(), 0);
-            // TODO missing first value. Should be [0]
-            assert_eq!(&*list.lock_ref(), Vec::<isize>::new());
+            assert_eq!(&*list.lock_ref(), [0]);
             assert_eq!(text.get_cloned(), "0");
 
             state.add(1);
             render_now().await;
             assert_eq!(text.get_cloned(), "1");
-            // TODO missing first value. Should be [0, 1]
-            assert_eq!(&*list.lock_ref(), [1]);
+            assert_eq!(&*list.lock_ref(), [0, 1]);
 
             state.add(-2);
             render_now().await;
             assert_eq!(text.get_cloned(), "-1");
-            // TODO missing first value. Should be [0, 1, -1]
-            assert_eq!(&*list.lock_ref(), [1, -1]);
+            assert_eq!(&*list.lock_ref(), [0, 1, -1]);
         })
         .await;
     }
