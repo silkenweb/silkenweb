@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use futures::StreamExt;
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
-    signal_vec::MutableVec,
+    signal_vec::{MutableVec, MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
 };
 
 use crate::task::spawn_local;
@@ -26,7 +26,7 @@ where
         let first_value = s
             .next()
             .await
-            .expect("a signal should always have an initial value");
+            .expect("a Signal should always have an initial value");
         let mutable = Mutable::new(first_value);
         spawn_local({
             let mutable = mutable.clone();
@@ -53,5 +53,66 @@ where
             }
         }));
         vec
+    }
+}
+
+#[async_trait(?Send)]
+pub trait TaskSignalVec<T: Clone + 'static> {
+    async fn to_mutable(self) -> MutableVec<T>;
+}
+
+#[async_trait(?Send)]
+impl<T, Sig> TaskSignalVec<T> for Sig
+where
+    T: Clone + 'static,
+    Sig: SignalVec<Item = T> + Sized + 'static,
+{
+    async fn to_mutable(self) -> MutableVec<T> {
+        let s = Box::pin(self.to_stream());
+
+        let mv = MutableVec::<T>::new();
+
+        spawn_local(s.for_each({
+            let mv = mv.clone();
+            move |diff| {
+                apply_diff(diff, mv.lock_mut());
+                async {}
+            }
+        }));
+        mv
+    }
+}
+
+fn apply_diff<T: Clone>(diff: VecDiff<T>, mut vec: MutableVecLockMut<T>) {
+    match diff {
+        VecDiff::Replace { values } => {
+            vec.clear();
+            values.into_iter().for_each(|v| vec.push_cloned(v));
+        }
+        VecDiff::InsertAt { index, value } => {
+            vec.insert_cloned(index, value);
+        }
+        VecDiff::UpdateAt { index, value } => {
+            vec.set_cloned(index, value);
+        }
+        VecDiff::Push { value } => {
+            vec.push_cloned(value);
+        }
+        VecDiff::RemoveAt { index } => {
+            vec.remove(index);
+        }
+        VecDiff::Move {
+            old_index,
+            new_index,
+        } => {
+            let value = vec.remove(old_index);
+            vec.insert_cloned(new_index, value);
+        }
+        VecDiff::Pop {} => {
+            vec.pop().unwrap();
+        }
+        VecDiff::Clear {} => {
+            vec.clear();
+        }
     }
 }

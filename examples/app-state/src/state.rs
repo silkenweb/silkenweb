@@ -50,7 +50,7 @@ impl CounterState {
 mod test {
     use silkenweb::{
         task::{render_now, server},
-        SignalVecToValue, TaskSignal,
+        TaskSignal, TaskSignalVec,
     };
 
     use super::CounterState;
@@ -60,7 +60,7 @@ mod test {
         server::scope(async {
             let state = CounterState::default();
             let text = state.text().to_mutable().await;
-            let list = state.list.signal_vec().to_mutable();
+            let list = state.list.signal_vec().to_mutable().await;
 
             assert_eq!(state.count().get(), 0);
             // TODO missing first value. Should be [0]

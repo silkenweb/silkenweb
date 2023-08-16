@@ -291,10 +291,8 @@ pub mod macros;
 
 mod event;
 mod runtime;
-mod to_value;
 
-pub use runtime::TaskSignal;
-pub use to_value::SignalVecToValue;
+pub use runtime::{TaskSignal, TaskSignalVec};
 
 pub mod animation;
 pub mod attribute;
