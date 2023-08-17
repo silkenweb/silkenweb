@@ -66,11 +66,9 @@ where
     Sig: SignalVec + 'static,
 {
     fn to_mutable(self) -> MutableVec<Self::Item> {
-        let s = self.to_stream();
-
         let mv = MutableVec::new();
 
-        spawn_local(s.for_each({
+        spawn_local(self.for_each({
             let mv = mv.clone();
             move |diff| {
                 apply_diff(diff, mv.lock_mut());
