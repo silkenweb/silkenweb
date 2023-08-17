@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use silkenweb::TaskSignal;
+use silkenweb::{clone, TaskSignal};
 
 pub struct CounterState {
     count: Mutable<isize>,
@@ -20,9 +20,15 @@ impl Default for CounterState {
 impl CounterState {
     fn new() -> Self {
         let count = Mutable::new(0);
-        let list = count
-            .signal()
-            .spawn_for_each(|vec, value| vec.lock_mut().push(value));
+        let list = MutableVec::new();
+
+        count.signal().spawn_for_each({
+            clone!(list);
+            move |value| {
+                list.lock_mut().push(value);
+                async {}
+            }
+        });
         Self { count, list }
     }
 

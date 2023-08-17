@@ -10,10 +10,11 @@ use crate::task::spawn_local;
 #[async_trait(?Send)]
 pub trait TaskSignal: Signal {
     async fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
-    fn spawn_for_each<TVec, F>(self, update: F) -> MutableVec<TVec>
+
+    fn spawn_for_each<U, F>(self, callback: F)
     where
-        TVec: 'static,
-        F: FnMut(&MutableVec<TVec>, Self::Item) + 'static;
+        U: Future<Output = ()> + 'static,
+        F: FnMut(Self::Item) -> U + 'static;
 }
 
 #[async_trait(?Send)]
@@ -39,20 +40,12 @@ where
         mutable.read_only()
     }
 
-    fn spawn_for_each<TVec, F>(self, mut update: F) -> MutableVec<TVec>
+    fn spawn_for_each<U, F>(self, callback: F)
     where
-        TVec: 'static,
-        F: FnMut(&MutableVec<TVec>, Self::Item) + 'static,
+        U: Future<Output = ()> + 'static,
+        F: FnMut(Self::Item) -> U + 'static,
     {
-        let vec = MutableVec::<TVec>::new();
-        spawn_local(self.for_each({
-            let vec = vec.clone();
-            move |value| {
-                update(&vec, value);
-                async {}
-            }
-        }));
-        vec
+        spawn_local(self.for_each(callback));
     }
 }
 
