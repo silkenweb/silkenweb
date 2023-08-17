@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use futures::StreamExt;
+use futures::{Future, StreamExt};
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
-    signal_vec::{MutableVec, MutableVecLockMut, SignalVec, SignalVecExt},
+    signal_vec::{MutableVec, MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
 };
 
 use crate::task::spawn_local;
@@ -58,6 +58,11 @@ where
 
 pub trait TaskSignalVec: SignalVec {
     fn to_mutable(self) -> MutableVec<Self::Item>;
+
+    fn spawn_for_each<U, F>(self, callback: F)
+    where
+        U: Future<Output = ()> + 'static,
+        F: FnMut(VecDiff<Self::Item>) -> U + 'static;
 }
 
 impl<Sig> TaskSignalVec for Sig
@@ -68,13 +73,22 @@ where
     fn to_mutable(self) -> MutableVec<Self::Item> {
         let mv = MutableVec::new();
 
-        spawn_local(self.for_each({
+        self.spawn_for_each({
             let mv = mv.clone();
             move |diff| {
                 MutableVecLockMut::apply_vec_diff(&mut mv.lock_mut(), diff);
                 async {}
             }
-        }));
+        });
+
         mv
+    }
+
+    fn spawn_for_each<U, F>(self, callback: F)
+    where
+        U: Future<Output = ()> + 'static,
+        F: FnMut(VecDiff<Self::Item>) -> U + 'static,
+    {
+        spawn_local(self.for_each(callback));
     }
 }
