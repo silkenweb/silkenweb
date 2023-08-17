@@ -56,18 +56,16 @@ where
     }
 }
 
-#[async_trait(?Send)]
 pub trait TaskSignalVec<T: Clone + 'static> {
-    async fn to_mutable(self) -> MutableVec<T>;
+    fn to_mutable(self) -> MutableVec<T>;
 }
 
-#[async_trait(?Send)]
 impl<T, Sig> TaskSignalVec<T> for Sig
 where
     T: Clone + 'static,
     Sig: SignalVec<Item = T> + Sized + 'static,
 {
-    async fn to_mutable(self) -> MutableVec<T> {
+    fn to_mutable(self) -> MutableVec<T> {
         let s = Box::pin(self.to_stream());
 
         let mv = MutableVec::<T>::new();

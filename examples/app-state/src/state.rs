@@ -60,7 +60,7 @@ mod test {
         server::scope(async {
             let state = CounterState::default();
             let text = state.text().to_mutable().await;
-            let list = state.list.signal_vec().to_mutable().await;
+            let list = state.list.signal_vec().to_mutable();
 
             render_now().await;
             assert_eq!(state.count().get(), 0);
