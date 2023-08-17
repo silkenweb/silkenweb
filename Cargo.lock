@@ -2690,7 +2690,6 @@ dependencies = [
 name = "silkenweb"
 version = "0.5.0"
 dependencies = [
- "async-trait",
  "caseless",
  "clonelet",
  "console_error_panic_hook",

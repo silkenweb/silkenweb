@@ -1,6 +1,5 @@
-use async_trait::async_trait;
 use clonelet::clone;
-use futures::{Future, StreamExt};
+use futures::{Future, FutureExt, StreamExt};
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{MutableVec, MutableVecLockMut, SignalVec, SignalVecExt, VecDiff},
@@ -8,9 +7,8 @@ use futures_signals::{
 
 use crate::task::spawn_local;
 
-#[async_trait(?Send)]
 pub trait TaskSignal: Signal {
-    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
+    fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
 
     fn spawn_for_each<U, F>(self, callback: F)
     where
@@ -18,17 +16,17 @@ pub trait TaskSignal: Signal {
         F: FnMut(Self::Item) -> U + 'static;
 }
 
-#[async_trait(?Send)]
 impl<Sig> TaskSignal for Sig
 where
     Sig: Signal + 'static,
 {
-    async fn to_mutable(self) -> ReadOnlyMutable<Self::Item> {
+    fn to_mutable(self) -> ReadOnlyMutable<Self::Item> {
         let mut s = Box::pin(self.to_stream());
         let first_value = s
             .next()
-            .await
-            .expect("a Signal should always have an initial value");
+            .now_or_never()
+            .expect("A `Signal`'s initial value must be `Ready` immediately")
+            .expect("`Signal`s must have an initial value");
         let mutable = Mutable::new(first_value);
         spawn_local({
             clone!(mutable);

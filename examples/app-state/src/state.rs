@@ -65,7 +65,7 @@ mod test {
     async fn test_counter() {
         server::scope(async {
             let state = CounterState::default();
-            let text = state.text().to_mutable().await;
+            let text = state.text().to_mutable();
             let list = state.list.signal_vec().to_mutable();
 
             render_now().await;
