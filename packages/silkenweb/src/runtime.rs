@@ -66,7 +66,7 @@ where
     Sig: SignalVec + 'static,
 {
     fn to_mutable(self) -> MutableVec<Self::Item> {
-        let s = Box::pin(self.to_stream());
+        let s = self.to_stream();
 
         let mv = MutableVec::new();
 
