@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use clonelet::clone;
 use futures::{Future, StreamExt};
 use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
@@ -30,7 +31,8 @@ where
             .expect("a Signal should always have an initial value");
         let mutable = Mutable::new(first_value);
         spawn_local({
-            let mutable = mutable.clone();
+            clone!(mutable);
+
             async move {
                 while let Some(value) = s.next().await {
                     mutable.set(value);
@@ -67,7 +69,8 @@ where
         let mv = MutableVec::new();
 
         self.spawn_for_each({
-            let mv = mv.clone();
+            clone!(mv);
+
             move |diff| {
                 MutableVecLockMut::apply_vec_diff(&mut mv.lock_mut(), diff);
                 async {}
