@@ -28,6 +28,7 @@ where
             .expect("A `Signal`'s initial value must be `Ready` immediately")
             .expect("`Signal`s must have an initial value");
         let mutable = Mutable::new(first_value);
+
         spawn_local({
             clone!(mutable);
 
@@ -37,6 +38,7 @@ where
                 }
             }
         });
+
         mutable.read_only()
     }
 

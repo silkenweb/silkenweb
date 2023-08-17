@@ -290,9 +290,6 @@ pub use silkenweb_macros::{
 pub mod macros;
 
 mod event;
-mod runtime;
-
-pub use runtime::{RuntimeSignal, RuntimeSignalVec};
 
 pub mod animation;
 pub mod attribute;
@@ -302,6 +299,7 @@ pub mod elements;
 pub mod hydration;
 pub mod node;
 pub mod router;
+pub mod runtime;
 pub mod storage;
 pub mod task;
 pub mod time;
