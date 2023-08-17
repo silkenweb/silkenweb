@@ -292,7 +292,7 @@ pub mod macros;
 mod event;
 mod runtime;
 
-pub use runtime::{TaskSignal, TaskSignalVec};
+pub use runtime::{RuntimeSignal, RuntimeSignalVec};
 
 pub mod animation;
 pub mod attribute;

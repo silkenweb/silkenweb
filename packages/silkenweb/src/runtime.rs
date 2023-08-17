@@ -7,7 +7,7 @@ use futures_signals::{
 
 use crate::task::spawn_local;
 
-pub trait TaskSignal: Signal {
+pub trait RuntimeSignal: Signal {
     fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
 
     fn spawn_for_each<U, F>(self, callback: F)
@@ -16,7 +16,7 @@ pub trait TaskSignal: Signal {
         F: FnMut(Self::Item) -> U + 'static;
 }
 
-impl<Sig> TaskSignal for Sig
+impl<Sig> RuntimeSignal for Sig
 where
     Sig: Signal + 'static,
 {
@@ -49,7 +49,7 @@ where
     }
 }
 
-pub trait TaskSignalVec: SignalVec {
+pub trait RuntimeSignalVec: SignalVec {
     fn to_mutable(self) -> MutableVec<Self::Item>;
 
     fn spawn_for_each<U, F>(self, callback: F)
@@ -58,7 +58,7 @@ pub trait TaskSignalVec: SignalVec {
         F: FnMut(VecDiff<Self::Item>) -> U + 'static;
 }
 
-impl<Sig> TaskSignalVec for Sig
+impl<Sig> RuntimeSignalVec for Sig
 where
     Self::Item: Clone + 'static,
     Sig: SignalVec + 'static,

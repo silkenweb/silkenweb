@@ -4,7 +4,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use silkenweb::{clone, TaskSignal};
+use silkenweb::{clone, RuntimeSignal};
 
 pub struct CounterState {
     count: Mutable<isize>,
@@ -56,7 +56,7 @@ impl CounterState {
 mod test {
     use silkenweb::{
         task::{render_now, server},
-        TaskSignal, TaskSignalVec,
+        RuntimeSignal, RuntimeSignalVec,
     };
 
     use super::CounterState;
