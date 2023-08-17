@@ -56,19 +56,19 @@ where
     }
 }
 
-pub trait TaskSignalVec<T: Clone + 'static> {
-    fn to_mutable(self) -> MutableVec<T>;
+pub trait TaskSignalVec: SignalVec {
+    fn to_mutable(self) -> MutableVec<Self::Item>;
 }
 
-impl<T, Sig> TaskSignalVec<T> for Sig
+impl<Sig> TaskSignalVec for Sig
 where
-    T: Clone + 'static,
-    Sig: SignalVec<Item = T> + Sized + 'static,
+    Self::Item: Clone + 'static,
+    Sig: SignalVec + 'static,
 {
-    fn to_mutable(self) -> MutableVec<T> {
+    fn to_mutable(self) -> MutableVec<Self::Item> {
         let s = Box::pin(self.to_stream());
 
-        let mv = MutableVec::<T>::new();
+        let mv = MutableVec::new();
 
         spawn_local(s.for_each({
             let mv = mv.clone();
