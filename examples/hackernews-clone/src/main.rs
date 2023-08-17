@@ -3,7 +3,7 @@ use std::{fmt::Display, result, time::Duration};
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use futures::{future::join_all, Future};
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::Mutable;
 use reqwasm::http::Request;
 use serde::{de::DeserializeOwned, Deserialize};
 use silkenweb::{
@@ -12,7 +12,7 @@ use silkenweb::{
     log_panics, mount,
     node::element::{Element, GenericElement, ParentElement},
     router,
-    task::spawn_local,
+    runtime::RuntimeSignal,
     value::Sig,
 };
 use timeago::Formatter;
@@ -311,7 +311,7 @@ fn main() {
 
     let app = App::new();
 
-    spawn_local(router::url_path().signal_cloned().for_each({
+    router::url_path().signal_cloned().spawn_for_each({
         clone!(app);
         move |pathname| {
             clone!(app);
@@ -331,7 +331,7 @@ fn main() {
                 })
             }
         }
-    }));
+    });
 
     mount("app", app.render());
 }
