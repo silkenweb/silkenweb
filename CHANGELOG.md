@@ -3,6 +3,7 @@
 ## Next
 
 - `Element::DomType` was renamed to `Element::DomElement`.
+- Added `runtime` module with `RuntimeSignal*` traits.
 
 ### Fixes
 
