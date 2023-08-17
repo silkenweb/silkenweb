@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use derive_more::Constructor;
 use futures_signals::{
-    signal::{not, Broadcaster, Signal, SignalExt},
+    signal::{not, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
 use silkenweb::{
@@ -17,6 +17,7 @@ use silkenweb::{
     node::{element::Element, Node},
     prelude::ParentElement,
     router::url_path,
+    runtime::RuntimeSignal,
     value::Sig,
 };
 use silkenweb_signals_ext::SignalProduct;
@@ -32,13 +33,15 @@ pub struct TodoAppView {
 
 impl TodoAppView {
     pub fn render(&self) -> Section {
-        let item_filter = url_path().signal_ref({
-            |url_path| match url_path.as_str() {
-                "#/active" => Filter::Active,
-                "#/completed" => Filter::Completed,
-                _ => Filter::All,
-            }
-        });
+        let item_filter = url_path()
+            .signal_ref({
+                |url_path| match url_path.as_str() {
+                    "#/active" => Filter::Active,
+                    "#/completed" => Filter::Completed,
+                    _ => Filter::All,
+                }
+            })
+            .to_mutable();
 
         clone!(self.app);
         let input_elem = input()
@@ -57,7 +60,6 @@ impl TodoAppView {
             })
             .effect(|elem: &HtmlInputElement| elem.focus().unwrap_throw());
 
-        let item_filter = Broadcaster::new(item_filter);
         let app_view = self.clone();
         let body = self
             .is_empty()
@@ -66,8 +68,8 @@ impl TodoAppView {
                     Vec::new()
                 } else {
                     vec![
-                        app_view.render_main(item_filter.signal()).into(),
-                        app_view.render_footer(item_filter.signal()).into(),
+                        app_view.render_main(item_filter.clone()).into(),
+                        app_view.render_footer(item_filter.clone()).into(),
                     ] as Vec<Node>
                 }
             })
@@ -79,7 +81,7 @@ impl TodoAppView {
             .children_signal(body)
     }
 
-    fn render_main(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Section {
+    fn render_main(&self, item_filter: ReadOnlyMutable<Filter>) -> Section {
         clone!(self.app);
         section()
             .class("main")
@@ -106,7 +108,7 @@ impl TodoAppView {
             )
     }
 
-    fn render_footer(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Footer {
+    fn render_footer(&self, item_filter: ReadOnlyMutable<Filter>) -> Footer {
         footer()
             .class("footer")
             .child(Sig(self.active_count().map(move |active_count| {
@@ -140,8 +142,7 @@ impl TodoAppView {
         .text(seperator)
     }
 
-    fn render_filters(&self, item_filter: impl Signal<Item = Filter> + 'static) -> Ul {
-        let item_filter = Broadcaster::new(item_filter);
+    fn render_filters(&self, item_filter: ReadOnlyMutable<Filter>) -> Ul {
         ul().class("filters").children([
             self.render_filter_link(Filter::All, item_filter.signal(), " "),
             self.render_filter_link(Filter::Active, item_filter.signal(), " "),
@@ -166,10 +167,8 @@ impl TodoAppView {
 
     fn visible_items_signal(
         &self,
-        item_filter: impl Signal<Item = Filter>,
+        item_filter: ReadOnlyMutable<Filter>,
     ) -> impl SignalVec<Item = Rc<TodoItem>> {
-        let item_filter = Broadcaster::new(item_filter);
-
         self.app.items_signal().filter_signal_cloned(move |item| {
             (item.completed(), item_filter.signal()).signal_ref(|completed, item_filter| {
                 match item_filter {

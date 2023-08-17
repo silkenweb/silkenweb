@@ -1,6 +1,6 @@
 use std::iter;
 
-use futures_signals::signal::{Broadcaster, Signal, SignalExt};
+use futures_signals::signal::{Signal, SignalExt};
 use num_traits::ToPrimitive;
 use silkenweb::{
     animation::infinite_animation,
@@ -14,6 +14,7 @@ use silkenweb::{
     },
     log_panics, mount,
     node::element::ParentElement,
+    runtime::RuntimeSignal,
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -44,7 +45,7 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
 
 fn main() {
     log_panics();
-    let ts = Broadcaster::new(infinite_animation());
+    let ts = infinite_animation().to_mutable();
     let mut svg = svg::svg().width(WIDTH).height(HEIGHT);
 
     for i in 2..6 {
