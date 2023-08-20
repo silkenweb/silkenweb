@@ -1,8 +1,7 @@
 use std::{
+    pin::pin,
     sync::Arc,
     task::{Context, Poll, Wake},
-    thread,
-    thread::Thread,
 };
 
 /// Synchronous version of [render_now].
@@ -40,18 +39,17 @@ pub use arch::render_now_sync;
 pub use arch::scope;
 /// Synchronous version of [`scope`].
 pub use arch::sync_scope;
+use crossbeam::sync::{Parker, Unparker};
 use futures::Future;
 use silkenweb_macros::cfg_browser;
 
-struct ThreadWaker(Thread);
+struct ThreadWaker(Unparker);
 
 impl Wake for ThreadWaker {
     fn wake(self: Arc<Self>) {
         self.0.unpark();
     }
 }
-
-// Adapted from <https://doc.rust-lang.org/stable/std/task/trait.Wake.html>
 
 /// Run a future to completion on the current thread.
 ///
@@ -60,19 +58,22 @@ impl Wake for ThreadWaker {
 ///
 /// [render_now]: super::render_now
 pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
-    // Pin the future so it can be polled.
-    let mut fut = Box::pin(fut);
+    let mut fut = pin!(fut);
 
-    // Create a new context to be passed to the future.
-    let t = thread::current();
-    let waker = Arc::new(ThreadWaker(t)).into();
+    // Use a `Parker` instance rather than global `thread::park/unpark`, so no one
+    // else can steal our `unpark`s and they don't get confused with recursive
+    // `block_on` `unpark`s.
+    let parker = Parker::new();
+    // Make sure we create a new waker each call, rather than using a global, so
+    // recursive `block_on`s don't use the same waker.
+    let waker = Arc::new(ThreadWaker(parker.unparker().clone())).into();
     let mut cx = Context::from_waker(&waker);
 
     // Run the future to completion.
     loop {
         match fut.as_mut().poll(&mut cx) {
             Poll::Ready(res) => return res,
-            Poll::Pending => thread::park(),
+            Poll::Pending => parker.park(),
         }
     }
 }

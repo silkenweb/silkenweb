@@ -21,6 +21,7 @@ css-transpile = ["silkenweb-macros/css-transpile"]
 all-features = true
 
 [dependencies]
+crossbeam = { workspace = true }
 discard = { workspace = true }
 js-sys = { workspace = true }
 futures = { workspace = true }
