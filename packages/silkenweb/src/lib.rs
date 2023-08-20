@@ -47,6 +47,11 @@
 //! [caniuse](https://caniuse.com/mdn-html_elements_template_shadowroot)
 //! for browser support. Polyfills are available.
 //!
+//! ## `css-transpile`
+//!
+//! Enable CSS transpilation for [`css!`]. This can significantly increase build
+//! time, so is presented as an opt-in feature.
+//!
 //! # Learning
 //!
 //! There's extensive documentation on each module in this crate, along with
@@ -101,28 +106,33 @@ use silkenweb_base::document as base_document;
 ///     prefix = "prefix",
 ///     include_prefixes = ["included-"],
 ///     exclude_prefixes = ["excluded-"],
-///     validate,
 ///     auto_mount,
-///     transpile = (
-///         minify,
-///         pretty,
-///         modules,
-///         nesting,
-///         browsers = (
-///             android = (1, 0, 0),
-///             chrome = (1, 0, 0),
-///             edge = (1, 0, 0),
-///             firefox = (1, 0, 0),
-///             ie = (1, 0, 0),
-///             ios_saf = (1, 0, 0),
-///             opera = (1, 0, 0),
-///             safari = (1, 0, 0),
-///             samsung = (1, 0, 0),
-///         )
-///     )
+#[cfg_attr(
+    feature = "css-transpile",
+    doc = r#"
+    validate,
+    transpile = (
+        minify,
+        pretty,
+        modules,
+        nesting,
+        browsers = (
+            android = (1, 0, 0),
+            chrome = (1, 0, 0),
+            edge = (1, 0, 0),
+            firefox = (1, 0, 0),
+            ie = (1, 0, 0),
+            ios_saf = (1, 0, 0),
+            opera = (1, 0, 0),
+            safari = (1, 0, 0),
+            samsung = (1, 0, 0),
+        )
+    )
+"#
+)]
 /// );
 /// ```
-///
+/// 
 /// All are optional, but one of `path` or `content` must be specified.
 ///
 /// - `path` is the path to the CSS/SCSS/SASS file. The syntax is determined
@@ -139,10 +149,10 @@ use silkenweb_base::document as base_document;
 /// - `exclude_prefixes`: a list of prefixes to exclude. No Rust constants will
 ///   be defined for a class starting with any of these prefixes.
 ///   `exclude_prefixes` takes precedence over `include_prefixes`.
-/// - `validate`: validate the CSS.
 /// - `auto_mount`: Generate a function for each CSS class that will call
 ///   `stylesheet::mount` before returning the class name.
-/// - `transpile`: transpile the CSS with [lightningcss].
+/// - `validate`: validate the CSS. Requires crate feature `css-transpile`.
+/// - `transpile`: transpile the CSS with [lightningcss]. Requires crate feature `css-transpile`.
 ///
 /// ## `transpile`
 ///
@@ -164,13 +174,12 @@ use silkenweb_base::document as base_document;
 /// # Examples
 ///
 /// Define private constants for all CSS classes:
-///
 /// ```
 /// # use silkenweb_macros::css;
 /// css!("my-css-file.css");
 /// assert_eq!(class::MY_CLASS, "my-class");
 /// ```
-///
+/// 
 /// Define private constants for all content CSS classes:
 ///
 ///  ```
@@ -187,7 +196,7 @@ use silkenweb_base::document as base_document;
 ///     }
 /// "#);
 /// ```
-/// 
+///
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
 /// ```
@@ -200,7 +209,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::SMALL, "border-small");
 /// ```
-/// 
+///
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
@@ -213,7 +222,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
-/// 
+///
 /// [lightningcss]: https://lightningcss.dev/
 /// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
 /// [CSS Modules]: https://github.com/css-modules/css-modules

@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css::{self, Source};
+use silkenweb_base::css::{self, NameMapping, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
     FieldsUnnamed, Ident, Index, LitBool,
@@ -299,26 +299,19 @@ pub fn css(input: TokenStream) -> TokenStream {
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let variables =
-        css::variable_names(&source).map(|variable| (variable.clone(), format!("--{variable}")));
+    let variables = css::variable_names(&source).map(|variable| NameMapping {
+        plain: variable.clone(),
+        mangled: format!("--{variable}"),
+    });
 
-    let classes = if let Some(name_mappings) = name_mappings {
-        let mut classes = Vec::new();
-
-        for (ident, mapping) in name_mappings {
-            if !mapping.composes.is_empty() {
-                abort_call_site!("`composes` is unsupported");
-            }
-
-            classes.push((ident, mapping.name));
-        }
-
-        classes
-    } else {
+    let classes = name_mappings.unwrap_or_else(|| {
         css::class_names(&source)
-            .map(|class| (class.clone(), class))
+            .map(|class| NameMapping {
+                plain: class.clone(),
+                mangled: class,
+            })
             .collect()
-    };
+    });
 
     let classes = only_matching_prefixes(&include_prefixes, &exclude_prefixes, classes.into_iter());
     let variables = only_matching_prefixes(&include_prefixes, &exclude_prefixes, variables);
@@ -335,16 +328,18 @@ pub fn css(input: TokenStream) -> TokenStream {
 fn only_matching_prefixes<'a>(
     include_prefixes: &'a Option<Vec<String>>,
     exclude_prefixes: &'a [String],
-    names: impl Iterator<Item = (String, String)> + 'a,
-) -> impl Iterator<Item = (String, String)> + 'a {
-    names.filter(move |(class_ident, _css_class)| {
+    names: impl Iterator<Item = NameMapping> + 'a,
+) -> impl Iterator<Item = NameMapping> + 'a {
+    names.filter(move |mapping| {
+        let ident = &mapping.plain;
+
         let include = if let Some(include_prefixes) = include_prefixes.as_ref() {
-            any_prefix_matches(class_ident, include_prefixes)
+            any_prefix_matches(ident, include_prefixes)
         } else {
             true
         };
 
-        let exclude = any_prefix_matches(class_ident, exclude_prefixes);
+        let exclude = any_prefix_matches(ident, exclude_prefixes);
 
         include && !exclude
     })
@@ -352,13 +347,13 @@ fn only_matching_prefixes<'a>(
 
 fn strip_prefixes<'a>(
     prefix: &'a str,
-    names: impl Iterator<Item = (String, String)> + 'a,
-) -> impl Iterator<Item = (String, String)> + 'a {
-    names.filter_map(move |(ident, mapping)| {
-        ident
+    names: impl Iterator<Item = NameMapping> + 'a,
+) -> impl Iterator<Item = NameMapping> + 'a {
+    names.filter_map(move |NameMapping { plain, mangled }| {
+        plain
             .strip_prefix(prefix)
             .map(str::to_string)
-            .map(|ident| (ident, mapping))
+            .map(|plain| NameMapping { plain, mangled })
     })
 }
 
@@ -370,11 +365,11 @@ fn code_gen(
     source: &Source,
     public: bool,
     auto_mount: bool,
-    classes: impl Iterator<Item = (String, String)>,
-    variables: impl Iterator<Item = (String, String)>,
+    classes: impl Iterator<Item = NameMapping>,
+    variables: impl Iterator<Item = NameMapping>,
 ) -> TokenStream {
-    let classes = classes.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
-    let variables = variables.map(|(ident, name)| define_css_entity(ident, name, auto_mount));
+    let classes = classes.map(|name| define_css_entity(name, auto_mount));
+    let variables = variables.map(|name| define_css_entity(name, auto_mount));
 
     let dependency = source.dependency().iter();
     let content = source.content();
@@ -421,15 +416,17 @@ fn code_gen(
     .into()
 }
 
-fn define_css_entity(ident: String, name: String, auto_mount: bool) -> proc_macro2::TokenStream {
-    if !ident.starts_with(char::is_alphabetic) {
+fn define_css_entity(name: NameMapping, auto_mount: bool) -> proc_macro2::TokenStream {
+    let NameMapping { plain, mangled } = name;
+
+    if !plain.starts_with(char::is_alphabetic) {
         abort_call_site!(
             "Identifier '{}' doesn't start with an alphabetic character",
-            ident
+            plain
         );
     }
 
-    let ident = ident.replace(|c: char| !c.is_alphanumeric(), "_");
+    let ident = plain.replace(|c: char| !c.is_alphanumeric(), "_");
 
     if auto_mount {
         let ident = Ident::new(&ident.to_lowercase(), Span::call_site());
@@ -442,11 +439,11 @@ fn define_css_entity(ident: String, name: String, auto_mount: bool) -> proc_macr
                 super::stylesheet::mount()
             });
 
-            #name
+            #mangled
         })
     } else {
         let ident = Ident::new(&ident.to_uppercase(), Span::call_site());
-        quote!(pub const #ident: &str = #name;)
+        quote!(pub const #ident: &str = #mangled;)
     }
 }
 

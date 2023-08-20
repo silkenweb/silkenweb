@@ -15,6 +15,10 @@ keywords = ["reactive", "web", "html", "browser", "dom"]
 [features]
 weak-refs = []
 declarative-shadow-dom = []
+css-transpile = ["silkenweb-macros/css-transpile"]
+
+[package.metadata."docs.rs"]
+all-features = true
 
 [dependencies]
 discard = { workspace = true }

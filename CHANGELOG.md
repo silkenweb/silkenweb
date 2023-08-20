@@ -4,6 +4,7 @@
 
 - `Element::DomType` was renamed to `Element::DomElement`.
 - Added `runtime` module with `RuntimeSignal*` traits.
+- Added `css-transpile` as an opt-in feature, as it can significatly build time.
 
 ### Fixes
 

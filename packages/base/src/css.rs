@@ -2,17 +2,20 @@ use std::{
     collections::HashSet,
     env, fs,
     path::{Path, PathBuf},
-    sync::{Arc, RwLock},
 };
 
-use clonelet::clone;
 use cssparser::{Parser, ParserInput, Token};
-use itertools::Itertools;
-use lightningcss::{
-    css_modules::{self, CssModuleExports},
-    stylesheet::{MinifyOptions, ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
-    targets::{Browsers, Features, Targets},
-};
+
+#[cfg_attr(feature = "css-transpile", path = "css/transpile-enabled.rs")]
+#[cfg_attr(not(feature = "css-transpile"), path = "css/transpile-disabled.rs")]
+mod transpile;
+
+pub use transpile::Version;
+
+pub struct NameMapping {
+    pub plain: String,
+    pub mangled: String,
+}
 
 #[derive(Debug)]
 pub struct Source {
@@ -21,6 +24,7 @@ pub struct Source {
 }
 
 impl Source {
+    // TODO: Take a `Syntax` enum, and convert to css
     pub fn from_content(content: impl Into<String>) -> Self {
         Self {
             content: content.into(),
@@ -28,6 +32,7 @@ impl Source {
         }
     }
 
+    // TODO: Take an `Option<Syntax>` and convert to CSS
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, String> {
         const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 
@@ -47,6 +52,7 @@ impl Source {
         })
     }
 
+    // TODO: Remove
     pub fn map_content<E>(self, f: impl FnOnce(String) -> Result<String, E>) -> Result<Self, E> {
         Ok(Self {
             content: f(self.content)?,
@@ -58,89 +64,12 @@ impl Source {
         &mut self,
         validate: bool,
         transpile: Option<Transpile>,
-    ) -> Result<Option<CssModuleExports>, String> {
+    ) -> Result<Option<Vec<NameMapping>>, String> {
         if validate || transpile.is_some() {
-            let modules = transpile.as_ref().map_or(false, |t| t.modules);
-            let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
-
-            clone!(self.content);
-            let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
-            let filename = self
-                .dependency
-                .as_ref()
-                .map_or_else(|| "<content>".to_string(), String::clone);
-            let css_modules = modules.then(|| css_modules::Config {
-                pattern: css_modules::Pattern::default(),
-                dashed_idents: false,
-            });
-            let mut flags = ParserFlags::empty();
-            flags.set(ParserFlags::NESTING, nesting);
-
-            let mut stylesheet: StyleSheet = StyleSheet::parse(
-                &content,
-                ParserOptions {
-                    filename,
-                    css_modules,
-                    source_index: 0,
-                    error_recovery: !validate,
-                    warnings: warnings.as_ref().map(Arc::clone),
-                    flags,
-                },
-            )
-            .map_err(|e| e.to_string())?;
-
-            if let Some(warnings) = warnings {
-                let warnings = warnings.read().unwrap();
-
-                if !warnings.is_empty() {
-                    let warnings_text = warnings.iter().map(|w| w.to_string()).join("\n");
-
-                    return Err(warnings_text);
-                }
-            }
-
-            if let Some(Transpile {
-                minify,
-                pretty,
-                browsers,
-                ..
-            }) = transpile
-            {
-                let targets = Targets {
-                    browsers,
-                    include: Features::empty(),
-                    exclude: Features::empty(),
-                };
-
-                if minify {
-                    // This does the structural minification and add/removes vendor prefixes.
-                    stylesheet
-                        .minify(MinifyOptions {
-                            targets,
-                            unused_symbols: HashSet::new(),
-                        })
-                        .map_err(|e| e.to_string())?;
-                }
-
-                let css = stylesheet
-                    .to_css(PrinterOptions {
-                        // `minify` just controls the output format without doing more structural
-                        // minification.
-                        minify: !pretty && minify,
-                        source_map: None,
-                        project_root: None,
-                        targets,
-                        analyze_dependencies: None,
-                        pseudo_classes: None,
-                    })
-                    .map_err(|e| e.to_string())?;
-                self.content = css.code;
-
-                return Ok(css.exports);
-            }
+            transpile::transpile(self, validate, transpile)
+        } else {
+            Ok(None)
         }
-
-        Ok(None)
     }
 
     pub fn dependency(&self) -> &Option<String> {
@@ -160,6 +89,20 @@ pub struct Transpile {
     pub browsers: Option<Browsers>,
 }
 
+#[derive(Default)]
+pub struct Browsers {
+    pub android: Option<Version>,
+    pub chrome: Option<Version>,
+    pub edge: Option<Version>,
+    pub firefox: Option<Version>,
+    pub ie: Option<Version>,
+    pub ios_saf: Option<Version>,
+    pub opera: Option<Version>,
+    pub safari: Option<Version>,
+    pub samsung: Option<Version>,
+}
+
+// TODO: Make this a method
 pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
     let mut parser_input = ParserInput::new(&css.content);
     let mut input = Parser::new(&mut parser_input);
@@ -179,6 +122,7 @@ pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
     classes.into_iter()
 }
 
+// TODO: Make this a method
 pub fn variable_names(css: &Source) -> impl Iterator<Item = String> {
     let mut parser_input = ParserInput::new(&css.content);
     let mut input = Parser::new(&mut parser_input);
