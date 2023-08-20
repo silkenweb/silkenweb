@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     env, fs,
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
@@ -9,10 +9,15 @@ use clonelet::clone;
 use cssparser::{Parser, ParserInput, Token};
 use itertools::Itertools;
 use lightningcss::{
-    css_modules::{self, CssModuleExports},
+    css_modules::{self, CssModuleExport},
     stylesheet::{MinifyOptions, ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
     targets::{Browsers, Features, Targets},
 };
+
+pub struct NameMapping {
+    pub plain: String,
+    pub mangled: String,
+}
 
 #[derive(Debug)]
 pub struct Source {
@@ -61,7 +66,7 @@ impl Source {
         &mut self,
         validate: bool,
         transpile: Option<Transpile>,
-    ) -> Result<Option<CssModuleExports>, String> {
+    ) -> Result<Option<Vec<NameMapping>>, String> {
         if validate || transpile.is_some() {
             let modules = transpile.as_ref().map_or(false, |t| t.modules);
             let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
@@ -139,7 +144,7 @@ impl Source {
                     .map_err(|e| e.to_string())?;
                 self.content = css.code;
 
-                return Ok(css.exports);
+                return css.exports.map(name_mappings).transpose();
             }
         }
 
@@ -153,6 +158,22 @@ impl Source {
     pub fn content(&self) -> &str {
         &self.content
     }
+}
+
+fn name_mappings(exports: HashMap<String, CssModuleExport>) -> Result<Vec<NameMapping>, String> {
+    exports
+        .into_iter()
+        .map(|(plain, mapping)| {
+            if mapping.composes.is_empty() {
+                Ok(NameMapping {
+                    plain,
+                    mangled: mapping.name,
+                })
+            } else {
+                Err("`composes` is unsupported".to_string())
+            }
+        })
+        .collect()
 }
 
 pub struct Transpile {
