@@ -6,4 +6,4 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { workspace = true }
+silkenweb = { workspace = true, features = ["css-transpile"] }
