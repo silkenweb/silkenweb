@@ -174,7 +174,7 @@ use silkenweb_base::document as base_document;
 /// css!("my-css-file.css");
 /// assert_eq!(class::MY_CLASS, "my-class");
 /// ```
-///
+/// 
 /// Define private constants for all content CSS classes:
 ///
 ///  ```
