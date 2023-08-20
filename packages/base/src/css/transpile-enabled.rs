@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashSet, HashMap},
+    collections::{HashMap, HashSet},
     sync::{Arc, RwLock},
 };
 
@@ -11,7 +11,27 @@ use lightningcss::{
     targets::{Features, Targets},
 };
 
-use super::{Browsers, NameMapping, Source, Transpile, Version};
+use super::{Browsers, NameMapping, Source, Transpile};
+
+pub struct Version {
+    major: u8,
+    minor: u8,
+    patch: u8,
+}
+
+impl Version {
+    pub fn new(major: u8, minor: u8, patch: u8) -> Self {
+        Self {
+            major,
+            minor,
+            patch,
+        }
+    }
+
+    fn encode_for_lightning(self) -> u32 {
+        u32::from_be_bytes([0, self.major, self.minor, self.patch])
+    }
+}
 
 impl From<Browsers> for lightningcss::targets::Browsers {
     fn from(value: Browsers) -> Self {

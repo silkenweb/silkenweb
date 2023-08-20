@@ -6,7 +6,11 @@ use std::{
 
 use cssparser::{Parser, ParserInput, Token};
 
+#[cfg_attr(feature = "css-transpile", path = "css/transpile-enabled.rs")]
+#[cfg_attr(not(feature = "css-transpile"), path = "css/transpile-disabled.rs")]
 mod transpile;
+
+pub use transpile::Version;
 
 pub struct NameMapping {
     pub plain: String,
@@ -96,26 +100,6 @@ pub struct Browsers {
     pub opera: Option<Version>,
     pub safari: Option<Version>,
     pub samsung: Option<Version>,
-}
-
-pub struct Version {
-    major: u8,
-    minor: u8,
-    patch: u8,
-}
-
-impl Version {
-    pub fn new(major: u8, minor: u8, patch: u8) -> Self {
-        Self {
-            major,
-            minor,
-            patch,
-        }
-    }
-
-    fn encode_for_lightning(self) -> u32 {
-        u32::from_be_bytes([0, self.major, self.minor, self.patch])
-    }
 }
 
 // TODO: Make this a method

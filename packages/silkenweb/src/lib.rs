@@ -101,28 +101,33 @@ use silkenweb_base::document as base_document;
 ///     prefix = "prefix",
 ///     include_prefixes = ["included-"],
 ///     exclude_prefixes = ["excluded-"],
-///     validate,
 ///     auto_mount,
-///     transpile = (
-///         minify,
-///         pretty,
-///         modules,
-///         nesting,
-///         browsers = (
-///             android = (1, 0, 0),
-///             chrome = (1, 0, 0),
-///             edge = (1, 0, 0),
-///             firefox = (1, 0, 0),
-///             ie = (1, 0, 0),
-///             ios_saf = (1, 0, 0),
-///             opera = (1, 0, 0),
-///             safari = (1, 0, 0),
-///             samsung = (1, 0, 0),
-///         )
-///     )
+#[cfg_attr(
+    feature = "css-transpile",
+    doc = r#"
+    validate,
+    transpile = (
+        minify,
+        pretty,
+        modules,
+        nesting,
+        browsers = (
+            android = (1, 0, 0),
+            chrome = (1, 0, 0),
+            edge = (1, 0, 0),
+            firefox = (1, 0, 0),
+            ie = (1, 0, 0),
+            ios_saf = (1, 0, 0),
+            opera = (1, 0, 0),
+            safari = (1, 0, 0),
+            samsung = (1, 0, 0),
+        )
+    )
+"#
+)]
 /// );
 /// ```
-///
+/// 
 /// All are optional, but one of `path` or `content` must be specified.
 ///
 /// - `path` is the path to the CSS/SCSS/SASS file. The syntax is determined
@@ -164,7 +169,6 @@ use silkenweb_base::document as base_document;
 /// # Examples
 ///
 /// Define private constants for all CSS classes:
-///
 /// ```
 /// # use silkenweb_macros::css;
 /// css!("my-css-file.css");
@@ -187,7 +191,7 @@ use silkenweb_base::document as base_document;
 ///     }
 /// "#);
 /// ```
-/// 
+///
 /// Include classes starting with `border-`, except classes starting with
 /// `border-excluded-`:
 /// ```
@@ -200,7 +204,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::SMALL, "border-small");
 /// ```
-/// 
+///
 /// This won't compile because `exclude_prefixes` takes precedence over
 /// `include_prefixes`:
 /// ```compile_fail
@@ -213,7 +217,7 @@ use silkenweb_base::document as base_document;
 ///
 /// assert_eq!(class::BORDER_EXCLUDED_HUGE, "border-excluded-huge");
 /// ```
-/// 
+///
 /// [lightningcss]: https://lightningcss.dev/
 /// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
 /// [CSS Modules]: https://github.com/css-modules/css-modules

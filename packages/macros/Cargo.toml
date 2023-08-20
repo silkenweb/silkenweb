@@ -14,6 +14,9 @@ keywords = ["css"]
 [lib]
 proc-macro = true
 
+[features]
+css-transpile = ["silkenweb-base/css-transpile"]
+
 [dependencies]
 silkenweb-base = { workspace = true }
 syn = { workspace = true, features = ["full"] }
