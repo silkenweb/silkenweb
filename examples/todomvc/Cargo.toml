@@ -8,13 +8,12 @@ publish = false
 [dependencies]
 silkenweb = { workspace = true }
 silkenweb-signals-ext = { workspace = true }
-futures-signals = { workspace = true }
+futures-signals = { workspace = true, features = ["serde"] }
 derive_more = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true, features = ["console"] }
-
 
 [dev-dependencies]
 criterion = { workspace = true, default-features = false }
