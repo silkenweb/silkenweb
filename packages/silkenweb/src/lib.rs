@@ -47,6 +47,11 @@
 //! [caniuse](https://caniuse.com/mdn-html_elements_template_shadowroot)
 //! for browser support. Polyfills are available.
 //!
+//! ## `css-transpile`
+//!
+//! Enable CSS transpilation for [`css!`]. This can significantly increase build
+//! time, so is presented as an opt-in feature.
+//!
 //! # Learning
 //!
 //! There's extensive documentation on each module in this crate, along with
@@ -144,10 +149,10 @@ use silkenweb_base::document as base_document;
 /// - `exclude_prefixes`: a list of prefixes to exclude. No Rust constants will
 ///   be defined for a class starting with any of these prefixes.
 ///   `exclude_prefixes` takes precedence over `include_prefixes`.
-/// - `validate`: validate the CSS.
 /// - `auto_mount`: Generate a function for each CSS class that will call
 ///   `stylesheet::mount` before returning the class name.
-/// - `transpile`: transpile the CSS with [lightningcss].
+/// - `validate`: validate the CSS. Requires crate feature `css-transpile`.
+/// - `transpile`: transpile the CSS with [lightningcss]. Requires crate feature `css-transpile`.
 ///
 /// ## `transpile`
 ///
