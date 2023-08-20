@@ -302,6 +302,7 @@ pub fn css(input: TokenStream) -> TokenStream {
     let variables =
         css::variable_names(&source).map(|variable| (variable.clone(), format!("--{variable}")));
 
+    // TODO: move to transpile
     let classes = if let Some(name_mappings) = name_mappings {
         let mut classes = Vec::new();
 

@@ -21,6 +21,7 @@ pub struct Source {
 }
 
 impl Source {
+    // TODO: Take a `Syntax` enum, and convert to css
     pub fn from_content(content: impl Into<String>) -> Self {
         Self {
             content: content.into(),
@@ -28,6 +29,7 @@ impl Source {
         }
     }
 
+    // TODO: Take an `Option<Syntax>` and convert to CSS
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, String> {
         const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 
@@ -47,6 +49,7 @@ impl Source {
         })
     }
 
+    // TODO: Remove
     pub fn map_content<E>(self, f: impl FnOnce(String) -> Result<String, E>) -> Result<Self, E> {
         Ok(Self {
             content: f(self.content)?,
@@ -160,6 +163,7 @@ pub struct Transpile {
     pub browsers: Option<Browsers>,
 }
 
+// TODO: Make this a method
 pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
     let mut parser_input = ParserInput::new(&css.content);
     let mut input = Parser::new(&mut parser_input);
@@ -179,6 +183,7 @@ pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
     classes.into_iter()
 }
 
+// TODO: Make this a method
 pub fn variable_names(css: &Source) -> impl Iterator<Item = String> {
     let mut parser_input = ParserInput::new(&css.content);
     let mut input = Parser::new(&mut parser_input);

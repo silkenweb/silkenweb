@@ -230,6 +230,7 @@ mod browsers {
     custom_keyword!(samsung);
 }
 
+// TODO: Move to `silkenweb_base::css`
 #[derive(Into)]
 pub struct Browsers(lightningcss::targets::Browsers);
 
