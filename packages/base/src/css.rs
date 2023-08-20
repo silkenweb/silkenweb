@@ -144,7 +144,7 @@ impl Source {
                     .map_err(|e| e.to_string())?;
                 self.content = css.code;
 
-                return css.exports.map(name_mappings).transpose();
+                return css.exports.map(Self::name_mappings).transpose();
             }
         }
 
@@ -158,22 +158,24 @@ impl Source {
     pub fn content(&self) -> &str {
         &self.content
     }
-}
 
-fn name_mappings(exports: HashMap<String, CssModuleExport>) -> Result<Vec<NameMapping>, String> {
-    exports
-        .into_iter()
-        .map(|(plain, mapping)| {
-            if mapping.composes.is_empty() {
-                Ok(NameMapping {
-                    plain,
-                    mangled: mapping.name,
-                })
-            } else {
-                Err("`composes` is unsupported".to_string())
-            }
-        })
-        .collect()
+    fn name_mappings(
+        exports: HashMap<String, CssModuleExport>,
+    ) -> Result<Vec<NameMapping>, String> {
+        exports
+            .into_iter()
+            .map(|(plain, mapping)| {
+                if mapping.composes.is_empty() {
+                    Ok(NameMapping {
+                        plain,
+                        mangled: mapping.name,
+                    })
+                } else {
+                    Err("`composes` is unsupported".to_string())
+                }
+            })
+            .collect()
+    }
 }
 
 pub struct Transpile {
