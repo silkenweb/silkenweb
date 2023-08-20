@@ -11,7 +11,7 @@ use itertools::Itertools;
 use lightningcss::{
     css_modules::{self, CssModuleExport},
     stylesheet::{MinifyOptions, ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
-    targets::{Browsers, Features, Targets},
+    targets::{Features, Targets},
 };
 
 pub struct NameMapping {
@@ -115,7 +115,7 @@ impl Source {
             }) = transpile
             {
                 let targets = Targets {
-                    browsers,
+                    browsers: browsers.map(Browsers::into),
                     include: Features::empty(),
                     exclude: Features::empty(),
                 };
@@ -184,6 +184,55 @@ pub struct Transpile {
     pub modules: bool,
     pub nesting: bool,
     pub browsers: Option<Browsers>,
+}
+
+#[derive(Default)]
+pub struct Browsers {
+    pub android: Option<Version>,
+    pub chrome: Option<Version>,
+    pub edge: Option<Version>,
+    pub firefox: Option<Version>,
+    pub ie: Option<Version>,
+    pub ios_saf: Option<Version>,
+    pub opera: Option<Version>,
+    pub safari: Option<Version>,
+    pub samsung: Option<Version>,
+}
+
+impl From<Browsers> for lightningcss::targets::Browsers {
+    fn from(value: Browsers) -> Self {
+        Self {
+            android: value.android.map(Version::encode_for_lightning),
+            chrome: value.chrome.map(Version::encode_for_lightning),
+            edge: value.edge.map(Version::encode_for_lightning),
+            firefox: value.firefox.map(Version::encode_for_lightning),
+            ie: value.ie.map(Version::encode_for_lightning),
+            ios_saf: value.ios_saf.map(Version::encode_for_lightning),
+            opera: value.opera.map(Version::encode_for_lightning),
+            safari: value.safari.map(Version::encode_for_lightning),
+            samsung: value.samsung.map(Version::encode_for_lightning),
+        }
+    }
+}
+
+pub struct Version {
+    major: u8,
+    minor: u8,
+    patch: u8,
+}
+
+impl Version {
+    pub fn new(major: u8, minor: u8, patch: u8) -> Self {
+        Self {
+            major,
+            minor,
+            patch,
+        }
+    }
+
+    fn encode_for_lightning(self) -> u32 {
+        u32::from_be_bytes([0, self.major, self.minor, self.patch])
+    }
 }
 
 // TODO: Make this a method

@@ -3,7 +3,7 @@ use std::{ffi::OsStr, path::Path};
 use derive_more::Into;
 use grass::InputSyntax;
 use proc_macro_error::{abort, abort_call_site};
-use silkenweb_base::css::{self, Source};
+use silkenweb_base::css::{self, Browsers, Source, Version};
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
@@ -230,86 +230,43 @@ mod browsers {
     custom_keyword!(samsung);
 }
 
-// TODO: Move to `silkenweb_base::css`
-#[derive(Into)]
-pub struct Browsers(lightningcss::targets::Browsers);
-
-impl Browsers {
-    fn browser<Keyword, KeywordToken, T>(
-        keyword: Keyword,
-        field: &Lookahead1,
-        input: ParseStream,
-        version: &mut Option<u32>,
-    ) -> syn::Result<bool>
-    where
-        Keyword: Peek + FnOnce(T) -> KeywordToken,
-        KeywordToken: Parse + CustomToken,
-    {
-        let mut exists = version.is_some();
-
-        Ok(if flag(keyword, field, input, &mut exists)? {
-            input.parse::<token::Eq>()?;
-            version.replace(Version::parse(input)?.encode_for_lightning());
-            true
-        } else {
-            false
-        })
-    }
-}
-
 impl ParseValue for Browsers {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut browsers = lightningcss::targets::Browsers::default();
+        let mut browsers = Browsers::default();
 
         parse_fields(&parenthesized(input)?, |field, input| {
             Ok(
-                Self::browser(browsers::android, field, input, &mut browsers.android)?
-                    || Self::browser(browsers::chrome, field, input, &mut browsers.chrome)?
-                    || Self::browser(browsers::edge, field, input, &mut browsers.edge)?
-                    || Self::browser(browsers::firefox, field, input, &mut browsers.firefox)?
-                    || Self::browser(browsers::ie, field, input, &mut browsers.ie)?
-                    || Self::browser(browsers::ios_saf, field, input, &mut browsers.ios_saf)?
-                    || Self::browser(browsers::opera, field, input, &mut browsers.opera)?
-                    || Self::browser(browsers::safari, field, input, &mut browsers.safari)?
-                    || Self::browser(browsers::samsung, field, input, &mut browsers.samsung)?,
+                parameter(browsers::android, field, input, &mut browsers.android)?
+                    || parameter(browsers::chrome, field, input, &mut browsers.chrome)?
+                    || parameter(browsers::edge, field, input, &mut browsers.edge)?
+                    || parameter(browsers::firefox, field, input, &mut browsers.firefox)?
+                    || parameter(browsers::ie, field, input, &mut browsers.ie)?
+                    || parameter(browsers::ios_saf, field, input, &mut browsers.ios_saf)?
+                    || parameter(browsers::opera, field, input, &mut browsers.opera)?
+                    || parameter(browsers::safari, field, input, &mut browsers.safari)?
+                    || parameter(browsers::samsung, field, input, &mut browsers.samsung)?,
             )
         })?;
 
-        Ok(Self(browsers))
-    }
-}
-
-struct Version {
-    major: u8,
-    minor: u8,
-    patch: u8,
-}
-
-impl Version {
-    fn encode_for_lightning(&self) -> u32 {
-        u32::from_be_bytes([0, self.major, self.minor, self.patch])
-    }
-
-    fn component(input: &syn::parse::ParseBuffer) -> Result<u8, syn::Error> {
-        input.parse::<LitInt>()?.base10_parse()
+        Ok(browsers)
     }
 }
 
 impl ParseValue for Version {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let input = parenthesized(input)?;
-        let major = Self::component(&input)?;
+        let major = version_component(&input)?;
         input.parse::<Comma>()?;
-        let minor = Self::component(&input)?;
+        let minor = version_component(&input)?;
         input.parse::<Comma>()?;
-        let patch = Self::component(&input)?;
+        let patch = version_component(&input)?;
 
-        Ok(Self {
-            major,
-            minor,
-            patch,
-        })
+        Ok(Self::new(major, minor, patch))
     }
+}
+
+fn version_component(input: &syn::parse::ParseBuffer) -> Result<u8, syn::Error> {
+    input.parse::<LitInt>()?.base10_parse()
 }
 
 fn parameter<Keyword, KeywordToken, T, V>(

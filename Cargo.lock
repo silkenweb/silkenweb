@@ -2961,7 +2961,6 @@ version = "0.5.0"
 dependencies = [
  "derive_more",
  "grass",
- "lightningcss",
  "proc-macro-error",
  "proc-macro2 1.0.66",
  "quote 1.0.31",
