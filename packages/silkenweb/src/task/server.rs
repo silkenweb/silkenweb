@@ -54,7 +54,8 @@ impl Wake for ThreadWaker {
 /// Run a future to completion on the current thread.
 ///
 /// This doesn't use the microtask executor, so it's safe to call
-/// [render_now] from within the future.
+/// [render_now] from within the future. It's also safe to call `block_on`
+/// recursively.
 ///
 /// [render_now]: super::render_now
 pub fn block_on<T>(fut: impl Future<Output = T>) -> T {
