@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css::{self, NameMapping, Source};
+use silkenweb_base::css::{NameMapping, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
     FieldsUnnamed, Ident, Index, LitBool,
@@ -299,13 +299,14 @@ pub fn css(input: TokenStream) -> TokenStream {
         .transpile(validate, transpile.map(Transpile::into))
         .unwrap_or_else(|e| abort_call_site!(e));
 
-    let variables = css::variable_names(&source).map(|variable| NameMapping {
+    let variables = source.variable_names().map(|variable| NameMapping {
         plain: variable.clone(),
         mangled: format!("--{variable}"),
     });
 
     let classes = name_mappings.unwrap_or_else(|| {
-        css::class_names(&source)
+        source
+            .class_names()
             .map(|class| NameMapping {
                 plain: class.clone(),
                 mangled: class,

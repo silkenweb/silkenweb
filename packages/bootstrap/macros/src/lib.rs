@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css::{self, Source};
+use silkenweb_base::css::Source;
 use syn::{parse_macro_input, Ident, LitStr};
 
 #[proc_macro]
@@ -12,7 +12,7 @@ pub fn define_icons(input: TokenStream) -> TokenStream {
     let path: LitStr = parse_macro_input!(input);
     let path = path.value();
     let css = Source::from_path(path).unwrap_or_else(|e| abort_call_site!(e));
-    let classes = css::class_names(&css).filter_map(|class| Class::new(&class));
+    let classes = css.class_names().filter_map(|class| Class::new(&class));
 
     code_gen(css.dependency(), classes)
 }

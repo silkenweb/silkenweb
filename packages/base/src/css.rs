@@ -79,6 +79,44 @@ impl Source {
     pub fn content(&self) -> &str {
         &self.content
     }
+
+    pub fn class_names(&self) -> impl Iterator<Item = String> {
+        let mut parser_input = ParserInput::new(&self.content);
+        let mut input = Parser::new(&mut parser_input);
+        let mut classes = HashSet::new();
+        let mut prev_dot = false;
+
+        while let Ok(token) = input.next_including_whitespace_and_comments() {
+            if prev_dot {
+                if let Token::Ident(class) = token {
+                    classes.insert(class.to_string());
+                }
+            }
+
+            prev_dot = matches!(token, Token::Delim('.'));
+        }
+
+        classes.into_iter()
+    }
+
+    pub fn variable_names(&self) -> impl Iterator<Item = String> {
+        let mut parser_input = ParserInput::new(&self.content);
+        let mut input = Parser::new(&mut parser_input);
+        let mut variables = HashSet::new();
+        let mut tokens = Vec::new();
+
+        flattened_tokens(&mut tokens, &mut input);
+
+        for token in tokens {
+            if let Token::Ident(ident) = token {
+                if let Some(var) = ident.strip_prefix("--") {
+                    variables.insert(var.to_string());
+                }
+            }
+        }
+
+        variables.into_iter()
+    }
 }
 
 pub struct Transpile {
@@ -100,46 +138,6 @@ pub struct Browsers {
     pub opera: Option<Version>,
     pub safari: Option<Version>,
     pub samsung: Option<Version>,
-}
-
-// TODO: Make this a method
-pub fn class_names(css: &Source) -> impl Iterator<Item = String> {
-    let mut parser_input = ParserInput::new(&css.content);
-    let mut input = Parser::new(&mut parser_input);
-    let mut classes = HashSet::new();
-    let mut prev_dot = false;
-
-    while let Ok(token) = input.next_including_whitespace_and_comments() {
-        if prev_dot {
-            if let Token::Ident(class) = token {
-                classes.insert(class.to_string());
-            }
-        }
-
-        prev_dot = matches!(token, Token::Delim('.'));
-    }
-
-    classes.into_iter()
-}
-
-// TODO: Make this a method
-pub fn variable_names(css: &Source) -> impl Iterator<Item = String> {
-    let mut parser_input = ParserInput::new(&css.content);
-    let mut input = Parser::new(&mut parser_input);
-    let mut variables = HashSet::new();
-    let mut tokens = Vec::new();
-
-    flattened_tokens(&mut tokens, &mut input);
-
-    for token in tokens {
-        if let Token::Ident(ident) = token {
-            if let Some(var) = ident.strip_prefix("--") {
-                variables.insert(var.to_string());
-            }
-        }
-    }
-
-    variables.into_iter()
 }
 
 fn flattened_tokens<'i>(tokens: &mut Vec<Token<'i>>, input: &mut Parser<'i, '_>) {
