@@ -1,4 +1,4 @@
-use super::{NameMapping, Css, Transpile};
+use super::{Css, NameMapping, Transpile};
 
 pub struct Version {}
 
