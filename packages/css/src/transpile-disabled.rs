@@ -1,4 +1,4 @@
-use super::{NameMapping, Source, Transpile};
+use super::{NameMapping, Css, Transpile};
 
 pub struct Version {}
 
@@ -9,7 +9,7 @@ impl Version {
 }
 
 pub fn transpile(
-    _source: &mut Source,
+    _source: &mut Css,
     _validate: bool,
     _transpile: Option<Transpile>,
 ) -> Result<Option<Vec<NameMapping>>, String> {
