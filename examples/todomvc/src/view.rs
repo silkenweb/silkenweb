@@ -17,7 +17,7 @@ use silkenweb::{
     node::{element::Element, Node},
     prelude::ParentElement,
     router::url_path,
-    runtime::TaskSignal,
+    task::TaskSignal,
     value::Sig,
 };
 use silkenweb_signals_ext::SignalProduct;

@@ -17,6 +17,10 @@ use silkenweb_macros::cfg_browser;
 
 pub(crate) mod local;
 
+mod signal;
+
+pub use signal::{TaskSignal, TaskSignalVec};
+
 /// Spawn a future on the microtask queue.
 pub fn spawn_local<F>(future: F)
 where
