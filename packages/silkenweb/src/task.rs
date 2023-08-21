@@ -16,6 +16,7 @@ use silkenweb_macros::cfg_browser;
 
 pub(crate) mod local;
 
+// TODO: Docs
 pub use arch::{scope, sync_scope};
 pub use silkenweb_task::{run_tasks, spawn_local, TaskSignal, TaskSignalVec};
 
@@ -29,10 +30,6 @@ pub mod server {
     /// Synchronous version of [`render_now`][super::render_now].
     ///
     /// This is only available on the server.
-    ///
-    /// # Panics
-    ///
-    /// This panics when called on browser platforms.
     pub fn render_now_sync() {
         Render::with(Render::render_effects);
         run_tasks_sync();

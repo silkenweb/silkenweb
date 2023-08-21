@@ -21,10 +21,6 @@ pub mod server {
     /// Synchronous version of [`run_tasks`][super::run_tasks].
     ///
     /// This is only available on the server.
-    ///
-    /// # Panics
-    ///
-    /// This panics when called on browser platforms.
     pub fn run_tasks_sync() {
         super::arch::run_tasks_sync()
     }
