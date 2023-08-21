@@ -190,10 +190,38 @@ where
     arch::spawn_local(future)
 }
 
-// TODO: Docs
+/// [`Signal`] methods that require a task queue.
 pub trait TaskSignal: Signal {
+    /// Convert `self` to a [`Mutable`].
+    ///
+    /// This uses the microtask queue to spawn a future that drives the signal.
+    /// The resulting `Mutable` can be used to memoize the signal, allowing many
+    /// signals to be derived from it.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use futures_signals::signal::Mutable;
+    /// # use silkenweb_task::{sync_scope, server::run_tasks_sync, TaskSignal};
+    /// #
+    /// let source = Mutable::new(0);
+    /// let signal = source.signal();
+    ///
+    /// // A scope isn't required on browser platforms
+    /// sync_scope(|| {
+    ///     let copy = signal.to_mutable();
+    ///     assert_eq!(copy.get(), 0);
+    ///     source.set(1);
+    ///     run_tasks_sync();
+    ///     assert_eq!(copy.get(), 1);
+    /// });
+    /// ```
     fn to_mutable(self) -> ReadOnlyMutable<Self::Item>;
 
+    /// Run `callback` on each signal value.
+    ///
+    /// The future is spawned on the microtask queue. This is equivalent to
+    /// `spawn_local(sig.for_each(callback))`.
     fn spawn_for_each<U, F>(self, callback: F)
     where
         U: Future<Output = ()> + 'static,
@@ -235,10 +263,38 @@ where
     }
 }
 
-// TODO: Docs
+/// [`SignalVec`] methods that require a task queue.
 pub trait TaskSignalVec: SignalVec {
+    /// Convert `self` to a [`MutableVec`].
+    ///
+    /// This uses the microtask queue to spawn a future that drives the signal.
+    /// The resulting `MutableVec` can be used to memoize the signal, allowing
+    /// many signals to be derived from it.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use futures_signals::signal_vec::MutableVec;
+    /// # use silkenweb_task::{sync_scope, server::run_tasks_sync, TaskSignalVec};
+    /// #
+    /// let source = MutableVec::new();
+    /// let signal = source.signal_vec();
+    ///
+    /// // A scope isn't required on browser platforms
+    /// sync_scope(|| {
+    ///     let copy = signal.to_mutable();
+    ///     assert!(copy.lock_ref().is_empty());
+    ///     source.lock_mut().push_cloned(1);
+    ///     run_tasks_sync();
+    ///     assert_eq!(*copy.lock_ref(), [1]);
+    /// });
+    /// ```
     fn to_mutable(self) -> MutableVec<Self::Item>;
 
+    /// Run `callback` on each signal delta.
+    ///
+    /// The future is spawned on the microtask queue. This is equivalent to
+    /// `spawn_local(sig.for_each(callback))`.
     fn spawn_for_each<U, F>(self, callback: F)
     where
         U: Future<Output = ()> + 'static,
