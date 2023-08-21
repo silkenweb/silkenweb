@@ -11,7 +11,7 @@ use lightningcss::{
     targets::{Features, Targets},
 };
 
-use super::{Browsers, NameMapping, Source, Transpile};
+use super::{Browsers, Css, NameMapping, Transpile};
 
 pub struct Version {
     major: u8,
@@ -50,7 +50,7 @@ impl From<Browsers> for lightningcss::targets::Browsers {
 }
 
 pub fn transpile(
-    source: &mut Source,
+    source: &mut Css,
     validate: bool,
     transpile: Option<Transpile>,
 ) -> Result<Option<Vec<NameMapping>>, String> {

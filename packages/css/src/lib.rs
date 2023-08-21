@@ -57,12 +57,12 @@ impl CssSyntax {
 }
 
 #[derive(Debug)]
-pub struct Source {
+pub struct Css {
     content: String,
     dependency: Option<String>,
 }
 
-impl Source {
+impl Css {
     // TODO: Don't use `String` errors
     pub fn from_content(content: impl Into<String>, syntax: CssSyntax) -> Result<Self, String> {
         Ok(Self {

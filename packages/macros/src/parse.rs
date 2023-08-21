@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use css::{Browsers, CssSyntax, Source, Version};
+use css::{Browsers, Css, CssSyntax, Version};
 use derive_more::Into;
 use proc_macro_error::{abort, abort_call_site};
 use silkenweb_css as css;
@@ -77,7 +77,7 @@ impl ParseValue for CssSyntax {
 }
 
 pub struct Input {
-    pub source: Source,
+    pub source: Css,
     pub public: bool,
     pub prefix: Option<String>,
     pub include_prefixes: Option<Vec<String>>,
@@ -92,7 +92,7 @@ impl Parse for Input {
         if input.peek(LitStr) {
             let path = input.parse::<LitStr>()?.value();
             return Ok(Self {
-                source: Source::from_path(path, None).unwrap_or_else(|e| abort_call_site!(e)),
+                source: Css::from_path(path, None).unwrap_or_else(|e| abort_call_site!(e)),
                 public: false,
                 prefix: None,
                 include_prefixes: None,
@@ -130,9 +130,9 @@ impl Parse for Input {
         let source = match (&path, content) {
             (None, None) => abort_call_site!("Must specify either 'path' or `content` parameter"),
             (None, Some(content)) => {
-                Source::from_content(content, syntax.unwrap_or(CssSyntax::default()))
+                Css::from_content(content, syntax.unwrap_or(CssSyntax::default()))
             }
-            (Some(path), None) => Source::from_path(path, syntax),
+            (Some(path), None) => Css::from_path(path, syntax),
             (Some(_), Some(_)) => {
                 abort_call_site!("Only one of 'path' or `content` can be specified")
             }
