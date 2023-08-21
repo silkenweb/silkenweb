@@ -1,4 +1,4 @@
-use super::{Css, NameMapping, Transpile};
+use super::{Css, NameMapping, Transpile, TranspileError};
 
 pub struct Version {}
 
@@ -12,6 +12,6 @@ pub fn transpile(
     _source: &mut Css,
     _validate: bool,
     _transpile: Option<Transpile>,
-) -> Result<Option<Vec<NameMapping>>, String> {
-    Err("To use CSS transpilation, you must enable the \"css-transpile\" feature".to_string())
+) -> Result<Option<Vec<NameMapping>>, TranspileError> {
+    Err(TranspileError::Disabled)
 }

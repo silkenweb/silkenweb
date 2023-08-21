@@ -7,6 +7,7 @@ use std::{
     str::FromStr,
 };
 
+use anyhow::{anyhow, Context};
 use cssparser::{Parser, ParserInput, Token};
 use derive_more::Into;
 use grass::InputSyntax;
@@ -15,6 +16,7 @@ use grass::InputSyntax;
 #[cfg_attr(not(feature = "css-transpile"), path = "transpile-disabled.rs")]
 mod transpile;
 
+use thiserror::Error;
 pub use transpile::Version;
 
 pub struct NameMapping {
@@ -63,52 +65,53 @@ pub struct Css {
 }
 
 impl Css {
-    // TODO: Don't use `String` errors
-    pub fn from_content(content: impl Into<String>, syntax: CssSyntax) -> Result<Self, String> {
+    pub fn from_content(content: impl Into<String>, syntax: CssSyntax) -> Result<Self, Error> {
         Ok(Self {
             content: Self::css_content(content.into(), syntax)?,
             dependency: None,
         })
     }
 
-    pub fn from_path(path: impl AsRef<Path>, syntax: Option<CssSyntax>) -> Result<Self, String> {
+    pub fn from_path(path: impl AsRef<Path>, syntax: Option<CssSyntax>) -> Result<Self, Error> {
         let syntax = syntax.unwrap_or_else(|| CssSyntax::from_path(path.as_ref()));
         const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 
-        let root_dir = env::var(CARGO_MANIFEST_DIR).map_err(|e| {
-            format!("Error reading environment variable '{CARGO_MANIFEST_DIR}': {e}")
-        })?;
+        let root_dir = env::var(CARGO_MANIFEST_DIR)
+            .with_context(|| format!("Couldn't read '{CARGO_MANIFEST_DIR}' variable"))?;
         let path = PathBuf::from(root_dir)
             .join(path)
             .into_os_string()
             .into_string()
-            .map_err(|e| format!("Couldn't convert path to string: '{e:?}'"))?;
+            .map_err(|filename| anyhow!("Couldn't convert filename to string: '{filename:?}'"))?;
 
         Ok(Self {
             content: Self::css_content(
-                fs::read_to_string(&path).map_err(|e| format!("Failed to read '{path}': {e}"))?,
+                fs::read_to_string(&path)
+                    .with_context(|| format!("Couldn't read file '{path}'"))?,
                 syntax,
             )?,
             dependency: Some(path),
         })
     }
 
-    fn css_content(source: String, syntax: CssSyntax) -> Result<String, String> {
+    fn css_content(source: String, syntax: CssSyntax) -> Result<String, Error> {
         let syntax = syntax.into();
 
-        if syntax != InputSyntax::Css {
+        let css = if syntax != InputSyntax::Css {
             grass::from_string(source, &grass::Options::default().input_syntax(syntax))
-                .map_err(|e| e.to_string())
+                .context("Error parsing CSS")?
         } else {
-            Ok(source)
-        }
+            source
+        };
+
+        Ok(css)
     }
 
     pub fn transpile(
         &mut self,
         validate: bool,
         transpile: Option<Transpile>,
-    ) -> Result<Option<Vec<NameMapping>>, String> {
+    ) -> Result<Option<Vec<NameMapping>>, TranspileError> {
         if validate || transpile.is_some() {
             transpile::transpile(self, validate, transpile)
         } else {
@@ -182,6 +185,24 @@ pub struct Browsers {
     pub opera: Option<Version>,
     pub safari: Option<Version>,
     pub samsung: Option<Version>,
+}
+
+#[derive(Error, Debug)]
+#[error(transparent)]
+pub struct Error(#[from] anyhow::Error);
+
+#[derive(Error, Debug)]
+pub enum TranspileError {
+    #[error("Transpilation requires `css-transpile` feature")]
+    Disabled,
+    #[error("Transpile failed: {0}")]
+    Failed(#[from] Error),
+}
+
+impl From<anyhow::Error> for TranspileError {
+    fn from(value: anyhow::Error) -> Self {
+        Self::Failed(value.into())
+    }
 }
 
 fn flattened_tokens<'i>(tokens: &mut Vec<Token<'i>>, input: &mut Parser<'i, '_>) {

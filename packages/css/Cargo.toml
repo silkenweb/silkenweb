@@ -21,3 +21,5 @@ cssparser = { workspace = true }
 lightningcss = { workspace = true, optional = true }
 itertools = { workspace = true }
 clonelet = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }

@@ -3,6 +3,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use anyhow::{anyhow, Context, Error};
 use clonelet::clone;
 use itertools::Itertools;
 use lightningcss::{
@@ -12,6 +13,7 @@ use lightningcss::{
 };
 
 use super::{Browsers, Css, NameMapping, Transpile};
+use crate::TranspileError;
 
 pub struct Version {
     major: u8,
@@ -53,7 +55,7 @@ pub fn transpile(
     source: &mut Css,
     validate: bool,
     transpile: Option<Transpile>,
-) -> Result<Option<Vec<NameMapping>>, String> {
+) -> Result<Option<Vec<NameMapping>>, TranspileError> {
     let modules = transpile.as_ref().map_or(false, |t| t.modules);
     let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
 
@@ -81,7 +83,7 @@ pub fn transpile(
             flags,
         },
     )
-    .map_err(|e| e.to_string())?;
+    .map_err(|e| anyhow!("Parsing failed: {e}"))?;
 
     if let Some(warnings) = warnings {
         let warnings = warnings.read().unwrap();
@@ -89,7 +91,7 @@ pub fn transpile(
         if !warnings.is_empty() {
             let warnings_text = warnings.iter().map(|w| w.to_string()).join("\n");
 
-            return Err(warnings_text);
+            return Err(Error::msg(warnings_text).into());
         }
     }
 
@@ -113,7 +115,7 @@ pub fn transpile(
                     targets,
                     unused_symbols: HashSet::new(),
                 })
-                .map_err(|e| e.to_string())?;
+                .context("Minify failed")?;
         }
 
         let css = stylesheet
@@ -127,7 +129,7 @@ pub fn transpile(
                 analyze_dependencies: None,
                 pseudo_classes: None,
             })
-            .map_err(|e| e.to_string())?;
+            .context("CSS printing failed")?;
         source.content = css.code;
 
         return css.exports.map(name_mappings).transpose();
@@ -136,7 +138,9 @@ pub fn transpile(
     Ok(None)
 }
 
-fn name_mappings(exports: HashMap<String, CssModuleExport>) -> Result<Vec<NameMapping>, String> {
+fn name_mappings(
+    exports: HashMap<String, CssModuleExport>,
+) -> Result<Vec<NameMapping>, TranspileError> {
     exports
         .into_iter()
         .map(|(plain, mapping)| {
@@ -146,7 +150,7 @@ fn name_mappings(exports: HashMap<String, CssModuleExport>) -> Result<Vec<NameMa
                     mangled: mapping.name,
                 })
             } else {
-                Err("`composes` is unsupported".to_string())
+                Err(Error::msg("`composes` is unsupported").into())
             }
         })
         .collect()

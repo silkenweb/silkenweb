@@ -32,6 +32,8 @@ silkenweb-task = { path = "packages/task", version = "0.5.0" }
 silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.5.0" }
 silkenweb-test = { path = "packages/test", version = "0.5.0" }
 
+anyhow = "1.0.75"
+thiserror="1.0.47"
 clonelet = "0.2.0"
 crossbeam = "0.8.2"
 js-sys = "0.3.60"
