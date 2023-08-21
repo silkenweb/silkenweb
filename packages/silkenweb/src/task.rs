@@ -16,8 +16,14 @@ use silkenweb_macros::cfg_browser;
 
 pub(crate) mod local;
 
-// TODO: Docs
-pub use arch::{scope, sync_scope};
+/// Run a future in a context.
+///
+/// The context includes [`silkenweb_task::scope`] and various task locals
+/// required for Silkenweb. This is not neccessary on browser platforms, and is
+/// a no-op.
+pub use arch::scope;
+/// Synchronous version of [`scope`].
+pub use arch::sync_scope;
 pub use silkenweb_task::{run_tasks, spawn_local, TaskSignal, TaskSignalVec};
 
 #[cfg_browser(false)]
