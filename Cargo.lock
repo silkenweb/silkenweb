@@ -2539,18 +2539,17 @@ dependencies = [
  "html-escape",
  "indexmap 2.0.0",
  "itertools 0.11.0",
- "js-sys",
  "paste",
  "pin-project",
  "silkenweb-base",
  "silkenweb-macros",
  "silkenweb-signals-ext",
+ "silkenweb-task",
  "silkenweb-test",
  "tokio",
  "tokio-stream",
  "trybuild",
  "wasm-bindgen",
- "wasm-bindgen-futures",
  "wasm-bindgen-test",
  "web-sys",
 ]
@@ -2849,6 +2848,21 @@ dependencies = [
  "futures-signals",
  "paste",
  "pin-project",
+]
+
+[[package]]
+name = "silkenweb-task"
+version = "0.5.0"
+dependencies = [
+ "clonelet",
+ "crossbeam",
+ "futures",
+ "futures-signals",
+ "js-sys",
+ "silkenweb-macros",
+ "tokio",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

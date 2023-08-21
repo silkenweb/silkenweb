@@ -5,7 +5,7 @@ use silkenweb::{
     dom::DefaultDom,
     elements::html::*,
     prelude::*,
-    task::server::{self, render_now_sync},
+    task::{server::render_now_sync, sync_scope},
     value::Sig,
 };
 
@@ -13,7 +13,7 @@ css!(content = ".red { color: red }", auto_mount);
 
 // For a more complete example, see <https://github.com/silkenweb/ssr-example>
 fn main() {
-    server::sync_scope(|| {
+    sync_scope(|| {
         let count = Mutable::new(0);
         let element = app(count.clone()).freeze();
 

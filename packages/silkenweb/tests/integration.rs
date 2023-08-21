@@ -17,7 +17,7 @@ macro_rules! isomorphic_test {
         #[silkenweb_macros::cfg_browser(false)]
         #[test]
         fn $name() {
-            silkenweb::task::server::block_on(::silkenweb::task::server::scope(async { $body }));
+            silkenweb::task::server::block_on(::silkenweb::task::scope(async { $body }));
         }
 
         #[silkenweb_macros::cfg_browser(true)]

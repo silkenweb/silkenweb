@@ -552,8 +552,8 @@ pub trait Element: Sized {
     ///
     /// ```
     /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, server}};
-    /// # server::block_on(server::scope(async {
+    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, scope, server}};
+    /// # server::block_on(scope(async {
     /// let my_class = Mutable::new("my-class");
     /// let my_other_class = Mutable::new("my-other-class");
     /// let app: Div<Dry> = div()
@@ -613,8 +613,8 @@ pub trait Element: Sized {
     ///
     /// ```
     /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, server}};
-    /// # server::block_on(server::scope(async {
+    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, scope, server}};
+    /// # server::block_on(scope(async {
     /// let my_classes = Mutable::new(vec!["class0", "class1"]);
     /// let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
     /// let app = app.freeze();
