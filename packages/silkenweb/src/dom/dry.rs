@@ -753,9 +753,9 @@ const STYLE_ATTR: &str = "style";
 mod tests {
     use silkenweb_macros::cfg_browser;
 
-    use crate::{dom::Dry, elements::html::*, prelude::*};
     #[cfg_browser(false)]
-    use crate::{task::render_now, task::server};
+    use crate::task::{render_now, scope};
+    use crate::{dom::Dry, elements::html::*, prelude::*};
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -784,7 +784,7 @@ mod tests {
     #[cfg_browser(false)]
     #[tokio::test]
     async fn style_property() {
-        server::scope(async {
+        scope(async {
             let app: Div<Dry> = div()
                 .style_property("--test0", "value0")
                 .style_property("--test1", "value1");

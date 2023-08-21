@@ -32,7 +32,7 @@ fn main() {
 async fn main() {
     use silkenweb::task;
 
-    task::server::scope(async {
+    task::scope(async {
         let app = app().freeze();
 
         for _i in 0..30 {

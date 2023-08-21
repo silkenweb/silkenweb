@@ -10,33 +10,38 @@
 //! [requestAnimationFrame on MDN]: <https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame>
 use std::cell::{Cell, RefCell};
 
-use arch::{wait_for_microtasks, Raf};
-use futures::Future;
+use arch::Raf;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use silkenweb_macros::cfg_browser;
 
 pub(crate) mod local;
 
-mod signal;
+pub use arch::{scope, sync_scope};
+pub use silkenweb_task::{run_tasks, spawn_local, TaskSignal, TaskSignalVec};
 
-pub use signal::{TaskSignal, TaskSignalVec};
+#[cfg_browser(false)]
+/// Server only task tools.
+pub mod server {
+    pub use silkenweb_task::server::{block_on, run_tasks_sync};
 
-/// Spawn a future on the microtask queue.
-pub fn spawn_local<F>(future: F)
-where
-    F: Future<Output = ()> + 'static,
-{
-    local::with(|local| local.task.runtime.spawn_local(future))
+    use super::Render;
+
+    /// Synchronous version of [`render_now`][super::render_now].
+    ///
+    /// This is only available on the server.
+    ///
+    /// # Panics
+    ///
+    /// This panics when called on browser platforms.
+    pub fn render_now_sync() {
+        Render::with(Render::render_effects);
+        run_tasks_sync();
+    }
 }
 
 #[cfg_browser(false)]
 mod arch {
-    use std::{cell::RefCell, future::Future};
-
-    use futures::{
-        executor::{LocalPool, LocalSpawner},
-        task::LocalSpawnExt,
-    };
+    use futures::Future;
 
     use super::local;
 
@@ -50,38 +55,20 @@ mod arch {
         pub fn request_animation_frame(&self) {}
     }
 
-    /// Run futures queued with `spawn_local`, until no more progress can be
-    /// made. Don't call this from a future spawned using `spawn_local`, use
-    /// `render::block_on`
-    pub async fn wait_for_microtasks() {
-        run();
+    pub fn scope<Fut>(f: Fut) -> impl Future<Output = Fut::Output>
+    where
+        Fut: Future,
+    {
+        local::TASK_LOCAL.scope(local::TaskLocal::default(), silkenweb_task::scope(f))
     }
 
-    pub fn run() {
-        local::with(|local| local.task.runtime.executor.borrow_mut().run_until_stalled())
-    }
-
-    pub struct Runtime {
-        executor: RefCell<LocalPool>,
-        spawner: LocalSpawner,
-    }
-
-    impl Default for Runtime {
-        fn default() -> Self {
-            let executor = RefCell::new(LocalPool::new());
-            let spawner = executor.borrow().spawner();
-
-            Self { executor, spawner }
-        }
-    }
-
-    impl Runtime {
-        pub fn spawn_local<F>(&self, future: F)
-        where
-            F: Future<Output = ()> + 'static,
-        {
-            self.spawner.spawn_local(future).unwrap()
-        }
+    pub fn sync_scope<F, R>(f: F) -> R
+    where
+        F: FnOnce() -> R,
+    {
+        local::TASK_LOCAL.sync_scope(local::TaskLocal::default(), || {
+            silkenweb_task::sync_scope(f)
+        })
     }
 }
 
@@ -89,10 +76,8 @@ mod arch {
 mod arch {
     use std::future::Future;
 
-    use js_sys::Promise;
     use silkenweb_base::window;
     use wasm_bindgen::{prelude::Closure, JsCast, JsValue, UnwrapThrowExt};
-    use wasm_bindgen_futures::JsFuture;
 
     use super::Render;
 
@@ -114,23 +99,18 @@ mod arch {
         }
     }
 
-    // Microtasks are run in the order they were queued in Javascript, so we just
-    // put a task on the queue and `await` it.
-    pub async fn wait_for_microtasks() {
-        let wait_for_microtasks = Promise::resolve(&JsValue::NULL);
-        JsFuture::from(wait_for_microtasks).await.unwrap_throw();
+    pub fn scope<Fut>(f: Fut) -> impl Future<Output = Fut::Output>
+    where
+        Fut: Future,
+    {
+        silkenweb_task::scope(f)
     }
 
-    #[derive(Default)]
-    pub struct Runtime;
-
-    impl Runtime {
-        pub fn spawn_local<F>(&self, future: F)
-        where
-            F: Future<Output = ()> + 'static,
-        {
-            wasm_bindgen_futures::spawn_local(future)
-        }
+    pub fn sync_scope<F, R>(f: F) -> R
+    where
+        F: FnOnce() -> R,
+    {
+        silkenweb_task::sync_scope(f)
     }
 }
 
@@ -154,22 +134,17 @@ pub(super) fn request_animation_frame() {
 /// Tasks on the microtask queue wil be executed first, then the effect queue
 /// will be processed. This is mostly useful for testing.
 pub async fn render_now() {
-    wait_for_microtasks().await;
+    run_tasks().await;
     Render::with(Render::render_effects);
 }
 
-/// Server tools.
-pub mod server;
-
 pub(crate) struct TaskLocal {
-    runtime: arch::Runtime,
     render: Render,
 }
 
 impl Default for TaskLocal {
     fn default() -> Self {
         Self {
-            runtime: arch::Runtime::default(),
             render: Render::new(),
         }
     }
