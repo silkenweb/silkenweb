@@ -11,7 +11,7 @@ use syn::{parse_macro_input, Ident, LitStr};
 pub fn define_icons(input: TokenStream) -> TokenStream {
     let path: LitStr = parse_macro_input!(input);
     let path = path.value();
-    let css = Source::from_path(path).unwrap_or_else(|e| abort_call_site!(e));
+    let css = Source::from_path(path, None).unwrap_or_else(|e| abort_call_site!(e));
     let classes = css.class_names().filter_map(|class| Class::new(&class));
 
     code_gen(css.dependency(), classes)

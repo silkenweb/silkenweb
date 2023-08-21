@@ -1,10 +1,15 @@
 use std::{
     collections::HashSet,
-    env, fs,
+    env,
+    ffi::OsStr,
+    fs,
     path::{Path, PathBuf},
+    str::FromStr,
 };
 
 use cssparser::{Parser, ParserInput, Token};
+use derive_more::Into;
+use grass::InputSyntax;
 
 #[cfg_attr(feature = "css-transpile", path = "css/transpile-enabled.rs")]
 #[cfg_attr(not(feature = "css-transpile"), path = "css/transpile-disabled.rs")]
@@ -17,6 +22,40 @@ pub struct NameMapping {
     pub mangled: String,
 }
 
+#[derive(Into)]
+pub struct CssSyntax(InputSyntax);
+
+impl Default for CssSyntax {
+    fn default() -> Self {
+        Self(InputSyntax::Css)
+    }
+}
+
+impl FromStr for CssSyntax {
+    type Err = ();
+
+    fn from_str(syntax: &str) -> Result<Self, Self::Err> {
+        let syntax = match syntax {
+            "css" => InputSyntax::Css,
+            "scss" => InputSyntax::Scss,
+            "sass" => InputSyntax::Sass,
+            _ => return Err(()),
+        };
+
+        Ok(Self(syntax))
+    }
+}
+
+impl CssSyntax {
+    fn from_path(path: impl AsRef<Path>) -> Self {
+        path.as_ref()
+            .extension()
+            .and_then(OsStr::to_str)
+            .and_then(|ext| Self::from_str(ext.to_lowercase().as_str()).ok())
+            .unwrap_or_default()
+    }
+}
+
 #[derive(Debug)]
 pub struct Source {
     content: String,
@@ -24,16 +63,16 @@ pub struct Source {
 }
 
 impl Source {
-    // TODO: Take a `Syntax` enum, and convert to css
-    pub fn from_content(content: impl Into<String>) -> Self {
-        Self {
-            content: content.into(),
+    // TODO: Don't use `String` errors
+    pub fn from_content(content: impl Into<String>, syntax: CssSyntax) -> Result<Self, String> {
+        Ok(Self {
+            content: Self::css_content(content.into(), syntax)?,
             dependency: None,
-        }
+        })
     }
 
-    // TODO: Take an `Option<Syntax>` and convert to CSS
-    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, String> {
+    pub fn from_path(path: impl AsRef<Path>, syntax: Option<CssSyntax>) -> Result<Self, String> {
+        let syntax = syntax.unwrap_or_else(|| CssSyntax::from_path(path.as_ref()));
         const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 
         let root_dir = env::var(CARGO_MANIFEST_DIR).map_err(|e| {
@@ -46,18 +85,23 @@ impl Source {
             .expect("Expected path to be convertible to string");
 
         Ok(Self {
-            content: fs::read_to_string(&path)
-                .map_err(|e| format!("Failed to read '{path}': {e}"))?,
+            content: Self::css_content(
+                fs::read_to_string(&path).map_err(|e| format!("Failed to read '{path}': {e}"))?,
+                syntax,
+            )?,
             dependency: Some(path),
         })
     }
 
-    // TODO: Remove
-    pub fn map_content<E>(self, f: impl FnOnce(String) -> Result<String, E>) -> Result<Self, E> {
-        Ok(Self {
-            content: f(self.content)?,
-            dependency: self.dependency,
-        })
+    fn css_content(source: String, syntax: CssSyntax) -> Result<String, String> {
+        let syntax = syntax.into();
+
+        if syntax != InputSyntax::Css {
+            grass::from_string(source, &grass::Options::default().input_syntax(syntax))
+                .map_err(|e| e.to_string())
+        } else {
+            Ok(source)
+        }
     }
 
     pub fn transpile(

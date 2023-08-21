@@ -1,9 +1,8 @@
-use std::{ffi::OsStr, path::Path};
+use std::str::FromStr;
 
 use derive_more::Into;
-use grass::InputSyntax;
 use proc_macro_error::{abort, abort_call_site};
-use silkenweb_base::css::{self, Browsers, Source, Version};
+use silkenweb_base::css::{self, Browsers, CssSyntax, Source, Version};
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
@@ -64,40 +63,10 @@ impl<T: ParseValue> ParseValue for Vec<T> {
     }
 }
 
-#[derive(Into)]
-pub struct CssSyntax(InputSyntax);
-
-impl Default for CssSyntax {
-    fn default() -> Self {
-        Self(InputSyntax::Css)
-    }
-}
-
-impl CssSyntax {
-    pub fn from_str(syntax: &str) -> Option<Self> {
-        let syntax = match syntax {
-            "css" => InputSyntax::Css,
-            "scss" => InputSyntax::Scss,
-            "sass" => InputSyntax::Sass,
-            _ => return None,
-        };
-
-        Some(Self(syntax))
-    }
-
-    fn from_path(path: impl AsRef<Path>) -> Self {
-        path.as_ref()
-            .extension()
-            .and_then(OsStr::to_str)
-            .and_then(|ext| Self::from_str(ext.to_lowercase().as_str()))
-            .unwrap_or_default()
-    }
-}
-
 impl ParseValue for CssSyntax {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let syntax_lit = &input.parse::<LitStr>()?;
-        Self::from_str(syntax_lit.value().as_str()).ok_or_else(|| {
+        Self::from_str(syntax_lit.value().as_str()).map_err(|()| {
             syn::Error::new(
                 syntax_lit.span(),
                 r#"expected one of  "css", "scss" or "sass" "#,
@@ -108,7 +77,6 @@ impl ParseValue for CssSyntax {
 
 pub struct Input {
     pub source: Source,
-    pub syntax: CssSyntax,
     pub public: bool,
     pub prefix: Option<String>,
     pub include_prefixes: Option<Vec<String>>,
@@ -123,8 +91,7 @@ impl Parse for Input {
         if input.peek(LitStr) {
             let path = input.parse::<LitStr>()?.value();
             return Ok(Self {
-                source: Source::from_path(&path).unwrap_or_else(|e| abort_call_site!(e)),
-                syntax: CssSyntax::from_path(path),
+                source: Source::from_path(path, None).unwrap_or_else(|e| abort_call_site!(e)),
                 public: false,
                 prefix: None,
                 include_prefixes: None,
@@ -161,19 +128,18 @@ impl Parse for Input {
 
         let source = match (&path, content) {
             (None, None) => abort_call_site!("Must specify either 'path' or `content` parameter"),
-            (None, Some(content)) => Source::from_content(content),
-            (Some(path), None) => Source::from_path(path).unwrap_or_else(|e| abort_call_site!(e)),
+            (None, Some(content)) => {
+                Source::from_content(content, syntax.unwrap_or(CssSyntax::default()))
+            }
+            (Some(path), None) => Source::from_path(path, syntax),
             (Some(_), Some(_)) => {
                 abort_call_site!("Only one of 'path' or `content` can be specified")
             }
-        };
-
-        let syntax =
-            syntax.unwrap_or_else(|| path.map_or(CssSyntax::default(), CssSyntax::from_path));
+        }
+        .unwrap_or_else(|e| abort_call_site!(e));
 
         Ok(Self {
             source,
-            syntax,
             public,
             prefix,
             include_prefixes,
