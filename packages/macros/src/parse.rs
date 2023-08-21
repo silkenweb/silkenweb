@@ -84,9 +84,7 @@ impl CssSyntax {
 
         Some(Self(syntax))
     }
-}
 
-impl CssSyntax {
     fn from_path(path: impl AsRef<Path>) -> Self {
         path.as_ref()
             .extension()
