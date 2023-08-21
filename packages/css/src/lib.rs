@@ -11,8 +11,8 @@ use cssparser::{Parser, ParserInput, Token};
 use derive_more::Into;
 use grass::InputSyntax;
 
-#[cfg_attr(feature = "css-transpile", path = "css/transpile-enabled.rs")]
-#[cfg_attr(not(feature = "css-transpile"), path = "css/transpile-disabled.rs")]
+#[cfg_attr(feature = "css-transpile", path = "transpile-enabled.rs")]
+#[cfg_attr(not(feature = "css-transpile"), path = "transpile-disabled.rs")]
 mod transpile;
 
 pub use transpile::Version;

@@ -1,8 +1,9 @@
 use std::str::FromStr;
 
+use css::{Browsers, CssSyntax, Source, Version};
 use derive_more::Into;
 use proc_macro_error::{abort, abort_call_site};
-use silkenweb_base::css::{self, Browsers, CssSyntax, Source, Version};
+use silkenweb_css as css;
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},

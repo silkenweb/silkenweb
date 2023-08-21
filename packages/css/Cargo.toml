@@ -1,0 +1,23 @@
+[package]
+name = "silkenweb-css"
+version = { workspace = true }
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "CSS utilities for Silkenweb"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui", "web-programming"]
+keywords = ["reactive", "web", "html", "browser", "dom"]
+
+[features]
+css-transpile = ["dep:lightningcss"]
+
+[dependencies]
+grass = { workspace = true }
+derive_more = { workspace = true }
+cssparser = { workspace = true }
+lightningcss = { workspace = true, optional = true }
+itertools = { workspace = true }
+clonelet = { workspace = true }

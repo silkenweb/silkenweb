@@ -1,7 +1,5 @@
 use wasm_bindgen::UnwrapThrowExt;
 
-pub mod css;
-
 pub mod window {
     use js_sys::Function;
     use wasm_bindgen::{JsValue, UnwrapThrowExt};

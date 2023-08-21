@@ -11,18 +11,9 @@ license = "MIT OR Apache-2.0"
 categories = ["gui", "web-programming"]
 keywords = ["reactive", "web", "html", "browser", "dom"]
 
-[features]
-css-transpile = ["dep:lightningcss"]
-
 [dependencies]
-grass = { workspace = true }
-derive_more = { workspace = true }
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
-cssparser = { workspace = true }
-lightningcss = { workspace = true, optional = true }
-itertools = { workspace = true }
-clonelet = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
 use quote::quote;
-use silkenweb_base::css::{NameMapping, Source};
+use silkenweb_css::{NameMapping, Source};
 use syn::{
     parse_macro_input, Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed,
     FieldsUnnamed, Ident, Index, LitBool,

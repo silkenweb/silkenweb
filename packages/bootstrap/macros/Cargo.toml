@@ -15,7 +15,7 @@ keywords = ["css"]
 proc-macro = true
 
 [dependencies]
-silkenweb-base = { workspace = true }
+silkenweb-css = { workspace = true }
 syn = { workspace = true, features = ["full"] }
 proc-macro-error = { workspace = true }
 quote = { workspace = true }

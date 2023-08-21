@@ -2559,13 +2559,7 @@ dependencies = [
 name = "silkenweb-base"
 version = "0.5.0"
 dependencies = [
- "clonelet",
- "cssparser 0.31.2",
- "derive_more",
- "grass",
- "itertools 0.11.0",
  "js-sys",
- "lightningcss",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -2596,8 +2590,20 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "silkenweb-base",
+ "silkenweb-css",
  "syn 2.0.26",
+]
+
+[[package]]
+name = "silkenweb-css"
+version = "0.5.0"
+dependencies = [
+ "clonelet",
+ "cssparser 0.31.2",
+ "derive_more",
+ "grass",
+ "itertools 0.11.0",
+ "lightningcss",
 ]
 
 [[package]]
@@ -2832,7 +2838,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "silkenweb-base",
+ "silkenweb-css",
  "syn 2.0.26",
 ]
 

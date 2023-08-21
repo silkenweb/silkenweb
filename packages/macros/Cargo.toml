@@ -15,10 +15,10 @@ keywords = ["css"]
 proc-macro = true
 
 [features]
-css-transpile = ["silkenweb-base/css-transpile"]
+css-transpile = ["silkenweb-css/css-transpile"]
 
 [dependencies]
-silkenweb-base = { workspace = true }
+silkenweb-css = { workspace = true }
 syn = { workspace = true, features = ["full"] }
 proc-macro-error = { workspace = true }
 quote = { workspace = true }
