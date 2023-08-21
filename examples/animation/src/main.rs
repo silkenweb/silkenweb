@@ -14,7 +14,7 @@ use silkenweb::{
     },
     log_panics, mount,
     node::element::ParentElement,
-    runtime::RuntimeSignal,
+    runtime::TaskSignal,
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;
