@@ -96,12 +96,12 @@ mod dry {
         elements::html::{div, Div},
         node::element::Const,
         prelude::ParentElement,
-        task::server::{self, render_now_sync},
+        task::{server::render_now_sync, sync_scope},
     };
 
     #[test]
     fn dry_clone_node_is_deep() {
-        server::sync_scope(|| {
+        sync_scope(|| {
             let template: Div<Template<String, Dry>, Const> = div()
                 .child(div().on_instantiate(|div, s| div.text(s)))
                 .freeze();

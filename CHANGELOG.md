@@ -3,8 +3,9 @@
 ## Next
 
 - `Element::DomType` was renamed to `Element::DomElement`.
-- Added `runtime` module with `RuntimeSignal*` traits.
-- Added `css-transpile` as an opt-in feature, as it can significatly build time.
+- Added `task::TaskSignal*` traits.
+- Add the `silkenweb_task` crate to help you split business logic and user interface code.
+- Added `css-transpile` as an opt-in feature, as it can significatly increase build time.
 
 ### Fixes
 

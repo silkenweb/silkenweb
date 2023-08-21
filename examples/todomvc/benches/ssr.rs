@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use silkenweb::task::server::{self, render_now_sync};
+use silkenweb::task::{server::render_now_sync, sync_scope};
 use silkenweb_examples_todomvc::{model::TodoApp, view::TodoAppView};
 
 pub fn ssr(c: &mut Criterion) {
@@ -8,7 +8,7 @@ pub fn ssr(c: &mut Criterion) {
     for n in [0, 10, 100, 1_000, 10_000] {
         group.bench_with_input(BenchmarkId::from_parameter(n), &n, |b, n| {
             b.iter(|| {
-                server::sync_scope(|| {
+                sync_scope(|| {
                     let node = TodoAppView::new(TodoApp::with_todos(
                         (0..*n).map(|n| format!("Todo #{n}")),
                     ))

@@ -43,9 +43,9 @@ mod tests {
     // Run this with `cargo test`
     #[test]
     fn sync_test() {
-        use silkenweb::task::server;
+        use silkenweb::task::{server, sync_scope};
 
-        server::sync_scope(|| {
+        sync_scope(|| {
             let count = Mutable::new(0);
 
             let app = app(count.clone()).freeze();

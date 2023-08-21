@@ -33,7 +33,7 @@ mod arch {
     pub fn with<R>(f: impl FnOnce(&TaskLocal) -> R) -> R {
         match TASK_LOCAL.try_with(f) {
             Ok(r) => r,
-            Err(_) => panic!("Must be run from within `silkenweb::task::server::scope`"),
+            Err(_) => panic!("Must be run from within `silkenweb::task::scope`"),
         }
     }
 }

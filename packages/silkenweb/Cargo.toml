@@ -23,13 +23,13 @@ all-features = true
 [dependencies]
 crossbeam = { workspace = true }
 discard = { workspace = true }
-js-sys = { workspace = true }
 futures = { workspace = true }
 caseless = { workspace = true }
 html-escape = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
 silkenweb-base = { workspace = true }
+silkenweb-task = { workspace = true }
 silkenweb-signals-ext = { workspace = true }
 silkenweb-macros = { workspace = true }
 paste = { workspace = true }
@@ -206,7 +206,6 @@ features = [
 ]
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
-wasm-bindgen-futures = { workspace = true }
 gloo-timers = { workspace = true, features = ["futures"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

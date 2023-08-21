@@ -12,7 +12,7 @@ use silkenweb::{
     log_panics, mount,
     node::element::{Element, GenericElement, ParentElement},
     router,
-    runtime::RuntimeSignal,
+    task::TaskSignal,
     value::Sig,
 };
 use timeago::Formatter;
