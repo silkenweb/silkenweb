@@ -82,7 +82,7 @@ impl Css {
             .join(path)
             .into_os_string()
             .into_string()
-            .expect("Expected path to be convertible to string");
+            .map_err(|e| format!("Couldn't convert path to string: '{e:?}'"))?;
 
         Ok(Self {
             content: Self::css_content(
