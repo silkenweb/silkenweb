@@ -119,8 +119,8 @@ impl Css {
         }
     }
 
-    pub fn dependency(&self) -> &Option<String> {
-        &self.dependency
+    pub fn dependency(&self) -> Option<&str> {
+        self.dependency.as_deref()
     }
 
     pub fn content(&self) -> &str {

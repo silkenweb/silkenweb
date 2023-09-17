@@ -49,7 +49,7 @@ impl Class {
     }
 }
 
-fn code_gen(dependency: &Option<String>, classes: impl Iterator<Item = Class>) -> TokenStream {
+fn code_gen(dependency: Option<&str>, classes: impl Iterator<Item = Class>) -> TokenStream {
     let classes: Vec<_> = classes.collect();
 
     let enum_variants = classes.iter().map(|class| &class.enum_variant);

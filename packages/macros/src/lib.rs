@@ -360,7 +360,7 @@ fn code_gen(
     let classes = classes.map(|name| define_css_entity(name, auto_mount));
     let variables = variables.map(|name| define_css_entity(name, auto_mount));
 
-    let dependency = source.dependency().iter();
+    let dependency = source.dependency().into_iter();
     let content = source.content();
     let visibility = if public { quote!(pub) } else { quote!() };
 
