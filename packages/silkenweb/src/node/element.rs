@@ -906,8 +906,7 @@ impl<D: Dom, DomElement: JsCast + Clone> ElementHandle<D, DomElement> {
     /// This will panic if [`Self::try_dom_element`] would return [`None`], or
     /// `self` was created from an invalid [`ElementHandle::cast`].
     pub fn dom_element(&self) -> DomElement {
-        self.try_dom_element()
-            .expect("Dom type doesn't support element handles")
+        self.0.dom_element().dyn_into().unwrap()
     }
 }
 

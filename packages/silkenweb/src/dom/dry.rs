@@ -84,6 +84,11 @@ impl private::DomElement for DryElement {
         self.0.borrow_mut().on(name, f, events)
     }
 
+    fn dom_element(&self) -> web_sys::Element {
+        self.try_dom_element()
+            .expect("Can't get raw dom element from `Dry` dom element")
+    }
+
     fn try_dom_element(&self) -> Option<web_sys::Element> {
         self.0.borrow().try_dom_element()
     }

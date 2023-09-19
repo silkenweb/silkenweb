@@ -207,6 +207,11 @@ impl DomElement for HydroElement {
         }
     }
 
+    fn dom_element(&self) -> web_sys::Element {
+        self.try_dom_element()
+            .expect("Can't get raw dom element from `Hydro` dom element until it's been hydrated")
+    }
+
     fn try_dom_element(&self) -> Option<web_sys::Element> {
         match &*self.borrow_mut() {
             SharedHydroElement::Dry(dry) => dry.try_dom_element(),

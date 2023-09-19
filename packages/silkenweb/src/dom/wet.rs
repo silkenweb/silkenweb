@@ -103,8 +103,12 @@ impl DomElement for WetElement {
         events.add_listener(&self.element, name, f);
     }
 
+    fn dom_element(&self) -> web_sys::Element {
+        self.element.clone()
+    }
+
     fn try_dom_element(&self) -> Option<web_sys::Element> {
-        Some(self.element.clone())
+        Some(self.dom_element())
     }
 
     fn style_property(&mut self, name: &str, value: &str) {

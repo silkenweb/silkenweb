@@ -47,9 +47,7 @@ pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
 
     fn on(&mut self, name: &'static str, f: impl FnMut(JsValue) + 'static, events: &mut EventStore);
 
-    fn dom_element(&self) -> web_sys::Element {
-        self.try_dom_element().unwrap()
-    }
+    fn dom_element(&self) -> web_sys::Element;
 
     fn try_dom_element(&self) -> Option<web_sys::Element>;
 
