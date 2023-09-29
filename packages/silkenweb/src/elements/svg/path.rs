@@ -212,6 +212,8 @@ impl Data {
 }
 
 impl AsAttribute<Data> for Data {}
+impl AsAttribute<Data> for String {}
+impl<'a> AsAttribute<Data> for &'a str {}
 
 impl Attribute for Data {
     fn text(&self) -> Option<std::borrow::Cow<str>> {
