@@ -3530,6 +3530,7 @@ html_element!(
         };
 
         properties {
+            checked: bool,
             value: String,
         };
     }

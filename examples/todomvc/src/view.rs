@@ -95,9 +95,7 @@ impl TodoAppView {
 
                         move |_, elem| app.set_completed_states(elem.checked())
                     })
-                    .effect_signal(self.all_completed(), |elem, all_complete| {
-                        elem.set_checked(all_complete)
-                    }),
+                    .set_checked(self.all_completed()),
             )
             .child(label().r#for("toggle-all"))
             .child(
@@ -261,9 +259,7 @@ impl TodoItemView {
                 move |_, elem| app.set_completed(&todo, elem.checked())
             })
             .checked(Sig(todo.completed()))
-            .effect_signal(todo.completed(), |elem, completed| {
-                elem.set_checked(completed)
-            });
+            .set_checked(todo.completed());
 
         div()
             .class("view")
