@@ -190,6 +190,11 @@ macro_rules! dom_element {
                     $custom_event:ident: $custom_event_type:ty
                 ),* $(,)?
             };)?
+
+            $(properties { $(
+                $(#[$property_meta:meta])*
+                $property:ident : $property_type:ty
+            ),* $(,)? }; )?
         }
     ) => {
         $(
@@ -249,6 +254,10 @@ macro_rules! dom_element {
                     ),*
                 }
             ); )?
+
+            $crate::properties![
+                $($($(#[$property_meta])* pub $property : $property_type,)*)?
+            ];
         }
 
         impl<Dom: $crate::dom::Dom> Default for $camel_name<Dom> {
@@ -663,6 +672,46 @@ macro_rules! attribute {
             $crate::node::element::Element::attribute(self, $crate::intern_static_str!($text_attr), value)
         }
     };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! properties {
+    (
+        $(
+            $(#[$property_meta:meta])*
+            $visibility:vis $name:ident : $typ:ty
+        ),* $(,)?
+     ) => {
+        $(
+            $crate::property!(
+                $(#[$property_meta])*
+                $visibility $name : $typ
+            );
+        )*
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! property {
+    (
+        $(#[$property_meta:meta])*
+        $visibility:vis $property:ident : $property_type:ty
+    ) => {$crate::macros::paste!{
+        $(#[$property_meta])*
+        $visibility fn [< set_ $property >] (
+            self,
+            value: impl $crate::macros::Signal<Item = $property_type> + 'static
+        ) -> Self
+        {
+            use $crate::{node::element::Element, property::AsProperty};
+
+            self.effect_signal(value, |element, value| {
+                element. [< set_ $property >] (value.as_property())
+            })
+        }
+     }}
 }
 
 #[doc(hidden)]

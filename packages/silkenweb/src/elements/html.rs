@@ -3528,6 +3528,11 @@ html_element!(
             invalid: web_sys::Event,
             select: web_sys::Event,
         };
+
+        properties {
+            checked: bool,
+            value: String,
+        };
     }
 );
 
