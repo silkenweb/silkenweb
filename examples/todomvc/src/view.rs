@@ -239,7 +239,7 @@ impl TodoItemView {
                     _ => (),
                 }
             })
-            .effect_signal(todo.is_editing(), |elem, editing| {
+            .map_element(todo.is_editing(), |elem, editing| {
                 elem.set_hidden(!editing);
 
                 if editing {

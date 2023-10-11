@@ -344,6 +344,22 @@ macro_rules! dom_element {
                 ))
             }
 
+            fn map_element<T: 'static>(
+                self,
+                sig: impl $crate::macros::Signal<Item = T> + 'static,
+                f: impl Fn(&Self::DomElement, T) + Clone + 'static,
+            ) -> Self {
+                Self(self.0.map_element(
+                    sig,
+                    move |elem, signal| {
+                        f(
+                            $crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)),
+                            signal,
+                        )
+                    }
+                ))
+            }
+
             fn handle(&self) -> $crate::node::element::ElementHandle<Self::Dom, Self::DomElement> {
                 self.0.handle().cast()
             }
@@ -707,7 +723,7 @@ macro_rules! property {
         {
             use $crate::{node::element::Element, property::AsProperty};
 
-            self.effect_signal(value, |element, value| {
+            self.map_element(value, |element, value| {
                 element. [< set_ $property >] (value.as_property())
             })
         }
