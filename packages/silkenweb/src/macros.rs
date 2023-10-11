@@ -696,7 +696,6 @@ macro_rules! properties {
     };
 }
 
-// TODO: Common properties for `HtmlElement`. e.g. `hidden`
 #[doc(hidden)]
 #[macro_export]
 macro_rules! property {
