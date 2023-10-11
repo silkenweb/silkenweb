@@ -272,7 +272,7 @@ impl TodoItemView {
                 clone!(todo, app);
                 move |_, _| todo.remove(&app)
             }))
-            .effect_signal(todo.is_editing(), |elem, editing| elem.set_hidden(editing))
+            .hidden(Sig(todo.is_editing()))
     }
 
     fn class(&self) -> impl Signal<Item = impl Iterator<Item = &'static str>> {
