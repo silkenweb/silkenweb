@@ -161,6 +161,14 @@ pub fn derive_element(item: TokenStream) -> TokenStream {
                 Self{#target: self.#target.effect_signal(sig, f) #other_fields}
             }
 
+            fn map_element<T: 'static>(
+                self,
+                sig: impl ::silkenweb::macros::Signal<Item = T> + 'static,
+                f: impl Fn(&Self::DomElement, T) + Clone + 'static,
+            ) -> Self {
+                Self{#target: self.#target.map_element(sig, f) #other_fields}
+            }
+
             fn handle(&self) -> ::silkenweb::node::element::ElementHandle<Self::Dom, Self::DomElement> {
                 self.#target.handle()
             }
