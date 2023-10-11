@@ -6,6 +6,8 @@
 - Added `task::TaskSignal*` traits.
 - Add the `silkenweb_task` crate to help you split business logic and user interface code.
 - Added `css-transpile` as an opt-in feature, as it can significatly increase build time.
+- Add `Element::map_element` that maps a function over the javascript element for each signal value.
+- Add signal based setters for `<input>` `value` and `checked` properties.
 
 ### Fixes
 
