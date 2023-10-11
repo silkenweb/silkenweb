@@ -307,6 +307,7 @@ pub mod dom;
 pub mod elements;
 pub mod hydration;
 pub mod node;
+pub mod property;
 pub mod router;
 pub mod storage;
 pub mod task;
