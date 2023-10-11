@@ -38,10 +38,6 @@ pub use crate::intern_str;
 ///     custom_events {
 ///         my_custom_event: CustomEvent<web_sys::HtmlElement>,
 ///     };
-///
-///     properties {
-///         my_property: String,
-///     };
 /// });
 ///
 /// let elem: MyHtmlElement = my_html_element()
