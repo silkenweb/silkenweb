@@ -459,6 +459,27 @@ impl<D: Dom> Element for GenericElement<D> {
         self.spawn_future(future)
     }
 
+    fn map_element<T>(
+        self,
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Clone + Fn(&Self::DomElement, T) + 'static,
+    ) -> Self
+    where
+        T: 'static,
+    {
+        clone!(mut self.element);
+
+        let future = sig.for_each(move |x| {
+            if let Some(element) = element.try_dom_element() {
+                f(&element, x);
+            }
+
+            async {}
+        });
+
+        self.spawn_future(future)
+    }
+
     fn handle(&self) -> ElementHandle<Self::Dom, Self::DomElement> {
         ElementHandle(self.element.clone(), PhantomData)
     }
@@ -678,6 +699,13 @@ pub trait Element: Sized {
     /// Apply an effect after the next render each time a signal yields a new
     /// value.
     fn effect_signal<T: 'static>(
+        self,
+        sig: impl Signal<Item = T> + 'static,
+        f: impl Fn(&Self::DomElement, T) + Clone + 'static,
+    ) -> Self;
+
+    /// Map a function over the element each time a signal changes.
+    fn map_element<T: 'static>(
         self,
         sig: impl Signal<Item = T> + 'static,
         f: impl Fn(&Self::DomElement, T) + Clone + 'static,
