@@ -1,6 +1,12 @@
-// TODO: Module docs
+//! Tools for working with Javascript properties.
 
-// TODO: Docs
+/// A type that can be used as a property.
+///
+/// This allows a type to be used as a property in [`custom_html_element`]. It
+/// exists so [`String`]s can be passed as `&str` and copyable values, like
+/// [`bool`] can be passed by value.
+///
+/// [`custom_html_element`]: crate::custom_html_element
 pub trait AsProperty {
     type Type<'a>
     where
