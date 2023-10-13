@@ -129,9 +129,7 @@ impl Parse for Input {
 
         let source = match (&path, content) {
             (None, None) => abort_call_site!("Must specify either 'path' or `content` parameter"),
-            (None, Some(content)) => {
-                Css::from_content(content, syntax.unwrap_or(CssSyntax::default()))
-            }
+            (None, Some(content)) => Css::from_content(content, syntax.unwrap_or_default()),
             (Some(path), None) => Css::from_path(path, syntax),
             (Some(_), Some(_)) => {
                 abort_call_site!("Only one of 'path' or `content` can be specified")
