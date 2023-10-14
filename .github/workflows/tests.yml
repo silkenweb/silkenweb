@@ -2,6 +2,8 @@ name: tests
 on: [push, pull_request]
 jobs:
   non-web-tests:
+    env:
+      CARGO_BUILD_JOBS: 1
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
