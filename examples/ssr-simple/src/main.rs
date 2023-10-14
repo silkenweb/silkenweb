@@ -11,7 +11,7 @@ use silkenweb::{
 
 css!(content = ".red { color: red }", auto_mount);
 
-// For a more complete example, see <https://github.com/silkenweb/ssr-example>
+// For a more complete example, see `examples/ssr-full`
 fn main() {
     sync_scope(|| {
         let count = Mutable::new(0);

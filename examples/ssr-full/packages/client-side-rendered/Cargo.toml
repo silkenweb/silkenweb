@@ -1,0 +1,11 @@
+[package]
+name = "ssr-full-client-side-rendered"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+silkenweb = { workspace = true }
+ssr-full-app = { workspace = true }
+wasm-bindgen = { workspace = true }

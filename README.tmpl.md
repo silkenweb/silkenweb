@@ -15,7 +15,7 @@ A library for building reactive web apps.
 - CSS scoping via [CSS Modules](https://github.com/css-modules/css-modules). See the [CSS modules example].
 - [Routing][router example] that works on the client or server.
 - [Tauri support](https://github.com/silkenweb/tauri-example)
-- Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/ssr-example).
+- Server side rendering with hydration, and [compile time pre-rendering](https://github.com/silkenweb/silkenweb/tree/main/examples/ssr-full).
 - Full stack apps using [Arpy]. See the [client-server example].
 - [htmx] integration. See the [htmx-axum example].
 

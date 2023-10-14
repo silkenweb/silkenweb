@@ -4,7 +4,7 @@ use silkenweb::{
     task::spawn_local, value::Sig,
 };
 
-// For a more complete example, see <https://github.com/silkenweb/ssr-example>
+// For a more complete example, see `examples/ssr-full`
 fn main() {
     log_panics();
 

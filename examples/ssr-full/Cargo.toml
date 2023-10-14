@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["packages/*"]
+
+[profile.dev]
+# Debug info isn't useful most of the time. It slows down builds and uses up disk space.
+# Disk space is particularly a problem for CI builds.
+debug = 0
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "z"
+
+[workspace.dependencies]
+silkenweb = { path = "../../packages/silkenweb" }
+ssr-full-app = { path = "packages/app" }
+wasm-bindgen = "0.2.84"
+web-log = "1.0.1"

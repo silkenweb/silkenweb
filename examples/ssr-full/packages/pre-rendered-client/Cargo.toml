@@ -1,0 +1,9 @@
+[package]
+name = "ssr_example_pre_rendered_client"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+ssr-full-app = { workspace = true }
