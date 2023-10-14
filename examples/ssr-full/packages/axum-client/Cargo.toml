@@ -1,0 +1,13 @@
+[package]
+name = "ssr-example-axum-client"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ssr-example-app = { workspace = true }
+wasm-bindgen = { workspace = true }

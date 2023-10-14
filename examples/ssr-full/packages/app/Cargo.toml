@@ -1,0 +1,11 @@
+[package]
+name = "ssr-example-app"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+silkenweb = { workspace = true }
+web-log = { workspace = true }
+futures-signals = "0.3.31"

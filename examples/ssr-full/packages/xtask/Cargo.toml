@@ -1,0 +1,14 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+silkenweb = { workspace = true }
+ssr-example-app = { workspace = true }
+xtask-wasm = { version = "0.1.8", features = ["wasm-opt"] }
+xshell = "0.2.2"
+env_logger = "0.9.0"
+log = "0.4.14"

@@ -1,10 +1,9 @@
 [package]
-name = "silkenweb-example-ssr"
+name = "ssr_example_pre_rendered_client"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { workspace = true }
-futures-signals = { workspace = true }
+ssr-example-app = { workspace = true }
