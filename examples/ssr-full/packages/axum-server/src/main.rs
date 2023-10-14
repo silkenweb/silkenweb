@@ -34,7 +34,7 @@ async fn handler(Extension(local_pool): Extension<LocalPoolHandle>, uri: Uri) ->
     // Silkenweb is single threaded, so we spawn a task pinned to a thread using
     // `LocalPoolHandle`.
     local_pool
-        .spawn_pinned(|| task::server::scope(render(uri)))
+        .spawn_pinned(|| task::scope(render(uri)))
         .await
         .unwrap()
 }

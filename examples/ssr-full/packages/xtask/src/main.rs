@@ -1,11 +1,7 @@
 use std::path::Path;
 
 use log::LevelFilter;
-use silkenweb::{
-    dom::Dry,
-    router,
-    task::{self, server},
-};
+use silkenweb::{dom::Dry, router, task};
 use ssr_example_app::app;
 use xshell::Shell;
 use xtask_wasm::{
@@ -45,7 +41,7 @@ fn main() -> Result<()> {
 }
 
 fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
-    server::sync_scope(|| {
+    task::sync_scope(|| {
         let (title, body) = app::<Dry>();
         let title = title.freeze();
         let body = body.freeze();
