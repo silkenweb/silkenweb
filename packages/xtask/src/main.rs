@@ -102,9 +102,11 @@ fn main() {
                 )
                 .run()?;
             }
-            Commands::FmtAll => {
-                foreach_workspace(|sh| Ok(cmd!(sh, "cargo +nightly fmt --all").run()?))?
-            }
+            Commands::FmtAll => foreach_workspace(|| {
+                let sh = Shell::new()?;
+                cmd!(sh, "cargo +nightly fmt --all").run()?;
+                Ok(())
+            })?,
             Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
         }
 
@@ -112,12 +114,12 @@ fn main() {
     });
 }
 
-fn foreach_workspace(f: impl Fn(&Shell) -> WorkflowResult<()>) -> WorkflowResult<()> {
-    let sh = Shell::new()?;
-
+fn foreach_workspace(f: impl Fn() -> WorkflowResult<()>) -> WorkflowResult<()> {
     for dir in [".", "examples/ssr-full"] {
-        let _dir = sh.push_dir(dir);
-        f(&sh)?;
+        let previous_dir = env::current_dir()?;
+        env::set_current_dir(dir)?;
+        f()?;
+        env::set_current_dir(previous_dir)?;
     }
 
     Ok(())
@@ -167,8 +169,7 @@ fn ci_browser() -> WorkflowResult<()> {
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
-
-    foreach_workspace(|_sh| xtask_base::ci_stable(fast, toolchain.as_deref(), &[]))?;
+    foreach_workspace(|| xtask_base::ci_stable(fast, toolchain.as_deref(), &[]))?;
     test_features()
 }
 
