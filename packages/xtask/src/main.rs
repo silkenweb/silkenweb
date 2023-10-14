@@ -169,6 +169,11 @@ fn ci_browser() -> WorkflowResult<()> {
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
+
+    // Pre-build all examples, so CI doesn't try to link too many at once and run
+    // out of memory.
+    build_examples()?;
+
     foreach_workspace(|| xtask_base::ci_stable(fast, toolchain.as_deref(), &[]))?;
     test_features()
 }
@@ -240,6 +245,38 @@ fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
     }
 
     Ok(browser_examples)
+}
+
+fn examples() -> WorkflowResult<Vec<PathBuf>> {
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples");
+    let examples_dir = sh.read_dir(".")?;
+    let mut examples = Vec::new();
+
+    for example in examples_dir {
+        if let Some(example) = example.file_name() {
+            for file in sh.read_dir(example)? {
+                if file.file_name() == Some(OsStr::new("Cargo.toml")) {
+                    examples.push(example.into());
+                    break;
+                }
+            }
+        }
+    }
+
+    Ok(examples)
+}
+
+fn build_examples() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples");
+
+    for example in examples()? {
+        let _dir = sh.push_dir(example);
+        cmd!(sh, "cargo build").run()?;
+    }
+
+    Ok(())
 }
 
 fn trunk_build() -> WorkflowResult<()> {
