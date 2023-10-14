@@ -17,12 +17,7 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
-    - run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - run: cargo build --all-targets
-    - run: cargo doc
-    - run: cargo test
-    - run: cargo test --benches --tests --release
-    - run: cargo xtask test-features
+    - run: cargo xtask ci stable
 
   browser-tests:
     strategy:
@@ -101,5 +96,4 @@ jobs:
       with:
         crate: cargo-udeps
         version: 0.1.40
-    - run: cargo fmt --all -- --check
-    - run: cargo udeps --all-targets
+    - run: cargo xtask ci nightly

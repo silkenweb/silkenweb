@@ -41,6 +41,7 @@ enum Commands {
         #[clap(long)]
         full: bool,
     },
+    FmtAll,
     #[clap(flatten)]
     Common(CommonCmds),
 }
@@ -101,11 +102,25 @@ fn main() {
                 )
                 .run()?;
             }
+            Commands::FmtAll => {
+                foreach_workspace(|sh| Ok(cmd!(sh, "cargo +nightly fmt --all").run()?))?
+            }
             Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
         }
 
         Ok(())
     });
+}
+
+fn foreach_workspace(f: impl Fn(&Shell) -> WorkflowResult<()>) -> WorkflowResult<()> {
+    let sh = Shell::new()?;
+
+    for dir in [".", "examples/ssr-full"] {
+        let _dir = sh.push_dir(dir);
+        f(&sh)?;
+    }
+
+    Ok(())
 }
 
 fn build_website() -> WorkflowResult<()> {
@@ -152,7 +167,8 @@ fn ci_browser() -> WorkflowResult<()> {
 fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
     build_readme(".", true)?;
     generate_open_source_files(2021, true)?;
-    xtask_base::ci_stable(fast, toolchain.as_deref(), &[])?;
+
+    foreach_workspace(|_sh| xtask_base::ci_stable(fast, toolchain.as_deref(), &[]))?;
     test_features()
 }
 
