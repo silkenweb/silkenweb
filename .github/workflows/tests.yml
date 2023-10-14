@@ -17,9 +17,11 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
+    # Windows seems to run out of disk space when linking, so we just run tests
+    - if: matrix.os == 'windows-latest'
+      run: cargo test
     - if: matrix.os != 'windows-latest'
-      run: echo "CARGO_BUILD_JOBS=1" >> $GITHUB_ENV
-    - run: cargo xtask ci stable
+      run: cargo xtask ci stable
 
   browser-tests:
     strategy:
