@@ -115,12 +115,7 @@ fn main() {
 }
 
 fn foreach_workspace(f: impl Fn() -> WorkflowResult<()>) -> WorkflowResult<()> {
-    for dir in [".", "examples/ssr-full"] {
-        let previous_dir = env::current_dir()?;
-        env::set_current_dir(dir)?;
-        f()?;
-        env::set_current_dir(previous_dir)?;
-    }
+    f()?;
 
     Ok(())
 }
