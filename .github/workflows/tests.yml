@@ -17,6 +17,8 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@v2
       if: ${{ !env.ACT }}
+    - if: matrix.os != 'windows-latest'
+      run: echo "CARGO_BUILD_JOBS=1" >> $GITHUB_ENV
     - run: cargo xtask ci stable
 
   browser-tests:
