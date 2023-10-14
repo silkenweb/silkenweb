@@ -213,7 +213,13 @@ tokio = { workspace = true, features = ["rt", "macros", "time"] }
 tokio-stream = { workspace = true, features = ["time"] }
 
 [dev-dependencies]
-silkenweb-test = { workspace = true }
+# We don't use the workspace version here. Currently, crates with cyclic
+# `dev-dependencies` [can't be published][issue-4242]. As a [workaround], we
+# don't specify the version of cyclic dependencies.
+# 
+# [issue-4242]: https://github.com/rust-lang/cargo/issues/4242
+# [workaround]: https://github.com/rust-lang/futures-rs/pull/2305
+silkenweb-test = { path = "../../packages/test" }
 wasm-bindgen-test = { workspace = true }
 itertools = { workspace = true }
 criterion = { workspace = true, default-features = false }
