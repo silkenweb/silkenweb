@@ -6,4 +6,4 @@ edition = "2021"
 publish = false
 
 [dependencies]
-ssr-example-app = { workspace = true }
+ssr-full-app = { workspace = true }

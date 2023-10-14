@@ -1,4 +1,4 @@
-use ssr_example_app::hydrate_app;
+use ssr_full_app::hydrate_app;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]

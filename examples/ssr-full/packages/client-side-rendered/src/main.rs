@@ -1,5 +1,5 @@
 use silkenweb::mount;
-use ssr_example_app::app;
+use ssr_full_app::app;
 
 pub fn main() {
     let (title, body) = app();

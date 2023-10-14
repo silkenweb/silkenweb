@@ -1985,7 +1985,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssr-example-app"
+name = "ssr-full-app"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
@@ -1994,20 +1994,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssr-example-axum-client"
+name = "ssr-full-axum-client"
 version = "0.1.0"
 dependencies = [
- "ssr-example-app",
+ "ssr-full-app",
  "wasm-bindgen",
 ]
 
 [[package]]
-name = "ssr-example-axum-server"
+name = "ssr-full-axum-server"
 version = "0.1.0"
 dependencies = [
  "axum",
  "silkenweb",
- "ssr-example-app",
+ "ssr-full-app",
  "tokio",
  "tokio-util",
  "tower-http",
@@ -2015,11 +2015,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssr-example-client-side-rendered"
+name = "ssr-full-client-side-rendered"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
- "ssr-example-app",
+ "ssr-full-app",
  "wasm-bindgen",
 ]
 
@@ -2027,7 +2027,7 @@ dependencies = [
 name = "ssr_example_pre_rendered_client"
 version = "0.1.0"
 dependencies = [
- "ssr-example-app",
+ "ssr-full-app",
 ]
 
 [[package]]
@@ -2776,7 +2776,7 @@ dependencies = [
  "env_logger",
  "log",
  "silkenweb",
- "ssr-example-app",
+ "ssr-full-app",
  "xshell",
  "xtask-wasm",
 ]

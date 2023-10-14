@@ -8,6 +8,7 @@
 - Added `css-transpile` as an opt-in feature, as it can significatly increase build time.
 - Add `Element::map_element` that maps a function over the javascript element for each signal value.
 - Add signal based setters for `<input>` `value` and `checked` properties.
+- Move `ssr-example` from it's own repo into the main Silkenweb repo.
 
 ### Fixes
 

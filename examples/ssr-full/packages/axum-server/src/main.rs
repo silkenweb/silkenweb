@@ -7,7 +7,7 @@ use axum::{
     Extension, Router, Server,
 };
 use silkenweb::{dom::Dry, router, task};
-use ssr_example_app::app;
+use ssr_full_app::app;
 use tokio_util::task::LocalPoolHandle;
 use tower_http::services::ServeDir;
 
