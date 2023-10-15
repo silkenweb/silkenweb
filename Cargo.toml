@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["packages/*", "examples/*"]
-exclude = ["examples/ssr-full"]
+exclude = ["examples/ssr-full", "examples/tauri"]
 
 [profile.dev]
 # Debug info isn't useful most of the time. It slows down builds and uses up disk space.
