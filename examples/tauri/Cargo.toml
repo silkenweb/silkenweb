@@ -4,3 +4,12 @@
 [workspace]
 resolver = "2"
 members = ["frontend", "src-tauri"]
+
+[workspace.dependencies]
+futures-signals = "0.3.31"
+silkenweb = { path = "../../packages/silkenweb" }
+silkenweb-tauri = { path = "../../packages/tauri" }
+web-sys = "0.3.60"
+serde = { version = "1.0" }
+tauri = { version = "1.5.2" }
+tauri-build = { version = "1.5.0", features = [] }
