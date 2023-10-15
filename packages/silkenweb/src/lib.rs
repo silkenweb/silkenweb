@@ -63,7 +63,7 @@
 //! [trunk]: https://trunkrs.dev/
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
 //! [routing]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
-//! [tauri]: https://github.com/silkenweb/tauri-example
+//! [tauri]: https://github.com/silkenweb/silkenweb/tree/main/examples/tauri
 //! [Server Side Rendering]: https://github.com/silkenweb/silkenweb/tree/main/examples/ssr-full
 //! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
