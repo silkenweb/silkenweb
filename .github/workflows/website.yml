@@ -17,7 +17,7 @@ jobs:
         default: true
         components: clippy
         target: wasm32-unknown-unknown
-    - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+    - uses: Swatinem/rust-cache@v2
     - uses: actions-rs/install@v0.1
       with:
         crate: trunk
