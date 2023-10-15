@@ -1,5 +1,7 @@
 # Server Side Rendering Example
 
+:warning: This example has some [security vulnerabilities](https://github.com/silkenweb/silkenweb/security/dependabot?q=is%3Aclosed+manifest%3Aexamples%2Fssr-full%2FCargo.lock). Use at your own risk!
+
 This example contains various crates that render the same app using different strategies. The [app] package contains the actual app.
 
 ## Pre Rendered HTML with Client Side Hydration
