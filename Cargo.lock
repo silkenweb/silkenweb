@@ -2555,7 +2555,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "caseless",
  "clonelet",
@@ -2586,7 +2586,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-base"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -2595,7 +2595,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-bootstrap"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "derive_more",
  "futures-signals",
@@ -2613,7 +2613,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-bootstrap-macros"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -2625,7 +2625,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-css"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "clonelet",
@@ -2841,7 +2841,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-htmx-axum"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "async-trait",
  "axum",
@@ -2863,7 +2863,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-macros"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "derive_more",
  "proc-macro-error",
@@ -2875,7 +2875,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-signals-ext"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "futures-signals",
  "paste",
@@ -2884,7 +2884,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-task"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "clonelet",
  "crossbeam",
@@ -2899,7 +2899,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-tauri"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "js-sys",
  "serde-wasm-bindgen",
@@ -2911,7 +2911,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-tauri-proc-macro"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "proc-macro-error",
  "quote",
@@ -2920,7 +2920,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-test"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "silkenweb",
  "silkenweb-base",

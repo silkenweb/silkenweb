@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.6.0 - 2023-10-15
 
 - `Element::DomType` was renamed to `Element::DomElement`.
 - Added `task::TaskSignal*` traits.
