@@ -15,7 +15,9 @@ impl FnRemote for Update {
 pub struct GetValue;
 
 impl FnSubscription for GetValue {
+    type InitialReply = ();
     type Item = i32;
+    type Update = ();
 }
 
 #[cfg_browser(false)]
@@ -36,7 +38,7 @@ pub mod server {
         let ws = WebSocketRouter::new()
             .handle_subscription({
                 clone!(value);
-                move |_: GetValue| value.signal().to_stream()
+                move |_updates, _args: GetValue| ((), value.signal().to_stream())
             })
             .handle(move |update: Update| {
                 clone!(value);

@@ -125,7 +125,8 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 [[package]]
 name = "arpy"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "710dfa96bd302fc99dca76d7c39bce6be835eca623dadc2490955d9b5268ce20"
 dependencies = [
  "arpy-macros",
  "async-trait",
@@ -138,7 +139,8 @@ dependencies = [
 [[package]]
 name = "arpy-axum"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f0d724d47839fd3df923288d36b11e7efd89a69bbfe77673adc370860771bc4"
 dependencies = [
  "arpy",
  "arpy-server",
@@ -158,7 +160,8 @@ dependencies = [
 [[package]]
 name = "arpy-client"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b30a5abb35cd162dde349dbb666391a7be28a497114c4b816bc94e99201f545"
 dependencies = [
  "arpy",
  "async-trait",
@@ -175,7 +178,8 @@ dependencies = [
 [[package]]
 name = "arpy-macros"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a638971e955109e92f60cadae48aad94dda28fcd552115febbcce29f22b839a5"
 dependencies = [
  "heck",
  "quote",
@@ -185,7 +189,8 @@ dependencies = [
 [[package]]
 name = "arpy-reqwasm"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bd0616415ffc6d7c9cd946cfb9f171550b56e206ed7cc19b041c03499832252"
 dependencies = [
  "arpy",
  "arpy-client",
@@ -208,7 +213,8 @@ dependencies = [
 [[package]]
 name = "arpy-server"
 version = "0.2.0"
-source = "git+https://github.com/simon-bourne/arpy#354f0b4c3c5ca2556b87c83a15e2e314da6a6550"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ca66bad09603291cd518b3f97dbcc8493b75e1c493d723a12f515b4a0bf39a0"
 dependencies = [
  "arpy",
  "bincode",
@@ -1443,18 +1449,9 @@ dependencies = [
 
 [[package]]
 name = "include-doc"
-version = "0.2.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5401488b442bfb8a96d72c168dfe6998e0c7cdb5ddfa2e7be290140699771ca7"
-dependencies = [
- "include-doc-macro",
-]
-
-[[package]]
-name = "include-doc-macro"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bce1e1bffdd80bfc66acbe71450a16d3a245da7378caff63a480948e82a1142"
+checksum = "3021df7bf19bf66c9cc6a43c81e8bebb345be98993e9d009b6eb41768a323e7f"
 dependencies = [
  "itertools 0.11.0",
  "proc-macro-error",
