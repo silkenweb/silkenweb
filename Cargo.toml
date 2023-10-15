@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["packages/*", "examples/*"]
-exclude = ["examples/ssr-full"]
+exclude = ["examples/ssr-full", "examples/tauri"]
 
 [profile.dev]
 # Debug info isn't useful most of the time. It slows down builds and uses up disk space.
@@ -100,10 +100,10 @@ tracing-subscriber = "0.3.16"
 num-traits = "0.2.15"
 getrandom = "0.2.7"
 
-arpy = { git = "https://github.com/simon-bourne/arpy" }
-arpy-reqwasm = { git = "https://github.com/simon-bourne/arpy" }
-arpy-server = { git = "https://github.com/simon-bourne/arpy" }
-arpy-axum = { git = "https://github.com/simon-bourne/arpy" }
+arpy = "0.2.0"
+arpy-reqwasm = "0.2.0"
+arpy-server = "0.2.0"
+arpy-axum = "0.2.0"
 
 # test dependencies
 wasm-bindgen-test = "0.3.28"
