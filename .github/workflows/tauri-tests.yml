@@ -65,14 +65,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
     - run: cargo fmt --all -- --check
-      working-directory: examples/tauri/frontend
-    - run: cargo fmt --all -- --check
-      working-directory: src-tauri
-    - name: Frontend udeps
-      run: cargo udeps --all-targets
-      working-directory: examples/tauri/frontend
-    - name: Backend udeps
+      working-directory: examples/tauri
+    - name: udeps
       run: |
-        mkdir ../frontend/dist
+        mkdir frontend/dist
         cargo udeps --all-targets
-      working-directory: examples/tauri/src-tauri
+      working-directory: examples/tauri
