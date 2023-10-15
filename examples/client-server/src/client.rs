@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use arpy::{ConcurrentRpcClient, FnRemote};
 use arpy_reqwasm::websocket;
-use futures::{StreamExt, stream};
+use futures::{stream, StreamExt};
 use futures_signals::signal::{Mutable, SignalExt};
 use reqwasm::websocket::futures::WebSocket;
 use silkenweb::{
@@ -55,7 +55,10 @@ async fn update(conn: websocket::Connection, delta: i32) {
 }
 
 async fn get_value(conn: websocket::Connection, count: Mutable<Count>) {
-    let ((), mut values) = conn.subscribe(api::GetValue, stream::pending()).await.unwrap();
+    let ((), mut values) = conn
+        .subscribe(api::GetValue, stream::pending())
+        .await
+        .unwrap();
 
     while let Some(v) = values.next().await {
         match v {
