@@ -1,0 +1,6 @@
+# Use a workspace to make CI builds cache
+# Doesn't seem to interfere with Tauri
+
+[workspace]
+resolver = "2"
+members = ["frontend", "src-tauri"]

@@ -1,0 +1,12 @@
+[package]
+name = "silkenweb-example-tauri-frontend"
+version = "0.1.0"
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+futures-signals = "0.3.24"
+silkenweb = "0.5.0"
+silkenweb-tauri = "0.5.0"
+web-sys = "0.3.60"

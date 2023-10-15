@@ -1,0 +1,78 @@
+name: tauri-tests
+on: [push, pull_request]
+jobs:
+  tauri-build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        rust: [1.65.0]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        default: true
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        target: wasm32-unknown-unknown
+    - uses: Swatinem/rust-cache@v2
+      if: ${{ !env.ACT }}
+    - name: Install tauri-cli
+      uses: actions-rs/install@v0.1
+      with:
+        crate: tauri-cli
+        version: ^1.1.1
+    - name: Install trunk
+      uses: actions-rs/install@v0.1
+      with:
+        crate: trunk
+        version: 0.16.0
+    - name: Install webkit2gtk
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y webkit2gtk-4.0
+    - run: cargo tauri build --debug --bundles deb
+      working-directory: examples/tauri
+
+  nightly:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [nightly-2023-06-06]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        default: true
+        components: rustfmt
+    - uses: Swatinem/rust-cache@v2
+      if: ${{ !env.ACT }}
+    - name: Install cargo-udeps
+      uses: actions-rs/install@v0.1
+      with:
+        crate: cargo-udeps
+    - name: Install webkit2gtk
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y webkit2gtk-4.0
+    - run: cargo fmt --all -- --check
+      working-directory: examples/tauri/frontend
+    - run: cargo fmt --all -- --check
+      working-directory: src-tauri
+    - name: Frontend udeps
+      run: cargo udeps --all-targets
+      working-directory: examples/tauri/frontend
+    - name: Backend udeps
+      run: |
+        mkdir ../frontend/dist
+        cargo udeps --all-targets
+      working-directory: examples/tauri/src-tauri
