@@ -379,7 +379,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
         );
 
         if let Some(value) = value.text() {
-            self.attributes.insert(name.to_owned(), value.into_owned());
+            self.attributes.insert(name.to_owned(), value.to_string());
         } else {
             self.attributes.remove(name);
         }

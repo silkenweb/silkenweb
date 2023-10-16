@@ -2,8 +2,6 @@
 //!
 //! See [MDN SVG Content Types](https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type)
 
-use std::borrow::Cow;
-
 use silkenweb_signals_ext::value::Value;
 
 use crate::attribute::{AsAttribute, Attribute};
@@ -22,7 +20,9 @@ pub enum Length {
 }
 
 impl Attribute for Length {
-    fn text(&self) -> Option<Cow<str>> {
+    type Text<'a> = String;
+
+    fn text(&self) -> Option<Self::Text<'_>> {
         let (length, units) = match self {
             Length::Em(l) => (l, "em"),
             Length::Ex(l) => (l, "ex"),
@@ -34,7 +34,7 @@ impl Attribute for Length {
             Length::Pc(l) => (l, "pc"),
         };
 
-        Some(format!("{length}{units}").into())
+        Some(format!("{length}{units}"))
     }
 }
 
@@ -48,8 +48,10 @@ impl AsAttribute<Length> for f64 {}
 pub struct Percentage(pub f64);
 
 impl Attribute for Percentage {
-    fn text(&self) -> Option<Cow<str>> {
-        Some(format!("{}%", self.0).into())
+    type Text<'a> = String;
+
+    fn text(&self) -> Option<Self::Text<'_>> {
+        Some(format!("{}%", self.0))
     }
 }
 
@@ -60,8 +62,10 @@ impl Value for Percentage {}
 pub struct Auto;
 
 impl Attribute for Auto {
-    fn text(&self) -> Option<Cow<str>> {
-        Some("auto".into())
+    type Text<'a> = &'static str;
+
+    fn text(&self) -> Option<Self::Text<'_>> {
+        Some("auto")
     }
 }
 
