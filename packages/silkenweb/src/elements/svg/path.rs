@@ -216,8 +216,10 @@ impl AsAttribute<Data> for String {}
 impl<'a> AsAttribute<Data> for &'a str {}
 
 impl Attribute for Data {
-    fn text(&self) -> Option<std::borrow::Cow<str>> {
-        Some(self.0.as_str().into())
+    type Text<'a> = &'a str;
+
+    fn text(&self) -> Option<Self::Text<'_>> {
+        Some(self.0.as_str())
     }
 }
 

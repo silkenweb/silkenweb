@@ -87,7 +87,7 @@ impl DomElement for WetElement {
         A: crate::attribute::Attribute,
     {
         if let Some(attr) = value.text() {
-            self.element.set_attribute(name, &attr)
+            self.element.set_attribute(name, attr.as_ref())
         } else {
             self.element.remove_attribute(name)
         }

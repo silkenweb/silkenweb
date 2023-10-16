@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- `Attribute` defines an associated type `Text`, meaning we no longer need to return `Cow<str>`. The attribute can decide if it's text type is a reference or value.
+
 ## 0.6.0 - 2023-10-15
 
 - `Element::DomType` was renamed to `Element::DomElement`.

@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
@@ -17,8 +15,10 @@ pub enum ButtonDesign {
 }
 
 impl Attribute for ButtonDesign {
-    fn text(&self) -> Option<Cow<str>> {
-        Some(self.to_string().into())
+    type Text<'a> = String;
+
+    fn text(&self) -> Option<Self::Text<'_>> {
+        Some(self.to_string())
     }
 }
 
