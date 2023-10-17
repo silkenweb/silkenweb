@@ -472,7 +472,7 @@ macro_rules! parent_element {
 
             fn child(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>
+                child: impl $crate::value::SignalOrValue<Item = impl $crate::node::ChildNode<Dom>>
             ) -> Self
             {
                 Self(self.0.child(child))
@@ -480,7 +480,7 @@ macro_rules! parent_element {
 
             fn optional_child(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::value::Value + Into<$crate::node::Node<Dom>> + 'static>>
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<impl $crate::node::ChildNode<Dom>>>
             ) -> Self
             {
                 Self(self.0.optional_child(child))
