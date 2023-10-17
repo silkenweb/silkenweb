@@ -19,6 +19,7 @@ pub use component::Component;
 
 /// A DOM Node
 pub struct Node<D: Dom = DefaultDom> {
+    // FEATURE(thin_box): Use a thin box to keep the size down.
     resources: Box<[Resource]>,
     events: EventStore,
     node: D::Node,
