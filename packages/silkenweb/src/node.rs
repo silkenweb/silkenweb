@@ -2,6 +2,8 @@
 
 use std::fmt;
 
+use discard::DiscardOnDrop;
+use futures_signals::CancelableFutureHandle;
 use silkenweb_signals_ext::value::Value;
 
 use crate::dom::{
@@ -17,9 +19,9 @@ pub use component::Component;
 
 /// A DOM Node
 pub struct Node<D: Dom = DefaultDom> {
-    node: D::Node,
-    resources: ResourceVec,
+    resources: Box<[Resource]>,
     events: EventStore,
+    node: D::Node,
 }
 
 impl<D: Dom> Value for Node<D> {}
@@ -32,7 +34,7 @@ impl<D: Dom> From<Text<D>> for Node<D> {
     fn from(text: Text<D>) -> Self {
         Self {
             node: text.0.into(),
-            resources: Vec::new(),
+            resources: Box::new([]),
             events: EventStore::default(),
         }
     }
@@ -65,8 +67,11 @@ pub fn text<D: Dom>(text: &str) -> Text<D> {
     Text(D::Text::new(text))
 }
 
-trait Resource {}
+trait Dropable {}
 
-impl<T> Resource for T {}
+impl<T> Dropable for T {}
 
-type ResourceVec = Vec<Box<dyn Resource>>;
+enum Resource {
+    Any(Box<dyn Dropable>),
+    FutureHandle(DiscardOnDrop<CancelableFutureHandle>),
+}

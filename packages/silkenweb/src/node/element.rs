@@ -24,7 +24,7 @@ use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Va
 use wasm_bindgen::{JsCast, JsValue};
 
 use self::child_vec::ChildVec;
-use super::{ChildNode, Node, ResourceVec};
+use super::{ChildNode, Node, Resource};
 use crate::{
     attribute::Attribute,
     clone,
@@ -50,7 +50,7 @@ mod child_vec;
 pub struct GenericElement<D: Dom = DefaultDom, Mutability = Mut> {
     static_child_count: usize,
     child_vec: Option<Pin<Box<dyn SignalVec<Item = Node<D>>>>>,
-    resources: ResourceVec,
+    resources: Vec<Resource>,
     events: EventStore,
     element: D::Element,
     #[cfg(debug_assertions)]
@@ -177,11 +177,8 @@ impl<D: Dom, Mutability> GenericElement<D, Mutability> {
             // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
             // keep a hold of `child_vec`, as it may own signals that need updating.
             let resource = (child_vec, spawn_cancelable_future(future));
-            self.resources.push(Box::new(resource));
+            self.resources.push(Resource::Any(Box::new(resource)));
         }
-
-        // This improves memory usage, and doesn't detectably impact performance
-        self.resources.shrink_to_fit();
     }
 }
 
@@ -243,7 +240,7 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
                     let child = child.into();
 
                     parent.element.append_child(&child.node);
-                    parent.resources.extend(child.resources);
+                    parent.resources.append(&mut child.resources.into_vec());
                     parent.events.combine(child.events);
                 }
 
@@ -331,9 +328,9 @@ impl<D: InstantiableDom> ShadowRootParent<D> for GenericElement<D> {
         let children: Vec<_> = children
             .into_iter()
             .map(|child| {
-                let mut child = child.into();
+                let child = child.into();
                 let child_node = child.node;
-                self.resources.append(&mut child.resources);
+                self.resources.append(&mut child.resources.into_vec());
                 self.events.combine(child.events);
                 child_node
             })
@@ -498,7 +495,7 @@ impl<D: Dom> Element for GenericElement<D> {
 impl<D: Dom> Executor for GenericElement<D> {
     fn spawn(&mut self, future: impl Future<Output = ()> + 'static) {
         self.resources
-            .push(Box::new(spawn_cancelable_future(future)));
+            .push(Resource::FutureHandle(spawn_cancelable_future(future)));
     }
 }
 
@@ -514,7 +511,7 @@ impl<D: Dom, Mutability> From<GenericElement<D, Mutability>> for Node<D> {
 
         Self {
             node: elem.element.into(),
-            resources: elem.resources,
+            resources: elem.resources.into_boxed_slice(),
             events: elem.events,
         }
     }
