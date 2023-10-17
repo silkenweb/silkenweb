@@ -456,7 +456,15 @@ impl<D: Dom> Element for GenericElement<D> {
         self.spawn_future(future)
     }
 
-    fn map_element<T>(
+    fn map(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self {
+        if let Some(element) = self.element.try_dom_element() {
+            f(&element);
+        }
+
+        self
+    }
+
+    fn map_signal<T>(
         self,
         sig: impl Signal<Item = T> + 'static,
         f: impl Clone + Fn(&Self::DomElement, T) + 'static,
@@ -701,8 +709,11 @@ pub trait Element: Sized {
         f: impl Fn(&Self::DomElement, T) + Clone + 'static,
     ) -> Self;
 
+    /// Map a function over the element.
+    fn map(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self;
+
     /// Map a function over the element each time a signal changes.
-    fn map_element<T: 'static>(
+    fn map_signal<T: 'static>(
         self,
         sig: impl Signal<Item = T> + 'static,
         f: impl Fn(&Self::DomElement, T) + Clone + 'static,

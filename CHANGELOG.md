@@ -3,6 +3,7 @@
 ## Next
 
 - `Attribute` defines an associated type `Text`, meaning we no longer need to return `Cow<str>`. The attribute can decide if it's text type is a reference or value.
+- Rename `map_element` to `map_signal` and add a `map` method.
 
 ## 0.6.0 - 2023-10-15
 

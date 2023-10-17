@@ -344,12 +344,18 @@ macro_rules! dom_element {
                 ))
             }
 
-            fn map_element<T: 'static>(
+            fn map(self, f: impl ::std::ops::FnOnce(&Self::DomElement) + 'static) -> Self {
+                Self(self.0.map(|elem| {
+                    f($crate::macros::UnwrapThrowExt::unwrap_throw($crate::macros::JsCast::dyn_ref(elem)))
+                }))
+            }
+
+            fn map_signal<T: 'static>(
                 self,
                 sig: impl $crate::macros::Signal<Item = T> + 'static,
                 f: impl Fn(&Self::DomElement, T) + Clone + 'static,
             ) -> Self {
-                Self(self.0.map_element(
+                Self(self.0.map_signal(
                     sig,
                     move |elem, signal| {
                         f(
@@ -723,7 +729,7 @@ macro_rules! property {
         {
             use $crate::{node::element::Element, property::AsProperty};
 
-            self.map_element(value, |element, value| {
+            self.map_signal(value, |element, value| {
                 element. [< set_ $property >] (value.as_property())
             })
         }
