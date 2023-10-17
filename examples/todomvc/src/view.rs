@@ -238,9 +238,8 @@ impl TodoItemView {
                     _ => (),
                 }
             })
+            .hidden(Sig(not(todo.is_editing())))
             .effect_signal(todo.is_editing(), |elem, editing| {
-                elem.set_hidden(!editing);
-
                 if editing {
                     elem.focus().unwrap_throw();
                 }
