@@ -34,16 +34,15 @@ pub struct TodoAppView {
 impl TodoAppView {
     pub fn render(&self) -> Section {
         let item_filter = url_path()
-            .signal_ref({
-                |url_path| match url_path.as_str() {
-                    "#/active" => Filter::Active,
-                    "#/completed" => Filter::Completed,
-                    _ => Filter::All,
-                }
+            .signal_ref(|url_path| match url_path.as_str() {
+                "#/active" => Filter::Active,
+                "#/completed" => Filter::Completed,
+                _ => Filter::All,
             })
             .to_mutable();
 
         clone!(self.app);
+
         let input_elem = input()
             .class("new-todo")
             .placeholder("What needs to be done?")
