@@ -31,6 +31,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
