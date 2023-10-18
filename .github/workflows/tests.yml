@@ -51,11 +51,12 @@ jobs:
       with:
         crate: trunk
         version: 0.17.2
-    - name: Playwright TodoMVC Install Dependencies
-      working-directory: examples/todomvc/playwright
-      run: npx playwright install-deps
     - name: Playwright TodoMVC
-      run: cargo xtask todomvc-playwright
+      working-directory: examples/todomvc/playwright
+      run: |
+        npm ci
+        npx playwright install --with-deps
+        npx playwright test
     - name: Trunk Build
       # Some example rely on `rsync`
       if: matrix.os != 'windows-latest'
