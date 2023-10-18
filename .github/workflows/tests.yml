@@ -51,25 +51,16 @@ jobs:
       with:
         crate: trunk
         version: 0.17.2
+    # Make sure we build first so playwright and cypress don't time out
+    - name: Build todomvc
+      working-directory: examples/todomvc
+      run: trunk build
     - name: Playwright TodoMVC
       working-directory: examples/todomvc/playwright
       run: |
         npm ci
         npx playwright install --with-deps
         npx playwright test
-    - name: Trunk Build
-      # Some example rely on `rsync`
-      if: matrix.os != 'windows-latest'
-      run: cargo xtask trunk-build
-    - name: Browser Tests
-      # Browser tests intermittantly hang with windows github actions.
-      if: matrix.os != 'windows-latest'
-      working-directory: packages/silkenweb
-      run: cargo xtask wasm-pack-test
-    # Make sure we build first so cypress doesn't time out
-    - name: Build todomvc
-      working-directory: examples/todomvc
-      run: trunk build
     - name: Cypress
       if: matrix.os != 'macos-latest'
       uses: cypress-io/github-action@v5
@@ -89,6 +80,15 @@ jobs:
       with:
         name: todomvc-cypress-videos
         path: examples/todomvc/e2e/cypress/videos
+    - name: Trunk Build
+      # Some example rely on `rsync`
+      if: matrix.os != 'windows-latest'
+      run: cargo xtask trunk-build
+    - name: Browser Tests
+      # Browser tests intermittantly hang with windows github actions.
+      if: matrix.os != 'windows-latest'
+      working-directory: packages/silkenweb
+      run: cargo xtask wasm-pack-test
 
   nightly:
     strategy:
