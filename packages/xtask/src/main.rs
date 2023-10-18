@@ -36,6 +36,7 @@ enum Commands {
         #[clap(long)]
         gui: bool,
     },
+    TodomvcPlaywright,
     BuildWebsite,
     GithubActions {
         #[clap(long)]
@@ -91,6 +92,9 @@ fn main() {
             }
             Commands::TodomvcCypress { gui } => {
                 cypress("install", if gui { "open" } else { "run" }, None)?;
+            }
+            Commands::TodomvcPlaywright => {
+                playwright()?;
             }
             Commands::BuildWebsite => build_website()?,
             Commands::GithubActions { full } => {
@@ -163,6 +167,7 @@ fn build_website() -> WorkflowResult<()> {
 
 fn ci_browser() -> WorkflowResult<()> {
     cypress("ci", "run", None)?;
+    playwright()?;
     trunk_build()
 }
 
@@ -207,6 +212,16 @@ fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> W
     } else {
         cmd!(sh, "npx cypress {cypress_cmd}").run()?;
     }
+
+    Ok(())
+}
+
+fn playwright() -> WorkflowResult<()> {
+    let sh = Shell::new()?;
+    let _dir = sh.push_dir("examples/todomvc/playwright");
+    cmd!(sh, "npm ci").run()?;
+    cmd!(sh, "npx playwright install").run()?;
+    cmd!(sh, "npx playwright test").run()?;
 
     Ok(())
 }

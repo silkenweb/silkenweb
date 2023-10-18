@@ -47,6 +47,8 @@ jobs:
       with:
         crate: trunk
         version: 0.17.2
+    - name: Playwright TodoMVC
+      run: cargo xtask todomvc-playwright
     - name: Trunk Build
       # Some example rely on `rsync`
       if: matrix.os != 'windows-latest'
