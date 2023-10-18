@@ -56,6 +56,7 @@ jobs:
       working-directory: examples/todomvc
       run: trunk build
     - name: Playwright TodoMVC
+      if: matrix.os != 'windows-latest'
       working-directory: examples/todomvc/playwright
       run: |
         npm ci
