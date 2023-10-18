@@ -51,6 +51,9 @@ jobs:
       with:
         crate: trunk
         version: 0.17.2
+    - name: Playwright TodoMVC Install Dependencies
+      working-directory: examples/todomvc/playwright
+      run: npx playwright install-deps
     - name: Playwright TodoMVC
       run: cargo xtask todomvc-playwright
     - name: Trunk Build
