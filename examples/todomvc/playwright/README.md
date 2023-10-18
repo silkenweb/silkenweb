@@ -5,5 +5,5 @@ To run playwright tests, from this directory, run:
 ```bash
 npm install
 npx playwright install
-npm test
+npx playwright test
 ```
