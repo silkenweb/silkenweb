@@ -15,7 +15,7 @@ use silkenweb::{
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
     node::{element::Element, Node},
-    prelude::ParentElement,
+    prelude::{AriaElement, ParentElement},
     router::url_path,
     task::TaskSignal,
     value::Sig,
@@ -96,7 +96,7 @@ impl TodoAppView {
                     })
                     .set_checked(self.all_completed()),
             )
-            .child(label().r#for("toggle-all"))
+            .child(label().r#for("toggle-all").text("Mark all as complete"))
             .child(
                 ul().class("todo-list").children_signal(
                     self.visible_items_signal(item_filter)
@@ -224,9 +224,10 @@ impl TodoItemView {
 
         input()
             .class("edit")
+            .aria_label("Edit")
             .r#type("text")
             .value(Sig(todo.text()))
-            .on_focusout({
+            .on_blur({
                 clone!(todo, app);
                 move |_, input| todo.save_edits(&app, input.value())
             })

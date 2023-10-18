@@ -30,20 +30,21 @@ impl TodoApp {
     }
 
     pub fn load() -> Rc<Self> {
-        if let Some(app_str) = Storage::local()
-            .ok()
-            .and_then(|storage| storage.get(STORAGE_KEY))
-        {
-            Rc::new(serde_json::from_str(&app_str).unwrap_throw())
-        } else {
-            Self::with_todos([])
-        }
+        let items = Self::load_items().unwrap_or_default();
+        let todo_id = Cell::new(items.lock_ref().len() as u128);
+        Rc::new(Self { todo_id, items })
+    }
+
+    fn load_items() -> Option<MutableVec<Rc<TodoItem>>> {
+        serde_json::from_str(&Storage::local().ok()?.get(STORAGE_KEY)?).ok()
     }
 
     pub fn save(&self) {
+        // TODO: Log errors rather than throwing
         if let Ok(storage) = Storage::local() {
+            let items = serde_json::to_string(&self.items).unwrap_throw();
             storage
-                .insert(STORAGE_KEY, &serde_json::to_string(self).unwrap_throw())
+                .insert(STORAGE_KEY, &items)
                 .expect_throw("Out of space");
         }
     }
@@ -89,7 +90,7 @@ impl TodoApp {
 #[derive(Serialize, Deserialize)]
 pub struct TodoItem {
     id: u128,
-    text: Mutable<String>,
+    title: Mutable<String>,
     completed: Mutable<bool>,
     #[serde(skip)]
     editing: Mutable<bool>,
@@ -99,7 +100,7 @@ impl TodoItem {
     pub fn new(id: u128, text: String) -> Rc<Self> {
         Rc::new(Self {
             id,
-            text: Mutable::new(text),
+            title: Mutable::new(text),
             completed: Mutable::new(false),
             editing: Mutable::new(false),
         })
@@ -119,7 +120,7 @@ impl TodoItem {
         if text.is_empty() {
             self.remove(app);
         } else {
-            self.text.set(text.to_string());
+            self.title.set(text.to_string());
             self.editing.set(false);
         }
 
@@ -128,7 +129,7 @@ impl TodoItem {
 
     pub fn revert_edits(&self) -> String {
         self.editing.set(false);
-        self.text.get_cloned()
+        self.title.get_cloned()
     }
 
     pub fn remove(&self, app: &TodoApp) {
@@ -136,7 +137,7 @@ impl TodoItem {
     }
 
     pub fn text(&self) -> impl Signal<Item = String> {
-        self.text.signal_cloned()
+        self.title.signal_cloned()
     }
 
     pub fn completed(&self) -> impl Signal<Item = bool> {
