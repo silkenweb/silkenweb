@@ -83,7 +83,10 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: echo $PATH
+    - run: cargo install wasm-pack --locked --version 0.12.1
+    - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
@@ -182,7 +185,10 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: echo $PATH
+    - run: cargo install wasm-pack --locked --version 0.12.1
+    - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
@@ -281,16 +287,15 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: echo $PATH
-    - run: cargo xtask todomvc-cypress
-    - working-directory: examples/todomvc/playwright
-      run: npm ci
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install --with-deps
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright test
+    - run: cargo install wasm-pack --locked --version 0.12.1
+    - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
+    - uses: cypress-io/github-action@v5
+      with:
+        working-directory: examples/todomvc/e2e
+        start: npm start
+        wait-on: 'http://localhost:8080'
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request

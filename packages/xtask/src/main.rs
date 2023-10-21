@@ -1,5 +1,4 @@
 use std::{
-    env,
     ffi::OsStr,
     fs::{self},
     path::PathBuf,
@@ -70,9 +69,8 @@ fn tests(platform: Platform) -> Tasks {
 fn web_tests(platform: Platform) -> Tasks {
     Tasks::new("web-tests", platform, stable_rust().wasm())
         .step(action("actions/setup-node@v3").with("node-version", "18"))
-    // TODO
-    // .step(install("wasm-pack", "0.12.1"))
-    // .step(trunk())
+        .step(install("wasm-pack", "0.12.1"))
+        .step(trunk())
 }
 
 fn trunk() -> Step {
@@ -185,12 +183,20 @@ fn install_gtk() -> actions::Run {
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     let mut tasks =
-        web_tests(platform)
-        //TODO: .run(actions::cmd("trunk", ["build"]).in_directory(TODOMVC_DIR))
-        ;
-    tasks.add_cmd("echo", ["$PATH"]);
-    tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
-    tasks = playwright(tasks);
+        web_tests(platform).run(actions::cmd("trunk", ["build"]).in_directory(TODOMVC_DIR));
+
+    if platform == Platform::WindowsLatest {
+        tasks = tasks.step(
+            action("cypress-io/github-action@v5")
+                .with("working-directory", "examples/todomvc/e2e")
+                .with("start", "npm start")
+                .with("wait-on", "'http://localhost:8080'"),
+        );
+    } else {
+        tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
+        tasks = playwright(tasks);
+    }
+
     trunk_build(tasks)
 }
 
@@ -226,7 +232,6 @@ fn test_features(mut tasks: Tasks) -> Tasks {
 }
 
 fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
-    println!("PATH: {}", env::var("PATH")?);
     let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
         .dir(TODOMVC_DIR)
         .start()?;
