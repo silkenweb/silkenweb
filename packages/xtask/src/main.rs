@@ -1,254 +1,244 @@
 use std::{
-    env,
     ffi::OsStr,
-    fmt::Write,
-    path::{Path, PathBuf},
+    fs::{self},
+    path::PathBuf,
 };
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use duct::cmd;
 use itertools::Itertools;
 use scopeguard::defer;
-use xshell::{cmd, Shell};
 use xtask_base::{
-    build_readme, ci_nightly, clippy, generate_open_source_files, run, CommonCmds, WorkflowResult,
+    build_readme,
+    ci::{Tasks, CI},
+    generate_open_source_files,
+    github::actions::{self, action, install, rust_toolchain, Platform, Rust, Step},
+    in_workspace, CommonCmds, WorkflowResult,
 };
+
+// TODO: Remove xshell dependencies
 
 #[derive(Parser)]
 enum Commands {
-    /// Generate all derived files. Will overwrite existing content.
-    Codegen {
-        /// If set, just check the file contents are up to date.
-        #[clap(long)]
-        check: bool,
-    },
-    /// Run CI checks
-    Ci {
-        #[clap(subcommand)]
-        command: Option<CiCommand>,
-    },
     TestFeatures,
     WasmPackTest,
     TrunkBuild,
-    /// Run TodoMVC with `trunk`
-    TodomvcRun,
     /// Run the TodoMVC Cypress tests
     TodomvcCypress {
         #[clap(long)]
         gui: bool,
     },
     TodomvcPlaywright,
-    BuildWebsite,
-    GithubActions {
-        #[clap(long)]
-        full: bool,
-    },
-    FmtAll,
     #[clap(flatten)]
     Common(CommonCmds),
 }
 
-#[derive(Subcommand, PartialEq, Eq)]
-enum CiCommand {
-    Stable {
-        #[clap(long)]
-        fast: bool,
-        toolchain: Option<String>,
-    },
-    Nightly {
-        toolchain: Option<String>,
-    },
-    Browser,
-}
-
 fn main() {
-    run(|workspace| {
-        let sh = Shell::new()?;
+    in_workspace(|workspace| {
+        let tests = tests(Platform::current());
+        let web_tests = || web_tests(Platform::current());
+        type Cmds = Commands;
 
-        match Commands::parse() {
-            Commands::Codegen { check } => {
-                build_readme(".", check)?;
-                generate_open_source_files(2021, check)?;
+        match Cmds::parse() {
+            Cmds::TestFeatures => test_features(tests).execute()?,
+            Cmds::WasmPackTest => wasm_pack_test(web_tests()).execute()?,
+            Cmds::TrunkBuild => trunk_build(web_tests())?.execute()?,
+            Cmds::TodomvcCypress { gui } => {
+                cypress(if gui { "open" } else { "run" }, None)?;
             }
-            Commands::Ci { command } => {
-                if let Some(command) = command {
-                    match command {
-                        CiCommand::Stable { fast, toolchain } => ci_stable(fast, toolchain)?,
-                        CiCommand::Nightly { toolchain } => ci_nightly(toolchain.as_deref())?,
-                        CiCommand::Browser => ci_browser()?,
-                    }
-                } else {
-                    ci_stable(false, None)?;
-                    ci_nightly(Some("nightly"))?;
-                    ci_browser()?;
-                    wasm_pack_test()?;
-                }
-            }
-            Commands::TestFeatures => test_features()?,
-            Commands::WasmPackTest => wasm_pack_test()?,
-            Commands::TrunkBuild => trunk_build()?,
-            Commands::TodomvcRun => {
-                let _dir = sh.push_dir("examples/todomvc");
-                cmd!(sh, "trunk serve --open").run()?;
-            }
-            Commands::TodomvcCypress { gui } => {
-                cypress("install", if gui { "open" } else { "run" }, None)?;
-            }
-            Commands::TodomvcPlaywright => {
-                playwright()?;
-            }
-            Commands::BuildWebsite => build_website()?,
-            Commands::GithubActions { full } => {
-                let reuse = (!full).then_some("--reuse");
-
-                cmd!(sh, "docker build . -t silkenweb-github-actions").run()?;
-                cmd!(sh,
-                    "act -P ubuntu-latest=silkenweb-github-actions:latest --use-gitignore {reuse...}"
-                )
-                .run()?;
-            }
-            Commands::FmtAll => foreach_workspace(|| {
-                let sh = Shell::new()?;
-                cmd!(sh, "cargo +nightly fmt --all").run()?;
-                Ok(())
-            })?,
-            Commands::Common(cmds) => cmds.run::<Commands>(workspace)?,
+            Cmds::TodomvcPlaywright => playwright(web_tests()).execute()?,
+            Cmds::Common(cmds) => cmds.sub_command::<Cmds>(
+                workspace,
+                WORKSPACE_SUB_DIRS.iter().copied(),
+                ci()?,
+                codegen,
+            )?,
         }
 
         Ok(())
     });
 }
 
-fn foreach_workspace(f: impl Fn() -> WorkflowResult<()>) -> WorkflowResult<()> {
-    for dir in [".", "examples/ssr-full"] {
-        let previous_dir = env::current_dir()?;
-        env::set_current_dir(dir)?;
-        f()?;
-        env::set_current_dir(previous_dir)?;
-    }
+fn stable_rust() -> Rust {
+    rust_toolchain("1.71").minimal().default()
+}
+fn tests(platform: Platform) -> Tasks {
+    Tasks::new("tests", platform, stable_rust().clippy())
+}
+
+fn web_tests(platform: Platform) -> Tasks {
+    Tasks::new("web-tests", platform, stable_rust().wasm())
+        .step(action("actions/setup-node@v3").with("node-version", "18"))
+        .step(install("wasm-pack", "0.12.1"))
+        .step(trunk())
+}
+
+fn trunk() -> Step {
+    install("trunk", "0.17.2")
+}
+
+fn codegen(check: bool) -> WorkflowResult<()> {
+    build_readme(".", check)?;
+    generate_open_source_files(2021, check)?;
+    // TODO: Workflow triggers: Only on branch
+    // CI::named("website").job(deploy_website()?).write(check)?;
 
     Ok(())
 }
 
-fn build_website() -> WorkflowResult<()> {
-    let sh = Shell::new()?;
+fn deploy_website() -> WorkflowResult<Tasks> {
+    let tasks = Tasks::new(
+        "build-website",
+        Platform::UbuntuLatest,
+        stable_rust().wasm(),
+    )
+    .step(trunk());
+
     let dest_dir = "target/website";
-    sh.remove_path(dest_dir)?;
-    let examples_dest_dir = format!("{dest_dir}/examples");
-    sh.create_dir(&examples_dest_dir)?;
-    let mut redirects = String::new();
+    let redirects_file = format!("{dest_dir}/_redirects");
+    let mut tasks = tasks
+        .cmd("mkdir", ["-p", &dest_dir])
+        .cmd("touch", [&redirects_file]);
 
-    for example in browser_examples()? {
-        let examples_dir: PathBuf = [Path::new("examples"), &example].iter().collect();
+    for example_dir in browser_example_dirs()? {
+        let example_dir = example_dir.to_str().expect("invalid path name");
 
-        {
-            let _dir = sh.push_dir(&examples_dir);
-            cmd!(sh, "trunk build --release --public-url examples/{example}").run()?;
-        }
-
-        cmd!(
-            sh,
-            "cp -R {examples_dir}/dist/ {examples_dest_dir}/{example}"
-        )
-        .run()?;
-
-        {
-            let example = example.display();
-            writeln!(
-                &mut redirects,
-                "/examples/{example}/* /examples/{example}/index.html 200"
-            )?;
-        }
+        tasks = tasks
+            .run(
+                actions::cmd(
+                    "trunk",
+                    ["build", "--release", "--public-url", &example_dir],
+                )
+                .in_directory(example_dir),
+            )
+            .run(
+                actions::cmd(
+                    "cp",
+                    [
+                        "-R",
+                        &format!("{example_dir}/dist/"),
+                        &format!("{dest_dir}/{example_dir}"),
+                    ],
+                )
+                .in_directory(example_dir),
+            )
+            .step(
+                actions::cmd(
+                    "echo",
+                    [
+                        &format!("/{example_dir}/* /{example_dir}/index.html 200"),
+                        ">>",
+                        &redirects_file,
+                    ],
+                )
+                .in_directory(example_dir),
+            );
     }
 
-    sh.write_file(format!("{dest_dir}/_redirects"), redirects)?;
+    let tasks = tasks.step(
+        action("nwtgck/actions-netlify@v2.0")
+            .with("publish-dir", "'target/website'")
+            .with("production-deploy", "true")
+            .env("NETLIFY_AUTH_TOKEN", "${{ secrets.NETLIFY_AUTH_TOKEN }}")
+            .env("NETLIFY_SITE_ID", "${{ secrets.NETLIFY_SITE_ID }}"),
+    );
 
-    Ok(())
+    Ok(tasks)
 }
 
-fn ci_browser() -> WorkflowResult<()> {
-    cypress("ci", "run", None)?;
-    playwright()?;
-    trunk_build()
+const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
+
+fn ci() -> WorkflowResult<CI> {
+    let mut ci = CI::new().standard_lints("nightly-2023-10-14", "0.1.43", WORKSPACE_SUB_DIRS);
+
+    for platform in Platform::latest() {
+        ci.add_job(ci_native(platform));
+        ci.add_job(ci_browser(platform)?);
+    }
+
+    Ok(ci)
 }
 
-fn ci_stable(fast: bool, toolchain: Option<String>) -> WorkflowResult<()> {
-    build_readme(".", true)?;
-    generate_open_source_files(2021, true)?;
-    foreach_workspace(|| xtask_base::ci_stable(fast, toolchain.as_deref(), &[]))?;
-    test_features()
+fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
+    let mut tasks = web_tests(platform).cmd("cargo", ["xtask", "cypress"]);
+    tasks = playwright(tasks);
+    trunk_build(tasks)
 }
 
-fn test_features() -> WorkflowResult<()> {
-    let sh = Shell::new()?;
+fn ci_native(platform: Platform) -> Tasks {
+    let tasks = tests(platform).tests(WORKSPACE_SUB_DIRS);
+    test_features(tasks)
+}
 
+fn test_features(mut tasks: Tasks) -> Tasks {
     for features in ["declarative-shadow-dom"].into_iter().powerset() {
         if !features.is_empty() {
-            clippy(None, &features)?;
-
-            let features = features.join(",");
-
-            cmd!(sh, "cargo test --package silkenweb --features {features}").run()?;
+            // TODO: We need something like the cmd macro in xshell
+            let mut args = vec!["clippy", "--features"];
+            args.extend(features.clone());
+            args.extend(["--all-targets", "--", "-D", "warnings", "-D", "clippy::all"]);
+            tasks.add_cmd("cargo", args);
+            tasks.add_cmd(
+                "cargo",
+                ["test", "--package", "silkenweb", "--features"]
+                    .into_iter()
+                    .chain(features),
+            );
         }
     }
 
-    Ok(())
+    tasks
 }
 
-fn cypress(npm_install_cmd: &str, cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
-    let sh = Shell::new()?;
-    let _dir = sh.push_dir("examples/todomvc");
-    cmd!(sh, "trunk build").run()?;
-    let dir = env::current_dir()?;
-    env::set_current_dir(sh.current_dir())?;
-    let trunk = duct::cmd("trunk", ["serve", "--no-autoreload", "--ignore=."]).start()?;
-    env::set_current_dir(dir)?;
+fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
+    let dir = "examples/todomvc";
+    cmd("trunk", ["build"]).dir(dir).run()?;
+    let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
+        .dir(dir)
+        .start()?;
     defer! { let _ = trunk.kill(); };
 
-    let _dir = sh.push_dir("e2e");
-    cmd!(sh, "npm {npm_install_cmd}").run()?;
+    let dir = format!("{dir}/e2e");
+    cmd("npm", ["ci"]).dir(&dir).run()?;
 
     if let Some(browser) = browser {
-        cmd!(sh, "npx cypress {cypress_cmd} --browser {browser}").run()?;
+        cmd("npx", ["cypress", cypress_cmd, "--browser", browser])
+            .dir(&dir)
+            .run()?;
     } else {
-        cmd!(sh, "npx cypress {cypress_cmd}").run()?;
+        cmd("npx", ["cypress", cypress_cmd]).dir(&dir).run()?;
     }
 
     Ok(())
 }
 
-fn playwright() -> WorkflowResult<()> {
-    let sh = Shell::new()?;
-    let _dir = sh.push_dir("examples/todomvc/playwright");
-    cmd!(sh, "npm ci").run()?;
-    cmd!(sh, "npx playwright install").run()?;
-    cmd!(sh, "npx playwright test").run()?;
-
-    Ok(())
+fn playwright(tasks: Tasks) -> Tasks {
+    let dir = "examples/todomvc/playwright";
+    tasks
+        .run(actions::cmd("npm", ["ci"]).in_directory(dir))
+        .run(actions::cmd("npx", ["playwright", "install"]).in_directory(dir))
+        .run(actions::cmd("npx", ["playwright", "test"]).in_directory(dir))
 }
 
-fn wasm_pack_test() -> WorkflowResult<()> {
-    let sh = Shell::new()?;
-    let _dir = sh.push_dir("packages/silkenweb");
-    cmd!(sh, "wasm-pack test --headless --firefox").run()?;
-    Ok(())
+fn wasm_pack_test(tasks: Tasks) -> Tasks {
+    let dir = "packages/silkenweb";
+    tasks.run(actions::cmd("wasm-pack", ["test", "--headless", "--firefox"]).in_directory(dir))
 }
 
-fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
-    let sh = Shell::new()?;
-    let _dir = sh.push_dir("examples");
-    let examples = sh.read_dir(".")?;
-    let non_browser = ["htmx-axum"];
-    let non_browser: Vec<_> = non_browser.into_iter().map(OsStr::new).collect();
+fn browser_example_dirs() -> WorkflowResult<Vec<PathBuf>> {
+    let non_browser = ["htmx-axum"].map(OsStr::new).map(Some);
     let mut browser_examples = Vec::new();
 
-    for example in examples {
-        if let Some(example) = example.file_name() {
-            if !non_browser.contains(&example) {
-                for file in sh.read_dir(example)? {
-                    if file.extension() == Some(OsStr::new("html")) {
-                        browser_examples.push(example.into());
-                        break;
-                    }
+    for example in fs::read_dir("examples")? {
+        let example = example?.path();
+
+        if !non_browser.contains(&example.file_name()) {
+            for file in fs::read_dir(&example)? {
+                let file: PathBuf = file?.file_name().into();
+
+                if file.extension() == Some(OsStr::new("html")) {
+                    browser_examples.push(example);
+                    break;
                 }
             }
         }
@@ -257,14 +247,13 @@ fn browser_examples() -> WorkflowResult<Vec<PathBuf>> {
     Ok(browser_examples)
 }
 
-fn trunk_build() -> WorkflowResult<()> {
-    let sh = Shell::new()?;
-    let _dir = sh.push_dir("examples");
-
-    for example in browser_examples()? {
-        let _dir = sh.push_dir(example);
-        cmd!(sh, "trunk build").run()?;
+fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
+    for example_dir in browser_example_dirs()? {
+        tasks.add_run(
+            actions::cmd("trunk", ["build"])
+                .in_directory(example_dir.to_str().expect("Invalid path name")),
+        );
     }
 
-    Ok(())
+    Ok(tasks)
 }
