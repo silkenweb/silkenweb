@@ -12,7 +12,7 @@ use xtask_base::{
     build_readme,
     ci::{Tasks, CI},
     generate_open_source_files,
-    github::actions::{self, action, install, rust_toolchain, Platform, Rust, Step, push},
+    github::actions::{self, action, install, push, rust_toolchain, Platform, Rust, Step},
     in_workspace, CommonCmds, WorkflowResult,
 };
 
@@ -107,11 +107,8 @@ fn deploy_website() -> WorkflowResult<Tasks> {
 
         tasks = tasks
             .run(
-                actions::cmd(
-                    "trunk",
-                    ["build", "--release", "--public-url", example_dir],
-                )
-                .in_directory(example_dir),
+                actions::cmd("trunk", ["build", "--release", "--public-url", example_dir])
+                    .in_directory(example_dir),
             )
             .run(
                 actions::cmd(
