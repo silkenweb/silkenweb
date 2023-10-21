@@ -86,7 +86,7 @@ fn codegen(check: bool) -> WorkflowResult<()> {
     Ok(())
 }
 
-fn deploy_website() -> WorkflowResult<Tasks> {
+fn _deploy_website() -> WorkflowResult<Tasks> {
     let tasks = Tasks::new(
         "build-website",
         Platform::UbuntuLatest,
