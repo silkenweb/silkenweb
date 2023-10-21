@@ -34,9 +34,13 @@ enum Commands {
 }
 
 fn main() {
+    dbg!();
     in_workspace(|workspace| {
+        dbg!();
         let web_tests = || web_tests(Platform::current());
+        dbg!();
         type Cmds = Commands;
+        dbg!();
 
         match Cmds::parse() {
             Cmds::TestFeatures => test_features(tests(Platform::current())).execute()?,
