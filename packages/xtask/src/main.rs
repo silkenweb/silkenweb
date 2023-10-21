@@ -35,12 +35,11 @@ enum Commands {
 
 fn main() {
     in_workspace(|workspace| {
-        let tests = tests(Platform::current());
         let web_tests = || web_tests(Platform::current());
         type Cmds = Commands;
 
         match Cmds::parse() {
-            Cmds::TestFeatures => test_features(tests).execute()?,
+            Cmds::TestFeatures => test_features(tests(Platform::current())).execute()?,
             Cmds::WasmPackTest => wasm_pack_test(web_tests()).execute()?,
             Cmds::TrunkBuild => trunk_build(web_tests())?.execute()?,
             Cmds::TodomvcCypress { gui } => {
