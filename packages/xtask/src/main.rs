@@ -59,7 +59,7 @@ fn main() {
 }
 
 fn stable_rust() -> Rust {
-    rust_toolchain("1.71").minimal().default()
+    rust_toolchain("1.73").minimal().default()
 }
 fn tests(platform: Platform) -> Tasks {
     Tasks::new("tests", platform, stable_rust().clippy())
