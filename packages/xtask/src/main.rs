@@ -170,7 +170,7 @@ fn ci() -> WorkflowResult<CI> {
 }
 
 fn pre_tauri_build() -> actions::Run {
-    actions::cmd("mkdir", ["-p", "examples/tauri/frontend"])
+    actions::cmd("mkdir", ["-p", "examples/tauri/frontend/dist"])
 }
 
 fn install_gtk() -> actions::Run {
