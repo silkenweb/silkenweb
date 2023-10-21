@@ -148,7 +148,23 @@ fn deploy_website() -> WorkflowResult<Tasks> {
 const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
 
 fn ci() -> WorkflowResult<CI> {
-    let mut ci = CI::new().standard_lints("nightly-2023-10-14", "0.1.43", WORKSPACE_SUB_DIRS);
+    let mut ci = CI::new();
+
+    ci = ci.job(
+        Tasks::new(
+            "lints",
+            Platform::UbuntuLatest,
+            rust_toolchain("nightly-2023-10-14")
+                .minimal()
+                .default()
+                .rustfmt(),
+        )
+        .script([
+            vec!["sudo", "apt-get", "update"],
+            vec!["sudo", "apt-get", "install", "-y", "webkit2gtk-4.0"],
+        ])
+        .lints("0.1.43", WORKSPACE_SUB_DIRS),
+    );
 
     for platform in Platform::latest() {
         ci.add_job(ci_native(platform));

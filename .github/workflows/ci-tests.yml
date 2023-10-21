@@ -16,6 +16,9 @@ jobs:
         default: true
         components: rustfmt
     - uses: Swatinem/rust-cache@v2
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y webkit2gtk-4.0
     - run: cargo fmt --all -- --check
     - working-directory: examples/ssr-full
       run: cargo fmt --all -- --check
