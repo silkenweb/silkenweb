@@ -68,8 +68,6 @@ fn tests(platform: Platform) -> Tasks {
 fn web_tests(platform: Platform) -> Tasks {
     Tasks::new("web-tests", platform, stable_rust().wasm())
         .step(action("actions/setup-node@v3").with("node-version", "18"))
-        .cmd("npm", ["--version"])
-        .cmd("npx", ["--version"])
         .step(install("wasm-pack", "0.12.1"))
         .step(trunk())
 }
