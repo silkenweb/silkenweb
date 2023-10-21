@@ -83,10 +83,6 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
-    - working-directory: examples/todomvc
-      run: trunk build
     - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
@@ -186,10 +182,6 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
-    - working-directory: examples/todomvc
-      run: trunk build
     - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
@@ -289,10 +281,6 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
-    - working-directory: examples/todomvc
-      run: trunk build
     - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
