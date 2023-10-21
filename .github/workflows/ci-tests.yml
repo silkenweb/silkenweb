@@ -19,7 +19,7 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
-    - run: mkdir -p examples/tauri/frontend
+    - run: mkdir -p examples/tauri/frontend/dist
     - run: cargo fmt --all -- --check
     - working-directory: examples/ssr-full
       run: cargo fmt --all -- --check
@@ -45,7 +45,7 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
-    - run: mkdir -p examples/tauri/frontend
+    - run: mkdir -p examples/tauri/frontend/dist
     - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
@@ -145,7 +145,7 @@ jobs:
         default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
-    - run: mkdir -p examples/tauri/frontend
+    - run: mkdir -p examples/tauri/frontend/dist
     - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
@@ -245,7 +245,7 @@ jobs:
         default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
-    - run: mkdir -p examples/tauri/frontend
+    - run: mkdir -p examples/tauri/frontend/dist
     - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
