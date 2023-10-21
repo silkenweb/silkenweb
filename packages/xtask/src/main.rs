@@ -12,7 +12,7 @@ use xtask_base::{
     build_readme,
     ci::{Tasks, CI},
     generate_open_source_files,
-    github::actions::{self, action, install, push, rust_toolchain, Platform, Rust, Step},
+    github::actions::{self, action, install, push, rust_toolchain, script, Platform, Rust, Step},
     in_workspace, CommonCmds, WorkflowResult,
 };
 
@@ -159,10 +159,10 @@ fn ci() -> WorkflowResult<CI> {
                 .default()
                 .rustfmt(),
         )
-        .script([
+        .step(script([
             vec!["sudo", "apt-get", "update"],
             vec!["sudo", "apt-get", "install", "-y", "webkit2gtk-4.0"],
-        ])
+        ]))
         .lints("0.1.43", WORKSPACE_SUB_DIRS),
     );
 
