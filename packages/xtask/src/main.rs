@@ -12,7 +12,7 @@ use xtask_base::{
     build_readme,
     ci::{Tasks, CI},
     generate_open_source_files,
-    github::actions::{self, action, install, rust_toolchain, Platform, Rust, Step},
+    github::actions::{self, action, install, rust_toolchain, Platform, Rust, Step, push},
     in_workspace, CommonCmds, WorkflowResult,
 };
 
@@ -80,13 +80,15 @@ fn trunk() -> Step {
 fn codegen(check: bool) -> WorkflowResult<()> {
     build_readme(".", check)?;
     generate_open_source_files(2021, check)?;
-    // TODO: Workflow triggers: Only on branch
-    // CI::named("website").job(deploy_website()?).write(check)?;
+    CI::named("website")
+        .on(push().branch("main"))
+        .job(deploy_website()?)
+        .write(check)?;
 
     Ok(())
 }
 
-fn _deploy_website() -> WorkflowResult<Tasks> {
+fn deploy_website() -> WorkflowResult<Tasks> {
     let tasks = Tasks::new(
         "build-website",
         Platform::UbuntuLatest,
@@ -97,7 +99,7 @@ fn _deploy_website() -> WorkflowResult<Tasks> {
     let dest_dir = "target/website";
     let redirects_file = format!("{dest_dir}/_redirects");
     let mut tasks = tasks
-        .cmd("mkdir", ["-p", &dest_dir])
+        .cmd("mkdir", ["-p", dest_dir])
         .cmd("touch", [&redirects_file]);
 
     for example_dir in browser_example_dirs()? {
@@ -107,7 +109,7 @@ fn _deploy_website() -> WorkflowResult<Tasks> {
             .run(
                 actions::cmd(
                     "trunk",
-                    ["build", "--release", "--public-url", &example_dir],
+                    ["build", "--release", "--public-url", example_dir],
                 )
                 .in_directory(example_dir),
             )
