@@ -12,9 +12,7 @@ use xtask_base::{
     build_readme,
     ci::{Tasks, CI},
     generate_open_source_files,
-    github::actions::{
-        self, action, install, push, rust_cache, rust_toolchain, script, Platform, Rust, Step,
-    },
+    github::actions::{self, action, install, push, rust_toolchain, script, Platform, Rust, Step},
     in_workspace, CommonCmds, WorkflowResult,
 };
 
@@ -68,11 +66,8 @@ fn tests(platform: Platform) -> Tasks {
 }
 
 fn web_tests(platform: Platform) -> Tasks {
-    Tasks::empty("web-tests", platform, false)
-        .step(action("actions/checkout@v3"))
+    Tasks::new("web-tests", platform, stable_rust().wasm())
         .step(action("actions/setup-node@v3").with("node-version", "18"))
-        .step(stable_rust().wasm())
-        .step(rust_cache())
         .step(install("wasm-pack", "0.12.1"))
         .step(trunk())
 }
