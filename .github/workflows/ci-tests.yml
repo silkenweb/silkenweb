@@ -70,7 +70,7 @@ jobs:
         toolchain: 1.71
         profile: minimal
         default: true
-        targets: wasm32-unknown-unknown
+        target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:
@@ -167,7 +167,7 @@ jobs:
         toolchain: 1.71
         profile: minimal
         default: true
-        targets: wasm32-unknown-unknown
+        target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:
@@ -264,7 +264,7 @@ jobs:
         toolchain: 1.71
         profile: minimal
         default: true
-        targets: wasm32-unknown-unknown
+        target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:

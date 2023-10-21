@@ -15,7 +15,7 @@ jobs:
         toolchain: 1.71
         profile: minimal
         default: true
-        targets: wasm32-unknown-unknown
+        target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - run: cargo install trunk --locked --version 0.17.2
     - run: mkdir -p target/website
