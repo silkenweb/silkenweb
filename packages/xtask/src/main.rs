@@ -34,20 +34,15 @@ enum Commands {
 }
 
 fn main() {
-    dbg!();
     in_workspace(|workspace| {
-        dbg!();
         let web_tests = || web_tests(Platform::current());
-        dbg!();
         type Cmds = Commands;
-        dbg!();
 
         match Cmds::parse() {
             Cmds::TestFeatures => test_features(tests(Platform::current())).execute()?,
             Cmds::WasmPackTest => wasm_pack_test(web_tests()).execute()?,
             Cmds::TrunkBuild => trunk_build(web_tests())?.execute()?,
             Cmds::TodomvcCypress { gui } => {
-                dbg!();
                 cypress(if gui { "open" } else { "run" }, None)?;
             }
             Cmds::TodomvcPlaywright => playwright(web_tests()).execute()?,
@@ -225,45 +220,23 @@ fn test_features(mut tasks: Tasks) -> Tasks {
 }
 
 fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
-    dbg!();
-    cmd("npm", ["--version"]).run()?;
-    dbg!();
-    cmd("npx", ["--version"]).run()?;
-    dbg!();
     let dir = "examples/todomvc";
     cmd("trunk", ["build"]).dir(dir).run()?;
-    dbg!();
     let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
         .dir(dir)
         .start()?;
-    dbg!();
     defer! { let _ = trunk.kill(); };
-    dbg!();
 
     let dir = format!("{dir}/e2e");
-    dbg!();
-    cmd("npm", ["--version"]).run()?;
-    dbg!();
-    cmd("npx", ["--version"]).run()?;
-    dbg!();
-
     cmd("npm", ["ci"]).dir(&dir).run()?;
-    dbg!();
 
-    cmd("npm", ["--version"]).run()?;
-    dbg!();
-    cmd("npx", ["--version"]).run()?;
-    dbg!();
     if let Some(browser) = browser {
-        dbg!();
         cmd("npx", ["cypress", cypress_cmd, "--browser", browser])
             .dir(&dir)
             .run()?;
     } else {
-        dbg!();
         cmd("npx", ["cypress", cypress_cmd]).dir(&dir).run()?;
     }
-    dbg!();
 
     Ok(())
 }
