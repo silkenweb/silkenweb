@@ -160,7 +160,7 @@ fn ci() -> WorkflowResult<CI> {
 }
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
-    let mut tasks = web_tests(platform).cmd("cargo", ["xtask", "cypress"]);
+    let mut tasks = web_tests(platform).cmd("cargo", ["xtask", "todomvc-cypress"]);
     tasks = playwright(tasks);
     trunk_build(tasks)
 }
@@ -243,6 +243,8 @@ fn browser_example_dirs() -> WorkflowResult<Vec<PathBuf>> {
             }
         }
     }
+
+    browser_examples.sort();
 
     Ok(browser_examples)
 }

@@ -75,52 +75,52 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask cypress
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - working-directory: examples/counter
-      run: trunk build
-    - working-directory: examples/hello-world
-      run: trunk build
-    - working-directory: examples/bootstrap
-      run: trunk build
-    - working-directory: examples/js-framework-benchmark
+    - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
       run: trunk build
-    - working-directory: examples/element-handle
-      run: trunk build
-    - working-directory: examples/reactive-styles
-      run: trunk build
-    - working-directory: examples/hackernews-clone
-      run: trunk build
-    - working-directory: examples/css-modules
-      run: trunk build
-    - working-directory: examples/counter-list
-      run: trunk build
-    - working-directory: examples/timers
+    - working-directory: examples/bootstrap
       run: trunk build
     - working-directory: examples/client-server
       run: trunk build
-    - working-directory: examples/web-components-wrapper
+    - working-directory: examples/component
       run: trunk build
-    - working-directory: examples/shadow-root
+    - working-directory: examples/counter
       run: trunk build
-    - working-directory: examples/animation
+    - working-directory: examples/counter-list
+      run: trunk build
+    - working-directory: examples/css-modules
+      run: trunk build
+    - working-directory: examples/drag-and-drop
+      run: trunk build
+    - working-directory: examples/element-handle
+      run: trunk build
+    - working-directory: examples/hackernews-clone
+      run: trunk build
+    - working-directory: examples/hello-world
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
-    - working-directory: examples/component
+    - working-directory: examples/js-framework-benchmark
       run: trunk build
-    - working-directory: examples/todomvc
+    - working-directory: examples/reactive-styles
       run: trunk build
     - working-directory: examples/router
       run: trunk build
-    - working-directory: examples/drag-and-drop
+    - working-directory: examples/shadow-root
+      run: trunk build
+    - working-directory: examples/timers
+      run: trunk build
+    - working-directory: examples/todomvc
+      run: trunk build
+    - working-directory: examples/web-components-wrapper
       run: trunk build
   tests-macos-latest:
     runs-on: macos-latest
@@ -172,52 +172,52 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask cypress
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - working-directory: examples/counter
-      run: trunk build
-    - working-directory: examples/hello-world
-      run: trunk build
-    - working-directory: examples/bootstrap
-      run: trunk build
-    - working-directory: examples/js-framework-benchmark
+    - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
       run: trunk build
-    - working-directory: examples/element-handle
-      run: trunk build
-    - working-directory: examples/reactive-styles
-      run: trunk build
-    - working-directory: examples/hackernews-clone
-      run: trunk build
-    - working-directory: examples/css-modules
-      run: trunk build
-    - working-directory: examples/counter-list
-      run: trunk build
-    - working-directory: examples/timers
+    - working-directory: examples/bootstrap
       run: trunk build
     - working-directory: examples/client-server
       run: trunk build
-    - working-directory: examples/web-components-wrapper
+    - working-directory: examples/component
       run: trunk build
-    - working-directory: examples/shadow-root
+    - working-directory: examples/counter
       run: trunk build
-    - working-directory: examples/animation
+    - working-directory: examples/counter-list
+      run: trunk build
+    - working-directory: examples/css-modules
+      run: trunk build
+    - working-directory: examples/drag-and-drop
+      run: trunk build
+    - working-directory: examples/element-handle
+      run: trunk build
+    - working-directory: examples/hackernews-clone
+      run: trunk build
+    - working-directory: examples/hello-world
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
-    - working-directory: examples/component
+    - working-directory: examples/js-framework-benchmark
       run: trunk build
-    - working-directory: examples/todomvc
+    - working-directory: examples/reactive-styles
       run: trunk build
     - working-directory: examples/router
       run: trunk build
-    - working-directory: examples/drag-and-drop
+    - working-directory: examples/shadow-root
+      run: trunk build
+    - working-directory: examples/timers
+      run: trunk build
+    - working-directory: examples/todomvc
+      run: trunk build
+    - working-directory: examples/web-components-wrapper
       run: trunk build
   tests-windows-latest:
     runs-on: windows-latest
@@ -269,50 +269,50 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask cypress
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - working-directory: examples/counter
-      run: trunk build
-    - working-directory: examples/hello-world
-      run: trunk build
-    - working-directory: examples/bootstrap
-      run: trunk build
-    - working-directory: examples/js-framework-benchmark
+    - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
       run: trunk build
-    - working-directory: examples/element-handle
-      run: trunk build
-    - working-directory: examples/reactive-styles
-      run: trunk build
-    - working-directory: examples/hackernews-clone
-      run: trunk build
-    - working-directory: examples/css-modules
-      run: trunk build
-    - working-directory: examples/counter-list
-      run: trunk build
-    - working-directory: examples/timers
+    - working-directory: examples/bootstrap
       run: trunk build
     - working-directory: examples/client-server
       run: trunk build
-    - working-directory: examples/web-components-wrapper
+    - working-directory: examples/component
       run: trunk build
-    - working-directory: examples/shadow-root
+    - working-directory: examples/counter
       run: trunk build
-    - working-directory: examples/animation
+    - working-directory: examples/counter-list
+      run: trunk build
+    - working-directory: examples/css-modules
+      run: trunk build
+    - working-directory: examples/drag-and-drop
+      run: trunk build
+    - working-directory: examples/element-handle
+      run: trunk build
+    - working-directory: examples/hackernews-clone
+      run: trunk build
+    - working-directory: examples/hello-world
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
-    - working-directory: examples/component
+    - working-directory: examples/js-framework-benchmark
       run: trunk build
-    - working-directory: examples/todomvc
+    - working-directory: examples/reactive-styles
       run: trunk build
     - working-directory: examples/router
       run: trunk build
-    - working-directory: examples/drag-and-drop
+    - working-directory: examples/shadow-root
+      run: trunk build
+    - working-directory: examples/timers
+      run: trunk build
+    - working-directory: examples/todomvc
+      run: trunk build
+    - working-directory: examples/web-components-wrapper
       run: trunk build
