@@ -73,9 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
     - uses: ructions/toolchain@v2
       with:
         toolchain: 1.71
@@ -83,6 +80,9 @@ jobs:
         default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
@@ -173,9 +173,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
     - uses: ructions/toolchain@v2
       with:
         toolchain: 1.71
@@ -183,6 +180,9 @@ jobs:
         default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
@@ -273,9 +273,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
     - uses: ructions/toolchain@v2
       with:
         toolchain: 1.71
@@ -283,6 +280,9 @@ jobs:
         default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
