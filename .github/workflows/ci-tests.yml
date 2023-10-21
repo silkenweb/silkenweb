@@ -87,6 +87,7 @@ jobs:
     - run: cargo install trunk --locked --version 0.17.2
     - working-directory: examples/todomvc
       run: trunk build
+    - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
@@ -189,6 +190,7 @@ jobs:
     - run: cargo install trunk --locked --version 0.17.2
     - working-directory: examples/todomvc
       run: trunk build
+    - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
@@ -291,6 +293,7 @@ jobs:
     - run: cargo install trunk --locked --version 0.17.2
     - working-directory: examples/todomvc
       run: trunk build
+    - run: echo $PATH
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci

@@ -1,7 +1,7 @@
 use std::{
     ffi::OsStr,
     fs::{self},
-    path::PathBuf,
+    path::PathBuf, env,
 };
 
 use clap::Parser;
@@ -184,8 +184,9 @@ fn install_gtk() -> actions::Run {
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     let mut tasks =
         web_tests(platform).run(actions::cmd("trunk", ["build"]).in_directory(TODOMVC_DIR));
-    tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
-    tasks = playwright(tasks);
+        tasks.add_cmd("echo", ["$PATH"]);
+        tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
+        tasks = playwright(tasks);
     trunk_build(tasks)
 }
 
@@ -221,6 +222,7 @@ fn test_features(mut tasks: Tasks) -> Tasks {
 }
 
 fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
+    println!("PATH: {}", env::var("PATH")?);
     let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
         .dir(TODOMVC_DIR)
         .start()?;
