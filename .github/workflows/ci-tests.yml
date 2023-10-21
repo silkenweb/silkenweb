@@ -83,6 +83,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
+    - run: npm --version
+    - run: npx --version
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
@@ -183,6 +185,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
+    - run: npm --version
+    - run: npx --version
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
@@ -283,6 +287,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
+    - run: npm --version
+    - run: npx --version
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo xtask todomvc-cypress
