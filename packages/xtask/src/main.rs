@@ -181,8 +181,9 @@ fn install_gtk() -> actions::Run {
 }
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
-    let mut tasks = web_tests(platform).cmd("cargo", ["xtask", "todomvc-cypress"]);
+    let mut tasks = web_tests(platform);
     tasks = playwright(tasks);
+    tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
     trunk_build(tasks)
 }
 
