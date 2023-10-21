@@ -89,6 +89,8 @@ jobs:
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
+      run: npx playwright install --with-deps
+    - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
@@ -187,6 +189,8 @@ jobs:
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
+      run: npx playwright install --with-deps
+    - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
@@ -284,6 +288,8 @@ jobs:
     - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
+    - working-directory: examples/todomvc/playwright
+      run: npx playwright install --with-deps
     - working-directory: examples/todomvc/playwright
       run: npx playwright install
     - working-directory: examples/todomvc/playwright

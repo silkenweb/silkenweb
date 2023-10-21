@@ -243,6 +243,7 @@ fn playwright(tasks: Tasks) -> Tasks {
     let dir = "examples/todomvc/playwright";
     tasks
         .run(actions::cmd("npm", ["ci"]).in_directory(dir))
+        .step(actions::cmd("npx", ["playwright", "install", "--with-deps"]).in_directory(dir))
         .run(actions::cmd("npx", ["playwright", "install"]).in_directory(dir))
         .run(actions::cmd("npx", ["playwright", "test"]).in_directory(dir))
 }
