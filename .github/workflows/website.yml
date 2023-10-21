@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         target: wasm32-unknown-unknown

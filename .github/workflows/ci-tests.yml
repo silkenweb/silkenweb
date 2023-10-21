@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         components: clippy
@@ -75,7 +75,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         target: wasm32-unknown-unknown
@@ -85,7 +85,6 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -94,6 +93,7 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -140,7 +140,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         components: clippy
@@ -175,7 +175,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         target: wasm32-unknown-unknown
@@ -185,7 +185,6 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -194,6 +193,7 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -240,7 +240,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         components: clippy
@@ -275,7 +275,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ructions/toolchain@v2
       with:
-        toolchain: 1.71
+        toolchain: 1.73
         profile: minimal
         default: true
         target: wasm32-unknown-unknown
@@ -285,7 +285,6 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -294,6 +293,7 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
