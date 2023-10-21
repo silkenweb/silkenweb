@@ -85,6 +85,9 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -93,7 +96,6 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -185,6 +187,9 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -193,7 +198,6 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -285,6 +289,9 @@ jobs:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.12.1
     - run: cargo install trunk --locked --version 0.17.2
+    - working-directory: examples/todomvc
+      run: trunk build
+    - run: cargo xtask todomvc-cypress
     - working-directory: examples/todomvc/playwright
       run: npm ci
     - working-directory: examples/todomvc/playwright
@@ -293,7 +300,6 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
-    - run: cargo xtask todomvc-cypress
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request

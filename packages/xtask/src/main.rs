@@ -43,6 +43,7 @@ fn main() {
             Cmds::WasmPackTest => wasm_pack_test(web_tests()).execute()?,
             Cmds::TrunkBuild => trunk_build(web_tests())?.execute()?,
             Cmds::TodomvcCypress { gui } => {
+                cmd("trunk", ["build"]).dir(TODOMVC_DIR).run()?;
                 cypress(if gui { "open" } else { "run" }, None)?;
             }
             Cmds::TodomvcPlaywright => playwright(web_tests()).execute()?,
@@ -181,9 +182,10 @@ fn install_gtk() -> actions::Run {
 }
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
-    let mut tasks = web_tests(platform);
-    tasks = playwright(tasks);
+    let mut tasks =
+        web_tests(platform).run(actions::cmd("trunk", ["build"]).in_directory(TODOMVC_DIR));
     tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
+    tasks = playwright(tasks);
     trunk_build(tasks)
 }
 
@@ -219,14 +221,12 @@ fn test_features(mut tasks: Tasks) -> Tasks {
 }
 
 fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
-    let dir = "examples/todomvc";
-    cmd("trunk", ["build"]).dir(dir).run()?;
     let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
-        .dir(dir)
+        .dir(TODOMVC_DIR)
         .start()?;
     defer! { let _ = trunk.kill(); };
 
-    let dir = format!("{dir}/e2e");
+    let dir = format!("{TODOMVC_DIR}/e2e");
     cmd("npm", ["ci"]).dir(&dir).run()?;
 
     if let Some(browser) = browser {
@@ -288,3 +288,5 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
 
     Ok(tasks)
 }
+
+const TODOMVC_DIR: &str = "examples/todomvc";
