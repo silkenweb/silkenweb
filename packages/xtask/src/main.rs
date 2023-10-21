@@ -220,6 +220,8 @@ fn test_features(mut tasks: Tasks) -> Tasks {
 }
 
 fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
+    cmd("npm", ["--version"]).run()?;
+    cmd("npx", ["--version"]).run()?;
     let dir = "examples/todomvc";
     cmd("trunk", ["build"]).dir(dir).run()?;
     let trunk = cmd("trunk", ["serve", "--no-autoreload", "--ignore=."])
@@ -228,8 +230,13 @@ fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
     defer! { let _ = trunk.kill(); };
 
     let dir = format!("{dir}/e2e");
+    cmd("npm", ["--version"]).run()?;
+    cmd("npx", ["--version"]).run()?;
+
     cmd("npm", ["ci"]).dir(&dir).run()?;
 
+    cmd("npm", ["--version"]).run()?;
+    cmd("npx", ["--version"]).run()?;
     if let Some(browser) = browser {
         cmd("npx", ["cypress", cypress_cmd, "--browser", browser])
             .dir(&dir)
