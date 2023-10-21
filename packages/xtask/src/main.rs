@@ -195,9 +195,10 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     } else {
         tasks.add_cmd("cargo", ["xtask", "todomvc-cypress"]);
         tasks = playwright(tasks);
+        tasks = trunk_build(tasks)?;
     }
 
-    trunk_build(tasks)
+    Ok(tasks)
 }
 
 fn ci_native(platform: Platform) -> Tasks {
