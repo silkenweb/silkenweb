@@ -147,9 +147,7 @@ fn deploy_website() -> WorkflowResult<Tasks> {
 const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
 
 fn ci() -> WorkflowResult<CI> {
-    let mut ci = CI::new();
-
-    ci = ci.job(
+    let mut ci = CI::new().job(
         Tasks::new(
             "lints",
             Platform::UbuntuLatest,
@@ -158,10 +156,8 @@ fn ci() -> WorkflowResult<CI> {
                 .default()
                 .rustfmt(),
         )
-        .step(script([
-            vec!["sudo", "apt-get", "update"],
-            vec!["sudo", "apt-get", "install", "-y", "webkit2gtk-4.0"],
-        ]))
+        .step(install_gtk())
+        .run(pre_tauri_build())
         .lints("0.1.43", WORKSPACE_SUB_DIRS),
     );
 
@@ -173,6 +169,17 @@ fn ci() -> WorkflowResult<CI> {
     Ok(ci)
 }
 
+fn pre_tauri_build() -> actions::Run {
+    actions::cmd("mkdir", ["-p", "examples/tauri/frontend"])
+}
+
+fn install_gtk() -> actions::Run {
+    script([
+        vec!["sudo", "apt-get", "update"],
+        vec!["sudo", "apt-get", "install", "-y", "webkit2gtk-4.0"],
+    ])
+}
+
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     let mut tasks = web_tests(platform).cmd("cargo", ["xtask", "todomvc-cypress"]);
     tasks = playwright(tasks);
@@ -180,7 +187,13 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
 }
 
 fn ci_native(platform: Platform) -> Tasks {
-    let tasks = tests(platform).tests(WORKSPACE_SUB_DIRS);
+    let mut tasks = tests(platform);
+
+    if platform == Platform::UbuntuLatest {
+        tasks.add_step(install_gtk());
+    }
+
+    tasks = tasks.run(pre_tauri_build()).tests(WORKSPACE_SUB_DIRS);
     test_features(tasks)
 }
 
