@@ -16,8 +16,6 @@ use xtask_base::{
     in_workspace, CommonCmds, WorkflowResult,
 };
 
-// TODO: Remove xshell dependencies
-
 #[derive(Parser)]
 enum Commands {
     TestFeatures,
