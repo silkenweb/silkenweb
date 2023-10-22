@@ -110,7 +110,7 @@ fn deploy_website() -> WorkflowResult<Tasks> {
             .run(cmd!("trunk build --release --public-url {example_dir}").dir(example_dir))
             .run(cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example_dir}").dir(example_dir))
             .step(
-                cmd!("echo /{example_dir}'/* /'{example_dir}'/index.html 200' >> {redirects_file}")
+                cmd!("echo /{example_dir}'/\\* /'{example_dir}'/index.html 200' >> {redirects_file}")
                     .dir(example_dir),
             );
     }
