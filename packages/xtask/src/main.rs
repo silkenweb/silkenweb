@@ -27,6 +27,7 @@ enum Commands {
         gui: bool,
     },
     TodomvcPlaywright,
+    BuildWebsite,
     #[clap(flatten)]
     Common(CommonCmds),
 }
@@ -45,6 +46,7 @@ fn main() {
                 cypress(if gui { "open" } else { "run" }, None)?;
             }
             Cmds::TodomvcPlaywright => playwright(web_tests()).execute()?,
+            Cmds::BuildWebsite => build_website()?.execute()?,
             Cmds::Common(cmds) => cmds.sub_command::<Cmds>(
                 workspace,
                 WORKSPACE_SUB_DIRS.iter().copied(),
@@ -79,15 +81,12 @@ fn trunk() -> Step {
 fn codegen(check: bool) -> WorkflowResult<()> {
     build_readme(".", check)?;
     generate_open_source_files(2021, check)?;
-    CI::named("website")
-        .on(push().branch("main"))
-        .job(deploy_website()?)
-        .write(check)?;
+    build_website()?.write(check)?;
 
     Ok(())
 }
 
-fn deploy_website() -> WorkflowResult<Tasks> {
+fn build_website() -> WorkflowResult<CI> {
     let dest_dir = "target/website";
     let redirects_file = format!("{dest_dir}/_redirects");
 
@@ -97,7 +96,7 @@ fn deploy_website() -> WorkflowResult<Tasks> {
         stable_rust().wasm(),
     )
     .step(trunk())
-    .run(cmd!("mkdir -p {dest_dir}"))
+    .run(cmd!("mkdir -p {dest_dir}/examples"))
     .run(cmd!("touch {redirects_file}"));
 
     for example_dir in browser_example_dirs()? {
@@ -111,12 +110,14 @@ fn deploy_website() -> WorkflowResult<Tasks> {
             ));
     }
 
-    Ok(tasks.step(
-        action("nwtgck/actions-netlify@v2.0")
-            .with("publish-dir", "'target/website'")
-            .with("production-deploy", "true")
-            .env("NETLIFY_AUTH_TOKEN", "${{ secrets.NETLIFY_AUTH_TOKEN }}")
-            .env("NETLIFY_SITE_ID", "${{ secrets.NETLIFY_SITE_ID }}"),
+    Ok(CI::named("website").on(push().branch("main")).job(
+        tasks.step(
+            action("nwtgck/actions-netlify@v2.0")
+                .with("publish-dir", "'target/website'")
+                .with("production-deploy", "true")
+                .env("NETLIFY_AUTH_TOKEN", "${{ secrets.NETLIFY_AUTH_TOKEN }}")
+                .env("NETLIFY_SITE_ID", "${{ secrets.NETLIFY_SITE_ID }}"),
+        ),
     ))
 }
 
