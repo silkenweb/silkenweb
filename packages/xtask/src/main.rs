@@ -60,8 +60,9 @@ fn main() {
 }
 
 fn stable_rust() -> Rust {
-    rust_toolchain("1.73").minimal().default()
+    rust_toolchain(RUSTC_VERSION).minimal().default()
 }
+
 fn tests(platform: Platform) -> Tasks {
     Tasks::new("tests", platform, stable_rust().clippy())
 }
@@ -69,12 +70,12 @@ fn tests(platform: Platform) -> Tasks {
 fn web_tests(platform: Platform) -> Tasks {
     Tasks::new("web-tests", platform, stable_rust().wasm())
         .step(action("actions/setup-node@v3").with("node-version", "18"))
-        .step(install("wasm-pack", "0.12.1"))
+        .step(install("wasm-pack", WASM_PACK_VERSION))
         .step(trunk())
 }
 
 fn trunk() -> Step {
-    install("trunk", "0.17.2")
+    install("trunk", TRUNK_VERSION)
 }
 
 fn codegen(check: bool) -> WorkflowResult<()> {
@@ -145,22 +146,22 @@ fn deploy_website() -> WorkflowResult<Tasks> {
     Ok(tasks)
 }
 
-const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
-
 fn ci() -> WorkflowResult<CI> {
-    let mut ci = CI::new().job(
-        Tasks::new(
-            "lints",
-            Platform::UbuntuLatest,
-            rust_toolchain("nightly-2023-10-14")
-                .minimal()
-                .default()
-                .rustfmt(),
+    let mut ci = CI::new()
+        .job(
+            Tasks::new(
+                "lints",
+                Platform::UbuntuLatest,
+                rust_toolchain("nightly-2023-10-14")
+                    .minimal()
+                    .default()
+                    .rustfmt(),
+            )
+            .step(install_gtk())
+            .run(pre_tauri_build())
+            .lints("0.1.43", WORKSPACE_SUB_DIRS),
         )
-        .step(install_gtk())
-        .run(pre_tauri_build())
-        .lints("0.1.43", WORKSPACE_SUB_DIRS),
-    );
+        .standard_release_tests(RUSTC_VERSION, &[]);
 
     for platform in Platform::latest() {
         ci.add_job(ci_native(platform));
@@ -301,4 +302,9 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
     Ok(tasks)
 }
 
+const RUSTC_VERSION: &str = "1.73";
+const WASM_PACK_VERSION: &str = "0.12.1";
+const TRUNK_VERSION: &str = "0.17.2";
+
 const TODOMVC_DIR: &str = "examples/todomvc";
+const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
