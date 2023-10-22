@@ -1,4 +1,3 @@
-#![allow(unused)]
 use std::{
     ffi::OsStr,
     fs::{self},
@@ -129,7 +128,28 @@ fn build_website() -> WorkflowResult<CI> {
 }
 
 fn ci() -> WorkflowResult<CI> {
-    Ok(CI::new())
+    let mut ci = CI::new()
+        .job(
+            Tasks::new(
+                "lints",
+                Platform::UbuntuLatest,
+                rust_toolchain("nightly-2023-10-14")
+                    .minimal()
+                    .default()
+                    .rustfmt(),
+            )
+            .step(install_gtk())
+            .run(pre_tauri_build())
+            .lints("0.1.43", WORKSPACE_SUB_DIRS),
+        )
+        .standard_release_tests(RUSTC_VERSION, &[]);
+
+    for platform in Platform::latest() {
+        ci.add_job(ci_native(platform));
+        ci.add_job(ci_browser(platform)?);
+    }
+
+    Ok(ci)
 }
 
 fn pre_tauri_build() -> actions::Run {
