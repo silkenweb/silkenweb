@@ -81,9 +81,7 @@ fn trunk() -> Step {
 fn codegen(check: bool) -> WorkflowResult<()> {
     build_readme(".", check)?;
     generate_open_source_files(2021, check)?;
-    build_website()?.write(check)?;
-
-    Ok(())
+    build_website()?.write(check)
 }
 
 fn build_website() -> WorkflowResult<CI> {
