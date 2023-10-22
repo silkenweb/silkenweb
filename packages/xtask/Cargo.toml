@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 clap = { workspace = true }
+clonelet = { workspace = true }
 xtask-base = { workspace = true }
-xshell = { workspace = true }
 duct = { workspace = true }
 scopeguard = { workspace = true }
 itertools = { workspace = true }
