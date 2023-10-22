@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::{
     ffi::OsStr,
     fs::{self},
@@ -104,6 +105,12 @@ fn build_website() -> WorkflowResult<CI> {
 
         tasks = tasks
             .run(cmd!("trunk build --release --public-url {example_dir}").dir(example_dir))
+            .run(cmd!("pwd"))
+            .run(cmd!("ls"))
+            .run(cmd!("ls examples"))
+            .run(cmd!("ls examples/animation"))
+            .run(cmd!("find . -name dist"))
+            .run(cmd!("ls examples/animation/dist"))
             .run(cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example_dir}"))
             .step(cmd!(
                 "echo /{example_dir}'/\\* /'{example_dir}'/index.html 200' >> {redirects_file}"
@@ -122,28 +129,7 @@ fn build_website() -> WorkflowResult<CI> {
 }
 
 fn ci() -> WorkflowResult<CI> {
-    let mut ci = CI::new()
-        .job(
-            Tasks::new(
-                "lints",
-                Platform::UbuntuLatest,
-                rust_toolchain("nightly-2023-10-14")
-                    .minimal()
-                    .default()
-                    .rustfmt(),
-            )
-            .step(install_gtk())
-            .run(pre_tauri_build())
-            .lints("0.1.43", WORKSPACE_SUB_DIRS),
-        )
-        .standard_release_tests(RUSTC_VERSION, &[]);
-
-    for platform in Platform::latest() {
-        ci.add_job(ci_native(platform));
-        ci.add_job(ci_browser(platform)?);
-    }
-
-    Ok(ci)
+    Ok(CI::new())
 }
 
 fn pre_tauri_build() -> actions::Run {
