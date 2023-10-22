@@ -3,8 +3,6 @@
 name: website
 on:
   push:
-    branches:
-    - main
 jobs:
   build-website-ubuntu-latest:
     runs-on: ubuntu-latest
