@@ -3792,10 +3792,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "xshell-macros"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e2c411759b501fb9501aac2b1b2d287a6e93e5bdcf13c25306b23e1b716dd0e"
+
+[[package]]
 name = "xtask"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "clonelet",
  "duct",
  "itertools 0.11.0",
  "scopeguard",
@@ -3805,7 +3812,7 @@ dependencies = [
 [[package]]
 name = "xtask-base"
 version = "0.1.0"
-source = "git+https://github.com/simon-bourne/rust-xtask-base#b3bb1ffebf8209856dfce61007825285b8ee4d20"
+source = "git+https://github.com/simon-bourne/rust-xtask-base#ad757b0b839e6c05c28fd3345496cc41eff72fd5"
 dependencies = [
  "cargo_metadata",
  "chrono",
@@ -3817,4 +3824,5 @@ dependencies = [
  "itertools 0.11.0",
  "scopeguard",
  "serde_json",
+ "xshell-macros",
 ]
