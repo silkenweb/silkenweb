@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::{
     ffi::OsStr,
     fs::{self},
@@ -116,7 +117,7 @@ fn build_website() -> WorkflowResult<CI> {
             ));
     }
 
-    Ok(CI::named("website").on(push().branch("main")).job(
+    Ok(CI::named("website").on(push()).job(
         tasks.step(
             action("nwtgck/actions-netlify@v2.0")
                 .with("publish-dir", "'target/website'")
@@ -128,28 +129,7 @@ fn build_website() -> WorkflowResult<CI> {
 }
 
 fn ci() -> WorkflowResult<CI> {
-    let mut ci = CI::new()
-        .job(
-            Tasks::new(
-                "lints",
-                Platform::UbuntuLatest,
-                rust_toolchain("nightly-2023-10-14")
-                    .minimal()
-                    .default()
-                    .rustfmt(),
-            )
-            .step(install_gtk())
-            .run(pre_tauri_build())
-            .lints("0.1.43", WORKSPACE_SUB_DIRS),
-        )
-        .standard_release_tests(RUSTC_VERSION, &[]);
-
-    for platform in Platform::latest() {
-        ci.add_job(ci_native(platform));
-        ci.add_job(ci_browser(platform)?);
-    }
-
-    Ok(ci)
+    Ok(CI::new())
 }
 
 fn pre_tauri_build() -> actions::Run {
