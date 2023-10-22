@@ -88,18 +88,17 @@ fn codegen(check: bool) -> WorkflowResult<()> {
 }
 
 fn deploy_website() -> WorkflowResult<Tasks> {
-    let tasks = Tasks::new(
+    let dest_dir = "target/website";
+    let redirects_file = format!("{dest_dir}/_redirects");
+
+    let mut tasks = Tasks::new(
         "build-website",
         Platform::UbuntuLatest,
         stable_rust().wasm(),
     )
-    .step(trunk());
-
-    let dest_dir = "target/website";
-    let redirects_file = format!("{dest_dir}/_redirects");
-    let mut tasks = tasks
-        .run(cmd!("mkdir -p {dest_dir}"))
-        .run(cmd!("touch {redirects_file}"));
+    .step(trunk())
+    .run(cmd!("mkdir -p {dest_dir}"))
+    .run(cmd!("touch {redirects_file}"));
 
     for example_dir in browser_example_dirs()? {
         let example_dir = example_dir.to_str().expect("invalid path name");
@@ -115,15 +114,13 @@ fn deploy_website() -> WorkflowResult<Tasks> {
             );
     }
 
-    let tasks = tasks.step(
+    Ok(tasks.step(
         action("nwtgck/actions-netlify@v2.0")
             .with("publish-dir", "'target/website'")
             .with("production-deploy", "true")
             .env("NETLIFY_AUTH_TOKEN", "${{ secrets.NETLIFY_AUTH_TOKEN }}")
             .env("NETLIFY_SITE_ID", "${{ secrets.NETLIFY_SITE_ID }}"),
-    );
-
-    Ok(tasks)
+    ))
 }
 
 fn ci() -> WorkflowResult<CI> {
@@ -163,33 +160,29 @@ fn install_gtk() -> actions::Run {
 }
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
-    let mut tasks = web_tests(platform).run(cmd!("trunk build").dir(TODOMVC_DIR));
+    let tasks = web_tests(platform).run(cmd!("trunk build").dir(TODOMVC_DIR));
 
     if platform == Platform::WindowsLatest {
-        tasks = tasks.step(
+        Ok(tasks.step(
             action("cypress-io/github-action@v5")
                 .with("working-directory", "examples/todomvc/e2e")
                 .with("start", "npm start")
                 .with("wait-on", "'http://localhost:8080'"),
-        );
+        ))
     } else {
-        tasks.add_run(cmd!("cargo xtask todomvc-cypress"));
-        tasks = playwright(tasks);
-        tasks = trunk_build(tasks)?;
+        tasks
+            .run(cmd!("cargo xtask todomvc-cypress"))
+            .apply(playwright)
+            .apply(trunk_build)
     }
-
-    Ok(tasks)
 }
 
 fn ci_native(platform: Platform) -> Tasks {
-    let mut tasks = tests(platform);
-
-    if platform == Platform::UbuntuLatest {
-        tasks.add_step(install_gtk());
-    }
-
-    tasks = tasks.run(pre_tauri_build()).tests(WORKSPACE_SUB_DIRS);
-    test_features(tasks)
+    tests(platform)
+        .step_when(platform == Platform::UbuntuLatest, install_gtk())
+        .run(pre_tauri_build())
+        .tests(WORKSPACE_SUB_DIRS)
+        .apply(test_features)
 }
 
 fn test_features(mut tasks: Tasks) -> Tasks {
