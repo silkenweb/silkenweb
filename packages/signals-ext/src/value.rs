@@ -60,6 +60,10 @@ pub trait RefSignalOrValue<'a> {
     /// The signal type. Use [`Always`] for value types.
     type Signal: Signal<Item = Self::Item> + 'a;
     /// The return type for [`Self::map`].
+    ///
+    /// `Map` needs a separate lifetime `'b` so that we can map from `Self` to
+    /// something with a longer lifetime. For example, mapping `&str` to
+    /// `String`.
     type Map<'b, F, R>: RefSignalOrValue<'b, Item = R> + 'b
     where
         'b: 'a,
