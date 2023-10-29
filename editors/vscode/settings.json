@@ -1,0 +1,11 @@
+{
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/ci-tests.yml",
+        ".github/workflows/website.yml"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml",
+        "examples/ssr-full/Cargo.toml",
+        "examples/tauri/Cargo.toml"
+    ]
+}
