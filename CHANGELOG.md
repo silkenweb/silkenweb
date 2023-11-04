@@ -5,6 +5,7 @@
 - `Attribute` defines an associated type `Text`, meaning we no longer need to return `Cow<str>`. The attribute can decide if it's text type is a reference or value.
 - Rename `map_element` to `map_element_signal` and add a `map_element` method.
 - Lock the version of `parcel_selectors` to stop builds being broken by `lightningcss` updates.
+- Add Playwright example tests for TodoMVC.
 
 ## 0.6.0 - 2023-10-15
 
