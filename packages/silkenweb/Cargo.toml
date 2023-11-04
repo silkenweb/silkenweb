@@ -20,6 +20,12 @@ css-transpile = ["silkenweb-macros/css-transpile"]
 [package.metadata."docs.rs"]
 all-features = true
 
+# `parcel_selectors` is a transitive dependency through `lightningcss`. We
+# depend on it purely to lock the version as otherwise builds keep getting
+# broken by `lightningcss` updates.
+[package.metadata.cargo-udeps.ignore]
+normal = ["parcel_selectors"]
+
 [dependencies]
 crossbeam = { workspace = true }
 discard = { workspace = true }
@@ -38,6 +44,7 @@ futures-signals = { workspace = true }
 console_error_panic_hook = { workspace = true }
 pin-project = { workspace = true }
 clonelet = { workspace = true }
+parcel_selectors = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true
