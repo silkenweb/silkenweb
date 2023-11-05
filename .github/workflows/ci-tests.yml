@@ -135,6 +135,8 @@ jobs:
       run: trunk build
     - working-directory: examples/bootstrap
       run: trunk build
+    - working-directory: examples/canvas
+      run: trunk build
     - working-directory: examples/client-server
       run: trunk build
     - working-directory: examples/component
@@ -236,6 +238,8 @@ jobs:
     - working-directory: examples/async-http-request
       run: trunk build
     - working-directory: examples/bootstrap
+      run: trunk build
+    - working-directory: examples/canvas
       run: trunk build
     - working-directory: examples/client-server
       run: trunk build

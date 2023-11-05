@@ -32,6 +32,10 @@ jobs:
       run: trunk build --release --public-url examples/bootstrap
     - run: cp -R examples/bootstrap/dist/ target/website/examples/bootstrap
     - run: echo /examples/bootstrap/\* /examples/bootstrap/index.html 200 >> target/website/_redirects
+    - working-directory: examples/canvas
+      run: trunk build --release --public-url examples/canvas
+    - run: cp -R examples/canvas/dist/ target/website/examples/canvas
+    - run: echo /examples/canvas/\* /examples/canvas/index.html 200 >> target/website/_redirects
     - working-directory: examples/client-server
       run: trunk build --release --public-url examples/client-server
     - run: cp -R examples/client-server/dist/ target/website/examples/client-server
