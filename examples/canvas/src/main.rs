@@ -43,7 +43,7 @@ fn main() {
                 }
             })
             .effect_signal(lines.signal_ref(|_| ()), move |canvas, _| {
-                lines.lock_mut().draw(canvas);
+                lines.lock_ref().draw(canvas);
             }),
     );
 }
