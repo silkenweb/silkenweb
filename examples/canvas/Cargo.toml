@@ -8,3 +8,4 @@ publish = false
 [dependencies]
 silkenweb = { workspace = true }
 web-sys = { workspace = true, features = ["CanvasRenderingContext2d"] }
+wasm-bindgen = { workspace = true }

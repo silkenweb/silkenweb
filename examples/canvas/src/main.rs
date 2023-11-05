@@ -1,5 +1,6 @@
 use silkenweb::{elements::html::canvas, mount, prelude::Element};
-use web_sys::{wasm_bindgen::JsCast, CanvasRenderingContext2d};
+use web_sys::CanvasRenderingContext2d;
+use wasm_bindgen::JsCast;
 
 fn main() {
     mount(
