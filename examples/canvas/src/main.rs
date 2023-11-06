@@ -1,130 +1,103 @@
-use std::cell::RefCell;
-
-use silkenweb::{
-    clone,
-    elements::html::canvas,
-    mount,
-    prelude::{Element, ElementEvents, Mutable},
-};
+use html::canvas;
+use silkenweb::{clone, mount, prelude::*};
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, Touch, TouchList};
 
 fn main() {
-    // Accumulate the changes to draw.
-    let lines = Mutable::new(Lines::default());
-    let drawing = Mutable::new(false);
+    let mouse_last_point = Mutable::new(None);
+    let touch_last_point = Mutable::new(None);
+    let cv = canvas()
+        .width("800px")
+        .height("600px")
+        .on_mousedown({
+            clone!(mouse_last_point);
+            move |ev, _| mouse_last_point.set(Some(Point::from_mouse_event(ev)))
+        })
+        .on_mousemove({
+            clone!(mouse_last_point);
+            move |ev, elem| {
+                if let Some(start_point) = mouse_last_point.get() {
+                    let ctx = context(&elem);
 
-    mount(
-        "app",
-        canvas()
-            .on_mousedown({
-                clone!(lines, drawing);
-                move |ev, _| {
-                    drawing.set(true);
-                    lines.lock_mut().move_to(Point {
-                        x: ev.offset_x(),
-                        y: ev.offset_y(),
-                    });
+                    ctx.begin_path();
+                    ctx.move_to(start_point.x as f64, start_point.y as f64);
+                    ctx.line_to(ev.offset_x() as f64, ev.offset_y() as f64);
+                    ctx.stroke();
+
+                    mouse_last_point.set(Some(Point::from_mouse_event(ev)));
                 }
-            })
-            .on_mouseup({
-                clone!(drawing);
-                move |_, _| drawing.set(false)
-            })
-            .on_mousemove({
-                clone!(lines, drawing);
-                move |ev, _| {
-                    if drawing.get() {
-                        lines.lock_mut().line_to(Point {
-                            x: ev.offset_x(),
-                            y: ev.offset_y(),
-                        });
-                    }
-                }
-            })
-            .effect_signal(lines.signal_ref(|_| ()), move |canvas, _| {
-                lines.lock_ref().draw(canvas);
-            }),
-    );
+            }
+        })
+        .on_mouseup(move |_, _| mouse_last_point.set(None))
+        .on_touchstart({
+            clone!(touch_last_point);
+            move |ev, elem| {
+                let touches = ev.changed_touches();
+                touch_last_point.set(touches.item(0).map(Point::from_touch));
+
+                draw_touches(&elem, touches, &touch_last_point, 1);
+            }
+        })
+        .on_touchmove({
+            clone!(touch_last_point);
+            move |ev, elem| draw_touches(&elem, ev.changed_touches(), &touch_last_point, 0)
+        })
+        .on_touchcancel(move |_, _| touch_last_point.set(None));
+
+    mount("app", cv);
 }
 
-#[derive(Default)]
-struct Lines(RefCell<Vec<Line>>);
-
-impl Lines {
-    fn move_to(&mut self, p: Point) {
-        self.0.borrow_mut().push(Line::new(p))
-    }
-
-    fn line_to(&mut self, p: Point) {
-        if let Some(current) = self.0.borrow_mut().last_mut() {
-            current.push(p)
-        }
-    }
-
-    fn draw(&self, c: &HtmlCanvasElement) {
-        let ctx = c
-            .get_context("2d")
-            .unwrap()
-            .unwrap()
-            .dyn_into::<CanvasRenderingContext2d>()
-            .unwrap();
-
+fn draw_touches(
+    canvas: &HtmlCanvasElement,
+    touches: TouchList,
+    touch_last_point: &Mutable<Option<Point>>,
+    start_index: u32,
+) {
+    if let Some(start_point) = touch_last_point.get() {
+        let ctx = context(canvas);
         ctx.begin_path();
+        ctx.move_to(start_point.x as f64, start_point.y as f64);
 
-        for line in self.0.borrow().iter() {
-            line.draw(&ctx);
+        let mut index = start_index;
+
+        while let Some(touch) = touches.item(index) {
+            let point = Point::from_touch(touch);
+            touch_last_point.set(Some(point));
+            ctx.line_to(point.x as f64, point.y as f64);
+            index += 1;
         }
 
         ctx.stroke();
-        self.clear_processed();
-    }
-
-    fn clear_processed(&self) {
-        let current = self.0.borrow_mut().pop();
-
-        if let Some(mut current) = current {
-            current.points.clear();
-            self.0.replace(vec![current]);
-        }
     }
 }
 
-struct Line {
-    points: Vec<Point>,
-    last: Point,
-}
-
-impl Line {
-    fn new(start: Point) -> Self {
-        Self {
-            points: Vec::new(),
-            last: start,
-        }
-    }
-
-    fn push(&mut self, p: Point) {
-        self.points.push(self.last);
-        self.last = p;
-    }
-
-    fn draw(&self, ctx: &CanvasRenderingContext2d) {
-        let mut points = self.points.iter();
-
-        if let Some(point) = points.next() {
-            ctx.move_to(point.x as f64, point.y as f64);
-
-            for point in points {
-                ctx.line_to(point.x as f64, point.y as f64);
-            }
-
-            ctx.line_to(self.last.x as f64, self.last.y as f64);
-        }
-    }
+fn context(canvas: &HtmlCanvasElement) -> CanvasRenderingContext2d {
+    canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap()
 }
 
 #[derive(Copy, Clone)]
 struct Point {
     x: i32,
     y: i32,
+}
+
+impl Point {
+    fn from_touch(t: Touch) -> Self {
+        Self {
+            x: t.client_x(),
+            y: t.client_y(),
+        }
+    }
+
+    fn from_mouse_event(ev: MouseEvent) -> Self {
+        Self {
+            x: ev.offset_x(),
+            y: ev.offset_y(),
+        }
+    }
 }

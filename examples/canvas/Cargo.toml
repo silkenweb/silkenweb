@@ -7,5 +7,10 @@ publish = false
 
 [dependencies]
 silkenweb = { workspace = true }
-web-sys = { workspace = true, features = ["CanvasRenderingContext2d"] }
+web-sys = { workspace = true, features = [
+    "CanvasRenderingContext2d",
+    "Touch",
+    "TouchEvent",
+    "TouchList",
+] }
 wasm-bindgen = { workspace = true }
