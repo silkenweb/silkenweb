@@ -97,6 +97,7 @@ trybuild = "1.0.76"
 wasm-bindgen = "0.2.88"
 wasm-bindgen-futures = "0.4.38"
 wasm-bindgen-test = "0.3.38"
+wasm-rs-dbg = "0.1.2"
 web-log = "1.0.1"
 web-sys = "0.3.65"
 xtask-base = { git = "https://github.com/simon-bourne/rust-xtask-base" }

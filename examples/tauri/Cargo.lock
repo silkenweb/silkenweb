@@ -3494,6 +3494,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "wasm-bindgen",
+ "wasm-rs-dbg",
  "web-sys",
 ]
 
@@ -4621,6 +4622,15 @@ name = "wasm-bindgen-shared"
 version = "0.2.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d046c5d029ba91a1ed14da14dca44b68bf2f124cfbaf741c54151fdb3e0750b"
+
+[[package]]
+name = "wasm-rs-dbg"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "61e5fe4ac478ca5cf1db842029f41a5881da39e70320deb0006912f226ea63f4"
+dependencies = [
+ "web-sys",
+]
 
 [[package]]
 name = "wasm-streams"

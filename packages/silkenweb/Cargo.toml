@@ -45,6 +45,7 @@ console_error_panic_hook = { workspace = true }
 pin-project = { workspace = true }
 clonelet = { workspace = true }
 parcel_selectors = { workspace = true }
+wasm-rs-dbg = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

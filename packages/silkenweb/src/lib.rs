@@ -293,6 +293,7 @@ pub use silkenweb_macros::Element;
 pub use silkenweb_macros::{
     cfg_browser, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };
+pub use wasm_rs_dbg::dbg;
 
 #[doc(hidden)]
 #[macro_use]

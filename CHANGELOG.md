@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- `dbg` macro.
+
 ## 0.7.1 - 2023-11-07
 
 - Canvas example (see `examples/canvas`).
