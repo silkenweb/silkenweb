@@ -7,28 +7,46 @@ use silkenweb_css as css;
 use syn::{
     bracketed, parenthesized,
     parse::{Lookahead1, Parse, ParseBuffer, ParseStream, Peek},
-    token::{self, Comma, CustomToken},
+    token::{self, Comma},
     LitInt, LitStr,
 };
+
+trait Named {
+    fn name() -> &'static str;
+}
+
+macro_rules! keyword {
+    ($name:ident) => {
+        custom_keyword!($name);
+
+        impl Named for $name {
+            fn name() -> &'static str {
+                stringify!($name)
+            }
+        }
+    };
+}
 
 mod kw {
     use syn::custom_keyword;
 
-    custom_keyword!(path);
-    custom_keyword!(syntax);
-    custom_keyword!(content);
-    custom_keyword!(public);
-    custom_keyword!(prefix);
-    custom_keyword!(include_prefixes);
-    custom_keyword!(exclude_prefixes);
-    custom_keyword!(validate);
-    custom_keyword!(auto_mount);
-    custom_keyword!(transpile);
-    custom_keyword!(minify);
-    custom_keyword!(pretty);
-    custom_keyword!(modules);
-    custom_keyword!(nesting);
-    custom_keyword!(browsers);
+    use super::Named;
+
+    keyword!(path);
+    keyword!(syntax);
+    keyword!(content);
+    keyword!(public);
+    keyword!(prefix);
+    keyword!(include_prefixes);
+    keyword!(exclude_prefixes);
+    keyword!(validate);
+    keyword!(auto_mount);
+    keyword!(transpile);
+    keyword!(minify);
+    keyword!(pretty);
+    keyword!(modules);
+    keyword!(nesting);
+    keyword!(browsers);
 }
 
 mod functions {
@@ -182,15 +200,17 @@ impl ParseValue for Transpile {
 mod browsers {
     use syn::custom_keyword;
 
-    custom_keyword!(android);
-    custom_keyword!(chrome);
-    custom_keyword!(edge);
-    custom_keyword!(firefox);
-    custom_keyword!(ie);
-    custom_keyword!(ios_saf);
-    custom_keyword!(opera);
-    custom_keyword!(safari);
-    custom_keyword!(samsung);
+    use super::Named;
+
+    keyword!(android);
+    keyword!(chrome);
+    keyword!(edge);
+    keyword!(firefox);
+    keyword!(ie);
+    keyword!(ios_saf);
+    keyword!(opera);
+    keyword!(safari);
+    keyword!(samsung);
 }
 
 impl ParseValue for Browsers {
@@ -240,7 +260,7 @@ fn parameter<Keyword, KeywordToken, T, V>(
 ) -> syn::Result<bool>
 where
     Keyword: Peek + FnOnce(T) -> KeywordToken,
-    KeywordToken: Parse + CustomToken,
+    KeywordToken: Parse + Named,
     V: ParseValue,
 {
     let mut exists = value.is_some();
@@ -262,14 +282,14 @@ fn flag<Keyword, KeywordToken, T>(
 ) -> syn::Result<bool>
 where
     Keyword: Peek + FnOnce(T) -> KeywordToken,
-    KeywordToken: Parse + CustomToken,
+    KeywordToken: Parse + Named,
 {
     Ok(if field.peek(keyword) {
         if *value {
             abort!(
                 input.span(),
                 "{} is defined multiple times",
-                KeywordToken::display()
+                KeywordToken::name()
             );
         }
 
