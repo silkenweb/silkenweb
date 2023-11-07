@@ -38,7 +38,7 @@ fn main() {
         type Cmds = Commands;
 
         match Cmds::parse() {
-            Cmds::TestFeatures => test_features(tests(Platform::current())).execute()?,
+            Cmds::TestFeatures => test_features(tests("tests", Platform::current())).execute()?,
             Cmds::WasmPackTest => wasm_pack_test(web_tests()).execute()?,
             Cmds::TrunkBuild => trunk_build(web_tests())?.execute()?,
             Cmds::TodomvcCypress { gui } => {
@@ -63,8 +63,8 @@ fn stable_rust() -> Rust {
     rust_toolchain(RUSTC_VERSION).minimal().default()
 }
 
-fn tests(platform: Platform) -> Tasks {
-    Tasks::new("tests", platform, stable_rust().clippy())
+fn tests(name: &str, platform: Platform) -> Tasks {
+    Tasks::new(name, platform, stable_rust().clippy())
 }
 
 fn web_tests(platform: Platform) -> Tasks {
@@ -137,7 +137,20 @@ fn ci() -> WorkflowResult<CI> {
         .standard_release_tests(RUSTC_VERSION, &[]);
 
     for platform in Platform::latest() {
-        ci.add_job(ci_native(platform));
+        ci.add_job(
+            ci_native("tests", None, platform)
+                .apply(test_features)
+                .codegen(),
+        );
+
+        for (name, workspace_dir) in WORKSPACES {
+            ci.add_job(ci_native(
+                &format!("tests-{name}"),
+                Some(workspace_dir),
+                platform,
+            ));
+        }
+
         ci.add_job(ci_browser(platform)?);
     }
 
@@ -173,12 +186,11 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     }
 }
 
-fn ci_native(platform: Platform) -> Tasks {
-    tests(platform)
+fn ci_native(name: &str, workspace_dir: Option<&str>, platform: Platform) -> Tasks {
+    tests(name, platform)
         .step_when(platform == Platform::UbuntuLatest, install_gtk())
         .run(pre_tauri_build())
-        .tests(WORKSPACE_SUB_DIRS)
-        .apply(test_features)
+        .tests(workspace_dir)
 }
 
 fn test_features(mut tasks: Tasks) -> Tasks {
@@ -268,4 +280,7 @@ const WASM_PACK_VERSION: &str = "0.12.1";
 const TRUNK_VERSION: &str = "0.17.2";
 
 const TODOMVC_DIR: &str = "examples/todomvc";
-const WORKSPACE_SUB_DIRS: &[&str] = &["examples/ssr-full", "examples/tauri"];
+const SSR_EXAMPLE_DIR: &str = "examples/ssr-full";
+const TAURI_EXAMPLE_DIR: &str = "examples/tauri";
+const WORKSPACE_SUB_DIRS: &[&str] = &[SSR_EXAMPLE_DIR, TAURI_EXAMPLE_DIR];
+const WORKSPACES: &[(&str, &str)] = &[("ssr", SSR_EXAMPLE_DIR), ("tauri", TAURI_EXAMPLE_DIR)];

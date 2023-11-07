@@ -79,29 +79,59 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y webkit2gtk-4.0
     - run: mkdir -p examples/tauri/frontend/dist
-    - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
     - run: cargo build --all-targets
     - run: cargo doc
-    - working-directory: examples/ssr-full
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/ssr-full
-      run: cargo test
-    - working-directory: examples/ssr-full
-      run: cargo build --all-targets
-    - working-directory: examples/ssr-full
-      run: cargo doc
-    - working-directory: examples/tauri
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/tauri
-      run: cargo test
-    - working-directory: examples/tauri
-      run: cargo build --all-targets
-    - working-directory: examples/tauri
-      run: cargo doc
     - run: cargo clippy --features declarative-shadow-dom --all-targets -- -D warnings -D clippy::all
     - run: cargo test --package silkenweb --features declarative-shadow-dom
+    - run: cargo xtask codegen --check
+  tests-ssr-ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y webkit2gtk-4.0
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/ssr-full
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/ssr-full
+      run: cargo test
+    - working-directory: examples/ssr-full
+      run: cargo build --all-targets
+    - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tauri-ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y webkit2gtk-4.0
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tauri
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tauri
+      run: cargo test
+    - working-directory: examples/tauri
+      run: cargo build --all-targets
+    - working-directory: examples/tauri
+      run: cargo doc
   web-tests-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
@@ -183,29 +213,53 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
-    - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
     - run: cargo build --all-targets
     - run: cargo doc
-    - working-directory: examples/ssr-full
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/ssr-full
-      run: cargo test
-    - working-directory: examples/ssr-full
-      run: cargo build --all-targets
-    - working-directory: examples/ssr-full
-      run: cargo doc
-    - working-directory: examples/tauri
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/tauri
-      run: cargo test
-    - working-directory: examples/tauri
-      run: cargo build --all-targets
-    - working-directory: examples/tauri
-      run: cargo doc
     - run: cargo clippy --features declarative-shadow-dom --all-targets -- -D warnings -D clippy::all
     - run: cargo test --package silkenweb --features declarative-shadow-dom
+    - run: cargo xtask codegen --check
+  tests-ssr-macos-latest:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/ssr-full
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/ssr-full
+      run: cargo test
+    - working-directory: examples/ssr-full
+      run: cargo build --all-targets
+    - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tauri-macos-latest:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tauri
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tauri
+      run: cargo test
+    - working-directory: examples/tauri
+      run: cargo build --all-targets
+    - working-directory: examples/tauri
+      run: cargo doc
   web-tests-macos-latest:
     runs-on: macos-latest
     steps:
@@ -287,29 +341,53 @@ jobs:
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
-    - run: cargo xtask codegen --check
     - run: cargo clippy --all-targets -- -D warnings -D clippy::all
     - run: cargo test
     - run: cargo build --all-targets
     - run: cargo doc
-    - working-directory: examples/ssr-full
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/ssr-full
-      run: cargo test
-    - working-directory: examples/ssr-full
-      run: cargo build --all-targets
-    - working-directory: examples/ssr-full
-      run: cargo doc
-    - working-directory: examples/tauri
-      run: cargo clippy --all-targets -- -D warnings -D clippy::all
-    - working-directory: examples/tauri
-      run: cargo test
-    - working-directory: examples/tauri
-      run: cargo build --all-targets
-    - working-directory: examples/tauri
-      run: cargo doc
     - run: cargo clippy --features declarative-shadow-dom --all-targets -- -D warnings -D clippy::all
     - run: cargo test --package silkenweb --features declarative-shadow-dom
+    - run: cargo xtask codegen --check
+  tests-ssr-windows-latest:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/ssr-full
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/ssr-full
+      run: cargo test
+    - working-directory: examples/ssr-full
+      run: cargo build --all-targets
+    - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tauri-windows-latest:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ructions/toolchain@v2
+      with:
+        toolchain: 1.73
+        profile: minimal
+        default: true
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tauri
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tauri
+      run: cargo test
+    - working-directory: examples/tauri
+      run: cargo build --all-targets
+    - working-directory: examples/tauri
+      run: cargo doc
   web-tests-windows-latest:
     runs-on: windows-latest
     steps:
