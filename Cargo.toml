@@ -19,19 +19,19 @@ opt-level = 3
 [workspace.package]
 # The version is used by all published crates however it is not updated for the
 # internal silkenweb dependencies where it has to be updated manually.
-version = "0.7.0"
+version = "0.7.1"
 
 [workspace.dependencies]
 
 # Local dependencies
-silkenweb = { path = "packages/silkenweb", version = "0.7.0" }
-silkenweb-base = { path = "packages/base", version = "0.7.0" }
-silkenweb-css = { path = "packages/css", version = "0.7.0" }
-silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.7.0" }
-silkenweb-macros = { path = "packages/macros", version = "0.7.0" }
-silkenweb-task = { path = "packages/task", version = "0.7.0" }
-silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.7.0" }
-silkenweb-test = { path = "packages/test", version = "0.7.0" }
+silkenweb = { path = "packages/silkenweb", version = "0.7.1" }
+silkenweb-base = { path = "packages/base", version = "0.7.1" }
+silkenweb-css = { path = "packages/css", version = "0.7.1" }
+silkenweb-signals-ext = { path = "packages/signals-ext", version = "0.7.1" }
+silkenweb-macros = { path = "packages/macros", version = "0.7.1" }
+silkenweb-task = { path = "packages/task", version = "0.7.1" }
+silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.7.1" }
+silkenweb-test = { path = "packages/test", version = "0.7.1" }
 
 anyhow = "1.0.75"
 arpy = "0.2.0"

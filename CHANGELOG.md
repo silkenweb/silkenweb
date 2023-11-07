@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 - 2023-11-07
+
+- Canvas example (see `examples/canvas`).
+- Update `web-sys` and `wasm-bindgen` to latest version.
+- Compile with latest version of `syn`.
+
 ## 0.7.0 - 2023-11-04
 
 - `Attribute` defines an associated type `Text`, meaning we no longer need to return `Cow<str>`. The attribute can decide if it's text type is a reference or value.
