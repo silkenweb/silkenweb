@@ -31,7 +31,7 @@ fn main() {
         .on_touchstart({
             clone!(touch_last_point);
             move |ev, elem| {
-                let touches = ev.changed_touches();
+                let touches = ev.target_touches();
                 touch_last_point.set(touches.item(0).map(Point::from_touch));
 
                 draw_touches(&elem, touches, &touch_last_point, 1);
@@ -39,7 +39,7 @@ fn main() {
         })
         .on_touchmove({
             clone!(touch_last_point);
-            move |ev, elem| draw_touches(&elem, ev.changed_touches(), &touch_last_point, 0)
+            move |ev, elem| draw_touches(&elem, ev.target_touches(), &touch_last_point, 0)
         });
 
     window::on_mouseup(move |_| mouse_last_point.set(None)).perpetual();
