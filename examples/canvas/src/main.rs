@@ -1,7 +1,7 @@
 use html::canvas;
 use silkenweb::{clone, mount, prelude::*, window};
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, Touch, TouchList};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, Touch, TouchEvent};
 
 fn main() {
     let mouse_last_point = Mutable::new(None);
@@ -30,16 +30,18 @@ fn main() {
         })
         .on_touchstart({
             clone!(touch_last_point);
-            move |ev, elem| {
+            move |ev, _| {
+                ev.prevent_default();
                 let touches = ev.target_touches();
-                touch_last_point.set(touches.item(0).map(Point::from_touch));
 
-                draw_touches(&elem, touches, &touch_last_point, 1);
+                if touches.length() == 1 {
+                    touch_last_point.set(touches.item(0).map(Point::from_touch));
+                }
             }
         })
         .on_touchmove({
             clone!(touch_last_point);
-            move |ev, elem| draw_touches(&elem, ev.target_touches(), &touch_last_point, 0)
+            move |ev, elem| draw_touch(ev, &elem, &touch_last_point)
         });
 
     window::on_mouseup(move |_| mouse_last_point.set(None)).perpetual();
@@ -48,27 +50,28 @@ fn main() {
     mount("app", cv);
 }
 
-fn draw_touches(
+fn draw_touch(
+    touch_event: TouchEvent,
     canvas: &HtmlCanvasElement,
-    touches: TouchList,
     touch_last_point: &Mutable<Option<Point>>,
-    start_index: u32,
 ) {
+    touch_event.prevent_default();
+    let touches = touch_event.target_touches();
+
+    if touches.length() != 1 {
+        return;
+    }
+
     if let Some(start_point) = touch_last_point.get() {
+        let end_point = Point::from_touch(touches.item(0).unwrap());
+
         let ctx = context(canvas);
         ctx.begin_path();
         ctx.move_to(start_point.x as f64, start_point.y as f64);
-
-        let mut index = start_index;
-
-        while let Some(touch) = touches.item(index) {
-            let point = Point::from_touch(touch);
-            touch_last_point.set(Some(point));
-            ctx.line_to(point.x as f64, point.y as f64);
-            index += 1;
-        }
-
+        ctx.line_to(end_point.x as f64, end_point.y as f64);
         ctx.stroke();
+
+        touch_last_point.set(Some(end_point));
     }
 }
 
