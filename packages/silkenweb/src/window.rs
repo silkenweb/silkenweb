@@ -9,7 +9,7 @@ use crate::event::{bubbling_events, GlobalEventCallback};
 /// Manage an event handler.
 ///
 /// This will remove the event handler when dropped.
-#[must_use]
+#[must_use = "`EventCallback` will be removed when it is dropped. Use the `perpetual` method to make it permanent."]
 pub struct EventCallback(GlobalEventCallback<Window>);
 
 impl EventCallback {
