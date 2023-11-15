@@ -1,5 +1,5 @@
 use html::canvas;
-use silkenweb::{clone, mount, prelude::*};
+use silkenweb::{clone, mount, prelude::*, window};
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, Touch, TouchList};
 
@@ -28,7 +28,6 @@ fn main() {
                 }
             }
         })
-        .on_mouseup(move |_, _| mouse_last_point.set(None))
         .on_touchstart({
             clone!(touch_last_point);
             move |ev, elem| {
@@ -41,8 +40,10 @@ fn main() {
         .on_touchmove({
             clone!(touch_last_point);
             move |ev, elem| draw_touches(&elem, ev.changed_touches(), &touch_last_point, 0)
-        })
-        .on_touchcancel(move |_, _| touch_last_point.set(None));
+        });
+
+    window::on_mouseup(move |_| mouse_last_point.set(None)).perpetual();
+    window::on_touchcancel(move |_| touch_last_point.set(None)).perpetual();
 
     mount("app", cv);
 }
