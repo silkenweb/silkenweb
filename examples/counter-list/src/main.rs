@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
@@ -17,7 +15,7 @@ use silkenweb::{
 fn main() {
     log_panics();
 
-    let list = Rc::new(MutableVec::new());
+    let list = MutableVec::new();
 
     mount(
         "app",
@@ -37,13 +35,13 @@ fn main() {
 #[derive(Copy, Clone)]
 pub struct Counter;
 
-fn push_button(list: Rc<MutableVec<Counter>>) -> Button {
+fn push_button(list: MutableVec<Counter>) -> Button {
     button()
         .on_click(move |_, _| list.lock_mut().push_cloned(Counter))
         .text("+")
 }
 
-fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
+fn pop_button(list: MutableVec<Counter>) -> Button {
     button()
         .on_click(move |_, _| {
             list.lock_mut().pop();
@@ -52,7 +50,7 @@ fn pop_button(list: Rc<MutableVec<Counter>>) -> Button {
 }
 
 pub fn define_counter() -> Div {
-    let count = Rc::new(Mutable::new(0));
+    let count = Mutable::new(0);
     let count_text = count.signal_ref(|i| format!("{i}"));
 
     div()
@@ -61,7 +59,7 @@ pub fn define_counter() -> Div {
         .child(define_button("+", 1, count))
 }
 
-pub fn define_button(label: &str, delta: i64, count: Rc<Mutable<i64>>) -> Button {
+pub fn define_button(label: &str, delta: i64, count: Mutable<i64>) -> Button {
     button()
         .on_click(move |_, _| {
             count.replace_with(move |i| *i + delta);
