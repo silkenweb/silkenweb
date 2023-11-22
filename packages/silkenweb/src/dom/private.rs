@@ -20,7 +20,7 @@ pub trait InstantiableDom:
 pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
     type Node;
 
-    fn new(ns: Namespace, tag: &str) -> Self;
+    fn new(ns: &Namespace, tag: &str) -> Self;
 
     fn append_child(&mut self, child: &Self::Node);
 

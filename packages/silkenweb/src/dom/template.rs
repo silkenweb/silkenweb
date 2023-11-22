@@ -41,7 +41,7 @@ where
 {
     type Node = TemplateNode<Param, D>;
 
-    fn new(ns: Namespace, tag: &str) -> Self {
+    fn new(ns: &Namespace, tag: &str) -> Self {
         Self {
             element: D::InstantiableElement::new(ns, tag),
             initialization_fns: InitializationFns::new(),

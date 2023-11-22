@@ -39,7 +39,7 @@ impl fmt::Display for WetElement {
 impl DomElement for WetElement {
     type Node = WetNode;
 
-    fn new(ns: Namespace, tag: &str) -> Self {
+    fn new(ns: &Namespace, tag: &str) -> Self {
         Self {
             element: ns.create_element(tag),
         }

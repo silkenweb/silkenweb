@@ -107,9 +107,10 @@ enum SharedHydroElement {
 impl DomElement for HydroElement {
     type Node = HydroNode;
 
-    fn new(namespace: Namespace, tag: &str) -> Self {
+    fn new(namespace: &Namespace, tag: &str) -> Self {
         Self::from_shared(SharedHydroElement::Dry(Box::new(SharedDryElement::new(
-            namespace, tag,
+            namespace.clone(),
+            tag,
         ))))
     }
 

@@ -58,7 +58,7 @@ macro_rules! custom_html_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
-                namespace = $crate::node::element::Namespace::Html;
+                namespace = &$crate::node::element::Namespace::Html;
                 $($tail)*
             }
         );
@@ -77,7 +77,7 @@ macro_rules! html_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::HtmlElement, $crate::elements::AriaElement];
                 common_events = [$crate::elements::HtmlElementEvents];
-                namespace = $crate::node::element::Namespace::Html;
+                namespace = &$crate::node::element::Namespace::Html;
                 doc_macro = html_element_doc;
                 attribute_doc_macro = html_attribute_doc;
                 $($tail)*
@@ -125,7 +125,7 @@ macro_rules! svg_element {
             $name $( ($text_name) )? = {
                 common_attributes = [$crate::elements::svg::attributes::Core, $crate::elements::AriaElement];
                 common_events = [];
-                namespace = $crate::node::element::Namespace::Svg;
+                namespace = &$crate::node::element::Namespace::Svg;
                 doc_macro = svg_element_doc;
                 attribute_doc_macro = svg_attribute_doc;
                 $($tail)*

@@ -60,7 +60,7 @@ pub struct GenericElement<D: Dom = DefaultDom, Mutability = Mut> {
 
 impl<D: Dom> GenericElement<D> {
     /// Construct an element with type `tag` in `namespace`.
-    pub fn new(namespace: Namespace, tag: &str) -> Self {
+    pub fn new(namespace: &Namespace, tag: &str) -> Self {
         Self::from_dom(D::Element::new(namespace, tag), 0)
     }
 
@@ -956,18 +956,18 @@ impl<D: Dom> ElementHandle<D, web_sys::Element> {
 }
 
 /// The namespace of a DOM element.
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum Namespace {
     /// New elements in the `Html` namespace are created with `create_element`,
     /// thus avoiding converting the namespace to a javascript string.
     Html,
     Svg,
     MathML,
-    Other(&'static str),
+    Other(String),
 }
 
 impl Namespace {
-    pub(crate) fn create_element(self, tag: &str) -> web_sys::Element {
+    pub(crate) fn create_element(&self, tag: &str) -> web_sys::Element {
         match self {
             Namespace::Html => document::create_element(tag),
             _ => document::create_element_ns(intern_str(self.as_str()), tag),

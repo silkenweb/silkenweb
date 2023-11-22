@@ -27,8 +27,8 @@ impl DryElement {
 impl private::DomElement for DryElement {
     type Node = DryNode;
 
-    fn new(ns: Namespace, tag: &str) -> Self {
-        Self::from_shared(SharedDryElement::new(ns, tag))
+    fn new(ns: &Namespace, tag: &str) -> Self {
+        Self::from_shared(SharedDryElement::new(ns.clone(), tag))
     }
 
     fn append_child(&mut self, child: &Self::Node) {
@@ -412,7 +412,7 @@ impl<Node: DryChild> SharedDryElement<Node> {
 
     pub fn clone_node(&self) -> Self {
         Self {
-            namespace: self.namespace,
+            namespace: self.namespace.clone(),
             tag: self.tag.clone(),
             attributes: self.attributes.clone(),
             styles: self.styles.clone(),
@@ -476,7 +476,7 @@ impl SharedDryElement<HydroNode> {
 
     pub fn hydrate(self, dom_elem: &web_sys::Element, tracker: &mut HydrationStats) -> WetElement {
         let existing_namespace = dom_elem.namespace_uri().unwrap_or_default();
-        let new_namespace = self.namespace;
+        let new_namespace = &self.namespace;
         let new_tag = &self.tag;
 
         if new_namespace.as_str() == existing_namespace
@@ -670,7 +670,7 @@ fn fmt_attr(f: &mut fmt::Formatter, name: &str, value: &str) -> Result<(), fmt::
 
 impl<Node: Into<WetNode>> From<SharedDryElement<Node>> for WetElement {
     fn from(dry: SharedDryElement<Node>) -> Self {
-        let mut wet = WetElement::new(dry.namespace, &dry.tag);
+        let mut wet = WetElement::new(&dry.namespace, &dry.tag);
 
         if let Some(style) = dry.style_prop_text() {
             wet.attribute(STYLE_ATTR, &style);
