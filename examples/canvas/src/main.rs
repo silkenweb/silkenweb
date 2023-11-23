@@ -1,5 +1,12 @@
 use html::canvas;
-use silkenweb::{clone, mount, prelude::*, window};
+use silkenweb::{
+    clone,
+    dom::Wet,
+    elements::html::{a, button, div},
+    mount,
+    prelude::*,
+    window,
+};
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, Touch, TouchEvent};
 
@@ -47,7 +54,20 @@ fn main() {
     window::on_mouseup(move |_| mouse_last_point.set(None)).perpetual();
     window::on_touchcancel(move |_| touch_last_point.set(None)).perpetual();
 
-    mount("app", cv);
+    let save = button().text("Save").on_click({
+        let cv = cv.handle();
+
+        move |_, _| {
+            if let Ok(data_url) = cv.dom_element().to_data_url() {
+                a::<Wet>().href(data_url).map_element(|elem| {
+                    elem.set_download("drawing.png");
+                    elem.click();
+                });
+            }
+        }
+    });
+
+    mount("app", div().children([div().child(cv), div().child(save)]));
 }
 
 fn draw_touch(
