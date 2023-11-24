@@ -187,6 +187,8 @@ jobs:
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
+    - working-directory: examples/inline-svgs
+      run: trunk build
     - working-directory: examples/js-framework-benchmark
       run: trunk build
     - working-directory: examples/reactive-styles
@@ -314,6 +316,8 @@ jobs:
     - working-directory: examples/hello-world
       run: trunk build
     - working-directory: examples/hydration
+      run: trunk build
+    - working-directory: examples/inline-svgs
       run: trunk build
     - working-directory: examples/js-framework-benchmark
       run: trunk build

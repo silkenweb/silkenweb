@@ -76,6 +76,10 @@ jobs:
       run: trunk build --release --public-url examples/hydration
     - run: cp -R examples/hydration/dist/ target/website/examples/hydration
     - run: echo /examples/hydration/\* /examples/hydration/index.html 200 >> target/website/_redirects
+    - working-directory: examples/inline-svgs
+      run: trunk build --release --public-url examples/inline-svgs
+    - run: cp -R examples/inline-svgs/dist/ target/website/examples/inline-svgs
+    - run: echo /examples/inline-svgs/\* /examples/inline-svgs/index.html 200 >> target/website/_redirects
     - working-directory: examples/js-framework-benchmark
       run: trunk build --release --public-url examples/js-framework-benchmark
     - run: cp -R examples/js-framework-benchmark/dist/ target/website/examples/js-framework-benchmark
