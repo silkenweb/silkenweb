@@ -11,6 +11,7 @@ futures-signals = { workspace = true }
 reqwasm = { workspace = true }
 serde = { workspace = true }
 silkenweb = { workspace = true, features = ["css-transpile"] }
+silkenweb-parse = { workspace = true }
 chrono = { workspace = true, features = ["serde", "wasmbind"] }
 timeago = { workspace = true }
 async-recursion = { workspace = true }

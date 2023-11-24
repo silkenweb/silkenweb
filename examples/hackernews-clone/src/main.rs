@@ -15,6 +15,7 @@ use silkenweb::{
     task::TaskSignal,
     value::Sig,
 };
+use silkenweb_parse::html_to_nodes;
 use timeago::Formatter;
 
 css!(path = "hackernews.css", validate);
@@ -261,10 +262,7 @@ impl CommentTree {
 }
 
 fn text_as_html(text: &str) -> Div {
-    let text = text.to_owned();
-    div()
-        .class(USER_CONTENT)
-        .effect(move |elem| elem.set_inner_html(&text))
+    div().class(USER_CONTENT).children(html_to_nodes(text))
 }
 
 fn user_link(user: &str) -> A {

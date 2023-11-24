@@ -147,6 +147,7 @@ features = [
     "HtmlTableElement",
     "HtmlTableRowElement",
     "HtmlTableSectionElement",
+    "HtmlTemplateElement",
     "HtmlTextAreaElement",
     "HtmlTimeElement",
     "HtmlTitleElement",

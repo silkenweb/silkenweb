@@ -1,0 +1,24 @@
+[package]
+name = "silkenweb-parse"
+version = { workspace = true }
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Parse HTML into Silkenweb data"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui"]
+keywords = ["reactive"]
+
+[dependencies]
+silkenweb = { workspace = true }
+
+[target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
+scraper = { workspace = true }
+html5ever = { workspace = true }
+ego-tree = { workspace = true }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+web-sys = { workspace = true }
+wasm-bindgen = { workspace = true }
