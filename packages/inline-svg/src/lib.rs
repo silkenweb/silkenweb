@@ -10,18 +10,17 @@ use quote::quote;
 use silkenweb_parse::html_to_tokens;
 use syn::{parse_macro_input, LitStr};
 
-// TODO: Doc
 #[proc_macro]
 #[proc_macro_error]
-pub fn inline_svg(input: TokenStream) -> TokenStream {
+pub fn svg_file(input: TokenStream) -> TokenStream {
     let file: LitStr = parse_macro_input!(input);
     let file_path = root_dir().join(file.value());
-    inline_svg_file(&file_path).into()
+    svg_from_path(&file_path).into()
 }
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn inline_svg_dir(input: TokenStream) -> TokenStream {
+pub fn svg_dir(input: TokenStream) -> TokenStream {
     let dir_literal: LitStr = parse_macro_input!(input);
     let dir = dir_literal.value();
     let fns = fs::read_dir(root_dir().join(&dir))
@@ -32,7 +31,7 @@ pub fn inline_svg_dir(input: TokenStream) -> TokenStream {
                 .path();
 
             if path.is_file() {
-                Some(inline_svg_file(&path))
+                Some(svg_from_path(&path))
             } else {
                 None
             }
@@ -41,7 +40,7 @@ pub fn inline_svg_dir(input: TokenStream) -> TokenStream {
     quote!(#(#fns)*).into()
 }
 
-fn inline_svg_file(file_path: &Path) -> proc_macro2::TokenStream {
+fn svg_from_path(file_path: &Path) -> proc_macro2::TokenStream {
     let svg_text = fs::read_to_string(file_path)
         .unwrap_or_else(|_| abort_call_site!("Unable to read file '{:?}'", &file_path));
     let mut element_iter = html_to_tokens(quote! {D}.into(), &svg_text).into_iter();
