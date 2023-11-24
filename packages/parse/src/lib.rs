@@ -84,7 +84,7 @@ mod arch {
         while let Some(current) = child {
             if let Some(src_elem) = current.dyn_ref::<web_sys::Element>() {
                 let ns = src_elem.namespace_uri().unwrap_or_default();
-                let mut elem = GenericElement::new(&Namespace::Other(ns), &src_elem.tag_name());
+                let mut elem = GenericElement::new(&Namespace::Other(ns), &src_elem.local_name());
                 let attributes = src_elem.attributes();
 
                 for item_index in 0.. {
