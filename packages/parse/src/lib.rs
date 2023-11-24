@@ -116,7 +116,7 @@ mod arch {
 
     use crate::DomNode;
 
-    pub fn parse_html(html: &str) -> Vec<DomNode> {
+    pub(super) fn parse_html(html: &str) -> Vec<DomNode> {
         let fragment = Html::parse_fragment(html);
         tree_to_nodes(&fragment.root_element())
     }
@@ -161,7 +161,7 @@ mod arch {
 
     use crate::DomNode;
 
-    pub fn parse_html(html: &str) -> Vec<DomNode> {
+    pub(super) fn parse_html(html: &str) -> Vec<DomNode> {
         let tmpl = GenericElement::<Wet>::new(&Namespace::Html, "template");
         let tmpl_elem = tmpl
             .handle()
