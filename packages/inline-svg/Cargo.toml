@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-inline-svgs"
+name = "silkenweb-inline-svg"
 version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"

@@ -32,7 +32,7 @@ silkenweb-macros = { path = "packages/macros", version = "0.7.1" }
 silkenweb-task = { path = "packages/task", version = "0.7.1" }
 silkenweb-tauri-proc-macro = { path = "packages/tauri-proc-macro", version = "0.7.1" }
 silkenweb-parse = { path = "packages/parse", version = "0.7.1" }
-silkenweb-inline-svgs = { path = "packages/inline-svgs", version = "0.7.1" }
+silkenweb-inline-svg = { path = "packages/inline-svg", version = "0.7.1" }
 silkenweb-test = { path = "packages/test", version = "0.7.1" }
 
 anyhow = "1.0.75"

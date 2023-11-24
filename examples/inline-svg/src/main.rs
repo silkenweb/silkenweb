@@ -1,5 +1,5 @@
 use silkenweb::{elements::html::div, mount, prelude::ParentElement};
-use silkenweb_inline_svgs::{inline_svg, inline_svg_dir};
+use silkenweb_inline_svg::{inline_svg, inline_svg_dir};
 
 mod svg {
     super::inline_svg_dir!("svg");

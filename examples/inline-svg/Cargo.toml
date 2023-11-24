@@ -1,5 +1,5 @@
 [package]
-name = "silkenweb-example-inline-svgs"
+name = "silkenweb-example-inline-svg"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 silkenweb = { workspace = true }
-silkenweb-inline-svgs  = { workspace = true }
+silkenweb-inline-svg  = { workspace = true }
