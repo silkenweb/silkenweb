@@ -1,0 +1,22 @@
+[package]
+name = "silkenweb-inline-svgs"
+version = { workspace = true }
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+description = "Convert SVGs to Silkenweb nodes"
+homepage = "https://github.com/silkenweb/silkenweb"
+repository = "https://github.com/silkenweb/silkenweb"
+license = "MIT OR Apache-2.0"
+
+categories = ["gui"]
+keywords = ["reactive"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+silkenweb-parse = { workspace = true }
+syn = { workspace = true, features = ["full"] }
+proc-macro-error = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }

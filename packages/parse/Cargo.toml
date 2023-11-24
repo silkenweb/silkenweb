@@ -13,6 +13,8 @@ keywords = ["reactive"]
 
 [dependencies]
 silkenweb = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
 
 [target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
 scraper = { workspace = true }

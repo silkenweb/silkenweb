@@ -2907,6 +2907,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-example-inline-svgs"
+version = "0.1.0"
+dependencies = [
+ "silkenweb",
+ "silkenweb-inline-svgs",
+]
+
+[[package]]
 name = "silkenweb-example-reactive-styles"
 version = "0.1.0"
 dependencies = [
@@ -2992,6 +3000,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-inline-svgs"
+version = "0.7.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "silkenweb-parse",
+ "syn 2.0.32",
+]
+
+[[package]]
 name = "silkenweb-js-framework-benchmark"
 version = "0.1.0"
 dependencies = [
@@ -3020,6 +3039,8 @@ version = "0.7.1"
 dependencies = [
  "ego-tree",
  "html5ever",
+ "proc-macro2",
+ "quote",
  "scraper",
  "silkenweb",
  "wasm-bindgen",
