@@ -36,9 +36,12 @@ fn tree_to_nodes<D: Dom>(nodes: Vec<DomNode>) -> Vec<Node<D>> {
             DomNode::Element {
                 ns,
                 name,
-                attributes,
+                mut attributes,
                 children,
             } => {
+                // Sort attributes for testability
+                attributes.sort();
+
                 let mut elem = GenericElement::new(&Namespace::Other(ns), &name);
 
                 for (name, value) in attributes {
@@ -70,9 +73,12 @@ fn tree_to_tokens(dom_type: proc_macro2::TokenStream, nodes: Vec<DomNode>) -> Ve
             DomNode::Element {
                 ns,
                 name,
-                attributes,
+                mut attributes,
                 children,
             } => {
+                // Sort attributes for testability
+                attributes.sort();
+
                 let children =
                     tree_to_tokens(dom_type.clone(), children).into_iter().map(proc_macro2::TokenStream::from);
                 let attributes = attributes.into_iter().map(|(name, value)| {

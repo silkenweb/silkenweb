@@ -3006,8 +3006,11 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
+ "silkenweb",
+ "silkenweb-inline-svg",
  "silkenweb-parse",
  "syn 2.0.32",
+ "wasm-bindgen-test",
 ]
 
 [[package]]

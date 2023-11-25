@@ -239,9 +239,12 @@ fn playwright(tasks: Tasks) -> Tasks {
         .run(cmd!("npx playwright test").dir(dir))
 }
 
-fn wasm_pack_test(tasks: Tasks) -> Tasks {
-    let dir = "packages/silkenweb";
-    tasks.run(cmd!("wasm-pack test --headless --firefox").dir(dir))
+fn wasm_pack_test(mut tasks: Tasks) -> Tasks {
+    for dir in ["packages/silkenweb", "packages/inline-svg"] {
+        tasks.add_run(cmd!("wasm-pack test --headless --firefox").dir(dir));
+    }
+
+    tasks
 }
 
 fn browser_example_dirs() -> WorkflowResult<Vec<PathBuf>> {
