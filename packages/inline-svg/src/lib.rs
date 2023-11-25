@@ -1,3 +1,4 @@
+// TODO: Rename to `inline-html`?
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -9,6 +10,31 @@ use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
 use silkenweb_parse::html_to_tokens;
 use syn::{parse_macro_input, LitStr};
+
+#[proc_macro]
+#[proc_macro_error]
+pub fn inline_svg(input: TokenStream) -> TokenStream {
+    let svg: LitStr = parse_macro_input!(input);
+    let svg_text = svg.value();
+    let mut element_iter = html_to_tokens(quote! {D}.into(), &svg_text).into_iter();
+    let element: proc_macro2::TokenStream = element_iter
+        .next()
+        .unwrap_or_else(|| abort_call_site!("Unable to parse any elements"))
+        .into();
+
+    if element_iter.next().is_some() {
+        abort_call_site!("Multiple elements found");
+    }
+
+    quote! {{
+        pub fn node<D: ::silkenweb::dom::Dom>() -> ::silkenweb::node::Node<D> {
+            #element
+        }
+
+        node()
+    }}
+    .into()
+}
 
 #[proc_macro]
 #[proc_macro_error]
