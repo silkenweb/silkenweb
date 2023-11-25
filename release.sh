@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-for PKG in base signals-ext css macros task silkenweb tauri-proc-macro tauri parse inline-svg test
+for PKG in base signals-ext css macros task silkenweb tauri-proc-macro tauri parse inline-html test
 do
     echo '(cd packages/'"$PKG"' && cargo publish)'
 done

@@ -1,9 +1,9 @@
 [package]
-name = "silkenweb-inline-svg"
+name = "silkenweb-inline-html"
 version = { workspace = true }
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"
-description = "Convert SVGs to Silkenweb nodes"
+description = "Convert HTML snippets to Silkenweb nodes"
 homepage = "https://github.com/silkenweb/silkenweb"
 repository = "https://github.com/silkenweb/silkenweb"
 license = "MIT OR Apache-2.0"
@@ -23,5 +23,5 @@ proc-macro2 = { workspace = true }
 
 [dev-dependencies]
 silkenweb = { workspace = true }
-silkenweb-inline-svg  = { workspace = true }
+silkenweb-inline-html  = { workspace = true }
 wasm-bindgen-test = { workspace = true }

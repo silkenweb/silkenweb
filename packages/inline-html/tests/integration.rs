@@ -1,5 +1,5 @@
 use silkenweb::{dom::Wet, elements::html::div, node::Node, prelude::ParentElement};
-use silkenweb_inline_svg::{inline_html, html_dir, html_file};
+use silkenweb_inline_html::{html_dir, html_file, inline_html};
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 wasm_bindgen_test_configure!(run_in_browser);

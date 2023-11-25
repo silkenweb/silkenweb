@@ -242,7 +242,7 @@ fn playwright(tasks: Tasks) -> Tasks {
 }
 
 fn wasm_pack_test(mut tasks: Tasks) -> Tasks {
-    for dir in ["packages/silkenweb", "packages/inline-svg"] {
+    for dir in ["packages/silkenweb", "packages/inline-html"] {
         tasks.add_run(cmd!("wasm-pack test --headless --firefox").dir(dir));
     }
 

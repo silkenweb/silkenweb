@@ -2907,11 +2907,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-example-inline-svg"
+name = "silkenweb-example-inline-html"
 version = "0.1.0"
 dependencies = [
  "silkenweb",
- "silkenweb-inline-svg",
+ "silkenweb-inline-html",
 ]
 
 [[package]]
@@ -3000,14 +3000,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-inline-svg"
+name = "silkenweb-inline-html"
 version = "0.7.1"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
  "silkenweb",
- "silkenweb-inline-svg",
+ "silkenweb-inline-html",
  "silkenweb-parse",
  "syn 2.0.32",
  "wasm-bindgen-test",

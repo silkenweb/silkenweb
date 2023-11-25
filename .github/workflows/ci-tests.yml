@@ -161,7 +161,7 @@ jobs:
       run: npx playwright test
     - working-directory: packages/silkenweb
       run: wasm-pack test --headless --firefox
-    - working-directory: packages/inline-svg
+    - working-directory: packages/inline-html
       run: wasm-pack test --headless --firefox
     - working-directory: examples/animation
       run: trunk build
@@ -191,7 +191,7 @@ jobs:
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
-    - working-directory: examples/inline-svg
+    - working-directory: examples/inline-html
       run: trunk build
     - working-directory: examples/js-framework-benchmark
       run: trunk build
@@ -295,7 +295,7 @@ jobs:
       run: npx playwright test
     - working-directory: packages/silkenweb
       run: wasm-pack test --headless --firefox
-    - working-directory: packages/inline-svg
+    - working-directory: packages/inline-html
       run: wasm-pack test --headless --firefox
     - working-directory: examples/animation
       run: trunk build
@@ -325,7 +325,7 @@ jobs:
       run: trunk build
     - working-directory: examples/hydration
       run: trunk build
-    - working-directory: examples/inline-svg
+    - working-directory: examples/inline-html
       run: trunk build
     - working-directory: examples/js-framework-benchmark
       run: trunk build
@@ -425,5 +425,5 @@ jobs:
         wait-on: 'http://localhost:8080'
     - working-directory: packages/silkenweb
       run: wasm-pack test --headless --firefox
-    - working-directory: packages/inline-svg
+    - working-directory: packages/inline-html
       run: wasm-pack test --headless --firefox
