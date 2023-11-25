@@ -182,6 +182,7 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
         tasks
             .run(cmd!("cargo xtask todomvc-cypress"))
             .apply(playwright)
+            .apply(wasm_pack_test)
             .apply(trunk_build)
     }
 }
