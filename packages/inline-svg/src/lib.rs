@@ -13,10 +13,10 @@ use syn::{parse_macro_input, LitStr};
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn inline_svg(input: TokenStream) -> TokenStream {
-    let svg: LitStr = parse_macro_input!(input);
-    let svg_text = svg.value();
-    let mut element_iter = html_to_tokens(quote! {D}.into(), &svg_text).into_iter();
+pub fn inline_html(input: TokenStream) -> TokenStream {
+    let html: LitStr = parse_macro_input!(input);
+    let html_text = html.value();
+    let mut element_iter = html_to_tokens(quote! {D}.into(), &html_text).into_iter();
     let element: proc_macro2::TokenStream = element_iter
         .next()
         .unwrap_or_else(|| abort_call_site!("Unable to parse any elements"))
@@ -38,15 +38,15 @@ pub fn inline_svg(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn svg_file(input: TokenStream) -> TokenStream {
+pub fn html_file(input: TokenStream) -> TokenStream {
     let file: LitStr = parse_macro_input!(input);
     let file_path = root_dir().join(file.value());
-    svg_from_path(&file_path).into()
+    html_from_path(&file_path).into()
 }
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn svg_dir(input: TokenStream) -> TokenStream {
+pub fn html_dir(input: TokenStream) -> TokenStream {
     let dir_literal: LitStr = parse_macro_input!(input);
     let dir = dir_literal.value();
     let fns = fs::read_dir(root_dir().join(&dir))
@@ -57,7 +57,7 @@ pub fn svg_dir(input: TokenStream) -> TokenStream {
                 .path();
 
             if path.is_file() {
-                Some(svg_from_path(&path))
+                Some(html_from_path(&path))
             } else {
                 None
             }
@@ -66,10 +66,10 @@ pub fn svg_dir(input: TokenStream) -> TokenStream {
     quote!(#(#fns)*).into()
 }
 
-fn svg_from_path(file_path: &Path) -> proc_macro2::TokenStream {
-    let svg_text = fs::read_to_string(file_path)
+fn html_from_path(file_path: &Path) -> proc_macro2::TokenStream {
+    let html_text = fs::read_to_string(file_path)
         .unwrap_or_else(|_| abort_call_site!("Unable to read file '{:?}'", &file_path));
-    let mut element_iter = html_to_tokens(quote! {D}.into(), &svg_text).into_iter();
+    let mut element_iter = html_to_tokens(quote! {D}.into(), &html_text).into_iter();
     let element: proc_macro2::TokenStream = element_iter
         .next()
         .unwrap_or_else(|| abort_call_site!("Unable to parse any elements for '{:?}'", &file_path))

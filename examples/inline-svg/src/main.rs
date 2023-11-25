@@ -1,12 +1,16 @@
 use silkenweb::{elements::html::div, mount, prelude::ParentElement};
-use silkenweb_inline_svg::{svg_dir, svg_file};
+use silkenweb_inline_svg::{html_dir, html_file, inline_html};
 
 mod svg {
-    super::svg_dir!("svg");
+    super::html_dir!("svg");
 }
 
-svg_file!("svg/test-image.svg");
+html_file!("svg/test-image.svg");
 
 fn main() {
-    mount("app", div().children([test_image(), svg::test_image()]));
+    let snippet = inline_html!(r#"<p>This is an HTML snippet</p>"#);
+    mount(
+        "app",
+        div().children([snippet, test_image(), svg::test_image()]),
+    );
 }
