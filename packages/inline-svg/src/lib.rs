@@ -56,11 +56,7 @@ pub fn svg_dir(input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|_| abort_call_site!("Unable to read dir entry"))
                 .path();
 
-            if path.is_file()
-                && path
-                    .extension()
-                    .map_or(false, |ext| ext.eq_ignore_ascii_case("svg"))
-            {
+            if path.is_file() {
                 Some(svg_from_path(&path))
             } else {
                 None
