@@ -9,7 +9,7 @@
     "axe-core": "^4.7.2",
     "cypress": "^13.3.0",
     "cypress-axe": "^1.5.0",
-    "start-server-and-test": "^2.0.0"
+    "start-server-and-test": "^2.0.3"
   },
   "scripts": {
     "start": "cd .. && trunk serve --no-autoreload --ignore=.",
