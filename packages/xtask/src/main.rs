@@ -172,12 +172,14 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     let tasks = web_tests(platform).run(cmd!("trunk build").dir(TODOMVC_DIR));
 
     if platform == Platform::WindowsLatest {
-        Ok(tasks.step(
-            action("cypress-io/github-action@v5")
-                .with("working-directory", "examples/todomvc/e2e")
-                .with("start", "npm start")
-                .with("wait-on", "'http://localhost:8080'"),
-        ))
+        Ok(tasks
+            .step(
+                action("cypress-io/github-action@v5")
+                    .with("working-directory", "examples/todomvc/e2e")
+                    .with("start", "npm start")
+                    .with("wait-on", "'http://localhost:8080'"),
+            )
+            .apply(wasm_pack_test))
     } else {
         tasks
             .run(cmd!("cargo xtask todomvc-cypress"))

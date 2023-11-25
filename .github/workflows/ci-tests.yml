@@ -159,6 +159,10 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
+    - working-directory: packages/silkenweb
+      run: wasm-pack test --headless --firefox
+    - working-directory: packages/inline-svg
+      run: wasm-pack test --headless --firefox
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -289,6 +293,10 @@ jobs:
       run: npx playwright install
     - working-directory: examples/todomvc/playwright
       run: npx playwright test
+    - working-directory: packages/silkenweb
+      run: wasm-pack test --headless --firefox
+    - working-directory: packages/inline-svg
+      run: wasm-pack test --headless --firefox
     - working-directory: examples/animation
       run: trunk build
     - working-directory: examples/async-http-request
@@ -415,3 +423,7 @@ jobs:
         working-directory: examples/todomvc/e2e
         start: npm start
         wait-on: 'http://localhost:8080'
+    - working-directory: packages/silkenweb
+      run: wasm-pack test --headless --firefox
+    - working-directory: packages/inline-svg
+      run: wasm-pack test --headless --firefox
