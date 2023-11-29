@@ -1,4 +1,4 @@
-// TODO: Rename to `inline-html`?
+// TODO: Doc
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -11,6 +11,7 @@ use quote::quote;
 use silkenweb_parse::html_to_tokens;
 use syn::{parse_macro_input, LitStr};
 
+// TODO: Doc
 #[proc_macro]
 #[proc_macro_error]
 pub fn inline_html(input: TokenStream) -> TokenStream {
@@ -36,6 +37,7 @@ pub fn inline_html(input: TokenStream) -> TokenStream {
     .into()
 }
 
+// TODO: Doc
 #[proc_macro]
 #[proc_macro_error]
 pub fn html_file(input: TokenStream) -> TokenStream {
@@ -44,6 +46,7 @@ pub fn html_file(input: TokenStream) -> TokenStream {
     html_from_path(&file_path).into()
 }
 
+// TODO: Doc
 #[proc_macro]
 #[proc_macro_error]
 pub fn html_dir(input: TokenStream) -> TokenStream {

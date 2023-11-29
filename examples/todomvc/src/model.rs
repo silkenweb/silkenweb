@@ -40,7 +40,6 @@ impl TodoApp {
     }
 
     pub fn save(&self) {
-        // TODO: Log errors rather than throwing
         if let Ok(storage) = Storage::local() {
             let items = serde_json::to_string(&self.items).unwrap_throw();
             storage
