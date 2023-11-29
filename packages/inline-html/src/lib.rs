@@ -1,4 +1,6 @@
-// TODO: Doc
+//! Include inline HTML snippets
+//!
+//! See [`silkenweb_parse`] for details on the parsing.
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -11,7 +13,23 @@ use quote::quote;
 use silkenweb_parse::html_to_tokens;
 use syn::{parse_macro_input, LitStr};
 
-// TODO: Doc
+/// Include an HTML snippet from a string literal.
+///
+/// Take a string literal containing a single HTML element, and produce a
+/// [`Node`][silkenweb::node::Node] expression. The [`Dom`][silkenweb::dom::Dom]
+/// type is not specified, so if it can't be determined by type inference, you
+/// may need to provide a type annotation.
+///
+/// See [`silkenweb_parse`] for details on the parsing.
+///
+/// # Example
+///
+/// ```
+/// # use silkenweb_inline_html::inline_html;
+/// # use silkenweb::node::Node;
+/// let node: Node = inline_html!("<p>Inline HTML</p>");
+/// assert_eq!(node.to_string(), "<p>Inline HTML</p>");
+/// ```
 #[proc_macro]
 #[proc_macro_error]
 pub fn inline_html(input: TokenStream) -> TokenStream {
@@ -37,7 +55,16 @@ pub fn inline_html(input: TokenStream) -> TokenStream {
     .into()
 }
 
-// TODO: Doc
+/// Include an HTML snippet from a file.
+///
+/// This takes a string literal as a filename, parses the contents of the file
+/// and puts the resulting expression into a funcion. The function name is
+/// derived from the filename by replacing non alphanumeric characters with an
+/// `_`.
+///
+/// See `examples/inline-html` for a usage example.
+///
+/// See [`silkenweb_parse`] for details on the parsing.
 #[proc_macro]
 #[proc_macro_error]
 pub fn html_file(input: TokenStream) -> TokenStream {
@@ -46,7 +73,14 @@ pub fn html_file(input: TokenStream) -> TokenStream {
     html_from_path(&file_path).into()
 }
 
-// TODO: Doc
+/// Include HTML snippets from a directory of files.
+///
+/// This takes a string literal as a directory name and is equivalent to running
+/// [`html_file!`] on every file directly contained in directory.
+///
+/// See `examples/inline-html` for a usage example.
+///
+/// See [`silkenweb_parse`] for details on the parsing.
 #[proc_macro]
 #[proc_macro_error]
 pub fn html_dir(input: TokenStream) -> TokenStream {

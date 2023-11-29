@@ -15,6 +15,7 @@ keywords = ["reactive"]
 proc-macro = true
 
 [dependencies]
+silkenweb = { workspace = true }
 silkenweb-parse = { workspace = true }
 syn = { workspace = true, features = ["full"] }
 proc-macro-error = { workspace = true }
