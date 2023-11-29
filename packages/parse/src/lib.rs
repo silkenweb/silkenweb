@@ -1,5 +1,18 @@
-// TODO: Doc
-
+//! # Parse HTML Fragments
+//!
+//! This module provides tools for parsing HTML fragments. An HTML fragment is a
+//! (possibly empty) list of HTML text or element nodes. For example:
+//!
+//! ```html
+//! <p>This is an HTML fragment</p>
+//! ```
+//!
+//! - Parsing on the browser is done using `Element::innerHtml`. On the server
+//!   it
+//! uses [`scraper`].
+//! - If any errors are present, a best effort is made to parse the HTML.
+//! - Any empty text nodes are removed.
+//! - Attributes are sorted to make the result more testable.
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
@@ -23,7 +36,20 @@ enum DomNode {
     Text(String),
 }
 
-// TODO: Doc
+/// Convert an HTML fragment to Silkenweb nodes.
+///
+/// See the [module][`self`] documentation for details.
+/// 
+/// # Example
+/// 
+/// ```
+/// # use silkenweb_parse::html_to_nodes;
+/// # use silkenweb::node::Node;
+/// let html_fragment = "<p>Node 1</p><p>Node 2</p>";
+/// let nodes: Vec<Node> = html_to_nodes(html_fragment);
+/// 
+/// assert_eq!(format!("{}{}", nodes[0], nodes[1]), html_fragment);
+/// ```
 pub fn html_to_nodes<D: Dom>(html: &str) -> Vec<Node<D>> {
     tree_to_nodes(arch::parse_html(html))
 }
@@ -60,7 +86,15 @@ fn tree_to_nodes<D: Dom>(nodes: Vec<DomNode>) -> Vec<Node<D>> {
         .collect()
 }
 
-// TODO: Doc
+/// Convert an HTML fragment to Silkenweb node expressions.
+///
+/// This is for writing your own proc macros to parse HTML fragments at compile
+/// time. See the [module][`self`] documentation for details about the parsing.
+///
+/// The resulting [`TokenStream`]s are expressions with type
+/// [`Node`][`silkenweb::node::Node`]. The [`Dom`][`silkenweb::dom::Dom`] type
+/// is left unspecified, so may need to be specified if it can't be determined
+/// with type inference.
 pub fn html_to_tokens(dom_type: TokenStream, html: &str) -> Vec<TokenStream> {
     tree_to_tokens(dom_type.into(), arch::parse_html(html))
 }
