@@ -39,15 +39,15 @@ enum DomNode {
 /// Convert an HTML fragment to Silkenweb nodes.
 ///
 /// See the [module][`self`] documentation for details.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// # use silkenweb_parse::html_to_nodes;
 /// # use silkenweb::node::Node;
 /// let html_fragment = "<p>Node 1</p><p>Node 2</p>";
 /// let nodes: Vec<Node> = html_to_nodes(html_fragment);
-/// 
+///
 /// assert_eq!(format!("{}{}", nodes[0], nodes[1]), html_fragment);
 /// ```
 pub fn html_to_nodes<D: Dom>(html: &str) -> Vec<Node<D>> {
