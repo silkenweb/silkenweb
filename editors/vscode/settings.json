@@ -1,6 +1,6 @@
 {
     "github-actions.workflows.pinned.workflows": [
-        ".github/workflows/ci-tests.yml",
+        ".github/workflows/tests.yml",
         ".github/workflows/website.yml"
     ],
     "rust-analyzer.linkedProjects": [

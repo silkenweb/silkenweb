@@ -1,6 +1,6 @@
 # Silkenweb
 
-[![tests](https://github.com/silkenweb/silkenweb/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/silkenweb/silkenweb/actions/workflows/ci-tests.yml)
+[![tests](https://github.com/silkenweb/silkenweb/actions/workflows/tests.yml/badge.svg)](https://github.com/silkenweb/silkenweb/actions/workflows/tests.yml)
 [![crates.io](https://img.shields.io/crates/v/silkenweb.svg)](https://crates.io/crates/silkenweb)
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
