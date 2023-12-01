@@ -2725,6 +2725,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-book"
+version = "0.7.1"
+dependencies = [
+ "futures-signals",
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-bootstrap"
 version = "0.7.1"
 dependencies = [

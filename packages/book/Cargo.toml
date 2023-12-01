@@ -1,0 +1,10 @@
+[package]
+name = "silkenweb-book"
+version = { workspace = true }
+authors = ["Simon Bourne <simonbourne@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+futures-signals.workspace = true
+silkenweb.workspace = true
