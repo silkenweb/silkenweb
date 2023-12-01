@@ -94,6 +94,7 @@ fn build_website() -> WorkflowResult<CI> {
         stable_rust().wasm(),
     )
     .step(trunk())
+    .step(install("mdbook", "0.4.36"))
     .step(install("mdbook-rust", "0.1.0"))
     .run(cmd!("mdbook build --dest-dir ../../{dest_dir}/book").dir("packages/book"))
     .run(cmd!("mkdir -p {dest_dir}/examples"))
