@@ -7,4 +7,3 @@ publish = false
 
 [dependencies]
 futures-signals.workspace = true
-silkenweb.workspace = true
