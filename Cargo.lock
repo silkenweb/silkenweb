@@ -2729,6 +2729,8 @@ name = "silkenweb-book"
 version = "0.7.1"
 dependencies = [
  "futures-signals",
+ "silkenweb",
+ "web-log",
 ]
 
 [[package]]
