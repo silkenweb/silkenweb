@@ -50,6 +50,10 @@ cd examples/counter
 trunk serve --open
 ```
 
+## Book
+
+The Silkenweb [book] provides a high level introduction to Silkenweb's main concepts.
+
 ## Comparison With Other Frameworks
 
 [Sycamore] and [Leptos] are 2 other signals based Rust frameworks. They are evolving quickly at the time of writing this comparison, as is [Silkenweb]. Also bear in mind I'm not that familiar with [Sycamore] or [Leptos].
@@ -110,6 +114,7 @@ While a macro DSL could be developed to work with Silkenweb, the syntax in Rust 
 - [web-components-wrapper](https://silkenweb.netlify.app/examples/web-components-wrapper)
 
 [Silkenweb]: https://github.com/silkenweb/silkenweb
+[book]: https://silkenweb.netlify.app/book/
 [Sycamore]: https://github.com/sycamore-rs/sycamore
 [Leptos]: https://github.com/leptos-rs/leptos
 [`cargo-leptos`]: https://github.com/leptos-rs/cargo-leptos

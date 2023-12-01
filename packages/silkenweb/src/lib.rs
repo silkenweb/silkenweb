@@ -8,6 +8,11 @@
 //! - [Tauri] support
 //! - [Server Side Rendering] with hydration
 //!
+//! # Book
+//!
+//! The Silkenweb [book] provides a high level introduction to Silkenweb's main
+//! concepts.
+//!
 //! # Quick Start
 //!
 //! First, install the `wasm32` target:
@@ -60,6 +65,7 @@
 //! Reactivity is provided by [`futures_signals`]. It would be helpful to
 //! familiarize yourself using [`futures_signals::tutorial`].
 //!
+//! [book]: https://silkenweb.netlify.app/book/
 //! [trunk]: https://trunkrs.dev/
 //! [counter]: https://github.com/silkenweb/silkenweb/tree/main/examples/counter
 //! [routing]: https://github.com/silkenweb/silkenweb/tree/main/examples/router
