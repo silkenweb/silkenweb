@@ -19,7 +19,7 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - run: cargo install trunk --locked --version 0.17.2
     - run: cargo install mdbook --locked --version 0.4.36
-    - run: cargo install mdbook-rust --locked --version 0.1.0
+    - run: cargo install mdbook-rust --locked --version 0.1.1
     - working-directory: packages/book
       run: mdbook build --dest-dir ../../target/website/book
     - run: mkdir -p target/website/examples
