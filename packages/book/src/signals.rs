@@ -12,8 +12,8 @@ pub fn body() {
 
     // ## Signals and Mutables
     //
-    // A `Mutable` is a variable whose changes can be tracked by a `Signal`. Lets go
-    // through a simple example.
+    // A `Mutable` is a variable with [interior mutability] whose changes can be
+    // tracked by a `Signal`. Lets go through a simple example.
     //
     // First we create a new `Mutable` initialized with the value `1`:
     let x = Mutable::new(1);
@@ -84,6 +84,7 @@ pub fn body() {
     // though, and not guaranteed.
 
     // [`futures-signals` tutorial]: https://docs.rs/futures-signals/latest/futures_signals/tutorial/index.html
+    // [interior mutability]: https://doc.rust-lang.org/reference/interior-mutability.html
     // [microtask queue]: https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide
     // [`Future`]: https://doc.rust-lang.org/std/future/trait.Future.html
     // [`signal_vec`]: https://docs.rs/futures-signals/latest/futures_signals/signal_vec/index.html
