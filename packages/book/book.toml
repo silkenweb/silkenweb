@@ -9,3 +9,6 @@ title = "Silkenweb"
 create-missing = false
 
 [preprocessor.rust]
+
+[output.html]
+site-url = "/book/"
