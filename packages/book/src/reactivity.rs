@@ -30,10 +30,10 @@ pub fn body() {
     // ## Investigating Reactivity
     //
     // Lets see how our app reacts to changes in `count`. We're going to use Server
-    // Side Rendering (SSR). This gives us more explicit control over the [microtask
-    // queue], so we can see whats going on. Converting our app to a `Node<Dry>`
-    // means we can render it to a `String` on the server side (this is what the
-    // `Dry` DOM type is):
+    // Side Rendering (SSR) as this gives us more explicit control over the
+    // [microtask queue], so we can see whats going on. Converting our app to a
+    // `Node<Dry>` means we can render it to a `String` on the server side (this
+    // is what the `Dry` DOM type is):
     let node: Node<Dry> = app.into();
 
     // Now we'll add a convenience function to see what our app looks like at
@@ -42,14 +42,14 @@ pub fn body() {
         assert_eq!(app.to_string(), expected);
     }
 
-    // Firstly, our app doesn't contain any text.
+    // The first thing you might notice is that our app doesn't contain any text yet:
     check(&node, "<p></p>");
     // This is a because we haven't processed the [microtask queue] yet, so lets do
-    // that now:
+    // that:
     render_now_sync();
-    // And we see that `count` has been rendered.
     check(&node, "<p>0</p>");
-    // If we change `count`, it doesn't immediately have an effect:
+    // Now we can see that `count` has been rendered. Similarly, if we change
+    // `count`, it doesn't immediately have an effect:
     count.set(1);
     check(&node, "<p>0</p>");
     // We need to process the [microtask queue] again, then our app will update:
