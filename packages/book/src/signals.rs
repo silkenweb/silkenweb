@@ -96,7 +96,7 @@ pub fn body() {
 mod tests {
     use silkenweb::task::sync_scope;
 
-    use super::*;
+    use super::body;
 
     #[test]
     fn test() {
