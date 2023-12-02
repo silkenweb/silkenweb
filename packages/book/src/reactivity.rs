@@ -1,8 +1,11 @@
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::{
+    signal::{Mutable, SignalExt},
+    signal_vec::{MutableVec, SignalVecExt},
+};
 use silkenweb::{
     dom::Dry,
     elements::{
-        html::{button, div, p},
+        html::{button, div, p, table, td, tr, Tr},
         ElementEvents,
     },
     node::{element::ParentElement, Node},
@@ -78,11 +81,9 @@ pub fn body() {
     // To do this, we can set the children of any DOM node based on a signal.
     // There are 3 ways of doing this:
     //
-    // - add a sigle child based on a signal
+    // - add a single child based on a signal
     // - add an optional child based on a signal
     // - add and remove multiple children based on a vector signal
-    //
-    // We can mix and match any of these on a given parent node.
 
     // ### Single Child Signal
     //
@@ -100,18 +101,24 @@ pub fn body() {
 
     let tab = Mutable::new(Tab::First);
 
-    // Next we map a signal from the current tab to the element we want to display.
+    // Next, we need a way to render a tab:
+    impl Tab {
+        fn render(self) -> Node {
+            match self {
+                Tab::First => p().text("First").into(),
+                Tab::Second => div().text("Second").into(),
+            }
+        }
+    }
+
     // We have to convert the element into a [`Node`] because the elements for each
     // tab are different types.
-    let tab_element = tab.signal().map(|t| -> Node {
-        match t {
-            Tab::First => p().text("First").into(),
-            Tab::Second => div().text("Second").into(),
-        }
-    });
+    //
+    // Now we map a signal from the current tab to the element we want to display:
+    let tab_element = tab.signal().map(Tab::render);
 
-    // Now we define our app:
-    let app: Node<Dry> = div().child(Sig(tab_element)).into();
+    // And define our app:
+    let app = div().child(Sig(tab_element)).into();
 
     // Then render the initial page.
     render_now_sync();
@@ -126,10 +133,70 @@ pub fn body() {
     // ### Optional Child Signal
     //
     // Optional child signals are much the same as child signals, but the
-    // element will appear and disappear base on whether the value i current
-    // `Some` or `None`.`
+    // element will appear and disappear base on whether the value is currently
+    // `Some` or `None`.
 
     // ### Child Signal Vector
+    //
+    // Sometimes we might want to have a variable number of children, based on some
+    // data. For example, we might want to display the results of a database query
+    // in a table. Lets create a simple app that will display a vector of data, to
+    // serve as an example. First we'll define a row type, and a [`MutableVec`] to
+    // hold the records:
+    #[derive(Clone)]
+    struct Row {
+        field1: usize,
+        field2: String,
+    }
+
+    let data = MutableVec::new_with_values(vec![Row {
+        field1: 0,
+        field2: "Rita".to_string(),
+    }]);
+
+    // Now we need a way to render rows:
+    impl Row {
+        fn render(self) -> Tr {
+            let field1 = td().text(self.field1.to_string());
+            let field2 = td().text(&self.field2);
+            tr().children([field1, field2])
+        }
+    }
+
+    // Next, we define a signal that maps `Row`s to rendered rows:
+    let data_elements = data.signal_vec_cloned().map(Row::render);
+    // Now we can define our app, with a table based on `data`:
+    let app = table().children_signal(data_elements).into();
+
+    // Initially we'll just see a table with one row:
+    render_now_sync();
+    check(&app, "<table><tr><td>0</td><td>Rita</td></tr></table>");
+
+    // When we add some data, we can see that our table gets updated:
+    data.lock_mut().push_cloned(Row {
+        field1: 1,
+        field2: "Sue".to_string(),
+    });
+    render_now_sync();
+    check(
+        &app,
+        &[
+            "<table>",
+            "<tr><td>0</td><td>Rita</td></tr>",
+            "<tr><td>1</td><td>Sue</td></tr>",
+            "</table>",
+        ]
+        .join(""),
+    );
+
+    // ### Mixing and Matching Reactive Children
+    //
+    // We can mix and match the methods we've seen so far, on a single parent
+    // element. For example:
+    let data_elements = data.signal_vec_cloned().map(Row::render);
+    let tab_node = tab.signal().map(Tab::render);
+    let app = div().children_signal(data_elements).child(Sig(tab_node));
+    mount(app);
 
     // [`Node`]: https://docs.rs/silkenweb/latest/silkenweb/node/struct.Node.html
     // [`Mutable`]: https://docs.rs/futures-signals/latest/futures_signals/signal/struct.Mutable.html
