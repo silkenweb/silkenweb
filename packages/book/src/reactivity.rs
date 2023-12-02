@@ -42,7 +42,8 @@ pub fn body() {
         assert_eq!(app.to_string(), expected);
     }
 
-    // The first thing you might notice is that our app doesn't contain any text yet:
+    // The first thing you might notice is that our app doesn't contain any text
+    // yet:
     check(&node, "<p></p>");
     // This is a because we haven't processed the [microtask queue] yet, so lets do
     // that:
