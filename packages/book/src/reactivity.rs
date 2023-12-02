@@ -69,6 +69,71 @@ pub fn body() {
     let app = div().child(p().text(Sig(count_text))).child(increment);
     mount(app);
 
+    // ## Children
+    //
+    // So far we've seen how we can add reactivity to the text in a DOM node.
+    // This is great, but very limiting. It would be much more powerful if we
+    // could change the structure of the DOM based on our data.
+    //
+    // To do this, we can set the children of any DOM node based on a signal.
+    // There are 3 ways of doing this:
+    //
+    // - add a sigle child based on a signal
+    // - add an optional child based on a signal
+    // - add and remove multiple children based on a vector signal
+    //
+    // We can mix and match any of these on a given parent node.
+
+    // ### Single Child Signal
+    //
+    // We'll write a very simple app with 2 tabs as an example. Each tab will have a
+    // different element type, and we'll just switch between tabs by setting a
+    // mutable, rather than wiring up buttons to change the tab.
+    //
+    // First we define an enum to represent which tab is selected, and a
+    // [`Mutable`] to hold the current state.
+    #[derive(Copy, Clone)]
+    enum Tab {
+        First,
+        Second,
+    }
+
+    let tab = Mutable::new(Tab::First);
+
+    // Next we map a signal from the current tab to the element we want to display.
+    // We have to convert the element into a [`Node`] because the elements for each
+    // tab are different types.
+    let tab_element = tab.signal().map(|t| -> Node {
+        match t {
+            Tab::First => p().text("First").into(),
+            Tab::Second => div().text("Second").into(),
+        }
+    });
+
+    // Now we define our app:
+    let app: Node<Dry> = div().child(Sig(tab_element)).into();
+
+    // Then render the initial page.
+    render_now_sync();
+    check(&app, "<div><p>First</p></div>");
+
+    // As we would expect, when we change the tab through the [`Mutable`], our app
+    // updates:
+    tab.set(Tab::Second);
+    render_now_sync();
+    check(&app, "<div><div>Second</div></div>");
+
+    // ### Optional Child Signal
+    //
+    // Optional child signals are much the same as child signals, but the
+    // element will appear and disappear base on whether the value i current
+    // `Some` or `None`.`
+
+    // ### Child Signal Vector
+
+    // [`Node`]: https://docs.rs/silkenweb/latest/silkenweb/node/struct.Node.html
+    // [`Mutable`]: https://docs.rs/futures-signals/latest/futures_signals/signal/struct.Mutable.html
+    // [`MutableVec`]: https://docs.rs/futures-signals/latest/futures_signals/signal_vec/struct.MutableVec.html
     // [microtask queue]: https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide
 }
 
