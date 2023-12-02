@@ -91,3 +91,15 @@ pub fn body() {
     // [`MutableVec`]: https://docs.rs/futures-signals/latest/futures_signals/signal_vec/struct.MutableVec.html
     // [`VecDiff`]: https://docs.rs/futures-signals/latest/futures_signals/signal_vec/enum.VecDiff.html
 }
+
+#[cfg(test)]
+mod tests {
+    use silkenweb::task::sync_scope;
+
+    use super::*;
+
+    #[test]
+    fn test() {
+        sync_scope(body)
+    }
+}
