@@ -809,7 +809,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// div().child(Sig(text.signal().map(|text| div().text(text))));
     /// ```
     fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
-        self.optional_child(child.map(|child| Some(child)))
+        self.optional_child(child.map(Some))
     }
 
     /// Add an optional child to the element.
