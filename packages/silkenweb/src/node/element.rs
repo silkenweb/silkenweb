@@ -23,7 +23,7 @@ use silkenweb_base::document;
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::child_vec::ChildVec;
+use self::child_vec::{ChildVec, ParentUnique};
 use super::{ChildNode, Node, Resource};
 use crate::{
     attribute::Attribute,
@@ -161,7 +161,7 @@ impl<D: Dom> GenericElement<D> {
 impl<D: Dom, Mutability> GenericElement<D, Mutability> {
     fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
-            let child_vec = Rc::new(RefCell::new(ChildVec::new(
+            let child_vec = Rc::new(RefCell::new(ChildVec::<D, ParentUnique>::new(
                 self.element.clone(),
                 self.static_child_count,
             )));

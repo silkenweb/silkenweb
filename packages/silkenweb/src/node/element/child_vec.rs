@@ -1,4 +1,4 @@
-use std::mem;
+use std::{marker::PhantomData, mem};
 
 use clonelet::clone;
 use futures_signals::signal_vec::VecDiff;
@@ -8,18 +8,31 @@ use crate::{
     node::Node,
 };
 
-pub struct ChildVec<D: Dom> {
+pub struct ChildVec<D: Dom, PO> {
     parent: D::Element,
     children: Vec<Node<D>>,
     static_child_count: usize,
+    phantom: PhantomData<PO>,
 }
 
-impl<D: Dom> ChildVec<D> {
+pub trait ParentOwner {
+    fn clear(&mut self);
+}
+
+pub struct ParentUnique;
+
+pub struct ParentShared;
+
+impl<D: Dom, PO> ChildVec<D, PO>
+where
+    Self: ParentOwner,
+{
     pub fn new(parent: D::Element, static_child_count: usize) -> Self {
         Self {
             parent,
             children: Vec::new(),
             static_child_count,
+            phantom: PhantomData,
         }
     }
 
@@ -117,17 +130,29 @@ impl<D: Dom> ChildVec<D> {
         }
     }
 
+    fn elementwise_clear(&mut self) {
+        let children = mem::take(&mut self.children);
+
+        for (index, child) in children.into_iter().enumerate().rev() {
+            self.parent
+                .remove_child(index + self.static_child_count, &child.node);
+        }
+    }
+}
+
+impl<D: Dom> ParentOwner for ChildVec<D, ParentUnique> {
     fn clear(&mut self) {
         if self.static_child_count > 0 {
-            clone!(mut self.parent);
-            let children = mem::take(&mut self.children);
-
-            for (index, child) in children.into_iter().enumerate().rev() {
-                parent.remove_child(index + self.static_child_count, &child.node);
-            }
+            self.elementwise_clear()
         } else {
             self.children.clear();
             self.parent.clear_children();
         }
+    }
+}
+
+impl<D: Dom> ParentOwner for ChildVec<D, ParentShared> {
+    fn clear(&mut self) {
+        self.elementwise_clear()
     }
 }
