@@ -1,8 +1,13 @@
-use std::{marker::PhantomData, mem};
+use std::{cell::RefCell, marker::PhantomData, mem, rc::Rc};
 
 use clonelet::clone;
-use futures_signals::signal_vec::VecDiff;
+use discard::DiscardOnDrop;
+use futures_signals::{
+    signal_vec::{SignalVec, SignalVecExt, VecDiff},
+    CancelableFutureHandle,
+};
 
+use super::spawn_cancelable_future;
 use crate::{
     dom::{private::DomElement, Dom},
     node::Node,
@@ -15,6 +20,12 @@ pub struct ChildVec<D: Dom, PO> {
     phantom: PhantomData<PO>,
 }
 
+#[must_use]
+pub struct ChildVecHandle<D: Dom, PO> {
+    _child_vec: Rc<RefCell<ChildVec<D, PO>>>,
+    _future_handle: DiscardOnDrop<CancelableFutureHandle>,
+}
+
 pub trait ParentOwner {
     fn clear(&mut self);
 }
@@ -25,6 +36,7 @@ pub struct ParentShared;
 
 impl<D: Dom, PO> ChildVec<D, PO>
 where
+    PO: 'static,
     Self: ParentOwner,
 {
     pub fn new(parent: D::Element, static_child_count: usize) -> Self {
@@ -36,7 +48,25 @@ where
         }
     }
 
-    pub fn apply_update(&mut self, update: VecDiff<impl Into<Node<D>>>) {
+    pub fn run(self, children: impl SignalVec<Item = Node<D>> + 'static) -> ChildVecHandle<D, PO> {
+        let child_vec = Rc::new(RefCell::new(self));
+        let future = children.for_each({
+            clone!(child_vec);
+            move |update| {
+                child_vec.borrow_mut().apply_update(update);
+                async {}
+            }
+        });
+
+        // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
+        // keep a hold of `child_vec`, as it may own signals that need updating.
+        ChildVecHandle {
+            _child_vec: child_vec,
+            _future_handle: spawn_cancelable_future(future),
+        }
+    }
+
+    fn apply_update(&mut self, update: VecDiff<impl Into<Node<D>>>) {
         match update {
             VecDiff::Replace { values } => self.replace(values),
             VecDiff::InsertAt { index, value } => self.insert(index, value),

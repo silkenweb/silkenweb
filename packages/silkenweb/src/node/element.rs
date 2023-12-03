@@ -2,13 +2,10 @@
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
 use std::{
-    self,
-    cell::RefCell,
-    fmt,
+    self, fmt,
     future::Future,
     marker::PhantomData,
     pin::{pin, Pin},
-    rc::Rc,
 };
 
 use discard::DiscardOnDrop;
@@ -161,23 +158,11 @@ impl<D: Dom> GenericElement<D> {
 impl<D: Dom, Mutability> GenericElement<D, Mutability> {
     fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
-            let child_vec = Rc::new(RefCell::new(ChildVec::<D, ParentUnique>::new(
-                self.element.clone(),
-                self.static_child_count,
-            )));
+            let child_vec =
+                ChildVec::<D, ParentUnique>::new(self.element.clone(), self.static_child_count);
 
-            let future = children.for_each({
-                clone!(child_vec);
-                move |update| {
-                    child_vec.borrow_mut().apply_update(update);
-                    async {}
-                }
-            });
-
-            // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
-            // keep a hold of `child_vec`, as it may own signals that need updating.
-            let resource = (child_vec, spawn_cancelable_future(future));
-            self.resources.push(Resource::Any(Box::new(resource)));
+            let handle = child_vec.run(children);
+            self.resources.push(Resource::Any(Box::new(handle)));
         }
     }
 }
