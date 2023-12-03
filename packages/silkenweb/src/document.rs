@@ -29,6 +29,7 @@ use crate::{
     remove_element,
 };
 
+// TODO: Hydro
 mod dry;
 mod wet;
 
@@ -98,20 +99,24 @@ pub trait Document: Dom + Sized {
 
     /// Remove all mounted elements.
     ///
+    /// All elements mounted with `mount` or `mount_in_head` will be removed.
     /// Mount points will not be restored. This is useful to ensure a clean
     /// environment for testing.
     fn unmount_all();
 
-    // TODO: Doc
+    /// Mount an element in the document `<head>`
+    ///
+    /// `id` is used by hydration, which will set a `data-silkenweb-head-id`
+    /// attribute on each top level element in `head` so it can identify which
+    /// elements to hydrate against. Mounting something with the same `id` twice
+    /// will remove the first mounted `DocumentHead`.
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
 
     /// Get the inner HTML of `<head>`.
     ///
     /// This only includes elements added with `mount_in_head`. It's useful for
     /// server side rendering, where it can be used to add any stylesheets
-    /// required for the HTML. The `id` attributes will be set on each element,
-    /// so hydration can avoid adding duplicate stylesheets with
-    /// [`Self::mount_in_head`].
+    /// required for the HTML.
     fn head_inner_html() -> String;
 }
 
