@@ -8,7 +8,10 @@ use silkenweb::{
         html::{button, div, p, table, td, tr, Tr},
         ElementEvents,
     },
-    node::{element::ParentElement, Node},
+    node::{
+        element::{ParentElement, TextParentElement},
+        Node,
+    },
     task::server::render_now_sync,
     value::Sig,
 };

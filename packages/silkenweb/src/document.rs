@@ -1,14 +1,22 @@
 //! Document utilities.
-use std::{cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, pin::Pin};
 
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::{self, SignalVec, SignalVecExt},
+};
 use paste::paste;
+use silkenweb_signals_ext::value::SignalOrValue;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
     dom::{Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
     insert_element,
-    node::element::{Const, GenericElement, Mut},
+    node::{
+        element::{Const, GenericElement, Mut, ParentElement},
+        ChildNode, Node,
+    },
     remove_element,
 };
 
@@ -128,6 +136,70 @@ impl MountHandle {
                 .replace_with_with_node_1(&self.mount_point)
                 .unwrap_throw();
         }
+    }
+}
+
+// TODO: More docs
+/// The document's `<head>` element.
+pub struct DocumentHead<D: Dom> {
+    child_vec: Pin<Box<dyn SignalVec<Item = Node<D>>>>,
+}
+
+impl<D: Dom> Default for DocumentHead<D> {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
+impl<D: Dom> DocumentHead<D> {
+    pub fn empty() -> Self {
+        let child_vec = Box::pin(signal_vec::always(Vec::new()));
+        Self { child_vec }
+    }
+}
+
+impl<D: Dom> ParentElement<D> for DocumentHead<D> {
+    fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
+        self.optional_child(child.map(Some))
+    }
+
+    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self {
+        child.select(
+            |parent, child| {
+                if let Some(child) = child {
+                    return parent.children_signal(signal_vec::always(vec![child]));
+                }
+
+                parent
+            },
+            |parent, child| {
+                let child_vec = child
+                    .map(|child| child.into_iter().collect::<Vec<_>>())
+                    .to_signal_vec();
+                parent.children_signal(child_vec)
+            },
+            self,
+        )
+    }
+
+    fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+    where
+        N: Into<Node<D>>,
+    {
+        self.children_signal(signal_vec::always(
+            children.into_iter().map(|child| child.into()).collect(),
+        ))
+    }
+
+    fn children_signal<N>(mut self, children: impl SignalVec<Item = N> + 'static) -> Self
+    where
+        N: Into<Node<D>>,
+    {
+        self.child_vec = self
+            .child_vec
+            .chain(children.map(|child| child.into()))
+            .boxed_local();
+        self
     }
 }
 

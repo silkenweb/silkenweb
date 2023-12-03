@@ -14,7 +14,10 @@ use silkenweb::{
         },
         ElementEvents, HtmlElement, HtmlElementEvents,
     },
-    node::{element::Element, Node},
+    node::{
+        element::{Element, TextParentElement},
+        Node,
+    },
     prelude::{AriaElement, ParentElement},
     router::url_path,
     task::TaskSignal,

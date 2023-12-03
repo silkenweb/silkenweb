@@ -393,7 +393,7 @@ fn code_gen(
                 use silkenweb::{
                     document::Document,
                     dom::DefaultDom,
-                    node::element::ParentElement,
+                    node::element::TextParentElement,
                     elements::html::style,
                 };
 

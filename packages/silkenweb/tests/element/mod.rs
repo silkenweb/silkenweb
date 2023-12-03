@@ -8,8 +8,10 @@ use silkenweb::{
         html::{div, p, Div},
         HtmlElement,
     },
-    node::{element::Element, text, Node},
-    prelude::ParentElement,
+    node::{
+        element::{Element, ParentElement, TextParentElement},
+        text, Node,
+    },
     task::render_now,
     value::Sig,
 };

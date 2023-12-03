@@ -6,6 +6,7 @@ use silkenweb::{
         ElementEvents,
     },
     hydration::hydrate,
+    node::element::TextParentElement,
     prelude::{
         html::{title, Title},
         HtmlElement, ParentElement,

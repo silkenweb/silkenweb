@@ -1,5 +1,5 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, log_panics, node::element::Element, prelude::*, value::Sig};
+use silkenweb::{elements::html::*, prelude::*};
 
 fn main() {
     log_panics();

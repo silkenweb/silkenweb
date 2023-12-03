@@ -7,7 +7,7 @@ use axum::{
     Router, Server, TypedHeader,
 };
 use serde::Deserialize;
-use silkenweb::prelude::{html::div, ParentElement};
+use silkenweb::{node::element::TextParentElement, prelude::html::div};
 use silkenweb_htmx_axum::{HtmxPostRequest, HtmxResponse};
 use tracing::info;
 
