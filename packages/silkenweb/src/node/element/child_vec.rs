@@ -22,8 +22,28 @@ pub struct ChildVec<D: Dom, PO> {
 
 #[must_use]
 pub struct ChildVecHandle<D: Dom, PO> {
-    _child_vec: Rc<RefCell<ChildVec<D, PO>>>,
+    child_vec: Rc<RefCell<ChildVec<D, PO>>>,
     _future_handle: DiscardOnDrop<CancelableFutureHandle>,
+}
+
+impl<D, PO> ChildVecHandle<D, PO>
+where
+    D: Dom,
+    ChildVec<D, PO>: ParentOwner,
+{
+    pub fn inner_html(&self) -> String {
+        let mut html = String::new();
+
+        for elem in self.child_vec.borrow().children.iter() {
+            html.push_str(&elem.to_string());
+        }
+
+        html
+    }
+
+    pub fn clear(self) {
+        self.child_vec.borrow_mut().clear();
+    }
 }
 
 pub trait ParentOwner {
@@ -61,7 +81,7 @@ where
         // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
         // keep a hold of `child_vec`, as it may own signals that need updating.
         ChildVecHandle {
-            _child_vec: child_vec,
+            child_vec,
             _future_handle: spawn_cancelable_future(future),
         }
     }

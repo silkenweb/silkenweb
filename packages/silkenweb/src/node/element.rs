@@ -36,7 +36,7 @@ use crate::{
     task,
 };
 
-mod child_vec;
+pub(crate) mod child_vec;
 
 /// A generic HTML element.
 ///

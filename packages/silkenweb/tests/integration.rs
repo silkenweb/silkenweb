@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    document::Document,
+    document::{Document, DocumentHead},
     dom::DefaultDom,
     elements::html::{button, div, p, P},
     mount,
@@ -45,10 +45,12 @@ isomorphic_test! {
 
         // Test escaping
         let id = "my-id:0:1";
-        DefaultDom::mount_in_head(id, div());
-        let head_html = r#"<div id="my-id:0:1"></div>"#;
+        DefaultDom::mount_in_head(id, DocumentHead::new().child(div())).unwrap();
+        let head_html = r#"<div></div>"#;
+        render_now().await;
         assert_eq!(DefaultDom::head_inner_html(), head_html);
-        DefaultDom::mount_in_head(id, div());
+        DefaultDom::mount_in_head(id, DocumentHead::new().child(div())).unwrap();
+        render_now().await;
         assert_eq!(DefaultDom::head_inner_html(), head_html);
     }
 }

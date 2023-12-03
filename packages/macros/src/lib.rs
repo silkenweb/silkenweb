@@ -389,24 +389,33 @@ fn code_gen(
 
         #visibility mod stylesheet {
             pub fn mount() {
-                use ::std::panic::Location;
+                use ::std::{panic::Location, thread_local};
                 use silkenweb::{
-                    document::Document,
+                    document::{Document, DocumentHead},
                     dom::DefaultDom,
-                    node::element::TextParentElement,
+                    node::element::{TextParentElement, ParentElement},
                     elements::html::style,
                 };
 
-                let location = Location::caller();
-                DefaultDom::mount_in_head(
-                    &format!(
-                        "silkenweb-style:{}:{}:{}",
-                        location.file(),
-                        location.line(),
-                        location.column()
-                    ),
-                    style().text(text())
-                );
+                thread_local!{
+                    static RESULT: () = {
+                        let location = Location::caller();
+                        let head = DocumentHead::new().child(style().text(text()));
+
+                        DefaultDom::mount_in_head(
+                            &format!(
+                                "silkenweb-style:{}:{}:{}",
+                                location.file(),
+                                location.line(),
+                                location.column()
+                            ),
+                            head
+                        )
+                        .unwrap()
+                    };
+                }
+
+                RESULT.with(|x| *x)
             }
 
             pub fn text() -> &'static str {

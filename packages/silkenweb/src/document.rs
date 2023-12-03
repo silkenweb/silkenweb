@@ -1,5 +1,10 @@
 //! Document utilities.
-use std::{cell::RefCell, collections::HashMap, pin::Pin};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fmt::{self, Display},
+    pin::Pin,
+};
 
 use futures_signals::{
     signal::SignalExt,
@@ -7,6 +12,7 @@ use futures_signals::{
 };
 use paste::paste;
 use silkenweb_signals_ext::value::SignalOrValue;
+use thiserror::Error;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
@@ -14,7 +20,10 @@ use crate::{
     event::{bubbling_events, GlobalEventCallback},
     insert_element,
     node::{
-        element::{Const, GenericElement, Mut, ParentElement},
+        element::{
+            child_vec::{ChildVecHandle, ParentUnique},
+            Const, GenericElement, ParentElement,
+        },
         ChildNode, Node,
     },
     remove_element,
@@ -93,16 +102,8 @@ pub trait Document: Dom + Sized {
     /// environment for testing.
     fn unmount_all();
 
-    /// Mount an element as a child of `<head>`
-    ///
-    /// This will search for `id` in the document. If it's found, no action is
-    /// taken and `false` is returned. If there's no matching `id` in the
-    /// document:
-    ///
-    /// - The `id` attribute  is set on `element`.
-    /// - `element` is added as a child of `head`.
-    /// - `true` is returned.
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool;
+    // TODO: Doc
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
 
     /// Get the inner HTML of `<head>`.
     ///
@@ -112,6 +113,15 @@ pub trait Document: Dom + Sized {
     /// so hydration can avoid adding duplicate stylesheets with
     /// [`Self::mount_in_head`].
     fn head_inner_html() -> String;
+}
+
+#[derive(Error, Debug)]
+pub struct HeadNotFound;
+
+impl Display for HeadNotFound {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Head element not found")
+    }
 }
 
 /// Manage a mount point
@@ -147,12 +157,12 @@ pub struct DocumentHead<D: Dom> {
 
 impl<D: Dom> Default for DocumentHead<D> {
     fn default() -> Self {
-        Self::empty()
+        Self::new()
     }
 }
 
 impl<D: Dom> DocumentHead<D> {
-    pub fn empty() -> Self {
+    pub fn new() -> Self {
         let child_vec = Box::pin(signal_vec::always(Vec::new()));
         Self { child_vec }
     }
@@ -205,5 +215,5 @@ impl<D: Dom> ParentElement<D> for DocumentHead<D> {
 
 #[derive(Default)]
 pub(crate) struct TaskLocal {
-    mounted_in_dry_head: RefCell<HashMap<String, GenericElement<Dry, Const>>>,
+    mounted_in_dry_head: RefCell<HashMap<String, ChildVecHandle<Dry, ParentUnique>>>,
 }

@@ -1,7 +1,10 @@
-use super::{Document, MountHandle};
+use super::{Document, DocumentHead, HeadNotFound, MountHandle};
 use crate::{
-    dom::Dry,
-    node::element::{Const, Element, GenericElement, Mut},
+    dom::{self, private::DomElement, Dry},
+    node::element::{
+        child_vec::{ChildVec, ParentUnique},
+        Const, GenericElement, Namespace,
+    },
     task,
 };
 
@@ -14,17 +17,20 @@ impl Document for Dry {
         task::local::with(|local| local.document.mounted_in_dry_head.take());
     }
 
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
+        let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
+        let child_vec = ChildVec::<Dry, ParentUnique>::new(head_elem, 0);
+        let child_vec_handle = child_vec.run(head.child_vec);
+
         task::local::with(|local| {
-            let mut mounted = local.document.mounted_in_dry_head.borrow_mut();
+            local
+                .document
+                .mounted_in_dry_head
+                .borrow_mut()
+                .insert(id.to_string(), child_vec_handle)
+        });
 
-            if mounted.contains_key(id) {
-                return false;
-            }
-
-            mounted.insert(id.to_string(), element.into().attribute("id", id).freeze());
-            true
-        })
+        Ok(())
     }
 
     fn head_inner_html() -> String {
@@ -32,7 +38,7 @@ impl Document for Dry {
 
         task::local::with(|local| {
             for elem in local.document.mounted_in_dry_head.borrow().values() {
-                html.push_str(&elem.to_string());
+                html.push_str(&elem.inner_html());
             }
         });
 
