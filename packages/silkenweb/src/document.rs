@@ -112,6 +112,11 @@ pub trait Document: Dom + Sized {
     /// will remove the first mounted `DocumentHead`.
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
 
+    /// Unmount `id` from `<head>`
+    /// 
+    /// If `id` was not added, this has no effect.
+    fn unmount_in_head(id: &str);
+
     /// Get the inner HTML of `<head>`.
     ///
     /// This only includes elements added with `mount_in_head`. It's useful for

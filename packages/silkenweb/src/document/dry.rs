@@ -33,6 +33,10 @@ impl Document for Dry {
         Ok(())
     }
 
+    fn unmount_in_head(id: &str) {
+        task::local::with(|local| local.document.mounted_in_dry_head.borrow_mut().remove(id));
+    }
+
     fn head_inner_html() -> String {
         let mut html = String::new();
 

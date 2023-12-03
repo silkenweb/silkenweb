@@ -54,6 +54,14 @@ impl Document for Wet {
         Ok(())
     }
 
+    fn unmount_in_head(id: &str) {
+        let removed = MOUNTED_IN_WET_HEAD.with(|mounted| mounted.borrow_mut().remove(id));
+
+        if let Some(removed) = removed {
+            removed.clear();
+        }
+    }
+
     fn head_inner_html() -> String {
         let mut html = String::new();
 
