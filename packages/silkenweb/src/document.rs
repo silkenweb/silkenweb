@@ -113,7 +113,7 @@ pub trait Document: Dom + Sized {
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
 
     /// Unmount `id` from `<head>`
-    /// 
+    ///
     /// If `id` was not added, this has no effect.
     fn unmount_in_head(id: &str);
 
