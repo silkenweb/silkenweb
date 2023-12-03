@@ -4,6 +4,7 @@
 
 - `dbg` macro.
 - `Namespace` owns its name string instead of referencing a `'static str`, so it doesn't need to be known at compile time.
+- Factor out `TextParentElement` from `ParentElement`. This is a breaking change, and you'll most likely just need to import `TextParentElement`.
 
 ## 0.7.1 - 2023-11-07
 
