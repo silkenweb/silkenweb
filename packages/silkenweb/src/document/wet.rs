@@ -24,18 +24,6 @@ impl Document for Wet {
         insert_element(element);
     }
 
-    fn unmount_all() {
-        ELEMENTS.with(|elements| {
-            for element in elements.take().into_values() {
-                element.dom_element().remove()
-            }
-        });
-
-        for element in MOUNTED_IN_WET_HEAD.with(|mounted| mounted.take().into_values()) {
-            element.clear();
-        }
-    }
-
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
         let head_elem = <Wet as dom::private::Dom>::Element::from_element(
             document::head().ok_or(HeadNotFound)?.into(),
@@ -51,6 +39,18 @@ impl Document for Wet {
         });
 
         Ok(())
+    }
+
+    fn unmount_all() {
+        ELEMENTS.with(|elements| {
+            for element in elements.take().into_values() {
+                element.dom_element().remove()
+            }
+        });
+
+        for element in MOUNTED_IN_WET_HEAD.with(|mounted| mounted.take().into_values()) {
+            element.clear();
+        }
     }
 
     fn head_inner_html() -> String {

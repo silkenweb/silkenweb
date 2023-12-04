@@ -15,10 +15,6 @@ impl Document for Hydro {
         todo!()
     }
 
-    fn unmount_all() {
-        todo!()
-    }
-
     fn mount_in_head(
         id: &str,
         _head: super::DocumentHead<Self>,
@@ -32,6 +28,10 @@ impl Document for Hydro {
         // TODO: Run child vec
 
         Ok(())
+    }
+
+    fn unmount_all() {
+        todo!()
     }
 
     fn head_inner_html() -> String {

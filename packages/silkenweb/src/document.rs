@@ -93,13 +93,6 @@ pub trait Document: Dom + Sized {
     /// the mount point.
     fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>);
 
-    /// Remove all mounted elements.
-    ///
-    /// All elements mounted with `mount` or `mount_in_head` will be removed.
-    /// Mount points will not be restored. This is useful to ensure a clean
-    /// environment for testing.
-    fn unmount_all();
-
     /// Mount an element in the document `<head>`
     ///
     /// `id` is used by hydration, which will set a `data-silkenweb-head-id`
@@ -107,6 +100,13 @@ pub trait Document: Dom + Sized {
     /// elements to hydrate against. Mounting something with the same `id` twice
     /// will remove the first mounted `DocumentHead`.
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
+
+    /// Remove all mounted elements.
+    ///
+    /// All elements mounted with `mount` or `mount_in_head` will be removed.
+    /// Mount points will not be restored. This is useful to ensure a clean
+    /// environment for testing.
+    fn unmount_all();
 
     /// Get the inner HTML of `<head>`.
     ///

@@ -13,10 +13,6 @@ impl Document for Dry {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
-    fn unmount_all() {
-        task::local::with(|local| local.document.mounted_in_dry_head.take());
-    }
-
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
         let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
@@ -31,6 +27,10 @@ impl Document for Dry {
         });
 
         Ok(())
+    }
+
+    fn unmount_all() {
+        task::local::with(|local| local.document.mounted_in_dry_head.take());
     }
 
     fn head_inner_html() -> String {
