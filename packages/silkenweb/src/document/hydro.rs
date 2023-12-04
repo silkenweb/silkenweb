@@ -40,6 +40,7 @@ impl Document for Hydro {
         hydro_head_elem.hydrate_in_head(id, &mut stats);
 
         // TODO: Run child vec
+        // TODO: Store child vec handle
 
         Ok(stats)
     }
