@@ -12,6 +12,12 @@ use crate::{
 impl Document for Hydro {
     type MountOutput = HydrationStats;
 
+    /// See [`hydrate`] for more details.
+    ///
+    /// [`hydrate`] just calls [`Hydro::mount`]. In particular, this should be
+    /// run from an `async` block as described in [`hydrate`].
+    ///
+    /// [`hydrate`]: crate::hydration::hydrate
     fn mount(
         id: &str,
         element: impl Into<crate::node::element::GenericElement<Self, crate::node::element::Const>>,
