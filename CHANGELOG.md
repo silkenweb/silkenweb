@@ -5,6 +5,7 @@
 - `dbg` macro.
 - `Namespace` owns its name string instead of referencing a `'static str`, so it doesn't need to be known at compile time.
 - Factor out `TextParentElement` from `ParentElement`. This is a breaking change, and you'll most likely just need to import `TextParentElement`.
+- `MountHandle` has been removed. It never quite worked properly and was a misfeature. Use `Document::unmount_all` for testing instead.
 
 ## 0.7.1 - 2023-11-07
 

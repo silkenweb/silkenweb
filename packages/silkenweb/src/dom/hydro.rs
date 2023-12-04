@@ -39,6 +39,10 @@ impl HydroElement {
         wet
     }
 
+    pub fn hydrate_in_head(self, _id: &str) {
+        todo!()
+    }
+
     fn from_shared(shared: SharedHydroElement) -> Self {
         Self(Rc::new(RefCell::new(shared)))
     }

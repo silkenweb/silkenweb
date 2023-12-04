@@ -77,7 +77,7 @@ use std::{cell::RefCell, collections::HashMap};
 
 #[doc(inline)]
 pub use clonelet::clone;
-use document::{Document, MountHandle};
+use document::Document;
 use dom::{DefaultDom, Wet};
 use node::element::{Const, GenericElement};
 use silkenweb_base::document as base_document;
@@ -343,7 +343,7 @@ pub mod prelude {
 pub use silkenweb_signals_ext::value;
 
 /// Shorthand for [`DefaultDom::mount`]
-pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) -> MountHandle {
+pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) {
     #[cfg(debug_assertions)]
     log_panics();
     DefaultDom::mount(id, element)
@@ -365,10 +365,6 @@ fn insert_element(element: GenericElement<Wet, Const>) -> u128 {
     let id = next_node_handle_id();
     ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
     id
-}
-
-fn remove_element(id: u128) -> Option<GenericElement<Wet, Const>> {
-    ELEMENTS.with(|elements| elements.borrow_mut().remove(&id))
 }
 
 fn next_node_handle_id() -> u128 {
@@ -401,5 +397,6 @@ pub fn empty_str() -> &'static str {
 
 thread_local! {
     static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
+    // TODO: This can just be a vec
     static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
 }

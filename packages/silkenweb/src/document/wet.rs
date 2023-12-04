@@ -3,10 +3,10 @@ use std::{cell::RefCell, collections::HashMap};
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{Document, DocumentHead, HeadNotFound, MountHandle};
+use super::{Document, DocumentHead, HeadNotFound};
 use crate::{
     dom::{self, Wet},
-    mount_point,
+    insert_element, mount_point,
     node::element::{
         child_vec::{ChildVec, ChildVecHandle, ParentShared},
         Const, GenericElement,
@@ -15,14 +15,13 @@ use crate::{
 };
 
 impl Document for Wet {
-    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) {
         let element = element.into();
 
-        let mount_point = mount_point(id);
-        mount_point
+    mount_point(id)
             .replace_with_with_node_1(&element.dom_element())
             .unwrap_throw();
-        MountHandle::new(mount_point, element)
+        insert_element(element);
     }
 
     fn unmount_all() {
@@ -52,14 +51,6 @@ impl Document for Wet {
         });
 
         Ok(())
-    }
-
-    fn unmount_in_head(id: &str) {
-        let removed = MOUNTED_IN_WET_HEAD.with(|mounted| mounted.borrow_mut().remove(id));
-
-        if let Some(removed) = removed {
-            removed.clear();
-        }
     }
 
     fn head_inner_html() -> String {

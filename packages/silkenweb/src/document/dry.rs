@@ -1,15 +1,15 @@
-use super::{Document, DocumentHead, HeadNotFound, MountHandle};
+use super::{Document, DocumentHead, HeadNotFound};
 use crate::{
     dom::{self, private::DomElement, Dry},
     node::element::{
-        child_vec::{ChildVec, ParentUnique},
+        child_vec::{ChildVec, ParentShared},
         Const, GenericElement, Namespace,
     },
     task,
 };
 
 impl Document for Dry {
-    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
+    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
@@ -19,7 +19,7 @@ impl Document for Dry {
 
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
         let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
-        let child_vec = ChildVec::<Dry, ParentUnique>::new(head_elem, 0);
+        let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
         task::local::with(|local| {
@@ -31,10 +31,6 @@ impl Document for Dry {
         });
 
         Ok(())
-    }
-
-    fn unmount_in_head(id: &str) {
-        task::local::with(|local| local.document.mounted_in_dry_head.borrow_mut().remove(id));
     }
 
     fn head_inner_html() -> String {

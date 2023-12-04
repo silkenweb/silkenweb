@@ -56,18 +56,6 @@ isomorphic_test! {
 }
 
 #[wasm_bindgen_test]
-async fn mount_unmount() {
-    let test = BrowserTest::new(APP_ID).await;
-
-    let message = "Hello, world!";
-    let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
-    render_now().await;
-    assert_eq!(format!(r#"<p id="app">{message}</p>"#), test.html());
-    mount_handle.unmount();
-    assert_eq!(r#"<div id="app"></div>"#, test.html());
-}
-
-#[wasm_bindgen_test]
 async fn simple_counter() {
     const BUTTON_ID: &str = "increment";
     const COUNTER_ID: &str = "counter";

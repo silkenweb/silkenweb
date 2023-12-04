@@ -13,24 +13,22 @@ use futures_signals::{
 use paste::paste;
 use silkenweb_signals_ext::value::SignalOrValue;
 use thiserror::Error;
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use wasm_bindgen::JsCast;
 
 use crate::{
-    dom::{Dom, Dry, Wet},
+    dom::{Dom, Dry},
     event::{bubbling_events, GlobalEventCallback},
-    insert_element,
     node::{
         element::{
-            child_vec::{ChildVecHandle, ParentUnique},
+            child_vec::{ChildVecHandle, ParentShared},
             Const, GenericElement, ParentElement,
         },
         ChildNode, Node,
     },
-    remove_element,
 };
 
-// TODO: Hydro
 mod dry;
+mod hydro;
 mod wet;
 
 /// Manage an event handler.
@@ -92,10 +90,8 @@ pub trait Document: Dom + Sized {
     /// Mount an element on the document.
     ///
     /// `id` is the id of the mount point element. The element will replace
-    /// the mount point. The returned `MountHandle` should usually just be
-    /// discarded, but it can be used to restore the mount point if
-    /// required. This can be useful for testing.
-    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> MountHandle;
+    /// the mount point.
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>);
 
     /// Remove all mounted elements.
     ///
@@ -112,11 +108,6 @@ pub trait Document: Dom + Sized {
     /// will remove the first mounted `DocumentHead`.
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
 
-    /// Unmount `id` from `<head>`
-    ///
-    /// If `id` was not added, this has no effect.
-    fn unmount_in_head(id: &str);
-
     /// Get the inner HTML of `<head>`.
     ///
     /// This only includes elements added with `mount_in_head`. It's useful for
@@ -131,31 +122,6 @@ pub struct HeadNotFound;
 impl Display for HeadNotFound {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Head element not found")
-    }
-}
-
-/// Manage a mount point
-pub struct MountHandle {
-    id: u128,
-    mount_point: web_sys::Element,
-}
-
-impl MountHandle {
-    fn new(mount_point: web_sys::Element, element: GenericElement<Wet, Const>) -> Self {
-        Self {
-            id: insert_element(element),
-            mount_point,
-        }
-    }
-
-    /// Remove the mounted element and restore the mount point.
-    pub fn unmount(self) {
-        if let Some(element) = remove_element(self.id) {
-            element
-                .dom_element()
-                .replace_with_with_node_1(&self.mount_point)
-                .unwrap_throw();
-        }
     }
 }
 
@@ -225,5 +191,5 @@ impl<D: Dom> ParentElement<D> for DocumentHead<D> {
 
 #[derive(Default)]
 pub(crate) struct TaskLocal {
-    mounted_in_dry_head: RefCell<HashMap<String, ChildVecHandle<Dry, ParentUnique>>>,
+    mounted_in_dry_head: RefCell<HashMap<String, ChildVecHandle<Dry, ParentShared>>>,
 }
