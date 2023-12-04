@@ -326,7 +326,9 @@ mod arch {
 
     thread_local! {
         static BASE_URI: String = {
-            let mut base_uri = document::base_uri();
+            let mut base_uri = document::base_uri().unwrap_or_else(
+                || window::location().origin().unwrap_throw()
+            );
 
             if ! base_uri.ends_with('/') {
                 base_uri.push('/');
