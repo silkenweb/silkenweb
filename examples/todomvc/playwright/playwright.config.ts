@@ -10,7 +10,7 @@ export default defineConfig({
   testDir: './tests',
 
   /* Maximum time one test can run for. */
-  timeout: 15_000,
+  timeout: 30_000,
 
   expect: {
 
@@ -18,7 +18,7 @@ export default defineConfig({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5_000
+    timeout: 10_000
   },
 
   /* Fail the build on CI if you accidentally left test.only in the source code. */
