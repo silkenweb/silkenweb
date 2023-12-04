@@ -49,7 +49,7 @@ async fn render(uri: Uri) -> impl IntoResponse {
         title_html = title.freeze(),
         body_html = body.freeze(),
         init_script = r#"
-            import init, {js_main} from '/pkg/ssr_example_axum_client.js';
+            import init, {js_main} from '/pkg/ssr_full_axum_client.js';
             init().then(js_main);
         "#
     );
