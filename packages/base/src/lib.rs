@@ -36,7 +36,8 @@ pub mod window {
 }
 
 pub mod document {
-    use wasm_bindgen::{JsValue, UnwrapThrowExt};
+    use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
+    use web_sys::HtmlBaseElement;
 
     use super::DOCUMENT;
 
@@ -56,11 +57,16 @@ pub mod document {
         DOCUMENT.with(|doc| doc.create_text_node(text))
     }
 
-    pub fn base_uri() -> String {
+    pub fn base_uri() -> Option<String> {
         DOCUMENT
-            .with(|doc| doc.base_uri())
+            .with(|doc| doc.query_selector("base[href]"))
             .unwrap_throw()
-            .unwrap_throw()
+            .map(|base_elem| {
+                base_elem
+                    .dyn_into::<HtmlBaseElement>()
+                    .unwrap_throw()
+                    .href()
+            })
     }
 
     pub fn query_selector(selectors: &str) -> Result<Option<web_sys::Element>, JsValue> {

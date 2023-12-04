@@ -27,6 +27,7 @@ features = [
     "Text",
     "Window",
 
+    "HtmlBaseElement",
     "HtmlHeadElement",
     "HtmlElement",
 ]
