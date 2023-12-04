@@ -16,7 +16,7 @@ use thiserror::Error;
 use wasm_bindgen::JsCast;
 
 use crate::{
-    dom::{Dom, Dry},
+    dom::{Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
     node::{
         element::{
@@ -87,11 +87,13 @@ events! {
 bubbling_events!();
 
 pub trait Document: Dom + Sized {
+    type MountOutput;
+
     /// Mount an element on the document.
     ///
     /// `id` is the id of the mount point element. The element will replace
     /// the mount point.
-    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>);
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput;
 
     /// Mount an element in the document `<head>`
     ///
@@ -99,7 +101,8 @@ pub trait Document: Dom + Sized {
     /// attribute on each top level element in `head` so it can identify which
     /// elements to hydrate against. Mounting something with the same `id` twice
     /// will remove the first mounted `DocumentHead`.
-    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound>;
+    fn mount_in_head(id: &str, head: DocumentHead<Self>)
+        -> Result<Self::MountOutput, HeadNotFound>;
 
     /// Remove all mounted elements.
     ///
@@ -192,4 +195,28 @@ impl<D: Dom> ParentElement<D> for DocumentHead<D> {
 #[derive(Default)]
 pub(crate) struct TaskLocal {
     mounted_in_dry_head: RefCell<HashMap<String, ChildVecHandle<Dry, ParentShared>>>,
+}
+
+fn insert_mounted(id: &str, element: GenericElement<Wet, Const>) {
+    let existing = WET_MOUNTED.with(|mounted| mounted.borrow_mut().insert(id.to_string(), element));
+
+    assert!(
+        existing.is_none(),
+        "Attempt to insert duplicate id ({id}) into document"
+    );
+}
+
+fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Wet, ParentShared>) {
+    let existing =
+        WET_MOUNTED_IN_HEAD.with(|mounted| mounted.borrow_mut().insert(id.to_string(), child_vec));
+
+    assert!(
+        existing.is_none(),
+        "Attempt to insert duplicate id ({id}) into head"
+    );
+}
+
+thread_local! {
+    static WET_MOUNTED: RefCell<HashMap<String, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
+    static WET_MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
 }

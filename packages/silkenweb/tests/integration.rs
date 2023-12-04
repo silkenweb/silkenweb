@@ -49,9 +49,6 @@ isomorphic_test! {
         let head_html = r#"<div></div>"#;
         render_now().await;
         assert_eq!(DefaultDom::head_inner_html(), head_html);
-        DefaultDom::mount_in_head(id, DocumentHead::new().child(div())).unwrap();
-        render_now().await;
-        assert_eq!(DefaultDom::head_inner_html(), head_html);
     }
 }
 

@@ -10,8 +10,8 @@ use std::fmt;
 use wasm_bindgen::JsCast;
 
 use crate::{
+    document::Document,
     dom::Hydro,
-    insert_element, mount_point,
     node::element::{Const, GenericElement},
 };
 
@@ -171,15 +171,8 @@ impl fmt::Display for HydrationStats {
 ///
 /// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
+// TODO: Remove this in favour of `Hydro::mount`, but put these docs on `mount`
+// hydro instance.
 pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
-    #[cfg(debug_assertions)]
-    crate::log_panics();
-    let element = element.into();
-    let mut stats = HydrationStats::default();
-
-    let mount_point = mount_point(id);
-    let wet_element = element.hydrate(&mount_point, &mut stats);
-    insert_element(wet_element);
-
-    stats
+    Hydro::mount(id, element)
 }

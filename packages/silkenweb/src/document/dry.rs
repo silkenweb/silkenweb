@@ -9,22 +9,32 @@ use crate::{
 };
 
 impl Document for Dry {
-    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) {
+    type MountOutput = ();
+
+    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
-    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
+    fn mount_in_head(
+        id: &str,
+        head: DocumentHead<Self>,
+    ) -> Result<Self::MountOutput, HeadNotFound> {
         let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
-        task::local::with(|local| {
+        let existing = task::local::with(|local| {
             local
                 .document
                 .mounted_in_dry_head
                 .borrow_mut()
                 .insert(id.to_string(), child_vec_handle)
         });
+
+        assert!(
+            existing.is_none(),
+            "Attempt to insert duplicate id ({id}) into head"
+        );
 
         Ok(())
     }

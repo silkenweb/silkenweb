@@ -39,7 +39,7 @@ impl HydroElement {
         wet
     }
 
-    pub fn hydrate_in_head(self, _id: &str) {
+    pub fn hydrate_in_head(self, _id: &str, _tracker: &mut HydrationStats) {
         todo!()
     }
 

@@ -1,30 +1,35 @@
-use std::{cell::RefCell, collections::HashMap};
-
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{Document, DocumentHead, HeadNotFound};
+use super::{
+    insert_mounted, insert_mounted_in_head, Document, DocumentHead, HeadNotFound, WET_MOUNTED,
+    WET_MOUNTED_IN_HEAD,
+};
 use crate::{
     dom::{self, Wet},
-    insert_element, mount_point,
+    mount_point,
     node::element::{
-        child_vec::{ChildVec, ChildVecHandle, ParentShared},
+        child_vec::{ChildVec, ParentShared},
         Const, GenericElement,
     },
-    ELEMENTS,
 };
 
 impl Document for Wet {
-    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) {
+    type MountOutput = ();
+
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         let element = element.into();
 
-    mount_point(id)
+        mount_point(id)
             .replace_with_with_node_1(&element.dom_element())
             .unwrap_throw();
-        insert_element(element);
+        insert_mounted(id, element);
     }
 
-    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Result<(), HeadNotFound> {
+    fn mount_in_head(
+        id: &str,
+        head: DocumentHead<Self>,
+    ) -> Result<Self::MountOutput, HeadNotFound> {
         let head_elem = <Wet as dom::private::Dom>::Element::from_element(
             document::head().ok_or(HeadNotFound)?.into(),
         );
@@ -32,23 +37,17 @@ impl Document for Wet {
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
-        MOUNTED_IN_HEAD.with(|mounted| {
-            mounted
-                .borrow_mut()
-                .insert(id.to_string(), child_vec_handle)
-        });
+        insert_mounted_in_head(id, child_vec_handle);
 
         Ok(())
     }
 
     fn unmount_all() {
-        ELEMENTS.with(|elements| {
-            for element in elements.take().into_values() {
-                element.dom_element().remove()
-            }
-        });
+        for element in WET_MOUNTED.take().into_values() {
+            element.dom_element().remove()
+        }
 
-        for element in MOUNTED_IN_HEAD.with(|mounted| mounted.take().into_values()) {
+        for element in WET_MOUNTED_IN_HEAD.take().into_values() {
             element.clear();
         }
     }
@@ -56,7 +55,7 @@ impl Document for Wet {
     fn head_inner_html() -> String {
         let mut html = String::new();
 
-        MOUNTED_IN_HEAD.with(|mounted| {
+        WET_MOUNTED_IN_HEAD.with(|mounted| {
             for elem in mounted.borrow().values() {
                 html.push_str(&elem.inner_html());
             }
@@ -64,8 +63,4 @@ impl Document for Wet {
 
         html
     }
-}
-
-thread_local! {
-    static MOUNTED_IN_HEAD: RefCell<Vec<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
 }

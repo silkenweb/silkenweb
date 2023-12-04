@@ -73,12 +73,11 @@
 //! [Server Side Rendering]: https://github.com/silkenweb/silkenweb/tree/main/examples/ssr-full
 //! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
-use std::{cell::RefCell, collections::HashMap};
 
 #[doc(inline)]
 pub use clonelet::clone;
 use document::Document;
-use dom::{DefaultDom, Wet};
+use dom::DefaultDom;
 use node::element::{Const, GenericElement};
 use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
@@ -361,16 +360,6 @@ fn mount_point(id: &str) -> web_sys::Element {
         .unwrap_or_else(|| panic!("DOM node id = '{id}' must exist"))
 }
 
-fn insert_element(element: GenericElement<Wet, Const>) -> u128 {
-    let id = next_node_handle_id();
-    ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
-    id
-}
-
-fn next_node_handle_id() -> u128 {
-    ELEMENT_HANDLE_IDS.with(|ids| ids.replace_with(|id| *id + 1))
-}
-
 #[cfg_browser(true)]
 pub fn intern_str(s: &str) -> &str {
     wasm_bindgen::intern(s)
@@ -393,10 +382,4 @@ pub fn intern_str(s: &str) -> &str {
 #[cfg_browser(false)]
 pub fn empty_str() -> &'static str {
     ""
-}
-
-thread_local! {
-    static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
-    // TODO: This can just be a vec
-    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
 }
