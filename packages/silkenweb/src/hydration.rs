@@ -141,7 +141,7 @@ impl fmt::Display for HydrationStats {
 /// let app = p().text(Sig(always("Hello, world!")));
 ///
 /// spawn_local(async {
-///     hydrate("app", app);
+///     hydrate("app", app).await;
 /// });
 /// ```
 ///
@@ -157,7 +157,7 @@ impl fmt::Display for HydrationStats {
 /// # use silkenweb::{hydration::hydrate, prelude::*, task::spawn_local};
 /// spawn_local(async {
 ///     let app = p().text(Sig(always("Hello, world!")));
-///     hydrate("app", app);
+///     hydrate("app", app).await;
 /// });
 /// ```
 ///
