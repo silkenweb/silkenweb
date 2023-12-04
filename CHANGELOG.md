@@ -4,6 +4,7 @@
 
 - `dbg` macro.
 - `Namespace` owns its name string instead of referencing a `'static str`, so it doesn't need to be known at compile time.
+- Routing: if there's no `<base href="..."/>` set, routing will use the origin of the current URL. Previously it used the whole URL.
 
 ## 0.7.1 - 2023-11-07
 
