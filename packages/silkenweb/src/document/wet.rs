@@ -32,7 +32,7 @@ impl Document for Wet {
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
-        MOUNTED_IN_WET_HEAD.with(|mounted| {
+        MOUNTED_IN_HEAD.with(|mounted| {
             mounted
                 .borrow_mut()
                 .insert(id.to_string(), child_vec_handle)
@@ -48,7 +48,7 @@ impl Document for Wet {
             }
         });
 
-        for element in MOUNTED_IN_WET_HEAD.with(|mounted| mounted.take().into_values()) {
+        for element in MOUNTED_IN_HEAD.with(|mounted| mounted.take().into_values()) {
             element.clear();
         }
     }
@@ -56,7 +56,7 @@ impl Document for Wet {
     fn head_inner_html() -> String {
         let mut html = String::new();
 
-        MOUNTED_IN_WET_HEAD.with(|mounted| {
+        MOUNTED_IN_HEAD.with(|mounted| {
             for elem in mounted.borrow().values() {
                 html.push_str(&elem.inner_html());
             }
@@ -67,5 +67,5 @@ impl Document for Wet {
 }
 
 thread_local! {
-    static MOUNTED_IN_WET_HEAD: RefCell<HashMap<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
+    static MOUNTED_IN_HEAD: RefCell<Vec<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
 }
