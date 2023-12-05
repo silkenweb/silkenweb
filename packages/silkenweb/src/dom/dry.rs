@@ -562,7 +562,7 @@ impl SharedDryElement<HydroNode> {
             Self::hydrate_with_new(dom_elem, child, tracker);
         }
 
-        Self::remove_children_from(dom_elem, skip_filtered, current_child);
+        Self::remove_children_from(dom_elem, skip_filtered, current_child, tracker);
     }
 
     /// Remove `child` and all siblings after `child`
@@ -570,9 +570,11 @@ impl SharedDryElement<HydroNode> {
         parent: &web_sys::Node,
         skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
         mut child: Option<web_sys::Node>,
+        tracker: &mut HydrationStats,
     ) {
         while let Some(node) = child {
             let next_child = skip_filtered(node.next_sibling());
+            tracker.node_removed(&node);
             parent.remove_child(&node).unwrap_throw();
             child = next_child;
         }
