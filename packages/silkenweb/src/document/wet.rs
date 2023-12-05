@@ -1,18 +1,13 @@
-use std::{cell::RefCell, collections::HashMap};
-
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{
-    head_inner_html, unmount_head, wet_insert_mounted, wet_unmount, Document, DocumentHead,
-    HeadNotFound,
-};
+use super::{wet_insert_mounted, wet_unmount, Document, DocumentHead, HeadNotFound};
 use crate::{
-    document::MountedChildVecMap,
+    document::MountedInHead,
     dom::{self, Wet},
     mount_point,
     node::element::{
-        child_vec::{ChildVec, ChildVecHandle, ParentShared},
+        child_vec::{ChildVec, ParentShared},
         Const, GenericElement,
     },
 };
@@ -41,31 +36,21 @@ impl Document for Wet {
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
-        insert_mounted_in_head(id, child_vec_handle);
+        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
 
         Ok(())
     }
 
     fn unmount_all() {
         wet_unmount();
-        unmount_head(&MOUNTED_IN_HEAD);
+        MOUNTED_IN_HEAD.with(|m| m.unmount_all());
     }
 
     fn head_inner_html() -> String {
-        head_inner_html(&MOUNTED_IN_HEAD)
+        MOUNTED_IN_HEAD.with(|m| m.inner_html())
     }
 }
 
-fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Wet, ParentShared>) {
-    let existing =
-        MOUNTED_IN_HEAD.with(|mounted| mounted.borrow_mut().insert(id.to_string(), child_vec));
-
-    assert!(
-        existing.is_none(),
-        "Attempt to insert duplicate id ({id}) into head"
-    );
-}
-
 thread_local! {
-    static MOUNTED_IN_HEAD: MountedChildVecMap<Wet> = RefCell::new(HashMap::new());
+    static MOUNTED_IN_HEAD: MountedInHead<Wet> = MountedInHead::new();
 }

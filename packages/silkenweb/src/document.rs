@@ -5,7 +5,6 @@ use std::{
     fmt::{self, Display},
     pin::{pin, Pin},
     task,
-    thread::LocalKey,
 };
 
 use futures::{future::RemoteHandle, Future};
@@ -242,28 +241,37 @@ fn wet_unmount() {
     }
 }
 
-type MountedChildVecMap<D> = RefCell<HashMap<String, ChildVecHandle<D, ParentShared>>>;
+struct MountedInHead<D: Dom>(RefCell<HashMap<String, ChildVecHandle<D, ParentShared>>>);
 
-fn unmount_head<D: Dom>(
-    mounted_in_head: &'static LocalKey<MountedChildVecMap<D>>,
-) {
-    for element in mounted_in_head.take().into_values() {
-        element.clear();
+impl<D: Dom> MountedInHead<D> {
+    fn new() -> Self {
+        Self(RefCell::new(HashMap::new()))
     }
-}
 
-fn head_inner_html<D: Dom>(
-    mounted_in_head: &'static LocalKey<MountedChildVecMap<D>>,
-) -> String {
-    let mut html = String::new();
+    fn mount(&self, id: &str, child_vec: ChildVecHandle<D, ParentShared>) {
+        let existing = self.0.borrow_mut().insert(id.to_string(), child_vec);
 
-    mounted_in_head.with(|mounted| {
-        for elem in mounted.borrow().values() {
+        assert!(
+            existing.is_none(),
+            "Attempt to insert duplicate id ({id}) into head"
+        );
+    }
+
+    fn unmount_all(&self) {
+        for element in self.0.take().into_values() {
+            element.clear();
+        }
+    }
+
+    fn inner_html(&self) -> String {
+        let mut html = String::new();
+
+        for elem in self.0.borrow().values() {
             html.push_str(&elem.inner_html());
         }
-    });
 
-    html
+        html
+    }
 }
 
 thread_local! {
