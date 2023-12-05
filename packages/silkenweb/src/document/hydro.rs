@@ -15,16 +15,12 @@ use crate::{
 };
 
 impl Document for Hydro {
-    // TODO: Wrap in an opaque type
     type MountInHeadOutput = MountHydroHead;
-    // TODO: Use an opaque future
     type MountOutput = MountHydro;
 
-    // TODO: Return a future and remove warning in docs
     /// See [`hydrate`] for more details.
     ///
-    /// [`hydrate`] just calls [`Hydro::mount`]. In particular, this should be
-    /// run from an `async` block as described in [`hydrate`].
+    /// [`hydrate`] just calls [`Hydro::mount`].
     ///
     /// [`hydrate`]: crate::hydration::hydrate
     fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
