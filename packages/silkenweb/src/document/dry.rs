@@ -7,7 +7,7 @@ use crate::{
         child_vec::{ChildVec, ParentShared},
         Const, Element, GenericElement, Namespace,
     },
-    task,
+    task, HEAD_ID_ATTRIBUTE,
 };
 
 impl Document for Dry {
@@ -23,9 +23,7 @@ impl Document for Dry {
         let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
         let children_with_id = head.child_vec.map({
             let id = id.to_string();
-            // TODO: Factor out constance for "data-silkenweb-head-id". Put this into
-            // dom::hydro::document?
-            move |child| child.attribute("data-silkenweb-head-id", id.clone()).into()
+            move |child| child.attribute(HEAD_ID_ATTRIBUTE, id.clone()).into()
         });
         let child_vec_handle = child_vec.run(children_with_id);
 

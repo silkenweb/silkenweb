@@ -383,3 +383,5 @@ pub fn intern_str(s: &str) -> &str {
 pub fn empty_str() -> &'static str {
     ""
 }
+
+const HEAD_ID_ATTRIBUTE: &str = "data-silkenweb-head-id";

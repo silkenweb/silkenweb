@@ -16,6 +16,7 @@ use crate::{
     },
     hydration::HydrationStats,
     node::element::Namespace,
+    HEAD_ID_ATTRIBUTE,
 };
 
 pub struct SharedDryElement<Node> {
@@ -286,9 +287,10 @@ impl SharedDryElement<HydroNode> {
         let id = id.to_string();
         let skip_filtered = move |mut node: Option<web_sys::Node>| {
             while let Some(current) = node {
-                if current.dyn_ref::<web_sys::Element>().is_some_and(|elem| {
-                    elem.get_attribute("data-silkenweb-head-id").as_ref() == Some(&id)
-                }) {
+                if current
+                    .dyn_ref::<web_sys::Element>()
+                    .is_some_and(|elem| elem.get_attribute(HEAD_ID_ATTRIBUTE).as_ref() == Some(&id))
+                {
                     return Some(current);
                 }
 
