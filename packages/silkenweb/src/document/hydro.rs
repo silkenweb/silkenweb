@@ -1,24 +1,24 @@
 use std::{cell::RefCell, collections::HashMap};
 
-use futures::{future::RemoteHandle, FutureExt};
+use futures::FutureExt;
 use silkenweb_task::spawn_local;
 
-use super::{insert_mounted, Document};
+use super::{insert_mounted, Document, MountHydro, MountHydroHead};
 use crate::{
     dom::{self, private::DomElement, Hydro, Wet},
     hydration::HydrationStats,
     mount_point,
     node::element::{
         child_vec::{ChildVec, ChildVecHandle, ParentShared},
-        Namespace,
+        Const, GenericElement, Namespace,
     },
 };
 
 impl Document for Hydro {
     // TODO: Wrap in an opaque type
-    type MountInHeadOutput = RemoteHandle<HydrationStats>;
+    type MountInHeadOutput = MountHydroHead;
     // TODO: Use an opaque future
-    type MountOutput = HydrationStats;
+    type MountOutput = MountHydro;
 
     // TODO: Return a future and remove warning in docs
     /// See [`hydrate`] for more details.
@@ -27,20 +27,24 @@ impl Document for Hydro {
     /// run from an `async` block as described in [`hydrate`].
     ///
     /// [`hydrate`]: crate::hydration::hydrate
-    fn mount(
-        id: &str,
-        element: impl Into<crate::node::element::GenericElement<Self, crate::node::element::Const>>,
-    ) -> Self::MountOutput {
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         #[cfg(debug_assertions)]
         crate::log_panics();
         let element = element.into();
-        let mut stats = HydrationStats::default();
+        let id = id.to_string();
 
-        let mount_point = mount_point(id);
-        let wet_element = element.hydrate(&mount_point, &mut stats);
-        insert_mounted(id, wet_element);
+        let (future, remote_handle) = async move {
+            let mut stats = HydrationStats::default();
 
-        stats
+            let mount_point = mount_point(&id);
+            let wet_element = element.hydrate(&mount_point, &mut stats);
+            insert_mounted(&id, wet_element);
+            stats
+        }
+        .remote_handle();
+        spawn_local(future);
+
+        MountHydro(remote_handle)
     }
 
     fn mount_in_head(
@@ -61,7 +65,7 @@ impl Document for Hydro {
         .remote_handle();
         spawn_local(future);
 
-        Ok(remote_handle)
+        Ok(MountHydroHead(remote_handle))
     }
 
     fn unmount_all() {

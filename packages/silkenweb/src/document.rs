@@ -3,14 +3,17 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     fmt::{self, Display},
-    pin::Pin,
+    pin::{pin, Pin},
+    task,
 };
 
+use futures::{future::RemoteHandle, Future};
 use futures_signals::{
     signal::SignalExt,
     signal_vec::{self, SignalVec, SignalVecExt},
 };
 use paste::paste;
+use pin_project::pin_project;
 use silkenweb_signals_ext::value::SignalOrValue;
 use thiserror::Error;
 use wasm_bindgen::JsCast;
@@ -18,6 +21,7 @@ use wasm_bindgen::JsCast;
 use crate::{
     dom::{Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
+    hydration::HydrationStats,
     node::{
         element::{
             child_vec::{ChildVecHandle, ParentShared},
@@ -102,8 +106,10 @@ pub trait Document: Dom + Sized {
     /// attribute on each top level element in `head` so it can identify which
     /// elements to hydrate against. Mounting something with the same `id` twice
     /// will remove the first mounted `DocumentHead`.
-    fn mount_in_head(id: &str, head: DocumentHead<Self>)
-        -> Result<Self::MountInHeadOutput, HeadNotFound>;
+    fn mount_in_head(
+        id: &str,
+        head: DocumentHead<Self>,
+    ) -> Result<Self::MountInHeadOutput, HeadNotFound>;
 
     /// Remove all mounted elements.
     ///
@@ -190,6 +196,28 @@ impl<D: Dom> ParentElement<D> for DocumentHead<D> {
             .chain(children.map(|child| child.into()))
             .boxed_local();
         self
+    }
+}
+
+#[pin_project]
+pub struct MountHydro(#[pin] RemoteHandle<HydrationStats>);
+
+impl Future for MountHydro {
+    type Output = HydrationStats;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> task::Poll<Self::Output> {
+        self.project().0.poll(cx)
+    }
+}
+
+#[pin_project]
+pub struct MountHydroHead(#[pin] RemoteHandle<HydrationStats>);
+
+impl Future for MountHydroHead {
+    type Output = HydrationStats;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> task::Poll<Self::Output> {
+        self.project().0.poll(cx)
     }
 }
 

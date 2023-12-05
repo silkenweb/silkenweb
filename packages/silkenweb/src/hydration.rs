@@ -174,5 +174,5 @@ impl fmt::Display for HydrationStats {
 // TODO: Remove this in favour of `Hydro::mount`, but put these docs on `mount`
 // hydro instance.
 pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
-    Hydro::mount(id, element)
+    Hydro::mount(id, element).await
 }
