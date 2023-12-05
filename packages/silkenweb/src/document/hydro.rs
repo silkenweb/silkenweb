@@ -45,13 +45,13 @@ impl Document for Hydro {
     fn mount_in_head(
         id: &str,
         head: super::DocumentHead<Self>,
-    ) -> Result<Self::MountInHeadOutput, super::HeadNotFound> {
+    ) -> Self::MountInHeadOutput {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
         MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(head.child_vec)));
         let id = id.to_string();
-        let head_elem = document_head()?;
+        let head_elem = document_head();
 
         let (future, remote_handle) = async move {
             let mut stats = HydrationStats::default();
@@ -61,7 +61,7 @@ impl Document for Hydro {
         .remote_handle();
         spawn_local(future);
 
-        Ok(MountHydroHead(remote_handle))
+        MountHydroHead(remote_handle)
     }
 
     fn unmount_all() {

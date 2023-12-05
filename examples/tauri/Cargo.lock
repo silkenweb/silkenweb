@@ -3491,7 +3491,6 @@ dependencies = [
  "silkenweb-macros",
  "silkenweb-signals-ext",
  "silkenweb-task",
- "thiserror",
  "tokio",
  "tokio-stream",
  "wasm-bindgen",

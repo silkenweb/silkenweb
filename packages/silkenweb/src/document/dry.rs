@@ -1,4 +1,4 @@
-use super::{Document, DocumentHead, HeadNotFound};
+use super::{Document, DocumentHead};
 use crate::{
     dom::{self, private::DomElement, Dry},
     node::element::{
@@ -16,10 +16,7 @@ impl Document for Dry {
         panic!("`mount` is not supported on `Dry` DOMs")
     }
 
-    fn mount_in_head(
-        id: &str,
-        head: DocumentHead<Self>,
-    ) -> Result<Self::MountInHeadOutput, HeadNotFound> {
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
         let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
@@ -36,8 +33,6 @@ impl Document for Dry {
             existing.is_none(),
             "Attempt to insert duplicate id ({id}) into head"
         );
-
-        Ok(())
     }
 
     fn unmount_all() {

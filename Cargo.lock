@@ -2706,7 +2706,6 @@ dependencies = [
  "silkenweb-signals-ext",
  "silkenweb-task",
  "silkenweb-test",
- "thiserror",
  "tokio",
  "tokio-stream",
  "trybuild",

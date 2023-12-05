@@ -45,7 +45,7 @@ isomorphic_test! {
 
         // Test escaping
         let id = "my-id:0:1";
-        DefaultDom::mount_in_head(id, DocumentHead::new().child(div())).unwrap();
+        DefaultDom::mount_in_head(id, DocumentHead::new().child(div()));
         let head_html = r#"<div></div>"#;
         render_now().await;
         assert_eq!(DefaultDom::head_inner_html(), head_html);

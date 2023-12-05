@@ -1,6 +1,6 @@
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead, HeadNotFound};
+use super::{document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead};
 use crate::{
     document::MountedInHead,
     dom::Wet,
@@ -24,17 +24,12 @@ impl Document for Wet {
         wet_insert_mounted(id, element);
     }
 
-    fn mount_in_head(
-        id: &str,
-        head: DocumentHead<Self>,
-    ) -> Result<Self::MountInHeadOutput, HeadNotFound> {
-        let head_elem = document_head()?;
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
+        let head_elem = document_head();
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 
         MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
-
-        Ok(())
     }
 
     fn unmount_all() {

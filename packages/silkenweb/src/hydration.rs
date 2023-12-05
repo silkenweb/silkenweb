@@ -10,7 +10,7 @@ use std::fmt;
 use wasm_bindgen::JsCast;
 
 use crate::{
-    document::Document,
+    document::{Document, DocumentHead},
     dom::Hydro,
     node::element::{Const, GenericElement},
 };
@@ -144,4 +144,9 @@ impl fmt::Display for HydrationStats {
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
 pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
     Hydro::mount(id, element).await
+}
+
+// TODO: Doc
+pub async fn hydrate_in_head(id: &str, children: DocumentHead<Hydro>) -> HydrationStats {
+    Hydro::mount_in_head(id, children).await
 }

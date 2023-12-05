@@ -2,7 +2,6 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    fmt::{self, Display},
     pin::{pin, Pin},
     task,
 };
@@ -16,8 +15,7 @@ use paste::paste;
 use pin_project::pin_project;
 use silkenweb_base::document;
 use silkenweb_signals_ext::value::SignalOrValue;
-use thiserror::Error;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
     dom::{self, Dom, Dry, Wet},
@@ -107,10 +105,7 @@ pub trait Document: Dom + Sized {
     /// attribute on each top level element in `head` so it can identify which
     /// elements to hydrate against. Mounting something with the same `id` twice
     /// will remove the first mounted `DocumentHead`.
-    fn mount_in_head(
-        id: &str,
-        head: DocumentHead<Self>,
-    ) -> Result<Self::MountInHeadOutput, HeadNotFound>;
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput;
 
     /// Remove all mounted elements.
     ///
@@ -125,15 +120,6 @@ pub trait Document: Dom + Sized {
     /// server side rendering, where it can be used to add any stylesheets
     /// required for the HTML.
     fn head_inner_html() -> String;
-}
-
-#[derive(Error, Debug)]
-pub struct HeadNotFound;
-
-impl Display for HeadNotFound {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Head element not found")
-    }
 }
 
 // TODO: More docs
@@ -222,10 +208,8 @@ impl Future for MountHydroHead {
     }
 }
 
-fn document_head() -> Result<<Wet as dom::private::Dom>::Element, HeadNotFound> {
-    Ok(<Wet as dom::private::Dom>::Element::from_element(
-        document::head().ok_or(HeadNotFound)?.into(),
-    ))
+fn document_head() -> <Wet as dom::private::Dom>::Element {
+    <Wet as dom::private::Dom>::Element::from_element(document::head().unwrap_throw().into())
 }
 
 #[derive(Default)]

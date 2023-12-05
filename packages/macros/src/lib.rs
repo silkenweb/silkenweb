@@ -411,7 +411,6 @@ fn code_gen(
                             ),
                             head
                         )
-                        .unwrap()
                     };
                 }
 
