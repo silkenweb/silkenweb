@@ -26,6 +26,7 @@ pub fn hydrate_app() {
     });
 }
 
+// TODO: Return a `DocumentHead`.
 pub fn app<D: Dom>() -> (Title<D>, Div<D>) {
     let title_text = Mutable::new("Silkenweb SSR Example");
 
