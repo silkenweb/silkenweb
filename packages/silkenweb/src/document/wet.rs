@@ -1,10 +1,9 @@
-use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{wet_insert_mounted, wet_unmount, Document, DocumentHead, HeadNotFound};
+use super::{document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead, HeadNotFound};
 use crate::{
     document::MountedInHead,
-    dom::{self, Wet},
+    dom::Wet,
     mount_point,
     node::element::{
         child_vec::{ChildVec, ParentShared},
@@ -29,10 +28,7 @@ impl Document for Wet {
         id: &str,
         head: DocumentHead<Self>,
     ) -> Result<Self::MountInHeadOutput, HeadNotFound> {
-        let head_elem = <Wet as dom::private::Dom>::Element::from_element(
-            document::head().ok_or(HeadNotFound)?.into(),
-        );
-
+        let head_elem = document_head()?;
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(head.child_vec);
 

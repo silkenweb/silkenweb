@@ -1,7 +1,7 @@
 use futures::FutureExt;
 use silkenweb_task::spawn_local;
 
-use super::{wet_insert_mounted, wet_unmount, Document, MountHydro, MountHydroHead};
+use super::{document_head, wet_insert_mounted, wet_unmount, Document, MountHydro, MountHydroHead};
 use crate::{
     document::MountedInHead,
     dom::{self, private::DomElement, Hydro},
@@ -51,10 +51,11 @@ impl Document for Hydro {
 
         MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(head.child_vec)));
         let id = id.to_string();
+        let head_elem = document_head()?;
 
         let (future, remote_handle) = async move {
             let mut stats = HydrationStats::default();
-            hydro_head_elem.hydrate_in_head(&id, &mut stats);
+            hydro_head_elem.hydrate_in_head(head_elem, &id, &mut stats);
             stats
         }
         .remote_handle();

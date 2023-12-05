@@ -39,8 +39,17 @@ impl HydroElement {
         wet
     }
 
-    pub fn hydrate_in_head(self, _id: &str, _tracker: &mut HydrationStats) {
-        todo!()
+    pub fn hydrate_in_head(self, head: WetElement, id: &str, tracker: &mut HydrationStats) {
+        let wet = match self.0.replace(SharedHydroElement::Unreachable) {
+            SharedHydroElement::Dry(dry) => {
+                dry.hydrate_in_head(&head, id, tracker);
+                head
+            }
+            SharedHydroElement::Wet(wet) => wet,
+            SharedHydroElement::Unreachable => unreachable!(),
+        };
+
+        self.0.replace(SharedHydroElement::Wet(wet));
     }
 
     fn from_shared(shared: SharedHydroElement) -> Self {

@@ -497,6 +497,10 @@ impl SharedDryElement<HydroNode> {
         }
     }
 
+    pub fn hydrate_in_head(self, _head: &WetElement, _id: &str, _tracker: &mut HydrationStats) {
+        todo!()
+    }
+
     fn hydrate_element(
         self,
         dom_elem: &web_sys::Element,

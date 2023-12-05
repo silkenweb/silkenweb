@@ -14,12 +14,13 @@ use futures_signals::{
 };
 use paste::paste;
 use pin_project::pin_project;
+use silkenweb_base::document;
 use silkenweb_signals_ext::value::SignalOrValue;
 use thiserror::Error;
 use wasm_bindgen::JsCast;
 
 use crate::{
-    dom::{Dom, Dry, Wet},
+    dom::{self, Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
     hydration::HydrationStats,
     node::{
@@ -219,6 +220,12 @@ impl Future for MountHydroHead {
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> task::Poll<Self::Output> {
         self.project().0.poll(cx)
     }
+}
+
+fn document_head() -> Result<<Wet as dom::private::Dom>::Element, HeadNotFound> {
+    Ok(<Wet as dom::private::Dom>::Element::from_element(
+        document::head().ok_or(HeadNotFound)?.into(),
+    ))
 }
 
 #[derive(Default)]
