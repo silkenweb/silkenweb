@@ -21,12 +21,9 @@ use crate::{
     dom::{self, Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
     hydration::HydrationStats,
-    node::{
-        element::{
-            child_vec::{ChildVecHandle, ParentShared},
-            Const, GenericElement, ParentElement,
-        },
-        ChildNode, Node,
+    node::element::{
+        child_vec::{ChildVecHandle, ParentShared},
+        Const, GenericElement,
     },
 };
 
@@ -125,7 +122,7 @@ pub trait Document: Dom + Sized {
 // TODO: More docs
 /// The document's `<head>` element.
 pub struct DocumentHead<D: Dom> {
-    child_vec: Pin<Box<dyn SignalVec<Item = Node<D>>>>,
+    child_vec: Pin<Box<dyn SignalVec<Item = GenericElement<D>>>>,
 }
 
 impl<D: Dom> Default for DocumentHead<D> {
@@ -141,12 +138,18 @@ impl<D: Dom> DocumentHead<D> {
     }
 }
 
-impl<D: Dom> ParentElement<D> for DocumentHead<D> {
-    fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
+impl<D: Dom> DocumentHead<D> {
+    pub fn child(
+        self,
+        child: impl SignalOrValue<Item = impl Into<GenericElement<D>> + 'static>,
+    ) -> Self {
         self.optional_child(child.map(Some))
     }
 
-    fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self {
+    pub fn optional_child(
+        self,
+        child: impl SignalOrValue<Item = Option<impl Into<GenericElement<D>> + 'static>>,
+    ) -> Self {
         child.select(
             |parent, child| {
                 if let Some(child) = child {
@@ -165,18 +168,18 @@ impl<D: Dom> ParentElement<D> for DocumentHead<D> {
         )
     }
 
-    fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
+    pub fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
     where
-        N: Into<Node<D>>,
+        N: Into<GenericElement<D>>,
     {
         self.children_signal(signal_vec::always(
             children.into_iter().map(|child| child.into()).collect(),
         ))
     }
 
-    fn children_signal<N>(mut self, children: impl SignalVec<Item = N> + 'static) -> Self
+    pub fn children_signal<E>(mut self, children: impl SignalVec<Item = E> + 'static) -> Self
     where
-        N: Into<Node<D>>,
+        E: Into<GenericElement<D>>,
     {
         self.child_vec = self
             .child_vec

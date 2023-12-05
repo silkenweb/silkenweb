@@ -1,4 +1,5 @@
 use futures::FutureExt;
+use futures_signals::signal_vec::SignalVecExt;
 use silkenweb_task::spawn_local;
 
 use super::{document_head, wet_insert_mounted, wet_unmount, Document, MountHydro, MountHydroHead};
@@ -46,7 +47,8 @@ impl Document for Hydro {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
-        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(head.child_vec)));
+        let children_with_id = head.child_vec.map(|child| child.into());
+        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(children_with_id)));
         let id = id.to_string();
         let head_elem = document_head();
 

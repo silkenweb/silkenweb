@@ -1,3 +1,4 @@
+use futures_signals::signal_vec::SignalVecExt;
 use wasm_bindgen::UnwrapThrowExt;
 
 use super::{document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead};
@@ -27,7 +28,8 @@ impl Document for Wet {
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
         let head_elem = document_head();
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
-        let child_vec_handle = child_vec.run(head.child_vec);
+        let children_with_id = head.child_vec.map(|child| child.into());
+        let child_vec_handle = child_vec.run(children_with_id);
 
         MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
     }
