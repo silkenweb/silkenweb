@@ -3,8 +3,12 @@ use std::{cell::RefCell, collections::HashMap};
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{insert_mounted, Document, DocumentHead, HeadNotFound, WET_MOUNTED};
+use super::{
+    head_inner_html, unmount_head, wet_insert_mounted, wet_unmount, Document, DocumentHead,
+    HeadNotFound,
+};
 use crate::{
+    document::MountedChildVecMap,
     dom::{self, Wet},
     mount_point,
     node::element::{
@@ -23,7 +27,7 @@ impl Document for Wet {
         mount_point(id)
             .replace_with_with_node_1(&element.dom_element())
             .unwrap_throw();
-        insert_mounted(id, element);
+        wet_insert_mounted(id, element);
     }
 
     fn mount_in_head(
@@ -43,25 +47,12 @@ impl Document for Wet {
     }
 
     fn unmount_all() {
-        for element in WET_MOUNTED.take().into_values() {
-            element.dom_element().remove()
-        }
-
-        for element in MOUNTED_IN_HEAD.take().into_values() {
-            element.clear();
-        }
+        wet_unmount();
+        unmount_head(&MOUNTED_IN_HEAD);
     }
 
     fn head_inner_html() -> String {
-        let mut html = String::new();
-
-        MOUNTED_IN_HEAD.with(|mounted| {
-            for elem in mounted.borrow().values() {
-                html.push_str(&elem.inner_html());
-            }
-        });
-
-        html
+        head_inner_html(&MOUNTED_IN_HEAD)
     }
 }
 
@@ -76,5 +67,5 @@ fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Wet, ParentShared>
 }
 
 thread_local! {
-    static MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
+    static MOUNTED_IN_HEAD: MountedChildVecMap<Wet> = RefCell::new(HashMap::new());
 }

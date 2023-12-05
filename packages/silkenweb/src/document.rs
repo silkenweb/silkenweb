@@ -5,6 +5,7 @@ use std::{
     fmt::{self, Display},
     pin::{pin, Pin},
     task,
+    thread::LocalKey,
 };
 
 use futures::{future::RemoteHandle, Future};
@@ -226,13 +227,43 @@ pub(crate) struct TaskLocal {
     mounted_in_dry_head: RefCell<HashMap<String, ChildVecHandle<Dry, ParentShared>>>,
 }
 
-fn insert_mounted(id: &str, element: GenericElement<Wet, Const>) {
+fn wet_insert_mounted(id: &str, element: GenericElement<Wet, Const>) {
     let existing = WET_MOUNTED.with(|mounted| mounted.borrow_mut().insert(id.to_string(), element));
 
     assert!(
         existing.is_none(),
         "Attempt to insert duplicate id ({id}) into document"
     );
+}
+
+fn wet_unmount() {
+    for element in WET_MOUNTED.take().into_values() {
+        element.dom_element().remove()
+    }
+}
+
+type MountedChildVecMap<D> = RefCell<HashMap<String, ChildVecHandle<D, ParentShared>>>;
+
+fn unmount_head<D: Dom>(
+    mounted_in_head: &'static LocalKey<MountedChildVecMap<D>>,
+) {
+    for element in mounted_in_head.take().into_values() {
+        element.clear();
+    }
+}
+
+fn head_inner_html<D: Dom>(
+    mounted_in_head: &'static LocalKey<MountedChildVecMap<D>>,
+) -> String {
+    let mut html = String::new();
+
+    mounted_in_head.with(|mounted| {
+        for elem in mounted.borrow().values() {
+            html.push_str(&elem.inner_html());
+        }
+    });
+
+    html
 }
 
 thread_local! {

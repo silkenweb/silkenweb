@@ -3,9 +3,13 @@ use std::{cell::RefCell, collections::HashMap};
 use futures::FutureExt;
 use silkenweb_task::spawn_local;
 
-use super::{insert_mounted, Document, MountHydro, MountHydroHead};
+use super::{
+    head_inner_html, unmount_head, wet_insert_mounted, wet_unmount, Document, MountHydro,
+    MountHydroHead,
+};
 use crate::{
-    dom::{self, private::DomElement, Hydro, Wet},
+    document::MountedChildVecMap,
+    dom::{self, private::DomElement, Hydro},
     hydration::HydrationStats,
     mount_point,
     node::element::{
@@ -34,7 +38,7 @@ impl Document for Hydro {
 
             let mount_point = mount_point(&id);
             let wet_element = element.hydrate(&mount_point, &mut stats);
-            insert_mounted(&id, wet_element);
+            wet_insert_mounted(&id, wet_element);
             stats
         }
         .remote_handle();
@@ -65,11 +69,12 @@ impl Document for Hydro {
     }
 
     fn unmount_all() {
-        Wet::unmount_all()
+        wet_unmount();
+        unmount_head(&MOUNTED_IN_HEAD);
     }
 
     fn head_inner_html() -> String {
-        Wet::head_inner_html()
+        head_inner_html(&MOUNTED_IN_HEAD)
     }
 }
 
@@ -84,5 +89,5 @@ fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Hydro, ParentShare
 }
 
 thread_local! {
-    static MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Hydro, ParentShared>>> = RefCell::new(HashMap::new());
+    static MOUNTED_IN_HEAD: MountedChildVecMap<Hydro> = RefCell::new(HashMap::new());
 }
