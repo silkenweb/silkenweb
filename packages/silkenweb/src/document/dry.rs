@@ -9,8 +9,8 @@ use crate::{
 };
 
 impl Document for Dry {
-    type MountOutput = ();
     type MountInHeadOutput = ();
+    type MountOutput = ();
 
     fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         panic!("`mount` is not supported on `Dry` DOMs")
