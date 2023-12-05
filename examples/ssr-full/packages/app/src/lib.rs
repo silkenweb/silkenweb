@@ -6,10 +6,10 @@ use silkenweb::{
         ElementEvents,
     },
     hydration::hydrate,
-    node::element::TextParentElement,
+    node::element::ParentElement,
     prelude::{
         html::{title, Title},
-        HtmlElement, ParentElement,
+        HtmlElement,
     },
     router,
     task::spawn_local,

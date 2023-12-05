@@ -20,7 +20,7 @@ use silkenweb::{
         AriaElement, ElementEvents, HtmlElement,
     },
     mount,
-    node::element::{Const, Element, ParentElement, TextParentElement},
+    node::element::{Const, Element, ParentElement},
     value::Sig,
 };
 use wasm_bindgen::UnwrapThrowExt;

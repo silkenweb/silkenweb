@@ -8,7 +8,6 @@ use silkenweb::{
     clone,
     elements::html::{button, div, p},
     log_panics, mount,
-    node::element::TextParentElement,
     prelude::{ElementEvents, ParentElement},
     task,
     value::Sig,

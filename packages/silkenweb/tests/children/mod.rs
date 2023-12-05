@@ -15,7 +15,6 @@ use silkenweb::{
     elements::html::{div, Div},
     macros::Signal,
     mount,
-    node::element::TextParentElement,
     prelude::{HtmlElement, ParentElement},
     task::render_now,
     value::Sig,

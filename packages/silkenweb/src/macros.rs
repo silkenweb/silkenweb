@@ -466,7 +466,7 @@ macro_rules! dom_element {
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{
-        impl<Dom: $crate::dom::Dom> $crate::node::element::TextParentElement<Dom>
+        impl<Dom: $crate::dom::Dom> $crate::node::element::ParentElement<Dom>
         for [< $name:camel >] <Dom>
         {
             fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
@@ -475,11 +475,7 @@ macro_rules! parent_element {
             {
                 Self(self.0.text(child))
             }
-        }
 
-        impl<Dom: $crate::dom::Dom> $crate::node::element::ParentElement<Dom>
-        for [< $name:camel >] <Dom>
-        {
             fn child(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = impl $crate::node::ChildNode<Dom>>

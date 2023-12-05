@@ -2,10 +2,7 @@ use silkenweb::{
     css,
     elements::html::{dd, dl, dt, span},
     log_panics, mount,
-    node::{
-        element::{ParentElement, TextParentElement},
-        ChildNode, Component,
-    },
+    node::{element::ParentElement, ChildNode, Component},
     prelude::{html::div, HtmlElement},
     ChildElement,
 };

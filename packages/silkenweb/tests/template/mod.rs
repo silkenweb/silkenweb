@@ -9,7 +9,7 @@ use silkenweb::{
         HtmlElement,
     },
     node::{
-        element::{Const, ParentElement, TextParentElement},
+        element::{Const, ParentElement},
         Node,
     },
     task::render_now,
@@ -96,7 +96,7 @@ mod dry {
     use silkenweb::{
         dom::{Dry, Template},
         elements::html::{div, Div},
-        node::element::{Const, ParentElement, TextParentElement},
+        node::element::{Const, ParentElement},
         task::{server::render_now_sync, sync_scope},
     };
 

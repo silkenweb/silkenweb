@@ -3,7 +3,6 @@ use silkenweb::{
     clone,
     elements::html::{button, div},
     mount,
-    node::element::TextParentElement,
     prelude::{ElementEvents, ParentElement},
     task::spawn_local,
     value::Sig,

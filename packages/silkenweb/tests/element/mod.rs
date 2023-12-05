@@ -9,7 +9,7 @@ use silkenweb::{
         HtmlElement,
     },
     node::{
-        element::{Element, ParentElement, TextParentElement},
+        element::{Element, ParentElement},
         text, Node,
     },
     task::render_now,

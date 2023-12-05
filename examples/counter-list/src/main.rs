@@ -8,7 +8,7 @@ use silkenweb::{
         ElementEvents,
     },
     log_panics, mount,
-    node::element::{ParentElement, TextParentElement},
+    node::element::ParentElement,
     value::Sig,
 };
 

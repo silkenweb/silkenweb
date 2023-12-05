@@ -1,5 +1,5 @@
 use super::{
-    element::{Const, GenericElement, ParentElement, ShadowRootParent, TextParentElement},
+    element::{Const, GenericElement, ParentElement, ShadowRootParent},
     ChildNode, Node,
 };
 use crate::{

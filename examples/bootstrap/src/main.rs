@@ -1,7 +1,6 @@
 use silkenweb::{
     elements::html::{a, div, A},
     log_panics, mount,
-    node::element::TextParentElement,
     prelude::ParentElement,
 };
 use silkenweb_bootstrap::{
