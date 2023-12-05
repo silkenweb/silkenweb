@@ -92,7 +92,9 @@ impl HydroElement {
         tracker: &mut HydrationStats,
     ) -> WetNode {
         let wet = match self.0.replace(SharedHydroElement::Unreachable) {
-            SharedHydroElement::Dry(dry) => dry.hydrate_child(parent,skip_filtered, child, tracker),
+            SharedHydroElement::Dry(dry) => {
+                dry.hydrate_child(parent, skip_filtered, child, tracker)
+            }
             SharedHydroElement::Wet(wet) => wet,
             SharedHydroElement::Unreachable => unreachable!(),
         };
