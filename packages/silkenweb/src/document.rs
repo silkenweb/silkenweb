@@ -139,6 +139,10 @@ impl<D: Dom> DocumentHead<D> {
 }
 
 impl<D: Dom> DocumentHead<D> {
+    /// Add a child.
+    ///
+    /// This like [`ParentElement::child`][`crate::node::element::ParentElement::child`],
+    /// but it only accepts element children, not text.
     pub fn child(
         self,
         child: impl SignalOrValue<Item = impl Into<GenericElement<D>> + 'static>,
@@ -146,6 +150,10 @@ impl<D: Dom> DocumentHead<D> {
         self.optional_child(child.map(Some))
     }
 
+    /// Add an optional child.
+    ///
+    /// This like [`ParentElement::optional_child`][`crate::node::element::ParentElement::optional_child`],
+    /// but it only accepts element children, not text.
     pub fn optional_child(
         self,
         child: impl SignalOrValue<Item = Option<impl Into<GenericElement<D>> + 'static>>,
@@ -168,6 +176,10 @@ impl<D: Dom> DocumentHead<D> {
         )
     }
 
+    /// Add some children
+    ///
+    /// This like [`ParentElement::children`][`crate::node::element::ParentElement::children`],
+    /// but it only accepts element children, not text.
     pub fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
     where
         N: Into<GenericElement<D>>,
@@ -177,6 +189,10 @@ impl<D: Dom> DocumentHead<D> {
         ))
     }
 
+    /// Add some reactive children.
+    ///
+    /// This like [`ParentElement::children_signal`][`crate::node::element::ParentElement::children_signal`],
+    /// but it only accepts element children, not text.
     pub fn children_signal<E>(mut self, children: impl SignalVec<Item = E> + 'static) -> Self
     where
         E: Into<GenericElement<D>>,
