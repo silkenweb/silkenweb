@@ -88,6 +88,7 @@ bubbling_events!();
 
 pub trait Document: Dom + Sized {
     type MountOutput;
+    type MountInHeadOutput;
 
     /// Mount an element on the document.
     ///
@@ -102,7 +103,7 @@ pub trait Document: Dom + Sized {
     /// elements to hydrate against. Mounting something with the same `id` twice
     /// will remove the first mounted `DocumentHead`.
     fn mount_in_head(id: &str, head: DocumentHead<Self>)
-        -> Result<Self::MountOutput, HeadNotFound>;
+        -> Result<Self::MountInHeadOutput, HeadNotFound>;
 
     /// Remove all mounted elements.
     ///
@@ -206,17 +207,6 @@ fn insert_mounted(id: &str, element: GenericElement<Wet, Const>) {
     );
 }
 
-fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Wet, ParentShared>) {
-    let existing =
-        WET_MOUNTED_IN_HEAD.with(|mounted| mounted.borrow_mut().insert(id.to_string(), child_vec));
-
-    assert!(
-        existing.is_none(),
-        "Attempt to insert duplicate id ({id}) into head"
-    );
-}
-
 thread_local! {
     static WET_MOUNTED: RefCell<HashMap<String, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
-    static WET_MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
 }

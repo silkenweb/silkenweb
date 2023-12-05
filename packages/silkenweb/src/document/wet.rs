@@ -1,20 +1,20 @@
+use std::{cell::RefCell, collections::HashMap};
+
 use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{
-    insert_mounted, insert_mounted_in_head, Document, DocumentHead, HeadNotFound, WET_MOUNTED,
-    WET_MOUNTED_IN_HEAD,
-};
+use super::{insert_mounted, Document, DocumentHead, HeadNotFound, WET_MOUNTED};
 use crate::{
     dom::{self, Wet},
     mount_point,
     node::element::{
-        child_vec::{ChildVec, ParentShared},
+        child_vec::{ChildVec, ChildVecHandle, ParentShared},
         Const, GenericElement,
     },
 };
 
 impl Document for Wet {
+    type MountInHeadOutput = ();
     type MountOutput = ();
 
     fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
@@ -29,7 +29,7 @@ impl Document for Wet {
     fn mount_in_head(
         id: &str,
         head: DocumentHead<Self>,
-    ) -> Result<Self::MountOutput, HeadNotFound> {
+    ) -> Result<Self::MountInHeadOutput, HeadNotFound> {
         let head_elem = <Wet as dom::private::Dom>::Element::from_element(
             document::head().ok_or(HeadNotFound)?.into(),
         );
@@ -47,7 +47,7 @@ impl Document for Wet {
             element.dom_element().remove()
         }
 
-        for element in WET_MOUNTED_IN_HEAD.take().into_values() {
+        for element in MOUNTED_IN_HEAD.take().into_values() {
             element.clear();
         }
     }
@@ -55,7 +55,7 @@ impl Document for Wet {
     fn head_inner_html() -> String {
         let mut html = String::new();
 
-        WET_MOUNTED_IN_HEAD.with(|mounted| {
+        MOUNTED_IN_HEAD.with(|mounted| {
             for elem in mounted.borrow().values() {
                 html.push_str(&elem.inner_html());
             }
@@ -63,4 +63,18 @@ impl Document for Wet {
 
         html
     }
+}
+
+fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Wet, ParentShared>) {
+    let existing =
+        MOUNTED_IN_HEAD.with(|mounted| mounted.borrow_mut().insert(id.to_string(), child_vec));
+
+    assert!(
+        existing.is_none(),
+        "Attempt to insert duplicate id ({id}) into head"
+    );
+}
+
+thread_local! {
+    static MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Wet, ParentShared>>> = RefCell::new(HashMap::new());
 }

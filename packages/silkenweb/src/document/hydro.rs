@@ -1,17 +1,26 @@
+use std::{cell::RefCell, collections::HashMap};
+
+use futures::{future::RemoteHandle, FutureExt};
+use silkenweb_task::spawn_local;
+
 use super::{insert_mounted, Document};
 use crate::{
     dom::{self, private::DomElement, Hydro, Wet},
     hydration::HydrationStats,
     mount_point,
     node::element::{
-        child_vec::{ChildVec, ParentShared},
+        child_vec::{ChildVec, ChildVecHandle, ParentShared},
         Namespace,
     },
 };
 
 impl Document for Hydro {
+    // TODO: Wrap in an opaque type
+    type MountInHeadOutput = RemoteHandle<HydrationStats>;
+    // TODO: Use an opaque future
     type MountOutput = HydrationStats;
 
+    // TODO: Return a future and remove warning in docs
     /// See [`hydrate`] for more details.
     ///
     /// [`hydrate`] just calls [`Hydro::mount`]. In particular, this should be
@@ -36,19 +45,23 @@ impl Document for Hydro {
 
     fn mount_in_head(
         id: &str,
-        _head: super::DocumentHead<Self>,
-    ) -> Result<Self::MountOutput, super::HeadNotFound> {
+        head: super::DocumentHead<Self>,
+    ) -> Result<Self::MountInHeadOutput, super::HeadNotFound> {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
-        let mut stats = HydrationStats::default();
-        let _child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
+        let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
-        // TODO: Run child vec until pending
-        hydro_head_elem.hydrate_in_head(id, &mut stats);
+        insert_mounted_in_head(id, child_vec.run(head.child_vec));
+        let id = id.to_string();
 
-        // TODO: Run child vec
-        // TODO: Store child vec handle
+        let (future, remote_handle) = async move {
+            let mut stats = HydrationStats::default();
+            hydro_head_elem.hydrate_in_head(&id, &mut stats);
+            stats
+        }
+        .remote_handle();
+        spawn_local(future);
 
-        Ok(stats)
+        Ok(remote_handle)
     }
 
     fn unmount_all() {
@@ -58,4 +71,18 @@ impl Document for Hydro {
     fn head_inner_html() -> String {
         Wet::head_inner_html()
     }
+}
+
+fn insert_mounted_in_head(id: &str, child_vec: ChildVecHandle<Hydro, ParentShared>) {
+    let existing =
+        MOUNTED_IN_HEAD.with(|mounted| mounted.borrow_mut().insert(id.to_string(), child_vec));
+
+    assert!(
+        existing.is_none(),
+        "Attempt to insert duplicate id ({id}) into head"
+    );
+}
+
+thread_local! {
+    static MOUNTED_IN_HEAD: RefCell<HashMap<String, ChildVecHandle<Hydro, ParentShared>>> = RefCell::new(HashMap::new());
 }
