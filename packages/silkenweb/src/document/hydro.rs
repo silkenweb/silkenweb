@@ -42,10 +42,7 @@ impl Document for Hydro {
         MountHydro(remote_handle)
     }
 
-    fn mount_in_head(
-        id: &str,
-        head: super::DocumentHead<Self>,
-    ) -> Self::MountInHeadOutput {
+    fn mount_in_head(id: &str, head: super::DocumentHead<Self>) -> Self::MountInHeadOutput {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
