@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, convert::identity, fmt, rc::Rc};
 
 use caseless::default_caseless_match_str;
 use html_escape::{encode_double_quoted_attribute, encode_text_minimal};
@@ -438,6 +438,7 @@ impl SharedDryElement<HydroNode> {
     pub fn hydrate_child(
         self,
         parent: &web_sys::Node,
+        skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> WetElement {
@@ -455,7 +456,7 @@ impl SharedDryElement<HydroNode> {
                 }
             }
 
-            let next = child.next_sibling();
+            let next = skip_filtered(child.next_sibling());
             tracker.node_removed(&child);
             parent.remove_child(&child).unwrap_throw();
 
@@ -497,8 +498,23 @@ impl SharedDryElement<HydroNode> {
         }
     }
 
-    pub fn hydrate_in_head(self, _head: &WetElement, _id: &str, _tracker: &mut HydrationStats) {
-        todo!()
+    pub fn hydrate_in_head(self, head: &WetElement, id: &str, tracker: &mut HydrationStats) {
+        let id = id.to_string();
+        let skip_filtered = move |mut node: Option<web_sys::Node>| {
+            while let Some(current) = node {
+                if current.dyn_ref::<web_sys::Element>().is_some_and(|elem| {
+                    elem.get_attribute("data-silkenweb-head-id").as_ref() == Some(&id)
+                }) {
+                    return Some(current);
+                }
+
+                node = current.next_sibling();
+            }
+
+            None
+        };
+
+        Self::hydrate_children(&head.dom_element(), &skip_filtered, self.children, tracker);
     }
 
     fn hydrate_element(
@@ -509,11 +525,11 @@ impl SharedDryElement<HydroNode> {
         self.reconcile_attributes(dom_elem, tracker);
         let mut elem = WetElement::from_element(dom_elem.clone());
 
-        Self::hydrate_children(dom_elem, self.children, tracker);
+        Self::hydrate_children(dom_elem, &identity, self.children, tracker);
 
         if !self.shadow_children.is_empty() {
             let shadow_root = elem.create_shadow_root();
-            Self::hydrate_children(&shadow_root, self.shadow_children, tracker);
+            Self::hydrate_children(&shadow_root, &identity, self.shadow_children, tracker);
         }
 
         for event in self.hydrate_actions {
@@ -525,16 +541,17 @@ impl SharedDryElement<HydroNode> {
 
     fn hydrate_children(
         dom_elem: &web_sys::Node,
+        skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
         children: impl IntoIterator<Item = HydroNode>,
         tracker: &mut HydrationStats,
     ) {
         let mut children = children.into_iter();
-        let mut current_child = dom_elem.first_child();
+        let mut current_child = skip_filtered(dom_elem.first_child());
 
         for child in children.by_ref() {
             if let Some(node) = &current_child {
-                let hydrated_elem = child.hydrate_child(dom_elem, node, tracker);
-                current_child = hydrated_elem.dom_node().next_sibling();
+                let hydrated_elem = child.hydrate_child(dom_elem, skip_filtered, node, tracker);
+                current_child = skip_filtered(hydrated_elem.dom_node().next_sibling());
             } else {
                 Self::hydrate_with_new(dom_elem, child, tracker);
                 break;
@@ -545,13 +562,17 @@ impl SharedDryElement<HydroNode> {
             Self::hydrate_with_new(dom_elem, child, tracker);
         }
 
-        Self::remove_children_from(dom_elem, current_child);
+        Self::remove_children_from(dom_elem, skip_filtered, current_child);
     }
 
     /// Remove `child` and all siblings after `child`
-    fn remove_children_from(parent: &web_sys::Node, mut child: Option<web_sys::Node>) {
+    fn remove_children_from(
+        parent: &web_sys::Node,
+        skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
+        mut child: Option<web_sys::Node>,
+    ) {
         while let Some(node) = child {
-            let next_child = node.next_sibling();
+            let next_child = skip_filtered(node.next_sibling());
             parent.remove_child(&node).unwrap_throw();
             child = next_child;
         }

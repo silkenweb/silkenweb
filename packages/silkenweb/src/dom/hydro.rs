@@ -87,11 +87,12 @@ impl HydroElement {
     fn hydrate_child(
         self,
         parent: &web_sys::Node,
+        skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> WetNode {
         let wet = match self.0.replace(SharedHydroElement::Unreachable) {
-            SharedHydroElement::Dry(dry) => dry.hydrate_child(parent, child, tracker),
+            SharedHydroElement::Dry(dry) => dry.hydrate_child(parent,skip_filtered, child, tracker),
             SharedHydroElement::Wet(wet) => wet,
             SharedHydroElement::Unreachable => unreachable!(),
         };
@@ -435,12 +436,13 @@ impl HydroNode {
     pub fn hydrate_child(
         self,
         parent: &web_sys::Node,
+        skip_filtered: &impl Fn(Option<web_sys::Node>) -> Option<web_sys::Node>,
         child: &web_sys::Node,
         tracker: &mut HydrationStats,
     ) -> WetNode {
         match self {
             Self::Text(text) => text.hydrate_child(parent, child, tracker),
-            Self::Element(elem) => elem.hydrate_child(parent, child, tracker),
+            Self::Element(elem) => elem.hydrate_child(parent, skip_filtered, child, tracker),
             Self::Wet(wet) => wet,
         }
     }
