@@ -84,3 +84,20 @@ async fn wet_basic() {
 async fn hydro_basic() {
     basic::<Hydro>().await
 }
+
+#[wasm_bindgen_test]
+async fn hydro_interleaved() {
+    interleaved::<Hydro>().await
+}
+
+#[wasm_bindgen_test]
+async fn wet_interleaved() {
+    interleaved::<Wet>().await
+}
+
+// We don't test interleaving on `Dry` DOMs as the ordering is different, and
+// the elements are segregated anyway.
+async fn interleaved<D: Document>() {
+    D::unmount_all();
+    // TODO: Implement
+}
