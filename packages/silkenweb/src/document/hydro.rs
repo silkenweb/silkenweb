@@ -49,7 +49,7 @@ impl Document for Hydro {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
-        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(children_with_id(head,id))));
+        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(children_with_id(head, id))));
         let id = id.to_string();
         let head_elem = document_head();
 
