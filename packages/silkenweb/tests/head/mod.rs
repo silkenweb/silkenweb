@@ -135,10 +135,7 @@ async fn interleaved<D: Document>() {
     render_now().await;
     assert_eq!(
         head.inner_html(),
-        format!(
-            r#"{existing}{}"#,
-            items([(0, id1), (0, id2), (1, id2)])
-        )
+        format!(r#"{existing}{}"#, items([(0, id1), (0, id2), (1, id2)]))
     );
     // TODO: More test cases
 }
