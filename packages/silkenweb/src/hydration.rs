@@ -146,7 +146,30 @@ pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>)
     Hydro::mount(id, element).await
 }
 
-// TODO: Doc
+/// Hydrate children in the document `<head>`.
+///
+/// This will only hydrate against children in `<head>` with attribute
+/// `data-silkenweb-head-id=<id>`. Any other elements in head will be left
+/// alone. This means you can have multiple sets of children in `<head>` or
+/// other scripts can modify `<head>` without interfering with this. The
+/// hydration algorithm is the same as used by [`hydrate`].
+///
+/// # Example
+///
+/// Hydrate in `<head>`, matching a single existing
+/// `<meta data-silkenweb-head-id="my-id" ...>` element, and removing any
+/// elements with attribute `data-silkenweb-head-id="my-id"`.
+///
+/// ```no_run
+/// # use futures_signals::signal::always;
+/// # use html::meta;
+/// # use silkenweb::{hydration::hydrate_in_head, document::DocumentHead, prelude::*, task::spawn_local};
+/// let head = DocumentHead::new().child(meta().name("description").content("A description"));
+///
+/// spawn_local(async {
+///     hydrate_in_head("my-id", head).await;
+/// });
+/// ```
 pub async fn hydrate_in_head(id: &str, children: DocumentHead<Hydro>) -> HydrationStats {
     Hydro::mount_in_head(id, children).await
 }

@@ -100,12 +100,15 @@ pub trait Document: Dom + Sized {
     /// the mount point.
     fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput;
 
-    /// Mount an element in the document `<head>`
+    /// Mount some children in the document `<head>`
     ///
     /// `id` is used by hydration, which will set a `data-silkenweb-head-id`
     /// attribute on each top level element in `head` so it can identify which
-    /// elements to hydrate against. Mounting something with the same `id` twice
-    /// will remove the first mounted `DocumentHead`.
+    /// elements to hydrate against.
+    ///
+    /// # Panics
+    ///
+    /// Mounting something with the same `id` will cause a panic.
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput;
 
     /// Remove all mounted elements.
@@ -123,8 +126,11 @@ pub trait Document: Dom + Sized {
     fn head_inner_html() -> String;
 }
 
-// TODO: More docs
 /// The document's `<head>` element.
+///
+/// This allows you to create a set of (possibly reactive) children that can be
+/// added to the head. See
+/// [`hydrate_in_head`][`crate::hydration::hydrate_in_head`] for more details.
 pub struct DocumentHead<D: Dom> {
     child_vec: Pin<Box<dyn SignalVec<Item = GenericElement<D>>>>,
 }
