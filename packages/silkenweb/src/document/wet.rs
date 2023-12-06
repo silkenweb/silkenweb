@@ -1,16 +1,16 @@
-use futures_signals::signal_vec::SignalVecExt;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead};
+use super::{
+    children_with_id, document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead,
+};
 use crate::{
     document::MountedInHead,
     dom::Wet,
     mount_point,
     node::element::{
         child_vec::{ChildVec, ParentShared},
-        Const, Element, GenericElement,
+        Const, GenericElement,
     },
-    HEAD_ID_ATTRIBUTE,
 };
 
 impl Document for Wet {
@@ -29,11 +29,7 @@ impl Document for Wet {
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
         let head_elem = document_head();
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
-        let children_with_id = head.child_vec.map({
-            let id = id.to_string();
-            move |child| child.attribute(HEAD_ID_ATTRIBUTE, id.clone()).into()
-        });
-        let child_vec_handle = child_vec.run(children_with_id);
+        let child_vec_handle = child_vec.run(children_with_id(head, id));
 
         MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
     }

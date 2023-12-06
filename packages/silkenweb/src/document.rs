@@ -21,10 +21,14 @@ use crate::{
     dom::{self, Dom, Dry, Wet},
     event::{bubbling_events, GlobalEventCallback},
     hydration::HydrationStats,
-    node::element::{
-        child_vec::{ChildVecHandle, ParentShared},
-        Const, GenericElement,
+    node::{
+        element::{
+            child_vec::{ChildVecHandle, ParentShared},
+            Const, Element, GenericElement,
+        },
+        Node,
     },
+    HEAD_ID_ATTRIBUTE,
 };
 
 mod dry;
@@ -229,6 +233,13 @@ impl Future for MountHydroHead {
 
 fn document_head() -> <Wet as dom::private::Dom>::Element {
     <Wet as dom::private::Dom>::Element::from_element(document::head().unwrap_throw().into())
+}
+
+fn children_with_id<D: Dom>(head: DocumentHead<D>, id: &str) -> impl SignalVec<Item = Node<D>> {
+    head.child_vec.map({
+        let id = id.to_string();
+        move |child| child.attribute(HEAD_ID_ATTRIBUTE, id.clone()).into()
+    })
 }
 
 #[derive(Default)]

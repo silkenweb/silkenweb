@@ -1,13 +1,12 @@
-use futures_signals::signal_vec::SignalVecExt;
-
 use super::{Document, DocumentHead};
 use crate::{
+    document::children_with_id,
     dom::{self, private::DomElement, Dry},
     node::element::{
         child_vec::{ChildVec, ParentShared},
-        Const, Element, GenericElement, Namespace,
+        Const, GenericElement, Namespace,
     },
-    task, HEAD_ID_ATTRIBUTE,
+    task,
 };
 
 impl Document for Dry {
@@ -21,11 +20,7 @@ impl Document for Dry {
     fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
         let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
-        let children_with_id = head.child_vec.map({
-            let id = id.to_string();
-            move |child| child.attribute(HEAD_ID_ATTRIBUTE, id.clone()).into()
-        });
-        let child_vec_handle = child_vec.run(children_with_id);
+        let child_vec_handle = child_vec.run(children_with_id(head, id));
 
         let existing = task::local::with(|local| {
             local
