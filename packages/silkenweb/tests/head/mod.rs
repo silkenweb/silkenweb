@@ -1,3 +1,4 @@
+use futures::Future;
 use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
@@ -5,7 +6,7 @@ use futures_signals::{
 use itertools::Itertools;
 use silkenweb::{
     document::{Document, DocumentHead},
-    dom::{Dom, Dry, Hydro, Wet},
+    dom::{Dom, Hydro, Wet},
     elements::html::{meta, Meta},
     task::render_now,
 };
@@ -76,7 +77,7 @@ async fn basic<D: Document>() {
 #[cfg_browser(false)]
 #[test]
 fn dry_basic() {
-    use silkenweb::task;
+    use silkenweb::{dom::Dry, task};
     task::server::block_on(task::scope(basic::<Dry>()))
 }
 
@@ -90,28 +91,34 @@ async fn hydro_basic() {
     basic::<Hydro>().await
 }
 
-// TODO: We need to await `Hydro::MountInHeadOutput`
-// #[wasm_bindgen_test]
-// async fn hydro_interleaved() {
-//     interleaved::<Hydro>().await
-// }
+#[wasm_bindgen_test]
+async fn hydro_interleaved() {
+    interleaved::<Hydro, _>(&|f| async {
+        f.await;
+    })
+    .await
+}
 
 #[wasm_bindgen_test]
 async fn wet_interleaved() {
-    interleaved::<Wet>().await
+    interleaved::<Wet, _>(&|()| async {}).await
 }
 
 // We don't test interleaving on `Dry` DOMs as the ordering is different, and
 // the elements are segregated anyway.
-async fn interleaved<D: Document>() {
+async fn interleaved<D, F>(run_mount: &impl Fn(D::MountInHeadOutput) -> F)
+where
+    D: Document,
+    F: Future<Output = ()>,
+{
     Wet::unmount_all();
     Hydro::unmount_all();
     let head = document::head().unwrap();
     let existing = head.inner_html();
     let id1 = "my-id1";
-    let numbers1 = head_vec::<D>(id1);
+    let numbers1 = head_vec::<D, F>(id1, run_mount).await;
     let id2 = "my-id2";
-    let numbers2 = head_vec::<D>(id2);
+    let numbers2 = head_vec::<D, F>(id2, run_mount).await;
     render_now().await;
     assert_eq!(head.inner_html(), existing.as_str());
     numbers1.lock_mut().push(0);
@@ -140,17 +147,25 @@ async fn interleaved<D: Document>() {
     // TODO: More test cases
 }
 
-fn head_vec<D: Document>(id: &str) -> MutableVec<usize> {
+async fn head_vec<D, F>(
+    id: &str,
+    run_mount: &impl Fn(D::MountInHeadOutput) -> F,
+) -> MutableVec<usize>
+where
+    D: Document,
+    F: Future<Output = ()>,
+{
     let numbers = MutableVec::new();
 
-    D::mount_in_head(
+    run_mount(D::mount_in_head(
         id,
         DocumentHead::new().children_signal(
             numbers
                 .signal_vec()
                 .map(|n| meta().name("description").content(format!("item {n}"))),
         ),
-    );
+    ))
+    .await;
 
     numbers
 }
