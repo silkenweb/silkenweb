@@ -1,4 +1,4 @@
-use futures::FutureExt;
+use futures::channel::oneshot;
 use silkenweb_task::spawn_local;
 
 use super::{
@@ -31,18 +31,17 @@ impl Document for Hydro {
         let element = element.into();
         let id = id.to_string();
 
-        let (future, remote_handle) = async move {
+        let (send, receive) = oneshot::channel();
+        spawn_local(async move {
             let mut stats = HydrationStats::default();
 
             let mount_point = mount_point(&id);
             let wet_element = element.hydrate(&mount_point, &mut stats);
             wet_insert_mounted(&id, wet_element);
-            stats
-        }
-        .remote_handle();
-        spawn_local(future);
+            let _ = send.send(stats);
+        });
 
-        MountHydro(remote_handle)
+        MountHydro(receive)
     }
 
     fn mount_in_head(id: &str, head: super::DocumentHead<Self>) -> Self::MountInHeadOutput {
@@ -53,15 +52,14 @@ impl Document for Hydro {
         let id = id.to_string();
         let head_elem = document_head();
 
-        let (future, remote_handle) = async move {
+        let (send, receive) = oneshot::channel();
+        spawn_local(async move {
             let mut stats = HydrationStats::default();
             hydro_head_elem.hydrate_in_head(head_elem, &id, &mut stats);
-            stats
-        }
-        .remote_handle();
-        spawn_local(future);
+            let _ = send.send(stats);
+        });
 
-        MountHydroHead(remote_handle)
+        MountHydroHead(receive)
     }
 
     fn unmount_all() {

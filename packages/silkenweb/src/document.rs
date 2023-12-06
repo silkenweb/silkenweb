@@ -6,7 +6,7 @@ use std::{
     task,
 };
 
-use futures::{future::RemoteHandle, Future};
+use futures::{channel::oneshot, Future};
 use futures_signals::{
     signal::SignalExt,
     signal_vec::{self, SignalVec, SignalVecExt},
@@ -209,26 +209,39 @@ impl<D: Dom> DocumentHead<D> {
     }
 }
 
+// If we used `RemoteHandle`, we'd have to wait on the future for
+// `HydrationStats` even if we want to discard it. Using `oneshot`, we can
+// discard the whole future if we don't need `HydrationStats`.
 #[pin_project]
-pub struct MountHydro(#[pin] RemoteHandle<HydrationStats>);
+pub struct MountHydro(#[pin] oneshot::Receiver<HydrationStats>);
 
 impl Future for MountHydro {
     type Output = HydrationStats;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> task::Poll<Self::Output> {
-        self.project().0.poll(cx)
+        poll_receiver(self.project().0, cx)
     }
 }
 
 #[pin_project]
-pub struct MountHydroHead(#[pin] RemoteHandle<HydrationStats>);
+pub struct MountHydroHead(#[pin] oneshot::Receiver<HydrationStats>);
 
 impl Future for MountHydroHead {
     type Output = HydrationStats;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> task::Poll<Self::Output> {
-        self.project().0.poll(cx)
+        poll_receiver(self.project().0, cx)
     }
+}
+
+fn poll_receiver<T>(
+    receiver: Pin<&mut oneshot::Receiver<T>>,
+    cx: &mut task::Context<'_>,
+) -> task::Poll<T> {
+    receiver.poll(cx).map(|r| {
+        // We send from a future that is run using `spawn_local`, so we can't cancel it.
+        r.unwrap_throw()
+    })
 }
 
 fn document_head() -> <Wet as dom::private::Dom>::Element {
