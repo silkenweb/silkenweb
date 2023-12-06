@@ -1,36 +1,34 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
+    document::DocumentHead,
     dom::Dom,
     elements::{
         html::{button, div, p, Div},
         ElementEvents,
     },
-    hydration::hydrate,
+    hydration::{hydrate, hydrate_in_head},
     node::element::ParentElement,
-    prelude::{
-        html::{title, Title},
-        HtmlElement,
-    },
+    prelude::{html::title, HtmlElement},
     router,
     task::spawn_local,
     value::Sig,
 };
 
 pub fn hydrate_app() {
-    let (title, body) = app();
+    let (head, body) = app();
 
     spawn_local(async {
-        hydrate("title", title).await;
+        let stats = hydrate_in_head("head", head).await;
+        web_log::println!("Hydrate head: {}", stats);
         let stats = hydrate("body", body).await;
-        web_log::println!("{}", stats);
+        web_log::println!("Hydrate body: {}", stats);
     });
 }
 
-// TODO: Return a `DocumentHead`.
-pub fn app<D: Dom>() -> (Title<D>, Div<D>) {
+pub fn app<D: Dom>() -> (DocumentHead<D>, Div<D>) {
     let title_text = Mutable::new("Silkenweb SSR Example");
 
-    let title = title().id("title").text(Sig(title_text.signal()));
+    let head = DocumentHead::new().child(title().id("title").text(Sig(title_text.signal())));
     let body = div()
         .id("body")
         .child(
@@ -58,5 +56,5 @@ pub fn app<D: Dom>() -> (Title<D>, Div<D>) {
             )
         }))));
 
-    (title, body)
+    (head, body)
 }

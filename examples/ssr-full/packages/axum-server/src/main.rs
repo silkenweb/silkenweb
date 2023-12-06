@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
     Extension, Router, Server,
 };
-use silkenweb::{dom::Dry, router, task};
+use silkenweb::{document::Document, dom::Dry, router, task};
 use ssr_full_app::app;
 use tokio_util::task::LocalPoolHandle;
 use tower_http::services::ServeDir;
@@ -40,13 +40,14 @@ async fn handler(Extension(local_pool): Extension<LocalPoolHandle>, uri: Uri) ->
 }
 
 async fn render(uri: Uri) -> impl IntoResponse {
-    let (title, body) = app::<Dry>();
+    let (head, body) = app::<Dry>();
+    Dry::mount_in_head("head", head);
     router::set_url_path(uri.path());
     task::render_now().await;
 
     let page_html = format!(
         include_str!("../../app/page.tmpl.html"),
-        title_html = title.freeze(),
+        head_html = Dry::head_inner_html(),
         body_html = body.freeze(),
         init_script = r#"
             import init, {js_main} from '/pkg/ssr_full_axum_client.js';
