@@ -32,6 +32,7 @@ mod children;
 mod component;
 mod css;
 mod element;
+mod head;
 mod hydration;
 mod template;
 
