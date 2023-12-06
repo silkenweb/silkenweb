@@ -10,8 +10,8 @@ use std::fmt;
 use wasm_bindgen::JsCast;
 
 use crate::{
+    document::{Document, DocumentHead},
     dom::Hydro,
-    insert_element, mount_point,
     node::element::{Const, GenericElement},
 };
 
@@ -103,8 +103,7 @@ impl fmt::Display for HydrationStats {
 
 /// Hydrate an element.
 ///
-/// `id` is the id of the element in the
-/// existing HTML.
+/// `id` is the id of the element in the existing HTML.
 ///
 /// [`hydrate`] will recursively attach the event handlers from `elem` to the
 /// element with id=`id`. If any node in the existing HTML doesn't match the
@@ -118,21 +117,14 @@ impl fmt::Display for HydrationStats {
 /// nodes to be introduced to prettify the server HTML, without impacting the
 /// hydration process.
 ///
-/// Attributes will be added or removed when necessary to make sure the exisitng
+/// Attributes will be added or removed when necessary to make sure the existing
 /// HTML matches `elem`. Attributes beginning with `data-silkenweb` will be left
 /// as they are in the existing HTML.
 ///
 /// Effect handlers registered with [`effect`] will be called once an element is
 /// hydrated.
 ///
-/// # Warning
-///
-/// It's a good idea to create your app outsize the `async` block that calls
-/// [`hydrate`], otherwise your signals won't be initialized before hydration.
-///
-/// ## Good
-///
-/// Creating the app outside the async block that calls [`hydrate`].
+/// # Example
 ///
 /// ```no_run
 /// # use futures_signals::signal::always;
@@ -141,45 +133,20 @@ impl fmt::Display for HydrationStats {
 /// let app = p().text(Sig(always("Hello, world!")));
 ///
 /// spawn_local(async {
-///     hydrate("app", app);
+///     hydrate("app", app).await;
 /// });
 /// ```
-///
-/// This will hydrate to `<p>Hello, world!</p>` correctly.
-///
-/// ## Bad
-///
-/// Creating the app inside the async block that calls [`hydrate`].
-///
-/// ```no_run
-/// # use futures_signals::signal::always;
-/// # use html::p;
-/// # use silkenweb::{hydration::hydrate, prelude::*, task::spawn_local};
-/// spawn_local(async {
-///     let app = p().text(Sig(always("Hello, world!")));
-///     hydrate("app", app);
-/// });
-/// ```
-///
-/// This will hydrate to `<p></p>`, removing any existing text. Then the signal
-/// will initialize and set the text to "Hello, world!".
-///
-/// # Example
 ///
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
-/// for an example.
+/// for a full example.
 ///
 /// [`effect`]: crate::node::element::Element::effect
 /// [`eval_dom_node`]: crate::node::Node::eval_dom_node
 pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
-    #[cfg(debug_assertions)]
-    crate::log_panics();
-    let element = element.into();
-    let mut stats = HydrationStats::default();
+    Hydro::mount(id, element).await
+}
 
-    let mount_point = mount_point(id);
-    let wet_element = element.hydrate(&mount_point, &mut stats);
-    insert_element(wet_element);
-
-    stats
+// TODO: Doc
+pub async fn hydrate_in_head(id: &str, children: DocumentHead<Hydro>) -> HydrationStats {
+    Hydro::mount_in_head(id, children).await
 }

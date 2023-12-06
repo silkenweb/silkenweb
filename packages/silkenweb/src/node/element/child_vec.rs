@@ -1,29 +1,92 @@
-use std::mem;
+use std::{cell::RefCell, marker::PhantomData, mem, rc::Rc};
 
 use clonelet::clone;
-use futures_signals::signal_vec::VecDiff;
+use discard::DiscardOnDrop;
+use futures_signals::{
+    signal_vec::{SignalVec, SignalVecExt, VecDiff},
+    CancelableFutureHandle,
+};
 
+use super::spawn_cancelable_future;
 use crate::{
     dom::{private::DomElement, Dom},
     node::Node,
 };
 
-pub struct ChildVec<D: Dom> {
+pub struct ChildVec<D: Dom, PO> {
     parent: D::Element,
     children: Vec<Node<D>>,
     static_child_count: usize,
+    phantom: PhantomData<PO>,
 }
 
-impl<D: Dom> ChildVec<D> {
+#[must_use]
+pub struct ChildVecHandle<D: Dom, PO> {
+    child_vec: Rc<RefCell<ChildVec<D, PO>>>,
+    _future_handle: DiscardOnDrop<CancelableFutureHandle>,
+}
+
+impl<D, PO> ChildVecHandle<D, PO>
+where
+    D: Dom,
+    ChildVec<D, PO>: ParentOwner,
+{
+    pub fn inner_html(&self) -> String {
+        let mut html = String::new();
+
+        for elem in self.child_vec.borrow().children.iter() {
+            html.push_str(&elem.to_string());
+        }
+
+        html
+    }
+
+    pub fn clear(self) {
+        self.child_vec.borrow_mut().clear();
+    }
+}
+
+pub trait ParentOwner {
+    fn clear(&mut self);
+}
+
+pub struct ParentUnique;
+
+pub struct ParentShared;
+
+impl<D: Dom, PO> ChildVec<D, PO>
+where
+    PO: 'static,
+    Self: ParentOwner,
+{
     pub fn new(parent: D::Element, static_child_count: usize) -> Self {
         Self {
             parent,
             children: Vec::new(),
             static_child_count,
+            phantom: PhantomData,
         }
     }
 
-    pub fn apply_update(&mut self, update: VecDiff<impl Into<Node<D>>>) {
+    pub fn run(self, children: impl SignalVec<Item = Node<D>> + 'static) -> ChildVecHandle<D, PO> {
+        let child_vec = Rc::new(RefCell::new(self));
+        let future = children.for_each({
+            clone!(child_vec);
+            move |update| {
+                child_vec.borrow_mut().apply_update(update);
+                async {}
+            }
+        });
+
+        // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
+        // keep a hold of `child_vec`, as it may own signals that need updating.
+        ChildVecHandle {
+            child_vec,
+            _future_handle: spawn_cancelable_future(future),
+        }
+    }
+
+    fn apply_update(&mut self, update: VecDiff<impl Into<Node<D>>>) {
         match update {
             VecDiff::Replace { values } => self.replace(values),
             VecDiff::InsertAt { index, value } => self.insert(index, value),
@@ -117,17 +180,29 @@ impl<D: Dom> ChildVec<D> {
         }
     }
 
+    fn elementwise_clear(&mut self) {
+        let children = mem::take(&mut self.children);
+
+        for (index, child) in children.into_iter().enumerate().rev() {
+            self.parent
+                .remove_child(index + self.static_child_count, &child.node);
+        }
+    }
+}
+
+impl<D: Dom> ParentOwner for ChildVec<D, ParentUnique> {
     fn clear(&mut self) {
         if self.static_child_count > 0 {
-            clone!(mut self.parent);
-            let children = mem::take(&mut self.children);
-
-            for (index, child) in children.into_iter().enumerate().rev() {
-                parent.remove_child(index + self.static_child_count, &child.node);
-            }
+            self.elementwise_clear()
         } else {
             self.children.clear();
             self.parent.clear_children();
         }
+    }
+}
+
+impl<D: Dom> ParentOwner for ChildVec<D, ParentShared> {
+    fn clear(&mut self) {
+        self.elementwise_clear()
     }
 }

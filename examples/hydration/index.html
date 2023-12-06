@@ -4,6 +4,13 @@
 <head profile="http://www.w3.org/2005/10/profile">
     <meta charset="utf-8" />
     <title>Silkenweb Example: Hydration</title>
+    <!--
+        `data-silkenweb-head-id` attributes are used to match up existing elements 
+        with a call to `Hydro::mount_in_head`. This is so other elements can exist in
+        `<head>`.
+    -->
+    <meta data-silkenweb-head-id="my-head-id" name="my-meta" content="abc" />
+    <meta data-silkenweb-head-id="my-head-id" name="my-other-meta" content="xyz" />
     <link rel="rust" data-trunk data-wasm-opt="z" data-weak-refs />
     <base data-trunk-public-url />
 </head>

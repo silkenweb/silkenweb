@@ -8,8 +8,10 @@ use silkenweb::{
         html::{div, Div},
         HtmlElement,
     },
-    node::{element::Const, Node},
-    prelude::ParentElement,
+    node::{
+        element::{Const, ParentElement},
+        Node,
+    },
     task::render_now,
     value::Sig,
 };
@@ -94,8 +96,7 @@ mod dry {
     use silkenweb::{
         dom::{Dry, Template},
         elements::html::{div, Div},
-        node::element::Const,
-        prelude::ParentElement,
+        node::element::{Const, ParentElement},
         task::{server::render_now_sync, sync_scope},
     };
 

@@ -73,12 +73,11 @@
 //! [Server Side Rendering]: https://github.com/silkenweb/silkenweb/tree/main/examples/ssr-full
 //! [examples]: https://github.com/silkenweb/silkenweb/tree/main/examples
 //! [Declarative Shadow DOM]: https://web.dev/declarative-shadow-dom/
-use std::{cell::RefCell, collections::HashMap};
 
 #[doc(inline)]
 pub use clonelet::clone;
-use document::{Document, MountHandle};
-use dom::{DefaultDom, Wet};
+use document::Document;
+use dom::DefaultDom;
 use node::element::{Const, GenericElement};
 use silkenweb_base::document as base_document;
 /// Define `&str` constants for each class in a CSS file.
@@ -343,7 +342,7 @@ pub mod prelude {
 pub use silkenweb_signals_ext::value;
 
 /// Shorthand for [`DefaultDom::mount`]
-pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) -> MountHandle {
+pub fn mount(id: &str, element: impl Into<GenericElement<DefaultDom, Const>>) {
     #[cfg(debug_assertions)]
     log_panics();
     DefaultDom::mount(id, element)
@@ -359,20 +358,6 @@ pub fn log_panics() {
 fn mount_point(id: &str) -> web_sys::Element {
     base_document::get_element_by_id(id)
         .unwrap_or_else(|| panic!("DOM node id = '{id}' must exist"))
-}
-
-fn insert_element(element: GenericElement<Wet, Const>) -> u128 {
-    let id = next_node_handle_id();
-    ELEMENTS.with(|elements| elements.borrow_mut().insert(id, element));
-    id
-}
-
-fn remove_element(id: u128) -> Option<GenericElement<Wet, Const>> {
-    ELEMENTS.with(|elements| elements.borrow_mut().remove(&id))
-}
-
-fn next_node_handle_id() -> u128 {
-    ELEMENT_HANDLE_IDS.with(|ids| ids.replace_with(|id| *id + 1))
 }
 
 #[cfg_browser(true)]
@@ -399,7 +384,4 @@ pub fn empty_str() -> &'static str {
     ""
 }
 
-thread_local! {
-    static ELEMENT_HANDLE_IDS: RefCell<u128> = RefCell::new(0);
-    static ELEMENTS: RefCell<HashMap<u128, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
-}
+const HEAD_ID_ATTRIBUTE: &str = "data-silkenweb-head-id";

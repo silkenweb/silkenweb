@@ -1,6 +1,6 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
-    document::Document,
+    document::{Document, DocumentHead},
     dom::DefaultDom,
     elements::html::{button, div, p, P},
     mount,
@@ -32,6 +32,7 @@ mod children;
 mod component;
 mod css;
 mod element;
+mod head;
 mod hydration;
 mod template;
 
@@ -45,24 +46,11 @@ isomorphic_test! {
 
         // Test escaping
         let id = "my-id:0:1";
-        DefaultDom::mount_in_head(id, div());
-        let head_html = r#"<div id="my-id:0:1"></div>"#;
-        assert_eq!(DefaultDom::head_inner_html(), head_html);
-        DefaultDom::mount_in_head(id, div());
+        DefaultDom::mount_in_head(id, DocumentHead::new().child(div()));
+        let head_html = r#"<div data-silkenweb-head-id="my-id:0:1"></div>"#;
+        render_now().await;
         assert_eq!(DefaultDom::head_inner_html(), head_html);
     }
-}
-
-#[wasm_bindgen_test]
-async fn mount_unmount() {
-    let test = BrowserTest::new(APP_ID).await;
-
-    let message = "Hello, world!";
-    let mount_handle = mount(APP_ID, p().id(APP_ID).text(message));
-    render_now().await;
-    assert_eq!(format!(r#"<p id="app">{message}</p>"#), test.html());
-    mount_handle.unmount();
-    assert_eq!(r#"<div id="app"></div>"#, test.html());
 }
 
 #[wasm_bindgen_test]

@@ -1,70 +1,49 @@
-use std::cell::RefCell;
-
-use silkenweb_base::document;
 use wasm_bindgen::UnwrapThrowExt;
 
-use super::{Document, MountHandle};
+use super::{
+    children_with_id, document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead,
+};
 use crate::{
+    document::MountedInHead,
     dom::Wet,
     mount_point,
-    node::element::{Const, Element, GenericElement, Mut},
-    ELEMENTS,
+    node::element::{
+        child_vec::{ChildVec, ParentShared},
+        Const, GenericElement,
+    },
 };
 
 impl Document for Wet {
-    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
+    type MountInHeadOutput = ();
+    type MountOutput = ();
+
+    fn mount(id: &str, element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         let element = element.into();
 
-        let mount_point = mount_point(id);
-        mount_point
+        mount_point(id)
             .replace_with_with_node_1(&element.dom_element())
             .unwrap_throw();
-        MountHandle::new(mount_point, element)
+        wet_insert_mounted(id, element);
+    }
+
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
+        let head_elem = document_head();
+        let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
+        let child_vec_handle = child_vec.run(children_with_id(head, id));
+
+        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
     }
 
     fn unmount_all() {
-        ELEMENTS.with(|elements| {
-            for element in elements.take().into_values() {
-                element.dom_element().remove()
-            }
-        });
-
-        for element in MOUNTED_IN_WET_HEAD.with(|mounted| mounted.take()) {
-            element.dom_element().remove()
-        }
-    }
-
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
-        if document::query_selector(&format!("#{}", web_sys::css::escape(id)))
-            .unwrap_throw()
-            .is_some()
-        {
-            return false;
-        }
-
-        let element = element.into().attribute("id", id).freeze();
-        let dom_element = element.dom_element();
-        document::head()
-            .map(|head| {
-                head.append_with_node_1(&dom_element).unwrap_throw();
-                MOUNTED_IN_WET_HEAD.with(|mounted| mounted.borrow_mut().push(element));
-            })
-            .is_some()
+        wet_unmount();
+        MOUNTED_IN_HEAD.with(|m| m.unmount_all());
     }
 
     fn head_inner_html() -> String {
-        let mut html = String::new();
-
-        MOUNTED_IN_WET_HEAD.with(|mounted| {
-            for elem in &*mounted.borrow() {
-                html.push_str(&elem.to_string());
-            }
-        });
-
-        html
+        MOUNTED_IN_HEAD.with(|m| m.inner_html())
     }
 }
 
 thread_local! {
-    static MOUNTED_IN_WET_HEAD: RefCell<Vec<GenericElement<Wet, Const>>> = RefCell::new(Vec::new());
+    static MOUNTED_IN_HEAD: MountedInHead<Wet> = MountedInHead::new();
 }

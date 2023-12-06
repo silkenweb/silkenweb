@@ -1,30 +1,43 @@
-use super::{Document, MountHandle};
+use super::{Document, DocumentHead};
 use crate::{
-    dom::Dry,
-    node::element::{Const, Element, GenericElement, Mut},
+    document::children_with_id,
+    dom::{self, private::DomElement, Dry},
+    node::element::{
+        child_vec::{ChildVec, ParentShared},
+        Const, GenericElement, Namespace,
+    },
     task,
 };
 
 impl Document for Dry {
-    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> MountHandle {
+    type MountInHeadOutput = ();
+    type MountOutput = ();
+
+    fn mount(_id: &str, _element: impl Into<GenericElement<Self, Const>>) -> Self::MountOutput {
         panic!("`mount` is not supported on `Dry` DOMs")
+    }
+
+    fn mount_in_head(id: &str, head: DocumentHead<Self>) -> Self::MountInHeadOutput {
+        let head_elem = <Dry as dom::private::Dom>::Element::new(&Namespace::Html, "head");
+        let child_vec = ChildVec::<Dry, ParentShared>::new(head_elem, 0);
+        let child_vec_handle = child_vec.run(children_with_id(head, id));
+
+        let existing = task::local::with(|local| {
+            local
+                .document
+                .mounted_in_dry_head
+                .borrow_mut()
+                .insert(id.to_string(), child_vec_handle)
+        });
+
+        assert!(
+            existing.is_none(),
+            "Attempt to insert duplicate id ({id}) into head"
+        );
     }
 
     fn unmount_all() {
         task::local::with(|local| local.document.mounted_in_dry_head.take());
-    }
-
-    fn mount_in_head(id: &str, element: impl Into<GenericElement<Self, Mut>>) -> bool {
-        task::local::with(|local| {
-            let mut mounted = local.document.mounted_in_dry_head.borrow_mut();
-
-            if mounted.contains_key(id) {
-                return false;
-            }
-
-            mounted.insert(id.to_string(), element.into().attribute("id", id).freeze());
-            true
-        })
     }
 
     fn head_inner_html() -> String {
@@ -32,7 +45,7 @@ impl Document for Dry {
 
         task::local::with(|local| {
             for elem in local.document.mounted_in_dry_head.borrow().values() {
-                html.push_str(&elem.to_string());
+                html.push_str(&elem.inner_html());
             }
         });
 

@@ -2,13 +2,10 @@
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
 use std::{
-    self,
-    cell::RefCell,
-    fmt,
+    self, fmt,
     future::Future,
     marker::PhantomData,
     pin::{pin, Pin},
-    rc::Rc,
 };
 
 use discard::DiscardOnDrop;
@@ -23,7 +20,7 @@ use silkenweb_base::document;
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
 
-use self::child_vec::ChildVec;
+use self::child_vec::{ChildVec, ParentUnique};
 use super::{ChildNode, Node, Resource};
 use crate::{
     attribute::Attribute,
@@ -39,7 +36,7 @@ use crate::{
     task,
 };
 
-mod child_vec;
+pub(crate) mod child_vec;
 
 /// A generic HTML element.
 ///
@@ -161,23 +158,11 @@ impl<D: Dom> GenericElement<D> {
 impl<D: Dom, Mutability> GenericElement<D, Mutability> {
     fn build(&mut self) {
         if let Some(children) = self.child_vec.take() {
-            let child_vec = Rc::new(RefCell::new(ChildVec::new(
-                self.element.clone(),
-                self.static_child_count,
-            )));
+            let child_vec =
+                ChildVec::<D, ParentUnique>::new(self.element.clone(), self.static_child_count);
 
-            let future = children.for_each({
-                clone!(child_vec);
-                move |update| {
-                    child_vec.borrow_mut().apply_update(update);
-                    async {}
-                }
-            });
-
-            // `future` may finish if, for example, a `MutableVec` is dropped. So we need to
-            // keep a hold of `child_vec`, as it may own signals that need updating.
-            let resource = (child_vec, spawn_cancelable_future(future));
-            self.resources.push(Resource::Any(Box::new(resource)));
+            let handle = child_vec.run(children);
+            self.resources.push(Resource::Any(Box::new(handle)));
         }
     }
 }
@@ -809,7 +794,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     /// div().child(Sig(text.signal().map(|text| div().text(text))));
     /// ```
     fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
-        self.optional_child(child.map(|child| Some(child)))
+        self.optional_child(child.map(Some))
     }
 
     /// Add an optional child to the element.
