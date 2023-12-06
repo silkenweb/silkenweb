@@ -231,7 +231,8 @@ impl Future for MountHydro {
     }
 }
 
-/// The type of [`Hydro::MountInHeadOutput`][`crate::dom::Hydro::MountInHeadOutput`].
+/// The type of
+/// [`Hydro::MountInHeadOutput`][`crate::dom::Hydro::MountInHeadOutput`].
 #[pin_project]
 pub struct MountHydroHead(#[pin] oneshot::Receiver<HydrationStats>);
 
