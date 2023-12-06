@@ -218,6 +218,8 @@ impl<D: Dom> DocumentHead<D> {
 // If we used `RemoteHandle`, we'd have to wait on the future for
 // `HydrationStats` even if we want to discard it. Using `oneshot`, we can
 // discard the whole future if we don't need `HydrationStats`.
+
+/// The type of [`Hydro::MountOutput`][`crate::dom::Hydro::MountOutput`].
 #[pin_project]
 pub struct MountHydro(#[pin] oneshot::Receiver<HydrationStats>);
 
@@ -229,6 +231,7 @@ impl Future for MountHydro {
     }
 }
 
+/// The type of [`Hydro::MountInHeadOutput`][`crate::dom::Hydro::MountInHeadOutput`].
 #[pin_project]
 pub struct MountHydroHead(#[pin] oneshot::Receiver<HydrationStats>);
 
