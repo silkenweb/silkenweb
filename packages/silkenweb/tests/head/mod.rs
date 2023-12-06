@@ -115,28 +115,25 @@ async fn interleaved<D: Document>() {
     assert_eq!(head.inner_html(), existing.as_str());
     numbers1.lock_mut().push(0);
     numbers2.lock_mut().push(0);
-    render_now().await;
-    assert_eq!(
-        head.inner_html(),
-        format!(r#"{existing}{}"#, items([(0, id1), (0, id2)]))
-    );
+    check_items(&head, &existing, [(0, id1), (0, id2)]).await;
     numbers1.lock_mut().push(1);
     numbers2.lock_mut().push(1);
-    render_now().await;
-    assert_eq!(
-        head.inner_html(),
-        format!(
-            r#"{existing}{}"#,
-            items([(0, id1), (0, id2), (1, id1), (1, id2)])
-        )
-    );
+    check_items(&head, &existing, [(0, id1), (0, id2), (1, id1), (1, id2)]).await;
     numbers1.lock_mut().pop();
-    render_now().await;
-    assert_eq!(
-        head.inner_html(),
-        format!(r#"{existing}{}"#, items([(0, id1), (0, id2), (1, id2)]))
-    );
-    // TODO: More test cases
+    check_items(&head, &existing, [(0, id1), (0, id2), (1, id2)]).await;
+    numbers2.lock_mut().clear();
+    check_items(&head, &existing, [(0, id1)]).await;
+    numbers2.lock_mut().replace(vec![2, 3, 4]);
+    check_items(&head, &existing, [(0, id1), (2, id2), (3, id2), (4, id2)]).await;
+    numbers1.lock_mut().replace(vec![2, 3, 4]);
+    check_items(
+        &head,
+        &existing,
+        [(2, id2), (3, id2), (4, id2), (2, id1), (3, id1), (4, id1)],
+    )
+    .await;
+    D::unmount_all();
+    check_items(&head, &existing, []).await;
 }
 
 fn head_vec<D: Document>(id: &str) -> MutableVec<usize> {
@@ -152,6 +149,15 @@ fn head_vec<D: Document>(id: &str) -> MutableVec<usize> {
     );
 
     numbers
+}
+
+async fn check_items<'a>(
+    head: &web_sys::HtmlHeadElement,
+    existing: &str,
+    is: impl IntoIterator<Item = (usize, &'a str)>,
+) {
+    render_now().await;
+    assert_eq!(head.inner_html(), format!(r#"{existing}{}"#, items(is)));
 }
 
 fn items<'a>(items: impl IntoIterator<Item = (usize, &'a str)>) -> String {
