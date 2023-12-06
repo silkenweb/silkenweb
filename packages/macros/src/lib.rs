@@ -388,33 +388,37 @@ fn code_gen(
         }
 
         #visibility mod stylesheet {
+            use ::silkenweb::document::Document;
+
             pub fn mount() {
-                use ::std::{panic::Location, thread_local};
-                use silkenweb::{
+                use ::silkenweb::dom::DefaultDom;
+                mount_dom::<DefaultDom>();
+            }
+
+            pub fn mount_dom<D: Document>() {
+                use ::std::{panic::Location, sync::Once};
+                use ::silkenweb::{
                     document::{Document, DocumentHead},
-                    dom::DefaultDom,
                     node::element::ParentElement,
                     elements::html::style,
                 };
 
-                thread_local!{
-                    static RESULT: () = {
-                        let location = Location::caller();
-                        let head = DocumentHead::new().child(style().text(text()));
+                static INIT: Once = Once::new();
 
-                        DefaultDom::mount_in_head(
-                            &format!(
-                                "silkenweb-style:{}:{}:{}",
-                                location.file(),
-                                location.line(),
-                                location.column()
-                            ),
-                            head
-                        )
-                    };
-                }
+                INIT.call_once(|| {
+                    let location = Location::caller();
+                    let head = DocumentHead::new().child(style().text(text()));
 
-                RESULT.with(|x| *x)
+                    D::mount_in_head(
+                        &format!(
+                            "silkenweb-style:{}:{}:{}",
+                            location.file(),
+                            location.line(),
+                            location.column()
+                        ),
+                        head
+                    );
+                });
             }
 
             pub fn text() -> &'static str {
@@ -440,14 +444,7 @@ fn define_css_entity(name: NameMapping, auto_mount: bool) -> proc_macro2::TokenS
     if auto_mount {
         let ident = Ident::new(&ident.to_lowercase(), Span::call_site());
         quote!(pub fn #ident() -> &'static str {
-            use ::std::{panic::Location, sync::Once};
-
-            static INIT: Once = Once::new();
-
-            INIT.call_once(|| {
-                super::stylesheet::mount()
-            });
-
+            super::stylesheet::mount();
             #mangled
         })
     } else {
