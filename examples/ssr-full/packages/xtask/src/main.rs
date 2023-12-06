@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use log::LevelFilter;
-use silkenweb::{dom::Dry, router, task, document::Document};
+use silkenweb::{document::Document, dom::Dry, router, task};
 use ssr_full_app::app;
 use xshell::Shell;
 use xtask_wasm::{
