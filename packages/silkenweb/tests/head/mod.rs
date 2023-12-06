@@ -5,8 +5,8 @@ use futures_signals::{
 use itertools::Itertools;
 use silkenweb::{
     document::{Document, DocumentHead},
-    dom::{Dom, Hydro, Wet},
-    elements::html::{meta, Meta},
+    dom::{Hydro, Wet},
+    elements::html::meta,
     task::render_now,
 };
 use silkenweb_base::document;
@@ -18,28 +18,20 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 const HEAD_ID_ATTRIBUTE: &str = "data-silkenweb-head-id";
 
-fn meta_description<D: Dom>() -> Meta<D> {
-    meta().name("description").content("A description")
+fn meta_text(name: &str, content: &str, id: &str) -> String {
+    format!(r#"<meta name="{name}" content="{content}" {HEAD_ID_ATTRIBUTE}="{id}">"#)
 }
 
 fn meta_description_text(id: &str) -> String {
-    format!(r#"<meta name="description" content="A description" {HEAD_ID_ATTRIBUTE}="{id}">"#)
-}
-
-fn meta_keywords<D: Dom>() -> Meta<D> {
-    meta().name("keywords").content("Test")
+    meta_text("description", "A description", id)
 }
 
 fn meta_keywords_text(id: &str) -> String {
-    format!(r#"<meta name="keywords" content="Test" {HEAD_ID_ATTRIBUTE}="{id}">"#)
-}
-
-fn meta_author<D: Dom>() -> Meta<D> {
-    meta().name("author").content("Simon Bourne")
+    meta_text("keywords", "Test", id)
 }
 
 fn meta_author_text(id: &str) -> String {
-    format!(r#"<meta name="author" content="Simon Bourne" {HEAD_ID_ATTRIBUTE}="{id}">"#)
+    meta_text("author", "Simon Bourne", id)
 }
 
 async fn basic<D: Document>() {
@@ -47,8 +39,13 @@ async fn basic<D: Document>() {
     let id = "my-id";
     let author = Mutable::new(false);
     let head = DocumentHead::new()
-        .children([meta_description(), meta_keywords()])
-        .optional_child(Sig(author.signal().map(|cond| cond.then(meta_author))));
+        .children([
+            meta().name("description").content("A description"),
+            meta().name("keywords").content("Test"),
+        ])
+        .optional_child(Sig(author.signal().map(|cond| {
+            cond.then(|| meta().name("author").content("Simon Bourne"))
+        })));
 
     D::mount_in_head(id, head);
 
