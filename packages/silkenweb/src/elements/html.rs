@@ -3972,6 +3972,10 @@ html_element!(
             /// If this attribute is not specified, soft is its default value.
             wrap: String,
         };
+
+        properties {
+            value: String,
+        };
     }
 );
 
