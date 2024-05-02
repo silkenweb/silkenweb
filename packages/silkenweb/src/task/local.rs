@@ -38,4 +38,6 @@ mod arch {
     }
 }
 
-pub use arch::{with, TASK_LOCAL};
+pub use arch::with;
+#[cfg_browser(false)]
+pub use arch::TASK_LOCAL;
