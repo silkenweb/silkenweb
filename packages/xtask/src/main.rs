@@ -128,7 +128,7 @@ fn ci() -> WorkflowResult<CI> {
             Tasks::new(
                 "lints",
                 Platform::UbuntuLatest,
-                rust_toolchain("nightly-2023-10-14").rustfmt(),
+                rust_toolchain(RUSTC_NIGHTLY_VERSION).rustfmt(),
             )
             .step(install_gtk())
             .run(pre_tauri_build())
@@ -281,7 +281,9 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
     Ok(tasks)
 }
 
-const RUSTC_VERSION: &str = "1.73";
+const RUSTC_VERSION: &str = "1.78";
+const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-05-01";
+
 const WASM_PACK_VERSION: &str = "0.12.1";
 const TRUNK_VERSION: &str = "0.17.2";
 
