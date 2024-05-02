@@ -460,7 +460,7 @@ impl DryChild for HydroNode {
     }
 
     fn set_next_sibling(&self, next_sibling: Option<&HydroNode>) {
-        let next_sibling = next_sibling.map(HydroNode::clone);
+        let next_sibling = next_sibling.cloned();
 
         match self {
             Self::Text(text) => text.set_next_sibling(next_sibling),

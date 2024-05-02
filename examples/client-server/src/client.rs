@@ -37,7 +37,7 @@ pub fn counter() {
 enum Count {
     Connecting,
     NotConnected,
-    Count(i32),
+    Value(i32),
 }
 
 impl Display for Count {
@@ -45,7 +45,7 @@ impl Display for Count {
         match self {
             Count::Connecting => f.write_str("Connecting..."),
             Count::NotConnected => f.write_str("Not connected."),
-            Count::Count(i) => write!(f, "{i}"),
+            Count::Value(i) => write!(f, "{i}"),
         }
     }
 }
@@ -62,7 +62,7 @@ async fn get_value(conn: websocket::Connection, count: Mutable<Count>) {
 
     while let Some(v) = values.next().await {
         match v {
-            Ok(v) => count.set(Count::Count(v)),
+            Ok(v) => count.set(Count::Value(v)),
             Err(_) => {
                 count.set(Count::NotConnected);
                 break;

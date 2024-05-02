@@ -72,6 +72,7 @@ trait Dropable {}
 
 impl<T> Dropable for T {}
 
+#[allow(dead_code)]
 enum Resource {
     Any(Box<dyn Dropable>),
     FutureHandle(DiscardOnDrop<CancelableFutureHandle>),

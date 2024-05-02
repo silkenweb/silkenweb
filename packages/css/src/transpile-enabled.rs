@@ -79,7 +79,7 @@ pub fn transpile(
             css_modules,
             source_index: 0,
             error_recovery: !validate,
-            warnings: warnings.as_ref().map(Arc::clone),
+            warnings: warnings.clone(),
             flags,
         },
     )
