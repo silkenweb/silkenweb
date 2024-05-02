@@ -9,11 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly-2023-10-14
-        profile: minimal
-        default: true
         components: rustfmt
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -35,44 +33,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   release-tests-macos-latest:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   release-tests-windows-latest:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   tests-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -90,11 +80,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -113,11 +101,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -136,11 +122,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
@@ -211,11 +195,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -230,11 +212,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -250,11 +230,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -270,11 +248,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
@@ -345,11 +321,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -364,11 +338,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -384,11 +356,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -404,11 +374,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3

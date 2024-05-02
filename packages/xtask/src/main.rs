@@ -60,7 +60,7 @@ fn main() {
 }
 
 fn stable_rust() -> Rust {
-    rust_toolchain(RUSTC_VERSION).minimal().default()
+    rust_toolchain(RUSTC_VERSION)
 }
 
 fn tests(name: &str, platform: Platform) -> Tasks {
@@ -128,10 +128,7 @@ fn ci() -> WorkflowResult<CI> {
             Tasks::new(
                 "lints",
                 Platform::UbuntuLatest,
-                rust_toolchain("nightly-2023-10-14")
-                    .minimal()
-                    .default()
-                    .rustfmt(),
+                rust_toolchain("nightly-2023-10-14").rustfmt(),
             )
             .step(install_gtk())
             .run(pre_tauri_build())

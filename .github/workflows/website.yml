@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ructions/toolchain@v2
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.73
-        profile: minimal
-        default: true
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - run: cargo install trunk --locked --version 0.17.2
