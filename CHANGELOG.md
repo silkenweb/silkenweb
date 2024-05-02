@@ -2,6 +2,8 @@
 
 ## Next
 
+## 0.8.0 - 2024-05-02
+
 - `dbg` macro.
 - `Namespace` owns its name string instead of referencing a `'static str`, so it doesn't need to be known at compile time.
 - `MountHandle` has been removed. It never quite worked properly and was a misfeature. Use `Document::unmount_all` for testing instead.

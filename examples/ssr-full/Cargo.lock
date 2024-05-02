@@ -1906,7 +1906,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "caseless",
  "clonelet",
@@ -1935,7 +1935,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-base"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -1944,7 +1944,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-css"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "clonelet",
@@ -1957,7 +1957,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-macros"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "derive_more",
  "proc-macro-error",
@@ -1969,7 +1969,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-signals-ext"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "futures-signals",
  "paste",
@@ -1978,7 +1978,7 @@ dependencies = [
 
 [[package]]
 name = "silkenweb-task"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "clonelet",
  "crossbeam",
