@@ -24,5 +24,4 @@ proc-macro2 = { workspace = true }
 
 [dev-dependencies]
 silkenweb = { workspace = true }
-silkenweb-inline-html  = { workspace = true }
 wasm-bindgen-test = { workspace = true }

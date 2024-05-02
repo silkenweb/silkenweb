@@ -2955,7 +2955,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "silkenweb",
- "silkenweb-inline-html",
  "silkenweb-parse",
  "syn 2.0.60",
  "wasm-bindgen-test",
