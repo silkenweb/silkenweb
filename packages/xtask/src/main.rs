@@ -132,7 +132,7 @@ fn ci() -> WorkflowResult<CI> {
             )
             .step(install_gtk())
             .run(pre_tauri_build())
-            .lints("0.1.43", WORKSPACE_SUB_DIRS),
+            .lints("0.1.47", WORKSPACE_SUB_DIRS),
         )
         .standard_release_tests(RUSTC_VERSION, &[]);
 

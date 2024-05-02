@@ -23,7 +23,7 @@ jobs:
       run: cargo fmt --all -- --check
     - working-directory: examples/tauri
       run: cargo fmt --all -- --check
-    - run: cargo install cargo-udeps --locked --version 0.1.43
+    - run: cargo install cargo-udeps --locked --version 0.1.47
     - run: cargo udeps --all-targets
     - working-directory: examples/ssr-full
       run: cargo udeps --all-targets
