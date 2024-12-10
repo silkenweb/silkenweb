@@ -132,7 +132,7 @@ fn ci() -> WorkflowResult<CI> {
             )
             .step(install_gtk())
             .run(pre_tauri_build())
-            .lints("0.1.47", WORKSPACE_SUB_DIRS),
+            .lints(UDEPS_VERSION, WORKSPACE_SUB_DIRS),
         )
         .standard_release_tests(RUSTC_VERSION, &[]);
 
@@ -284,6 +284,7 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
 const RUSTC_VERSION: &str = "1.83";
 const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-11-26";
 
+const UDEPS_VERSION: &str = "0.1.53";
 const WASM_PACK_VERSION: &str = "0.13.1";
 const TRUNK_VERSION: &str = "0.21.4";
 
