@@ -106,4 +106,4 @@ impl<'a> Attribute for &'a String {
     }
 }
 
-impl<'a> AsAttribute<String> for &'a String {}
+impl AsAttribute<String> for &String {}

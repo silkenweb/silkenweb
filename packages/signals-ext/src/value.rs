@@ -146,7 +146,7 @@ impl<'a, T: 'a> RefValue<'a> for [T] {}
 impl<'a, T: 'a> RefValue<'a> for &'a [T] {}
 impl<'a, const COUNT: usize, T: 'a> RefValue<'a> for [T; COUNT] {}
 
-impl<'a> RefValue<'a> for () {}
+impl RefValue<'_> for () {}
 
 macro_rules! tuple_values {
     ($t:ident $(,)?) => {};

@@ -8,8 +8,7 @@
 //! ```
 //!
 //! - Parsing on the browser is done using `Element::innerHtml`. On the server
-//!   it
-//! uses [`scraper`].
+//!   it uses [`scraper`].
 //! - If any errors are present, a best effort is made to parse the HTML.
 //! - Any empty text nodes are removed.
 //! - Attributes are sorted to make the result more testable.
