@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: nightly-2024-05-01
+        toolchain: nightly-2024-11-26
         components: rustfmt
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   release-tests-macos-latest:
@@ -44,7 +44,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   release-tests-windows-latest:
@@ -53,7 +53,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
     - uses: Swatinem/rust-cache@v2
     - run: cargo test --benches --tests --release
   tests-ubuntu-latest:
@@ -62,7 +62,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -82,7 +82,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -103,7 +103,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: |
@@ -124,14 +124,14 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
+    - run: cargo install wasm-pack --locked --version 0.13.1
+    - run: cargo install trunk --locked --version 0.21.4
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
@@ -197,7 +197,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -214,7 +214,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -232,7 +232,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -250,14 +250,14 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
+    - run: cargo install wasm-pack --locked --version 0.13.1
+    - run: cargo install trunk --locked --version 0.21.4
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
@@ -323,7 +323,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -340,7 +340,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -358,7 +358,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         components: clippy
     - uses: Swatinem/rust-cache@v2
     - run: mkdir -p examples/tauri/frontend/dist
@@ -376,14 +376,14 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: 1.78
+        toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: cargo install wasm-pack --locked --version 0.12.1
-    - run: cargo install trunk --locked --version 0.17.2
+    - run: cargo install wasm-pack --locked --version 0.13.1
+    - run: cargo install trunk --locked --version 0.21.4
     - working-directory: examples/todomvc
       run: trunk build
     - uses: cypress-io/github-action@v5

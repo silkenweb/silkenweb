@@ -281,11 +281,11 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
     Ok(tasks)
 }
 
-const RUSTC_VERSION: &str = "1.78";
-const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-05-01";
+const RUSTC_VERSION: &str = "1.83";
+const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-11-26";
 
-const WASM_PACK_VERSION: &str = "0.12.1";
-const TRUNK_VERSION: &str = "0.17.2";
+const WASM_PACK_VERSION: &str = "0.13.1";
+const TRUNK_VERSION: &str = "0.21.4";
 
 const TODOMVC_DIR: &str = "examples/todomvc";
 const SSR_EXAMPLE_DIR: &str = "examples/ssr-full";
