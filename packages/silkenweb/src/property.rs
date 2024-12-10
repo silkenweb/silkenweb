@@ -16,7 +16,10 @@ pub trait AsProperty {
 }
 
 impl<'a> AsProperty for &'a str {
-    type Type<'b> = &'b str where 'a: 'b;
+    type Type<'b>
+        = &'b str
+    where
+        'a: 'b;
 
     fn as_property(&self) -> Self::Type<'_> {
         self

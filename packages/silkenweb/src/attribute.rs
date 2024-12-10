@@ -65,7 +65,10 @@ impl Attribute for String {
 impl AsAttribute<String> for String {}
 
 impl<T: Attribute> Attribute for Option<T> {
-    type Text<'a> = T::Text<'a> where T: 'a;
+    type Text<'a>
+        = T::Text<'a>
+    where
+        T: 'a;
 
     fn text(&self) -> Option<Self::Text<'_>> {
         self.as_ref()?.text()
@@ -89,17 +92,23 @@ impl Attribute for bool {
 impl AsAttribute<bool> for bool {}
 
 impl<'a> Attribute for &'a str {
-    type Text<'b> = &'b str where 'a: 'b;
+    type Text<'b>
+        = &'b str
+    where
+        'a: 'b;
 
     fn text(&self) -> Option<Self::Text<'_>> {
         Some(*self)
     }
 }
 
-impl<'a> AsAttribute<String> for &'a str {}
+impl AsAttribute<String> for &str {}
 
 impl<'a> Attribute for &'a String {
-    type Text<'b> = &'b str where 'a: 'b;
+    type Text<'b>
+        = &'b str
+    where
+        'a: 'b;
 
     fn text(&self) -> Option<Self::Text<'_>> {
         Some(self.as_str())

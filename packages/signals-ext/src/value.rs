@@ -164,7 +164,8 @@ where
     T: RefValue<'a> + 'a,
 {
     type Item = Self;
-    type Map<'b, F, R> = R
+    type Map<'b, F, R>
+        = R
     where
         'b: 'a,
         F: FnMut(Self::Item) -> R + 'b,
@@ -203,7 +204,8 @@ where
     T: 'static,
 {
     type Item = T;
-    type Map<'b, F, R> = R
+    type Map<'b, F, R>
+        = R
     where
         'b: 'a,
         F: FnMut(Self::Item) -> R + 'b,
@@ -243,7 +245,8 @@ where
     S: Signal<Item = T> + 'static,
 {
     type Item = T;
-    type Map<'b, F, R> = Sig<signal::Map<S, F>>
+    type Map<'b, F, R>
+        = Sig<signal::Map<S, F>>
     where
         'b: 'static,
         F: FnMut(Self::Item) -> R + 'b,
