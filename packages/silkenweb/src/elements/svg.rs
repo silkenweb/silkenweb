@@ -818,7 +818,9 @@ parent_element!(mpath);
 svg_element!(
     /// The `path` SVG element is the generic element to define a shape. All the
     /// basic shapes can be created with a path element.
-    path  = { dom_type: web_sys::SvgPathElement;
+    path = {
+        dom_type: web_sys::SvgPathElement;
+
         attributes {
             /// This attribute lets authors specify the total length for the
             /// path, in user units.
@@ -950,7 +952,9 @@ svg_element!(
     /// The `<rect>` element is a basic SVG shape that draws rectangles, defined
     /// by their position, width, and height. The rectangles may have their
     /// corners rounded.
-    rect  = { dom_type: web_sys::SvgRectElement;
+    rect = {
+        dom_type: web_sys::SvgRectElement;
+
         attributes {
             /// The x coordinate of the rect. Value type: `<length>`|`<percentage>` ; Default
             /// value: 0; Animatable: yes
@@ -1094,7 +1098,9 @@ svg_element!(
     /// Note: The xmlns attribute is only required on the outermost svg element
     /// of SVG documents. It is unnecessary for inner svg elements or inside
     /// HTML documents.
-    svg  = { dom_type: web_sys::SvgsvgElement;
+    svg = {
+        dom_type: web_sys::SvgsvgElement;
+
         attributes {
             /// The displayed height of the rectangular viewport. (Not the
             /// height of its coordinate system.)
