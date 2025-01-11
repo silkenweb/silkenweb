@@ -172,6 +172,7 @@ features = [
     "SvgfeDiffuseLightingElement",
     "SvgfeDisplacementMapElement",
     "SvgfeDistantLightElement",
+    "SvgfeDropShadowElement",
     "SvgfeFloodElement",
     "SvgfeFuncAElement",
     "SvgfeFuncBElement",

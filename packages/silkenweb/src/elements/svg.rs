@@ -418,6 +418,35 @@ svg_element!(
 parent_element!(fe_distant_light);
 
 svg_element!(
+    fe_drop_shadow("feDropShadow") = {
+        dom_type: web_sys::SvgfeDropShadowElement;
+
+        attributes {
+            /// This attribute defines the x offset of the drop shadow.
+            /// Value type: `<number>`; Default value: 2; Animatable: yes
+            dx: f64,
+
+            /// This attribute defines the y offset of the drop shadow.
+            /// Value type: `<number>``; Default value: 2; Animatable: yes
+            dy: f64,
+
+            /// This attribute defines the standard deviation for the blur
+            /// operation in the drop shadow.
+            /// Value type: <number-optional-number>; Default value: 2;
+            /// Animatable: yes
+            std_deviation("stdDeviation"): String,
+
+            r#in: String,
+        };
+    }
+);
+
+impl<D: Dom> Presentation for FeDropShadow<D> {}
+impl<D: Dom> FilterPrimitives for FeDropShadow<D> {}
+
+parent_element!(fe_drop_shadow);
+
+svg_element!(
     fe_flood("feFlood") = {
         dom_type: web_sys::SvgfeFloodElement;
 
