@@ -1105,6 +1105,26 @@ impl<D: Dom> ConditionalProcessing for Polyline<D> {}
 impl<D: Dom> Presentation for Polyline<D> {}
 
 svg_element!(
+    radial_gradient("radialGradient") = {
+        dom_type: web_sys::SvgRadialGradientElement;
+
+        attributes {
+            cx: Length,
+            cy: Length,
+            fr: Length,
+            fx: Length,
+            fy: Length,
+            gradient_units("gradientUnits"): String,
+            gradient_transform("gradientTransform"): String,
+            href: String,
+            r: String,
+        };
+    }
+);
+
+parent_element!(radial_gradient);
+
+svg_element!(
     /// The `<rect>` element is a basic SVG shape that draws rectangles, defined
     /// by their position, width, and height. The rectangles may have their
     /// corners rounded.
