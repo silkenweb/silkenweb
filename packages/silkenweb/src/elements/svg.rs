@@ -121,14 +121,14 @@ impl<D: Dom> OtherAnimation for AnimateMotion<D> {}
 parent_element!(animate_motion);
 
 svg_element!(
-    /// The `<animateTransform>` SVG element animates a transformation 
-    /// attribute on its target element, thereby allowing animations to 
+    /// The `<animateTransform>` SVG element animates a transformation
+    /// attribute on its target element, thereby allowing animations to
     /// control translation, scaling, rotation, and/or skewing.
     animate_transform("animateTransform") = {
         dom_type: web_sys::SvgAnimateTransformElement;
 
         attributes {
-            /// `type` defines the type of transformation, whose values change 
+            /// `type` defines the type of transformation, whose values change
             /// over time.
             /// Value: translate | scale | rotate | skewX | skewY
             /// Animatable:	No
