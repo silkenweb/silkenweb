@@ -429,7 +429,7 @@ svg_element!(
             dx: f64,
 
             /// This attribute defines the y offset of the drop shadow.
-            /// Value type: `<number>``; Default value: 2; Animatable: yes
+            /// Value type: `<number>`; Default value: 2; Animatable: yes
             dy: f64,
 
             /// This attribute defines the standard deviation for the blur
