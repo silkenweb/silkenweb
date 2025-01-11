@@ -158,6 +158,7 @@ features = [
     "SvgaElement",
     "SvgAnimateElement",
     "SvgAnimateMotionElement",
+    "SvgAnimateTransformElement",
     "SvgCircleElement",
     "SvgClipPathElement",
     "SvgDefsElement",
