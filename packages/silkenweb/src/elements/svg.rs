@@ -836,6 +836,25 @@ impl<D: Dom> ConditionalProcessing for Line<D> {}
 impl<D: Dom> Presentation for Line<D> {}
 
 svg_element!(
+    linear_gradient("linearGradient") = {
+        dom_type: web_sys::SvgLinearGradientElement;
+
+        attributes {
+            gradient_units("gradientUnits"): String,
+            gradient_transform("gradientTransform"): String,
+            href: String,
+            spread_method("spreadMethod"): String,
+            x1: Length,
+            x2: Length,
+            y1: Length,
+            y2: Length,
+        };
+    }
+);
+
+parent_element!(linear_gradient);
+
+svg_element!(
     marker = {
         dom_type: web_sys::SvgMarkerElement;
 
