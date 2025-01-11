@@ -418,6 +418,8 @@ svg_element!(
 parent_element!(fe_distant_light);
 
 svg_element!(
+    /// The `<feDropShadow>` SVG filter primitive creates a drop shadow of the
+    ///  input image. It can only be used inside a `<filter>` element.
     fe_drop_shadow("feDropShadow") = {
         dom_type: web_sys::SvgfeDropShadowElement;
 
