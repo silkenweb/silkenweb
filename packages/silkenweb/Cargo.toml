@@ -191,6 +191,7 @@ features = [
     "SvgfeTurbulenceElement",
     "SvgFilterElement",
     "SvggElement",
+    "SvgImageElement",
     "SvgLineElement",
     "SvgLinearGradientElement",
     "SvgMarkerElement",

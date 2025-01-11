@@ -749,6 +749,45 @@ impl<D: Dom> ConditionalProcessing for G<D> {}
 impl<D: Dom> Presentation for G<D> {}
 
 svg_element!(
+    image = {
+        dom_type: web_sys::SvgImageElement;
+
+        attributes {
+            /// Positions the image horizontally from the origin.
+            x: Length,
+
+            /// Positions the image vertically from the origin.
+            y: Length,
+
+            /// The width the image renders at. Unlike HTML's `<img>`, this
+            /// attribute is required.
+            width: AutoOrLength,
+
+            /// The height the image renders at. Unlike HTML's `<img>`, this
+            /// attribute is required.
+            height: AutoOrLength,
+
+            /// Points at a URL for the image file.
+            href: String,
+
+            /// Controls how the image is scaled.
+            preserve_aspect_ratio("preserveAspectRatio"): String,
+
+            /// Defines the value of the credentials flag for CORS requests.
+            crossorigin: String,
+
+            /// Provides a hint to the browser as to whether it should perform
+            /// image decoding synchronously or asynchronously.
+            decoding: String,
+        };
+    }
+);
+
+impl<D: Dom> ConditionalProcessing for Image<D> {}
+
+parent_element!(image);
+
+svg_element!(
     line = {
         dom_type: web_sys::SvgLineElement;
 
