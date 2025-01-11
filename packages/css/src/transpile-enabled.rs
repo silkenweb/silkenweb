@@ -56,8 +56,8 @@ pub fn transpile(
     validate: bool,
     transpile: Option<Transpile>,
 ) -> Result<Option<Vec<NameMapping>>, TranspileError> {
-    let modules = transpile.as_ref().map_or(false, |t| t.modules);
-    let nesting = transpile.as_ref().map_or(false, |t| t.nesting);
+    let modules = transpile.as_ref().is_some_and(|t| t.modules);
+    let nesting = transpile.as_ref().is_some_and(|t| t.nesting);
 
     clone!(source.content);
     let warnings = validate.then(|| Arc::new(RwLock::new(Vec::new())));
