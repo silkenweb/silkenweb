@@ -2,6 +2,14 @@
 
 ## Next
 
+- Add SVG elements:
+  - `<animateMotion>`
+  - `<animateTransform>`
+  - `<feDropShadow>`
+  - `<image>`
+  - `<linearGradient>`
+  - `<radialGradient>`
+
 ## 0.8.0 - 2024-05-02
 
 - `dbg` macro.
