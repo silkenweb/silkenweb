@@ -156,6 +156,8 @@ features = [
     "HtmlVideoElement",
 
     "SvgaElement",
+    "SvgAnimateElement",
+    "SvgAnimateMotionElement",
     "SvgCircleElement",
     "SvgClipPathElement",
     "SvgDefsElement",

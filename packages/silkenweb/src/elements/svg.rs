@@ -79,13 +79,44 @@ svg_element!(
     /// The SVG `<animate>` element provides a way to animate an attribute of an
     /// element over time.
     animate = {
-        dom_type: web_sys::SvgaElement;
+        dom_type: web_sys::SvgAnimateElement;
     }
 );
 
 impl<D: Dom> AnimationTiming for Animate<D> {}
 impl<D: Dom> AnimationValue for Animate<D> {}
 impl<D: Dom> OtherAnimation for Animate<D> {}
+
+svg_element!(
+    /// The `<animateMotion>` SVG element provides a way to define how an
+    /// element moves along a motion path.
+    animate_motion("animateMotion") = {
+        dom_type: web_sys::SvgAnimateMotionElement;
+
+        attributes {
+            /// This attribute indicate, in the range [0,1], how far is the
+            ///  object along the path for each keyTimes associated values.
+            ///  Value type: <number>*; Default value: none; Animatable: no
+            key_points("keyPoints"): String,
+
+            /// This attribute defines the path of the motion, using the same
+            ///  syntax as the d attribute. Value type: <string>; Default
+            ///  value: none; Animatable: no
+            path: String,
+
+            /// This attribute defines a rotation applied to the element
+            /// animated along a path, usually to make it pointing in the
+            /// direction of the animation.
+            /// Value type: <number>|auto|auto-reverse; Default value: 0;
+            /// Animatable: no
+            rotate: String,
+        };
+    }
+);
+
+impl<D: Dom> AnimationTiming for AnimateMotion<D> {}
+impl<D: Dom> AnimationValue for AnimateMotion<D> {}
+impl<D: Dom> OtherAnimation for AnimateMotion<D> {}
 
 svg_element!(
     /// The `<circle>` SVG element is an SVG basic shape, used to draw circles
