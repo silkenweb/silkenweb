@@ -94,20 +94,20 @@ svg_element!(
         dom_type: web_sys::SvgAnimateMotionElement;
 
         attributes {
-            /// This attribute indicate, in the range [0,1], how far is the
+            /// This attribute indicate, in the range 0 to 1, how far is the
             ///  object along the path for each keyTimes associated values.
-            ///  Value type: <number>*; Default value: none; Animatable: no
+            ///  Value type: `<number>`*; Default value: none; Animatable: no
             key_points("keyPoints"): String,
 
             /// This attribute defines the path of the motion, using the same
-            ///  syntax as the d attribute. Value type: <string>; Default
+            ///  syntax as the d attribute. Value type: `<string>`; Default
             ///  value: none; Animatable: no
             path: String,
 
             /// This attribute defines a rotation applied to the element
             /// animated along a path, usually to make it pointing in the
             /// direction of the animation.
-            /// Value type: <number>|auto|auto-reverse; Default value: 0;
+            /// Value type: `<number>`|auto|auto-reverse; Default value: 0;
             /// Animatable: no
             rotate: String,
         };
@@ -434,7 +434,7 @@ svg_element!(
 
             /// This attribute defines the standard deviation for the blur
             /// operation in the drop shadow.
-            /// Value type: <number-optional-number>; Default value: 2;
+            /// Value type: `<number-optional-number>`; Default value: 2;
             /// Animatable: yes
             std_deviation("stdDeviation"): String,
 
@@ -752,11 +752,11 @@ svg_element!(
     /// The `<image>` SVG element includes images inside SVG documents. It can
     /// display raster image files or other SVG files.
     ///
-    /// The only image formats SVG software must support are JPEG, PNG, and 
+    /// The only image formats SVG software must support are JPEG, PNG, and
     /// other SVG files. Animated GIF behavior is undefined.
     ///
-    /// SVG files displayed with `<image>` are treated as an image: external 
-    /// resources aren't loaded, :visited styles aren't applied, and they 
+    /// SVG files displayed with `<image>` are treated as an image: external
+    /// resources aren't loaded, :visited styles aren't applied, and they
     /// cannot be interactive. To include dynamic SVG elements, try `<use>`
     /// with an external URL. To include SVG files and run scripts inside them,
     /// try `<object>` inside of `<foreignObject>`.
