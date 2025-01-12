@@ -7,8 +7,12 @@ publish = false
 
 [dependencies]
 silkenweb = { workspace = true }
-silkenweb-test = { workspace = true }
 futures-signals = { workspace = true }
 
 [dev-dependencies]
+silkenweb-test = { workspace = true }
 wasm-bindgen-test = { workspace = true }
+
+[package.metadata.cargo-udeps.ignore]
+# `udeps` doesn't pick these dependencies up as they are ony in browser builds
+development = ["silkenweb-test", "wasm-bindgen-test"]

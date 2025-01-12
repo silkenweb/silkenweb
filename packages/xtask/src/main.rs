@@ -284,7 +284,7 @@ fn trunk_build(mut tasks: Tasks) -> WorkflowResult<Tasks> {
 const RUSTC_VERSION: &str = "1.83";
 const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-11-26";
 
-const UDEPS_VERSION: &str = "0.1.53";
+const UDEPS_VERSION: &str = "0.1.54";
 const WASM_PACK_VERSION: &str = "0.13.1";
 const TRUNK_VERSION: &str = "0.21.4";
 
