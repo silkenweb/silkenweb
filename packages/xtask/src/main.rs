@@ -130,7 +130,7 @@ fn ci() -> WorkflowResult<CI> {
                 Platform::UbuntuLatest,
                 rust_toolchain(RUSTC_NIGHTLY_VERSION).rustfmt(),
             )
-            .step(install_gtk())
+            .step(install_tauri_libs())
             .run(pre_tauri_build())
             .lints(UDEPS_VERSION, WORKSPACE_SUB_DIRS),
         )
@@ -161,10 +161,24 @@ fn pre_tauri_build() -> actions::Run {
     cmd!("mkdir -p examples/tauri/frontend/dist")
 }
 
-fn install_gtk() -> actions::Run {
+fn install_tauri_libs() -> actions::Run {
     script([
         vec!["sudo", "apt-get", "update"],
-        vec!["sudo", "apt-get", "install", "-y", "webkit2gtk-4.0"],
+        vec![
+            "sudo",
+            "apt-get",
+            "install",
+            "-y",
+            "libwebkit2gtk-4.1-dev",
+            "build-essential",
+            "curl",
+            "wget",
+            "file",
+            "libxdo-dev",
+            "libssl-dev",
+            "libayatana-appindicator3-dev",
+            "librsvg2-dev",
+        ],
     ])
 }
 
@@ -191,7 +205,7 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
 
 fn ci_native(name: &str, workspace_dir: Option<&str>, platform: Platform) -> Tasks {
     tests(name, platform)
-        .step_when(platform == Platform::UbuntuLatest, install_gtk())
+        .step_when(platform == Platform::UbuntuLatest, install_tauri_libs())
         .run(pre_tauri_build())
         .tests(workspace_dir)
 }
