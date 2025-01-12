@@ -1,33 +1,29 @@
 {
-  "package": {
-    "productName": "silkenweb-tauri-example",
-    "version": "0.1.0"
-  },
+  "identifier": "com.simonbourne.silkenweb",
+  "plugins": {},
   "build": {
-    "distDir": "../frontend/dist",
-    "devPath": "http://localhost:8080",
+    "devUrl": "http://localhost:8080",
+    "frontendDist": "../frontend/dist",
     "beforeDevCommand": "cd frontend && trunk serve",
-    "beforeBuildCommand": "cd frontend && trunk build",
-    "withGlobalTauri": true
+    "beforeBuildCommand": "cd frontend && trunk build"
   },
-  "tauri": {
-    "updater": {
-      "active": false
+  "productName": "silkenweb-tauri-example",
+  "mainBinaryName": "silkenweb-tauri-example",
+  "version": "0.1.0",
+  "app": {
+    "security": {
+      "csp": null
     },
-    "allowlist": {
-      "all": true
-    },
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "SilkenWeb Tauri Example",
         "width": 800,
         "height": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "useHttpsScheme": true
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   }
 }

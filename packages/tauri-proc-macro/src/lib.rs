@@ -66,7 +66,7 @@ pub fn client_command(attr: TokenStream, item: TokenStream) -> TokenStream {
 
             #[wasm_bindgen(inline_js = r#"
                 export async function invoke(name, args) {
-                    return await window.__TAURI__.invoke(name, args);
+                    return await window.__TAURI__.core.invoke(name, args);
                 }
             "#)]
 

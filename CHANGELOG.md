@@ -9,6 +9,7 @@
   - `<image>`
   - `<linearGradient>`
   - `<radialGradient>`
+- Migrate to Tauri v2
 
 ## 0.8.0 - 2024-05-02
 
