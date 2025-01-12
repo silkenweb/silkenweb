@@ -178,6 +178,7 @@ fn install_tauri_libs() -> actions::Run {
             "libssl-dev",
             "libayatana-appindicator3-dev",
             "librsvg2-dev",
+            "libsoup-3.0-dev",
         ],
     ])
 }
