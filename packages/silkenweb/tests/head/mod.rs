@@ -26,6 +26,7 @@ fn meta_author_text(id: &str) -> String {
 }
 
 async fn basic<D: Document>() {
+    D::unmount_all();
     let id = "my-id";
     let author = Mutable::new(false);
     let head = DocumentHead::new()
