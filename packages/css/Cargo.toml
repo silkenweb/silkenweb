@@ -16,7 +16,7 @@ css-transpile = ["dep:lightningcss"]
 
 [dependencies]
 grass = { workspace = true }
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 cssparser = { workspace = true }
 lightningcss = { workspace = true, optional = true }
 itertools = { workspace = true }

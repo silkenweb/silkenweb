@@ -1,5 +1,7 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{elements::html::*, prelude::*, value::Sig};
+#[cfg(test)]
+use silkenweb::cfg_browser;
 
 pub fn app(count: Mutable<i32>) -> Div {
     let count_text = count.signal_ref(|i| format!("{i}"));
@@ -12,8 +14,9 @@ pub fn app(count: Mutable<i32>) -> Div {
         .child(p().text(Sig(count_text)))
 }
 
+#[cfg_browser(true)]
 #[cfg(test)]
-mod tests {
+mod browser_tests {
     use futures_signals::signal::Mutable;
     use silkenweb::{mount, task::render_now};
     use silkenweb_test::BrowserTest;
@@ -39,6 +42,14 @@ mod tests {
         render_now().await;
         assert_eq!(r#"<div><button>+</button><p>1</p></div>"#, test.html());
     }
+}
+
+#[cfg_browser(false)]
+#[cfg(test)]
+mod tests {
+    use futures_signals::signal::Mutable;
+
+    use crate::app;
 
     // Run this with `cargo test`
     #[test]

@@ -9,4 +9,4 @@ publish = false
 silkenweb = { workspace = true }
 silkenweb-bootstrap-macros = { workspace = true }
 futures-signals = { workspace = true }
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }

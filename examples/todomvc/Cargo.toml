@@ -9,7 +9,7 @@ publish = false
 silkenweb = { workspace = true }
 silkenweb-signals-ext = { workspace = true }
 futures-signals = { workspace = true, features = ["serde"] }
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
 wasm-bindgen = { workspace = true }
