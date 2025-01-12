@@ -17,7 +17,6 @@ tauri-build = { workspace = true }
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
 tauri = { workspace = true }
-tauri-plugin-os = "2"
 
 [features]
 # by default Tauri runs in production mode
