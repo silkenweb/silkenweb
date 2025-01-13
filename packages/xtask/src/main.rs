@@ -192,24 +192,12 @@ fn install_tauri_libs() -> actions::Run {
 }
 
 fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
-    let tasks = web_tests(platform).run(cmd!("trunk build").dir(TODOMVC_DIR));
-
-    if platform == Platform::WindowsLatest {
-        Ok(tasks
-            .step(
-                action("cypress-io/github-action@v5")
-                    .with("working-directory", "examples/todomvc/cypress")
-                    .with("start", "npm start")
-                    .with("wait-on", "'http://localhost:8080'"),
-            )
-            .apply(wasm_pack_test))
-    } else {
-        tasks
-            .run(cmd!("cargo xtask todomvc-cypress"))
-            .apply(playwright)
-            .apply(wasm_pack_test)
-            .apply(trunk_build)
-    }
+    web_tests(platform)
+        .run(cmd!("trunk build").dir(TODOMVC_DIR))
+        .run(cmd!("cargo xtask todomvc-cypress"))
+        .apply(playwright)
+        .apply(wasm_pack_test)
+        .apply(trunk_build)
 }
 
 fn ci_native(name: &str, workspace_dir: Option<&str>, platform: Platform) -> Tasks {
