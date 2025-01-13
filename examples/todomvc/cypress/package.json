@@ -6,10 +6,10 @@
   "author": "Simon Bourne",
   "license": "MIT",
   "devDependencies": {
-    "axe-core": "^4.7.2",
-    "cypress": "^13.3.0",
+    "axe-core": "^4.10.2",
+    "cypress": "^13.17.0",
     "cypress-axe": "^1.5.0",
-    "start-server-and-test": "^2.0.3"
+    "start-server-and-test": "^2.0.9"
   },
   "scripts": {
     "start": "cd .. && trunk serve --no-autoreload --ignore=.",
