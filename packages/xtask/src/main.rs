@@ -69,6 +69,10 @@ fn tests(name: &str, platform: Platform) -> Tasks {
 
 fn web_tests(platform: Platform) -> Tasks {
     Tasks::new("web-tests", platform, stable_rust().wasm())
+        .step_when(platform == Platform::WindowsLatest, script([
+            vec!["echo \"VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT\" | Out-File -FilePath $env:GITHUB_ENV -Append"],
+            vec!["vcpkg install openssl:x64-windows-static-md"]
+        ]))
         .step(action("actions/setup-node@v3").with("node-version", "18"))
         .step(install("wasm-pack", WASM_PACK_VERSION))
         .step(trunk())

@@ -379,6 +379,9 @@ jobs:
         toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
+    - run: |
+        echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+        vcpkg install openssl:x64-windows-static-md
     - uses: actions/setup-node@v3
       with:
         node-version: 18
