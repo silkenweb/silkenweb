@@ -253,6 +253,9 @@ jobs:
         toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
+    - run: |
+        brew install --cask firefox
+        brew install geckodriver
     - uses: actions/setup-node@v3
       with:
         node-version: 18
