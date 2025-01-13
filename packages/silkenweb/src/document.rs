@@ -18,7 +18,7 @@ use silkenweb_signals_ext::value::SignalOrValue;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 
 use crate::{
-    dom::{self, Dom, Dry, Wet},
+    dom::{self, Dom, Dry, Hydro, Wet},
     event::{bubbling_events, GlobalEventCallback},
     hydration::HydrationStats,
     node::{
@@ -293,11 +293,20 @@ impl<D: Dom> MountedInHead<D> {
     }
 
     fn mount(&self, id: &str, child_vec: ChildVecHandle<D, ParentShared>) {
+        WET_MOUNTED_IN_HEAD.with(|m| m.check_not_mounted(id, "wet"));
+        HYDRO_MOUNTED_IN_HEAD.with(|m| m.check_not_mounted(id, "hydro"));
         let existing = self.0.borrow_mut().insert(id.to_string(), child_vec);
 
         assert!(
             existing.is_none(),
             "Attempt to insert duplicate id ({id}) into head"
+        );
+    }
+
+    fn check_not_mounted(&self, id: &str, dom_type: &str) {
+        assert!(
+            !self.0.borrow().contains_key(id),
+            "Id ({id}) is already mounted in {dom_type} head",
         );
     }
 
@@ -320,4 +329,6 @@ impl<D: Dom> MountedInHead<D> {
 
 thread_local! {
     static WET_MOUNTED: RefCell<HashMap<String, GenericElement<Wet, Const>>> = RefCell::new(HashMap::new());
+    static WET_MOUNTED_IN_HEAD: MountedInHead<Wet> = MountedInHead::new();
+    static HYDRO_MOUNTED_IN_HEAD: MountedInHead<Hydro> = MountedInHead::new();
 }

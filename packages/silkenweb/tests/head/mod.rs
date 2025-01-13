@@ -107,8 +107,6 @@ mod browser_tests {
     // We don't test interleaving on `Dry` DOMs as the ordering is different, and
     // the elements are segregated anyway.
     async fn interleaved<D: Document>() {
-        Wet::unmount_all();
-        Hydro::unmount_all();
         let head = document::head().unwrap();
         let existing = head.inner_html();
         let id1 = "my-id1";

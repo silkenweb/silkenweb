@@ -44,8 +44,6 @@ mod browser_tests {
 
     isomorphic_test! {
         async fn head_inner_html() {
-            DefaultDom::unmount_all();
-
             assert_eq!(DefaultDom::head_inner_html(), "");
 
             // Test escaping
@@ -54,6 +52,7 @@ mod browser_tests {
             let head_html = r#"<div data-silkenweb-head-id="my-id:0:1"></div>"#;
             render_now().await;
             assert_eq!(DefaultDom::head_inner_html(), head_html);
+            DefaultDom::unmount_all();
         }
     }
 

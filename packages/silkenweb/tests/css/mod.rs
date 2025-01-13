@@ -13,14 +13,13 @@ use silkenweb::{
 
 isomorphic_test! {
     async fn css_auto_mount() {
-        DefaultDom::unmount_all();
         assert_eq!(DefaultDom::head_inner_html(), "");
         let elem: Div<DefaultDom, Const> = div().class(class::red()).freeze();
         render_now().await;
         assert_eq!(elem.to_string(), r#"<div class="red"></div>"#);
         let file = Location::caller().file();
         let style_html =
-            format!(r#"<style data-silkenweb-head-id="silkenweb-style:{file}:2:1">.red {{ color: red }}</style>"#);
+        format!(r#"<style data-silkenweb-head-id="silkenweb-style:{file}:2:1">.red {{ color: red }}</style>"#);
         assert_eq!(
             DefaultDom::head_inner_html(),
             style_html
@@ -33,5 +32,6 @@ isomorphic_test! {
             DefaultDom::head_inner_html(),
             style_html
         );
+        DefaultDom::unmount_all();
     }
 }

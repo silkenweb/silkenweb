@@ -6,7 +6,7 @@ use super::{
     MountHydroHead,
 };
 use crate::{
-    document::MountedInHead,
+    document::HYDRO_MOUNTED_IN_HEAD,
     dom::{self, private::DomElement, Hydro},
     hydration::HydrationStats,
     mount_point,
@@ -48,7 +48,7 @@ impl Document for Hydro {
         let hydro_head_elem = <Hydro as dom::private::Dom>::Element::new(&Namespace::Html, "head");
         let child_vec = ChildVec::<Hydro, ParentShared>::new(hydro_head_elem.clone(), 0);
 
-        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(children_with_id(head, id))));
+        HYDRO_MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec.run(children_with_id(head, id))));
         let id = id.to_string();
         let head_elem = document_head();
 
@@ -64,14 +64,10 @@ impl Document for Hydro {
 
     fn unmount_all() {
         wet_unmount();
-        MOUNTED_IN_HEAD.with(|m| m.unmount_all());
+        HYDRO_MOUNTED_IN_HEAD.with(|m| m.unmount_all());
     }
 
     fn head_inner_html() -> String {
-        MOUNTED_IN_HEAD.with(|m| m.inner_html())
+        HYDRO_MOUNTED_IN_HEAD.with(|m| m.inner_html())
     }
-}
-
-thread_local! {
-    static MOUNTED_IN_HEAD: MountedInHead<Hydro> = MountedInHead::new();
 }

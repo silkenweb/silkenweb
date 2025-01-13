@@ -2,9 +2,9 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use super::{
     children_with_id, document_head, wet_insert_mounted, wet_unmount, Document, DocumentHead,
+    WET_MOUNTED_IN_HEAD,
 };
 use crate::{
-    document::MountedInHead,
     dom::Wet,
     mount_point,
     node::element::{
@@ -31,19 +31,15 @@ impl Document for Wet {
         let child_vec = ChildVec::<Wet, ParentShared>::new(head_elem, 0);
         let child_vec_handle = child_vec.run(children_with_id(head, id));
 
-        MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
+        WET_MOUNTED_IN_HEAD.with(|m| m.mount(id, child_vec_handle));
     }
 
     fn unmount_all() {
         wet_unmount();
-        MOUNTED_IN_HEAD.with(|m| m.unmount_all());
+        WET_MOUNTED_IN_HEAD.with(|m| m.unmount_all());
     }
 
     fn head_inner_html() -> String {
-        MOUNTED_IN_HEAD.with(|m| m.inner_html())
+        WET_MOUNTED_IN_HEAD.with(|m| m.inner_html())
     }
-}
-
-thread_local! {
-    static MOUNTED_IN_HEAD: MountedInHead<Wet> = MountedInHead::new();
 }
