@@ -388,7 +388,7 @@ jobs:
       run: trunk build
     - uses: cypress-io/github-action@v5
       with:
-        working-directory: examples/todomvc/e2e
+        working-directory: examples/todomvc/cypress
         start: npm start
         wait-on: 'http://localhost:8080'
     - working-directory: packages/silkenweb

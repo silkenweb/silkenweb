@@ -190,7 +190,7 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
         Ok(tasks
             .step(
                 action("cypress-io/github-action@v5")
-                    .with("working-directory", "examples/todomvc/e2e")
+                    .with("working-directory", "examples/todomvc/cypress")
                     .with("start", "npm start")
                     .with("wait-on", "'http://localhost:8080'"),
             )
@@ -233,7 +233,7 @@ fn cypress(cypress_cmd: &str, browser: Option<&str>) -> WorkflowResult<()> {
         .start()?;
     defer! { let _ = trunk.kill(); };
 
-    let dir = format!("{TODOMVC_DIR}/e2e");
+    let dir = format!("{TODOMVC_DIR}/cypress");
     cmd!("npm ci").dir(&dir).run()?;
 
     if let Some(browser) = browser {

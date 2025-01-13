@@ -1,2 +1,2 @@
 [watch]
-ignore = ["e2e", "playwright"]
+ignore = ["cypress", "playwright"]
