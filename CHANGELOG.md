@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.9.0 - 2025-01-14
 
 - Add SVG elements:
   - `<animateMotion>`
