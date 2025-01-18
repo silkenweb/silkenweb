@@ -313,6 +313,11 @@ const TRUNK_VERSION: &str = "0.21.4";
 
 const TODOMVC_DIR: &str = "examples/todomvc";
 const SSR_EXAMPLE_DIR: &str = "examples/ssr-full";
+const TAILWIND_EXAMPLE_DIR: &str = "examples/tailwind";
 const TAURI_EXAMPLE_DIR: &str = "examples/tauri";
-const WORKSPACE_SUB_DIRS: &[&str] = &[SSR_EXAMPLE_DIR, TAURI_EXAMPLE_DIR];
-const WORKSPACES: &[(&str, &str)] = &[("ssr", SSR_EXAMPLE_DIR), ("tauri", TAURI_EXAMPLE_DIR)];
+const WORKSPACE_SUB_DIRS: &[&str] = &[SSR_EXAMPLE_DIR, TAILWIND_EXAMPLE_DIR, TAURI_EXAMPLE_DIR];
+const WORKSPACES: &[(&str, &str)] = &[
+    ("ssr", SSR_EXAMPLE_DIR),
+    ("tailwind", TAILWIND_EXAMPLE_DIR),
+    ("tauri", TAURI_EXAMPLE_DIR),
+];
