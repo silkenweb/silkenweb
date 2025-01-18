@@ -98,6 +98,10 @@ jobs:
       run: trunk build --release --public-url examples/shadow-root
     - run: cp -R examples/shadow-root/dist/ target/website/examples/shadow-root
     - run: echo /examples/shadow-root/\* /examples/shadow-root/index.html 200 >> target/website/_redirects
+    - working-directory: examples/tailwind
+      run: trunk build --release --public-url examples/tailwind
+    - run: cp -R examples/tailwind/dist/ target/website/examples/tailwind
+    - run: echo /examples/tailwind/\* /examples/tailwind/index.html 200 >> target/website/_redirects
     - working-directory: examples/timers
       run: trunk build --release --public-url examples/timers
     - run: cp -R examples/timers/dist/ target/website/examples/timers

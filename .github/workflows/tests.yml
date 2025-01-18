@@ -21,11 +21,15 @@ jobs:
     - run: cargo fmt --all -- --check
     - working-directory: examples/ssr-full
       run: cargo fmt --all -- --check
+    - working-directory: examples/tailwind
+      run: cargo fmt --all -- --check
     - working-directory: examples/tauri
       run: cargo fmt --all -- --check
     - run: cargo install cargo-udeps --locked --version 0.1.54
     - run: cargo udeps --all-targets
     - working-directory: examples/ssr-full
+      run: cargo udeps --all-targets
+    - working-directory: examples/tailwind
       run: cargo udeps --all-targets
     - working-directory: examples/tauri
       run: cargo udeps --all-targets
@@ -96,6 +100,27 @@ jobs:
     - working-directory: examples/ssr-full
       run: cargo build --all-targets
     - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tailwind-ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.83
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tailwind
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tailwind
+      run: cargo test
+    - working-directory: examples/tailwind
+      run: cargo build --all-targets
+    - working-directory: examples/tailwind
       run: cargo doc
   tests-tauri-ubuntu-latest:
     runs-on: ubuntu-latest
@@ -185,6 +210,8 @@ jobs:
       run: trunk build
     - working-directory: examples/shadow-root
       run: trunk build
+    - working-directory: examples/tailwind
+      run: trunk build
     - working-directory: examples/timers
       run: trunk build
     - working-directory: examples/todomvc
@@ -225,6 +252,24 @@ jobs:
     - working-directory: examples/ssr-full
       run: cargo build --all-targets
     - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tailwind-macos-latest:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.83
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tailwind
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tailwind
+      run: cargo test
+    - working-directory: examples/tailwind
+      run: cargo build --all-targets
+    - working-directory: examples/tailwind
       run: cargo doc
   tests-tauri-macos-latest:
     runs-on: macos-latest
@@ -314,6 +359,8 @@ jobs:
       run: trunk build
     - working-directory: examples/shadow-root
       run: trunk build
+    - working-directory: examples/tailwind
+      run: trunk build
     - working-directory: examples/timers
       run: trunk build
     - working-directory: examples/todomvc
@@ -354,6 +401,24 @@ jobs:
     - working-directory: examples/ssr-full
       run: cargo build --all-targets
     - working-directory: examples/ssr-full
+      run: cargo doc
+  tests-tailwind-windows-latest:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.83
+        components: clippy
+    - uses: Swatinem/rust-cache@v2
+    - run: mkdir -p examples/tauri/frontend/dist
+    - working-directory: examples/tailwind
+      run: cargo clippy --all-targets -- -D warnings -D clippy::all
+    - working-directory: examples/tailwind
+      run: cargo test
+    - working-directory: examples/tailwind
+      run: cargo build --all-targets
+    - working-directory: examples/tailwind
       run: cargo doc
   tests-tauri-windows-latest:
     runs-on: windows-latest
