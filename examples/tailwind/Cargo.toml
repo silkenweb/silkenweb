@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 silkenweb = { path = "../../packages/silkenweb" }
-twust = "=1.0.4"
+twust = "1.1.0"
