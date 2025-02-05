@@ -14,5 +14,5 @@ command = "sh"
 # build.
 command_arguments = [
     "-c",
-    "rsync --checksum \"$TRUNK_STAGING_DIR/index.html\" .",
+    "rsync --checksum \"$TRUNK_STAGING_DIR/trunk-target.html\" index.html",
 ]
