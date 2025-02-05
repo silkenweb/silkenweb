@@ -15,7 +15,7 @@ jobs:
         toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
-    - run: cargo install trunk --locked --version 0.21.4
+    - run: cargo install trunk --locked --version 0.21.7
     - run: cargo install mdbook --locked --version 0.4.36
     - run: cargo install mdbook-rust --locked --version 0.1.2
     - working-directory: packages/book
