@@ -192,7 +192,7 @@ impl ParseValue for Transpile {
             pretty,
             modules,
             nesting,
-            browsers: browsers.map(Browsers::into),
+            browsers,
         }))
     }
 }
