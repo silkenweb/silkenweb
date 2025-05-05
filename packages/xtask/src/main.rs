@@ -309,7 +309,7 @@ const RUSTC_NIGHTLY_VERSION: &str = "nightly-2024-11-26";
 
 const UDEPS_VERSION: &str = "0.1.54";
 const WASM_PACK_VERSION: &str = "0.13.1";
-const TRUNK_VERSION: &str = "0.21.7";
+const TRUNK_VERSION: &str = "0.21.13";
 
 const TODOMVC_DIR: &str = "examples/todomvc";
 const SSR_EXAMPLE_DIR: &str = "examples/ssr-full";
