@@ -37,7 +37,7 @@ fn path(time: impl Signal<Item = f64> + 'static, humps: usize, speed: f64) -> sv
                 Abs,
                 [(hump_width / 2.0, control_point, hump_width, half_height)],
             )
-            .smooth_quadradic_bezier_curves(Rel, iter::repeat((hump_width, 0.0)).take(humps - 1))
+            .smooth_quadradic_bezier_curves(Rel, iter::repeat_n((hump_width, 0.0), humps - 1))
     });
 
     svg::path().d(Sig(path)).stroke("black").fill("transparent")
