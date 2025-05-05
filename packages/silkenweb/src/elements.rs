@@ -28,9 +28,9 @@
 //! [`ParentElement`]: crate::node::element::ParentElement
 //! [`ShadowRootParent`]: crate::node::element::ShadowRootParent
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ops::Deref};
 
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 
 use crate::node::element::Element;
 
@@ -55,6 +55,20 @@ impl<T: JsCast> CustomEvent<T> {
     /// The downcast is unchecked.
     pub fn detail(&self) -> T {
         self.0.detail().unchecked_into()
+    }
+}
+
+impl<T> Deref for CustomEvent<T> {
+    type Target = web_sys::CustomEvent;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> From<JsValue> for CustomEvent<T> {
+    fn from(src: JsValue) -> Self {
+        Self(src.into(), PhantomData)
     }
 }
 

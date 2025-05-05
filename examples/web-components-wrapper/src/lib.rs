@@ -1,7 +1,9 @@
 use parse_display::Display;
 use silkenweb::{
     attribute::{AsAttribute, Attribute},
-    custom_html_element, parent_element, Value,
+    custom_html_element,
+    elements::CustomEvent,
+    parent_element, Value,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Display, Value)]
@@ -37,8 +39,8 @@ custom_html_element!(
             tooltop: String,
         };
 
-        custom_events {
-            click: web_sys::CustomEvent,
+        events {
+            click: CustomEvent<web_sys::HtmlElement>,
         };
     }
 );

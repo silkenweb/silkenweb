@@ -33,9 +33,6 @@ pub use crate::intern_str;
 ///
 ///     events {
 ///         my_event: web_sys::MouseEvent
-///     };
-///
-///     custom_events {
 ///         my_custom_event: CustomEvent<web_sys::HtmlElement>,
 ///     };
 /// });
@@ -185,12 +182,6 @@ macro_rules! dom_element {
                 ),* $(,)?
             };)?
 
-            $(custom_events { $(
-                    $(#[$custom_event_meta:meta])*
-                    $custom_event:ident: $custom_event_type:ty
-                ),* $(,)?
-            };)?
-
             $(properties { $(
                 $(#[$property_meta:meta])*
                 $property:ident : $property_type:ty
@@ -242,15 +233,6 @@ macro_rules! dom_element {
                     $(
                         $(#[$event_meta])*
                         pub $event: $event_type
-                    ),*
-                }
-            ); )?
-
-            $($crate::custom_events!(
-                $elem_type {
-                    $(
-                        $(#[$custom_event_meta])*
-                        $custom_event: $custom_event_type
                     ),*
                 }
             ); )?
@@ -555,49 +537,13 @@ macro_rules! events {
                     move |js_ev| {
                         use $crate::macros::JsCast;
                         // I *think* we can assume event and event.current_target aren't null
-                        let event: $event_type = js_ev.unchecked_into();
+                        let event: $event_type = js_ev.into();
                         let target: $elem_type =
                             $crate::macros::UnwrapThrowExt::unwrap_throw(
                                 event.current_target()
                             )
                             .unchecked_into();
                         f(event, target);
-                    }
-                )
-            }
-        )*
-    }};
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! custom_events {
-    ($elem_type:ty {
-        $(
-            $(#[$event_meta:meta])*
-            $name:ident: $event_type:ty
-        ),* $(,)?
-    }) => { $crate::macros::paste!{
-        $(
-            $(#[$event_meta])*
-            pub fn [<on_ $name>] (
-                self,
-                mut f: impl FnMut($event_type, $elem_type) + 'static
-            ) -> Self {
-                $crate::node::element::Element::on(
-                    self,
-                    $crate::text_name_intern!($name),
-                    move |js_ev| {
-                        use $crate::macros::JsCast;
-                        // I *think* it's safe to assume event and event.current_target aren't null
-                        let event: $crate::macros::web_sys::CustomEvent =
-                            js_ev.unchecked_into();
-                        let target: $elem_type =
-                            $crate::macros::UnwrapThrowExt::unwrap_throw(
-                                event.current_target()
-                            )
-                            .unchecked_into();
-                        f(event.into(), target);
                     }
                 )
             }
