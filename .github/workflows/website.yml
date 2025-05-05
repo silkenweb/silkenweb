@@ -82,10 +82,6 @@ jobs:
       run: trunk build --release --public-url /examples/inline-html
     - run: cp -R examples/inline-html/dist/ target/website/examples/inline-html
     - run: echo /examples/inline-html/\* /examples/inline-html/index.html 200 >> target/website/_redirects
-    - working-directory: examples/js-framework-benchmark
-      run: trunk build --release --public-url /examples/js-framework-benchmark
-    - run: cp -R examples/js-framework-benchmark/dist/ target/website/examples/js-framework-benchmark
-    - run: echo /examples/js-framework-benchmark/\* /examples/js-framework-benchmark/index.html 200 >> target/website/_redirects
     - working-directory: examples/reactive-styles
       run: trunk build --release --public-url /examples/reactive-styles
     - run: cp -R examples/reactive-styles/dist/ target/website/examples/reactive-styles

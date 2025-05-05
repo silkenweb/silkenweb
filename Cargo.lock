@@ -3173,17 +3173,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "silkenweb-js-framework-benchmark"
-version = "0.1.0"
-dependencies = [
- "futures-signals",
- "getrandom",
- "rand",
- "silkenweb",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "silkenweb-macros"
 version = "0.9.0"
 dependencies = [

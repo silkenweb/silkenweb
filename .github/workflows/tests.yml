@@ -202,8 +202,6 @@ jobs:
       run: trunk build
     - working-directory: examples/inline-html
       run: trunk build
-    - working-directory: examples/js-framework-benchmark
-      run: trunk build
     - working-directory: examples/reactive-styles
       run: trunk build
     - working-directory: examples/router
@@ -350,8 +348,6 @@ jobs:
     - working-directory: examples/hydration
       run: trunk build
     - working-directory: examples/inline-html
-      run: trunk build
-    - working-directory: examples/js-framework-benchmark
       run: trunk build
     - working-directory: examples/reactive-styles
       run: trunk build
