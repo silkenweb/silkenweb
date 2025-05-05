@@ -15,7 +15,7 @@ jobs:
         toolchain: 1.83
         target: wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
-    - run: cargo install trunk --locked --version 0.21.7
+    - run: cargo install trunk --locked --version 0.21.13
     - run: cargo install mdbook --locked --version 0.4.36
     - run: cargo install mdbook-rust --locked --version 0.1.2
     - working-directory: packages/book
@@ -23,95 +23,95 @@ jobs:
     - run: mkdir -p target/website/examples
     - run: touch target/website/_redirects
     - working-directory: examples/animation
-      run: trunk build --release --public-url examples/animation
+      run: trunk build --release --public-url /examples/animation
     - run: cp -R examples/animation/dist/ target/website/examples/animation
     - run: echo /examples/animation/\* /examples/animation/index.html 200 >> target/website/_redirects
     - working-directory: examples/async-http-request
-      run: trunk build --release --public-url examples/async-http-request
+      run: trunk build --release --public-url /examples/async-http-request
     - run: cp -R examples/async-http-request/dist/ target/website/examples/async-http-request
     - run: echo /examples/async-http-request/\* /examples/async-http-request/index.html 200 >> target/website/_redirects
     - working-directory: examples/bootstrap
-      run: trunk build --release --public-url examples/bootstrap
+      run: trunk build --release --public-url /examples/bootstrap
     - run: cp -R examples/bootstrap/dist/ target/website/examples/bootstrap
     - run: echo /examples/bootstrap/\* /examples/bootstrap/index.html 200 >> target/website/_redirects
     - working-directory: examples/canvas
-      run: trunk build --release --public-url examples/canvas
+      run: trunk build --release --public-url /examples/canvas
     - run: cp -R examples/canvas/dist/ target/website/examples/canvas
     - run: echo /examples/canvas/\* /examples/canvas/index.html 200 >> target/website/_redirects
     - working-directory: examples/client-server
-      run: trunk build --release --public-url examples/client-server
+      run: trunk build --release --public-url /examples/client-server
     - run: cp -R examples/client-server/dist/ target/website/examples/client-server
     - run: echo /examples/client-server/\* /examples/client-server/index.html 200 >> target/website/_redirects
     - working-directory: examples/component
-      run: trunk build --release --public-url examples/component
+      run: trunk build --release --public-url /examples/component
     - run: cp -R examples/component/dist/ target/website/examples/component
     - run: echo /examples/component/\* /examples/component/index.html 200 >> target/website/_redirects
     - working-directory: examples/counter
-      run: trunk build --release --public-url examples/counter
+      run: trunk build --release --public-url /examples/counter
     - run: cp -R examples/counter/dist/ target/website/examples/counter
     - run: echo /examples/counter/\* /examples/counter/index.html 200 >> target/website/_redirects
     - working-directory: examples/counter-list
-      run: trunk build --release --public-url examples/counter-list
+      run: trunk build --release --public-url /examples/counter-list
     - run: cp -R examples/counter-list/dist/ target/website/examples/counter-list
     - run: echo /examples/counter-list/\* /examples/counter-list/index.html 200 >> target/website/_redirects
     - working-directory: examples/css-modules
-      run: trunk build --release --public-url examples/css-modules
+      run: trunk build --release --public-url /examples/css-modules
     - run: cp -R examples/css-modules/dist/ target/website/examples/css-modules
     - run: echo /examples/css-modules/\* /examples/css-modules/index.html 200 >> target/website/_redirects
     - working-directory: examples/drag-and-drop
-      run: trunk build --release --public-url examples/drag-and-drop
+      run: trunk build --release --public-url /examples/drag-and-drop
     - run: cp -R examples/drag-and-drop/dist/ target/website/examples/drag-and-drop
     - run: echo /examples/drag-and-drop/\* /examples/drag-and-drop/index.html 200 >> target/website/_redirects
     - working-directory: examples/element-handle
-      run: trunk build --release --public-url examples/element-handle
+      run: trunk build --release --public-url /examples/element-handle
     - run: cp -R examples/element-handle/dist/ target/website/examples/element-handle
     - run: echo /examples/element-handle/\* /examples/element-handle/index.html 200 >> target/website/_redirects
     - working-directory: examples/hackernews-clone
-      run: trunk build --release --public-url examples/hackernews-clone
+      run: trunk build --release --public-url /examples/hackernews-clone
     - run: cp -R examples/hackernews-clone/dist/ target/website/examples/hackernews-clone
     - run: echo /examples/hackernews-clone/\* /examples/hackernews-clone/index.html 200 >> target/website/_redirects
     - working-directory: examples/hello-world
-      run: trunk build --release --public-url examples/hello-world
+      run: trunk build --release --public-url /examples/hello-world
     - run: cp -R examples/hello-world/dist/ target/website/examples/hello-world
     - run: echo /examples/hello-world/\* /examples/hello-world/index.html 200 >> target/website/_redirects
     - working-directory: examples/hydration
-      run: trunk build --release --public-url examples/hydration
+      run: trunk build --release --public-url /examples/hydration
     - run: cp -R examples/hydration/dist/ target/website/examples/hydration
     - run: echo /examples/hydration/\* /examples/hydration/index.html 200 >> target/website/_redirects
     - working-directory: examples/inline-html
-      run: trunk build --release --public-url examples/inline-html
+      run: trunk build --release --public-url /examples/inline-html
     - run: cp -R examples/inline-html/dist/ target/website/examples/inline-html
     - run: echo /examples/inline-html/\* /examples/inline-html/index.html 200 >> target/website/_redirects
     - working-directory: examples/js-framework-benchmark
-      run: trunk build --release --public-url examples/js-framework-benchmark
+      run: trunk build --release --public-url /examples/js-framework-benchmark
     - run: cp -R examples/js-framework-benchmark/dist/ target/website/examples/js-framework-benchmark
     - run: echo /examples/js-framework-benchmark/\* /examples/js-framework-benchmark/index.html 200 >> target/website/_redirects
     - working-directory: examples/reactive-styles
-      run: trunk build --release --public-url examples/reactive-styles
+      run: trunk build --release --public-url /examples/reactive-styles
     - run: cp -R examples/reactive-styles/dist/ target/website/examples/reactive-styles
     - run: echo /examples/reactive-styles/\* /examples/reactive-styles/index.html 200 >> target/website/_redirects
     - working-directory: examples/router
-      run: trunk build --release --public-url examples/router
+      run: trunk build --release --public-url /examples/router
     - run: cp -R examples/router/dist/ target/website/examples/router
     - run: echo /examples/router/\* /examples/router/index.html 200 >> target/website/_redirects
     - working-directory: examples/shadow-root
-      run: trunk build --release --public-url examples/shadow-root
+      run: trunk build --release --public-url /examples/shadow-root
     - run: cp -R examples/shadow-root/dist/ target/website/examples/shadow-root
     - run: echo /examples/shadow-root/\* /examples/shadow-root/index.html 200 >> target/website/_redirects
     - working-directory: examples/tailwind
-      run: trunk build --release --public-url examples/tailwind
+      run: trunk build --release --public-url /examples/tailwind
     - run: cp -R examples/tailwind/dist/ target/website/examples/tailwind
     - run: echo /examples/tailwind/\* /examples/tailwind/index.html 200 >> target/website/_redirects
     - working-directory: examples/timers
-      run: trunk build --release --public-url examples/timers
+      run: trunk build --release --public-url /examples/timers
     - run: cp -R examples/timers/dist/ target/website/examples/timers
     - run: echo /examples/timers/\* /examples/timers/index.html 200 >> target/website/_redirects
     - working-directory: examples/todomvc
-      run: trunk build --release --public-url examples/todomvc
+      run: trunk build --release --public-url /examples/todomvc
     - run: cp -R examples/todomvc/dist/ target/website/examples/todomvc
     - run: echo /examples/todomvc/\* /examples/todomvc/index.html 200 >> target/website/_redirects
     - working-directory: examples/web-components-wrapper
-      run: trunk build --release --public-url examples/web-components-wrapper
+      run: trunk build --release --public-url /examples/web-components-wrapper
     - run: cp -R examples/web-components-wrapper/dist/ target/website/examples/web-components-wrapper
     - run: echo /examples/web-components-wrapper/\* /examples/web-components-wrapper/index.html 200 >> target/website/_redirects
     - uses: nwtgck/actions-netlify@v2.0

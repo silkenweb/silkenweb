@@ -156,7 +156,7 @@ jobs:
       with:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.13.1
-    - run: cargo install trunk --locked --version 0.21.7
+    - run: cargo install trunk --locked --version 0.21.13
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
@@ -305,7 +305,7 @@ jobs:
       with:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.13.1
-    - run: cargo install trunk --locked --version 0.21.7
+    - run: cargo install trunk --locked --version 0.21.13
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
@@ -454,7 +454,7 @@ jobs:
       with:
         node-version: 18
     - run: cargo install wasm-pack --locked --version 0.13.1
-    - run: cargo install trunk --locked --version 0.21.7
+    - run: cargo install trunk --locked --version 0.21.13
     - working-directory: examples/todomvc
       run: trunk build
     - uses: cypress-io/github-action@v5
