@@ -1,4 +1,4 @@
 [[hooks]]
 stage = "pre_build"
 command = "make"
-command_arguments = ["--directory=ui5-bundler"]
+command_arguments = ["--directory=js-bundler"]

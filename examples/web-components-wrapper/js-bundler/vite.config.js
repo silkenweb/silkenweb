@@ -5,8 +5,8 @@ module.exports = defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, 'main.js'),
-            name: 'UI5',
-            formats: ['iife'],
+            name: 'JSBundle',
+            formats: ['esm'],
         },
     },
 })
