@@ -32,7 +32,7 @@ pub use crate::intern_str;
 ///     };
 ///
 ///     events {
-///         my_event: web_sys::MouseEvent
+///         my_event: web_sys::MouseEvent,
 ///         my_custom_event: CustomEvent<web_sys::HtmlElement>,
 ///     };
 /// });
