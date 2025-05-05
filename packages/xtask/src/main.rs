@@ -112,7 +112,7 @@ fn build_website() -> WorkflowResult<CI> {
         let example_dir = example_dir.to_str().expect("invalid path name");
 
         tasks = tasks
-            .run(cmd!("trunk build --release --public-url {example_dir}").dir(example_dir))
+            .run(cmd!("trunk build --release --public-url /{example_dir}").dir(example_dir))
             .run(cmd!("cp -R {example_dir}/dist/ {dest_dir}/{example_dir}"))
             .step(cmd!(
                 "echo /{example_dir}'/\\* /'{example_dir}'/index.html 200' >> {redirects_file}"
