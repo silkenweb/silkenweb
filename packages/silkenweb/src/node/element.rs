@@ -906,8 +906,13 @@ fn spawn_cancelable_future(
 /// should only be used inside event handlers and effects.
 ///
 /// See [`Element::handle`] for an example.
-#[derive(Clone)]
 pub struct ElementHandle<D: Dom, DomElement>(D::Element, PhantomData<DomElement>);
+
+impl<D: Dom, DomElement> Clone for ElementHandle<D, DomElement> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone(), PhantomData)
+    }
+}
 
 impl<D: Dom, DomElement: JsCast + Clone> ElementHandle<D, DomElement> {
     /// Get the associated DOM element, if it is a [`Wet`] element.
