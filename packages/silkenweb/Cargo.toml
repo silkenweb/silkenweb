@@ -48,7 +48,6 @@ pin-project = { workspace = true }
 clonelet = { workspace = true }
 parcel_selectors = { workspace = true }
 wasm-rs-dbg = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
 
 [dependencies.web-sys]
 workspace = true
@@ -241,6 +240,7 @@ wasm-bindgen-test = { workspace = true }
 itertools = { workspace = true }
 criterion = { workspace = true, default-features = false }
 trybuild = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
 
 [[bench]]
 name = "ssr"
