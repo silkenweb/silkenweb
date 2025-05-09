@@ -1,8 +1,4 @@
-use silkenweb::{
-    custom_html_element,
-    elements::CustomEvent,
-    parent_element, StrAttribute, Value,
-};
+use silkenweb::{custom_html_element, elements::CustomEvent, parent_element, StrAttribute, Value};
 use strum::AsRefStr;
 
 #[derive(Copy, Clone, Eq, PartialEq, AsRefStr, StrAttribute, Value)]
