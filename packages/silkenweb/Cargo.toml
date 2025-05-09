@@ -26,7 +26,8 @@ all-features = true
 # broken by `lightningcss` updates.
 normal = ["parcel_selectors"]
 # `udeps` doesn't pick these dependencies up as they are ony in browser builds
-development = ["silkenweb-test", "wasm-bindgen-test"]
+# or only used by docs
+development = ["silkenweb-test", "wasm-bindgen-test", "strum"]
 
 [dependencies]
 crossbeam = { workspace = true }
