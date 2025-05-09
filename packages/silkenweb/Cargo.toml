@@ -48,6 +48,7 @@ pin-project = { workspace = true }
 clonelet = { workspace = true }
 parcel_selectors = { workspace = true }
 wasm-rs-dbg = { workspace = true }
+strum = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

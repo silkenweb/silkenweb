@@ -2053,31 +2053,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "parse-display"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "287d8d3ebdce117b8539f59411e4ed9ec226e0a4153c7f55495c6070d68e6f72"
-dependencies = [
- "parse-display-derive",
- "regex",
- "regex-syntax",
-]
-
-[[package]]
-name = "parse-display-derive"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fc048687be30d79502dea2f623d052f3a074012c6eac41726b7ab17213616b1"
-dependencies = [
- "proc-macro2",
- "quote",
- "regex",
- "regex-syntax",
- "structmeta",
- "syn 2.0.96",
-]
-
-[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2857,6 +2832,7 @@ dependencies = [
  "silkenweb-signals-ext",
  "silkenweb-task",
  "silkenweb-test",
+ "strum",
  "tokio",
  "tokio-stream",
  "trybuild",
@@ -3128,8 +3104,8 @@ name = "silkenweb-example-web-components-wrapper"
 version = "0.1.0"
 dependencies = [
  "futures-signals",
- "parse-display",
  "silkenweb",
+ "strum",
  "web-sys",
 ]
 
@@ -3363,25 +3339,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
-name = "structmeta"
-version = "0.3.0"
+name = "strum"
+version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e1575d8d40908d70f6fd05537266b90ae71b15dbbe7a8b7dffa2b759306d329"
+checksum = "f64def088c51c9510a8579e3c5d67c65349dcf755e5479ad3d010aa6454e2c32"
 dependencies = [
- "proc-macro2",
- "quote",
- "structmeta-derive",
- "syn 2.0.96",
+ "strum_macros",
 ]
 
 [[package]]
-name = "structmeta-derive"
-version = "0.3.0"
+name = "strum_macros"
+version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "152a0b65a590ff6c3da95cabe2353ee04e6167c896b28e3b14478c2636c922fc"
+checksum = "c77a8c5abcaf0f9ce05d62342b7d298c346515365c36b673df4ebe3ced01fde8"
 dependencies = [
+ "heck 0.5.0",
  "proc-macro2",
  "quote",
+ "rustversion",
  "syn 2.0.96",
 ]
 

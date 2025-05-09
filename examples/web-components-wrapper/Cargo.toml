@@ -11,4 +11,4 @@ readme = true
 silkenweb = { workspace = true }
 futures-signals = { workspace = true }
 web-sys = { workspace = true }
-parse-display = { workspace = true }
+strum = { workspace = true, features = ["derive"] }

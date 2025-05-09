@@ -46,6 +46,25 @@ derive_empty!(
     derive_element_events(elements, ElementEvents);
 );
 
+#[proc_macro_derive(StrAttribute)]
+pub fn str_attribute(item: TokenStream) -> TokenStream {
+    let item: DeriveInput = parse_macro_input!(item);
+    let item_name = item.ident;
+
+    quote!(
+        impl ::silkenweb::attribute::Attribute for #item_name {
+            type Text<'a> = &'a str;
+
+            fn text(&self) -> Option<Self::Text<'_>> {
+                Some(self.as_ref())
+            }
+        }
+
+        impl ::silkenweb::attribute::AsAttribute<#item_name> for #item_name {}
+    )
+    .into()
+}
+
 #[proc_macro_derive(ChildElement, attributes(child_element))]
 #[proc_macro_error]
 pub fn derive_child_element(item: TokenStream) -> TokenStream {

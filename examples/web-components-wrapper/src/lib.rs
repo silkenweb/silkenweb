@@ -1,12 +1,11 @@
-use parse_display::Display;
 use silkenweb::{
-    attribute::{AsAttribute, Attribute},
     custom_html_element,
     elements::CustomEvent,
-    parent_element, Value,
+    parent_element, StrAttribute, Value,
 };
+use strum::AsRefStr;
 
-#[derive(Copy, Clone, Eq, PartialEq, Display, Value)]
+#[derive(Copy, Clone, Eq, PartialEq, AsRefStr, StrAttribute, Value)]
 pub enum ButtonDesign {
     Default,
     Emphasized,
@@ -15,16 +14,6 @@ pub enum ButtonDesign {
     Transparent,
     Attention,
 }
-
-impl Attribute for ButtonDesign {
-    type Text<'a> = String;
-
-    fn text(&self) -> Option<Self::Text<'_>> {
-        Some(self.to_string())
-    }
-}
-
-impl AsAttribute<ButtonDesign> for ButtonDesign {}
 
 custom_html_element!(
     ui5_button = {

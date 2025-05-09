@@ -234,6 +234,25 @@ use silkenweb_base::document as base_document;
 /// [`DefaultDom::mount_in_head`]: crate::dom::DefaultDom::mount_in_head
 /// [CSS Modules]: https://github.com/css-modules/css-modules
 pub use silkenweb_macros::css;
+/// Derive [`Attribute`] and [`AsAttribute`] for types that implement [`AsRef<str>`]
+/// 
+/// # Example
+/// 
+/// ```
+/// # use silkenweb::{StrAttribute, attribute::{Attribute, AsAttribute}};
+/// use strum::AsRefStr;
+/// 
+/// #[derive(AsRefStr, StrAttribute)]
+/// enum MyEnum {
+///     A,
+///     B
+/// }
+/// ```
+/// 
+/// [`Attribute`]: crate::attribute::Attribute
+/// [`AsAttribute`]: crate::attribute::AsAttribute
+/// [`AsRef<str>`]: ::std::convert::AsRef
+pub use silkenweb_macros::StrAttribute;
 /// Derive the traits needed for a blanket implmenetation of [`ChildElement`].
 ///
 /// This only works for structs. It will defer to one field for the
