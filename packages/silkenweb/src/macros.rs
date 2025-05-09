@@ -498,17 +498,17 @@ macro_rules! parent_element {
 /// [slot](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot)
 ///
 /// # Arguments
-/// 
+///
 /// - `element` is the type of the custom element
-/// - `method_prefix` is the prefix for the generated methods.
-///    For a `method_prefix` of `my_prefix`, these methods will be generated:
+/// - `method_prefix` is the prefix for the generated methods. For a
+///   `method_prefix` of `my_prefix`, these methods will be generated:
 ///     - `my_prefix_child`
 ///     - `my_prefix_optional_child`
 ///     - `my_prefix_children`
 ///     - `my_prefix_children_signal`
 /// - `slot` is the name of the slot, or pass `default` for the default slot.
 /// - `child_trait` optionally specifies a trait that children must implement.
-/// 
+///
 /// # Example
 ///
 /// ```no_run
