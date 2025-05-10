@@ -453,7 +453,7 @@ jobs:
     - run: cargo install trunk --locked --version 0.21.13
     - working-directory: examples/todomvc
       run: trunk build
-    - uses: cypress-io/github-action@v5
+    - uses: cypress-io/github-action@v6
       with:
         working-directory: examples/todomvc/cypress
         start: npm start
