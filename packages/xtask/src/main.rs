@@ -197,7 +197,7 @@ fn ci_browser(platform: Platform) -> WorkflowResult<Tasks> {
     if platform == Platform::WindowsLatest {
         Ok(tasks
             .step(
-                action("cypress-io/github-action@v5")
+                action("cypress-io/github-action@v6")
                     .with("working-directory", "examples/todomvc/cypress")
                     .with("start", "npm start")
                     .with("wait-on", "'http://localhost:8080'"),
