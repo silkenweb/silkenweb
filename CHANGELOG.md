@@ -2,6 +2,7 @@
 
 ## Next
 
+- Add `element_slot` and `element_slot_single` to generate methods for adding slotted children to custom HTML elements.
 - `custom_html_element!` no longer has a `custom_events` section. You can now just use `elements::CustomEvent` in the `events` section. See `examples/web-components-wrapper`.
 - `StrAttribute` derive macro to `impl Attribute` for types that implement `AsRef<str>`
 

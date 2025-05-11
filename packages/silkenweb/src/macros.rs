@@ -1,4 +1,7 @@
-pub use futures_signals::{signal::Signal, signal_vec::SignalVec};
+pub use futures_signals::{
+    signal::Signal,
+    signal_vec::{SignalVec, SignalVecExt},
+};
 pub use paste::paste;
 pub use silkenweb_macros::rust_to_html_ident;
 pub use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
@@ -489,6 +492,129 @@ macro_rules! parent_element {
                 N: Into<$crate::node::Node<Dom>>
             {
                 Self(self.0.children_signal(children))
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! element_slot {
+    ($element:ident, $slot_ident:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    {$crate::macros::paste!{
+        $crate::element_slot_single!($element, $slot_ident, $slot_name, $(impl $child_trait)?);
+
+        impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
+        {
+            pub fn [< $slot_ident _children >]<Child>(self, children: impl IntoIterator<Item = Child>) -> Self
+            where
+                Child:
+                    $($child_trait + )?
+                    $crate::elements::HtmlElement +
+                    Into<$crate::node::Node<Dom>>
+            {
+                use $crate::node::element::ParentElement;
+                Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
+            }
+
+            pub fn [< $slot_ident _children_signal >] <Child>(
+                self,
+                children: impl $crate::macros::SignalVec<Item = Child> + 'static,
+            ) -> Self
+            where
+                Child:
+                    $($child_trait + )?
+                    $crate::elements::HtmlElement +
+                    Into<$crate::node::Node<Dom>>
+            {
+                use $crate::{
+                    macros::SignalVecExt,
+                    node::element::ParentElement,
+                };
+                Self(self.0.children_signal(children.map(|child| child.slot($slot_name))))
+            }
+        }
+    }};
+    ($element:ident, $slot_ident:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+        $crate::element_slot_single!($element, $slot_ident, $slot_name, $child_type);
+
+        impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
+        {
+            pub fn [< $slot_ident _children >](self, children: impl IntoIterator<Item = $child_type<Dom>>) -> Self
+            {
+                use $crate::{node::element::ParentElement, elements::HtmlElement};
+                Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
+            }
+
+            pub fn [< $slot_ident _children_signal >] (
+                self,
+                children: impl $crate::macros::SignalVec<Item = $child_type<Dom>> + 'static,
+            ) -> Self
+            {
+                use $crate::{
+                    macros::SignalVecExt,
+                    node::element::ParentElement,
+                    elements::HtmlElement,
+                };
+                Self(self.0.children_signal(children.map(|child| child.slot($slot_name))))
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! element_slot_single {
+    ($element:ident, $slot_ident:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    {$crate::macros::paste!{
+        impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
+        {
+            pub fn [< $slot_ident _child >] <Child>(
+                self,
+                child: impl $crate::value::SignalOrValue<Item = Child>
+            ) -> Self
+            where
+                Child:
+                    $($child_trait + )?
+                    $crate::elements::HtmlElement +
+                    $crate::node::ChildNode<Dom>
+            {
+                use $crate::node::element::ParentElement;
+                Self(self.0.child(child.map(|child| child.slot($slot_name))))
+            }
+
+            pub fn [< $slot_ident _optional_child >] <Child>(
+                self,
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<Child>>
+            ) -> Self
+            where
+                Child:
+                    $($child_trait + )?
+                    $crate::elements::HtmlElement +
+                    $crate::node::ChildNode<Dom>
+            {
+                use $crate::node::element::ParentElement;
+                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot_name)))))
+            }
+        }
+    }};
+    ($element:ident, $slot_ident:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+        impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
+        {
+            pub fn [< $slot_ident _child >](
+                self,
+                child: impl $crate::value::SignalOrValue<Item = $child_type<Dom>>
+            ) -> Self
+            {
+                use $crate::{node::element::ParentElement, elements::HtmlElement};
+                Self(self.0.child(child.map(|child| child.slot($slot_name))))
+            }
+
+            pub fn [< $slot_ident _optional_child >](
+                self,
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<$child_type<Dom>>>
+            ) -> Self
+            {
+                use $crate::{node::element::ParentElement, elements::HtmlElement};
+                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot_name)))))
             }
         }
     }};
