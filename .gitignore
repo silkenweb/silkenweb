@@ -1,4 +1,4 @@
 /target/
-/.vscode/settings.json
+/.vscode/
 /examples/*/dist/
 /lcov.info
