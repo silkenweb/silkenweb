@@ -497,15 +497,62 @@ macro_rules! parent_element {
     }};
 }
 
+/// Generate methods to put children in a
+/// [slot](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot)
+///
+/// # Arguments
+///
+/// - `element` is the type of the custom element
+/// - `method_prefix` is the prefix for the generated methods. For a
+///   `method_prefix` of `my_prefix`, these methods will be generated:
+///     - `my_prefix_child`
+///     - `my_prefix_optional_child`
+///     - `my_prefix_children`
+///     - `my_prefix_children_signal`
+/// - `slot_name` is the name of the slot, or pass `None::<String>` for the
+///   default slot.
+/// - `child_trait` or `child_type`:
+///     - `child_trait` specifies a trait that children must implement.
+///     - `child_type` specifies the type of children.
+///     - Omitting both will allow any [`HtmlElement`] to be used as a child.
+///
+/// # Example
+///
+/// ```no_run
+/// # use silkenweb::{
+/// #   custom_html_element,
+/// #   element_slot,
+/// #   elements::html::{Div, div, A, a, Button, button}
+/// # };
+///
+/// custom_html_element!(my_element = {
+///     dom_type: web_sys::HtmlDivElement;
+/// });
+///
+/// trait SlotElements {}
+///
+/// impl SlotElements for A {}
+/// impl SlotElements for Button {}
+///
+/// element_slot!(my_element, my_default_slot, None::<String>, Div);
+/// element_slot!(my_element, my_slot, "my-slot", impl SlotElements);
+///
+/// let elem: MyElement = my_element()
+///     .my_default_slot_child(div())
+///     .my_slot_child(a())
+///     .my_slot_child(button());
+/// ```
+///
+/// [`HtmlElement`]: crate::elements::HtmlElement
 #[macro_export]
 macro_rules! element_slot {
-    ($element:ident, $slot_ident:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    ($element:ident, $method_prefix:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
     {$crate::macros::paste!{
-        $crate::element_slot_single!($element, $slot_ident, $slot_name, $(impl $child_trait)?);
+        $crate::element_slot_single!($element, $method_prefix, $slot_name, $(impl $child_trait)?);
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _children >]<C>(self, children: impl IntoIterator<Item = C>) -> Self
+            pub fn [< $method_prefix _children >]<C>(self, children: impl IntoIterator<Item = C>) -> Self
             where
                 C:
                     $($child_trait + )?
@@ -516,7 +563,7 @@ macro_rules! element_slot {
                 Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _children_signal >] <C>(
+            pub fn [< $method_prefix _children_signal >] <C>(
                 self,
                 children: impl $crate::macros::SignalVec<Item = C> + 'static,
             ) -> Self
@@ -534,18 +581,18 @@ macro_rules! element_slot {
             }
         }
     }};
-    ($element:ident, $slot_ident:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
-        $crate::element_slot_single!($element, $slot_ident, $slot_name, $child_type);
+    ($element:ident, $method_prefix:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+        $crate::element_slot_single!($element, $method_prefix, $slot_name, $child_type);
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _children >](self, children: impl IntoIterator<Item = $child_type<Dom>>) -> Self
+            pub fn [< $method_prefix _children >](self, children: impl IntoIterator<Item = $child_type<Dom>>) -> Self
             {
                 use $crate::{node::element::ParentElement, elements::HtmlElement};
                 Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _children_signal >] (
+            pub fn [< $method_prefix _children_signal >] (
                 self,
                 children: impl $crate::macros::SignalVec<Item = $child_type<Dom>> + 'static,
             ) -> Self
@@ -561,13 +608,18 @@ macro_rules! element_slot {
     }};
 }
 
+/// Generate methods to put a single child in a
+/// [slot](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot)
+///
+/// This is almost identical to [`element_slot`], except it won't generate
+/// `*_children` and `*_children_signal` methods.
 #[macro_export]
 macro_rules! element_slot_single {
-    ($element:ident, $slot_ident:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    ($element:ident, $method_prefix:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
     {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _child >] <C>(
+            pub fn [< $method_prefix _child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = C>
             ) -> Self
@@ -581,7 +633,7 @@ macro_rules! element_slot_single {
                 Self(self.0.child(child.map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _optional_child >] <C>(
+            pub fn [< $method_prefix _optional_child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<C>>
             ) -> Self
@@ -596,10 +648,10 @@ macro_rules! element_slot_single {
             }
         }
     }};
-    ($element:ident, $slot_ident:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+    ($element:ident, $method_prefix:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _child >](
+            pub fn [< $method_prefix _child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = $child_type<Dom>>
             ) -> Self
@@ -608,7 +660,7 @@ macro_rules! element_slot_single {
                 Self(self.0.child(child.map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _optional_child >](
+            pub fn [< $method_prefix _optional_child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<$child_type<Dom>>>
             ) -> Self
