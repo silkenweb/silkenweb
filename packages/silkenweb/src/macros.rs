@@ -509,8 +509,8 @@ macro_rules! parent_element {
 ///     - `my_prefix_optional_child`
 ///     - `my_prefix_children`
 ///     - `my_prefix_children_signal`
-/// - `slot_name` is the name of the slot, or pass `None::<String>` for the
-///   default slot.
+/// - `slot` is the name of the slot, or pass `None::<String>` for the default
+///   slot.
 /// - `child_trait` or `child_type`:
 ///     - `child_trait` specifies a trait that children must implement.
 ///     - `child_type` specifies the type of children.
@@ -546,12 +546,15 @@ macro_rules! parent_element {
 /// [`HtmlElement`]: crate::elements::HtmlElement
 #[macro_export]
 macro_rules! element_slot {
-    ($element:ident, $method_prefix:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    ($element:ident, $method_prefix:ident, $slot:expr $(, impl $child_trait:path)? $(,)?) =>
     {$crate::macros::paste!{
-        $crate::element_slot_single!($element, $method_prefix, $slot_name, $(impl $child_trait)?);
+        $crate::element_slot_single!($element, $method_prefix, $slot, $(impl $child_trait)?);
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
+            #[doc = "Add children to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _children >]<C>(self, children: impl IntoIterator<Item = C>) -> Self
             where
                 C:
@@ -560,9 +563,12 @@ macro_rules! element_slot {
                     Into<$crate::node::Node<Dom>>
             {
                 use $crate::node::element::ParentElement;
-                Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
+                Self(self.0.children(children.into_iter().map(|child| child.slot($slot))))
             }
 
+            #[doc = "Add children to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _children_signal >] <C>(
                 self,
                 children: impl $crate::macros::SignalVec<Item = C> + 'static,
@@ -577,21 +583,27 @@ macro_rules! element_slot {
                     macros::SignalVecExt,
                     node::element::ParentElement,
                 };
-                Self(self.0.children_signal(children.map(|child| child.slot($slot_name))))
+                Self(self.0.children_signal(children.map(|child| child.slot($slot))))
             }
         }
     }};
-    ($element:ident, $method_prefix:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
-        $crate::element_slot_single!($element, $method_prefix, $slot_name, $child_type);
+    ($element:ident, $method_prefix:ident, $slot:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+        $crate::element_slot_single!($element, $method_prefix, $slot, $child_type);
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
+            #[doc = "Add children to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _children >](self, children: impl IntoIterator<Item = $child_type<Dom>>) -> Self
             {
                 use $crate::{node::element::ParentElement, elements::HtmlElement};
-                Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
+                Self(self.0.children(children.into_iter().map(|child| child.slot($slot))))
             }
 
+            #[doc = "Add children to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _children_signal >] (
                 self,
                 children: impl $crate::macros::SignalVec<Item = $child_type<Dom>> + 'static,
@@ -602,7 +614,7 @@ macro_rules! element_slot {
                     node::element::ParentElement,
                     elements::HtmlElement,
                 };
-                Self(self.0.children_signal(children.map(|child| child.slot($slot_name))))
+                Self(self.0.children_signal(children.map(|child| child.slot($slot))))
             }
         }
     }};
@@ -615,10 +627,13 @@ macro_rules! element_slot {
 /// `*_children` and `*_children_signal` methods.
 #[macro_export]
 macro_rules! element_slot_single {
-    ($element:ident, $method_prefix:ident, $slot_name:expr $(, impl $child_trait:path)? $(,)?) =>
+    ($element:ident, $method_prefix:ident, $slot:expr $(, impl $child_trait:path)? $(,)?) =>
     {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
+            #[doc = "Add a child to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = C>
@@ -630,9 +645,12 @@ macro_rules! element_slot_single {
                     $crate::node::ChildNode<Dom>
             {
                 use $crate::node::element::ParentElement;
-                Self(self.0.child(child.map(|child| child.slot($slot_name))))
+                Self(self.0.child(child.map(|child| child.slot($slot))))
             }
 
+            #[doc = "Add an optional child to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _optional_child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<C>>
@@ -644,29 +662,35 @@ macro_rules! element_slot_single {
                     $crate::node::ChildNode<Dom>
             {
                 use $crate::node::element::ParentElement;
-                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot_name)))))
+                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot)))))
             }
         }
     }};
-    ($element:ident, $method_prefix:ident, $slot_name:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
+    ($element:ident, $method_prefix:ident, $slot:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
+            #[doc = "Add a child to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = $child_type<Dom>>
             ) -> Self
             {
                 use $crate::{node::element::ParentElement, elements::HtmlElement};
-                Self(self.0.child(child.map(|child| child.slot($slot_name))))
+                Self(self.0.child(child.map(|child| child.slot($slot))))
             }
 
+            #[doc = "Add an optional child to slot `"]
+            #[doc = $slot]
+            #[doc = "`"]
             pub fn [< $method_prefix _optional_child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<$child_type<Dom>>>
             ) -> Self
             {
                 use $crate::{node::element::ParentElement, elements::HtmlElement};
-                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot_name)))))
+                Self(self.0.optional_child(child.map(|child| child.map(|child| child.slot($slot)))))
             }
         }
     }};

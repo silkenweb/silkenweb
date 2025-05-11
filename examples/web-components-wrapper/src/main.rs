@@ -1,6 +1,6 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{elements::html::*, log_panics, prelude::*, value::Sig};
-use silkenweb_example_web_components_wrapper::{ui5_button, ButtonDesign};
+use silkenweb_example_web_components_wrapper::{ui5_button, ui5_button_badge, ButtonDesign};
 
 fn main() {
     log_panics();
@@ -16,7 +16,8 @@ fn main() {
             ui5_button()
                 .design(ButtonDesign::Emphasized)
                 .text("+")
-                .on_click(inc),
+                .on_click(inc)
+                .badge_child(ui5_button_badge()),
         )
         .child(p().text(Sig(count_text)));
 

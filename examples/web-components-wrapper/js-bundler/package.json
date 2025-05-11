@@ -9,6 +9,6 @@
     "vite": "^6.2.7"
   },
   "dependencies": {
-    "@ui5/webcomponents": "^2.7.3"
+    "@ui5/webcomponents": "^2.10.0"
   }
 }
