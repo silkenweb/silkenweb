@@ -552,9 +552,6 @@ macro_rules! element_slot {
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            #[doc = "Add children to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _children >]<C>(self, children: impl IntoIterator<Item = C>) -> Self
             where
                 C:
@@ -566,9 +563,6 @@ macro_rules! element_slot {
                 Self(self.0.children(children.into_iter().map(|child| child.slot($slot))))
             }
 
-            #[doc = "Add children to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _children_signal >] <C>(
                 self,
                 children: impl $crate::macros::SignalVec<Item = C> + 'static,
@@ -592,18 +586,12 @@ macro_rules! element_slot {
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            #[doc = "Add children to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _children >](self, children: impl IntoIterator<Item = $child_type<Dom>>) -> Self
             {
                 use $crate::{node::element::ParentElement, elements::HtmlElement};
                 Self(self.0.children(children.into_iter().map(|child| child.slot($slot))))
             }
 
-            #[doc = "Add children to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _children_signal >] (
                 self,
                 children: impl $crate::macros::SignalVec<Item = $child_type<Dom>> + 'static,
@@ -631,9 +619,6 @@ macro_rules! element_slot_single {
     {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            #[doc = "Add a child to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = C>
@@ -648,9 +633,6 @@ macro_rules! element_slot_single {
                 Self(self.0.child(child.map(|child| child.slot($slot))))
             }
 
-            #[doc = "Add an optional child to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _optional_child >] <C>(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<C>>
@@ -669,9 +651,6 @@ macro_rules! element_slot_single {
     ($element:ident, $method_prefix:ident, $slot:expr, $child_type:path $(,)?) => {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            #[doc = "Add a child to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = $child_type<Dom>>
@@ -681,9 +660,6 @@ macro_rules! element_slot_single {
                 Self(self.0.child(child.map(|child| child.slot($slot))))
             }
 
-            #[doc = "Add an optional child to slot `"]
-            #[doc = $slot]
-            #[doc = "`"]
             pub fn [< $method_prefix _optional_child >](
                 self,
                 child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<$child_type<Dom>>>
