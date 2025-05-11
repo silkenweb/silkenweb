@@ -505,9 +505,9 @@ macro_rules! element_slot {
 
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _children >]<Child>(self, children: impl IntoIterator<Item = Child>) -> Self
+            pub fn [< $slot_ident _children >]<C>(self, children: impl IntoIterator<Item = C>) -> Self
             where
-                Child:
+                C:
                     $($child_trait + )?
                     $crate::elements::HtmlElement +
                     Into<$crate::node::Node<Dom>>
@@ -516,12 +516,12 @@ macro_rules! element_slot {
                 Self(self.0.children(children.into_iter().map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _children_signal >] <Child>(
+            pub fn [< $slot_ident _children_signal >] <C>(
                 self,
-                children: impl $crate::macros::SignalVec<Item = Child> + 'static,
+                children: impl $crate::macros::SignalVec<Item = C> + 'static,
             ) -> Self
             where
-                Child:
+                C:
                     $($child_trait + )?
                     $crate::elements::HtmlElement +
                     Into<$crate::node::Node<Dom>>
@@ -567,12 +567,12 @@ macro_rules! element_slot_single {
     {$crate::macros::paste!{
         impl<Dom: $crate::dom::Dom> [< $element:camel >] <Dom>
         {
-            pub fn [< $slot_ident _child >] <Child>(
+            pub fn [< $slot_ident _child >] <C>(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = Child>
+                child: impl $crate::value::SignalOrValue<Item = C>
             ) -> Self
             where
-                Child:
+                C:
                     $($child_trait + )?
                     $crate::elements::HtmlElement +
                     $crate::node::ChildNode<Dom>
@@ -581,12 +581,12 @@ macro_rules! element_slot_single {
                 Self(self.0.child(child.map(|child| child.slot($slot_name))))
             }
 
-            pub fn [< $slot_ident _optional_child >] <Child>(
+            pub fn [< $slot_ident _optional_child >] <C>(
                 self,
-                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<Child>>
+                child: impl $crate::value::SignalOrValue<Item = ::std::option::Option<C>>
             ) -> Self
             where
-                Child:
+                C:
                     $($child_trait + )?
                     $crate::elements::HtmlElement +
                     $crate::node::ChildNode<Dom>
