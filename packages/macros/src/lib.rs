@@ -50,9 +50,11 @@ derive_empty!(
 pub fn str_attribute(item: TokenStream) -> TokenStream {
     let item: DeriveInput = parse_macro_input!(item);
     let item_name = item.ident;
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     quote!(
-        impl ::silkenweb::attribute::Attribute for #item_name {
+        impl #impl_generics ::silkenweb::attribute::Attribute
+        for #item_name #ty_generics #where_clause {
             type Text<'a> = &'a str;
 
             fn text(&self) -> Option<Self::Text<'_>> {
@@ -60,7 +62,8 @@ pub fn str_attribute(item: TokenStream) -> TokenStream {
             }
         }
 
-        impl ::silkenweb::attribute::AsAttribute<#item_name> for #item_name {}
+        impl #impl_generics ::silkenweb::attribute::AsAttribute<#item_name>
+        for #item_name #ty_generics #where_clause {}
     )
     .into()
 }
