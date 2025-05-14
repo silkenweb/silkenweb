@@ -866,6 +866,7 @@ dependencies = [
  "html-escape",
  "indexmap",
  "itertools",
+ "js-sys",
  "parcel_selectors",
  "paste",
  "pin-project",
