@@ -30,7 +30,7 @@ mod browser_tests {
         dom::DefaultDom,
         elements::html::{button, div, p, P},
         mount,
-        node::element::ParentElement,
+        node::element::{ParentElement, TextParentElement},
         prelude::{ElementEvents, HtmlElement},
         task::render_now,
         value::Sig,
