@@ -57,7 +57,7 @@ pub fn str_attribute(item: TokenStream) -> TokenStream {
         for #item_name #ty_generics #where_clause {
             type Text<'a> = &'a str;
 
-            fn text(&self) -> Option<Self::Text<'_>> {
+            fn text(&self) -> Option<<Self as ::silkenweb::attribute::Attribute>::Text<'_>> {
                 Some(self.as_ref())
             }
         }
