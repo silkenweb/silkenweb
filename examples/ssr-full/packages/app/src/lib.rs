@@ -7,7 +7,7 @@ use silkenweb::{
         ElementEvents,
     },
     hydration::{hydrate, hydrate_in_head},
-    node::element::ParentElement,
+    node::element::{ParentElement, TextParentElement},
     prelude::{html::title, HtmlElement},
     router,
     task::spawn_local,
