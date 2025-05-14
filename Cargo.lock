@@ -3162,6 +3162,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silkenweb-mutation-observer"
+version = "0.1.0"
+dependencies = [
+ "futures-signals",
+ "silkenweb",
+]
+
+[[package]]
 name = "silkenweb-parse"
 version = "0.9.0"
 dependencies = [
