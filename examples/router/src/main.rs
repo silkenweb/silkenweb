@@ -4,7 +4,7 @@ use silkenweb::{
         ElementEvents,
     },
     log_panics, mount,
-    node::element::ParentElement,
+    node::element::{ParentElement, TextParentElement},
     router::{self, UrlPath},
     value::Sig,
 };

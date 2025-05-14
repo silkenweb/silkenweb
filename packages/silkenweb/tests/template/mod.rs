@@ -96,7 +96,7 @@ mod dry {
     use silkenweb::{
         dom::{Dry, Template},
         elements::html::{div, Div},
-        node::element::{Const, ParentElement},
+        node::element::{Const, ParentElement, TextParentElement},
         task::{server::render_now_sync, sync_scope},
     };
 
