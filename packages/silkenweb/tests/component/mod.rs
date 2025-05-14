@@ -4,7 +4,7 @@ fn component() {
     use silkenweb::{
         dom::Dry,
         node::{
-            element::{Const, GenericElement},
+            element::{Const, GenericElement, TextParentElement},
             Component,
         },
         prelude::{
