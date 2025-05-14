@@ -473,7 +473,9 @@ macro_rules! dom_element {
 #[macro_export]
 macro_rules! attribute_observer {
     ($attr:ident ($text_attr:expr) : $typ:ty) => {
-
+        pub fn $attr(self, f: impl FnMut(&$crate::macros::web_sys::Element)) -> Self {
+            Self(self.0.attribute($text_attr, f))
+        }
     };
     ($attr:ident : $typ:ty) => {
         $crate::attribute_observer!($attr (stringify!($attr)) : $typ);

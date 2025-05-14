@@ -163,6 +163,10 @@ impl<D: Dom> GenericElement<D> {
 pub struct GenericElementObserver<D: Dom>(GenericElement<D>);
 
 impl<D: Dom> GenericElementObserver<D> {
+    pub fn attribute(self, name: &str, f: impl FnMut(&web_sys::Element)) -> Self {
+        self
+    }
+
     pub fn end_observations(self) -> GenericElement<D> {
         self.0
     }
