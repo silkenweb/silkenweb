@@ -446,12 +446,25 @@ macro_rules! dom_element {
         );
 
         impl<'a, Dom: $crate::dom::Dom> $observer_name<'a, Dom> {
-            pub fn attribute(self, name: String, f: impl FnMut(&$crate::macros::web_sys::Element) + 'static) -> Self {
-                Self(self.0.attribute(name, f))
+            pub fn attribute(
+                self,
+                name: String,
+                mut f: impl FnMut(
+                    &$elem_type,
+                    ::std::option::Option<String>,
+                ) + 'static
+            ) -> Self {
+                use $crate::macros::JsCast;
+                Self(
+                    self.0.attribute(
+                        name,
+                        move |elem, prev| f(elem.unchecked_ref(), prev)
+                    )
+                )
             }
 
             $($(
-                $crate::attribute_observer!($attr $( ($text_attr) )?: $typ);
+                $crate::attribute_observer!($elem_type, $attr $( ($text_attr) )? : $typ);
             )*)?
         }
     };
@@ -475,13 +488,19 @@ macro_rules! dom_element {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! attribute_observer {
-    ($attr:ident ($text_attr:expr) : $typ:ty) => {
-        pub fn $attr(self, f: impl FnMut(&$crate::macros::web_sys::Element) + 'static) -> Self {
-            Self(self.0.attribute($text_attr.to_string(), f))
+    ($elem_type:ty, $attr:ident ($text_attr:expr) : $typ:ty) => {
+        pub fn $attr(
+            self,
+            f: impl FnMut(
+                &$elem_type,
+                ::std::option::Option<String>,
+            ) + 'static
+        ) -> Self {
+            self.attribute($text_attr.to_string(), f)
         }
     };
-    ($attr:ident : $typ:ty) => {
-        $crate::attribute_observer!($attr (stringify!($attr)) : $typ);
+    ($elem_type:ty, $attr:ident : $typ:ty) => {
+        $crate::attribute_observer!($elem_type, $attr (stringify!($attr)) : $typ);
     };
 }
 

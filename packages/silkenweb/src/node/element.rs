@@ -167,9 +167,12 @@ impl<D: Dom> GenericElement<D> {
 pub struct GenericElementObserver<'a, D: Dom>(&'a mut GenericElement<D>);
 
 impl<D: Dom> GenericElementObserver<'_, D> {
-    pub fn attribute(self, name: String, mut f: impl FnMut(&web_sys::Element) + 'static) -> Self {
+    pub fn attribute(
+        self,
+        name: String,
+        mut f: impl FnMut(&web_sys::Element, Option<String>) + 'static,
+    ) -> Self {
         let name = name.to_string();
-        let dom_element = self.0.element.dom_element();
 
         self.0.element.observe_attributes(
             move |changes, _observer| {
@@ -179,10 +182,13 @@ impl<D: Dom> GenericElementObserver<'_, D> {
                     .map(|change| change.unchecked_into::<web_sys::MutationRecord>())
                 {
                     if change.type_() == "attributes"
-                        && change.target().as_ref() == Some(&dom_element)
                         && change.attribute_name().as_ref() == Some(&name)
                     {
-                        f(&dom_element)
+                        if let Some(elem) =
+                            change.target().and_then(|target| target.dyn_into().ok())
+                        {
+                            f(&elem, change.old_value())
+                        }
                     }
                 }
             },
