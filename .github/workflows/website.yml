@@ -82,6 +82,10 @@ jobs:
       run: trunk build --release --public-url /examples/inline-html
     - run: cp -R examples/inline-html/dist/ target/website/examples/inline-html
     - run: echo /examples/inline-html/\* /examples/inline-html/index.html 200 >> target/website/_redirects
+    - working-directory: examples/mutation-observer
+      run: trunk build --release --public-url /examples/mutation-observer
+    - run: cp -R examples/mutation-observer/dist/ target/website/examples/mutation-observer
+    - run: echo /examples/mutation-observer/\* /examples/mutation-observer/index.html 200 >> target/website/_redirects
     - working-directory: examples/reactive-styles
       run: trunk build --release --public-url /examples/reactive-styles
     - run: cp -R examples/reactive-styles/dist/ target/website/examples/reactive-styles
