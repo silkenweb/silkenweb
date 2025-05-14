@@ -77,8 +77,12 @@ impl<D: Dom> GenericElement<D> {
     }
 
     /// Observe mutations to attributes.
-    pub fn begin_observations(self) -> GenericElementObserver<D> {
-        GenericElementObserver(self)
+    pub fn observe_mutations<F>(mut self, mut f: F) -> Self
+    where
+        F: for<'a> FnMut(GenericElementObserver<'a, D>) -> GenericElementObserver<'a, D>,
+    {
+        f(GenericElementObserver(&mut self));
+        self
     }
 
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
@@ -160,14 +164,10 @@ impl<D: Dom> GenericElement<D> {
     }
 }
 
-pub struct GenericElementObserver<D: Dom>(GenericElement<D>);
+pub struct GenericElementObserver<'a, D: Dom>(&'a mut GenericElement<D>);
 
-impl<D: Dom> GenericElementObserver<D> {
-    pub fn attribute(
-        mut self,
-        name: String,
-        mut f: impl FnMut(&web_sys::Element) + 'static,
-    ) -> Self {
+impl<D: Dom> GenericElementObserver<'_, D> {
+    pub fn attribute(self, name: String, mut f: impl FnMut(&web_sys::Element) + 'static) -> Self {
         let name = name.to_string();
         let dom_element = self.0.element.dom_element();
 
@@ -189,10 +189,6 @@ impl<D: Dom> GenericElementObserver<D> {
             &mut self.0.events,
         );
         self
-    }
-
-    pub fn end_observations(self) -> GenericElement<D> {
-        self.0
     }
 }
 

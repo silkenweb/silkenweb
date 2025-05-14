@@ -228,8 +228,11 @@ macro_rules! dom_element {
             ///
             /// Currently this is quite inefficient, as it will create a new
             /// `MutationObserver` for each observed attribute.
-            pub fn begin_observations(self) -> $observer_name<Dom> {
-                $observer_name(self.0.begin_observations())
+            pub fn observe_mutations<F>(self, mut f: F) -> Self
+            where
+                F: for<'a> FnMut($observer_name<'a, Dom>) -> $observer_name<'a, Dom>
+            {
+                Self(self.0.observe_mutations(|observer| f($observer_name(observer)).0))
             }
 
             $crate::attributes![
@@ -438,13 +441,13 @@ macro_rules! dom_element {
         }
 
         $(#[$elem_meta])*
-        pub struct $observer_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> (
-            $crate::node::element::GenericElementObserver<Dom>
+        pub struct $observer_name<'a, Dom: $crate::dom::Dom = $crate::dom::DefaultDom> (
+            $crate::node::element::GenericElementObserver<'a, Dom>
         );
 
-        impl<Dom: $crate::dom::Dom> $observer_name<Dom> {
-            pub fn end_observations(self) -> $camel_name<Dom> {
-                $camel_name(self.0.end_observations())
+        impl<'a, Dom: $crate::dom::Dom> $observer_name<'a, Dom> {
+            pub fn attribute(self, name: String, f: impl FnMut(&$crate::macros::web_sys::Element) + 'static) -> Self {
+                Self(self.0.attribute(name, f))
             }
 
             $($(
