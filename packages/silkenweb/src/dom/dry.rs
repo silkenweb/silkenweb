@@ -100,6 +100,14 @@ impl private::DomElement for DryElement {
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.0.borrow_mut().effect(f)
     }
+
+    fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &mut EventStore,
+    ) {
+        self.0.borrow_mut().observe_attributes(f, events)
+    }
 }
 
 impl private::InstantiableDomElement for DryElement {

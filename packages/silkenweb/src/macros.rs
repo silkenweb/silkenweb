@@ -166,6 +166,7 @@ macro_rules! dom_element {
         $(#[$elem_meta:meta])*
         $snake_name:ident ($text_name:expr) = {
             camel_name = $camel_name:ident;
+            observer_name = $observer_name:ident;
             common_attributes = [$($attribute_trait:ty),*];
             common_events = [$($event_trait:ty),*];
             namespace = $namespace:expr;
@@ -221,6 +222,14 @@ macro_rules! dom_element {
             /// Freeze `self`, making it immutable.
             pub fn freeze(self) -> $camel_name<Dom, $crate::node::element::Const> {
                 $camel_name(self.0.freeze())
+            }
+
+            /// Observe mutations to attributes.
+            ///
+            /// Currently this is quite inefficient, as it will create a new
+            /// `MutationObserver` for each observed attribute.
+            pub fn begin_observations(self) -> $observer_name<Dom> {
+                $observer_name(self)
             }
 
             $crate::attributes![
@@ -427,6 +436,21 @@ macro_rules! dom_element {
                 $camel_name(self.0.instantiate(param))
             }
         }
+
+        $(#[$elem_meta])*
+        pub struct $observer_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> (
+            $camel_name<Dom>
+        );
+
+        impl<Dom: $crate::dom::Dom> $observer_name<Dom> {
+            pub fn end_observations(self) -> $camel_name<Dom> {
+                self.0
+            }
+
+            $($(
+                $crate::attribute_observer!($attr $( ($text_attr) )?: $typ);
+            )*)?
+        }
     };
     (
         $(#[$elem_meta:meta])*
@@ -438,10 +462,22 @@ macro_rules! dom_element {
             $(#[$elem_meta])*
             $name($crate::text_name!($name $( ($text_name) )?)) = {
                 camel_name = [< $name:camel >];
+                observer_name = [< $name:camel Mutations>];
                 common_attributes $($tail)*
             }
         );
     }};
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! attribute_observer {
+    ($attr:ident ($text_attr:expr) : $typ:ty) => {
+
+    };
+    ($attr:ident : $typ:ty) => {
+        $crate::attribute_observer!($attr (stringify!($attr)) : $typ);
+    };
 }
 
 /// Add `child` and `text` methods to an html element.

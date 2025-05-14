@@ -49,6 +49,7 @@ pin-project = { workspace = true }
 clonelet = { workspace = true }
 parcel_selectors = { workspace = true }
 wasm-rs-dbg = { workspace = true }
+js-sys = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true
@@ -74,6 +75,9 @@ features = [
     "Location",
     "MessageEvent",
     "MouseEvent",
+    "MutationObserver",
+    "MutationObserverInit",
+    "MutationRecord",
     "NamedNodeMap",
     "Node",
     "PageTransitionEvent",

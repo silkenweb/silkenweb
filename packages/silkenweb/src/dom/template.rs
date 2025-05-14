@@ -120,6 +120,14 @@ where
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static) {
         self.element.effect(f)
     }
+
+    fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &mut EventStore,
+    ) {
+        self.element.observe_attributes(f, events);
+    }
 }
 
 impl<Param, D> fmt::Display for TemplateElement<Param, D>

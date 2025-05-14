@@ -252,6 +252,18 @@ impl DomElement for HydroElement {
             SharedHydroElement::Unreachable => unreachable!(),
         }
     }
+
+    fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &mut EventStore,
+    ) {
+        match &mut *self.borrow_mut() {
+            SharedHydroElement::Dry(dry) => dry.observe_attributes(f, events),
+            SharedHydroElement::Wet(wet) => wet.observe_attributes(f, events),
+            SharedHydroElement::Unreachable => unreachable!(),
+        }
+    }
 }
 
 impl InstantiableDomElement for HydroElement {

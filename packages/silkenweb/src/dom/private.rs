@@ -54,6 +54,12 @@ pub trait DomElement: Display + Into<Self::Node> + Clone + 'static {
     fn style_property(&mut self, name: &str, value: &str);
 
     fn effect(&mut self, f: impl FnOnce(&web_sys::Element) + 'static);
+
+    fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &mut EventStore,
+    );
 }
 
 pub trait DomText: Clone + 'static {
@@ -100,6 +106,14 @@ mod event {
                 .unwrap_throw();
         }
 
+        pub fn add_mutation_observer(
+            &mut self,
+            element: &web_sys::Element,
+            f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        ) {
+            self.observe_mutations(element, Closure::new(f).into_js_value().unchecked_ref());
+        }
+
         pub fn combine(&mut self, _other: Self) {}
     }
 }
@@ -128,11 +142,24 @@ mod event {
                 .add_event_listener_with_callback(name, callback.as_ref().unchecked_ref())
                 .unwrap_throw();
 
-            self.0.borrow_mut().0.push(EventCallback {
+            self.0.borrow_mut().0.push(EventCallback::Event {
                 element: element.clone(),
                 name,
                 callback,
             });
+        }
+
+        pub fn add_mutation_observer(
+            &mut self,
+            element: &web_sys::Element,
+            f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        ) {
+            let callback = Closure::new(f);
+            let observer = self.observe_mutations(element, callback.as_ref().unchecked_ref());
+            self.0
+                .borrow_mut()
+                .0
+                .push(EventCallback::MutationObserver { observer, callback });
         }
 
         pub fn combine(&mut self, other: Self) {
@@ -142,20 +169,52 @@ mod event {
         }
     }
 
-    pub struct EventCallback {
-        element: web_sys::Element,
-        name: &'static str,
-        callback: Closure<dyn FnMut(JsValue)>,
+    impl EventStore {
+        fn observe_mutations(
+            &mut self,
+            element: &web_sys::Element,
+            f: &js_sys::Function,
+        ) -> web_sys::MutationObserver {
+            let options = web_sys::MutationObserverInit::new();
+            options.set_attributes(true);
+            let observer = web_sys::MutationObserver::new(f).unwrap_throw();
+            observer
+                .observe_with_options(element, &options)
+                .unwrap_throw();
+            observer
+        }
+    }
+
+    pub enum EventCallback {
+        Event {
+            element: web_sys::Element,
+            name: &'static str,
+            callback: Closure<dyn FnMut(JsValue)>,
+        },
+        MutationObserver {
+            observer: web_sys::MutationObserver,
+            callback: Closure<dyn FnMut(js_sys::Array, web_sys::MutationObserver)>,
+        },
     }
 
     impl Drop for EventCallback {
         fn drop(&mut self) {
-            self.element
-                .remove_event_listener_with_callback(
-                    self.name,
-                    self.callback.as_ref().as_ref().unchecked_ref(),
-                )
-                .unwrap_throw();
+            match self {
+                Self::Event {
+                    element,
+                    name,
+                    callback,
+                } => element
+                    .remove_event_listener_with_callback(
+                        name,
+                        callback.as_ref().as_ref().unchecked_ref(),
+                    )
+                    .unwrap_throw(),
+                Self::MutationObserver {
+                    observer,
+                    callback: _callback,
+                } => observer.disconnect(),
+            }
         }
     }
 }

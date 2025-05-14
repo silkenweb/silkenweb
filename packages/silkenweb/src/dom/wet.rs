@@ -127,6 +127,14 @@ impl DomElement for WetElement {
         clone!(self.element);
         on_animation_frame(move || f(&element));
     }
+
+    fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &mut EventStore,
+    ) {
+        events.add_mutation_observer(&self.element, f);
+    }
 }
 
 impl InstantiableDomElement for WetElement {

@@ -195,6 +195,18 @@ impl<Node: DryChild> SharedDryElement<Node> {
             .push(Box::new(move |element| element.effect(f)))
     }
 
+    pub fn observe_attributes(
+        &mut self,
+        f: impl FnMut(js_sys::Array, web_sys::MutationObserver) + 'static,
+        events: &EventStore,
+    ) {
+        clone!(mut events);
+
+        self.hydrate_actions.push(Box::new(move |element| {
+            element.observe_attributes(f, &mut events)
+        }))
+    }
+
     pub fn clone_node(&self) -> Self {
         Self {
             namespace: self.namespace.clone(),
