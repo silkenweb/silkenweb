@@ -76,6 +76,11 @@ impl<D: Dom> GenericElement<D> {
         }
     }
 
+    /// Observe mutations to attributes.
+    pub fn begin_observations(self) -> GenericElementObserver<D> {
+        GenericElementObserver(self)
+    }
+
     pub(crate) fn from_dom(element: D::Element, static_child_count: usize) -> Self {
         Self {
             static_child_count,
@@ -152,6 +157,14 @@ impl<D: Dom> GenericElement<D> {
             !name.as_ref().contains(char::is_whitespace),
             "Class names must not contain whitespace."
         )
+    }
+}
+
+pub struct GenericElementObserver<D: Dom>(GenericElement<D>);
+
+impl<D: Dom> GenericElementObserver<D> {
+    pub fn end_observations(self) -> GenericElement<D> {
+        self.0
     }
 }
 

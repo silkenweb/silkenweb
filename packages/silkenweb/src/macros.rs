@@ -229,7 +229,7 @@ macro_rules! dom_element {
             /// Currently this is quite inefficient, as it will create a new
             /// `MutationObserver` for each observed attribute.
             pub fn begin_observations(self) -> $observer_name<Dom> {
-                $observer_name(self)
+                $observer_name(self.0.begin_observations())
             }
 
             $crate::attributes![
@@ -439,12 +439,12 @@ macro_rules! dom_element {
 
         $(#[$elem_meta])*
         pub struct $observer_name<Dom: $crate::dom::Dom = $crate::dom::DefaultDom> (
-            $camel_name<Dom>
+            $crate::node::element::GenericElementObserver<Dom>
         );
 
         impl<Dom: $crate::dom::Dom> $observer_name<Dom> {
             pub fn end_observations(self) -> $camel_name<Dom> {
-                self.0
+                $camel_name(self.0.end_observations())
             }
 
             $($(
