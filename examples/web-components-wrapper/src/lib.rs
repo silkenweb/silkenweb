@@ -1,6 +1,6 @@
 use silkenweb::{
-    custom_html_element, element_slot_single, elements::CustomEvent, parent_element, StrAttribute,
-    Value,
+    custom_html_element, element_slot_single, elements::CustomEvent, text_parent_element,
+    StrAttribute, Value,
 };
 use strum::AsRefStr;
 
@@ -23,7 +23,7 @@ custom_html_element!(
     }
 );
 
-parent_element!(ui5_button);
+text_parent_element!(ui5_button);
 element_slot_single!(ui5_button, badge, "badge", Ui5ButtonBadge);
 
 custom_html_element!(

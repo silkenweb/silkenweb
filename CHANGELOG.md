@@ -2,6 +2,7 @@
 
 ## Next
 
+- *Breaking change*: `TextParentElement` has been split out from `ParentElement`. This should just mean you need to import `silkenweb::node::element::TextParentElement` in some cases.
 - Add a mutation API based on `MutationObserver`. See `examples/mutation-observer`.
 - Add `element_slot` and `element_slot_single` to generate methods for adding slotted children to custom HTML elements.
 - `custom_html_element!` no longer has a `custom_events` section. You can now just use `elements::CustomEvent` in the `events` section. See `examples/web-components-wrapper`.

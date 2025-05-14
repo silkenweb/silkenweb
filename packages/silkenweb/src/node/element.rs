@@ -224,7 +224,7 @@ where
     }
 }
 
-impl<D: Dom> ParentElement<D> for GenericElement<D> {
+impl<D: Dom> TextParentElement<D> for GenericElement<D> {
     fn text<'a, T>(mut self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>,
@@ -255,7 +255,9 @@ impl<D: Dom> ParentElement<D> for GenericElement<D> {
 
         self
     }
+}
 
+impl<D: Dom> ParentElement<D> for GenericElement<D> {
     fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self {
         child.select(
             |mut parent, child| {
@@ -785,8 +787,8 @@ pub trait Element: Sized {
     fn on(self, name: &'static str, f: impl FnMut(JsValue) + 'static) -> Self;
 }
 
-/// An element that can have children.
-pub trait ParentElement<D: Dom = DefaultDom>: Element {
+/// An element that can have text children.
+pub trait TextParentElement<D: Dom = DefaultDom>: Element {
     /// Add a text child to this element
     ///
     /// # Example
@@ -812,7 +814,10 @@ pub trait ParentElement<D: Dom = DefaultDom>: Element {
     fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
         T: 'a + AsRef<str> + Into<String>;
+}
 
+/// An element that can have children.
+pub trait ParentElement<D: Dom = DefaultDom>: TextParentElement<D> {
     /// Add a child to the element.
     ///
     /// # Example

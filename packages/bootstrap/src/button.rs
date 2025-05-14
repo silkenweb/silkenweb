@@ -3,7 +3,7 @@ use silkenweb::{
     dom::{DefaultDom, Dom},
     elements::html,
     node::{
-        element::{Element, GenericElement},
+        element::{Element, GenericElement, TextParentElement},
         Node,
     },
     prelude::ParentElement,

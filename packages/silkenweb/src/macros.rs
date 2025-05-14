@@ -504,23 +504,20 @@ macro_rules! attribute_observer {
     };
 }
 
-/// Add `child` and `text` methods to an html element.
+/// Derive [`ParentElement`]
 ///
 /// See [`custom_html_element`] for a complete example of defining an html
 /// element.
+///
+/// [`ParentElement`]: crate::node::element::ParentElement
 #[macro_export]
 macro_rules! parent_element {
     ($name:ident) => {$crate::macros::paste!{
+        $crate::text_parent_element!($name);
+
         impl<Dom: $crate::dom::Dom> $crate::node::element::ParentElement<Dom>
         for [< $name:camel >] <Dom>
         {
-            fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
-            where
-                T: 'a + AsRef<str> + Into<String>
-            {
-                Self(self.0.text(child))
-            }
-
             fn child(
                 self,
                 child: impl $crate::value::SignalOrValue<Item = impl $crate::node::ChildNode<Dom>>
@@ -555,6 +552,28 @@ macro_rules! parent_element {
             }
         }
     }};
+}
+
+/// Derive [`TextParentElement`]
+///
+/// See [`custom_html_element`] for a complete example of defining an html
+/// element.
+///
+/// [`TextParentElement`]: crate::node::element::TextParentElement
+#[macro_export]
+macro_rules! text_parent_element {
+    ($name:ident) => {$crate::macros::paste!{
+        impl<Dom: $crate::dom::Dom> $crate::node::element::TextParentElement<Dom>
+        for [< $name:camel >] <Dom>
+        {
+            fn text<'a, T>(self, child: impl $crate::value::RefSignalOrValue<'a, Item = T>) -> Self
+            where
+                T: 'a + AsRef<str> + Into<String>
+            {
+                Self(self.0.text(child))
+            }
+        }
+    }}
 }
 
 /// Generate methods to put children in a

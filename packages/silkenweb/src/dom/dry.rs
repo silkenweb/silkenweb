@@ -299,7 +299,7 @@ mod tests {
 
     #[cfg_browser(false)]
     use crate::task::{render_now, scope};
-    use crate::{dom::Dry, elements::html::*, prelude::*};
+    use crate::{dom::Dry, elements::html::*, node::element::TextParentElement, prelude::*};
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]

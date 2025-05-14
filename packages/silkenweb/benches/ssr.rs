@@ -3,7 +3,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     dom::{Dom, Dry},
     elements::html::{self, button, div, h1, p, span, Div},
-    node::element::{Const, ParentElement},
+    node::element::{Const, ParentElement, TextParentElement},
     prelude::{html::Main, ElementEvents},
     task::{server::render_now_sync, sync_scope},
     value::Sig,

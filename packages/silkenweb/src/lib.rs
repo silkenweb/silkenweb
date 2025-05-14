@@ -354,7 +354,7 @@ pub mod prelude {
         elements::{html, svg, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents},
         log_panics, mount,
         node::{
-            element::{Element, ParentElement, ShadowRootParent},
+            element::{Element, ParentElement, ShadowRootParent, TextParentElement},
             Node,
         },
         value::Sig,

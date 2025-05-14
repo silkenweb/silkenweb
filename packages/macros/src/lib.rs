@@ -421,7 +421,7 @@ fn code_gen(
                 use ::std::{panic::Location, sync::Once};
                 use ::silkenweb::{
                     document::{Document, DocumentHead},
-                    node::element::ParentElement,
+                    node::element::TextParentElement,
                     elements::html::style,
                 };
 
