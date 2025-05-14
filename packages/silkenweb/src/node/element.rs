@@ -163,7 +163,31 @@ impl<D: Dom> GenericElement<D> {
 pub struct GenericElementObserver<D: Dom>(GenericElement<D>);
 
 impl<D: Dom> GenericElementObserver<D> {
-    pub fn attribute(self, name: &str, f: impl FnMut(&web_sys::Element)) -> Self {
+    pub fn attribute(
+        mut self,
+        name: String,
+        mut f: impl FnMut(&web_sys::Element) + 'static,
+    ) -> Self {
+        let name = name.to_string();
+        let dom_element = self.0.element.dom_element();
+
+        self.0.element.observe_attributes(
+            move |changes, _observer| {
+                for change in changes
+                    .to_vec()
+                    .into_iter()
+                    .map(|change| change.unchecked_into::<web_sys::MutationRecord>())
+                {
+                    if change.type_() == "attributes"
+                        && change.target().as_ref() == Some(&dom_element)
+                        && change.attribute_name().as_ref() == Some(&name)
+                    {
+                        f(&dom_element)
+                    }
+                }
+            },
+            &mut self.0.events,
+        );
         self
     }
 
