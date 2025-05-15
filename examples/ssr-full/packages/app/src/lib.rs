@@ -1,9 +1,10 @@
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
+    clone,
     document::DocumentHead,
     dom::Dom,
     elements::{
-        html::{button, div, p, Div},
+        html::{button, details, div, p, span, summary, Div},
         ElementEvents,
     },
     hydration::{hydrate, hydrate_in_head},
@@ -27,6 +28,10 @@ pub fn hydrate_app() {
 
 pub fn app<D: Dom>() -> (DocumentHead<D>, Div<D>) {
     let title_text = Mutable::new("Silkenweb SSR Example");
+    let details_open = Mutable::new(false);
+    let details_open_sig = details_open
+        .signal()
+        .map(|is_open| format!("Details open: {is_open}"));
 
     let head = DocumentHead::new().child(title().id("title").text(Sig(title_text.signal())));
     let body = div()
@@ -54,7 +59,21 @@ pub fn app<D: Dom>() -> (DocumentHead<D>, Div<D>) {
                     path => path,
                 }
             )
-        }))));
+        }))))
+        .child(
+            details()
+                .child(summary().text("Mutation Observer: expand me for more details..."))
+                .child(p().text("Check the text below to see the mutation observer in action!"))
+                .observe_mutations({
+                    |observe| {
+                        clone!(details_open);
+                        observe.open(move |elem, _prev| {
+                            details_open.set(elem.open());
+                        })
+                    }
+                }),
+        )
+        .child(span().text(Sig(details_open_sig)));
 
     (head, body)
 }
