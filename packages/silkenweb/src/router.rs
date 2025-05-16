@@ -6,31 +6,12 @@
 //! # Example
 //!
 //! ```no_run
-//! # use silkenweb::{
-//! #    elements::{html::{button, div, p, Div}, ElementEvents},
-//! #    node::element::{ParentElement, TextParentElement},
-//! #    router,
-//! #    value::Sig,
-//! # };
-//! # let doc: Div =
-//! div()
-//!     .child(
-//!         button()
-//!             .on_click(|_, _| router::set_url_path("route_1"))
-//!             .text("Go to route 1"),
-//!     )
-//!     .child(
-//!         button()
-//!             .on_click(|_, _| router::set_url_path("route_2"))
-//!             .text("Go to route 2"),
-//!     )
-//!     .child(p().text(Sig(
-//!         router::url_path().signal_ref(|url_path| format!("URL Path is: {url_path}")),
-//!     )));
+#![doc = function_body!("tests/doc/router.rs", module_example, [])]
 //! ```
 use std::{collections::HashMap, fmt::Display};
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use include_doc::function_body;
 use silkenweb_macros::cfg_browser;
 
 use crate::{
@@ -70,11 +51,7 @@ impl UrlPath {
     /// Get the path portion of the `UrlPath`
     ///
     /// ```
-    /// # use silkenweb::router::UrlPath;
-    /// assert_eq!(UrlPath::new("path?query_string").path(), "path");
-    /// assert_eq!(UrlPath::new("?query_string").path(), "");
-    /// assert_eq!(UrlPath::new("?").path(), "");
-    /// assert_eq!(UrlPath::new("").path(), "");
+    #[doc = function_body!("tests/doc/router.rs", url_path, [])]
     /// ```
     pub fn path(&self) -> &str {
         &self.url[..self.path_end]
@@ -83,17 +60,8 @@ impl UrlPath {
     /// Get the path components of the `UrlPath`
     ///
     /// ```
-    /// # use silkenweb::router::UrlPath;
-    /// let path = UrlPath::new("path1/path2/path3");
-    /// let components: Vec<&str> = path.path_components().collect();
-    /// assert_eq!(&components, &["path1", "path2", "path3"]);
-    ///
-    /// let path = UrlPath::new("");
-    /// assert_eq!(path.path_components().next(), None);
-    ///
-    /// let path = UrlPath::new("path1//path2"); // Note the double `'/'`
-    /// let components: Vec<&str> = path.path_components().collect();
-    /// assert_eq!(&components, &["path1", "", "path2"]);
+    #[doc = function_body!("tests/doc/router.rs", url_path_components, [])]
+    /// ```
     pub fn path_components(&self) -> impl Iterator<Item = &str> {
         let path = self.path();
         let mut components = path.split('/');
@@ -113,19 +81,7 @@ impl UrlPath {
     /// Get the query string portion of the `UrlPath`
     ///
     /// ```
-    /// # use silkenweb::router::UrlPath;
-    /// assert_eq!(
-    ///     UrlPath::new("path?query_string").query_string(),
-    ///     "query_string"
-    /// );
-    /// assert_eq!(UrlPath::new("?query_string").query_string(), "query_string");
-    /// assert_eq!(UrlPath::new("?").query_string(), "");
-    /// assert_eq!(UrlPath::new("").query_string(), "");
-    /// assert_eq!(UrlPath::new("#hash").query_string(), "");
-    /// assert_eq!(
-    ///     UrlPath::new("?query_string#hash").query_string(),
-    ///     "query_string"
-    /// );
+    #[doc = function_body!("tests/doc/router.rs", url_query_string, [])]
     /// ```
     pub fn query_string(&self) -> &str {
         self.range(self.path_end, self.query_end)
@@ -134,13 +90,7 @@ impl UrlPath {
     /// Split the query string into key/value pairs
     ///
     /// ```
-    /// # use silkenweb::router::UrlPath;
-    /// let path = UrlPath::new("path?x=1&y=2&flag");
-    /// let kv_args: Vec<(&str, Option<&str>)> = path.query().collect();
-    /// assert_eq!(
-    ///     &kv_args,
-    ///     &[("x", Some("1")), ("y", Some("2")), ("flag", None)]
-    /// );
+    #[doc = function_body!("tests/doc/router.rs", url_query, [])]
     /// ```
     pub fn query(&self) -> impl Iterator<Item = (&str, Option<&str>)> {
         self.query_string()
@@ -156,11 +106,7 @@ impl UrlPath {
     /// Get the query string portion of the `UrlPath`
     ///
     /// ```
-    /// # use silkenweb::router::UrlPath;
-    /// assert_eq!(UrlPath::new("path?query_string#hash").hash(), "hash");
-    /// assert_eq!(UrlPath::new("#hash").hash(), "hash");
-    /// assert_eq!(UrlPath::new("#").hash(), "");
-    /// assert_eq!(UrlPath::new("").hash(), "");
+    #[doc = function_body!("tests/doc/router.rs", url_hash, [])]
     /// ```
     pub fn hash(&self) -> &str {
         self.range(self.query_end, self.url.len())
@@ -230,16 +176,7 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 /// # Example
 ///
 /// ```no_run
-/// use silkenweb::{
-///     dom::Dom,
-///     elements::{
-///         html::{a, A},
-///         ElementEvents, HtmlElement,
-///     },
-///     node::element::TextParentElement,
-///     router::anchor,
-/// };
-/// let link: A = anchor("/my-path").text("click me");
+#[doc = function_body!("tests/doc/router.rs", anchor_example, [])]
 /// ```
 pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
     let path = path.into();
@@ -254,13 +191,7 @@ pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
 /// # Example
 ///
 /// ```no_run
-/// # use silkenweb::{
-/// #     router::link_clicked,
-/// #     elements::{html::{a, A}, HtmlElement, ElementEvents},
-/// #     node::element::TextParentElement,
-/// # };
-/// let path = "/my_path";
-/// let link: A = a().href(path).text("click me").on_click(link_clicked(path));
+#[doc = function_body!("tests/doc/router.rs", link_clicked_example, [])]
 /// ```
 pub fn link_clicked(
     path: impl Into<String>,
