@@ -1,4 +1,8 @@
-use silkenweb::{elements::html::*, log_panics, prelude::*};
+use silkenweb::{
+    elements::html::div,
+    log_panics, mount,
+    node::element::{Element, ParentElement, TextParentElement},
+};
 
 mod red {
     silkenweb::css!(path = "red.css", auto_mount, transpile = (modules));

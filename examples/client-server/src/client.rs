@@ -6,10 +6,12 @@ use futures::{stream, StreamExt};
 use futures_signals::signal::{Mutable, SignalExt};
 use reqwasm::websocket::futures::WebSocket;
 use silkenweb::{
-    prelude::{
+    elements::{
         html::{button, div, p},
-        *,
+        ElementEvents,
     },
+    mount,
+    node::element::{ParentElement, TextParentElement},
     task::spawn_local,
     value::Sig,
 };

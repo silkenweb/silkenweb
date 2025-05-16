@@ -1,5 +1,14 @@
 use futures_signals::signal::Mutable;
-use silkenweb::{elements::html::*, prelude::*};
+use silkenweb::{
+    clone,
+    elements::{
+        html::{button, div, input},
+        ElementEvents,
+    },
+    log_panics, mount,
+    node::element::{Element, ParentElement, TextParentElement},
+    value::Sig,
+};
 
 fn main() {
     log_panics();

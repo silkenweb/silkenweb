@@ -1,12 +1,14 @@
 use silkenweb::{
     css,
-    elements::html::{dd, dl, dt, span},
+    elements::{
+        html::{dd, div, dl, dt, span},
+        HtmlElement,
+    },
     log_panics, mount,
     node::{
         element::{ParentElement, TextParentElement},
         ChildNode, Component,
     },
-    prelude::{html::div, HtmlElement},
     ChildElement,
 };
 

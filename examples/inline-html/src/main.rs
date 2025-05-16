@@ -1,4 +1,4 @@
-use silkenweb::{elements::html::div, mount, prelude::ParentElement};
+use silkenweb::{elements::html::div, mount, node::element::ParentElement};
 use silkenweb_inline_html::{html_dir, html_file, inline_html};
 
 mod svg {

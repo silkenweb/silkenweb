@@ -1,10 +1,12 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     clone,
-    elements::html::{button, div},
+    elements::{
+        html::{button, div},
+        ElementEvents,
+    },
     mount,
-    node::element::TextParentElement,
-    prelude::{ElementEvents, ParentElement},
+    node::element::{ParentElement, TextParentElement},
     task::spawn_local,
     value::Sig,
 };

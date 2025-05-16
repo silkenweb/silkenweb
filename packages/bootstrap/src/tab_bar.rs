@@ -7,10 +7,9 @@ use silkenweb::{
         AriaElement,
     },
     node::{
-        element::{Element, GenericElement},
+        element::{Element, GenericElement, ParentElement},
         ChildNode, Node,
     },
-    prelude::ParentElement,
     value::SignalOrValue,
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };

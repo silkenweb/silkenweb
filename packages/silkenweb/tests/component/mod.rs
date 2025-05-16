@@ -3,13 +3,10 @@
 fn component() {
     use silkenweb::{
         dom::Dry,
+        elements::html::{div, span},
         node::{
-            element::{Const, GenericElement, TextParentElement},
+            element::{Const, GenericElement, ParentElement, TextParentElement},
             Component,
-        },
-        prelude::{
-            html::{div, span},
-            ParentElement,
         },
     };
 

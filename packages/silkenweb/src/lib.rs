@@ -342,25 +342,7 @@ pub mod task;
 pub mod time;
 pub mod window;
 
-/// Commonly used imports, all in one place.
-pub mod prelude {
-    pub use futures_signals::{
-        signal::{Mutable, Signal, SignalExt},
-        signal_vec::{MutableVec, SignalVec, SignalVecExt},
-    };
-
-    pub use crate::{
-        clone,
-        elements::{html, svg, AriaElement, ElementEvents, HtmlElement, HtmlElementEvents},
-        log_panics, mount,
-        node::{
-            element::{Element, ParentElement, ShadowRootParent, TextParentElement},
-            Node,
-        },
-        value::Sig,
-    };
-}
-
+pub use futures_signals;
 pub use silkenweb_signals_ext::value;
 
 /// Shorthand for [`DefaultDom::mount`]

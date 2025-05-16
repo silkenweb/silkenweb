@@ -6,8 +6,12 @@
 //! # Example
 //!
 //! ```no_run
-//! # use html::{button, div, p, Div};
-//! # use silkenweb::{prelude::*, router};
+//! # use silkenweb::{
+//! #    elements::{html::{button, div, p, Div}, ElementEvents},
+//! #    node::element::{ParentElement, TextParentElement},
+//! #    router,
+//! #    value::Sig,
+//! # };
 //! # let doc: Div =
 //! div()
 //!     .child(
@@ -31,8 +35,10 @@ use silkenweb_macros::cfg_browser;
 
 use crate::{
     dom::Dom,
-    elements::html::{a, A},
-    prelude::ElementEvents,
+    elements::{
+        html::{a, A},
+        ElementEvents,
+    },
     task,
 };
 
@@ -224,8 +230,15 @@ pub fn set_url_path(path: impl Into<UrlPath>) {
 /// # Example
 ///
 /// ```no_run
-/// # use html::{a, A};
-/// use silkenweb::{prelude::*, router::anchor};
+/// use silkenweb::{
+///     dom::Dom,
+///     elements::{
+///         html::{a, A},
+///         ElementEvents, HtmlElement,
+///     },
+///     node::element::TextParentElement,
+///     router::anchor,
+/// };
 /// let link: A = anchor("/my-path").text("click me");
 /// ```
 pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
@@ -241,8 +254,11 @@ pub fn anchor<D: Dom>(path: impl Into<String>) -> A<D> {
 /// # Example
 ///
 /// ```no_run
-/// # use html::{a, A};
-/// # use silkenweb::{prelude::*, router::link_clicked};
+/// # use silkenweb::{
+/// #     router::link_clicked,
+/// #     elements::{html::{a, A}, HtmlElement, ElementEvents},
+/// #     node::element::TextParentElement,
+/// # };
 /// let path = "/my_path";
 /// let link: A = a().href(path).text("click me").on_click(link_clicked(path));
 /// ```

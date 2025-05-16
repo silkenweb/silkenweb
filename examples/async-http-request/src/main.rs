@@ -6,9 +6,12 @@ use futures_signals::signal::Mutable;
 use reqwasm::http::Request;
 use silkenweb::{
     clone,
-    elements::html::{button, div, p},
+    elements::{
+        html::{button, div, p},
+        ElementEvents,
+    },
     log_panics, mount,
-    prelude::{ElementEvents, ParentElement, TextParentElement},
+    node::element::{ParentElement, TextParentElement},
     task,
     value::Sig,
 };

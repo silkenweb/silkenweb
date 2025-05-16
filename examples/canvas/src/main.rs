@@ -1,10 +1,13 @@
-use html::canvas;
+use futures_signals::signal::Mutable;
 use silkenweb::{
     clone,
     dom::Wet,
-    elements::html::{a, button, div},
+    elements::{
+        html::{a, button, canvas, div},
+        ElementEvents,
+    },
     mount,
-    prelude::*,
+    node::element::{Element, ParentElement, TextParentElement},
     window,
 };
 use wasm_bindgen::JsCast;

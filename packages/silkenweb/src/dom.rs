@@ -11,6 +11,7 @@
 //! See the concrete DOM types for some examples.
 use std::marker::PhantomData;
 
+use include_doc::function_body;
 use silkenweb_macros::cfg_browser;
 
 use self::{
@@ -56,10 +57,7 @@ pub type DefaultDom = Dry;
 /// inferred.
 ///
 /// ```
-/// # use silkenweb::{dom::Dry, elements::html::{p, P}, prelude::*};
-/// let app: P<Dry> = p().text("Hello, world!").into();
-///
-/// assert_eq!(app.freeze().to_string(), "<p>Hello, world!</p>");
+#[doc = function_body!("tests/doc/dom.rs", dry, [])]
 /// ```
 pub struct Dry;
 
@@ -87,11 +85,7 @@ impl private::InstantiableDom for Dry {
 /// inferred.
 ///
 /// ```no_run
-/// # use html::{p, P};
-/// # use silkenweb::{dom::Hydro, hydration::hydrate, prelude::*};
-/// let app: P<Hydro> = p().text("Hello, world!");
-///
-/// hydrate("app-id", app);
+#[doc = function_body!("tests/doc/dom.rs", hydro, [])]
 /// ```
 pub struct Hydro;
 
@@ -118,11 +112,7 @@ impl private::InstantiableDom for Hydro {
 /// inferred.
 ///
 /// ```no_run
-/// # use html::{p, P};
-/// # use silkenweb::{dom::Wet, document::Document, prelude::*};
-/// let app: P<Wet> = p().text("Hello, world!");
-///
-/// Wet::mount("app-id", app);
+#[doc = function_body!("tests/doc/dom.rs", wet, [])]
 /// ```
 pub struct Wet;
 
@@ -153,19 +143,7 @@ impl private::InstantiableDom for Wet {
 /// inferred.
 ///
 /// ```
-/// # use html::{p, P};
-/// # use silkenweb::{
-/// #     dom::{Dry, Template},
-/// #     node::element::Const,
-/// #     prelude::*,
-/// # };
-/// let elem: P<Template<String, Dry>> = p().on_instantiate(|p, message| p.text(message));
-/// let template: P<Template<String, Dry>, Const> = elem.freeze();
-/// let hello = template.instantiate(&"Hello, world!".to_string());
-/// let goodbye = template.instantiate(&"Goodbye!".to_string());
-///
-/// assert_eq!(hello.freeze().to_string(), "<p>Hello, world!</p>");
-/// assert_eq!(goodbye.freeze().to_string(), "<p>Goodbye!</p>");
+#[doc = function_body!("tests/doc/dom.rs", template, [])]
 /// ```
 pub struct Template<Param, D: InstantiableDom = DefaultDom>(PhantomData<(Param, D)>);
 

@@ -16,6 +16,7 @@ use futures_signals::{
     signal_vec::{always, SignalVec, SignalVecExt},
     CancelableFutureHandle,
 };
+use include_doc::function_body;
 use silkenweb_base::document;
 use silkenweb_signals_ext::value::{Executor, RefSignalOrValue, SignalOrValue, Value};
 use wasm_bindgen::{JsCast, JsValue};
@@ -595,42 +596,12 @@ pub trait Element: Sized {
     /// Add static class names:
     ///
     /// ```
-    /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*};
-    /// let app: Div<Dry> = div().class("my-class").class("my-other-class");
-    /// assert_eq!(
-    ///     app.freeze().to_string(),
-    ///     r#"<div class="my-class my-other-class"></div>"#
-    /// );
+    #[doc = function_body!("tests/doc/node/element.rs", static_single_class_name, [])]
     /// ```
-    ///
+    /// 
     /// Add dynamic class names:
-    ///
     /// ```
-    /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, scope, server}};
-    /// # server::block_on(scope(async {
-    /// let my_class = Mutable::new("my-class");
-    /// let my_other_class = Mutable::new("my-other-class");
-    /// let app: Div<Dry> = div()
-    ///     .class(Sig(my_class.signal()))
-    ///     .class(Sig(my_other_class.signal()));
-    /// let app = app.freeze();
-    ///
-    /// render_now().await;
-    /// assert_eq!(
-    ///     app.to_string(),
-    ///     r#"<div class="my-class my-other-class"></div>"#
-    /// );
-    ///
-    /// my_other_class.set("my-other-class-updated");
-    ///
-    /// render_now().await;
-    /// assert_eq!(
-    ///     app.to_string(),
-    ///     r#"<div class="my-class my-other-class-updated"></div>"#
-    /// );
-    /// # }))
+    #[doc = function_body!("tests/doc/node/element.rs", dynamic_single_class_name, [])]
     /// ```
     fn class<'a, T>(self, class: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
@@ -656,33 +627,12 @@ pub trait Element: Sized {
     /// Add static class names:
     ///
     /// ```
-    /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*};
-    /// let app: Div<Dry> = div().classes(["class0", "class1"]);
-    /// assert_eq!(
-    ///     app.freeze().to_string(),
-    ///     r#"<div class="class0 class1"></div>"#
-    /// );
+    #[doc = function_body!("tests/doc/node/element.rs", static_class_names, [])]
     /// ```
-    ///
+    /// 
     /// Add dynamic class names:
-    ///
     /// ```
-    /// # use html::{div, Div};
-    /// # use silkenweb::{dom::Dry, prelude::*, task::{render_now, scope, server}};
-    /// # server::block_on(scope(async {
-    /// let my_classes = Mutable::new(vec!["class0", "class1"]);
-    /// let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
-    /// let app = app.freeze();
-    ///
-    /// render_now().await;
-    /// assert_eq!(app.to_string(), r#"<div class="class0 class1"></div>"#);
-    ///
-    /// my_classes.set(vec![]);
-    ///
-    /// render_now().await;
-    /// assert_eq!(app.to_string(), r#"<div class=""></div>"#);
-    /// # }))
+    #[doc = function_body!("tests/doc/node/element.rs", dynamic_class_names, [])]
     /// ```
     fn classes<'a, T, Iter>(self, classes: impl RefSignalOrValue<'a, Item = Iter>) -> Self
     where
@@ -723,11 +673,7 @@ pub trait Element: Sized {
     /// Set the focus to an `HTMLInputElement`.
     ///
     /// ```no_run
-    /// # use web_sys::HtmlInputElement;
-    /// # use html::{input, Input};
-    /// # use silkenweb::prelude::*;
-    /// # let input: Input =
-    /// input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    #[doc = function_body!("tests/doc/node/element.rs", effect, [])]
     /// ```
     fn effect(self, f: impl FnOnce(&Self::DomElement) + 'static) -> Self;
 
@@ -756,18 +702,7 @@ pub trait Element: Sized {
     /// # Example
     ///
     /// ```no_run
-    /// # use html::{button, div, input, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("".to_string());
-    /// let input = input();
-    /// let input_handle = input.handle();
-    /// let app: Div = div()
-    ///     .child(input)
-    ///     .child(button().text("Read Input").on_click({
-    ///         clone!(text);
-    ///         move |_, _| text.set(input_handle.dom_element().value())
-    ///     }))
-    ///     .text(Sig(text.signal_cloned()));
+    #[doc = function_body!("tests/doc/node/element.rs", handle, [])]
     /// ```
     fn handle(&self) -> ElementHandle<Self::Dom, Self::DomElement>;
 
@@ -796,20 +731,12 @@ pub trait TextParentElement<D: Dom = DefaultDom>: Element {
     /// Static text:
     ///
     /// ```no_run
-    /// # use html::{div, Div};
-    /// # use silkenweb::prelude::*;
-    /// # let d: Div =
-    /// div().text("Hello, world!");
+    #[doc = function_body!("tests/doc/node/element.rs", static_text, [])]
     /// ```
-    ///
+    /// 
     /// Dynamic text:
-    ///
     /// ```no_run
-    /// # use html::{div, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("Hello, world!");
-    /// # let d: Div =
-    /// div().text(Sig(text.signal()));
+    #[doc = function_body!("tests/doc/node/element.rs", dynamic_text, [])]
     /// ```
     fn text<'a, T>(self, child: impl RefSignalOrValue<'a, Item = T>) -> Self
     where
@@ -825,21 +752,12 @@ pub trait ParentElement<D: Dom = DefaultDom>: TextParentElement<D> {
     /// Add static children:
     ///
     /// ```no_run
-    /// # use html::{div, p, Div};
-    /// # use silkenweb::prelude::*;
-    /// # let div: Div =
-    /// div().child(p().text("Hello,")).child(p().text("world!"));
+    #[doc = function_body!("tests/doc/node/element.rs", static_child, [])]
     /// ```
-    ///
+    /// 
     /// Add a dynamic child:
-    ///
     /// ```no_run
-    /// # use html::{div, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("Hello, world!");
-    ///
-    /// # let d: Div =
-    /// div().child(Sig(text.signal().map(|text| div().text(text))));
+    #[doc = function_body!("tests/doc/node/element.rs", dynamic_child, [])]
     /// ```
     fn child(self, child: impl SignalOrValue<Item = impl ChildNode<D>>) -> Self {
         self.optional_child(child.map(Some))
@@ -855,29 +773,12 @@ pub trait ParentElement<D: Dom = DefaultDom>: TextParentElement<D> {
     /// Add a static optional child:
     ///
     /// ```no_run
-    /// # use html::{div, p, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("hello");
-    ///
-    /// # let div: Div =
-    /// div().optional_child(Some(p().text("Hello, world!")));
+    #[doc = function_body!("tests/doc/node/element.rs", static_optional_child, [])]
     /// ```
-    ///
+    /// 
     /// Add a dynamic optional child:
-    ///
     /// ```no_run
-    /// # use html::{div, Div};
-    /// # use silkenweb::prelude::*;
-    /// let text = Mutable::new("hello");
-    ///
-    /// # let div: Div =
-    /// div().optional_child(Sig(text.signal().map(|text| {
-    ///     if text.is_empty() {
-    ///         None
-    ///     } else {
-    ///         Some(div().text(text))
-    ///     }
-    /// })));
+    #[doc = function_body!("tests/doc/node/element.rs", dynamic_optional_child, [])]
     /// ```
     fn optional_child(self, child: impl SignalOrValue<Item = Option<impl ChildNode<D>>>) -> Self;
 
@@ -886,10 +787,7 @@ pub trait ParentElement<D: Dom = DefaultDom>: TextParentElement<D> {
     /// # Example
     ///
     /// ```no_run
-    /// # use html::{div, p, Div};
-    /// # use silkenweb::prelude::*;
-    /// # let div: Div =
-    /// div().children([p().text("Hello,"), p().text("world!")]);
+    #[doc = function_body!("tests/doc/node/element.rs", children, [])]
     /// ```
     fn children<N>(self, children: impl IntoIterator<Item = N>) -> Self
     where

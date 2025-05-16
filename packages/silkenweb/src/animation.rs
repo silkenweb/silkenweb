@@ -7,6 +7,7 @@
 //!
 //! See [`finite_animation`] and [`infinite_animation`] for examples.
 use futures_signals::signal::{Signal, SignalExt};
+use include_doc::function_body;
 
 use crate::task::{animation_timestamp, request_animation_frame};
 
@@ -21,15 +22,9 @@ use crate::task::{animation_timestamp, request_animation_frame};
 /// Slowly filling a progress bar:
 ///
 /// ```no_run
-/// # use html::{progress, Progress};
-/// # use silkenweb::{animation::finite_animation, prelude::*};
-/// const DURATION: f64 = 3000.0;
-/// # let p: Progress =
-/// progress().max(DURATION as f32).value(Sig(
-///     finite_animation(DURATION).map(|time| time.unwrap_or(DURATION) as f32)
-/// ));
+#[doc = function_body!("tests/doc/animation.rs", doc_finite_animation, [])]
 /// ```
-///
+/// 
 /// See [module-level documentation](self) for more details.
 pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>> + 'static {
     animation_timestamp()
@@ -53,21 +48,9 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// A rotating square:
 ///
 /// ```no_run
-/// # use silkenweb::{animation::infinite_animation, prelude::*};
-/// # use svg::{attributes::Presentation, content_type::Length::Px, rect, svg, Svg};
-/// # let doc: Svg =
-/// svg().width(200.0).height(200.0).child(
-///     rect()
-///         .x(Px(25.0))
-///         .y(Px(25.0))
-///         .width(Px(50.0))
-///         .height(Px(50.0))
-///         .transform(Sig(
-///             infinite_animation().map(|time| format!("rotate({} 50 50)", time / 10.0))
-///         )),
-/// );
+#[doc = function_body!("tests/doc/animation.rs", doc_infinite_animation, [])]
 /// ```
-///
+/// 
 /// See [module-level documentation](self) for more details.
 pub fn infinite_animation() -> impl Signal<Item = f64> + 'static {
     animation_timestamp()

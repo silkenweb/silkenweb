@@ -2,7 +2,16 @@ use std::time::Duration;
 
 use futures::stream::StreamExt;
 use futures_signals::signal::{Mutable, SignalExt};
-use silkenweb::{cfg_browser, elements::html::*, prelude::*, task::spawn_local, time, value::Sig};
+#[cfg_browser(true)]
+use silkenweb::mount;
+use silkenweb::{
+    cfg_browser,
+    elements::html::*,
+    node::element::{ParentElement, TextParentElement},
+    task::spawn_local,
+    time,
+    value::Sig,
+};
 
 fn app() -> Div {
     let ticks = Mutable::new(0);

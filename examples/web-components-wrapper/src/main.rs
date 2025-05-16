@@ -1,6 +1,9 @@
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
-    elements::html::*, log_panics, node::element::TextParentElement, prelude::*, value::Sig,
+    elements::html::*,
+    log_panics, mount,
+    node::element::{ParentElement, TextParentElement},
+    value::Sig,
 };
 use silkenweb_example_web_components_wrapper::{ui5_button, ui5_button_badge, ButtonDesign};
 

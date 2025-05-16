@@ -2,9 +2,11 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::{
     dom::{Dom, Dry},
-    elements::html::{self, button, div, h1, p, span, Div},
+    elements::{
+        html::{self, button, div, h1, p, span, Div, Main},
+        ElementEvents,
+    },
     node::element::{Const, ParentElement, TextParentElement},
-    prelude::{html::Main, ElementEvents},
     task::{server::render_now_sync, sync_scope},
     value::Sig,
 };

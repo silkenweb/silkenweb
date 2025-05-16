@@ -7,6 +7,7 @@ publish = false
 
 [dependencies]
 silkenweb = { workspace = true }
+futures-signals = { workspace = true }
 web-sys = { workspace = true, features = [
     "CanvasRenderingContext2d",
     "Touch",

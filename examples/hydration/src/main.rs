@@ -1,11 +1,10 @@
 use futures_signals::signal::Mutable;
 use silkenweb::{
     document::DocumentHead,
-    elements::html::*,
+    elements::{html::*, ElementEvents, HtmlElement},
     hydration::{hydrate, hydrate_in_head},
     log_panics,
-    node::element::Element,
-    prelude::*,
+    node::element::{Element, ParentElement, TextParentElement},
     task::spawn_local,
     value::Sig,
 };

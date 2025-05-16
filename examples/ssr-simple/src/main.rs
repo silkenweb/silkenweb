@@ -3,8 +3,8 @@ use silkenweb::{
     css,
     document::Document,
     dom::DefaultDom,
-    elements::html::*,
-    prelude::*,
+    elements::{html::*, ElementEvents},
+    node::element::{Element, ParentElement, TextParentElement},
     task::{server::render_now_sync, sync_scope},
     value::Sig,
 };

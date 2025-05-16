@@ -50,6 +50,7 @@ clonelet = { workspace = true }
 parcel_selectors = { workspace = true }
 wasm-rs-dbg = { workspace = true }
 js-sys = { workspace = true }
+include-doc = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

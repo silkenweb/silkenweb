@@ -1,8 +1,7 @@
 use silkenweb::{
     elements::html::{div, p},
     log_panics, mount,
-    node::element::{ParentElement, TextParentElement},
-    prelude::Element,
+    node::element::{Element, ParentElement, TextParentElement},
 };
 use twust::{tw1, tws1};
 

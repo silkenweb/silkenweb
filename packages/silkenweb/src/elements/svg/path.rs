@@ -1,6 +1,7 @@
 //! Tools to construct an SVG path.
 use std::fmt::Write;
 
+use include_doc::function_body;
 use silkenweb_signals_ext::value::Value;
 
 use crate::attribute::{AsAttribute, Attribute};
@@ -17,21 +18,7 @@ pub enum Offset {
 /// # Example
 ///
 /// ```
-/// # use silkenweb::{dom::Dry, prelude::*};
-/// # use svg::{
-/// #     attributes::Presentation,
-/// #     path,
-/// #     path::{Data, Offset::Abs},
-/// #     Path,
-/// # };
-/// let path: Path<Dry> = path().d(Data::new()
-///     .move_to(Abs, 10.0, 10.0)
-///     .lines_to(Abs, [(20.0, 20.0), (30.0, 30.0)]));
-///
-/// assert_eq!(
-///     r#"<path d="M 10,10 L 20,20 30,30"></path>"#,
-///     path.freeze().to_string()
-/// );
+#[doc = function_body!("tests/doc/elements/svg.rs", path_data, [])]
 /// ```
 /// [`d`]: `super::attributes::Presentation::d`
 #[derive(Default, Clone)]

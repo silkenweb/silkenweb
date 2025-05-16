@@ -1,4 +1,9 @@
-use silkenweb::{dbg, elements::html::*, prelude::*};
+use silkenweb::{
+    dbg,
+    elements::html::*,
+    mount,
+    node::element::{ParentElement, TextParentElement},
+};
 
 fn main() {
     let app = details()

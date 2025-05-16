@@ -1,5 +1,13 @@
 use futures_signals::signal::{Mutable, SignalExt};
-use silkenweb::{elements::html::*, prelude::*, value::Sig};
+use silkenweb::{
+    elements::{
+        html::{button, div, p},
+        ElementEvents,
+    },
+    mount,
+    node::element::{ParentElement, TextParentElement},
+    value::Sig,
+};
 
 fn main() {
     let count = Mutable::new(0);

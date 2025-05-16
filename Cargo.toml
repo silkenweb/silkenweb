@@ -67,6 +67,7 @@ grass = { version = "0.13.4", default-features = false, features = ["random"] }
 heck = "0.5.0"
 html-escape = "0.2.13"
 html5ever = "0.29.0"
+include-doc = "0.2.2"
 indexmap = "2.7.0"
 itertools = "0.14.0"
 js-sys = "0.3.76"

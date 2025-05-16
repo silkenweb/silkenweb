@@ -8,7 +8,7 @@ use axum::{
     BoxError, TypedHeader,
 };
 use serde::de::DeserializeOwned;
-use silkenweb::{dom::Dry, prelude::Node};
+use silkenweb::{dom::Dry, node::Node};
 
 pub struct HtmxResponse(Node<Dry>);
 

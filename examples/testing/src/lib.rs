@@ -1,7 +1,11 @@
 use futures_signals::signal::Mutable;
 #[cfg(test)]
 use silkenweb::cfg_browser;
-use silkenweb::{elements::html::*, prelude::*, value::Sig};
+use silkenweb::{
+    elements::{html::*, ElementEvents},
+    node::element::{ParentElement, TextParentElement},
+    value::Sig,
+};
 
 pub fn app(count: Mutable<i32>) -> Div {
     let count_text = count.signal_ref(|i| format!("{i}"));

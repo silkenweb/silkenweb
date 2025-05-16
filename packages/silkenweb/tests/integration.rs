@@ -28,10 +28,12 @@ mod browser_tests {
     use silkenweb::{
         document::{Document, DocumentHead},
         dom::DefaultDom,
-        elements::html::{button, div, p, P},
+        elements::{
+            html::{button, div, p, P},
+            ElementEvents, HtmlElement,
+        },
         mount,
         node::element::{ParentElement, TextParentElement},
-        prelude::{ElementEvents, HtmlElement},
         task::render_now,
         value::Sig,
     };

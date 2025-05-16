@@ -3,10 +3,9 @@ use silkenweb::{
     dom::{DefaultDom, Dom},
     elements::html,
     node::{
-        element::{Element, GenericElement, TextParentElement},
+        element::{Element, GenericElement, ParentElement, TextParentElement},
         Node,
     },
-    prelude::ParentElement,
     value::{RefSignalOrValue, SignalOrValue, Value},
     AriaElement, Element, ElementEvents, HtmlElement, HtmlElementEvents, Value,
 };

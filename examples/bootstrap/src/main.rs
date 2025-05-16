@@ -1,8 +1,7 @@
 use silkenweb::{
     elements::html::{a, div, A},
     log_panics, mount,
-    node::element::TextParentElement,
-    prelude::ParentElement,
+    node::element::{ParentElement, TextParentElement},
 };
 use silkenweb_bootstrap::{
     badge::badge,

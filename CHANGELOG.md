@@ -2,10 +2,11 @@
 
 ## Next
 
+- *Breaking change*: `silkenweb::prelude` has been removed. It wasn't maintained and caused issues with Rust Analyser prefering to generate prelude imports.
 - *Breaking change*: `TextParentElement` has been split out from `ParentElement`. This should just mean you need to import `silkenweb::node::element::TextParentElement` in some cases.
 - Add a mutation API based on `MutationObserver`. See `examples/mutation-observer`.
 - Add `element_slot` and `element_slot_single` to generate methods for adding slotted children to custom HTML elements.
-- `custom_html_element!` no longer has a `custom_events` section. You can now just use `elements::CustomEvent` in the `events` section. See `examples/web-components-wrapper`.
+- *Breaking change*: `custom_html_element!` no longer has a `custom_events` section. You can now just use `elements::CustomEvent` in the `events` section. See `examples/web-components-wrapper`.
 - `StrAttribute` derive macro to `impl Attribute` for types that implement `AsRef<str>`
 
 ## 0.9.0 - 2025-01-14

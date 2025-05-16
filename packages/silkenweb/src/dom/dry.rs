@@ -299,7 +299,11 @@ mod tests {
 
     #[cfg_browser(false)]
     use crate::task::{render_now, scope};
-    use crate::{dom::Dry, elements::html::*, node::element::TextParentElement, prelude::*};
+    use crate::{
+        dom::Dry,
+        elements::html::*,
+        node::element::{ParentElement, ShadowRootParent, TextParentElement},
+    };
 
     #[cfg(feature = "declarative-shadow-dom")]
     #[test]
@@ -328,6 +332,8 @@ mod tests {
     #[cfg_browser(false)]
     #[tokio::test]
     async fn style_property() {
+        use crate::node::element::Element;
+
         scope(async {
             let app: Div<Dry> = div()
                 .style_property("--test0", "value0")

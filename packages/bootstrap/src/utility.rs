@@ -1,5 +1,8 @@
 use silkenweb::{
-    dom::Dom, elements::html, node::element::Element, prelude::HtmlElement, value::SignalOrValue,
+    dom::Dom,
+    elements::{html, HtmlElement},
+    node::element::Element,
+    value::SignalOrValue,
     Value,
 };
 

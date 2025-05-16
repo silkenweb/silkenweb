@@ -1,6 +1,13 @@
 use gloo_console::info;
-use html::{div, img, p};
-use silkenweb::{css, prelude::*};
+use silkenweb::{
+    css,
+    elements::{
+        html::{div, img, p},
+        HtmlElement, HtmlElementEvents,
+    },
+    log_panics, mount,
+    node::element::{Element, ParentElement, TextParentElement},
+};
 use web_sys::DragEvent;
 
 css!(path = "style.css");

@@ -8,8 +8,9 @@ mod browser_tests {
             ElementEvents, HtmlElement,
         },
         hydration::hydrate,
-        node::element::{Const, GenericElement, ShadowRootParent, TextParentElement},
-        prelude::{Element, ParentElement},
+        node::element::{
+            Const, Element, GenericElement, ParentElement, ShadowRootParent, TextParentElement,
+        },
         task::render_now,
         value::Sig,
     };

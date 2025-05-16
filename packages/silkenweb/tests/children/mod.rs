@@ -14,11 +14,13 @@ mod browser_tests {
     use itertools::Itertools;
     use silkenweb::{
         dom::Dom,
-        elements::html::{div, Div},
+        elements::{
+            html::{div, Div},
+            HtmlElement,
+        },
         macros::Signal,
         mount,
-        node::element::TextParentElement,
-        prelude::{HtmlElement, ParentElement},
+        node::element::{ParentElement, TextParentElement},
         task::render_now,
         value::Sig,
     };

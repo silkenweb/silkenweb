@@ -1,8 +1,10 @@
 use silkenweb::{
-    elements::html::{dd, div, dl, dt, slot, span},
+    elements::{
+        html::{dd, div, dl, dt, slot, span},
+        HtmlElement,
+    },
     log_panics, mount,
     node::element::{ParentElement, ShadowRootParent, TextParentElement},
-    prelude::HtmlElement,
 };
 
 fn main() {

@@ -1,3 +1,5 @@
+use include_doc::function_body;
+
 use super::{
     element::{Const, GenericElement, ParentElement, ShadowRootParent, TextParentElement},
     ChildNode, Node,
@@ -29,26 +31,9 @@ use crate::{
 /// encapsulated by the shadow DOM.
 ///
 /// ```
-/// # use silkenweb::{prelude::*, css, node::Component, dom::Dry};
-/// # use html::{dd, div, dl, dt, span};
-/// #
-/// let name = span().text("HTML");
-/// let description = span().text("HyperText Markup Language");
-///
-/// css!(content = "span {border: 3px solid red}");
-///
-/// let mut term = Component::<Dry>::styled(stylesheet::text());
-/// let name_slot = term.slot(name);
-/// let description_slot = term.slot(description);
-///
-/// term.child(
-///     div().child(span().text("Term Definition")).child(
-///         dl().child(dt().child(name_slot))
-///             .child(dd().child(description_slot)),
-///     ),
-/// );
+#[doc = function_body!("tests/doc/node/component.rs", component, [])]
 /// ```
-///
+/// 
 /// [Using Shadow DOM]: https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
 pub struct Component<D: InstantiableDom = DefaultDom> {
     element: Option<Div<D>>,

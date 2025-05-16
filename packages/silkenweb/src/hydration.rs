@@ -7,6 +7,7 @@
 //! this is done.
 use std::fmt;
 
+use include_doc::function_body;
 use wasm_bindgen::JsCast;
 
 use crate::{
@@ -127,21 +128,13 @@ impl fmt::Display for HydrationStats {
 /// # Example
 ///
 /// ```no_run
-/// # use futures_signals::signal::always;
-/// # use html::p;
-/// # use silkenweb::{hydration::hydrate, prelude::*, task::spawn_local};
-/// let app = p().text(Sig(always("Hello, world!")));
-///
-/// spawn_local(async {
-///     hydrate("app", app).await;
-/// });
+#[doc = function_body!("tests/doc/hydration.rs", doc_hydrate, [])]
 /// ```
-///
+/// 
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
 /// for a full example.
 ///
 /// [`effect`]: crate::node::element::Element::effect
-/// [`eval_dom_node`]: crate::node::Node::eval_dom_node
 pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>) -> HydrationStats {
     Hydro::mount(id, element).await
 }
@@ -161,14 +154,7 @@ pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>)
 /// elements with attribute `data-silkenweb-head-id="my-id"`.
 ///
 /// ```no_run
-/// # use futures_signals::signal::always;
-/// # use html::meta;
-/// # use silkenweb::{hydration::hydrate_in_head, document::DocumentHead, prelude::*, task::spawn_local};
-/// let head = DocumentHead::new().child(meta().name("description").content("A description"));
-///
-/// spawn_local(async {
-///     hydrate_in_head("my-id", head).await;
-/// });
+#[doc = function_body!("tests/doc/hydration.rs", doc_hydrate_in_head, [])]
 /// ```
 pub async fn hydrate_in_head(id: &str, children: DocumentHead<Hydro>) -> HydrationStats {
     Hydro::mount_in_head(id, children).await
