@@ -8,7 +8,7 @@ use silkenweb::{
 };
 use silkenweb_task::spawn_local;
 
-pub async fn doc_hydrate() {
+pub async fn hydrate_example() {
     let app = p().text(Sig(always("Hello, world!")));
 
     spawn_local(async {
@@ -16,7 +16,7 @@ pub async fn doc_hydrate() {
     });
 }
 
-pub async fn doc_hydrate_in_head() {
+pub async fn hydrate_in_head_example() {
     let head = DocumentHead::new().child(meta().name("description").content("A description"));
 
     spawn_local(async {

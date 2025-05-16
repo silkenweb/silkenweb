@@ -128,7 +128,7 @@ impl fmt::Display for HydrationStats {
 /// # Example
 ///
 /// ```no_run
-#[doc = function_body!("tests/doc/hydration.rs", doc_hydrate, [])]
+#[doc = function_body!("tests/doc/hydration.rs", hydrate_example, [])]
 /// ```
 /// 
 /// See [examples/hydration](http://github.com/silkenweb/silkenweb/tree/main/examples/hydration)
@@ -154,7 +154,7 @@ pub async fn hydrate(id: &str, element: impl Into<GenericElement<Hydro, Const>>)
 /// elements with attribute `data-silkenweb-head-id="my-id"`.
 ///
 /// ```no_run
-#[doc = function_body!("tests/doc/hydration.rs", doc_hydrate_in_head, [])]
+#[doc = function_body!("tests/doc/hydration.rs", hydrate_in_head_example, [])]
 /// ```
 pub async fn hydrate_in_head(id: &str, children: DocumentHead<Hydro>) -> HydrationStats {
     Hydro::mount_in_head(id, children).await
