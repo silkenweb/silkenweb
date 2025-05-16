@@ -22,11 +22,6 @@ pub use serde_wasm_bindgen;
 /// An infallible command with arguments:
 ///
 /// ```
-/// # pub use js_sys;
-/// # pub use silkenweb_tauri_proc_macro::client_command;
-/// # pub use static_assertions;
-/// # pub use wasm_bindgen;
-/// # pub use wasm_bindgen_futures;
 /// #[silkenweb_tauri::client_command(infallible)]
 /// async fn never_fails(arg1: &str, arg2: u64) -> String;
 /// ```
@@ -34,11 +29,6 @@ pub use serde_wasm_bindgen;
 /// A fallible command:
 ///
 /// ```
-/// # pub use js_sys;
-/// # pub use silkenweb_tauri_proc_macro::client_command;
-/// # pub use static_assertions;
-/// # pub use wasm_bindgen;
-/// # pub use wasm_bindgen_futures;
 /// #[silkenweb_tauri::client_command(fallible)]
 /// async fn might_fail() -> Result<String, String>;
 /// ```
@@ -46,11 +36,6 @@ pub use serde_wasm_bindgen;
 /// A publicly visible command:
 ///
 /// ```
-/// # pub use js_sys;
-/// # pub use silkenweb_tauri_proc_macro::client_command;
-/// # pub use static_assertions;
-/// # pub use wasm_bindgen;
-/// # pub use wasm_bindgen_futures;
 /// #[silkenweb_tauri::client_command(infallible)]
 /// pub async fn now_you_see_me() -> String;
 /// ```
