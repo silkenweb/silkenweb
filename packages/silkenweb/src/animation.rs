@@ -22,7 +22,7 @@ use crate::task::{animation_timestamp, request_animation_frame};
 /// Slowly filling a progress bar:
 ///
 /// ```no_run
-#[doc = function_body!("tests/doc/animation.rs", doc_finite_animation, [])]
+#[doc = function_body!("tests/doc/animation.rs", finite_animation_example, [])]
 /// ```
 /// 
 /// See [module-level documentation](self) for more details.
@@ -48,7 +48,7 @@ pub fn finite_animation(duration_millis: f64) -> impl Signal<Item = Option<f64>>
 /// A rotating square:
 ///
 /// ```no_run
-#[doc = function_body!("tests/doc/animation.rs", doc_infinite_animation, [])]
+#[doc = function_body!("tests/doc/animation.rs", infinite_animation_example, [])]
 /// ```
 /// 
 /// See [module-level documentation](self) for more details.

@@ -10,7 +10,7 @@ use silkenweb::{
     value::Sig,
 };
 
-pub fn doc_finite_animation() {
+pub fn finite_animation_example() {
     const DURATION: f64 = 3000.0;
     let app = progress().max(DURATION as f32).value(Sig(
         finite_animation(DURATION).map(|time| time.unwrap_or(DURATION) as f32)
@@ -18,7 +18,7 @@ pub fn doc_finite_animation() {
     mount("app", app);
 }
 
-pub fn doc_infinite_animation() {
+pub fn infinite_animation_example() {
     let app = svg().width(200.0).height(200.0).child(
         rect()
             .x(Px(25.0))
