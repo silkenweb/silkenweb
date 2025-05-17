@@ -22,15 +22,15 @@ fn main() -> Result<()> {
     match Workflow::parse() {
         Workflow::Build(build) => {
             let release = build.release;
-            let artifacts = build
+            let dist = build
                 .app_name("ssr_example_pre_rendered_client")
                 .run("ssr_example_pre_rendered_client")?;
 
             if release {
-                WasmOpt::level(1).shrink(2).optimize(artifacts.wasm)?;
+                WasmOpt::level(1).shrink(2).optimize(&dist)?;
             }
 
-            generate_pages(&artifacts.dist_dir)?;
+            generate_pages(&dist)?;
         }
         Workflow::Serve(server) => {
             server.arg("build").start(default_dist_dir(false))?;
@@ -55,7 +55,7 @@ fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
                 include_str!("../../app/page.tmpl.html"),
                 init_script = r#"
                 import init from "/ssr_example_pre_rendered_client.js";
-                init(new URL('ssr_example_pre_rendered_client.wasm', import.meta.url));
+                init(new URL('ssr_example_pre_rendered_client_bg.wasm', import.meta.url));
             "#,
                 head_html = Dry::head_inner_html(),
                 body_html = body
