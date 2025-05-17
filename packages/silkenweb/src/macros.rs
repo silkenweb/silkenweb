@@ -228,9 +228,9 @@ macro_rules! dom_element {
             ///
             /// Currently this is quite inefficient, as it will create a new
             /// `MutationObserver` for each observed attribute.
-            pub fn observe_mutations<F>(self, mut f: F) -> Self
+            pub fn observe_mutations<F>(self, f: F) -> Self
             where
-                F: for<'a> FnMut($observer_name<'a, Dom>) -> $observer_name<'a, Dom>
+                F: for<'a> FnOnce($observer_name<'a, Dom>) -> $observer_name<'a, Dom>
             {
                 Self(self.0.observe_mutations(|observer| f($observer_name(observer)).0))
             }

@@ -78,9 +78,9 @@ impl<D: Dom> GenericElement<D> {
     }
 
     /// Observe mutations to attributes.
-    pub fn observe_mutations<F>(mut self, mut f: F) -> Self
+    pub fn observe_mutations<F>(mut self, f: F) -> Self
     where
-        F: for<'a> FnMut(GenericElementObserver<'a, D>) -> GenericElementObserver<'a, D>,
+        F: for<'a> FnOnce(GenericElementObserver<'a, D>) -> GenericElementObserver<'a, D>,
     {
         f(GenericElementObserver(&mut self));
         self
