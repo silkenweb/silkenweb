@@ -30,7 +30,7 @@ use crate::{
 /// slots for the light DOM elements. HTML `id` attributes and CSS are
 /// encapsulated by the shadow DOM.
 ///
-/// ```
+/// ```no_run
 #[doc = function_body!("tests/doc/node/component.rs", component, [])]
 /// ```
 /// 

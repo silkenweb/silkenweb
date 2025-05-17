@@ -4,11 +4,12 @@ use futures_signals::signal::{Mutable, SignalExt};
 use silkenweb::task::{render_now, scope, server};
 use silkenweb::{
     cfg_browser,
-    dom::{DefaultDom, Dry},
+    dom::Dry,
     elements::{
         html::{button, div, input, p, Div},
         ElementEvents,
     },
+    mount,
     node::element::{Element, ParentElement, TextParentElement},
     value::Sig,
 };
@@ -76,57 +77,64 @@ pub fn dynamic_class_names() {
 }
 
 pub fn effect() {
-    input::<DefaultDom>().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    let app = input().effect(|elem: &HtmlInputElement| elem.focus().unwrap());
+    mount("app", app);
 }
 
 pub fn handle() {
     let text = Mutable::new("".to_string());
     let input = input();
     let input_handle = input.handle();
-    div::<DefaultDom>()
+    let app = div()
         .child(input)
         .child(button().text("Read Input").on_click({
             clone!(text);
             move |_, _| text.set(input_handle.dom_element().value())
         }))
         .text(Sig(text.signal_cloned()));
+    mount("app", app);
 }
 
 pub fn static_text() {
-    div::<DefaultDom>().text("Hello, world!");
+    let app = div().text("Hello, world!");
+    mount("app", app);
 }
 
 pub fn dynamic_text() {
     let text = Mutable::new("Hello, world!");
-    div::<DefaultDom>().text(Sig(text.signal()));
+    let app = div().text(Sig(text.signal()));
+    mount("app", app);
 }
 
 pub fn static_child() {
-    div::<DefaultDom>()
-        .child(p().text("Hello,"))
-        .child(p().text("world!"));
+    let app = div().child(p().text("Hello,")).child(p().text("world!"));
+    mount("app", app);
 }
 
 pub fn dynamic_child() {
     let text = Mutable::new("Hello, world!");
-    div::<DefaultDom>().child(Sig(text.signal().map(|text| div().text(text))));
+    let app = div().child(Sig(text.signal().map(|text| div().text(text))));
+    mount("app", app);
 }
 
 pub fn static_optional_child() {
-    div::<DefaultDom>().optional_child(Some(p().text("Hello, world!")));
+    let app = div().optional_child(Some(p().text("Hello, world!")));
+    mount("app", app);
 }
 
 pub fn dynamic_optional_child() {
     let text = Mutable::new("hello");
-    div::<DefaultDom>().optional_child(Sig(text.signal().map(|text| {
+    let app = div().optional_child(Sig(text.signal().map(|text| {
         if text.is_empty() {
             None
         } else {
             Some(div().text(text))
         }
     })));
+    mount("app", app);
 }
 
 pub fn children() {
-    div::<DefaultDom>().children([p().text("Hello,"), p().text("world!")]);
+    let app = div().children([p().text("Hello,"), p().text("world!")]);
+    mount("app", app);
 }

@@ -1,9 +1,10 @@
 use silkenweb::{
     dom::DefaultDom,
     elements::{
-        html::{a, button, div, p, A},
+        html::{a, button, div, p},
         ElementEvents,
     },
+    mount,
     node::element::{ParentElement, TextParentElement},
     router::{self, anchor, link_clicked, UrlPath},
     value::Sig,
@@ -78,10 +79,12 @@ pub fn url_hash() {
 }
 
 pub fn anchor_example() {
-    let _link: A = anchor("/my-path").text("click me");
+    let app = anchor("/my-path").text("click me");
+    mount("app", app);
 }
 
 pub fn link_clicked_example() {
     let path = "/my_path";
-    let _link: A = a().href(path).text("click me").on_click(link_clicked(path));
+    let app = a().href(path).text("click me").on_click(link_clicked(path));
+    mount("app", app);
 }
