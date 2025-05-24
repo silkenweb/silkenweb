@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 0.10.0 - 2025-05-24
 
 - *Breaking change*: `silkenweb::prelude` has been removed. It wasn't maintained and caused issues with Rust Analyser prefering to generate prelude imports.
 - *Breaking change*: `TextParentElement` has been split out from `ParentElement`. This should just mean you need to import `silkenweb::node::element::TextParentElement` in some cases.
