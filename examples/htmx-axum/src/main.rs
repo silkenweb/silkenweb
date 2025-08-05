@@ -27,7 +27,7 @@ struct Name {
 async fn form_submit(
     HtmxPostRequest(Name { first, last }): HtmxPostRequest<Name>,
 ) -> impl IntoResponse {
-    HtmxResponse::new(div().text(format!("Hello, {} {}!", first, last)))
+    HtmxResponse::new(div().text(format!("Hello, {first} {last}!")))
 }
 
 #[tokio::main]
