@@ -103,11 +103,11 @@ impl HydroElement {
         wet.into()
     }
 
-    fn borrow(&self) -> Ref<SharedHydroElement> {
+    fn borrow(&'_ self) -> Ref<'_, SharedHydroElement> {
         self.0.as_ref().borrow()
     }
 
-    fn borrow_mut(&self) -> RefMut<SharedHydroElement> {
+    fn borrow_mut(&'_ self) -> RefMut<'_, SharedHydroElement> {
         self.0.as_ref().borrow_mut()
     }
 }
@@ -303,11 +303,11 @@ impl From<HydroElement> for WetNode {
 pub struct HydroText(Rc<RefCell<SharedHydroText>>);
 
 impl HydroText {
-    fn borrow(&self) -> Ref<SharedHydroText> {
+    fn borrow(&'_ self) -> Ref<'_, SharedHydroText> {
         self.0.as_ref().borrow()
     }
 
-    fn borrow_mut(&self) -> RefMut<SharedHydroText> {
+    fn borrow_mut(&'_ self) -> RefMut<'_, SharedHydroText> {
         self.0.as_ref().borrow_mut()
     }
 
