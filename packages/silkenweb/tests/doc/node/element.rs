@@ -1,9 +1,6 @@
 use clonelet::clone;
 use futures_signals::signal::{Mutable, SignalExt};
-#[cfg_browser(false)]
-use silkenweb::task::{render_now, scope, server};
 use silkenweb::{
-    cfg_browser,
     dom::Dry,
     elements::{
         html::{button, div, input, p, Div},
@@ -11,6 +8,7 @@ use silkenweb::{
     },
     mount,
     node::element::{Element, ParentElement, TextParentElement},
+    task::render_now,
     value::Sig,
 };
 use web_sys::HtmlInputElement;
@@ -23,31 +21,27 @@ pub fn static_single_class_name() {
     );
 }
 
-#[cfg_browser(false)]
-pub fn dynamic_single_class_name() {
-    // `block_on` is only required if we're outside the browser
-    server::block_on(scope(async {
-        let my_class = Mutable::new("my-class");
-        let my_other_class = Mutable::new("my-other-class");
-        let app: Div<Dry> = div()
-            .class(Sig(my_class.signal()))
-            .class(Sig(my_other_class.signal()));
-        let app = app.freeze();
+pub async fn dynamic_single_class_name() {
+    let my_class = Mutable::new("my-class");
+    let my_other_class = Mutable::new("my-other-class");
+    let app: Div<Dry> = div()
+        .class(Sig(my_class.signal()))
+        .class(Sig(my_other_class.signal()));
+    let app = app.freeze();
 
-        render_now().await;
-        assert_eq!(
-            app.to_string(),
-            r#"<div class="my-class my-other-class"></div>"#
-        );
+    render_now().await;
+    assert_eq!(
+        app.to_string(),
+        r#"<div class="my-class my-other-class"></div>"#
+    );
 
-        my_other_class.set("my-other-class-updated");
+    my_other_class.set("my-other-class-updated");
 
-        render_now().await;
-        assert_eq!(
-            app.to_string(),
-            r#"<div class="my-class my-other-class-updated"></div>"#
-        );
-    }))
+    render_now().await;
+    assert_eq!(
+        app.to_string(),
+        r#"<div class="my-class my-other-class-updated"></div>"#
+    );
 }
 
 pub fn static_class_names() {
@@ -58,22 +52,18 @@ pub fn static_class_names() {
     );
 }
 
-#[cfg_browser(false)]
-pub fn dynamic_class_names() {
-    // `block_on` is only required if we're outside the browser
-    server::block_on(scope(async {
-        let my_classes = Mutable::new(vec!["class0", "class1"]);
-        let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
-        let app = app.freeze();
+pub async fn dynamic_class_names() {
+    let my_classes = Mutable::new(vec!["class0", "class1"]);
+    let app: Div<Dry> = div().classes(Sig(my_classes.signal_cloned()));
+    let app = app.freeze();
 
-        render_now().await;
-        assert_eq!(app.to_string(), r#"<div class="class0 class1"></div>"#);
+    render_now().await;
+    assert_eq!(app.to_string(), r#"<div class="class0 class1"></div>"#);
 
-        my_classes.set(vec![]);
+    my_classes.set(vec![]);
 
-        render_now().await;
-        assert_eq!(app.to_string(), r#"<div class=""></div>"#);
-    }))
+    render_now().await;
+    assert_eq!(app.to_string(), r#"<div class=""></div>"#);
 }
 
 pub fn effect() {
