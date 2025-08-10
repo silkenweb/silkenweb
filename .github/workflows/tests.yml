@@ -160,14 +160,6 @@ jobs:
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
-    - working-directory: examples/todomvc/playwright
-      run: npm ci
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install --with-deps
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright test
     - working-directory: packages/silkenweb
       run: wasm-pack test --headless --firefox
     - working-directory: packages/inline-html
@@ -309,14 +301,6 @@ jobs:
     - working-directory: examples/todomvc
       run: trunk build
     - run: cargo xtask todomvc-cypress
-    - working-directory: examples/todomvc/playwright
-      run: npm ci
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install --with-deps
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright install
-    - working-directory: examples/todomvc/playwright
-      run: npx playwright test
     - working-directory: packages/silkenweb
       run: wasm-pack test --headless --firefox
     - working-directory: packages/inline-html
