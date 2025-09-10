@@ -6,7 +6,7 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "vite": "^6.2.7"
+    "vite": "^6.3.6"
   },
   "dependencies": {
     "@ui5/webcomponents": "^2.10.0"
