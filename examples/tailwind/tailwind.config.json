@@ -1,0 +1,12 @@
+{
+    "corePlugins": {},
+    "allowedLists": {
+        "classes": [],
+        "modifiers": []
+    },
+    "theme": {
+        "extend": {}
+    },
+    "variants": {},
+    "plugins": {}
+}
