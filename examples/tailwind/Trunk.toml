@@ -1,4 +1,7 @@
+[watch]
+ignore = ["output.css", "node_modules"]
+
 [[hooks]]
 stage = "pre_build"
 command = "sh"
-command_arguments = ["-c", "npm ci && npx tailwindcss -i input.css -o output.css"]
+command_arguments = ["-c", "npm ci && npx postcss input.css -o output.css"]
