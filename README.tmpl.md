@@ -4,7 +4,6 @@
 [![crates.io](https://img.shields.io/crates/v/silkenweb.svg)](https://crates.io/crates/silkenweb)
 [![Documentation](https://docs.rs/silkenweb/badge.svg)](https://docs.rs/silkenweb)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/silkenweb)](./LICENSE-APACHE)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/silkenweb/silkenweb)
 [![Discord](https://img.shields.io/discord/881942707675729931)](https://discord.gg/usSUczZ5ua)
 
 A library for building reactive web apps.
