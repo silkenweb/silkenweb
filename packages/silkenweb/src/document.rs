@@ -1,10 +1,5 @@
 //! Document utilities.
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    pin::{pin, Pin},
-    task,
-};
+use std::{cell::RefCell, collections::HashMap, pin::Pin, task};
 
 use futures::{channel::oneshot, Future};
 use futures_signals::{
