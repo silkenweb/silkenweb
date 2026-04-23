@@ -8,7 +8,7 @@ jobs:
   lints-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly-2026-02-12
@@ -36,7 +36,7 @@ jobs:
   release-tests-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -45,7 +45,7 @@ jobs:
   release-tests-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -54,7 +54,7 @@ jobs:
   release-tests-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -63,7 +63,7 @@ jobs:
   tests-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -83,7 +83,7 @@ jobs:
   tests-ssr-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -104,7 +104,7 @@ jobs:
   tests-tailwind-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -125,7 +125,7 @@ jobs:
   tests-tauri-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -146,7 +146,7 @@ jobs:
   web-tests-ubuntu-latest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -213,7 +213,7 @@ jobs:
   tests-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -230,7 +230,7 @@ jobs:
   tests-ssr-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -248,7 +248,7 @@ jobs:
   tests-tailwind-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -266,7 +266,7 @@ jobs:
   tests-tauri-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -284,7 +284,7 @@ jobs:
   web-tests-macos-latest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -354,7 +354,7 @@ jobs:
   tests-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -371,7 +371,7 @@ jobs:
   tests-ssr-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -389,7 +389,7 @@ jobs:
   tests-tailwind-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -407,7 +407,7 @@ jobs:
   tests-tauri-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
@@ -425,7 +425,7 @@ jobs:
   web-tests-windows-latest:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.93.1
