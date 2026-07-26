@@ -7,8 +7,8 @@
   "license": "MIT",
   "devDependencies": {
     "axe-core": "^4.10.2",
-    "cypress": "^13.17.0",
-    "cypress-axe": "^1.5.0",
+    "cypress": "^15.19.0",
+    "cypress-axe": "^1.7.0",
     "start-server-and-test": "^2.0.9"
   },
   "scripts": {
